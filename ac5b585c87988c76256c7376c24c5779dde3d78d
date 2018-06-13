@@ -304,6 +304,30 @@
       "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "04f9d605_692e44ab",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 8004
+      },
+      "writtenOn": "2018-06-13T07:11:37Z",
+      "side": 1,
+      "message": "What is there in config DS will be reconciled, both create and delete. ovsdb plugin will not look into tep/tz change in ovs external_ids. Once reconciliation is done, switch gets published, now auto-tunnel module should handle change in configuration.\n\nThen the question, what we will be do in case of replay based upgrade, when switch connects there is no config in DS except TZ, in this case according to above logic, we will delete everything in the switch. this will result in traffic hit.",
+      "parentUuid": "81d569a7_75c4b2e4",
+      "range": {
+        "startLine": 75,
+        "startChar": 32,
+        "endLine": 75,
+        "endChar": 62
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

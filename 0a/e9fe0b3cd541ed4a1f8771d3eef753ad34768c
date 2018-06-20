@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Vishal Thapar <vthapar@redhat.com>
+Submitted-by: Vishal Thapar <vthapar@redhat.com>
+Submitted-at: Wed, 20 Jun 2018 06:18:13 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/73075
+Project: ovsdb
+Branch: refs/heads/stable/oxygen

@@ -166,10 +166,27 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             // not be used as a candidate in Entity election (given that this instance is
             // about to disconnect as well), if current owner get disconnected from
             // OVSDB device.
-            unregisterEntityForOwnership(ovsdbConnectionInstance);
+            if (ovsdbConnectionInstance.getHasDeviceOwnership()) {
+                ovsdbConnectionInstance.setHasDeviceOwnership(false);
+                //remove the node from oper only if it has ownership
+                txInvoker.invoke(new OvsdbNodeRemoveCommand(ovsdbConnectionInstance, null, null) {
 
-            txInvoker.invoke(new OvsdbNodeRemoveCommand(ovsdbConnectionInstance, null, null));
+                    @Override
+                    public void onSuccess() {
+                        super.onSuccess();
+                        //Giveup the ownership only after cleanup is done
+                        unregisterEntityForOwnership(ovsdbConnectionInstance);
+                    }
 
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        super.onFailure(throwable);
+                        unregisterEntityForOwnership(ovsdbConnectionInstance);
+                    }
+                });
+            } else {
+                unregisterEntityForOwnership(ovsdbConnectionInstance);
+            }
             removeConnectionInstance(key);
 
             //Controller initiated connection can be terminated from switch side.
@@ -523,8 +540,13 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     private void registerEntityForOwnership(OvsdbConnectionInstance ovsdbConnectionInstance) {
+        putConnectionInstance(ovsdbConnectionInstance.getMDConnectionInfo(), ovsdbConnectionInstance);
 
         Entity candidateEntity = getEntityFromConnectionInstance(ovsdbConnectionInstance);
+        if (entityConnectionMap.containsKey(candidateEntity)) {
+            LOG.error("Old connection still hanging for {}", candidateEntity);
+            //TODO do cleanup for old connection or stale check
+        }
         entityConnectionMap.put(candidateEntity, ovsdbConnectionInstance);
         ovsdbConnectionInstance.setConnectedEntity(candidateEntity);
         try {
@@ -533,28 +555,26 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             ovsdbConnectionInstance.setDeviceOwnershipCandidateRegistration(registration);
             LOG.info("OVSDB entity {} is registered for ownership.", candidateEntity);
 
-            //If entity already has owner, it won't get notification from EntityOwnershipService
-            //so cache the connection instances.
-            Optional<EntityOwnershipState> ownershipStateOpt =
-                    entityOwnershipService.getOwnershipState(candidateEntity);
-            if (ownershipStateOpt.isPresent()) {
-                EntityOwnershipState ownershipState = ownershipStateOpt.get();
-                if (ownershipState == EntityOwnershipState.OWNED_BY_OTHER) {
-                    LOG.info("OVSDB entity {} is already owned by other southbound plugin "
-                                    + "instance, so *this* instance is NOT an OWNER of the device",
-                            ovsdbConnectionInstance.getConnectionInfo());
-                    putConnectionInstance(ovsdbConnectionInstance.getMDConnectionInfo(),ovsdbConnectionInstance);
-                }
-            }
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("OVSDB entity {} was already registered for ownership", candidateEntity, e);
         }
-
+        //If entity already has owner, it won't get notification from EntityOwnershipService
+        Optional<EntityOwnershipState> ownershipStateOpt =
+                entityOwnershipService.getOwnershipState(candidateEntity);
+        if (ownershipStateOpt.isPresent()) {
+            EntityOwnershipState ownershipState = ownershipStateOpt.get();
+            if (ownershipState == EntityOwnershipState.OWNED_BY_OTHER) {
+                ovsdbConnectionInstance.setHasDeviceOwnership(false);
+            } else {
+                ovsdbConnectionInstance.setHasDeviceOwnership(true);
+                ovsdbConnectionInstance.registerCallbacks(instanceIdentifierCodec);
+            }
+        }
     }
 
     private void unregisterEntityForOwnership(OvsdbConnectionInstance ovsdbConnectionInstance) {
         ovsdbConnectionInstance.closeDeviceOwnershipCandidateRegistration();
-        entityConnectionMap.remove(ovsdbConnectionInstance.getConnectedEntity());
+        entityConnectionMap.remove(ovsdbConnectionInstance.getConnectedEntity(), ovsdbConnectionInstance);
     }
 
     private void retryConnection(final InstanceIdentifier<Node> iid, final OvsdbNodeAugmentation ovsdbNode,

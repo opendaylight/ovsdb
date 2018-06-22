@@ -14,4 +14,9 @@ public interface TransactionCommand {
 
     void execute(ReadWriteTransaction transaction);
 
+    default void onSuccess() {
+    }
+
+    default void onFailure(Throwable throwable) {
+    }
 }

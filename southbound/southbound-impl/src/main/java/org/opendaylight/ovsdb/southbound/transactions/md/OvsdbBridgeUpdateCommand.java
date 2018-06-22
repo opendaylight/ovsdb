@@ -72,8 +72,9 @@ import org.slf4j.LoggerFactory;
 public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbBridgeUpdateCommand.class);
     private final InstanceIdentifierCodec instanceIdentifierCodec;
-    private Map<UUID,Bridge> updatedBridgeRows;
-    private Map<UUID, Bridge> oldBridgeRows;
+    private final Map<UUID,Bridge> updatedBridgeRows;
+    private final Map<UUID, Bridge> oldBridgeRows;
+    private final List<InstanceIdentifier<Node>> updatedBridges = new ArrayList<>();
 
     public OvsdbBridgeUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
@@ -110,7 +111,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         InstanceIdentifier<Node> bridgeIid = getInstanceIdentifier(bridge);
         Node bridgeNode = buildBridgeNode(bridge);
         transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNode);
-        deleteEntries(transaction, protocolEntriesToRemove(bridgeIid,bridge));
+        updatedBridges.add(bridgeIid);
+        deleteEntries(transaction, protocolEntriesToRemove(bridgeIid, bridge));
         deleteEntries(transaction, externalIdsToRemove(bridgeIid,bridge));
         deleteEntries(transaction, bridgeOtherConfigsToRemove(bridgeIid,bridge));
     }
@@ -405,5 +407,17 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     private NodeId getNodeId(Bridge bridge) {
         NodeKey nodeKey = getInstanceIdentifier(bridge).firstKeyOf(Node.class);
         return nodeKey.getNodeId();
+    }
+
+    public void onSuccess() {
+        for (InstanceIdentifier<Node> updatedBridge : updatedBridges) {
+            LOG.debug("Updated bridge {} in operational datastore", updatedBridge);
+        }
+    }
+
+    public void onFailure(Throwable throwable) {
+        for (InstanceIdentifier<Node> updatedBridge : updatedBridges) {
+            LOG.error("Failed to update bridge {} in operational datastore", updatedBridge);
+        }
     }
 }

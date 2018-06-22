@@ -94,6 +94,7 @@ public class BridgeUpdateCommand implements TransactCommand {
                     ovsdbManagedNode.getBridgeUuid());
         } else {
             String existingBridgeName = operationalBridgeOptional.get().getBridgeName().getValue();
+            LOG.debug("Bridge {} already exists in device updating {}", existingBridgeName, iid);
             // Name is immutable, and so we *can't* update it.  So we use extraBridge for the schema stuff
             Bridge extraBridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
             extraBridge.setName("");

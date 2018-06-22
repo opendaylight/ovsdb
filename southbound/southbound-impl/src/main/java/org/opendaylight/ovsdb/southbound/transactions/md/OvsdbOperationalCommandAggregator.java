@@ -62,4 +62,18 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
             }
         }
     }
+
+    @Override
+    public void onSuccess() {
+        for (TransactionCommand command: commands) {
+            command.onSuccess();
+        }
+    }
+
+    @Override
+    public void onFailure(Throwable throwable) {
+        for (TransactionCommand command: commands) {
+            command.onFailure(throwable);
+        }
+    }
 }

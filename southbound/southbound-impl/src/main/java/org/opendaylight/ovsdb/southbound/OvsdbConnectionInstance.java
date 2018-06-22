@@ -373,6 +373,8 @@ public class OvsdbConnectionInstance {
 
     public void setHasDeviceOwnership(Boolean hasDeviceOwnership) {
         if (hasDeviceOwnership != null) {
+            LOG.debug("Ownership status for {} old {} new {}",
+                    instanceIdentifier, this.hasDeviceOwnership, hasDeviceOwnership);
             this.hasDeviceOwnership = hasDeviceOwnership;
         }
     }

@@ -77,6 +77,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private final TransactionInvoker txInvoker;
     private final Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers =
             new ConcurrentHashMap<>();
+    private final Map<InstanceIdentifier<Node>, OvsdbConnectionInstance> nodeIdVsConnectionInstance =
+            new ConcurrentHashMap<>();
     private final Map<Entity, OvsdbConnectionInstance> entityConnectionMap =
             new ConcurrentHashMap<>();
     private final EntityOwnershipService entityOwnershipService;
@@ -169,15 +171,20 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             // not be used as a candidate in Entity election (given that this instance is
             // about to disconnect as well), if current owner get disconnected from
             // OVSDB device.
-            unregisterEntityForOwnership(ovsdbConnectionInstance);
-
-            txInvoker.invoke(new OvsdbNodeRemoveCommand(ovsdbConnectionInstance, null, null));
-
+            if (ovsdbConnectionInstance.getHasDeviceOwnership()) {
+                LOG.info("Library disconnected {} this controller instance has ownership", key);
+                deleteOperNodeAndReleaseOwnership(ovsdbConnectionInstance);
+            } else {
+                LOG.info("Library disconnected {} this controller does not have ownership", key);
+                unregisterEntityForOwnership(ovsdbConnectionInstance);
+            }
             removeConnectionInstance(key);
 
             //Controller initiated connection can be terminated from switch side.
             //So cleanup the instance identifier cache.
             removeInstanceIdentifier(key);
+            nodeIdVsConnectionInstance.remove(ovsdbConnectionInstance.getInstanceIdentifier(),
+                    ovsdbConnectionInstance);
             stopBridgeConfigReconciliationIfActive(ovsdbConnectionInstance.getInstanceIdentifier());
             retryConnection(ovsdbConnectionInstance.getInstanceIdentifier(),
                     ovsdbConnectionInstance.getOvsdbNodeAugmentation(),
@@ -186,6 +193,29 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             LOG.warn("disconnected : Connection instance not found for OVSDB Node {} ", key);
         }
         LOG.trace("OvsdbConnectionManager: exit disconnected client: {}", client);
+    }
+
+    private void deleteOperNodeAndReleaseOwnership(final OvsdbConnectionInstance ovsdbConnectionInstance) {
+        ovsdbConnectionInstance.setHasDeviceOwnership(false);
+        final InstanceIdentifier nodeIid = ovsdbConnectionInstance.getInstanceIdentifier();
+        //remove the node from oper only if it has ownership
+        txInvoker.invoke(new OvsdbNodeRemoveCommand(ovsdbConnectionInstance, null, null) {
+
+            @Override
+            public void onSuccess() {
+                super.onSuccess();
+                LOG.debug("Successfully removed node {} from oper", nodeIid);
+                //Giveup the ownership only after cleanup is done
+                unregisterEntityForOwnership(ovsdbConnectionInstance);
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                LOG.debug("Failed to remove node {} from oper", nodeIid);
+                super.onFailure(throwable);
+                unregisterEntityForOwnership(ovsdbConnectionInstance);
+            }
+        });
     }
 
     public OvsdbClient connect(InstanceIdentifier<Node> iid,
@@ -218,7 +248,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         OvsdbConnectionInstance client = getConnectionInstance(ovsdbNode.getConnectionInfo());
         if (client != null) {
             // Unregister Cluster Onwership for ConnectionInfo
-            unregisterEntityForOwnership(client);
+            deleteOperNodeAndReleaseOwnership(client);
 
             client.disconnect();
 
@@ -309,6 +339,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     public OvsdbConnectionInstance getConnectionInstance(InstanceIdentifier<Node> nodePath) {
+        if (nodeIdVsConnectionInstance.get(nodePath) != null) {
+            return nodeIdVsConnectionInstance.get(nodePath);
+        }
         try {
             ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
             CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture = transaction.read(
@@ -527,8 +560,15 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     private void registerEntityForOwnership(OvsdbConnectionInstance ovsdbConnectionInstance) {
+        putConnectionInstance(ovsdbConnectionInstance.getMDConnectionInfo(), ovsdbConnectionInstance);
 
         Entity candidateEntity = getEntityFromConnectionInstance(ovsdbConnectionInstance);
+        if (entityConnectionMap.containsKey(candidateEntity)) {
+            LOG.error("Old connection still hanging for {}", candidateEntity);
+            disconnected(ovsdbConnectionInstance.getOvsdbClient());
+            //TODO do cleanup for old connection or stale check
+        }
+        nodeIdVsConnectionInstance.put(ovsdbConnectionInstance.getInstanceIdentifier(), ovsdbConnectionInstance);
         entityConnectionMap.put(candidateEntity, ovsdbConnectionInstance);
         ovsdbConnectionInstance.setConnectedEntity(candidateEntity);
         try {
@@ -536,29 +576,28 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                     entityOwnershipService.registerCandidate(candidateEntity);
             ovsdbConnectionInstance.setDeviceOwnershipCandidateRegistration(registration);
             LOG.info("OVSDB entity {} is registered for ownership.", candidateEntity);
-
-            //If entity already has owner, it won't get notification from EntityOwnershipService
-            //so cache the connection instances.
-            Optional<EntityOwnershipState> ownershipStateOpt =
-                    entityOwnershipService.getOwnershipState(candidateEntity);
-            if (ownershipStateOpt.isPresent()) {
-                EntityOwnershipState ownershipState = ownershipStateOpt.get();
-                if (ownershipState.hasOwner() && !ownershipState.isOwner()) {
-                    LOG.info("OVSDB entity {} is already owned by other southbound plugin "
-                                    + "instance, so *this* instance is NOT an OWNER of the device",
-                            ovsdbConnectionInstance.getConnectionInfo());
-                    putConnectionInstance(ovsdbConnectionInstance.getMDConnectionInfo(),ovsdbConnectionInstance);
-                }
-            }
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("OVSDB entity {} was already registered for ownership", candidateEntity, e);
         }
-
+        //If entity already has owner, it won't get notification from EntityOwnershipService
+        Optional<EntityOwnershipState> ownershipStateOpt =
+                    entityOwnershipService.getOwnershipState(candidateEntity);
+        if (ownershipStateOpt.isPresent()) {
+            EntityOwnershipState ownershipState = ownershipStateOpt.get();
+            if (ownershipState.hasOwner()) {
+                if (ownershipState.isOwner()) {
+                    ovsdbConnectionInstance.setHasDeviceOwnership(true);
+                    ovsdbConnectionInstance.registerCallbacks(instanceIdentifierCodec);
+                } else {
+                    ovsdbConnectionInstance.setHasDeviceOwnership(false);
+                }
+            }
+        }
     }
 
     private void unregisterEntityForOwnership(OvsdbConnectionInstance ovsdbConnectionInstance) {
         ovsdbConnectionInstance.closeDeviceOwnershipCandidateRegistration();
-        entityConnectionMap.remove(ovsdbConnectionInstance.getConnectedEntity());
+        entityConnectionMap.remove(ovsdbConnectionInstance.getConnectedEntity(), ovsdbConnectionInstance);
     }
 
     private void retryConnection(final InstanceIdentifier<Node> iid, final OvsdbNodeAugmentation ovsdbNode,

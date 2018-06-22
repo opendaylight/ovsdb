@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
@@ -60,6 +61,11 @@ public class TransactInvokerImpl implements TransactInvoker {
             try {
                 if (!result.isCancelled()) {
                     List<OperationResult> got = result.get();
+                    if (got != null) {
+                        got.stream()
+                                .filter(response -> !StringUtils.isEmpty(response.getError()))
+                                .peek(response -> LOG.error("Failed to transact to device {}", response.getError()));
+                    }
                     LOG.debug("OVSDB transaction result: {}", got);
                 } else {
                     LOG.debug("Operation task cancelled for transaction : {}", tb);

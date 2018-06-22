@@ -66,6 +66,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     public void onTransactionChainFailed(TransactionChain<?, ?> chainArg,
             AsyncTransaction<?, ?> transaction, Throwable cause) {
         failedTransactionQueue.offer(transaction);
+        LOG.error("Failed to write operational topology", cause);
     }
 
     @Override
@@ -96,11 +97,16 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                     Futures.addCallback(transaction.submit(), new FutureCallback<Void>() {
                         @Override
                         public void onSuccess(final Void result) {
-                            successfulTransactionQueue.offer(transaction);
+                            if (!successfulTransactionQueue.offer(transaction)) {
+                                LOG.error("successfulTransactionQueue is full (size: {}) - could not offer {}",
+                                        successfulTransactionQueue.size(), transaction);
+                            }
+                            command.onSuccess();
                         }
 
                         @Override
                         public void onFailure(final Throwable throwable) {
+                            command.onFailure(throwable);
                             // NOOP - handled by failure of transaction chain
                         }
                     });

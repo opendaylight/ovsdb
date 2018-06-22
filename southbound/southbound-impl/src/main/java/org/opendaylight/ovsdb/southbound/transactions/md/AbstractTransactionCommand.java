@@ -45,4 +45,9 @@ public abstract class AbstractTransactionCommand implements TransactionCommand {
         this.key = key;
     }
 
+    public void onSuccess() {
+    }
+
+    public void onFailure(Throwable throwable) {
+    }
 }

@@ -23,6 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.net.InetAddress;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -175,6 +176,7 @@ public class OvsdbConnectionManagerTest {
                 OvsdbConnectionInstance.class));
         instanceIdentifiers = new ConcurrentHashMap<>();
         field(OvsdbConnectionManager.class, "instanceIdentifiers").set(ovsdbConnManager, instanceIdentifiers);
+        field(OvsdbConnectionManager.class, "nodeIdVsConnectionInstance").set(ovsdbConnManager, new HashMap<>());
 
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "reconcileConnection",
                 InstanceIdentifier.class, OvsdbNodeAugmentation.class));

@@ -96,6 +96,8 @@ public class OvsdbBridgeUpdateCommandTest {
     @Before
     public void setUp() throws Exception {
         ovsdbBridgeUpdateCommand = PowerMockito.mock(OvsdbBridgeUpdateCommand.class, Mockito.CALLS_REAL_METHODS);
+        MemberModifier.field(OvsdbBridgeUpdateCommand.class, "updatedBridges")
+                .set(ovsdbBridgeUpdateCommand, new ArrayList<>());
         MemberModifier.field(OvsdbBridgeUpdateCommand.class, "updatedBridgeRows").set(ovsdbBridgeUpdateCommand,
                 updatedBridgeRows);
     }

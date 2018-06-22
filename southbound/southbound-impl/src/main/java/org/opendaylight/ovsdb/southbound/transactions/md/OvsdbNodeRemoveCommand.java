@@ -56,6 +56,7 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
                     } else {
                         LOG.warn("{} had no OvsdbNodeAugmentation", ovsdbNode.getNodeId().getValue());
                     }
+                    LOG.debug("Deleting node {} from oper", getOvsdbConnectionInstance().getInstanceIdentifier());
                     transaction.delete(LogicalDatastoreType.OPERATIONAL,
                             getOvsdbConnectionInstance().getInstanceIdentifier());
                 } else {

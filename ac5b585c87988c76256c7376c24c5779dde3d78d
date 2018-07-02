@@ -96,6 +96,52 @@
     },
     {
       "key": {
+        "uuid": "0d2b2c01_53057524",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-07-02T07:52:18Z",
+      "side": 1,
+      "message": "This may not work as I think we stamp iid even when updating. This may cause issues for VM ports if QoS is set as ODL doesn\u0027t create but does update it. Please confirm this before going with this change.",
+      "range": {
+        "startLine": 39,
+        "startChar": 19,
+        "endLine": 39,
+        "endChar": 48
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18b42af7_c1f1feb1",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-07-02T07:52:18Z",
+      "side": 1,
+      "message": "I think you will need this flag, else may end up deleting VM ports that have QoS configured on them.",
+      "range": {
+        "startLine": 41,
+        "startChar": 16,
+        "endLine": 41,
+        "endChar": 30
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8c636f27_1be4d68f",
         "filename": "docs/specs/ovsdb-reconciliation.rst",
         "patchSetId": 11
@@ -230,6 +276,29 @@
         "startChar": 23,
         "endLine": 52,
         "endChar": 31
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00cf89b9_da3548e4",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-07-02T07:52:18Z",
+      "side": 1,
+      "message": "This is too vague a statement for such a critical part of solution. Decide one way or other and capture in spec. Unless both approaches will be tried and decision will be made based on test results, in which case specify it here.",
+      "range": {
+        "startLine": 53,
+        "startChar": 13,
+        "endLine": 54,
+        "endChar": 49
       },
       "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",

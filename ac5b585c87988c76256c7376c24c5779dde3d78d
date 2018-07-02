@@ -119,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "e7e420b8_218b88be",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-07-02T07:54:07Z",
+      "side": 1,
+      "message": "\u003e This may not work as I think we stamp iid even when updating. This\n \u003e may cause issues for VM ports if QoS is set as ODL doesn\u0027t create\n \u003e but does update it. Please confirm this before going with this\n \u003e change.\n\nIgnore this, I misread it as currently you will use iid field as marker.",
+      "parentUuid": "0d2b2c01_53057524",
+      "range": {
+        "startLine": 39,
+        "startChar": 19,
+        "endLine": 39,
+        "endChar": 48
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "18b42af7_c1f1feb1",
         "filename": "docs/specs/ovsdb-reconciliation.rst",
         "patchSetId": 11

@@ -166,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "68df5507_f40499c8",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 8004
+      },
+      "writtenOn": "2018-07-06T09:38:21Z",
+      "side": 1,
+      "message": "Hi Vishal,\n\nCan you look at the latest spec. that is more clearly defined.",
+      "parentUuid": "18b42af7_c1f1feb1",
+      "range": {
+        "startLine": 41,
+        "startChar": 16,
+        "endLine": 41,
+        "endChar": 30
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8c636f27_1be4d68f",
         "filename": "docs/specs/ovsdb-reconciliation.rst",
         "patchSetId": 11
@@ -318,6 +342,30 @@
       "writtenOn": "2018-07-02T07:52:18Z",
       "side": 1,
       "message": "This is too vague a statement for such a critical part of solution. Decide one way or other and capture in spec. Unless both approaches will be tried and decision will be made based on test results, in which case specify it here.",
+      "range": {
+        "startLine": 53,
+        "startChar": 13,
+        "endLine": 54,
+        "endChar": 49
+      },
+      "revId": "ac5b585c87988c76256c7376c24c5779dde3d78d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2a81bba_1f434e98",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 11
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 8004
+      },
+      "writtenOn": "2018-07-06T09:38:21Z",
+      "side": 1,
+      "message": "I will prefer the current approach, where it is a separate task, since it invovlve less changes. let me know your comments..",
+      "parentUuid": "00cf89b9_da3548e4",
       "range": {
         "startLine": 53,
         "startChar": 13,

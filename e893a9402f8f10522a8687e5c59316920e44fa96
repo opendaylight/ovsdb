@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8f14d393_c2e7bdba",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 16
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-07-09T06:00:53Z",
+      "side": 1,
+      "message": "since you\u0027re going with separate path, update this document to reflect that. What about race conditions? You\u0027re comparing config and operational in reconciliation task while a parallel task is updating operational. Which means you can\u0027t really compare till operational is up. How do you handle this?",
+      "range": {
+        "startLine": 59,
+        "startChar": 20,
+        "endLine": 60,
+        "endChar": 49
+      },
+      "revId": "e893a9402f8f10522a8687e5c59316920e44fa96",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

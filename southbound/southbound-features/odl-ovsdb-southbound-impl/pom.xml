@@ -67,6 +67,15 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <!-- finalname="etc/org.opendaylight.ovsdb.southbound.cfg" -->
+            <groupId>${project.groupId}</groupId>
+            <artifactId>southbound-impl</artifactId>
+            <version>${project.version}</version>
+            <type>cfg</type>
+            <classifier>config</classifier>
+        </dependency>
+
+        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>

@@ -22,6 +22,30 @@
       "revId": "e893a9402f8f10522a8687e5c59316920e44fa96",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "169f332f_18913804",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 16
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 8004
+      },
+      "writtenOn": "2018-07-10T06:44:02Z",
+      "side": 1,
+      "message": "Will update the spec...",
+      "parentUuid": "8f14d393_c2e7bdba",
+      "range": {
+        "startLine": 59,
+        "startChar": 20,
+        "endLine": 60,
+        "endChar": 49
+      },
+      "revId": "e893a9402f8f10522a8687e5c59316920e44fa96",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

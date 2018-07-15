@@ -27,6 +27,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.infrautils.diagstatus.DiagStatusService;
 import org.opendaylight.infrautils.ready.SystemReadyListener;
+import org.opendaylight.infrautils.ready.SystemReadyListenerRegistration;
 import org.opendaylight.infrautils.ready.SystemReadyMonitor;
 import org.opendaylight.infrautils.ready.SystemState;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
@@ -193,9 +194,15 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
         }
 
         @Override
-        public void registerListener(SystemReadyListener listener) {
+        public SystemReadyListenerRegistration registerListener(SystemReadyListener listener) {
             listener.onSystemBootReady();
+            return new SystemReadyListenerRegistration() {
+                @Override
+                public void close() throws Exception {
+                }
+            };
         }
 
     }
+
 }

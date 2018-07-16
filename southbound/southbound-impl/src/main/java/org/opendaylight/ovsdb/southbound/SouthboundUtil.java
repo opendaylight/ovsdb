@@ -16,7 +16,6 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -129,7 +128,7 @@ public final class SouthboundUtil {
         ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
         LOG.info("connectionInfo: {}", connectionInfo);
         if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
-            ipAddr = String.valueOf(connectionInfo.getLocalIp().getValue());
+            ipAddr = connectionInfo.getLocalIp().stringValue();
         }
         if (ipAddr == null) {
             ipAddr = getLocalControllerHostIpAddress();
@@ -144,8 +143,7 @@ public final class SouthboundUtil {
     }
 
     public static String connectionInfoToString(final ConnectionInfo connectionInfo) {
-        return String.valueOf(
-                connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
+        return connectionInfo.getRemoteIp().stringValue() + ":" + connectionInfo.getRemotePort().getValue();
     }
 
     public static void schemaMismatchLog(String column, String table, SchemaVersionMismatchException ex) {

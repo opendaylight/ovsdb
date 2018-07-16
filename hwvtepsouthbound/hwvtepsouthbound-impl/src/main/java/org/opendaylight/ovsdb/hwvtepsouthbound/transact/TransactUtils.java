@@ -30,7 +30,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocatorSet;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeVxlanOverIpv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
@@ -162,7 +162,7 @@ public final class TransactUtils {
         builder.setEncapsulationType(EncapsulationTypeVxlanOverIpv4.class);
         String tepKey = iid.firstKeyOf(TerminationPoint.class).getTpId().getValue();
         String ip = tepKey.substring(tepKey.indexOf(":") + 1);
-        builder.setDstIp(new IpAddress(ip.toCharArray()));
+        builder.setDstIp(IpAddressBuilder.getDefaultInstance(ip));
         locatorAugmentation = builder.build();
         locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
         operationalState.updateCurrentTxData(TerminationPoint.class, iid, locatorUuid);
@@ -230,7 +230,7 @@ public final class TransactUtils {
             }
             return null;
         }
-        LogicalSwitchUpdateCommand cmd = new LogicalSwitchUpdateCommand(operationalState, Collections.EMPTY_LIST);
+        LogicalSwitchUpdateCommand cmd = new LogicalSwitchUpdateCommand(operationalState, Collections.emptyList());
         MdsalUtils mdsalUtils = new MdsalUtils(operationalState.getDataBroker());
         LogicalSwitches ls = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, lswitchIid);
         if (ls != null) {

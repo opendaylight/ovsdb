@@ -166,8 +166,7 @@ public class SouthboundUtils {
             .build();
 
     public static NodeId createNodeId(IpAddress ip, PortNumber port) {
-        String uriString = OVSDB_URI_PREFIX + "://"
-                + String.valueOf(ip.getValue()) + ":" + port.getValue();
+        String uriString = OVSDB_URI_PREFIX + "://" + ip.stringValue() + ":" + port.getValue();
         Uri uri = new Uri(uriString);
         return new NodeId(uri);
     }
@@ -306,8 +305,7 @@ public class SouthboundUtils {
     }
 
     public static String connectionInfoToString(final ConnectionInfo connectionInfo) {
-        return String.valueOf(
-                connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
+        return connectionInfo.getRemoteIp().stringValue() + ":" + connectionInfo.getRemotePort().getValue();
     }
 
     public boolean addOvsdbNode(final ConnectionInfo connectionInfo) {
@@ -880,7 +878,7 @@ public class SouthboundUtils {
                         } else if (tokens[0].equalsIgnoreCase("ptcp")) {
                             ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
                             if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
-                                controllerIpStr = String.valueOf(connectionInfo.getLocalIp().getValue());
+                                controllerIpStr = connectionInfo.getLocalIp().stringValue();
                                 controllersStr.add(OPENFLOW_CONNECTION_PROTOCOL
                                         + ":" + controllerIpStr + ":" + OPENFLOW_PORT);
                             } else {
@@ -892,7 +890,7 @@ public class SouthboundUtils {
                         } else if (tokens[0].equalsIgnoreCase("pssl")) {
                             ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
                             if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
-                                controllerIpStr = String.valueOf(connectionInfo.getLocalIp().getValue());
+                                controllerIpStr = connectionInfo.getLocalIp().stringValue();
                                 controllersStr.add(OPENFLOW_SECURE_PROTOCOL
                                         + ":" + controllerIpStr + ":" + OPENFLOW_PORT);
                             } else {
@@ -985,7 +983,7 @@ public class SouthboundUtils {
         return ovsdbBridgeAugmentation;
     }
 
-    private void setManagedByForBridge(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+    private static void setManagedByForBridge(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                                        NodeKey ovsdbNodeKey) {
         InstanceIdentifier<Node> connectionNodePath = createInstanceIdentifier(ovsdbNodeKey.getNodeId());
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
@@ -1008,7 +1006,7 @@ public class SouthboundUtils {
         return found;
     }
 
-    private List<ControllerEntry> createControllerEntries(List<String> controllersStr,
+    private static List<ControllerEntry> createControllerEntries(List<String> controllersStr,
             Long maxBackoff, Long inactivityProbe) {
         List<ControllerEntry> controllerEntries = new ArrayList<>();
         if (controllersStr != null) {

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -97,7 +97,7 @@ public final class TestBuilders {
     public static RemoteUcastMacs buildRemoteUcastMacs(InstanceIdentifier<Node> nodeIid, String vmMac,
                                                        String vmip, String tepIp, String logicalSwitchName) {
         RemoteUcastMacsBuilder ucmlBuilder = new RemoteUcastMacsBuilder();
-        ucmlBuilder.setIpaddr(new IpAddress(vmip.toCharArray()));
+        ucmlBuilder.setIpaddr(IpAddressBuilder.getDefaultInstance(vmip));
         ucmlBuilder.setMacEntryKey(new MacAddress(vmMac));
         ucmlBuilder.setMacEntryUuid(getUUid(vmMac));
         ucmlBuilder.setLocatorRef(buildLocatorRef(nodeIid, tepIp));
@@ -115,7 +115,7 @@ public final class TestBuilders {
                     new HwvtepPhysicalLocatorAugmentationBuilder();
             tpAugmentationBuilder.setPhysicalLocatorUuid(getUUid(ip));
             tpAugmentationBuilder.setEncapsulationType(HwvtepSouthboundMapper.createEncapsulationType(VXLAN_OVER_IPV4));
-            tpAugmentationBuilder.setDstIp(new IpAddress(ip.toCharArray()));
+            tpAugmentationBuilder.setDstIp(IpAddressBuilder.getDefaultInstance(ip));
             tpBuilder.addAugmentation(HwvtepPhysicalLocatorAugmentation.class, tpAugmentationBuilder.build());
         }
         return tpBuilder.build();

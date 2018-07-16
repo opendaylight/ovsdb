@@ -76,7 +76,7 @@ public final class HwvtepSouthboundMapper {
 
     private static InstanceIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
         String uriString = HwvtepSouthboundConstants.HWVTEP_URI_PREFIX + "://"
-                + String.valueOf(ip.getValue()) + ":" + port.getValue();
+                + ip.stringValue() + ":" + port.getValue();
         Uri uri = new Uri(uriString);
         NodeId nodeId = new NodeId(uri);
         InstanceIdentifier<Node> path = InstanceIdentifier.create(NetworkTopology.class)

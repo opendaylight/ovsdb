@@ -36,7 +36,7 @@ public final class HwvtepSouthboundUtils {
 
     public static NodeId createNodeId(IpAddress ip, PortNumber port) {
         String uriString = HwvtepSouthboundConstants.HWVTEP_URI_PREFIX + "://"
-                + String.valueOf(ip.getValue()) + ":" + port.getValue();
+                + ip.stringValue() + ":" + port.getValue();
         Uri uri = new Uri(uriString);
         return new NodeId(uri);
     }
@@ -87,8 +87,7 @@ public final class HwvtepSouthboundUtils {
     }
 
     public static Object connectionInfoToString(ConnectionInfo connectionInfo) {
-        return String.valueOf(
-                        connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
+        return connectionInfo.getRemoteIp().stringValue() + ":" + connectionInfo.getRemotePort().getValue();
     }
 
 }

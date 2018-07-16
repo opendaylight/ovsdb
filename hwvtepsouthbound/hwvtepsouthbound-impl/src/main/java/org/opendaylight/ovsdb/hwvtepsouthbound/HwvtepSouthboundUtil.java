@@ -130,8 +130,7 @@ public final class HwvtepSouthboundUtil {
     }
 
     public static String connectionInfoToString(final ConnectionInfo connectionInfo) {
-        return String.valueOf(
-                connectionInfo.getRemoteIp().getValue()) + ":" + connectionInfo.getRemotePort().getValue();
+        return connectionInfo.getRemoteIp().stringValue() + ":" + connectionInfo.getRemotePort().getValue();
     }
 
 

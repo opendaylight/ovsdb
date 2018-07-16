@@ -39,6 +39,7 @@ import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -365,7 +366,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 IpAddress bridgeControllerIpAddress = null;
                 for (String targetElement : controllerTarget) {
                     if (InetAddresses.isInetAddress(targetElement)) {
-                        bridgeControllerIpAddress = new IpAddress(targetElement.toCharArray());
+                        bridgeControllerIpAddress = IpAddressBuilder.getDefaultInstance(targetElement);
                         continue;
                     }
                     if (NumberUtils.isNumber(targetElement)) {
@@ -405,12 +406,14 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         return nodeKey.getNodeId();
     }
 
+    @Override
     public void onSuccess() {
         for (InstanceIdentifier<Node> updatedBridge : updatedBridges) {
             LOG.debug("Updated bridge {} in operational datastore", updatedBridge);
         }
     }
 
+    @Override
     public void onFailure(Throwable throwable) {
         for (InstanceIdentifier<Node> updatedBridge : updatedBridges) {
             LOG.error("Failed to update bridge {} in operational datastore", updatedBridge);

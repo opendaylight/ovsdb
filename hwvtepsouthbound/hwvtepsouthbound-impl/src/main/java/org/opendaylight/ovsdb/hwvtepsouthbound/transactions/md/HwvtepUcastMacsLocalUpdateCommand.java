@@ -23,7 +23,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -82,7 +82,7 @@ public class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransactionComman
         InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
         LocalUcastMacsBuilder ucmlBuilder = new LocalUcastMacsBuilder();
         if (ucml.getIpAddr() != null && !ucml.getIpAddr().isEmpty()) {
-            ucmlBuilder.setIpaddr(new IpAddress(ucml.getIpAddr().toCharArray()));
+            ucmlBuilder.setIpaddr(IpAddressBuilder.getDefaultInstance(ucml.getIpAddr()));
         }
         ucmlBuilder.setMacEntryKey(new MacAddress(ucml.getMac()));
         ucmlBuilder.setMacEntryUuid(new Uuid(ucml.getUuid().toString()));

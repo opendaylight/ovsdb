@@ -21,7 +21,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentationBuilder;
@@ -85,7 +85,7 @@ public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionComma
         }
     }
 
-    private void setEncapsType(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder,
+    private static void setEncapsType(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder,
             PhysicalLocator locator) {
         String encapsType = locator.getEncapsulationTypeColumn().getData();
         if (HwvtepSouthboundMapper.createEncapsulationType(encapsType) != null) {
@@ -93,10 +93,9 @@ public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionComma
         }
     }
 
-    private void setDstIp(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder,
+    private static void setDstIp(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder,
             PhysicalLocator locator) {
-        IpAddress ip = new IpAddress(locator.getDstIpColumn().getData().toCharArray());
-        tpAugmentationBuilder.setDstIp(ip);
+        tpAugmentationBuilder.setDstIp(IpAddressBuilder.getDefaultInstance(locator.getDstIpColumn().getData()));
     }
 
 }

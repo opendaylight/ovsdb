@@ -23,7 +23,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -80,7 +80,7 @@ public class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactionComma
         rumBuilder.setMacEntryKey(new MacAddress(macRemote.getMac()));
         rumBuilder.setMacEntryUuid(new Uuid(macRemote.getUuid().toString()));
         if (macRemote.getIpAddr() != null && !macRemote.getIpAddr().isEmpty()) {
-            rumBuilder.setIpaddr(new IpAddress(macRemote.getIpAddr().toCharArray()));
+            rumBuilder.setIpaddr(IpAddressBuilder.getDefaultInstance(macRemote.getIpAddr()));
         }
         if (macRemote.getLocatorColumn() != null
                 && macRemote.getLocatorColumn().getData() != null) {

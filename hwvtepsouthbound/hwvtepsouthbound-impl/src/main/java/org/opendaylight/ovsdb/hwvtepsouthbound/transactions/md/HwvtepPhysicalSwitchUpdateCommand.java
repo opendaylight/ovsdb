@@ -30,6 +30,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Tunnel;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
@@ -113,8 +114,9 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         }
     }
 
-    private InstanceIdentifier<TunnelIps> getTunnelIpIid(final String tunnelIp, final InstanceIdentifier<Node> psIid) {
-        IpAddress ip = new IpAddress(tunnelIp.toCharArray());
+    private static InstanceIdentifier<TunnelIps> getTunnelIpIid(final String tunnelIp,
+            final InstanceIdentifier<Node> psIid) {
+        IpAddress ip = IpAddressBuilder.getDefaultInstance(tunnelIp);
         TunnelIps tunnelIps = new TunnelIpsBuilder().withKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build();
         return psIid.augmentation(PhysicalSwitchAugmentation.class).child(TunnelIps.class, tunnelIps.key());
     }
@@ -135,7 +137,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
             transaction.delete(LogicalDatastoreType.OPERATIONAL, tunnelIpsInstanceIdentifier);
         }
         for (String tunnelIp : addedTunnelIps) {
-            IpAddress ip = new IpAddress(tunnelIp.toCharArray());
+            IpAddress ip = IpAddressBuilder.getDefaultInstance(tunnelIp);
             InstanceIdentifier<TunnelIps> tunnelIpsInstanceIdentifier = getTunnelIpIid(tunnelIp, psIid);
             TunnelIps tunnelIps = new TunnelIpsBuilder().withKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build();
             transaction.put(LogicalDatastoreType.OPERATIONAL, tunnelIpsInstanceIdentifier, tunnelIps, true);
@@ -175,7 +177,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         psAugmentationBuilder.setManagedBy(new HwvtepGlobalRef(connectionNodePath));
     }
 
-    private void setPhysicalSwitchId(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
+    private static void setPhysicalSwitchId(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
             PhysicalSwitch phySwitch) {
         if (phySwitch.getName() != null) {
             psAugmentationBuilder.setHwvtepNodeName(new HwvtepNodeName(phySwitch.getName()));
@@ -185,12 +187,13 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         }
     }
 
-    private void setManagementIps(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch phySwitch) {
+    private static void setManagementIps(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
+            PhysicalSwitch phySwitch) {
         if (phySwitch.getManagementIpsColumn() != null && phySwitch.getManagementIpsColumn().getData() != null
                 && !phySwitch.getManagementIpsColumn().getData().isEmpty()) {
             List<ManagementIps> mgmtIps = new ArrayList<>();
             for (String mgmtIp : phySwitch.getManagementIpsColumn().getData()) {
-                IpAddress ip = new IpAddress(mgmtIp.toCharArray());
+                IpAddress ip = IpAddressBuilder.getDefaultInstance(mgmtIp);
                 mgmtIps.add(
                         new ManagementIpsBuilder().withKey(new ManagementIpsKey(ip)).setManagementIpsKey(ip).build());
             }
@@ -226,7 +229,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         return nodeKey.getNodeId();
     }
 
-    private <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
+    private static <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
             List<InstanceIdentifier<T>> entryIids) {
         for (InstanceIdentifier<T> entryIid : entryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
@@ -252,7 +255,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         return result;
     }
 
-    private void setSwitchFaultStatus(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
+    private static void setSwitchFaultStatus(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
             PhysicalSwitch phySwitch) {
         if (phySwitch.getSwitchFaultStatusColumn() != null && phySwitch.getSwitchFaultStatusColumn().getData() != null
                 && !phySwitch.getSwitchFaultStatusColumn().getData().isEmpty()) {

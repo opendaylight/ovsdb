@@ -145,10 +145,10 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
                         getOperationalState().getAcls(aclIid);
                 if (operationalAclOptional.isPresent()) {
                     Uuid aclUuid = operationalAclOptional.get().getAclUuid();
-                    bindingMap.put(String.valueOf(aclBinding.getRouterInterface().getValue()),
+                    bindingMap.put(aclBinding.getRouterInterface().stringValue(),
                             new UUID(aclUuid.getValue()));
                 } else {
-                    bindingMap.put(String.valueOf(aclBinding.getRouterInterface().getValue()),
+                    bindingMap.put(aclBinding.getRouterInterface().stringValue(),
                             TransactUtils.getAclUUID(aclIid));
                 }
             }
@@ -161,8 +161,8 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
         if (staticRoutes != null) {
             Map<String, String> staticRoutesMap = new HashMap<>();
             for (StaticRoutes staticRoute : staticRoutes) {
-                staticRoutesMap.put(String.valueOf(staticRoute.getDestinationAddress().getValue()),
-                        String.valueOf(staticRoute.getNexthopAddress().getValue()));
+                staticRoutesMap.put(staticRoute.getDestinationAddress().stringValue(),
+                        staticRoute.getNexthopAddress().stringValue());
             }
             logicalRouter.setStaticRoutes(staticRoutesMap);
         }

@@ -38,6 +38,7 @@ import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -116,7 +117,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         deleteEntries(transaction, bridgeOtherConfigsToRemove(bridgeIid,bridge));
     }
 
-    private <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
+    private static <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
             List<InstanceIdentifier<T>> entryIids) {
         for (InstanceIdentifier<T> entryIid: entryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
@@ -246,7 +247,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         return bridgeNodeBuilder.build();
     }
 
-    private void setAutoAttach(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+    private static void setAutoAttach(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
             Bridge bridge) {
         try {
             if (bridge.getAutoAttachColumn() != null
@@ -267,13 +268,13 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }
 
-    private void setDataPathType(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+    private static void setDataPathType(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
             Bridge bridge) {
         ovsdbBridgeAugmentationBuilder.setDatapathType(
                 SouthboundMapper.createDatapathType(bridge.getDatapathTypeColumn().getData()));
     }
 
-    private void setFailMode(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+    private static void setFailMode(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
             Bridge bridge) {
         if (bridge.getFailModeColumn() != null
                 && bridge.getFailModeColumn().getData() != null
@@ -285,7 +286,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setOtherConfig(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+    private static void setOtherConfig(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
             Bridge bridge) {
         Map<String, String> otherConfigs = bridge
                 .getOtherConfigColumn().getData();
@@ -305,7 +306,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setExternalIds(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+    private static void setExternalIds(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
             Bridge bridge) {
         Map<String, String> externalIds = bridge.getExternalIdsColumn()
                 .getData();
@@ -325,7 +326,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setProtocol(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+    private static void setProtocol(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
             Bridge bridge) {
         final List<ProtocolEntry> protocols = SouthboundMapper.createMdsalProtocols(bridge);
         if (!protocols.isEmpty()) {
@@ -333,7 +334,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setDataPath(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+    private static void setDataPath(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
             Bridge bridge) {
         DatapathId dpid = SouthboundMapper.createDatapathId(bridge);
         if (dpid != null) {
@@ -341,7 +342,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setStpEnalbe(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+    private static void setStpEnalbe(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                               Bridge bridge) {
         if (bridge.getStpEnableColumn() != null) {
             Boolean stpEnable = bridge.getStpEnableColumn().getData();
@@ -363,7 +364,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 IpAddress bridgeControllerIpAddress = null;
                 for (String targetElement : controllerTarget) {
                     if (InetAddresses.isInetAddress(targetElement)) {
-                        bridgeControllerIpAddress = new IpAddress(targetElement.toCharArray());
+                        bridgeControllerIpAddress = IpAddressBuilder.getDefaultInstance(targetElement);
                         continue;
                     }
                     if (NumberUtils.isNumber(targetElement)) {
@@ -403,12 +404,14 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         return nodeKey.getNodeId();
     }
 
+    @Override
     public void onSuccess() {
         for (InstanceIdentifier<Node> updatedBridge : updatedBridges) {
             LOG.debug("Updated bridge {} in operational datastore", updatedBridge);
         }
     }
 
+    @Override
     public void onFailure(Throwable throwable) {
         for (InstanceIdentifier<Node> updatedBridge : updatedBridges) {
             LOG.error("Failed to update bridge {} in operational datastore", updatedBridge);

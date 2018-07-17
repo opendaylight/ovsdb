@@ -19,7 +19,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
-import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -29,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -87,7 +85,7 @@ import org.powermock.reflect.Whitebox;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ TyperUtils.class, OvsdbBridgeUpdateCommand.class, SouthboundUtil.class, InstanceIdentifier.class,
-        SouthboundMapper.class, InetAddresses.class, NumberUtils.class, NetworkInterface.class })
+        SouthboundMapper.class, NetworkInterface.class })
 public class OvsdbBridgeUpdateCommandTest {
     private Map<UUID,Bridge> updatedBridgeRows = new HashMap<>();
     private Map<UUID, Bridge> oldBridgeRows = new HashMap<>();
@@ -460,13 +458,9 @@ public class OvsdbBridgeUpdateCommandTest {
         when(uri.getValue()).thenReturn("tcp:192.168.12.56:6633");
 
         IpAddress bridgeControllerIpAddress = mock(IpAddress.class);
-        PowerMockito.mockStatic(InetAddresses.class);
-        when(InetAddresses.isInetAddress("192.168.12.56")).thenReturn(true);
         PowerMockito.whenNew(IpAddress.class).withAnyArguments().thenReturn(bridgeControllerIpAddress);
 
 
-        PowerMockito.mockStatic(NumberUtils.class);
-        when(NumberUtils.isNumber("6633")).thenReturn(true);
         PortNumber bridgeControllerPortNumber = mock(PortNumber.class);
         PowerMockito.whenNew(PortNumber.class).withAnyArguments().thenReturn(bridgeControllerPortNumber);
 

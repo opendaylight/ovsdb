@@ -107,7 +107,6 @@ public class SouthboundUtilTest {
         assertEquals("Incorrect Optional object received", node, SouthboundUtil.readNode(transaction, connectionIid));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testGetLocalControllerHostIpAddress() throws Exception {
 
@@ -116,12 +115,14 @@ public class SouthboundUtilTest {
         when(NetworkInterface.getNetworkInterfaces()).thenReturn(null);
         assertNull(SouthboundUtil.getLocalControllerHostIpAddress());
 
+        @SuppressWarnings("unchecked")
         Enumeration<NetworkInterface> ifaces = mock(Enumeration.class);
         when(NetworkInterface.getNetworkInterfaces()).thenReturn(ifaces);
         when(ifaces.hasMoreElements()).thenReturn(true).thenReturn(false);
         NetworkInterface iface = PowerMockito.mock(NetworkInterface.class);
         when(ifaces.nextElement()).thenReturn(iface);
 
+        @SuppressWarnings("unchecked")
         Enumeration<InetAddress> inetAddrs = mock(Enumeration.class);
         when(iface.getInetAddresses()).thenReturn(inetAddrs);
         when(inetAddrs.hasMoreElements()).thenReturn(true).thenReturn(false);

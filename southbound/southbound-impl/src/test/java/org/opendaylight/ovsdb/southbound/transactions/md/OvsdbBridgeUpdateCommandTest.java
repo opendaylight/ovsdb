@@ -19,7 +19,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
-import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -29,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,7 +49,6 @@ import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
@@ -87,14 +84,16 @@ import org.powermock.reflect.Whitebox;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ TyperUtils.class, OvsdbBridgeUpdateCommand.class, SouthboundUtil.class, InstanceIdentifier.class,
-        SouthboundMapper.class, InetAddresses.class, NumberUtils.class, NetworkInterface.class })
+        SouthboundMapper.class, NetworkInterface.class })
 public class OvsdbBridgeUpdateCommandTest {
-    private Map<UUID,Bridge> updatedBridgeRows = new HashMap<>();
-    private Map<UUID, Bridge> oldBridgeRows = new HashMap<>();
+    private Map<UUID,Bridge> updatedBridgeRows;
+    private Map<UUID, Bridge> oldBridgeRows;
     private OvsdbBridgeUpdateCommand ovsdbBridgeUpdateCommand;
 
     @Before
     public void setUp() throws Exception {
+        updatedBridgeRows = new HashMap<>();
+        oldBridgeRows = new HashMap<>();
         ovsdbBridgeUpdateCommand = PowerMockito.mock(OvsdbBridgeUpdateCommand.class, Mockito.CALLS_REAL_METHODS);
         MemberModifier.field(OvsdbBridgeUpdateCommand.class, "updatedBridges")
                 .set(ovsdbBridgeUpdateCommand, new ArrayList<>());
@@ -459,16 +458,7 @@ public class OvsdbBridgeUpdateCommandTest {
         when(controllerEntry.getTarget()).thenReturn(uri);
         when(uri.getValue()).thenReturn("tcp:192.168.12.56:6633");
 
-        IpAddress bridgeControllerIpAddress = mock(IpAddress.class);
-        PowerMockito.mockStatic(InetAddresses.class);
-        when(InetAddresses.isInetAddress("192.168.12.56")).thenReturn(true);
-        PowerMockito.whenNew(IpAddress.class).withAnyArguments().thenReturn(bridgeControllerIpAddress);
-
-
-        PowerMockito.mockStatic(NumberUtils.class);
-        when(NumberUtils.isNumber("6633")).thenReturn(true);
-        PortNumber bridgeControllerPortNumber = mock(PortNumber.class);
-        PowerMockito.whenNew(PortNumber.class).withAnyArguments().thenReturn(bridgeControllerPortNumber);
+        IpAddress bridgeControllerIpAddress = new IpAddress(new Ipv4Address("127.0.0.1"));
 
         PowerMockito.mockStatic(NetworkInterface.class);
         Enumeration<NetworkInterface> networkInterfaces = mock(Enumeration.class);
@@ -483,10 +473,6 @@ public class OvsdbBridgeUpdateCommandTest {
         when(networkInterfaceAddresses.hasMoreElements()).thenReturn(true, false);
         InetAddress networkInterfaceAddress = PowerMockito.mock(InetAddress.class);
         when(networkInterfaceAddresses.nextElement()).thenReturn(networkInterfaceAddress);
-
-        Ipv4Address ipv4Address = mock(Ipv4Address.class);
-        when(bridgeControllerIpAddress.getIpv4Address()).thenReturn(ipv4Address);
-        when(ipv4Address.getValue()).thenReturn("127.0.0.1");
         when(networkInterfaceAddress.getHostAddress()).thenReturn("127.0.0.1");
         assertEquals(bridgeControllerIpAddress.getIpv4Address().getValue(), networkInterfaceAddress.getHostAddress());
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);

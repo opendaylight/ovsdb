@@ -24,11 +24,28 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
          build failure. Please do not modify this unless you have a good reason. -->
     <name>ODL :: ovsdb :: ${project.artifactId}</name>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.opendaylight.mdsal.model</groupId>
+                <artifactId>mdsal-model-artifacts</artifactId>
+                <version>0.13.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.mdsal.model</groupId>
-            <artifactId>odl-mdsal-models</artifactId>
-            <version>0.13.0-SNAPSHOT</version>
+            <artifactId>odl-mdsal-model-odl-l2-types</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.mdsal.model</groupId>
+            <artifactId>odl-mdsal-model-draft-clemm-netmod-yang-network-topo-01-minimal</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

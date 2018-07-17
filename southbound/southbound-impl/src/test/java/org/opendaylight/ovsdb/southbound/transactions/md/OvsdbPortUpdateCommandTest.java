@@ -477,8 +477,7 @@ public class OvsdbPortUpdateCommandTest {
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
                 OvsdbTerminationPointAugmentationBuilder.class);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        InstanceIdentifier<TerminationPoint> tpPath = (InstanceIdentifier<TerminationPoint>) mock(
-                InstanceIdentifier.class);
+        InstanceIdentifier<TerminationPoint> tpPath = mock(InstanceIdentifier.class);
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updatePort", transaction, node, tpPath, port,
                 ovsdbTerminationPointBuilder);
 

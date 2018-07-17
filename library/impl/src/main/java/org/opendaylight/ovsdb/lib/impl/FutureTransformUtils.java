@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.ovsdb.lib.operations.Operation;
@@ -69,6 +70,6 @@ public final class FutureTransformUtils {
             }
 
             return operationResults;
-        });
+        }, MoreExecutors.directExecutor());
     }
 }

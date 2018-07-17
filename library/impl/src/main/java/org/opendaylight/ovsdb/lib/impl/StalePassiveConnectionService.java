@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.lib.impl;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,7 +47,7 @@ public class StalePassiveConnectionService implements AutoCloseable {
     }
 
     public Map<OvsdbClient, Set<OvsdbClient>> getPendingClients() {
-        return new HashMap(pendingClients);
+        return new HashMap<>(pendingClients);
     }
 
     /**
@@ -82,7 +83,7 @@ public class StalePassiveConnectionService implements AutoCloseable {
                         LOG.info("Echo testing of old client {} failed", oldClient.getConnectionInfo());
                         onInactiveClient(oldClient);
                     }
-                });
+                }, MoreExecutors.directExecutor());
         }
     }
 

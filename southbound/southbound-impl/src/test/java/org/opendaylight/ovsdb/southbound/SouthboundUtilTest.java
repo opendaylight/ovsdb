@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.southbound;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -107,21 +108,23 @@ public class SouthboundUtilTest {
         assertEquals("Incorrect Optional object received", node, SouthboundUtil.readNode(transaction, connectionIid));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testGetLocalControllerHostIpAddress() throws Exception {
 
         //NetworkInterface.getNetworkInterfaces() returns null case
         PowerMockito.mockStatic(NetworkInterface.class);
         when(NetworkInterface.getNetworkInterfaces()).thenReturn(null);
-        assertEquals(null, (String) Whitebox.invokeMethod(SouthboundUtil.class, "getLocalControllerHostIpAddress"));
+        assertTrue(String.class.isInstance(
+            Whitebox.invokeMethod(SouthboundUtil.class, "getLocalControllerHostIpAddress")));
 
+        @SuppressWarnings("unchecked")
         Enumeration<NetworkInterface> ifaces = mock(Enumeration.class);
         when(NetworkInterface.getNetworkInterfaces()).thenReturn(ifaces);
         when(ifaces.hasMoreElements()).thenReturn(true).thenReturn(false);
         NetworkInterface iface = PowerMockito.mock(NetworkInterface.class);
         when(ifaces.nextElement()).thenReturn(iface);
 
+        @SuppressWarnings("unchecked")
         Enumeration<InetAddress> inetAddrs = mock(Enumeration.class);
         when(iface.getInetAddresses()).thenReturn(inetAddrs);
         when(inetAddrs.hasMoreElements()).thenReturn(true).thenReturn(false);

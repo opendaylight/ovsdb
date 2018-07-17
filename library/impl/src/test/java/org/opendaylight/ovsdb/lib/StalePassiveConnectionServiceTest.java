@@ -29,15 +29,13 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.ovsdb.lib.impl.StalePassiveConnectionService;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ StalePassiveConnectionService.class })
+@RunWith(MockitoJUnitRunner.class)
 public class StalePassiveConnectionServiceTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(StalePassiveConnectionService.class);

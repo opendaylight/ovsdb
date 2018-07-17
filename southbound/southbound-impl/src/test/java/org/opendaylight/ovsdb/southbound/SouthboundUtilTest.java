@@ -31,6 +31,7 @@ import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
@@ -141,12 +142,10 @@ public class SouthboundUtilTest {
         when(ovsdbNodeAugmentation.getConnectionInfo()).thenReturn(connectionInfo);
 
         //ipAddr not null case
-        IpAddress ipAddr = mock(IpAddress.class);
+        IpAddress ipAddr = new IpAddress(new Ipv4Address("0.0.0.0"));
         when(connectionInfo.getLocalIp()).thenReturn(ipAddr);
-        char[] ipAddress = {'0', '.', '0', '.', '0', '.', '0'};
-        when(connectionInfo.getLocalIp().getValue()).thenReturn(ipAddress);
         String testTarget = SouthboundConstants.OPENFLOW_CONNECTION_PROTOCOL + ":"
-                + String.valueOf(ipAddress) + ":" + SouthboundConstants.DEFAULT_OPENFLOW_PORT;
+                + "0.0.0.0" + ":" + SouthboundConstants.DEFAULT_OPENFLOW_PORT;
         assertEquals("Incorrect controller IP", testTarget, SouthboundUtil.getControllerTarget(ovsdbNode));
         verify(ovsdbNode).augmentation(OvsdbNodeAugmentation.class);
         verify(ovsdbNodeAugmentation).getConnectionInfo();

@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.southbound;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -45,7 +44,6 @@ import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({SouthboundUtil.class, NetworkInterface.class})
@@ -114,8 +112,8 @@ public class SouthboundUtilTest {
         //NetworkInterface.getNetworkInterfaces() returns null case
         PowerMockito.mockStatic(NetworkInterface.class);
         when(NetworkInterface.getNetworkInterfaces()).thenReturn(null);
-        assertTrue(String.class.isInstance(
-            Whitebox.invokeMethod(SouthboundUtil.class, "getLocalControllerHostIpAddress")));
+
+        assertEquals(null, SouthboundUtil.getLocalControllerHostIpAddress());
 
         @SuppressWarnings("unchecked")
         Enumeration<NetworkInterface> ifaces = mock(Enumeration.class);
@@ -133,7 +131,7 @@ public class SouthboundUtilTest {
         when(inetAddr.isLoopbackAddress()).thenReturn(false);
         when(inetAddr.isSiteLocalAddress()).thenReturn(true);
         when(inetAddr.getHostAddress()).thenReturn("HostAddress");
-        assertEquals("HostAddress", Whitebox.invokeMethod(SouthboundUtil.class, "getLocalControllerHostIpAddress"));
+        assertEquals("HostAddress", SouthboundUtil.getLocalControllerHostIpAddress());
     }
 
     @Test

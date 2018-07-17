@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -95,7 +96,8 @@ public final class SouthboundUtil {
         return node;
     }
 
-    private static String getLocalControllerHostIpAddress() {
+    @VisibleForTesting
+    static String getLocalControllerHostIpAddress() {
         String ipaddress = null;
         try {
             Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();

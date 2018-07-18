@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -438,7 +439,6 @@ public class OvsdbBridgeUpdateCommandTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSetOpenFlowNodeRef() throws Exception {
-        PowerMockito.mockStatic(SouthboundMapper.class);
 
         when(ovsdbBridgeUpdateCommand.getUpdates()).thenReturn(mock(TableUpdates.class));
         when(ovsdbBridgeUpdateCommand.getDbSchema()).thenReturn(mock(DatabaseSchema.class));
@@ -450,6 +450,8 @@ public class OvsdbBridgeUpdateCommandTest {
         List<ControllerEntry> controllerEntryList = new ArrayList<>();
         ControllerEntry controllerEntry = mock(ControllerEntry.class);
         controllerEntryList.add(controllerEntry);
+
+        PowerMockito.mockStatic(SouthboundMapper.class);
         when(SouthboundMapper.createControllerEntries(any(Bridge.class), any(Map.class)))
                 .thenReturn(controllerEntryList);
         when(controllerEntry.isIsConnected()).thenReturn(true);
@@ -470,20 +472,17 @@ public class OvsdbBridgeUpdateCommandTest {
         when(networkInterfaces.hasMoreElements()).thenReturn(true, false);
         NetworkInterface networkInterface = PowerMockito.mock(NetworkInterface.class);
         when(networkInterfaces.nextElement()).thenReturn(networkInterface);
-
-        OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
-        when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
-        when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(mock(InstanceIdentifier.class));
-        OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
-        Bridge bridge = mock(Bridge.class);
-        when(ovsdbBridgeAugmentationBuilder.setBridgeOpenflowNodeRef(any(InstanceIdentifier.class)))
-                .thenReturn(ovsdbBridgeAugmentationBuilder);
         when(networkInterface.getInetAddresses()).thenReturn(Iterators.asEnumeration(
             Iterators.singletonIterator(InetAddresses.forString("127.0.0.1"))));
 
-        Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "setOpenFlowNodeRef", ovsdbBridgeAugmentationBuilder, bridge);
+        when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(
+            new OvsdbConnectionInstance(null, null, null, mock(InstanceIdentifier.class)));
+
+        OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
+        ovsdbBridgeUpdateCommand.setOpenFlowNodeRef(ovsdbBridgeAugmentationBuilder, mock(Bridge.class));
+
         verify(controllerEntry, times(2)).isIsConnected();
-        verify(ovsdbBridgeAugmentationBuilder).setBridgeOpenflowNodeRef(any(InstanceIdentifier.class));
+        assertNotNull(ovsdbBridgeAugmentationBuilder.build().getBridgeOpenflowNodeRef());
     }
 
     @SuppressWarnings("unchecked")

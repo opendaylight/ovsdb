@@ -461,9 +461,7 @@ public class OvsdbBridgeUpdateCommandTest {
         when(uri.getValue()).thenReturn("tcp:192.168.12.56:6633");
 
         Ipv4Address ipv4Address = new Ipv4Address("127.0.0.1");
-        IpAddress bridgeControllerIpAddress = mock(IpAddress.class);
-        when(bridgeControllerIpAddress.getIpv4Address()).thenReturn(ipv4Address);
-        PowerMockito.whenNew(IpAddress.class).withAnyArguments().thenReturn(bridgeControllerIpAddress);
+        PowerMockito.whenNew(IpAddress.class).withAnyArguments().thenReturn(new IpAddress(ipv4Address));
 
         PowerMockito.mockStatic(NetworkInterface.class);
         Enumeration<NetworkInterface> networkInterfaces = mock(Enumeration.class);

@@ -19,11 +19,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterators;
 import com.google.common.net.InetAddresses;
-import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -87,8 +86,8 @@ import org.powermock.reflect.Whitebox;
 @PrepareForTest({ TyperUtils.class, OvsdbBridgeUpdateCommand.class, SouthboundUtil.class, InstanceIdentifier.class,
         SouthboundMapper.class, NetworkInterface.class })
 public class OvsdbBridgeUpdateCommandTest {
-    private Map<UUID,Bridge> updatedBridgeRows = new HashMap<>();
-    private Map<UUID, Bridge> oldBridgeRows = new HashMap<>();
+    private final Map<UUID,Bridge> updatedBridgeRows = new HashMap<>();
+    private final Map<UUID, Bridge> oldBridgeRows = new HashMap<>();
     private OvsdbBridgeUpdateCommand ovsdbBridgeUpdateCommand;
 
     @Before
@@ -457,27 +456,19 @@ public class OvsdbBridgeUpdateCommandTest {
         when(controllerEntry.getTarget()).thenReturn(uri);
         when(uri.getValue()).thenReturn("tcp:192.168.12.56:6633");
 
+        Ipv4Address ipv4Address = mock(Ipv4Address.class);
+        when(ipv4Address.getValue()).thenReturn("127.0.0.1");
         IpAddress bridgeControllerIpAddress = mock(IpAddress.class);
+        when(bridgeControllerIpAddress.getIpv4Address()).thenReturn(ipv4Address);
         PowerMockito.whenNew(IpAddress.class).withAnyArguments().thenReturn(bridgeControllerIpAddress);
 
         PowerMockito.mockStatic(NetworkInterface.class);
-        Enumeration<NetworkInterface> networkInterfaces = mock(Enumeration.class);
-        when(NetworkInterface.getNetworkInterfaces()).thenReturn(networkInterfaces);
-
-        when(networkInterfaces.hasMoreElements()).thenReturn(true, false);
         NetworkInterface networkInterface = PowerMockito.mock(NetworkInterface.class);
-        when(networkInterfaces.nextElement()).thenReturn(networkInterface);
+        when(networkInterface.getInetAddresses()).thenReturn(Iterators.asEnumeration(
+            Iterators.singletonIterator(InetAddresses.forString("127.0.0.1"))));
+        when(NetworkInterface.getNetworkInterfaces()).thenReturn(Iterators.asEnumeration(
+            Iterators.singletonIterator(networkInterface)));
 
-        Enumeration<InetAddress> networkInterfaceAddresses = mock(Enumeration.class);
-        when(networkInterface.getInetAddresses()).thenReturn(networkInterfaceAddresses);
-        when(networkInterfaceAddresses.hasMoreElements()).thenReturn(true, false);
-
-        InetAddress networkInterfaceAddress = InetAddresses.forString("127.0.0.1");
-        when(networkInterfaceAddresses.nextElement()).thenReturn(networkInterfaceAddress);
-
-        Ipv4Address ipv4Address = mock(Ipv4Address.class);
-        when(bridgeControllerIpAddress.getIpv4Address()).thenReturn(ipv4Address);
-        when(ipv4Address.getValue()).thenReturn("127.0.0.1");
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(mock(InstanceIdentifier.class));

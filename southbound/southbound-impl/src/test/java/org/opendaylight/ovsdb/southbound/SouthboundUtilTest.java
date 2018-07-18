@@ -21,7 +21,6 @@ import com.google.common.collect.Iterators;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -41,19 +40,12 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberMatcher;
-import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({SouthboundUtil.class, NetworkInterface.class})
+@PrepareForTest({NetworkInterface.class})
 public class SouthboundUtilTest {
-
-    @Before
-    public void setUp() {
-        PowerMockito.mockStatic(SouthboundUtil.class, Mockito.CALLS_REAL_METHODS);
-    }
 
     @SuppressWarnings("unchecked")
     @Test
@@ -109,25 +101,20 @@ public class SouthboundUtilTest {
 
     @Test
     public void testGetLocalControllerHostIpAddress() throws Exception {
+        // NetworkInterface.getNetworkInterfaces() returns null case
+        assertNull(SouthboundUtil.getLocalControllerHostIpAddress(null));
 
-        //NetworkInterface.getNetworkInterfaces() returns null case
-        PowerMockito.mockStatic(NetworkInterface.class);
-        when(NetworkInterface.getNetworkInterfaces()).thenReturn(null);
-        assertNull(SouthboundUtil.getLocalControllerHostIpAddress());
-
-        InetAddress inetAddr = mock(InetAddress.class);
+        final InetAddress inetAddr = mock(InetAddress.class);
         when(inetAddr.isLoopbackAddress()).thenReturn(false);
         when(inetAddr.isSiteLocalAddress()).thenReturn(true);
         when(inetAddr.getHostAddress()).thenReturn("HostAddress");
 
-        NetworkInterface iface = PowerMockito.mock(NetworkInterface.class);
-        when(iface.getInetAddresses()).thenReturn(Iterators.asEnumeration(
-            Iterators.singletonIterator(inetAddr)));
+        // Ugh, NetworkInterface is a final class, we need to apply PowerMockito
+        final NetworkInterface iface = PowerMockito.mock(NetworkInterface.class);
+        when(iface.getInetAddresses()).thenReturn(Iterators.asEnumeration(Iterators.singletonIterator(inetAddr)));
 
-        when(NetworkInterface.getNetworkInterfaces()).thenReturn(Iterators.asEnumeration(
-            Iterators.singletonIterator(iface)));
-
-        assertEquals("HostAddress", SouthboundUtil.getLocalControllerHostIpAddress());
+        assertEquals("HostAddress", SouthboundUtil.getLocalControllerHostIpAddress(
+            Iterators.asEnumeration(Iterators.singletonIterator(iface))));
     }
 
     @Test
@@ -150,11 +137,9 @@ public class SouthboundUtilTest {
         //ipAddr null case
         when(connectionInfo.getLocalIp()).thenReturn(null);
 
-        //suppress call to getLocalControllerHostIpAddress()
-        MemberModifier.suppress(MemberMatcher.method(SouthboundUtil.class, "getLocalControllerHostIpAddress"));
-        PowerMockito.when(SouthboundUtil.class, "getLocalControllerHostIpAddress").thenReturn("127.0.0.1");
         testTarget = SouthboundConstants.OPENFLOW_CONNECTION_PROTOCOL + ":"
                 + "127.0.0.1" + ":" + SouthboundConstants.DEFAULT_OPENFLOW_PORT;
-        assertEquals("Incorrect Local controller host IP", testTarget, SouthboundUtil.getControllerTarget(ovsdbNode));
+        assertEquals("Incorrect Local controller host IP", testTarget, SouthboundUtil.getControllerTarget(ovsdbNode,
+            () -> "127.0.0.1"));
     }
 }

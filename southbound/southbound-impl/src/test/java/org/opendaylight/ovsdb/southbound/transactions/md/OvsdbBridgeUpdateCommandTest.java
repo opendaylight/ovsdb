@@ -20,8 +20,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterators;
 import com.google.common.net.InetAddresses;
-import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -459,7 +459,10 @@ public class OvsdbBridgeUpdateCommandTest {
         when(controllerEntry.getTarget()).thenReturn(uri);
         when(uri.getValue()).thenReturn("tcp:192.168.12.56:6633");
 
+        Ipv4Address ipv4Address = mock(Ipv4Address.class);
+        when(ipv4Address.getValue()).thenReturn("127.0.0.1");
         IpAddress bridgeControllerIpAddress = mock(IpAddress.class);
+        when(bridgeControllerIpAddress.getIpv4Address()).thenReturn(ipv4Address);
         PowerMockito.whenNew(IpAddress.class).withAnyArguments().thenReturn(bridgeControllerIpAddress);
 
         PowerMockito.mockStatic(NetworkInterface.class);
@@ -470,16 +473,8 @@ public class OvsdbBridgeUpdateCommandTest {
         NetworkInterface networkInterface = PowerMockito.mock(NetworkInterface.class);
         when(networkInterfaces.nextElement()).thenReturn(networkInterface);
 
-        Enumeration<InetAddress> networkInterfaceAddresses = mock(Enumeration.class);
-        when(networkInterface.getInetAddresses()).thenReturn(networkInterfaceAddresses);
-        when(networkInterfaceAddresses.hasMoreElements()).thenReturn(true, false);
-
-        InetAddress networkInterfaceAddress = InetAddresses.forString("127.0.0.1");
-        when(networkInterfaceAddresses.nextElement()).thenReturn(networkInterfaceAddress);
-
-        Ipv4Address ipv4Address = mock(Ipv4Address.class);
-        when(bridgeControllerIpAddress.getIpv4Address()).thenReturn(ipv4Address);
-        when(ipv4Address.getValue()).thenReturn("127.0.0.1");
+        when(networkInterface.getInetAddresses()).thenReturn(Iterators.asEnumeration(
+            Iterators.singletonIterator(InetAddresses.forString("127.0.0.1"))));
 
         when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(
             new OvsdbConnectionInstance(null, null, null, mock(InstanceIdentifier.class)));

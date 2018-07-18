@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.net.InetAddresses;
@@ -351,7 +352,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setOpenFlowNodeRef(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+    @VisibleForTesting
+    void setOpenFlowNodeRef(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
             Bridge bridge) {
         Map<UUID, Controller> updatedControllerRows =
                 TyperUtils.extractRowsUpdated(Controller.class, getUpdates(), getDbSchema());

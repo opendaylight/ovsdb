@@ -16,7 +16,8 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.concurrent.ExecutionException;
-
+import java.util.function.Supplier;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -96,34 +97,13 @@ public final class SouthboundUtil {
         return node;
     }
 
-    @VisibleForTesting
-    static String getLocalControllerHostIpAddress() {
-        String ipaddress = null;
-        try {
-            Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
-            if (ifaces != null) {
-                while (ifaces.hasMoreElements()) {
-                    NetworkInterface iface = ifaces.nextElement();
-
-                    for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
-                        InetAddress inetAddr = inetAddrs.nextElement();
-                        if (!inetAddr.isLoopbackAddress() && inetAddr.isSiteLocalAddress()) {
-                            ipaddress = inetAddr.getHostAddress();
-                            break;
-                        }
-                    }
-                }
-            } else {
-                LOG.warn("Local Host don't have any associated IP address");
-            }
-        } catch (SocketException e) {
-            LOG.warn("Exception while fetching local host ip address ",e);
-        }
-        return ipaddress;
+    // FIXME: this really should return Optional<String>
+    public static @Nullable String getControllerTarget(Node ovsdbNode) {
+        return getControllerTarget(ovsdbNode, SouthboundUtil::getLocalControllerHostIpAddress);
     }
 
-    public static String getControllerTarget(Node ovsdbNode) {
-        String target = null;
+    @VisibleForTesting static String getControllerTarget(Node ovsdbNode,
+            Supplier<String> localControllerHostIpAddress) {
         String ipAddr = null;
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
         ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
@@ -132,15 +112,12 @@ public final class SouthboundUtil {
             ipAddr = String.valueOf(connectionInfo.getLocalIp().getValue());
         }
         if (ipAddr == null) {
-            ipAddr = getLocalControllerHostIpAddress();
+            ipAddr = localControllerHostIpAddress.get();
         }
 
-        if (ipAddr != null) {
-            target = SouthboundConstants.OPENFLOW_CONNECTION_PROTOCOL + ":"
-                    + ipAddr + ":" + SouthboundConstants.DEFAULT_OPENFLOW_PORT;
-        }
-
-        return target;
+        return ipAddr == null ? null
+                : SouthboundConstants.OPENFLOW_CONNECTION_PROTOCOL + ":" + ipAddr + ":"
+                + SouthboundConstants.DEFAULT_OPENFLOW_PORT;
     }
 
     public static String connectionInfoToString(final ConnectionInfo connectionInfo) {
@@ -150,5 +127,42 @@ public final class SouthboundUtil {
 
     public static void schemaMismatchLog(String column, String table, SchemaVersionMismatchException ex) {
         LOG.debug(SCHEMA_VERSION_MISMATCH, column, table, SouthboundConstants.OPEN_V_SWITCH, ex.getMessage());
+    }
+
+    @VisibleForTesting
+    static @Nullable String getLocalControllerHostIpAddress() {
+        final Enumeration<NetworkInterface> ifaces;
+        try {
+            ifaces = NetworkInterface.getNetworkInterfaces();
+        } catch (SocketException e) {
+            LOG.warn("Exception while fetching local host ip address ",e);
+            return null;
+        }
+
+        return getLocalControllerHostIpAddress(ifaces);
+    }
+
+    @VisibleForTesting
+    static @Nullable String getLocalControllerHostIpAddress(Enumeration<NetworkInterface> ifaces) {
+        String ipaddress = null;
+        if (ifaces != null) {
+            while (ifaces.hasMoreElements()) {
+                NetworkInterface iface = ifaces.nextElement();
+
+                for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
+                    InetAddress inetAddr = inetAddrs.nextElement();
+                    if (!inetAddr.isLoopbackAddress() && inetAddr.isSiteLocalAddress()) {
+                        ipaddress = inetAddr.getHostAddress();
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (ipaddress == null) {
+            LOG.warn("Local Host don't have any associated IP address");
+        }
+
+        return ipaddress;
     }
 }

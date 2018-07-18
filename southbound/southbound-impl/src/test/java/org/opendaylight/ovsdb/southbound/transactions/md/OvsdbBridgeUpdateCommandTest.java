@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
+import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -470,13 +471,13 @@ public class OvsdbBridgeUpdateCommandTest {
         Enumeration<InetAddress> networkInterfaceAddresses = mock(Enumeration.class);
         when(networkInterface.getInetAddresses()).thenReturn(networkInterfaceAddresses);
         when(networkInterfaceAddresses.hasMoreElements()).thenReturn(true, false);
-        InetAddress networkInterfaceAddress = PowerMockito.mock(InetAddress.class);
+
+        InetAddress networkInterfaceAddress = InetAddresses.forString("127.0.0.1");
         when(networkInterfaceAddresses.nextElement()).thenReturn(networkInterfaceAddress);
 
         Ipv4Address ipv4Address = mock(Ipv4Address.class);
         when(bridgeControllerIpAddress.getIpv4Address()).thenReturn(ipv4Address);
         when(ipv4Address.getValue()).thenReturn("127.0.0.1");
-        when(networkInterfaceAddress.getHostAddress()).thenReturn("127.0.0.1");
         assertEquals(bridgeControllerIpAddress.getIpv4Address().getValue(), networkInterfaceAddress.getHostAddress());
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);

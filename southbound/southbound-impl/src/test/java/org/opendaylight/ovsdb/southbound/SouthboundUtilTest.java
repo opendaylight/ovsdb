@@ -17,10 +17,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterators;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.util.Enumeration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -115,22 +115,18 @@ public class SouthboundUtilTest {
         when(NetworkInterface.getNetworkInterfaces()).thenReturn(null);
         assertNull(SouthboundUtil.getLocalControllerHostIpAddress());
 
-        @SuppressWarnings("unchecked")
-        Enumeration<NetworkInterface> ifaces = mock(Enumeration.class);
-        when(NetworkInterface.getNetworkInterfaces()).thenReturn(ifaces);
-        when(ifaces.hasMoreElements()).thenReturn(true).thenReturn(false);
-        NetworkInterface iface = PowerMockito.mock(NetworkInterface.class);
-        when(ifaces.nextElement()).thenReturn(iface);
-
-        @SuppressWarnings("unchecked")
-        Enumeration<InetAddress> inetAddrs = mock(Enumeration.class);
-        when(iface.getInetAddresses()).thenReturn(inetAddrs);
-        when(inetAddrs.hasMoreElements()).thenReturn(true).thenReturn(false);
         InetAddress inetAddr = mock(InetAddress.class);
-        when(inetAddrs.nextElement()).thenReturn(inetAddr);
         when(inetAddr.isLoopbackAddress()).thenReturn(false);
         when(inetAddr.isSiteLocalAddress()).thenReturn(true);
         when(inetAddr.getHostAddress()).thenReturn("HostAddress");
+
+        NetworkInterface iface = PowerMockito.mock(NetworkInterface.class);
+        when(iface.getInetAddresses()).thenReturn(Iterators.asEnumeration(
+            Iterators.singletonIterator(inetAddr)));
+
+        when(NetworkInterface.getNetworkInterfaces()).thenReturn(Iterators.asEnumeration(
+            Iterators.singletonIterator(iface)));
+
         assertEquals("HostAddress", SouthboundUtil.getLocalControllerHostIpAddress());
     }
 

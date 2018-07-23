@@ -13,5 +13,7 @@ Contents:
 .. toctree::
    :maxdepth: 1
 
+   ovsdb-user-guide
+   ovsdb-developer-guide
    specs/index
 

@@ -65,7 +65,7 @@ public class NodeInfo {
         bridgeWaiter.registerDataChangeListener(itUtils.dataBroker);
     }
 
-    private void closeWaiters() throws Exception {
+    private void closeWaiters() {
         ovsdbWaiter.close();
         bridgeWaiter.close();
     }

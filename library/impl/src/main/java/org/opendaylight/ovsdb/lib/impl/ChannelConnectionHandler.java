@@ -21,7 +21,7 @@ public class ChannelConnectionHandler implements ChannelFutureListener {
     }
 
     @Override
-    public void operationComplete(ChannelFuture arg0) throws Exception {
+    public void operationComplete(ChannelFuture arg0) {
         OvsdbConnectionService.channelClosed(client);
     }
 }

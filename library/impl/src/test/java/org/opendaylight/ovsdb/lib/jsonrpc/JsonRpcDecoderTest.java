@@ -47,7 +47,7 @@ public class JsonRpcDecoderTest {
      * individual Json node objects.
      */
     @Test
-    public void testDecode() throws Exception {
+    public void testDecode() {
         for (int i = 0; i < 10; i++) {
             ch.writeInbound(copiedBuffer(testJson, CharsetUtil.UTF_8));
         }
@@ -61,7 +61,7 @@ public class JsonRpcDecoderTest {
      * individual Json node objects.
      */
     @Test
-    public void testDecodePrettyJson() throws Exception {
+    public void testDecodePrettyJson() {
         ch.writeInbound(copiedBuffer(prettyTestJson, CharsetUtil.UTF_8));
         ch.readInbound();
         assertEquals(1, decoder.getRecordsRead());
@@ -73,7 +73,7 @@ public class JsonRpcDecoderTest {
      * individual Json node objects.
      */
     @Test
-    public void testDecodeSkipSpaces() throws Exception {
+    public void testDecodeSkipSpaces() {
         ch.writeInbound(copiedBuffer(PREAMBLE + testJson + PREAMBLE + testJson, CharsetUtil.UTF_8));
         ch.readInbound();
         assertEquals(2, decoder.getRecordsRead());
@@ -102,7 +102,7 @@ public class JsonRpcDecoderTest {
      * character set.
      */
     @Test(expected = DecoderException.class)
-    public void testDecodeInvalidEncoding() throws Exception {
+    public void testDecodeInvalidEncoding() {
         ch.writeInbound(copiedBuffer(testJson, CharsetUtil.UTF_16));
         ch.finish();
     }

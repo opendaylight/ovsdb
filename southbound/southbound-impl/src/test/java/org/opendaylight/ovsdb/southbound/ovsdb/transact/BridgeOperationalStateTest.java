@@ -68,7 +68,7 @@ public class BridgeOperationalStateTest {
     }
 
     @Test
-    public void testGetBridgeNode() throws Exception {
+    public void testGetBridgeNode() {
         Optional<Node> optNodes = briOperationState.getBridgeNode(iid);
         verify(iid, times(1)).firstIdentifierOf(Node.class);
         assertNotNull(optNodes);
@@ -76,7 +76,7 @@ public class BridgeOperationalStateTest {
     }
 
     @Test
-    public void testGetOvsdbBridgeAugmentation() throws Exception {
+    public void testGetOvsdbBridgeAugmentation() {
         Optional<OvsdbBridgeAugmentation> optOvsdbBri = briOperationState.getOvsdbBridgeAugmentation(iid);
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertNotNull(optOvsdbBri);
@@ -94,7 +94,7 @@ public class BridgeOperationalStateTest {
     }
 
     @Test
-    public void testGetBridgeTerminationPoint() throws Exception {
+    public void testGetBridgeTerminationPoint() {
         Optional<TerminationPoint> optTerm = briOperationState.getBridgeTerminationPoint(iid);
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertNotNull(optTerm);
@@ -152,7 +152,7 @@ public class BridgeOperationalStateTest {
     }
 
     @Test
-    public void testGetProtocolEntry() throws Exception {
+    public void testGetProtocolEntry() {
         Optional<ProtocolEntry> optProtocolEntry = briOperationState.getProtocolEntry(protocolEntry);
         verify(briOperationState, times(1)).getOvsdbBridgeAugmentation(any(InstanceIdentifier.class));
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));

@@ -50,7 +50,7 @@ public class OvsdbNodeRemoveCommandTest {
     private OvsdbNodeRemoveCommand ovsdbNodeRemoveCommand;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         ovsdbNodeRemoveCommand = PowerMockito.mock(OvsdbNodeRemoveCommand.class, Mockito.CALLS_REAL_METHODS);
     }
 

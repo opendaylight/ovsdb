@@ -73,7 +73,7 @@ public class SouthboundMapperTest {
     }
 
     @Test
-    public void testCreateInstanceIdentifier() throws Exception {
+    public void testCreateInstanceIdentifier() {
         NodeId nodeId = NodeId.getDefaultInstance("test");
         InstanceIdentifier<Node> iid = SouthboundMapper.createInstanceIdentifier(nodeId);
         assertEquals(nodeId, iid.firstKeyOf(Node.class).getNodeId());
@@ -81,7 +81,7 @@ public class SouthboundMapperTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testCreateInstanceIdentifier1() throws Exception {
+    public void testCreateInstanceIdentifier1() {
         Bridge bridge = mock(Bridge.class);
 
         // When bridge is not empty, we expect a deserialized identifier
@@ -109,7 +109,7 @@ public class SouthboundMapperTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testCreateInstanceIdentifier2() throws Exception {
+    public void testCreateInstanceIdentifier2() {
         Controller controller = mock(Controller.class);
 
         // When controller is not empty, we expect a deserialized identifier
@@ -152,7 +152,7 @@ public class SouthboundMapperTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testCreateDatapathId() throws Exception {
+    public void testCreateDatapathId() {
         Bridge bridge = mock(Bridge.class);
         when(bridge.getDatapathIdColumn()).thenReturn(null);
         assertNull(SouthboundMapper.createDatapathId(bridge));
@@ -170,7 +170,7 @@ public class SouthboundMapperTest {
     }
 
     @Test
-    public void testCreateDatapathType() throws Exception {
+    public void testCreateDatapathType() {
         OvsdbBridgeAugmentation mdsalbridge = mock(OvsdbBridgeAugmentation.class);
         when(mdsalbridge.getDatapathType()).thenAnswer(
                 (Answer<Class<? extends DatapathTypeBase>>) invocation -> DatapathTypeNetdev.class);
@@ -216,7 +216,7 @@ public class SouthboundMapperTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testCreateMdsalProtocols() throws Exception {
+    public void testCreateMdsalProtocols() {
         Bridge bridge = mock(Bridge.class);
         Set<String> value = new HashSet<>();
         value.add("OpenFlow10");
@@ -231,7 +231,7 @@ public class SouthboundMapperTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testCreateControllerEntries() throws Exception {
+    public void testCreateControllerEntries() {
         Bridge bridge = mock(Bridge.class);
         Column<GenericTableSchema, Set<UUID>> controllerColumn = mock(Column.class);
         when(bridge.getControllerColumn()).thenReturn(controllerColumn);
@@ -263,7 +263,7 @@ public class SouthboundMapperTest {
     }
 
     @Test
-    public void testCreateControllerEntries1() throws Exception {
+    public void testCreateControllerEntries1() {
 
     }
 
@@ -310,7 +310,7 @@ public class SouthboundMapperTest {
     }
 
     @Test
-    public void testSuppressLocalIpPort() throws Exception {
+    public void testSuppressLocalIpPort() {
         ConnectionInfo connectionInfo = mock(ConnectionInfo.class);
         IpAddress ipAddress = IpAddressBuilder.getDefaultInstance("1.2.3.4");
         when(connectionInfo.getRemoteIp()).thenReturn(ipAddress);
@@ -325,7 +325,7 @@ public class SouthboundMapperTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testCreateManagerEntries() throws Exception {
+    public void testCreateManagerEntries() {
         OpenVSwitch ovsdbNode = mock(OpenVSwitch.class);
         Map<UUID, Manager> updatedManagerRows = new HashMap<>();
         Set<UUID> managerUUIDs = new HashSet<>();
@@ -372,7 +372,7 @@ public class SouthboundMapperTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testCreateManagerEntries1() throws Exception {
+    public void testCreateManagerEntries1() {
         Node ovsdbNode = mock(Node.class);
         Map<Uri, Manager> updatedManagerRows = new HashMap<>();
         Uri uri = mock(Uri.class);
@@ -430,7 +430,7 @@ public class SouthboundMapperTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testGetInstanceIdentifier() throws Exception {
+    public void testGetInstanceIdentifier() {
         OpenVSwitch ovs = mock(OpenVSwitch.class);
         Column<GenericTableSchema, Map<String, String>> externalIdColumn = mock(Column.class);
         when(ovs.getExternalIdsColumn()).thenReturn(externalIdColumn);

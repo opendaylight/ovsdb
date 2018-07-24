@@ -145,7 +145,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
             bootstrap.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
-                public void initChannel(SocketChannel channel) throws Exception {
+                public void initChannel(SocketChannel channel) {
                     if (certificateManagerSrv != null && certificateManagerSrv.getServerContext() != null) {
                         SSLContext sslContext = certificateManagerSrv.getServerContext();
                         /* First add ssl handler if ssl context is given */
@@ -315,7 +315,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
-                        public void initChannel(SocketChannel channel) throws Exception {
+                        public void initChannel(SocketChannel channel) {
                             LOG.debug("New Passive channel created : {}", channel);
                             if (certificateManagerSrv != null && certificateManagerSrv.getServerContext() != null) {
                                 /* Add SSL handler first if SSL context is provided */
@@ -501,7 +501,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         LOG.info("OvsdbConnectionService closed");
         JsonRpcEndpoint.close();
     }

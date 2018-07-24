@@ -53,7 +53,7 @@ public class UnMetDependencyGetterTest extends DataChangeListenerTestBase {
     }
 
     @Test
-    public void testLogicalSwitchConfigDependency() throws Exception {
+    public void testLogicalSwitchConfigDependency() {
         setupForTest();
         unMetDependencies = mcastMacDataValidator.getInTransitDependencies(opState, mac);
         assertEquals(0, unMetDependencies.size());
@@ -68,7 +68,7 @@ public class UnMetDependencyGetterTest extends DataChangeListenerTestBase {
     }
 
     @Test
-    public void testLogicalSwitchInTransitDependency() throws Exception {
+    public void testLogicalSwitchInTransitDependency() {
         setupForTest();
         unMetDependencies = mcastMacDataValidator.getInTransitDependencies(opState, mac);
         assertEquals(0, unMetDependencies.size());

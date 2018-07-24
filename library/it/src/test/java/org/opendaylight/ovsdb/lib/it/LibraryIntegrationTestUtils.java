@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.lib.it;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Objects;
@@ -48,8 +47,8 @@ public final class LibraryIntegrationTestUtils {
         // Nothing to do
     }
 
-    public static OvsdbClient getTestConnection(Object provider) throws IOException,
-            InterruptedException, ExecutionException, TimeoutException {
+    public static OvsdbClient getTestConnection(Object provider) throws
+        InterruptedException, ExecutionException, TimeoutException {
         Properties props = System.getProperties();
         String addressStr = props.getProperty(SERVER_IPADDRESS);
         String portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);

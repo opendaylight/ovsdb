@@ -16,7 +16,6 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
-import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -102,7 +101,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (hwvtepDeviceEntityOwnershipListener != null) {
             hwvtepDeviceEntityOwnershipListener.close();
         }
@@ -176,7 +175,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     public OvsdbClient connect(InstanceIdentifier<Node> iid,
-                               HwvtepGlobalAugmentation hwvtepGlobal) throws UnknownHostException, ConnectException {
+                               HwvtepGlobalAugmentation hwvtepGlobal) throws UnknownHostException {
         LOG.info("Connecting to {}", HwvtepSouthboundUtil.connectionInfoToString(hwvtepGlobal.getConnectionInfo()));
         InetAddress ip = HwvtepSouthboundMapper.createInetAddress(hwvtepGlobal.getConnectionInfo().getRemoteIp());
         OvsdbClient client = ovsdbConnectionService
@@ -195,7 +194,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         return client;
     }
 
-    public void disconnect(HwvtepGlobalAugmentation ovsdbNode) throws UnknownHostException {
+    public void disconnect(HwvtepGlobalAugmentation ovsdbNode) {
         LOG.info("Diconnecting from {}", HwvtepSouthboundUtil.connectionInfoToString(ovsdbNode.getConnectionInfo()));
         HwvtepConnectionInstance client = getConnectionInstance(ovsdbNode.getConnectionInfo());
         if (client != null) {

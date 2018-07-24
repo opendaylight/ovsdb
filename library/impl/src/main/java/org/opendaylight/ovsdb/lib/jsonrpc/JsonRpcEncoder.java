@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class JsonRpcEncoder extends MessageToMessageEncoder<Object> {
     @Override
-    protected void encode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, Object msg, List<Object> out) {
 
     }
 }

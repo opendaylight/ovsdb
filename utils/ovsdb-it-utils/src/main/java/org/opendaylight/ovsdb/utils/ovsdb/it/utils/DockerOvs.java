@@ -557,10 +557,9 @@ public class DockerOvs implements AutoCloseable {
     /**
      * Wait for all Ovs's to accept and respond to OVSDB requests.
      * @param waitFor How long to wait
-     * @throws IOException if something goes wrong on the IO end
      * @throws InterruptedException If this thread is interrupted
      */
-    private void waitForOvsdbServers(long waitFor) throws IOException, InterruptedException {
+    private void waitForOvsdbServers(long waitFor) throws InterruptedException {
         AtomicInteger numRunningOvs = new AtomicInteger(0);
 
         int numOvs = dockerComposeServices.size();

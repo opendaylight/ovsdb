@@ -20,7 +20,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import org.opendaylight.ovsdb.lib.error.InvalidEncodingException;
@@ -142,7 +141,7 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
         return recordsRead;
     }
 
-    private static void skipSpaces(ByteBuf byteBuf) throws IOException {
+    private static void skipSpaces(ByteBuf byteBuf) {
         while (byteBuf.isReadable()) {
             int ch = byteBuf.getByte(byteBuf.readerIndex()) & 0xFF;
             if (!(ch == ' ' || ch == '\r' || ch == '\n' || ch == '\t')) {

@@ -62,7 +62,7 @@ public class ProtocolUpdateCommandTest {
 
     @SuppressWarnings("unchecked")
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         protocols.put(mock(InstanceIdentifier.class), protocolEntry);
     }
 

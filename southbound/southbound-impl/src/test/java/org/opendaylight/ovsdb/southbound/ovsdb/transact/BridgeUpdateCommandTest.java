@@ -36,7 +36,7 @@ public class BridgeUpdateCommandTest {
     @Mock private Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updated;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         briUpdatedCmd = mock(BridgeUpdateCommand.class, Mockito.CALLS_REAL_METHODS);
     }
 

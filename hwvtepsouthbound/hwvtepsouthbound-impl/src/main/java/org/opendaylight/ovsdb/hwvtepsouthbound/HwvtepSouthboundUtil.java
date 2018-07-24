@@ -29,7 +29,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,13 +57,7 @@ public final class HwvtepSouthboundUtil {
     }
 
     public static InstanceIdentifier<?> deserializeInstanceIdentifier(String iidString) {
-        InstanceIdentifier<?> result = null;
-        try {
-            result = instanceIdentifierCodec.bindingDeserializer(iidString);
-        } catch (DeserializationException e) {
-            LOG.warn("Unable to deserialize iidString", e);
-        }
-        return result;
+        return instanceIdentifierCodec.bindingDeserializer(iidString);
     }
 
     public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNode(

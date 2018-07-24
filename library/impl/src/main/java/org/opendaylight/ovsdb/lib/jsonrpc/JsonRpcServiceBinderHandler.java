@@ -33,7 +33,7 @@ public class JsonRpcServiceBinderHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
+    public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
         if (msg instanceof JsonNode) {
             JsonNode jsonNode = (JsonNode) msg;
             if (jsonNode.has("result")) {
@@ -61,7 +61,7 @@ public class JsonRpcServiceBinderHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+    public void channelReadComplete(ChannelHandlerContext ctx) {
         ctx.flush();
     }
 }

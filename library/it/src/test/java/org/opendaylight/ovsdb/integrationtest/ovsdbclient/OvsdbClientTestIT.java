@@ -18,7 +18,6 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -69,7 +68,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
      * transactions (viz., abort and assert).
      */
     @Test
-    public void testTransact() throws IOException, InterruptedException, ExecutionException {
+    public void testTransact() throws InterruptedException, ExecutionException {
         assertNotNull(dbSchema);
         TableSchema<GenericTableSchema> bridge = dbSchema.table("Bridge", GenericTableSchema.class);
         bridge.column("name", String.class);
@@ -85,7 +84,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
      * flood_vlans and 2 key-value pairs, and monitoring the DB update.
      */
     @Test
-    public void testMonitorRequest() throws ExecutionException, InterruptedException, IOException {
+    public void testMonitorRequest() throws ExecutionException, InterruptedException {
         assertNotNull(dbSchema);
         // Create Test Bridge before testing the Monitor operation
         createBridgeTransaction();
@@ -93,7 +92,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
         sendBridgeMonitorRequest(false); // Test monitor request without filters
     }
 
-    public void sendBridgeMonitorRequest(boolean filter) throws ExecutionException, InterruptedException, IOException {
+    public void sendBridgeMonitorRequest(boolean filter) throws InterruptedException {
         assertNotNull(dbSchema);
         GenericTableSchema bridge = dbSchema.table("Bridge", GenericTableSchema.class);
 
@@ -204,7 +203,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
         return ovsTableRow.getColumn(uuid).getData();
     }
 
-    private void createBridgeTransaction() throws IOException, InterruptedException, ExecutionException {
+    private void createBridgeTransaction() throws InterruptedException, ExecutionException {
         assertNotNull(dbSchema);
         TableSchema<GenericTableSchema> bridge = dbSchema.table("Bridge", GenericTableSchema.class);
         GenericTableSchema ovsTable = dbSchema.table("Open_vSwitch", GenericTableSchema.class);

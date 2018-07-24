@@ -33,7 +33,7 @@ public class HwvtepOperationalStateTest extends DataChangeListenerTestBase {
     UUID uuid = new UUID("ls0");
 
     @Test
-    public void testUpdateCurrentTxData() throws Exception {
+    public void testUpdateCurrentTxData() {
         InstanceIdentifier<LogicalSwitches> lsIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
                 .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
 

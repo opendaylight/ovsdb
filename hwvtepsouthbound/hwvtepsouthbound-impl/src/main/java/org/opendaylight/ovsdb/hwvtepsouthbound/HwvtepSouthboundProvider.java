@@ -106,7 +106,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void close() throws Exception {
+    public void close() {
         LOG.info("HwvtepSouthboundProvider Closed");
         if (txInvoker != null) {
             try {

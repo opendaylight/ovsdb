@@ -53,7 +53,7 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (registration != null) {
             registration.close();
         }

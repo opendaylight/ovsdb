@@ -57,7 +57,7 @@ public class OvsdbControllerRemovedCommandTest {
     private OvsdbControllerRemovedCommand ovsdbControllerRemovedCommand;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         ovsdbControllerRemovedCommand = PowerMockito.mock(OvsdbControllerRemovedCommand.class,
                 Mockito.CALLS_REAL_METHODS);
     }

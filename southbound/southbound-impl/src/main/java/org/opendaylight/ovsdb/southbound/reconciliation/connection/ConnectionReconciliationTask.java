@@ -7,7 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound.reconciliation.connection;
 
-import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -54,7 +53,7 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
                 LOG.warn("Connection retry({}) failed for {}.",
                         connectionAttempt.get(), ovsdbNode.getConnectionInfo());
             }
-        } catch (UnknownHostException | ConnectException e) {
+        } catch (UnknownHostException e) {
             LOG.warn("Connection retry({}) failed with exception. ",connectionAttempt.get(), e);
         }
         return result;

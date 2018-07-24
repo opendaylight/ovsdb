@@ -192,7 +192,7 @@ public class OvsdbConnectionManagerTest {
     }
 
     @Test
-    public void testDisconnect() throws Exception {
+    public void testDisconnect() {
         OvsdbNodeAugmentation ovsdbNode = mock(OvsdbNodeAugmentation.class);
         ConnectionInfo connectionInfo = mock(ConnectionInfo.class);
         when(ovsdbNode.getConnectionInfo()).thenReturn(connectionInfo);

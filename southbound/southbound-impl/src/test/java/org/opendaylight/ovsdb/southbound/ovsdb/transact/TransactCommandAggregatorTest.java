@@ -35,7 +35,7 @@ public class TransactCommandAggregatorTest {
     @Mock private BridgeOperationalState operationalState;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         transactCommandAggregator = new TransactCommandAggregator();
 
         //mock commands field

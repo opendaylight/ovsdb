@@ -113,12 +113,12 @@ public class OvsdbPortUpdateCommandTest {
     private OvsdbPortUpdateCommand ovsdbPortUpdateCommand;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         ovsdbPortUpdateCommand = PowerMockito.mock(OvsdbPortUpdateCommand.class, Mockito.CALLS_REAL_METHODS);
     }
 
     @Test
-    public void testOvsdbPortUpdateCommand() throws Exception {
+    public void testOvsdbPortUpdateCommand() {
         TableUpdates updates = mock(TableUpdates.class);
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
 

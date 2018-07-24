@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.southbound;
 
-import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -125,7 +124,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                             InstanceIdentifier<Node> instanceIdentifier = change.getRootPath().getRootIdentifier();
                             cm.connect(instanceIdentifier, ovsdbNode);
                             LOG.info("OVSDB node has been connected: {}",ovsdbNode);
-                        } catch (UnknownHostException | ConnectException e) {
+                        } catch (UnknownHostException e) {
                             LOG.warn("Failed to connect to ovsdbNode", e);
                         }
                     }
@@ -143,13 +142,9 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                     OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.getDataBefore();
                     ConnectionInfo key = ovsdbNode.getConnectionInfo();
                     InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
-                    try {
-                        cm.disconnect(ovsdbNode);
-                        LOG.info("OVSDB node has been disconnected:{}", ovsdbNode);
-                        cm.stopConnectionReconciliationIfActive(iid.firstIdentifierOf(Node.class), ovsdbNode);
-                    } catch (UnknownHostException e) {
-                        LOG.warn("Failed to disconnect ovsdbNode", e);
-                    }
+                    cm.disconnect(ovsdbNode);
+                    LOG.info("OVSDB node has been disconnected:{}", ovsdbNode);
+                    cm.stopConnectionReconciliationIfActive(iid.firstIdentifierOf(Node.class), ovsdbNode);
                 }
             }
 
@@ -165,15 +160,11 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                             && connectionInfoDOM.getDataBefore() != null) {
                         ConnectionInfo key = connectionInfoDOM.getDataBefore();
                         InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
-                        try {
-                            OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.getDataBefore();
-                            cm.disconnect(ovsdbNode);
-                            LOG.warn("OVSDB node {} has been disconnected, because connection-info related to "
-                                    + "the node is removed by user, but node still exist.", ovsdbNode);
-                            cm.stopConnectionReconciliationIfActive(iid.firstIdentifierOf(Node.class), ovsdbNode);
-                        } catch (UnknownHostException e) {
-                            LOG.warn("Failed to disconnect ovsdbNode", e);
-                        }
+                        OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.getDataBefore();
+                        cm.disconnect(ovsdbNode);
+                        LOG.warn("OVSDB node {} has been disconnected, because connection-info related to "
+                                + "the node is removed by user, but node still exist.", ovsdbNode);
+                        cm.stopConnectionReconciliationIfActive(iid.firstIdentifierOf(Node.class), ovsdbNode);
                     }
                 }
             }
@@ -196,7 +187,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                                 cm.disconnect(ovsdbNodeModification.getDataBefore());
                                 cm.connect(change.getRootPath().getRootIdentifier(), ovsdbNodeModification
                                         .getDataAfter());
-                            } catch (UnknownHostException | ConnectException e) {
+                            } catch (UnknownHostException e) {
                                 LOG.warn("Error disconnecting from or connecting to ovsdbNode", e);
                             }
                         }

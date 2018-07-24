@@ -359,7 +359,7 @@ public final class TyperUtils {
             }
 
             @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
+            public Object invoke(Object proxy, Method method, Object[] args) {
                 if (isGetTableSchema(method)) {
                     return processGetTableSchema();
                 } else if (isGetRow(method)) {

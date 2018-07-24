@@ -43,12 +43,12 @@ public class ControllerRemovedCommandTest {
     private final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updated = new HashMap<>();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         contRemoveCmd = mock(ControllerRemovedCommand.class, Mockito.CALLS_REAL_METHODS);
     }
 
     @Test
-    public void testExecute() throws Exception {
+    public void testExecute() {
         PowerMockito.mockStatic(TransactUtils.class);
         when(TransactUtils.extractRemoved(changes, ControllerEntry.class)).thenReturn(removed);
         when(TransactUtils.extractOriginal(changes, ControllerEntry.class)).thenReturn(operationalControllerEntries);

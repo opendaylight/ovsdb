@@ -460,7 +460,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testNetworkTopology() throws InterruptedException {
+    public void testNetworkTopology() {
         NetworkTopology networkTopology = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION,
                 InstanceIdentifier.create(NetworkTopology.class));
         Assert.assertNotNull("NetworkTopology could not be found in " + LogicalDatastoreType.CONFIGURATION,
@@ -473,7 +473,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testHwvtepTopology() throws InterruptedException {
+    public void testHwvtepTopology() {
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID));
@@ -497,7 +497,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testAddDeletePhysicalSwitch() throws InterruptedException {
+    public void testAddDeletePhysicalSwitch() {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
 
         try (TestPhysicalSwitch testPSwitch = new TestPhysicalSwitch(connectionInfo, PS_NAME)) {

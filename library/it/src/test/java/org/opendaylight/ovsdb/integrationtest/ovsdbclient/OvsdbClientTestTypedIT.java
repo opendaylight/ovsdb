@@ -15,8 +15,6 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -58,8 +56,8 @@ public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
      * are verified.
      */
     @Test
-    public void testTypedBridgeCreate() throws IOException, InterruptedException, ExecutionException,
-            NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public void testTypedBridgeCreate() throws InterruptedException, ExecutionException,
+        IllegalArgumentException {
         TestBridge testBridge = ovs.createTypedRowWrapper(TestBridge.class);
         testBridge.setName(TEST_BRIDGE_NAME);
         testBridge.setStatus(ImmutableMap.of("key","value"));

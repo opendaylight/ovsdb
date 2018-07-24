@@ -86,9 +86,8 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
      *
      * @param newType DataStore type
      * @param newIid of the md-sal object we're waiting for
-     * @throws Exception on failure
      */
-    public void modify(LogicalDatastoreType newType, InstanceIdentifier<?> newIid) throws Exception {
+    public void modify(LogicalDatastoreType newType, InstanceIdentifier<?> newIid) {
         this.close();
         this.clear();
         this.type = newType;

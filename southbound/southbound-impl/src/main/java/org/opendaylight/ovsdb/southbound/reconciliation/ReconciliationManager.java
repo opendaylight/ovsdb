@@ -127,7 +127,7 @@ public class ReconciliationManager implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (this.reconcilers != null) {
             this.reconcilers.shutdownNow();
         }
@@ -194,7 +194,7 @@ public class ReconciliationManager implements AutoCloseable {
                 .expireAfterWrite(BRIDGE_CACHE_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
                 .build(new CacheLoader<NodeKey, NodeConnectionMetadata>() {
                     @Override
-                    public NodeConnectionMetadata load(NodeKey nodeKey) throws Exception {
+                    public NodeConnectionMetadata load(NodeKey nodeKey) {
                         // the termination points are explicitly added to the cache, retrieving bridges that are not in
                         // the cache results in NoSuchElementException
                         throw new NoSuchElementException();

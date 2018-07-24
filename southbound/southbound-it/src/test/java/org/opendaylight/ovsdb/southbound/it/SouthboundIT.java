@@ -528,7 +528,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testNetworkTopology() throws InterruptedException {
+    public void testNetworkTopology() {
         NetworkTopology networkTopology = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION,
                 InstanceIdentifier.create(NetworkTopology.class));
         Assert.assertNotNull("NetworkTopology could not be found in " + LogicalDatastoreType.CONFIGURATION,
@@ -541,7 +541,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testOvsdbTopology() throws InterruptedException {
+    public void testOvsdbTopology() {
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
@@ -694,21 +694,21 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testOvsdbNodeOvsVersion() throws InterruptedException {
+    public void testOvsdbNodeOvsVersion() {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         assertNotNull(ovsdbNodeAugmentation.getOvsVersion());
     }
 
     @Test
-    public void testOvsdbNodeDbVersion() throws InterruptedException {
+    public void testOvsdbNodeDbVersion() {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         assertNotNull(ovsdbNodeAugmentation.getDbVersion());
     }
 
     @Test
-    public void testOpenVSwitchOtherConfig() throws InterruptedException {
+    public void testOpenVSwitchOtherConfig() {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         List<OpenvswitchOtherConfigs> otherConfigsList = ovsdbNodeAugmentation.getOpenvswitchOtherConfigs();
@@ -727,7 +727,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testOvsdbBridgeControllerInfo() throws InterruptedException {
+    public void testOvsdbBridgeControllerInfo() {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr,portNumber);
         String controllerTarget = SouthboundUtil.getControllerTarget(ovsdbNode);
         assertNotNull("Failed to get controller target", controllerTarget);
@@ -1286,7 +1286,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testAddDeleteBridge() throws InterruptedException {
+    public void testAddDeleteBridge() {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
 
         try (TestBridge testBridge = new TestBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME)) {
@@ -2010,7 +2010,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testGetOvsdbNodes() throws InterruptedException {
+    public void testGetOvsdbNodes() {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         InstanceIdentifier<Topology> topologyPath = InstanceIdentifier
                 .create(NetworkTopology.class)
@@ -2130,7 +2130,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testAddDeleteQos() throws InterruptedException {
+    public void testAddDeleteQos() {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         OvsdbNodeAugmentation ovsdbNodeAugmentation;
         Uri qosUri = new Uri("QOS-ROW");
@@ -2154,7 +2154,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testAddDeleteQueue() throws InterruptedException {
+    public void testAddDeleteQueue() {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         Uri queueUri = new Uri("QUEUE-A1");
 

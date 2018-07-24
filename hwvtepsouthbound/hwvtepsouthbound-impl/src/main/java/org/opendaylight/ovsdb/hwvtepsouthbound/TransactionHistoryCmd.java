@@ -36,7 +36,7 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
     }
 
     @Override
-    protected Object doExecute() throws Exception {
+    protected Object doExecute() {
         Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxLogs
                 = hwvtepProvider.getHwvtepConnectionManager().getControllerTxHistory();
         Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateLogs

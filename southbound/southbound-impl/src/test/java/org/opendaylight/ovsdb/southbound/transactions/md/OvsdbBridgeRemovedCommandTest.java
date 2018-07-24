@@ -53,7 +53,7 @@ public class OvsdbBridgeRemovedCommandTest {
     }
 
     @Test
-    public void testExecute() throws Exception {
+    public void testExecute() {
         //suppress calls to parent get methods
         MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeRemovedCommand.class, "getUpdates"));
         when(ovsdbBridgeRemovedCommand.getUpdates()).thenReturn(mock(TableUpdates.class));

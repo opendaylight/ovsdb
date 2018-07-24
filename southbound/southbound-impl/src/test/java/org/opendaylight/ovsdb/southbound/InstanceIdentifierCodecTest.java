@@ -63,7 +63,7 @@ public class InstanceIdentifierCodecTest {
     }
 
     @Test
-    public void testInstanceIdentifierCodec() throws Exception {
+    public void testInstanceIdentifierCodec() {
         InstanceIdentifierCodec codec = new InstanceIdentifierCodec(schemaService, bindingNormalizedNodeSerializer);
         verify(schemaService).registerSchemaContextListener(codec);
     }
@@ -124,7 +124,7 @@ public class InstanceIdentifierCodecTest {
     }
 
     @Test
-    public void testBindingDeserializer() throws Exception {
+    public void testBindingDeserializer() {
         YangInstanceIdentifier yiid = mock(YangInstanceIdentifier.class);
         when(PowerMockito.mock(AbstractModuleStringInstanceIdentifierCodec.class).deserialize(anyString()))
                 .thenReturn(yiid);

@@ -20,7 +20,7 @@ public class VersionTest {
      * during construction of the object.
      */
     @Test
-    public void testToString() throws Exception {
+    public void testToString() {
         Version version123 = Version.fromString("1.2.3");
         assertEquals("1.2.3", version123.toString());
     }
@@ -30,7 +30,7 @@ public class VersionTest {
      * for the Version object.
      */
     @Test
-    public void testEquals() throws Exception {
+    public void testEquals() {
         Version version123 = Version.fromString("1.2.3");
         Version version0 = Version.fromString("0.0.0");
         assertEquals(version123, Version.fromString("1.2.3"));
@@ -44,7 +44,7 @@ public class VersionTest {
      * X.Y.Z semantics of the version number.
      */
     @Test
-    public void testCompareTo() throws Exception {
+    public void testCompareTo() {
         Version version1227 = Version.fromString("1.2.27");
         Version version1200 = Version.fromString("1.2.0");
 
@@ -64,7 +64,7 @@ public class VersionTest {
     /* TODO: Incomplete compare test
      */
     @Test
-    public void testCompare() throws Exception {
+    public void testCompare() {
         Version.fromString("6.9.3");
         Version.fromString("7.1.0");
     }

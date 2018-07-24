@@ -42,7 +42,7 @@ public class NettyBootStrapper {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
 
                     @Override
-                    public void initChannel(SocketChannel ch) throws Exception {
+                    public void initChannel(SocketChannel ch) {
                         for (ChannelHandler handler : handlers) {
                             ch.pipeline().addLast(handler);
                         }

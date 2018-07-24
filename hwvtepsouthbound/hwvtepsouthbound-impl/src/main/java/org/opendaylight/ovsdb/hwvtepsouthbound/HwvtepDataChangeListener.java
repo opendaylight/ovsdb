@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -127,7 +126,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                     } else {
                         try {
                             hcm.connect(key, hwvtepGlobal);
-                        } catch (UnknownHostException | ConnectException e) {
+                        } catch (UnknownHostException e) {
                             LOG.warn("Failed to connect to HWVTEP node", e);
                         }
                     }
@@ -157,7 +156,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                             if (newClient == null) {
                                 hcm.reconcileConnection(key, hgUpdated);
                             }
-                        } catch (UnknownHostException | ConnectException e) {
+                        } catch (UnknownHostException e) {
                             LOG.warn("Failed to update connection on HWVTEP Node", e);
                         }
                     }
@@ -189,12 +188,8 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
             if (deleted != null) {
                 HwvtepGlobalAugmentation hgDeleted = deleted.augmentation(HwvtepGlobalAugmentation.class);
                 if (hgDeleted != null) {
-                    try {
-                        hcm.disconnect(hgDeleted);
-                        hcm.stopConnectionReconciliationIfActive(key, hgDeleted);
-                    } catch (UnknownHostException e) {
-                        LOG.warn("Failed to disconnect HWVTEP Node", e);
-                    }
+                    hcm.disconnect(hgDeleted);
+                    hcm.stopConnectionReconciliationIfActive(key, hgDeleted);
                 }
             }
         }

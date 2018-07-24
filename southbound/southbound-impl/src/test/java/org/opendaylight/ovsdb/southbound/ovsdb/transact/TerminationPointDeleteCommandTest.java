@@ -43,7 +43,7 @@ public class TerminationPointDeleteCommandTest {
     private final Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> removedTps = new HashSet<>();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         terminationPointDeleteCommand = mock(TerminationPointDeleteCommand.class, Mockito.CALLS_REAL_METHODS);
     }
 

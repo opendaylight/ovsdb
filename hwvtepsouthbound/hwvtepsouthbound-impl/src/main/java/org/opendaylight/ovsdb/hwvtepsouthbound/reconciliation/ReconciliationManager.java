@@ -97,7 +97,7 @@ public class ReconciliationManager implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (this.reconcilers != null) {
             this.reconcilers.shutdownNow();
         }

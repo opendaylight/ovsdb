@@ -72,7 +72,7 @@ public class BridgeConfigReconciliationTaskTest {
     @Mock private InstanceIdentifier<Node> iid;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         NodeKey nodeKey = new NodeKey(new NodeId(new Uri(NODE_ID)));
         List<Node> bridgeNodes = new ArrayList<>();
 

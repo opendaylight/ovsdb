@@ -14,7 +14,6 @@ import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSeriali
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.data.util.AbstractModuleStringInstanceIdentifierCodec;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -65,7 +64,7 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
         return bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid);
     }
 
-    public  InstanceIdentifier<?> bindingDeserializer(String iidString) throws DeserializationException {
+    public  InstanceIdentifier<?> bindingDeserializer(String iidString) {
         YangInstanceIdentifier normalizedYangIid = deserialize(iidString);
         return bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(normalizedYangIid);
     }

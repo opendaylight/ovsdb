@@ -21,7 +21,6 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -150,7 +149,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
     }
 
     public boolean checkSchema(String schemaStr)
-            throws IOException, InterruptedException, ExecutionException, TimeoutException {
+            throws InterruptedException, ExecutionException, TimeoutException {
         if (schemaSupported) {
             LOG.info("Schema ({}) is supported", schemaStr);
             return true;
@@ -216,7 +215,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         return monitorBuilder.with(new MonitorSelect(true, true, true, true)).build();
     }
 
-    public boolean monitorTables() throws ExecutionException, InterruptedException, IOException {
+    public boolean monitorTables() {
         if (monitorReady) {
             LOG.info("Monitoring is already initialized.");
             return monitorReady;

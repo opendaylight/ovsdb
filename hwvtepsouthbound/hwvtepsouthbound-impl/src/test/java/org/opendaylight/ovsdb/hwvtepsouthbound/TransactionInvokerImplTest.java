@@ -74,7 +74,7 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
     private TransactionInvokerImpl invoker;
 
     @Before
-    public void setupTest() throws Exception {
+    public void setupTest() {
         dataBroker = getDataBroker();
         invoker = new TransactionInvokerImpl(dataBroker);
         nodeIid1 = createInstanceIdentifier(java.util.UUID.randomUUID().toString());
@@ -83,7 +83,7 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
     }
 
     @After
-    public void cleanup() throws Exception {
+    public void cleanup() {
         deleteNode(nodeIid1);
         deleteNode(nodeIid2);
         deleteNode(nodeIid3);

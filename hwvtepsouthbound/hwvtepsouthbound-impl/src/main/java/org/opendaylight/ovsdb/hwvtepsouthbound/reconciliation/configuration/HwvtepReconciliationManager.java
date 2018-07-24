@@ -42,7 +42,7 @@ public class HwvtepReconciliationManager implements ClusteredDataTreeChangeListe
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (registration != null) {
             registration.close();
         }

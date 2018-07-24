@@ -53,7 +53,7 @@ public class OvsdbPortRemoveCommandTest {
     private OvsdbPortRemoveCommand ovsdbPortRemoveCommand;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         ovsdbPortRemoveCommand = PowerMockito.mock(OvsdbPortRemoveCommand.class, Mockito.CALLS_REAL_METHODS);
     }
 
@@ -71,7 +71,7 @@ public class OvsdbPortRemoveCommandTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testExecute() throws Exception {
+    public void testExecute() {
         when(ovsdbPortRemoveCommand.getUpdates()).thenReturn(mock(TableUpdates.class));
         when(ovsdbPortRemoveCommand.getDbSchema()).thenReturn(mock(DatabaseSchema.class));
         PowerMockito.mockStatic(TyperUtils.class);

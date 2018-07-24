@@ -129,7 +129,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         hwvtepDataChangeListener.close();
         deleteNode(OPERATIONAL);
         deleteNode(CONFIGURATION);
@@ -244,7 +244,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(ft).when(ovsdbClient).transact(any(DatabaseSchema.class), transactCaptor.capture());
     }
 
-    void addNode(LogicalDatastoreType logicalDatastoreType) throws Exception {
+    void addNode(LogicalDatastoreType logicalDatastoreType) {
         NodeBuilder nodeBuilder = prepareNode(nodeIid);
         HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
         nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, builder.build());

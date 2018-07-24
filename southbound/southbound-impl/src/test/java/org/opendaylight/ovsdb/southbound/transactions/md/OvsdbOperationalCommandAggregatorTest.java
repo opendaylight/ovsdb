@@ -68,7 +68,7 @@ public class OvsdbOperationalCommandAggregatorTest {
     }
 
     @Test
-    public void testOvsdbOperationalCommandAggregator() throws Exception {
+    public void testOvsdbOperationalCommandAggregator() {
         OvsdbConnectionInstance key = mock(OvsdbConnectionInstance.class);
         TableUpdates updates = mock(TableUpdates.class);
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);

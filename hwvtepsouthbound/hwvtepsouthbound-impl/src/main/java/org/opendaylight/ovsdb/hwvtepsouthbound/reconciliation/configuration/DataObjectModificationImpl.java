@@ -71,21 +71,20 @@ public class DataObjectModificationImpl<T extends DataObject> implements DataObj
     @SuppressWarnings("unchecked")
     public <C extends Identifiable<K> & ChildOf<? super T>, K extends Identifier<C>> DataObjectModification<C>
         getModifiedChildListItem(final Class<C> listItem, final K listKey) {
-        return (DataObjectModification<C>) getModifiedChild(
-                new InstanceIdentifier.IdentifiableItem<>(listItem, listKey));
+        return (DataObjectModification<C>) getModifiedChild(InstanceIdentifier.IdentifiableItem.of(listItem, listKey));
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <C extends ChildOf<? super T>> DataObjectModification<C> getModifiedChildContainer(final Class<C> arg) {
-        return (DataObjectModification<C>) getModifiedChild(new InstanceIdentifier.Item<>(arg));
+        return (DataObjectModification<C>) getModifiedChild(InstanceIdentifier.Item.of(arg));
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <C extends Augmentation<T> & DataObject> DataObjectModification<C> getModifiedAugmentation(
             final Class<C> augmentation) {
-        return (DataObjectModification<C>) getModifiedChild(new InstanceIdentifier.Item<>(augmentation));
+        return (DataObjectModification<C>) getModifiedChild(InstanceIdentifier.Item.of(augmentation));
     }
 
     @Override

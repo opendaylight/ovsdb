@@ -133,7 +133,7 @@ public class TransactCommandAggregator implements TransactCommand {
         }
     }
 
-    private void extractDataChanged(final Collection<DataObjectModification<? extends DataObject>> children,
+    private void extractDataChanged(final Collection<? extends DataObjectModification<? extends DataObject>> children,
                                     final Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
                                     final Map<Class<? extends Identifiable>, List<Identifiable>> deletedData) {
         if (children == null) {

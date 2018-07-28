@@ -70,8 +70,7 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
             DataObjectModification<HwvtepGlobalAugmentation> aug =
                     mod.getModifiedAugmentation(HwvtepGlobalAugmentation.class);
             if (aug != null && getModificationType(aug) != null) {
-                Collection<DataObjectModification<? extends DataObject>> children = aug.getModifiedChildren();
-                for (DataObjectModification<? extends DataObject> child : children) {
+                for (DataObjectModification<? extends DataObject> child : aug.getModifiedChildren()) {
                     updateDeviceOpData(key, child);
                 }
             }

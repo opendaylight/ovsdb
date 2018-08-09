@@ -817,7 +817,11 @@ public class SouthboundUtils {
         if (addressString != null) {
             try {
                 if (InetAddress.getByName(addressString) != null) {
-                    return addressString;
+                    if (addressString instanceof Inet4Address)  {
+                        return addressString;
+                    } else if (addressString instanceof Inet6Address)  {
+                        return [addressString];
+                    }
                 }
             } catch (UnknownHostException e) {
                 LOG.error("Host {} is invalid", addressString, e);

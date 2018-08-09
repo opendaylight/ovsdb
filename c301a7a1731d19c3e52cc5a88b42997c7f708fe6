@@ -22,6 +22,30 @@
       "revId": "c301a7a1731d19c3e52cc5a88b42997c7f708fe6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "10187cd0_2a34fb51",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 823,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-08-09T10:24:38Z",
+      "side": 1,
+      "message": "no. it won\u0027t. Besides, this is fetching entry from config which we can always program as [ipv6] in file itself.",
+      "parentUuid": "3e026d73_6b802fae",
+      "range": {
+        "startLine": 823,
+        "startChar": 31,
+        "endLine": 823,
+        "endChar": 47
+      },
+      "revId": "c301a7a1731d19c3e52cc5a88b42997c7f708fe6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

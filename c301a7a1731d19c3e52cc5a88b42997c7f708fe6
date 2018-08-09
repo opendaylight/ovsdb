@@ -46,6 +46,23 @@
       "revId": "c301a7a1731d19c3e52cc5a88b42997c7f708fe6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5bef96da_10e46bad",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 878,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-08-09T14:54:01Z",
+      "side": 1,
+      "message": "This is where you want to make the change. We get controller IP based off what is configured in manager.",
+      "revId": "c301a7a1731d19c3e52cc5a88b42997c7f708fe6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

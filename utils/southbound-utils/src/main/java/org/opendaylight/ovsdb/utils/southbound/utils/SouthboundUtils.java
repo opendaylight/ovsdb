@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 - 2017 Red Hat, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2018 Red Hat, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -872,9 +872,18 @@ public class SouthboundUtils {
                             continue;
                         }
                         String[] tokens = managerEntry.getTarget().getValue().split(":");
-                        if (tokens.length == 3 && tokens[0].equalsIgnoreCase("tcp")) {
+                        if (tokens.length == 3) {
+                            //IPv4 Address
+                            controllerIpStr = tokens[1];
+                        } else if (tokens.length > 3){
+                            //IPv6 Address
+                            String managerEntryStr = managerEntry.getTarget().getValue();
+                            controllerIpStr = managerEntryStr.substring(managerEntryStr.indexOf(':')+1,
+                                managerEntryStr.lastIndexOf(':'));
+                        }
+                        if (tokens[0].equalsIgnoreCase("tcp")) {
                             controllersStr.add(OPENFLOW_CONNECTION_PROTOCOL
-                                    + ":" + tokens[1] + ":" + getControllerOFPort());
+                                    + ":" + controllerIpStr + ":" + getControllerOFPort());
                         } else if (tokens[0].equalsIgnoreCase("ptcp")) {
                             ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
                             if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
@@ -884,9 +893,9 @@ public class SouthboundUtils {
                             } else {
                                 LOG.warn("Ovsdb Node does not contain connection info: {}", node);
                             }
-                        } else if (tokens.length == 3 && tokens[0].equalsIgnoreCase("ssl")) {
+                        } else if (tokens[0].equalsIgnoreCase("ssl")) {
                             controllersStr.add(OPENFLOW_SECURE_PROTOCOL
-                                    + ":" + tokens[1] + ":" + getControllerOFPort());
+                                    + ":" + controllerIpStr + ":" + getControllerOFPort());
                         } else if (tokens[0].equalsIgnoreCase("pssl")) {
                             ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
                             if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
@@ -913,7 +922,6 @@ public class SouthboundUtils {
             LOG.debug("Found {} OpenFlow Controller(s) :{}", controllersStr.size(),
                     controllersStr.stream().collect(Collectors.joining(" ")));
         }
-
         return controllersStr;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 - 2017 Red Hat, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015, 2018 Red Hat, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import java.util.regex.Matcher;
@@ -885,28 +886,34 @@ public class SouthboundUtils {
                         if (managerEntry == null || managerEntry.getTarget() == null) {
                             continue;
                         }
-                        String[] tokens = managerEntry.getTarget().getValue().split(":");
-                        if (tokens.length == 3 && tokens[0].equalsIgnoreCase("tcp")) {
-                            controllersStr.add(OPENFLOW_CONNECTION_PROTOCOL
-                                    + ":" + tokens[1] + ":" + getControllerOFPort());
-                        } else if (tokens[0].equalsIgnoreCase("ptcp")) {
+                        String managerStr = managerEntry.getTarget().getValue().toLowerCase(Locale.ROOT);
+                        int firstColonIdx = managerStr.indexOf(':');
+                        int lastColonIdx = managerStr.lastIndexOf(':');
+                        if (lastColonIdx <= firstColonIdx) {
+                            continue;
+                        }
+                        controllerIpStr = managerStr.substring(firstColonIdx + 1, lastColonIdx);
+                        if (managerStr.startsWith(("tcp"))) {
+                            controllersStr.add(OPENFLOW_CONNECTION_PROTOCOL + ":" + controllerIpStr + ":"
+                                + getControllerOFPort());
+                        } else if (managerStr.startsWith(("ssl"))) {
+                            controllersStr.add(OPENFLOW_SECURE_PROTOCOL + ":" + controllerIpStr + ":"
+                                + getControllerOFPort());
+                        } else if (managerStr.startsWith(("ptcp"))) {
                             ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
                             if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
                                 controllerIpStr = String.valueOf(connectionInfo.getLocalIp().getValue());
                                 controllersStr.add(OPENFLOW_CONNECTION_PROTOCOL
-                                        + ":" + controllerIpStr + ":" + OPENFLOW_PORT);
+                                    + ":" + controllerIpStr + ":" + OPENFLOW_PORT);
                             } else {
                                 LOG.warn("Ovsdb Node does not contain connection info: {}", node);
                             }
-                        } else if (tokens.length == 3 && tokens[0].equalsIgnoreCase("ssl")) {
-                            controllersStr.add(OPENFLOW_SECURE_PROTOCOL
-                                    + ":" + tokens[1] + ":" + getControllerOFPort());
-                        } else if (tokens[0].equalsIgnoreCase("pssl")) {
+                        } else if (managerStr.startsWith(("pssl"))) {
                             ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
                             if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
                                 controllerIpStr = String.valueOf(connectionInfo.getLocalIp().getValue());
                                 controllersStr.add(OPENFLOW_SECURE_PROTOCOL
-                                        + ":" + controllerIpStr + ":" + OPENFLOW_PORT);
+                                    + ":" + controllerIpStr + ":" + OPENFLOW_PORT);
                             } else {
                                 LOG.warn("Ovsdb Node does not contain connection info: {}", node);
                             }
@@ -930,7 +937,6 @@ public class SouthboundUtils {
             }
             LOG.debug("Found {} OpenFlow Controller(s) :{}", controllersStr.size(), controllerIpStr);
         }
-
         return controllersStr;
     }
 

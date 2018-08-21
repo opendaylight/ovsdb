@@ -16,6 +16,24 @@
       "revId": "35d96d8af6bafe24e831906631a7b526b97387af",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e142c5e_fbe7840f",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 876,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-08-21T09:15:52Z",
+      "side": 1,
+      "message": "since we get this from configured managers, should never be invalid, but just realized one can configure one correct and one wrong manager and cause same problem. will address this.",
+      "parentUuid": "eafc7def_6b970d31",
+      "revId": "35d96d8af6bafe24e831906631a7b526b97387af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

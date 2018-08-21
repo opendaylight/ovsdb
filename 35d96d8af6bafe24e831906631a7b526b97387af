@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eafc7def_6b970d31",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 876,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-08-21T08:39:44Z",
+      "side": 1,
+      "message": "This needs to check that lastIndexOf doesn\u0027t return -1 first, otherwise invalid configuration can cause denials of service (and we get a security issue to deal with).",
+      "revId": "35d96d8af6bafe24e831906631a7b526b97387af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

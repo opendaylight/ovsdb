@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a39bc46f_edba649f",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 880,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-08-21T13:17:48Z",
+      "side": 1,
+      "message": "This will also fail if there\u0027s a single : in the string; how about\n\n    int firstColonIdx \u003d managerStr.indexOf(\u0027:\u0027);\n    int lastColonIdx \u003d managerStr.lastIndexOf(\u0027:\u0027);\n    if (lastColonIdx \u003c\u003d firstColonIdx) {\n        continue;\n    }\n    controllerIpStr \u003d managerString.substring(firstColonIdx + 1, lastColonIdx);",
+      "revId": "a6248b9b9e08d7c97683cc3c618d3615db4ec90e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

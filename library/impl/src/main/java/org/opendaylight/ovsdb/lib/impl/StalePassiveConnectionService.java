@@ -80,7 +80,9 @@ public class StalePassiveConnectionService implements AutoCloseable {
 
                     @Override
                     public void onFailure(Throwable throwable) {
-                        LOG.info("Echo testing of old client {} failed", oldClient.getConnectionInfo());
+                        LOG.info("Echo testing of old client {} failed, disconnect and notify clients", oldClient.getConnectionInfo());
+                        //disconnect the old client to cleanup, so that new connection can proceed
+                        oldClient.disconnect();
                         onInactiveClient(oldClient);
                     }
                 }, MoreExecutors.directExecutor());

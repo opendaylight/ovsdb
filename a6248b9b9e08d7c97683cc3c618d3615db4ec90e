@@ -16,6 +16,24 @@
       "revId": "a6248b9b9e08d7c97683cc3c618d3615db4ec90e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f8109729_e2a41298",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 880,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-08-23T08:30:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a39bc46f_edba649f",
+      "revId": "a6248b9b9e08d7c97683cc3c618d3615db4ec90e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

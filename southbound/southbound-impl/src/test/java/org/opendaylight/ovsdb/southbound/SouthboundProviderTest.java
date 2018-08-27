@@ -197,5 +197,9 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
             listener.onSystemBootReady();
         }
 
+        @Override
+        public String getFailureCause() {
+            return "";
+        }
     }
 }

@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Vishal Thapar <vthapar@redhat.com>
+Submitted-by: Stephen Kitt <skitt@redhat.com>
+Submitted-at: Tue, 28 Aug 2018 09:08:40 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/75488
+Project: ovsdb
+Branch: refs/heads/master

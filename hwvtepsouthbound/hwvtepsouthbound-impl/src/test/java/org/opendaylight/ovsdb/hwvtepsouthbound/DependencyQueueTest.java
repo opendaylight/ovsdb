@@ -14,6 +14,7 @@ import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastor
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -39,6 +40,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
+@Ignore
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HwvtepConnectionInstance.class, HwvtepConnectionManager.class, Operations.class,
     DependencyQueue.class})

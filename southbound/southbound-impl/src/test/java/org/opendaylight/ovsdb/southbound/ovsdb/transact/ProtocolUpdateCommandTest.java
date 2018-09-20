@@ -52,7 +52,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({InstanceIdentifier.class, ProtocolUpdateCommand.class, TyperUtils.class, Operations.class})
+@PrepareForTest({InstanceIdentifier.class, ProtocolUpdateCommand.class, TransactUtils.class, TyperUtils.class,
+    Operations.class})
 public class ProtocolUpdateCommandTest {
 
     private static final String BRIDGE_NAME_COLUMN = null;

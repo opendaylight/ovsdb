@@ -11,6 +11,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.FrameworkUtil;
@@ -22,6 +23,7 @@ import org.springframework.osgi.mock.MockBundle;
 /**
  * JUnit test for {@link ServiceHelper}.
  */
+@Ignore
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(FrameworkUtil.class)
 public class ServiceHelperTest {

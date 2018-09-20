@@ -578,7 +578,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             LOG.warn("OVSDB entity {} was already registered for ownership", candidateEntity, e);
         }
         //If entity already has owner, it won't get notification from EntityOwnershipService
-        Optional<EntityOwnershipState> ownershipStateOpt =
+        java.util.Optional<EntityOwnershipState> ownershipStateOpt =
                 entityOwnershipService.getOwnershipState(candidateEntity);
         if (ownershipStateOpt.isPresent()) {
             EntityOwnershipState ownershipState = ownershipStateOpt.get();
@@ -611,8 +611,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             case ON_CONTROLLER_INITIATED_CONNECTION_FAILURE:
                 reconciliationManager.enqueueForRetry(task);
                 break;
-            case ON_DISCONNECT:
-            {
+            case ON_DISCONNECT: {
                 CheckedFuture<Optional<Node>, ReadFailedException> readNodeFuture;
                 try (ReadOnlyTransaction tx = db.newReadOnlyTransaction()) {
                     readNodeFuture = tx.read(LogicalDatastoreType.CONFIGURATION, iid);

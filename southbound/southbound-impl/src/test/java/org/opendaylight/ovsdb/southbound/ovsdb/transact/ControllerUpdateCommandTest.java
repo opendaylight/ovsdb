@@ -25,7 +25,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-@PrepareForTest(ControllerUpdateCommand.class)
+@PrepareForTest({ControllerUpdateCommand.class, TransactUtils.class})
 @RunWith(PowerMockRunner.class)
 public class ControllerUpdateCommandTest {
 

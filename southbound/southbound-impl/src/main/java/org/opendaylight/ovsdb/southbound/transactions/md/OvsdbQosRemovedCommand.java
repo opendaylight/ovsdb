@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
-    private static final Logger LOG = LoggerFactory.getLogger(OvsdbQueueUpdateCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OvsdbQosRemovedCommand.class);
 
     private Map<UUID, Qos> removedQosRows;
 

@@ -54,7 +54,7 @@ public final class ProcUtils {
     public static int runProcess(int reserved, long waitFor, StringBuilder capturedStdout, String... words)
             throws IOException, InterruptedException {
         int exitValue = tryProcess(null, waitFor, capturedStdout, words);
-        LOG.info("ProcUtils.runProcess exit code: ", exitValue);
+        LOG.info("ProcUtils.runProcess exit code: {}", exitValue);
         return exitValue;
     }
 

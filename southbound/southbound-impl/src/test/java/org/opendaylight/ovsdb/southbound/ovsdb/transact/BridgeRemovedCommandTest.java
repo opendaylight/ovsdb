@@ -28,7 +28,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-@PrepareForTest(BridgeRemovedCommand.class)
+@PrepareForTest({BridgeRemovedCommand.class, TransactUtils.class})
 @RunWith(PowerMockRunner.class)
 public class BridgeRemovedCommandTest {
 

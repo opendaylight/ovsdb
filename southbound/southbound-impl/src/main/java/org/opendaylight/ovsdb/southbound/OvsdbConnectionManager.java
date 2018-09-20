@@ -578,7 +578,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             LOG.warn("OVSDB entity {} was already registered for ownership", candidateEntity, e);
         }
         //If entity already has owner, it won't get notification from EntityOwnershipService
-        Optional<EntityOwnershipState> ownershipStateOpt =
+        java.util.Optional<EntityOwnershipState> ownershipStateOpt =
                 entityOwnershipService.getOwnershipState(candidateEntity);
         if (ownershipStateOpt.isPresent()) {
             EntityOwnershipState ownershipState = ownershipStateOpt.get();

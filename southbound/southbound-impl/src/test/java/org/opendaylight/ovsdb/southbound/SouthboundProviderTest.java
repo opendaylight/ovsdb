@@ -64,7 +64,7 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
     public void testInit() throws CandidateAlreadyRegisteredException {
         // Indicate that this is the owner
         when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
-                Optional.of(EntityOwnershipState.from(true, true)));
+                java.util.Optional.of(EntityOwnershipState.from(true, true)));
 
         try (SouthboundProvider southboundProvider = new SouthboundProvider(
                 getDataBroker(),
@@ -91,7 +91,7 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
     public void testInitWithClose() throws CandidateAlreadyRegisteredException {
         // Indicate that this is the owner
         when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
-                Optional.of(EntityOwnershipState.from(true, true)));
+                java.util.Optional.of(EntityOwnershipState.from(true, true)));
 
         try (SouthboundProvider southboundProvider = new SouthboundProvider(
                 getDataBroker(),
@@ -120,7 +120,7 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
     @Test
     public void testGetDb() {
         when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
-                Optional.of(EntityOwnershipState.from(true, true)));
+            java.util.Optional.of(EntityOwnershipState.from(true, true)));
 
         try (SouthboundProvider southboundProvider = new SouthboundProvider(
                 getDataBroker(),
@@ -140,7 +140,7 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
     @Test
     public void testHandleOwnershipChange() throws ReadFailedException {
         when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
-                Optional.of(EntityOwnershipState.from(false, true)));
+            java.util.Optional.of(EntityOwnershipState.from(false, true)));
         Entity entity = new Entity("ovsdb-southbound-provider", "ovsdb-southbound-provider");
         KeyedInstanceIdentifier<Topology, TopologyKey> topologyIid = InstanceIdentifier
                 .create(NetworkTopology.class)

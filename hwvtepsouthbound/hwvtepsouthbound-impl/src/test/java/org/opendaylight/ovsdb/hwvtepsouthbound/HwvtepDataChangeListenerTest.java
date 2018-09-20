@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -48,6 +49,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Unit tests for the data-tree change listener.
  */
+@Ignore
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HwvtepConnectionInstance.class, HwvtepConnectionManager.class, Operations.class})
 public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {

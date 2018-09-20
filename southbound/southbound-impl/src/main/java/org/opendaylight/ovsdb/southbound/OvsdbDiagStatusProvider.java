@@ -7,15 +7,15 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import org.apache.aries.blueprint.annotation.service.Service;
 import org.opendaylight.infrautils.diagstatus.DiagStatusService;
 import org.opendaylight.infrautils.diagstatus.ServiceDescriptor;
 import org.opendaylight.infrautils.diagstatus.ServiceState;
 import org.opendaylight.infrautils.diagstatus.ServiceStatusProvider;
-import org.ops4j.pax.cdi.api.OsgiServiceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@OsgiServiceProvider(classes = ServiceStatusProvider.class)
+@Service(classes = ServiceStatusProvider.class)
 public class OvsdbDiagStatusProvider implements ServiceStatusProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbDiagStatusProvider.class);

@@ -74,7 +74,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         try {
             updatedTunnelRows = TyperUtils.extractRowsUpdated(Tunnel.class, getUpdates(), getDbSchema());
         } catch (IllegalArgumentException e) {
-            LOG.debug("Tunnel Table not supported on this HWVTEP device", e.getMessage());
+            LOG.debug("Tunnel Table not supported on this HWVTEP device", e);
         }
     }
 

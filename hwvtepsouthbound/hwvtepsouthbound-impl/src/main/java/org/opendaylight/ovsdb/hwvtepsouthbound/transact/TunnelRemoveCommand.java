@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TunnelRemoveCommand extends AbstractTransactCommand {
-    private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortRemoveCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TunnelRemoveCommand.class);
 
     public TunnelRemoveCommand(HwvtepOperationalState state,
             Collection<DataTreeModification<Node>> changes) {

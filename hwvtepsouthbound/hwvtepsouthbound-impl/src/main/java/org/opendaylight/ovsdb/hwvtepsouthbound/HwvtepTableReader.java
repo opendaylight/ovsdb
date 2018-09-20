@@ -245,7 +245,7 @@ public class HwvtepTableReader {
             }
             return Optional.empty();
         } catch (RuntimeException e) {
-            LOG.error("Failed to get the hwvtep row for iid {} {} ", iid, e);
+            LOG.error("Failed to get the hwvtep row for iid {}", iid, e);
             return Optional.empty();
         }
     }

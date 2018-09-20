@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Red Hat, Inc. and others. All rights reserved.
+ * Copyright (c) 2014, 2018 Red Hat, Inc. and others. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,8 +8,7 @@
 
 package org.opendaylight.ovsdb.lib.notation;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.google.errorprone.annotations.Var;
 
 /**
  * This class represents a version according to RFC 7047.
@@ -18,12 +17,11 @@ import java.util.regex.Pattern;
  */
 public class Version implements Comparable<Version> {
 
-    int major;
-    int minor;
-    int patch;
+    private int major;
+    private int minor;
+    private int patch;
 
     private static final String FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)";
-    private static final Pattern PATTERN = Pattern.compile(Version.FORMAT);
 
     public Version(int major, int minor, int patch) {
         this.major = major;
@@ -35,16 +33,39 @@ public class Version implements Comparable<Version> {
     public static final String NULL_VERSION_STRING = "0.0.0";
 
     public static Version fromString(String version) {
-        final Matcher matcher = Version.PATTERN.matcher(version);
-        if (!matcher.find()) {
+        final int firstDot = version.indexOf('.');
+        final int secondDot = version.indexOf('.', firstDot + 1);
+        if (firstDot == -1 || secondDot == -1) {
             throw new IllegalArgumentException("<" + version + "> does not match format " + Version.FORMAT);
         }
-        int major = Integer.valueOf(matcher.group(1));
-        int minor = Integer.valueOf(matcher.group(2));
-        int patch = Integer.valueOf(matcher.group(3));
+        final int major = parse(version, 0, firstDot);
+        final int minor = parse(version, firstDot + 1, secondDot);
+        final int patch = parse(version, secondDot + 1, version.length());
         return new Version(major, minor, patch);
     }
 
+    /**
+     * Parses the string argument from position 'start' to 'end' as a signed decimal integer.
+     * We use a custom hand written method instead of {@link Integer#parseInt(String)}
+     * just to avoid allocating three intermediate String objects in {@link #fromString(String)},
+     * as objection allocation data in Java Mission Control from ODL running in a scale lab
+     * has identified this as the top #3 (!) memory allocator overall - 1 GB avoidable String.
+     * @author Michael Vorburger.ch
+     */
+    private static int parse(String string, int start, int end) {
+        @Var int result = 0;
+        for (int i = start; i < end && i < string.length(); i++) {
+            char character = string.charAt(i);
+            int digit = Character.digit(character, 10);
+            if (digit < 0) {
+                throw new IllegalArgumentException("Not a digit: " + character);
+            }
+            result = result * 10 + digit;
+        }
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "" + major + "." + minor + "." + patch;
     }

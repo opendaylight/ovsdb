@@ -21,8 +21,10 @@ public class VersionTest {
      */
     @Test
     public void testToString() throws Exception {
-        Version version123 = Version.fromString("1.2.3");
-        assertEquals("1.2.3", version123.toString());
+        assertEquals("0.0.0", Version.fromString("0.0.0").toString());
+        assertEquals("1.2.3", Version.fromString("1.2.3").toString());
+        assertEquals("1.2.3", Version.fromString("01.2.003").toString());
+        assertEquals("12.34.56", Version.fromString("12.34.56").toString());
     }
 
     /**

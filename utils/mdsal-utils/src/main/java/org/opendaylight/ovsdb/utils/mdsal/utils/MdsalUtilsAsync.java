@@ -210,12 +210,12 @@ public class MdsalUtilsAsync {
         Futures.addCallback(transactionFuture, new FutureCallback<Void>() {
             @Override
             public void onSuccess(final Void result) {
-                LOG.debug("Transaction({}) {} SUCCESSFUL", operationDesc);
+                LOG.debug("Transaction({}) SUCCESSFUL", operationDesc);
             }
 
             @Override
             public void onFailure(final Throwable ex) {
-                LOG.error("Transaction({}) {} FAILED!", operationDesc, ex);
+                LOG.error("Transaction({}) FAILED!", operationDesc, ex);
                 throw new IllegalStateException("  Transaction(" + operationDesc + ") not committed correctly", ex);
             }
         }, MoreExecutors.directExecutor());

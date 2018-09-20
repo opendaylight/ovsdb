@@ -491,7 +491,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 ovsdbTerminationPointBuilder
                     .setOfport(ofPort);
             } else {
-                LOG.debug("Received negative value for ofPort from ovsdb for {} {} {}",
+                LOG.debug("Received negative value for ofPort from ovsdb for {} {}",
                         interf.getName(),ofPort);
             }
         }
@@ -513,7 +513,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 ovsdbTerminationPointBuilder
                     .setOfportRequest(ofPort);
             } else {
-                LOG.debug("Received negative value for ofPort from ovsdb for {} {} {}",
+                LOG.debug("Received negative value for ofPort from ovsdb for {} {}",
                         interf.getName(),ofPort);
             }
         }

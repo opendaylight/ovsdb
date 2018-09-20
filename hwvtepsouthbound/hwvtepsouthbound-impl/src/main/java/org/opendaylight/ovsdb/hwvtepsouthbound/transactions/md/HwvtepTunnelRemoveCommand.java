@@ -37,7 +37,7 @@ public class HwvtepTunnelRemoveCommand extends AbstractTransactionCommand {
         try {
             deletedTunnelRows = TyperUtils.extractRowsRemoved(Tunnel.class, getUpdates(), getDbSchema()).values();
         } catch (IllegalArgumentException e) {
-            LOG.debug("Tunnel Table not supported on this HWVTEP device", e.getMessage());
+            LOG.debug("Tunnel Table not supported on this HWVTEP device", e);
         }
     }
 
@@ -82,7 +82,7 @@ public class HwvtepTunnelRemoveCommand extends AbstractTransactionCommand {
     private PhysicalLocator getPhysicalLocatorFromUUID(UUID uuid) {
         PhysicalLocator locator = getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocator(uuid);
         if (locator == null) {
-            LOG.trace("Available PhysicalLocators: ",
+            LOG.trace("Available PhysicalLocators: {}",
                             getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocators());
         }
         return locator;

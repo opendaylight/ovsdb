@@ -160,7 +160,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
                     if (data != null) {
                         onConfigUpdate(transactionBuilder, nodeIid, data, key, extraData);
                     } else {
-                        LOG.warn("Skipping add of key: {} as it is not present txId: {}", key);
+                        LOG.warn("Skipping add of key: {} as it is not present", key);
                     }
                 }
             };

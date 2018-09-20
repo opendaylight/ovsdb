@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNull;
 
 import java.util.List;
 import java.util.Map;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
@@ -32,6 +33,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
+@Ignore
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HwvtepConnectionInstance.class, HwvtepConnectionManager.class, Operations.class})
 public class UnMetDependencyGetterTest extends DataChangeListenerTestBase {

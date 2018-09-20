@@ -13,6 +13,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
@@ -26,6 +27,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+@Ignore
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HwvtepConnectionInstance.class, HwvtepConnectionManager.class, Operations.class})
 public class HwvtepOperationalStateTest extends DataChangeListenerTestBase {

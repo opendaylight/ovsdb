@@ -370,7 +370,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private void handleOwnershipState(Entity candidateEntity, HwvtepConnectionInstance hwvtepConnectionInstance) {
         //If entity already has owner, it won't get notification from EntityOwnershipService
         //so cache the connection instances.
-        Optional<EntityOwnershipState> ownershipStateOpt =
+        java.util.Optional<EntityOwnershipState> ownershipStateOpt =
                 entityOwnershipService.getOwnershipState(candidateEntity);
         if (ownershipStateOpt.isPresent()) {
             EntityOwnershipState ownershipState = ownershipStateOpt.get();

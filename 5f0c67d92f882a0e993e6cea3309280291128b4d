@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a5deed8c_07d2dd88",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-09-21T08:26:31Z",
+      "side": 1,
+      "message": "Why final if you’re also using @Var?",
+      "revId": "5f0c67d92f882a0e993e6cea3309280291128b4d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39e91d6a_a19f2fa2",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-09-21T08:26:31Z",
+      "side": 1,
+      "message": "Just to err on the side of caution, how about\n\n    for (int i \u003d start; i \u003c end \u0026\u0026 i \u003c string.length(); i++) {\n        char character \u003d string.charAt(i);\n\n(or check end at the start of the method).",
+      "revId": "5f0c67d92f882a0e993e6cea3309280291128b4d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

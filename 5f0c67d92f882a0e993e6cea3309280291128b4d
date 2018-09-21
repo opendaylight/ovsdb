@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "82462594_6bb2b764",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-09-21T16:07:28Z",
+      "side": 1,
+      "message": "No big deal, I was mostly curious about the inconsistency.",
+      "parentUuid": "8ec1b210_5468e908",
+      "revId": "5f0c67d92f882a0e993e6cea3309280291128b4d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25686f5d_3dd1f0db",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
         "patchSetId": 1

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "8ec1b210_5468e908",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-09-21T15:44:24Z",
+      "side": 1,
+      "message": "because ovsdb has not yet adopted infrautils:quality-parent? There was also final Machter, here, so I carry on in that tradition here... ;-)  \n\nThe @Var in line 47 was really more because I\u0027m so used to it meanwhile, and why not, it\u0027s handy for when we do adopt Error-Prone here.. I could also remove the @Var, if that\u0027s a big deal.",
+      "parentUuid": "a5deed8c_07d2dd88",
+      "revId": "5f0c67d92f882a0e993e6cea3309280291128b4d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25686f5d_3dd1f0db",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "10aacdb1_5f58e2c5",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-09-21T15:44:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25686f5d_3dd1f0db",
+      "revId": "5f0c67d92f882a0e993e6cea3309280291128b4d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "39e91d6a_a19f2fa2",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2018-09-21T08:26:31Z",
       "side": 1,
       "message": "Just to err on the side of caution, how about\n\n    for (int i \u003d start; i \u003c end \u0026\u0026 i \u003c string.length(); i++) {\n        char character \u003d string.charAt(i);\n\n(or check end at the start of the method).",
+      "revId": "5f0c67d92f882a0e993e6cea3309280291128b4d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d90d44c1_455c47d5",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-09-21T15:44:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "39e91d6a_a19f2fa2",
       "revId": "5f0c67d92f882a0e993e6cea3309280291128b4d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

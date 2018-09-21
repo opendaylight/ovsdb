@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "25686f5d_3dd1f0db",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-09-21T08:27:36Z",
+      "side": 1,
+      "message": "This needs a comment explaining why we parse numbers manually.",
+      "revId": "5f0c67d92f882a0e993e6cea3309280291128b4d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "39e91d6a_a19f2fa2",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/notation/Version.java",
         "patchSetId": 1

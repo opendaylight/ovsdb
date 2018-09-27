@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "02ac7ad0_c1d199ec",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 19
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2018-09-27T07:24:02Z",
+      "side": 1,
+      "message": "Switch connect is not the trigger for every config reconciliation.\n\nCurrently for Bridge configuration reconciliation is getting triggered upon gaining eos ownership.\nand TerminationPoint reconciliation is getting triggered after the bridge appears in oper datastore.\n\nPlease capture these details also.\n\n@Vishal do you know the reason behind such a design ?\nlike for some config we wait for oper datastore to fill\nfor some config we just do it upon gaining eos ownership.",
+      "range": {
+        "startLine": 71,
+        "startChar": 83,
+        "endLine": 71,
+        "endChar": 89
+      },
+      "revId": "99c052b675c5734e6bcce7828267140022a60052",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

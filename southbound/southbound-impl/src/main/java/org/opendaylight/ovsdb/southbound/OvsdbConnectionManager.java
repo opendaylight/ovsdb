@@ -611,8 +611,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             case ON_CONTROLLER_INITIATED_CONNECTION_FAILURE:
                 reconciliationManager.enqueueForRetry(task);
                 break;
-            case ON_DISCONNECT:
-            {
+            case ON_DISCONNECT: {
                 CheckedFuture<Optional<Node>, ReadFailedException> readNodeFuture;
                 try (ReadOnlyTransaction tx = db.newReadOnlyTransaction()) {
                     readNodeFuture = tx.read(LogicalDatastoreType.CONFIGURATION, iid);

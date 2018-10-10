@@ -46,6 +46,30 @@
       "revId": "99c052b675c5734e6bcce7828267140022a60052",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af9dafa7_94a8f2c8",
+        "filename": "docs/specs/ovsdb-reconciliation.rst",
+        "patchSetId": 19
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2018-10-10T06:41:14Z",
+      "side": 1,
+      "message": "That is to follow the order of normal operations, where first bridge is created and then you create ports. You create TP on a bridge, so requires bridge to be already present before you can add TP. TP create/update uses bridge NodeId which we get from operational.",
+      "parentUuid": "02ac7ad0_c1d199ec",
+      "range": {
+        "startLine": 71,
+        "startChar": 83,
+        "endLine": 71,
+        "endChar": 89
+      },
+      "revId": "99c052b675c5734e6bcce7828267140022a60052",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -129,6 +129,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <!-- https://github.com/powermock/powermock/issues/924 -->
+      <groupId>org.javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <scope>test</scope>
+      <version>3.22.0-GA</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

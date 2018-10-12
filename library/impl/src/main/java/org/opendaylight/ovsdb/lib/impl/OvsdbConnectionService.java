@@ -49,6 +49,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult.HandshakeStatus;
@@ -107,7 +108,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final Map<OvsdbClient, Channel> CONNECTIONS = new ConcurrentHashMap<>();
 
     private volatile boolean useSSL = false;
-    private volatile ICertificateManager certManagerSrv;
+    private final ICertificateManager certManagerSrv;
 
     private volatile int jsonRpcDecoderMaxFrameLength = 100000;
     private volatile Channel serverChannel;
@@ -115,6 +116,11 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private final AtomicBoolean singletonCreated = new AtomicBoolean(false);
     private volatile String listenerIp = "0.0.0.0";
     private volatile int listenerPort = 6640;
+
+    @Inject
+    public OvsdbConnectionService(ICertificateManager certManagerSrv) {
+        this.certManagerSrv = certManagerSrv;
+    }
 
     /**
      * If the SSL flag is enabled, the method internally will establish TLS communication using the default
@@ -552,15 +558,6 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      */
     public void setUseSsl(boolean flag) {
         useSSL = flag;
-    }
-
-    /**
-     * Set default Certificate manager service.
-     *
-     * @param certificateManagerSrv reference
-     */
-    public void setCertificatManager(ICertificateManager certificateManagerSrv) {
-        certManagerSrv = certificateManagerSrv;
     }
 
     /**

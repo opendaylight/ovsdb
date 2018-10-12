@@ -24,6 +24,7 @@
 
   <!-- Notify OvsdbConnectionService with any change in the config properties value-->
   <bean id="ovsdbConnectionService" class="org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService">
+    <argument ref="aaaCertificateManager"/>
     <cm:managed-properties persistent-id="org.opendaylight.ovsdb.library"
                            update-strategy="component-managed"
                            update-method="updateConfigParameter"/>
@@ -31,7 +32,6 @@
     <property name="ovsdbListenerPort" value="${ovsdb-listener-port}"/>
     <property name="ovsdbRpcTaskTimeout" value="${ovsdb-rpc-task-timeout}"/>
     <property name="useSsl" value="${use-ssl}"/>
-    <property name="certificatManager" ref="aaaCertificateManager"/>
     <property name="jsonRpcDecoderMaxFrameLength" value="${json-rpc-decoder-max-frame-length}"/>
   </bean>
 

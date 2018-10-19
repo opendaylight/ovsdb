@@ -99,16 +99,22 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
-      <dependency>
-          <groupId>org.powermock</groupId>
-          <artifactId>powermock-api-mockito</artifactId>
-          <scope>test</scope>
-      </dependency>
-      <dependency>
-          <groupId>org.powermock</groupId>
-          <artifactId>powermock-module-junit4</artifactId>
-          <scope>test</scope>
-      </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-api-mockito</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-module-junit4</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <version>3.21.0-GA</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

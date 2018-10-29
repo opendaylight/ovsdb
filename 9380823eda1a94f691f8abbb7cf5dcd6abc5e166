@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "32b08aa5_5cfd334f",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2018-10-29T20:35:09Z",
+      "side": 1,
+      "message": "also \"@Singleton\", in a follow-up change which replaces \u003cbean\u003e BP XML with maven-blueprint-plugin (here and in all other places...)",
+      "revId": "9380823eda1a94f691f8abbb7cf5dcd6abc5e166",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

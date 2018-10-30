@@ -16,6 +16,24 @@
       "revId": "9380823eda1a94f691f8abbb7cf5dcd6abc5e166",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "771448bb_9d773f6b",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2018-10-30T08:17:48Z",
+      "side": 1,
+      "message": "Yes, which requires changes to Aries Blueprint, which I\u0027m working on ;-).",
+      "parentUuid": "32b08aa5_5cfd334f",
+      "revId": "9380823eda1a94f691f8abbb7cf5dcd6abc5e166",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

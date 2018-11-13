@@ -103,6 +103,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.Item;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -879,13 +882,13 @@ public class SouthboundUtils {
                             continue;
                         }
                         controllerIpStr = managerStr.substring(firstColonIdx + 1, lastColonIdx);
-                        if (managerStr.startsWith(("tcp"))) {
+                        if (managerStr.startsWith("tcp")) {
                             controllersStr.add(OPENFLOW_CONNECTION_PROTOCOL + ":" + controllerIpStr + ":"
                                 + getControllerOFPort());
-                        } else if (managerStr.startsWith(("ssl"))) {
+                        } else if (managerStr.startsWith("ssl")) {
                             controllersStr.add(OPENFLOW_SECURE_PROTOCOL + ":" + controllerIpStr + ":"
                                 + getControllerOFPort());
-                        } else if (managerStr.startsWith(("ptcp"))) {
+                        } else if (managerStr.startsWith("ptcp")) {
                             ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
                             if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
                                 controllerIpStr = connectionInfo.getLocalIp().stringValue();
@@ -894,7 +897,7 @@ public class SouthboundUtils {
                             } else {
                                 LOG.warn("Ovsdb Node does not contain connection info: {}", node);
                             }
-                        } else if (managerStr.startsWith(("pssl"))) {
+                        } else if (managerStr.startsWith("pssl")) {
                             ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
                             if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
                                 controllerIpStr = connectionInfo.getLocalIp().stringValue();
@@ -968,14 +971,30 @@ public class SouthboundUtils {
             if (managedNodes != null) {
                 for (ManagedNodeEntry managedNode : managedNodes) {
                     InstanceIdentifier<?> bridgeIid = managedNode.getBridgeRef().getValue();
-                    if (bridgeIid.toString().contains(bridgeName)) {
-                        found = true;
-                        break;
+                    for (PathArgument bridgeIidPathArg : bridgeIid.getPathArguments()) {
+                        if (toString(bridgeIidPathArg).contains(bridgeName)) {
+                            found = true;
+                            break;
+                        }
                     }
                 }
             }
         }
         return found;
+    }
+
+    // see OVSDB-470 for background
+    // TODO This is a lot better than the original, but still has a toString, which ideally should be avoided..
+    private String toString(PathArgument pathArgument) {
+        if (pathArgument instanceof IdentifiableItem<?, ?>) {
+            IdentifiableItem<?, ?> identifiableItem = (IdentifiableItem<?, ?>) pathArgument;
+            return identifiableItem.getKey().toString();
+        } else if (pathArgument instanceof Item<?>) {
+            Item<?> item = (Item<?>) pathArgument;
+            return item.getType().getName();
+        } else {
+            throw new IllegalArgumentException("Unknown kind of PathArgument: " + pathArgument);
+        }
     }
 
     public OvsdbBridgeAugmentation getBridgeFromConfig(Node node, String bridge) {

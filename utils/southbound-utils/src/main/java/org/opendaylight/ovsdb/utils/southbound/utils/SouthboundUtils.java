@@ -102,6 +102,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
+import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.Item;
@@ -962,37 +963,46 @@ public class SouthboundUtils {
     }
 
     public boolean isBridgeOnOvsdbNode(Node ovsdbNode, String bridgeName) {
-        boolean found = false;
         OvsdbNodeAugmentation ovsdbNodeAugmentation = extractNodeAugmentation(ovsdbNode);
         if (ovsdbNodeAugmentation != null) {
             List<ManagedNodeEntry> managedNodes = ovsdbNodeAugmentation.getManagedNodeEntry();
             if (managedNodes != null) {
                 for (ManagedNodeEntry managedNode : managedNodes) {
-                    InstanceIdentifier<?> bridgeIid = managedNode.getBridgeRef().getValue();
-                    for (PathArgument bridgeIidPathArg : bridgeIid.getPathArguments()) {
-                        if (toString(bridgeIidPathArg).contains(bridgeName)) {
-                            found = true;
-                            break;
-                        }
+                    if (matchesBridgeName(managedNode, bridgeName)) {
+                        return true;
                     }
                 }
             }
         }
-        return found;
+        return false;
     }
 
     // see OVSDB-470 for background
-    // TODO This is a lot better than the original, but still has a toString, which ideally should be avoided..
-    private String toString(PathArgument pathArgument) {
-        if (pathArgument instanceof IdentifiableItem<?, ?>) {
-            IdentifiableItem<?, ?> identifiableItem = (IdentifiableItem<?, ?>) pathArgument;
-            return identifiableItem.getKey().toString();
-        } else if (pathArgument instanceof Item<?>) {
-            Item<?> item = (Item<?>) pathArgument;
-            return item.getType().getName();
-        } else {
-            throw new IllegalArgumentException("Unknown kind of PathArgument: " + pathArgument);
+    private boolean matchesBridgeName(ManagedNodeEntry managedNode, String bridgeName) {
+        InstanceIdentifier<?> bridgeIid = managedNode.getBridgeRef().getValue();
+        for (PathArgument bridgeIidPathArg : bridgeIid.getPathArguments()) {
+            if (bridgeIidPathArg instanceof IdentifiableItem<?, ?>) {
+                IdentifiableItem<?, ?> identifiableItem = (IdentifiableItem<?, ?>) bridgeIidPathArg;
+                Identifier<?> key = identifiableItem.getKey();
+                if (key instanceof NodeKey) {
+                    // Do not combine the above if with that below, we want to
+                    // avoid the toString() call in the else if this is a NodeKey
+                    NodeKey nodeKey = (NodeKey) key;
+                    if (nodeKey.getNodeId().getValue().contains(bridgeName)) {
+                        return true;
+                    }
+                } else if (key.toString().contains(bridgeName)) {
+                    return true;
+                }
+            } else if (bridgeIidPathArg instanceof Item<?>) {
+                if (((Item<?>) bridgeIidPathArg).getType().getName().contains(bridgeName)) {
+                    return true;
+                }
+            } else {
+                throw new IllegalArgumentException("Unknown kind of PathArgument: " + bridgeIidPathArg);
+            }
         }
+        return false;
     }
 
     public OvsdbBridgeAugmentation getBridgeFromConfig(Node node, String bridge) {

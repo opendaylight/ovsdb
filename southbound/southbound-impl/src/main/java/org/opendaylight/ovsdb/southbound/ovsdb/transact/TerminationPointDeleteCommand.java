@@ -46,12 +46,15 @@ public class TerminationPointDeleteCommand implements TransactCommand {
         execute(transaction, state, TransactUtils.extractOriginal(events, OvsdbTerminationPointAugmentation.class),
                 TransactUtils.extractOriginal(events, Node.class),
                 TransactUtils.extractRemoved(events, OvsdbTerminationPointAugmentation.class));
+        LOG.info("Inside execute1 with async data change event");
     }
 
     @Override
     public void execute(TransactionBuilder transaction, BridgeOperationalState state,
             Collection<DataTreeModification<Node>> modifications,
             InstanceIdentifierCodec instanceIdentifierCodec) {
+        // execute2
+        LOG.info("Inside execute2 with collection of mods");
         execute(transaction, state,
                 TransactUtils.extractOriginal(modifications, OvsdbTerminationPointAugmentation.class),
                 TransactUtils.extractOriginal(modifications, Node.class),
@@ -64,7 +67,7 @@ public class TerminationPointDeleteCommand implements TransactCommand {
                          Map<InstanceIdentifier<Node>, Node> originalNodes,
                          Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> removedTps) {
         for (InstanceIdentifier<OvsdbTerminationPointAugmentation> removedTpIid: removedTps) {
-            LOG.debug("Received request to delete termination point {}", removedTpIid);
+            LOG.info("Received request to delete termination point {}", removedTpIid);
 
             OvsdbTerminationPointAugmentation original = originals.get(removedTpIid);
             Node originalNode = originalNodes.get(removedTpIid.firstIdentifierOf(Node.class));
@@ -107,6 +110,8 @@ public class TerminationPointDeleteCommand implements TransactCommand {
                             + " to remove port " + portUuid));
                     LOG.info("Deleted Termination Point : {} with uuid : {}",
                             original.getName(), portUuid);
+                    //LOG.info(new Exception().getStackTrace().toString());
+                    new Exception("TROZET port name:" + original.getName()).printStackTrace();
                 } else {
                     LOG.warn("Unable to delete port {} from bridge  {} because it was not found in the operational "
                             + "store, operational store,  and thus we cannot retrieve its UUID",

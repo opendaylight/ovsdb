@@ -757,8 +757,7 @@ public class SouthboundUtils {
         InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(bridgeNode, portName);
         tpBuilder.withKey(InstanceIdentifier.keyOf(tpIid));
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
-        /* TODO SB_MIGRATION should this be merge or mdsalUtils.put */
-        return mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
+        return mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
     }
 
     public Boolean addTerminationPoint(Node bridgeNode, String portName, String type) {
@@ -788,8 +787,7 @@ public class SouthboundUtils {
         InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(bridgeNode, portName);
         tpBuilder.withKey(InstanceIdentifier.keyOf(tpIid));
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
-        /* TODO SB_MIGRATION should this be merge or mdsalUtils.put */
-        return mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
+        return mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
     }
 
     public Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type) {
@@ -804,7 +802,7 @@ public class SouthboundUtils {
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         tpBuilder.withKey(InstanceIdentifier.keyOf(tpIid));
         tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
-        return mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
+        return mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
     }
 
     public Boolean addPatchTerminationPoint(Node node, String bridgeName, String portName, String peerPortName) {

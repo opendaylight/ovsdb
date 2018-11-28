@@ -134,6 +134,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public OvsdbClient connectWithSsl(final InetAddress address, final int port,
                                final ICertificateManager certificateManagerSrv) {
         try {
@@ -169,6 +170,10 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             return getChannelClient(channel, ConnectionType.ACTIVE, SocketConnectionType.SSL);
         } catch (InterruptedException e) {
             LOG.warn("Failed to connect {}:{}", address, port, e);
+        } catch (Throwable throwable) {
+            // sync() re-throws exceptions declared as Throwable, so the compiler doesn't see them
+            LOG.error("Error while binding to address {}, port {}", address, port, throwable);
+            throw throwable;
         }
         return null;
     }
@@ -303,6 +308,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * OVSDB Passive listening thread that uses Netty ServerBootstrap to open
      * passive connection with Ssl and handle channel callbacks.
      */
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void ovsdbManagerWithSsl(String ip, int port, final ICertificateManager certificateManagerSrv,
                                             final String[] protocols, final String[] cipherSuites) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -361,6 +367,10 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             serverListenChannel.closeFuture().sync();
         } catch (InterruptedException e) {
             LOG.error("Thread interrupted", e);
+        } catch (Throwable throwable) {
+            // sync() re-throws exceptions declared as Throwable, so the compiler doesn't see them
+            LOG.error("Error while binding to address {}, port {}", ip, port, throwable);
+            throw throwable;
         } finally {
             // Shut down all event loops to terminate all threads.
             bossGroup.shutdownGracefully();

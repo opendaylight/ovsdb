@@ -31,12 +31,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.binding.api.Transaction;
+import org.opendaylight.mdsal.binding.api.TransactionChain;
+import org.opendaylight.mdsal.binding.api.TransactionChainListener;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -48,13 +47,12 @@ import org.powermock.reflect.Whitebox;
 public class TransactionInvokerImplTest {
 
     private static final int QUEUE_SIZE = 10000;
-    @Mock private BindingTransactionChain chain;
+    @Mock private TransactionChain chain;
     @Mock private DataBroker db;
     private BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
     private BlockingQueue<ReadWriteTransaction> successfulTxQ
         = new LinkedBlockingQueue<>(QUEUE_SIZE);
-    private BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQ
-        = new LinkedBlockingQueue<>(QUEUE_SIZE);
+    private BlockingQueue<Transaction> failedTransactionQ = new LinkedBlockingQueue<>(QUEUE_SIZE);
     @Mock private ExecutorService executor;
     @Mock private AtomicBoolean runTask;
     private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand
@@ -73,7 +71,7 @@ public class TransactionInvokerImplTest {
     public void testTransactionInvokerImpl() throws Exception {
         MemberModifier.field(TransactionInvokerImpl.class, "inputQueue").set(transactionInvokerImpl, inputQueue);
         when(db.createTransactionChain(any(TransactionChainListener.class)))
-                .thenReturn(mock(BindingTransactionChain.class));
+                .thenReturn(mock(TransactionChain.class));
         TransactionInvokerImpl transactionInvokerImpl1 = new TransactionInvokerImpl(db);
         verify(db).createTransactionChain(any(TransactionChainListener.class));
         assertNotNull(Whitebox.getInternalState(transactionInvokerImpl1, "executor"));
@@ -93,10 +91,10 @@ public class TransactionInvokerImplTest {
     public void testOnTransactionChainFailed() throws Exception {
         field(TransactionInvokerImpl.class, "failedTransactionQueue").set(transactionInvokerImpl,
                 failedTransactionQ);
-        AsyncTransaction<?, ?> transaction = mock(AsyncTransaction.class);
+        Transaction transaction = mock(Transaction.class);
         Throwable cause = mock(Throwable.class);
         transactionInvokerImpl.onTransactionChainFailed(mock(TransactionChain.class), transaction, cause);
-        BlockingQueue<AsyncTransaction<?, ?>> testFailedTransactionQueue = Whitebox
+        BlockingQueue<Transaction> testFailedTransactionQueue = Whitebox
                 .getInternalState(transactionInvokerImpl, "failedTransactionQueue");
         assertTrue(testFailedTransactionQueue.contains(transaction));
     }
@@ -104,13 +102,13 @@ public class TransactionInvokerImplTest {
     @SuppressWarnings("rawtypes")
     @Test
     public void testExtractResubmitCommands() throws Exception {
-        AsyncTransaction<?, ?> transaction = mock(ReadWriteTransaction.class);
+        Transaction transaction = mock(ReadWriteTransaction.class);
         failedTransactionQ.put(transaction);
         field(TransactionInvokerImpl.class, "failedTransactionQueue").set(transactionInvokerImpl,
                 failedTransactionQ);
 
-        AsyncTransaction tx1 = mock(ReadWriteTransaction.class);
-        AsyncTransaction tx2 = mock(ReadWriteTransaction.class);
+        Transaction tx1 = mock(ReadWriteTransaction.class);
+        Transaction tx2 = mock(ReadWriteTransaction.class);
         pendingTransactions.add((ReadWriteTransaction) tx1);
         pendingTransactions.add((ReadWriteTransaction) transaction);
         pendingTransactions.add((ReadWriteTransaction) tx2);
@@ -139,7 +137,7 @@ public class TransactionInvokerImplTest {
         doNothing().when(chain).close();
         when(db.createTransactionChain(any(TransactionInvokerImpl.class))).thenReturn(chain);
 
-        failedTransactionQ.add(mock(AsyncTransaction.class));
+        failedTransactionQ.add(mock(Transaction.class));
         field(TransactionInvokerImpl.class, "pendingTransactions").set(transactionInvokerImpl, pendingTransactions);
         field(TransactionInvokerImpl.class, "transactionToCommand").set(transactionInvokerImpl, transactionToCommand);
         field(TransactionInvokerImpl.class, "failedTransactionQueue").set(transactionInvokerImpl, failedTransactionQ);
@@ -148,7 +146,7 @@ public class TransactionInvokerImplTest {
         Whitebox.invokeMethod(transactionInvokerImpl, "resetTransactionQueue");
         assertNotNull(Whitebox.getInternalState(transactionInvokerImpl, "pendingTransactions"));
         assertNotNull(Whitebox.getInternalState(transactionInvokerImpl, "transactionToCommand"));
-        BlockingQueue<AsyncTransaction<?, ?>> testFailedTransactionQueue = Whitebox
+        BlockingQueue<Transaction> testFailedTransactionQueue = Whitebox
                 .getInternalState(transactionInvokerImpl, "failedTransactionQueue");
         assertEquals(0, testFailedTransactionQueue.size());
     }

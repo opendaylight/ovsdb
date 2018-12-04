@@ -14,7 +14,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;

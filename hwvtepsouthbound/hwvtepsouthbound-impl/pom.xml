@@ -70,15 +70,15 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <!-- Testing Dependencies -->
       <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-binding-broker-impl</artifactId>
-          <scope>test</scope>
+        <groupId>org.opendaylight.mdsal</groupId>
+        <artifactId>mdsal-binding-dom-adapter</artifactId>
+        <scope>test</scope>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-binding-broker-impl</artifactId>
-          <scope>test</scope>
-          <type>test-jar</type>
+        <groupId>org.opendaylight.mdsal</groupId>
+        <artifactId>mdsal-binding-dom-adapter</artifactId>
+        <scope>test</scope>
+        <type>test-jar</type>
       </dependency>
       <dependency>
           <groupId>org.slf4j</groupId>

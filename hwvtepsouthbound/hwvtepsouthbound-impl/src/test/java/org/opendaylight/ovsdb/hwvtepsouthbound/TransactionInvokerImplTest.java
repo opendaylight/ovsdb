@@ -19,11 +19,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
@@ -74,7 +74,7 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
     private TransactionInvokerImpl invoker;
 
     @Before
-    public void setupTest() throws Exception {
+    public void setupTest() {
         dataBroker = getDataBroker();
         invoker = new TransactionInvokerImpl(dataBroker);
         nodeIid1 = createInstanceIdentifier(java.util.UUID.randomUUID().toString());
@@ -83,7 +83,7 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
     }
 
     @After
-    public void cleanup() throws Exception {
+    public void cleanup() {
         deleteNode(nodeIid1);
         deleteNode(nodeIid2);
         deleteNode(nodeIid3);
@@ -92,7 +92,7 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
     private void deleteNode(InstanceIdentifier<Node> iid) {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         tx.delete(LogicalDatastoreType.CONFIGURATION, iid);
-        tx.submit();
+        tx.commit();
     }
 
     @Test

@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,13 +15,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactCommandAggregator;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -53,7 +52,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
 
     private void registerListener() {
         final DataTreeIdentifier<Node> treeId =
-                new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, getWildcardPath());
+                DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION, getWildcardPath());
 
         LOG.trace("Registering on path: {}", treeId);
         registration = db.registerDataTreeChangeListener(treeId, HwvtepDataChangeListener.this);
@@ -127,7 +126,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                     } else {
                         try {
                             hcm.connect(key, hwvtepGlobal);
-                        } catch (UnknownHostException | ConnectException e) {
+                        } catch (UnknownHostException e) {
                             LOG.warn("Failed to connect to HWVTEP node", e);
                         }
                     }
@@ -157,7 +156,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                             if (newClient == null) {
                                 hcm.reconcileConnection(key, hgUpdated);
                             }
-                        } catch (UnknownHostException | ConnectException e) {
+                        } catch (UnknownHostException e) {
                             LOG.warn("Failed to update connection on HWVTEP Node", e);
                         }
                     }

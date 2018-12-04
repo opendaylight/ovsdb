@@ -13,8 +13,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
+import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION;
+import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL;
 
 import com.google.common.collect.Lists;
 import java.lang.reflect.Field;
@@ -38,7 +38,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -99,7 +98,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     }
 
     @After
-    public void cleanupListener() throws Exception {
+    public void cleanupListener() {
         opDataChangeListener.close();
     }
 
@@ -119,13 +118,13 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     }
 
     @Test
-    public <T extends DataObject> void testLogicalSwitchAdd() throws Exception {
+    public void testLogicalSwitchAdd() {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         verifyThatLogicalSwitchCreated();
     }
 
     @Test
-    public <T extends DataObject> void testLogicalSwitchDelete() throws Exception {
+    public void testLogicalSwitchDelete() {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
@@ -134,7 +133,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     }
 
     @Test
-    public <T extends DataObject> void testUcastMacAdd() throws Exception {
+    public void testUcastMacAdd() {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
@@ -146,7 +145,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     }
 
     @Test
-    public <T extends DataObject> void testUcastMacAddWithoutConfigTep() throws Exception {
+    public void testUcastMacAddWithoutConfigTep() {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
@@ -157,7 +156,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     }
 
     @Test
-    public <T extends DataObject> void testUcastMacDelete() throws Exception {
+    public void testUcastMacDelete() {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
@@ -172,7 +171,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     }
 
     @Test
-    public <T extends DataObject> void testMcastMacAdd() throws Exception {
+    public void testMcastMacAdd() {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
@@ -183,7 +182,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     }
 
     @Test
-    public <T extends DataObject> void testMcastMacAddWithoutConfigTep() throws Exception {
+    public void testMcastMacAddWithoutConfigTep() {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
@@ -193,7 +192,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     }
 
     @Test
-    public <T extends DataObject> void testMcastMacDelete() throws Exception {
+    public void testMcastMacDelete() {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
@@ -207,7 +206,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     }
 
     @Test
-    public <T extends DataObject> void testAddMacs() throws Exception {
+    public void testAddMacs() {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
@@ -224,7 +223,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     }
 
     @Test
-    public <T extends DataObject> void testUpdateMacs() throws Exception {
+    public void testUpdateMacs() {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
@@ -247,7 +246,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     }
 
     @Test
-    public <T extends DataObject> void testUpdateMacsWithZeroLocators() throws Exception {
+    public void testUpdateMacsWithZeroLocators() {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
@@ -268,7 +267,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     }
 
     @Test
-    public <T extends DataObject> void testBackToBackMacsUpdate() throws Exception {
+    public void testBackToBackMacsUpdate() {
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();

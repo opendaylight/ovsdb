@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.FutureCallback;
@@ -20,10 +19,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
@@ -288,7 +288,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                         updatedPhysicalSwitch));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private Optional<InstanceIdentifier<Node>> getTerminationPointSwitch(final ReadWriteTransaction transaction,
@@ -308,7 +308,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private void setPortFaultStatus(HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder,

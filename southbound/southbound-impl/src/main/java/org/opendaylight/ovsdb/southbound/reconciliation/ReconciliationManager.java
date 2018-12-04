@@ -24,11 +24,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
@@ -127,7 +127,7 @@ public class ReconciliationManager implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (this.reconcilers != null) {
             this.reconcilers.shutdownNow();
         }
@@ -182,7 +182,7 @@ public class ReconciliationManager implements AutoCloseable {
             InstanceIdentifier<Node> path = SouthboundMapper.createTopologyInstanceIdentifier()
                     .child(Node.class);
             DataTreeIdentifier<Node> dataTreeIdentifier =
-                    new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, path);
+                    DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, path);
 
             bridgeCreatedDataTreeChangeRegistration = db.registerDataTreeChangeListener(dataTreeIdentifier,
                     bridgeCreatedDataTreeChangeListener);
@@ -194,7 +194,7 @@ public class ReconciliationManager implements AutoCloseable {
                 .expireAfterWrite(BRIDGE_CACHE_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
                 .build(new CacheLoader<NodeKey, NodeConnectionMetadata>() {
                     @Override
-                    public NodeConnectionMetadata load(NodeKey nodeKey) throws Exception {
+                    public NodeConnectionMetadata load(NodeKey nodeKey) {
                         // the termination points are explicitly added to the cache, retrieving bridges that are not in
                         // the cache results in NoSuchElementException
                         throw new NoSuchElementException();

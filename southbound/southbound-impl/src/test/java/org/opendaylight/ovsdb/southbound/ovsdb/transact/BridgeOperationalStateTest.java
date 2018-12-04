@@ -17,11 +17,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.support.membermodification.MemberModifier.suppress;
 
-import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,19 +68,19 @@ public class BridgeOperationalStateTest {
     }
 
     @Test
-    public void testGetBridgeNode() throws Exception {
+    public void testGetBridgeNode() {
         Optional<Node> optNodes = briOperationState.getBridgeNode(iid);
         verify(iid, times(1)).firstIdentifierOf(Node.class);
         assertNotNull(optNodes);
-        assertTrue(optNodes.equals(Optional.absent()));
+        assertTrue(optNodes.equals(Optional.empty()));
     }
 
     @Test
-    public void testGetOvsdbBridgeAugmentation() throws Exception {
+    public void testGetOvsdbBridgeAugmentation() {
         Optional<OvsdbBridgeAugmentation> optOvsdbBri = briOperationState.getOvsdbBridgeAugmentation(iid);
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertNotNull(optOvsdbBri);
-        assertTrue(optOvsdbBri.equals(Optional.absent()));
+        assertTrue(optOvsdbBri.equals(Optional.empty()));
 
         suppress(MemberMatcher.method(BridgeOperationalState.class, "getBridgeNode", InstanceIdentifier.class));
         Node node = mock(Node.class);
@@ -94,11 +94,11 @@ public class BridgeOperationalStateTest {
     }
 
     @Test
-    public void testGetBridgeTerminationPoint() throws Exception {
+    public void testGetBridgeTerminationPoint() {
         Optional<TerminationPoint> optTerm = briOperationState.getBridgeTerminationPoint(iid);
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertNotNull(optTerm);
-        assertTrue(optTerm.equals(Optional.absent()));
+        assertTrue(optTerm.equals(Optional.empty()));
 
         TerminationPoint termPnt = mock(TerminationPoint.class);
         List<TerminationPoint> termPntList = new ArrayList<>();
@@ -127,7 +127,7 @@ public class BridgeOperationalStateTest {
         assertNotNull(optOvsdbTermPoint);
         verify(briOperationState, times(1)).getBridgeTerminationPoint(any(InstanceIdentifier.class));
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
-        assertTrue(optOvsdbTermPoint.equals(Optional.absent()));
+        assertTrue(optOvsdbTermPoint.equals(Optional.empty()));
 
         PowerMockito.suppress(MemberMatcher.method(BridgeOperationalState.class, "getBridgeTerminationPoint",
                 InstanceIdentifier.class));
@@ -148,15 +148,15 @@ public class BridgeOperationalStateTest {
         verify(briOperationState, times(1)).getOvsdbBridgeAugmentation(any(InstanceIdentifier.class));
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertNotNull(optController);
-        assertTrue(optController.equals(Optional.absent()));
+        assertTrue(optController.equals(Optional.empty()));
     }
 
     @Test
-    public void testGetProtocolEntry() throws Exception {
+    public void testGetProtocolEntry() {
         Optional<ProtocolEntry> optProtocolEntry = briOperationState.getProtocolEntry(protocolEntry);
         verify(briOperationState, times(1)).getOvsdbBridgeAugmentation(any(InstanceIdentifier.class));
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertNotNull(optProtocolEntry);
-        assertTrue(optProtocolEntry.equals(Optional.absent()));
+        assertTrue(optProtocolEntry.equals(Optional.empty()));
     }
 }

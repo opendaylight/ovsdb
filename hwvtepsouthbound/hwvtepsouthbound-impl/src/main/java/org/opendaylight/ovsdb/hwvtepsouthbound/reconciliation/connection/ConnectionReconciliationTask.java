@@ -7,7 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.connection;
 
-import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionManager;
@@ -60,7 +59,7 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
                 LOG.warn("Connection retry({}) failed for {}.",
                         connectionAttempt.get(), hwvtepNode.getConnectionInfo());
             }
-        } catch (UnknownHostException | ConnectException e) {
+        } catch (UnknownHostException e) {
             LOG.warn("Connection retry({}) failed with exception. ", connectionAttempt.get(), e);
         }
         return result;

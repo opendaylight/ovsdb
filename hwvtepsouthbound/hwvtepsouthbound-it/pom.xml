@@ -37,9 +37,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <scope>import</scope>
       </dependency>
       <dependency>
-        <groupId>org.opendaylight.controller</groupId>
+        <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>${controller.mdsal.version}</version>
+        <version>3.0.6</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -52,14 +52,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>hwvtepsouthbound-features</artifactId>
       <classifier>features</classifier>
       <type>xml</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-common-api</artifactId>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>

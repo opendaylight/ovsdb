@@ -7,10 +7,9 @@
  */
 package org.opendaylight.ovsdb.southbound.reconciliation.configuration;
 
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
+import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import java.util.ArrayList;
@@ -18,10 +17,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
@@ -67,9 +66,9 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
 
     @Override
     public boolean reconcileConfiguration(final OvsdbConnectionManager connectionManagerOfDevice) {
-        CheckedFuture<Optional<Topology>, ReadFailedException> readTopologyFuture;
+        FluentFuture<Optional<Topology>> readTopologyFuture;
         InstanceIdentifier<Topology> topologyInstanceIdentifier = SouthboundMapper.createTopologyInstanceIdentifier();
-        try (ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
+        try (ReadTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
             // find all bridges of the specific device in the config data store
             // TODO: this query is not efficient. It retrieves all the Nodes in the datastore, loop over them and look
             // for the bridges of specific device. It is mre efficient if MDSAL allows query nodes using wildcard on

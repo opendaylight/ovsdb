@@ -9,7 +9,7 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import static org.junit.Assert.assertEquals;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
+import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION;
 
 import java.util.List;
 import java.util.Map;

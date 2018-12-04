@@ -49,7 +49,7 @@ public final class LibraryIntegrationTestUtils {
     }
 
     public static OvsdbClient getTestConnection(Object provider) throws IOException,
-            InterruptedException, ExecutionException, TimeoutException {
+        InterruptedException, ExecutionException, TimeoutException {
         Properties props = System.getProperties();
         String addressStr = props.getProperty(SERVER_IPADDRESS);
         String portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);

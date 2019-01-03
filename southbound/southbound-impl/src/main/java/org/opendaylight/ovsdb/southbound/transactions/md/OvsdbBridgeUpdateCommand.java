@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
@@ -117,7 +116,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         deleteEntries(transaction, bridgeOtherConfigsToRemove(bridgeIid,bridge));
     }
 
-    private <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
+    private static <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
             List<InstanceIdentifier<T>> entryIids) {
         for (InstanceIdentifier<T> entryIid: entryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
@@ -247,8 +246,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         return bridgeNodeBuilder.build();
     }
 
-    private void setAutoAttach(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
-            Bridge bridge) {
+    private static void setAutoAttach(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
         try {
             if (bridge.getAutoAttachColumn() != null
                     && bridge.getAutoAttachColumn().getData() != null
@@ -268,14 +266,12 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }
 
-    private void setDataPathType(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
-            Bridge bridge) {
+    private static void setDataPathType(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
         ovsdbBridgeAugmentationBuilder.setDatapathType(
                 SouthboundMapper.createDatapathType(bridge.getDatapathTypeColumn().getData()));
     }
 
-    private void setFailMode(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
-            Bridge bridge) {
+    private static void setFailMode(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
         if (bridge.getFailModeColumn() != null
                 && bridge.getFailModeColumn().getData() != null
                 && !bridge.getFailModeColumn().getData().isEmpty()) {
@@ -286,8 +282,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setOtherConfig(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
-            Bridge bridge) {
+    private static void setOtherConfig(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
         Map<String, String> otherConfigs = bridge
                 .getOtherConfigColumn().getData();
         if (otherConfigs != null && !otherConfigs.isEmpty()) {
@@ -306,8 +301,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setExternalIds(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
-            Bridge bridge) {
+    private static void setExternalIds(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
         Map<String, String> externalIds = bridge.getExternalIdsColumn()
                 .getData();
         if (externalIds != null && !externalIds.isEmpty()) {
@@ -326,23 +320,21 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setProtocol(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
-            Bridge bridge) {
+    private static void setProtocol(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
         final List<ProtocolEntry> protocols = SouthboundMapper.createMdsalProtocols(bridge);
         if (!protocols.isEmpty()) {
             ovsdbBridgeAugmentationBuilder.setProtocolEntry(protocols);
         }
     }
 
-    private void setDataPath(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
-            Bridge bridge) {
+    private static void setDataPath(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
         DatapathId dpid = SouthboundMapper.createDatapathId(bridge);
         if (dpid != null) {
             ovsdbBridgeAugmentationBuilder.setDatapathId(dpid);
         }
     }
 
-    private void setStpEnalbe(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+    private static void setStpEnalbe(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                               Bridge bridge) {
         if (bridge.getStpEnableColumn() != null) {
             Boolean stpEnable = bridge.getStpEnableColumn().getData();
@@ -352,8 +344,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setOpenFlowNodeRef(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
-            Bridge bridge) {
+    private void setOpenFlowNodeRef(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
         Map<UUID, Controller> updatedControllerRows =
                 TyperUtils.extractRowsUpdated(Controller.class, getUpdates(), getDbSchema());
         LOG.debug("setOpenFlowNodeRef: updatedControllerRows: {}", updatedControllerRows);
@@ -367,7 +358,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                         bridgeControllerIpAddress = IpAddressBuilder.getDefaultInstance(targetElement);
                         continue;
                     }
-                    if (NumberUtils.isNumber(targetElement)) {
+                    if (NumberUtils.isCreatable(targetElement)) {
                         continue;
                     }
                 }

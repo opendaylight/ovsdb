@@ -885,8 +885,21 @@ public class SouthboundUtils {
                                 + getControllerOFPort());
                         } else if (managerStr.startsWith(("ptcp"))) {
                             ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
-                            if (connectionInfo != null && connectionInfo.getLocalIp() != null) {
-                                controllerIpStr = connectionInfo.getLocalIp().stringValue();
+                            /* If we're connected to switch ptcp, only then use connection info
+                                to configure controller. Ptcp is configured as:
+                                Manager "ptcp:<port>:<ip>"
+                                ip is optional
+                             */
+                            String managerPortStr =  managerStr.split(":", 3)[1];
+                            if (connectionInfo != null && connectionInfo.getLocalIp() != null
+                                    && connectionInfo.getRemotePort() != null
+                                    && managerPortStr.equals(connectionInfo.getRemotePort().toString())) {
+                                IpAddress controllerIp = connectionInfo.getLocalIp();
+                                if (controllerIp.getIpv6Address() != null) {
+                                    controllerIpStr = "[" + connectionInfo.getLocalIp().stringValue() + "]";
+                                } else {
+                                    controllerIpStr = connectionInfo.getLocalIp().stringValue();
+                                }
                                 controllersStr.add(OPENFLOW_CONNECTION_PROTOCOL
                                     + ":" + controllerIpStr + ":" + OPENFLOW_PORT);
                             } else {

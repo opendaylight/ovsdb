@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Vishal Thapar <vthapar@redhat.com>
+Submitted-by: Vishal Thapar <vthapar@redhat.com>
+Submitted-at: Tue, 08 Jan 2019 13:42:46 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/79296
+Project: ovsdb
+Branch: refs/heads/stable/fluorine

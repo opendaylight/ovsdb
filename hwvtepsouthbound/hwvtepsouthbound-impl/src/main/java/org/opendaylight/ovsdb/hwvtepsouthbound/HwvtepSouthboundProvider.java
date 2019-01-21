@@ -12,6 +12,11 @@ import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.apache.aries.blueprint.annotation.service.Reference;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
@@ -41,6 +46,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundProvider.class);
@@ -59,11 +65,12 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
     private final AtomicBoolean registered = new AtomicBoolean(false);
     private ListenerRegistration<HwvtepSouthboundProvider> operTopologyRegistration;
 
-    public HwvtepSouthboundProvider(final DataBroker dataBroker,
-            final EntityOwnershipService entityOwnershipServiceDependency,
-            final OvsdbConnection ovsdbConnection,
-            final DOMSchemaService schemaService,
-            final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
+    @Inject
+    public HwvtepSouthboundProvider(@Reference final DataBroker dataBroker,
+            @Reference final EntityOwnershipService entityOwnershipServiceDependency,
+            @Reference final OvsdbConnection ovsdbConnection,
+            @Reference final DOMSchemaService schemaService,
+            @Reference final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
         this.dataBroker = dataBroker;
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
@@ -76,6 +83,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
     /**
      * Used by blueprint when starting the container.
      */
+    @PostConstruct
     public void init() {
         LOG.info("HwvtepSouthboundProvider Session Initiated");
         txInvoker = new TransactionInvokerImpl(dataBroker);
@@ -105,6 +113,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
     }
 
     @Override
+    @PreDestroy
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void close() throws Exception {
         LOG.info("HwvtepSouthboundProvider Closed");

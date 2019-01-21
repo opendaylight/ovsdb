@@ -50,10 +50,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLPeerUnverifiedException;
+import org.apache.aries.blueprint.annotation.service.Service;
 import org.opendaylight.aaa.cert.api.ICertificateManager;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
@@ -84,6 +86,8 @@ import org.slf4j.LoggerFactory;
  * environment. Hence a single instance of the service will be active (via Service Registry in OSGi)
  * and a Singleton object in a non-OSGi environment.
  */
+@Singleton
+@Service(classes = OvsdbConnection.class)
 public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionService.class);
     private static final int IDLE_READER_TIMEOUT = 30;

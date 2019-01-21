@@ -18,13 +18,9 @@
     </cm:default-properties>
   </cm:property-placeholder>
 
-  <reference id="aaaCertificateManager"
-        interface="org.opendaylight.aaa.cert.api.ICertificateManager"
-        odl:type="default-certificate-manager"/>
-
   <!-- Notify OvsdbConnectionService with any change in the config properties value-->
-  <bean id="ovsdbConnectionService" class="org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService">
-    <argument ref="aaaCertificateManager"/>
+  <bean id="ovsdbConnectionServiceConfigurator" class="org.opendaylight.ovsdb.lib.impl.OvsdbConnectionServiceConfigurator">
+    <argument ref="ovsdbConnectionService"/>
     <cm:managed-properties persistent-id="org.opendaylight.ovsdb.library"
                            update-strategy="component-managed"
                            update-method="updateConfigParameter"/>
@@ -34,8 +30,5 @@
     <property name="useSsl" value="${use-ssl}"/>
     <property name="jsonRpcDecoderMaxFrameLength" value="${json-rpc-decoder-max-frame-length}"/>
   </bean>
-
-  <service ref="ovsdbConnectionService" interface="org.opendaylight.ovsdb.lib.OvsdbConnection"
-    odl:type="default" />
 
 </blueprint>

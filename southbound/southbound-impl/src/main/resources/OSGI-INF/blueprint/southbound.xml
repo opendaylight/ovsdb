@@ -4,39 +4,18 @@
   xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
   odl:use-default-for-reference-types="true">
 
-  <reference id="dataBroker"
-    interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
-    odl:type="default" />
-  <reference id="eos"
-    interface="org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService" />
-  <reference id="ovsdbConnection" interface="org.opendaylight.ovsdb.lib.OvsdbConnection" />
-  <reference id="schemaService"
-    interface="org.opendaylight.mdsal.dom.api.DOMSchemaService" />
-  <reference id="bindingNormalizedNodeSerializer"
-    interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer" />
-  <reference id="systemReadyMonitor"
-    interface="org.opendaylight.infrautils.ready.SystemReadyMonitor" />
-  <reference id="diagStatusService" interface="org.opendaylight.infrautils.diagstatus.DiagStatusService" />
-
     <cm:property-placeholder persistent-id="org.opendaylight.ovsdb.southbound" update-strategy="none">
     <cm:default-properties>
       <cm:property name="skip-monitoring-manager-status" value="false"/>
     </cm:default-properties>
   </cm:property-placeholder>
 
-  <bean id="southboundProvider"
-    class="org.opendaylight.ovsdb.southbound.SouthboundProvider"
-    init-method="init" destroy-method="close">
+  <bean id="southboundProviderConfigurator"
+    class="org.opendaylight.ovsdb.southbound.SouthboundProviderConfigurator">
    <cm:managed-properties persistent-id="org.opendaylight.ovsdb.southbound"
                            update-strategy="component-managed"
                            update-method="updateConfigParameter"/>
-    <argument ref="dataBroker" />
-    <argument ref="eos" />
-    <argument ref="ovsdbConnection" />
-    <argument ref="schemaService" />
-    <argument ref="bindingNormalizedNodeSerializer" />
-    <argument ref="systemReadyMonitor" />
-    <argument ref="diagStatusService"/>
+    <argument ref="southboundProvider" />
     <property name="skipMonitoringManagerStatus" value="${skip-monitoring-manager-status}"/>
   </bean>
 

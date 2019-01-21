@@ -14,6 +14,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.apache.aries.blueprint.annotation.service.Reference;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
@@ -45,6 +50,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundProvider.class);
@@ -73,13 +79,14 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     private ListenerRegistration<SouthboundProvider> operTopologyRegistration;
     private final OvsdbDiagStatusProvider ovsdbStatusProvider;
 
-    public SouthboundProvider(final DataBroker dataBroker,
-            final EntityOwnershipService entityOwnershipServiceDependency,
-            final OvsdbConnection ovsdbConnection,
-            final DOMSchemaService schemaService,
-            final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
-            final SystemReadyMonitor systemReadyMonitor,
-            final DiagStatusService diagStatusService) {
+    @Inject
+    public SouthboundProvider(@Reference final DataBroker dataBroker,
+                              @Reference final EntityOwnershipService entityOwnershipServiceDependency,
+                              @Reference final OvsdbConnection ovsdbConnection,
+                              @Reference final DOMSchemaService schemaService,
+                              @Reference final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
+                              @Reference final SystemReadyMonitor systemReadyMonitor,
+                              @Reference final DiagStatusService diagStatusService) {
         this.db = dataBroker;
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
@@ -94,6 +101,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     /**
      * Used by blueprint when starting the container.
      */
+    @PostConstruct
     public void init() {
         LOG.info("SouthboundProvider Session Initiated");
         ovsdbStatusProvider.reportStatus(ServiceState.STARTING, "OVSDB initialization in progress");
@@ -125,6 +133,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     }
 
     @Override
+    @PreDestroy
     public void close() {
         LOG.info("SouthboundProvider Closed");
         try {

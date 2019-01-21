@@ -11,9 +11,13 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.apache.aries.blueprint.annotation.service.Reference;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
@@ -45,12 +49,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundProvider.class);
 
     private static final String ENTITY_TYPE = "ovsdb-southbound-provider";
-    private static final String SKIP_MONITORING_MANAGER_STATUS_PARAM = "skip-monitoring-manager-status";
 
     public static DataBroker getDb() {
         return db;
@@ -73,13 +77,14 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     private ListenerRegistration<SouthboundProvider> operTopologyRegistration;
     private final OvsdbDiagStatusProvider ovsdbStatusProvider;
 
-    public SouthboundProvider(final DataBroker dataBroker,
-            final EntityOwnershipService entityOwnershipServiceDependency,
-            final OvsdbConnection ovsdbConnection,
-            final DOMSchemaService schemaService,
-            final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
-            final SystemReadyMonitor systemReadyMonitor,
-            final DiagStatusService diagStatusService) {
+    @Inject
+    public SouthboundProvider(@Reference final DataBroker dataBroker,
+                              @Reference final EntityOwnershipService entityOwnershipServiceDependency,
+                              @Reference final OvsdbConnection ovsdbConnection,
+                              @Reference final DOMSchemaService schemaService,
+                              @Reference final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
+                              @Reference final SystemReadyMonitor systemReadyMonitor,
+                              @Reference final DiagStatusService diagStatusService) {
         this.db = dataBroker;
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
@@ -94,6 +99,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     /**
      * Used by blueprint when starting the container.
      */
+    @PostConstruct
     public void init() {
         LOG.info("SouthboundProvider Session Initiated");
         ovsdbStatusProvider.reportStatus(ServiceState.STARTING, "OVSDB initialization in progress");
@@ -125,6 +131,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     }
 
     @Override
+    @PreDestroy
     public void close() {
         LOG.info("SouthboundProvider Closed");
         try {
@@ -214,18 +221,6 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         @Override
         public void ownershipChanged(EntityOwnershipChange ownershipChange) {
             sp.handleOwnershipChange(ownershipChange);
-        }
-    }
-
-    public void updateConfigParameter(Map<String, Object> configParameters) {
-        if (configParameters != null && !configParameters.isEmpty()) {
-            LOG.debug("Config parameters received : {}", configParameters.entrySet());
-            for (Map.Entry<String, Object> paramEntry : configParameters.entrySet()) {
-                if (paramEntry.getKey().equalsIgnoreCase(SKIP_MONITORING_MANAGER_STATUS_PARAM)) {
-                    setSkipMonitoringManagerStatus(Boolean.parseBoolean((String)paramEntry.getValue()));
-                    break;
-                }
-            }
         }
     }
 

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7ca313c6_57a16673",
+        "filename": "library/impl/src/main/resources/OSGI-INF/blueprint/library.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2019-01-24T13:31:01Z",
+      "side": 1,
+      "message": "what replaces this removal?  I think as it currently is (Patch Set 5) this OvsdbConnection is no longer registered as an OSGi Service, which means other projects which relied on that will break, no?  So either keep this or use a @Service(classes \u003d OvsdbConnection.classes) on OvsdbConnectionService annotation to replace it?  See https://wiki.opendaylight.org/view/BestPractices/DI_Guidelines#Neon_and_later:_.40Reference_.26_.40Service_.28blueprint-maven-plugin-annotation.29",
+      "revId": "b89baf1d507a918eb8c344a953d6043b42e33e6e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

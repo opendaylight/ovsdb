@@ -22,6 +22,30 @@
       "revId": "da42d2c9ebe0de875e7c78fe119647a00671d7cf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "92b87866_06ab9b29",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2019-01-24T14:57:06Z",
+      "side": 1,
+      "message": "This is correct and how it\u0027s used in most places, and as documented on https://wiki.opendaylight.org/view/BestPractices/DI_Guidelines#Neon_and_later:_.40Reference_.26_.40Service_.28blueprint-maven-plugin-annotation.29.  It\u0027s because these annotations are really only needed at build time, not at run time. Not sure what exact problem you had in the coe policy patch but I suspect it must have been something slightly different only indirectly related.",
+      "parentUuid": "327dcba4_d9edbbe3",
+      "range": {
+        "startLine": 53,
+        "startChar": 6,
+        "endLine": 53,
+        "endChar": 31
+      },
+      "revId": "da42d2c9ebe0de875e7c78fe119647a00671d7cf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

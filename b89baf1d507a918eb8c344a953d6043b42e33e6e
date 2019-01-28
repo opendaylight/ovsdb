@@ -52,6 +52,24 @@
       "revId": "b89baf1d507a918eb8c344a953d6043b42e33e6e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cc849d97_c52d08d2",
+        "filename": "library/impl/src/main/resources/OSGI-INF/blueprint/library.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 5867
+      },
+      "writtenOn": "2019-01-28T10:57:08Z",
+      "side": 1,
+      "message": "Done, sorry; not sure what I was looking at (probably wrong Patch Set)",
+      "parentUuid": "5caff5fa_dd4b5e72",
+      "revId": "b89baf1d507a918eb8c344a953d6043b42e33e6e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

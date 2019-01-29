@@ -12,12 +12,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.opendaylight.mdsal.binding.api.DataBroker;
-import org.opendaylight.mdsal.binding.api.DataObjectModification;
-import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
-import org.opendaylight.mdsal.binding.api.DataTreeModification;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -29,8 +29,9 @@ import org.slf4j.LoggerFactory;
  * Once an instance is created one must invoke the registerDataChangeListener method
  * with a DataBroker.
  */
-public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChangeListener<DataObject> {
-    private static final Logger LOG = LoggerFactory.getLogger(NotifyingDataChangeListener.class);
+@Deprecated
+public class ControllerNotifyingDataChangeListener implements AutoCloseable, DataTreeChangeListener<DataObject> {
+    private static final Logger LOG = LoggerFactory.getLogger(ControllerNotifyingDataChangeListener.class);
     private static final int RETRY_WAIT = 100;
     private static final int MDSAL_TIMEOUT_OPERATIONAL = 10000;
     private static final int MDSAL_TIMEOUT_CONFIG = 1000;
@@ -43,16 +44,16 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
     private final Set<InstanceIdentifier<?>> createdIids = ConcurrentHashMap.newKeySet();
     private final Set<InstanceIdentifier<?>> removedIids = ConcurrentHashMap.newKeySet();
     private final Set<InstanceIdentifier<?>> updatedIids = ConcurrentHashMap.newKeySet();
-    private final List<NotifyingDataChangeListener> waitList;
+    private final List<ControllerNotifyingDataChangeListener> waitList;
     private ListenerRegistration<?> listenerRegistration;
     private int mdsalTimeout = MDSAL_TIMEOUT_OPERATIONAL;
     private volatile InstanceIdentifier<?> iid;
-    private volatile LogicalDatastoreType type;
+    private volatile  LogicalDatastoreType type;
     private volatile boolean listen;
     private volatile int mask;
 
-    public NotifyingDataChangeListener(LogicalDatastoreType type, int mask,
-                                       InstanceIdentifier<?> iid, List<NotifyingDataChangeListener> waitList) {
+    public ControllerNotifyingDataChangeListener(LogicalDatastoreType type, int mask, InstanceIdentifier<?> iid,
+                                                 List<ControllerNotifyingDataChangeListener> waitList) {
         this(type, iid, waitList);
         this.mask = mask;
     }
@@ -64,8 +65,8 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
      * @param iid of the md-sal object we're waiting for
      * @param waitList for tracking outstanding changes
      */
-    public NotifyingDataChangeListener(LogicalDatastoreType type,
-                                        InstanceIdentifier<?> iid, List<NotifyingDataChangeListener> waitList) {
+    public ControllerNotifyingDataChangeListener(LogicalDatastoreType type, InstanceIdentifier<?> iid,
+                                                 List<ControllerNotifyingDataChangeListener> waitList) {
         this.type = type;
         this.iid = iid;
         this.waitList = waitList;
@@ -161,7 +162,7 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void registerDataChangeListener(DataBroker dataBroker) {
-        listenerRegistration = dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.create(type,
+        listenerRegistration = dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(type,
                 (InstanceIdentifier)iid), this);
     }
 

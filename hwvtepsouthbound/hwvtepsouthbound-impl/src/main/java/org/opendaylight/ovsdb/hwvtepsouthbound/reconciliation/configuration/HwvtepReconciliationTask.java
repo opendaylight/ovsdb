@@ -21,7 +21,7 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationMana
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationTask;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactCommandAggregator;
-import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -31,7 +31,7 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
     private final HwvtepConnectionInstance connectionInstance;
     private final DataBroker db;
     private final Node psNode;
-    private final MdsalUtils mdsalUtils;
+    private final ControllerMdsalUtils mdsalUtils;
 
     public HwvtepReconciliationTask(ReconciliationManager reconciliationManager,
                                     HwvtepConnectionManager connectionManager,
@@ -43,7 +43,7 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
         this.db = db;
         this.psNode = psNode;
         this.connectionInstance = connectionInstance;
-        this.mdsalUtils = new MdsalUtils(db);
+        this.mdsalUtils = new ControllerMdsalUtils(db);
     }
 
     private void transactChangesToDevice(final Collection<DataTreeModification<Node>> changes,

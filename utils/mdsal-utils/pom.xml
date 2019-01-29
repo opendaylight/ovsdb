@@ -57,6 +57,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-binding-dom-adapter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-binding-dom-adapter</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
 
   </dependencies>
 

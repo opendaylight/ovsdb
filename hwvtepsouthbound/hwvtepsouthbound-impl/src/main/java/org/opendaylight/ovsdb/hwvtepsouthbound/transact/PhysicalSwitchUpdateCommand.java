@@ -11,7 +11,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import static org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil.schemaMismatchLog;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,10 +19,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
@@ -33,7 +33,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Tunnel;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIps;
@@ -285,7 +285,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         } else {
             // TODO/FIXME: Not in operational, do we create a new one?
             LOG.warn("Trying to create tunnel without creating physical locators first");
-            Optional<TerminationPoint> confLocOptional = new ControllerMdsalUtils(getOperationalState().getDataBroker())
+            Optional<TerminationPoint> confLocOptional = new MdsalUtils(getOperationalState().getDataBroker())
                     .readOptional(LogicalDatastoreType.CONFIGURATION, iid);
             if (confLocOptional.isPresent()) {
                 locatorUUID = TransactUtils.createPhysicalLocator(transaction, getOperationalState(), iid);

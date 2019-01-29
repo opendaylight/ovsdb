@@ -8,17 +8,17 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import java.util.concurrent.ExecutionException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalSwitchAttributes;
@@ -69,10 +69,10 @@ public final class HwvtepSouthboundUtil {
 
     public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNode(
                     ReadWriteTransaction transaction, final InstanceIdentifier<D> connectionIid) {
-        Optional<D> node = Optional.absent();
+        Optional<D> node = Optional.empty();
         try {
-            node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid).checkedGet();
-        } catch (final ReadFailedException e) {
+            node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid).get();
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.warn("Read Operational/DS for Node failed! {}", connectionIid, e);
         }
         return node;
@@ -87,7 +87,7 @@ public final class HwvtepSouthboundUtil {
             result = getManagingNode(db, ref);
         } else {
             LOG.warn("Cannot find client for PhysicalSwitch without a specified ManagedBy {}", node);
-            return Optional.absent();
+            return Optional.empty();
         }
         if (!result.isPresent()) {
             LOG.warn("Failed to find managing node for PhysicalSwitch {}", node);
@@ -103,7 +103,7 @@ public final class HwvtepSouthboundUtil {
             // below
             InstanceIdentifier<Node> path = (InstanceIdentifier<Node>) ref.getValue();
 
-            Optional<Node> optional = new ControllerMdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, path);
+            Optional<Node> optional = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, path);
             if (optional != null && optional.isPresent()) {
                 HwvtepGlobalAugmentation hwvtepNode = null;
                 Node node = optional.get();
@@ -117,15 +117,15 @@ public final class HwvtepSouthboundUtil {
                 } else {
                     LOG.warn("Hwvtep switch claims to be managed by {} but " + "that HwvtepNode does not exist",
                                     ref.getValue());
-                    return Optional.absent();
+                    return Optional.empty();
                 }
             } else {
                 LOG.warn("Mysteriously got back a thing which is *not* a topology Node: {}", optional);
-                return Optional.absent();
+                return Optional.empty();
             }
         } catch (RuntimeException e) {
             LOG.warn("Failed to get HwvtepNode {}", ref, e);
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 

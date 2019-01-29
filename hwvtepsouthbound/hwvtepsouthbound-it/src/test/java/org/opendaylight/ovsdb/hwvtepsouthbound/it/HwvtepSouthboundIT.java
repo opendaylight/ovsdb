@@ -32,17 +32,17 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.utils.hwvtepsouthbound.utils.HwvtepSouthboundUtils;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalRef;
@@ -96,7 +96,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     private static final int OVSDB_UPDATE_TIMEOUT = 1000;
     private static final int OVSDB_ROUNDTRIP_TIMEOUT = 10000;
 
-    private static ControllerMdsalUtils mdsalUtils = null;
+    private static MdsalUtils mdsalUtils = null;
     private static boolean setup = false;
     private static int testMethodsRemaining;
     private static String addressStr;
@@ -268,11 +268,11 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
             }
         }
 
-        mdsalUtils = new ControllerMdsalUtils(dataBroker);
+        mdsalUtils = new MdsalUtils(dataBroker);
         assertTrue("Did not find " + HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID.getValue(), getHwvtepTopology());
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         final InstanceIdentifier<Node> iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
-        final DataTreeIdentifier<Node> treeId = new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, iid);
+        final DataTreeIdentifier<Node> treeId = DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, iid);
 
         dataBroker.registerDataTreeChangeListener(treeId, OPERATIONAL_LISTENER);
 
@@ -460,7 +460,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testNetworkTopology() throws InterruptedException {
+    public void testNetworkTopology() {
         NetworkTopology networkTopology = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION,
                 InstanceIdentifier.create(NetworkTopology.class));
         Assert.assertNotNull("NetworkTopology could not be found in " + LogicalDatastoreType.CONFIGURATION,
@@ -473,7 +473,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testHwvtepTopology() throws InterruptedException {
+    public void testHwvtepTopology() {
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID));
@@ -497,7 +497,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testAddDeletePhysicalSwitch() throws InterruptedException {
+    public void testAddDeletePhysicalSwitch() {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
 
         try (TestPhysicalSwitch testPSwitch = new TestPhysicalSwitch(connectionInfo, PS_NAME)) {

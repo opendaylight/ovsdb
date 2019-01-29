@@ -16,7 +16,7 @@ import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
-import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -105,7 +105,7 @@ public abstract class UnMetDependencyGetter<T extends Identifiable> {
 
         boolean isConfigDataAvailable(HwvtepOperationalState opState, InstanceIdentifier<? extends DataObject> key) {
             DataBroker db = opState.getConnectionInstance().getDataBroker();
-            MdsalUtils mdsalUtils = new MdsalUtils(db);
+            ControllerMdsalUtils mdsalUtils = new ControllerMdsalUtils(db);
             return mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, key) != null;
         }
     }

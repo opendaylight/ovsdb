@@ -15,11 +15,11 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.base.Optional;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,7 +77,7 @@ public class ProtocolUpdateCommandTest {
                 Collections.emptyMap());
 
         BridgeOperationalState bridgeOpState = mock(BridgeOperationalState.class);
-        Optional<ProtocolEntry> operationalProtocolEntryOptional = Optional.absent();
+        Optional<ProtocolEntry> operationalProtocolEntryOptional = Optional.empty();
         when(bridgeOpState.getProtocolEntry(any(InstanceIdentifier.class)))
                 .thenReturn(operationalProtocolEntryOptional);
 

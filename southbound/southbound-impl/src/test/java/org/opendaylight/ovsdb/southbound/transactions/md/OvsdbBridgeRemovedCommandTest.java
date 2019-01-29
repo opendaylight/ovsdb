@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -53,7 +53,7 @@ public class OvsdbBridgeRemovedCommandTest {
     }
 
     @Test
-    public void testExecute() throws Exception {
+    public void testExecute() {
         //suppress calls to parent get methods
         MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeRemovedCommand.class, "getUpdates"));
         when(ovsdbBridgeRemovedCommand.getUpdates()).thenReturn(mock(TableUpdates.class));

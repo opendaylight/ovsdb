@@ -42,18 +42,18 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.runner.RunWith;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
@@ -174,7 +174,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static int portNumber;
     private static String connectionType;
     private static boolean setup = false;
-    private static ControllerMdsalUtils mdsalUtils = null;
+    private static MdsalUtils mdsalUtils = null;
     private static Node ovsdbNode;
     private static int testMethodsRemaining;
     private static Version schemaVersion;
@@ -266,7 +266,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
 
         public void registerDataChangeListener() {
-            dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(type,
+            dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.create(type,
                     (InstanceIdentifier)iid), this);
         }
 
@@ -422,13 +422,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
 
-        mdsalUtils = new ControllerMdsalUtils(dataBroker);
+        mdsalUtils = new MdsalUtils(dataBroker);
         assertTrue("Did not find " + SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue(), getOvsdbTopology());
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         final InstanceIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
-        dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION,
+        dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION,
                 (InstanceIdentifier)iid), CONFIGURATION_LISTENER);
-        dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL,
+        dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL,
                 (InstanceIdentifier)iid), OPERATIONAL_LISTENER);
 
         ovsdbNode = connectOvsdbNode(connectionInfo);
@@ -528,7 +528,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testNetworkTopology() throws InterruptedException {
+    public void testNetworkTopology() {
         NetworkTopology networkTopology = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION,
                 InstanceIdentifier.create(NetworkTopology.class));
         Assert.assertNotNull("NetworkTopology could not be found in " + LogicalDatastoreType.CONFIGURATION,
@@ -541,7 +541,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testOvsdbTopology() throws InterruptedException {
+    public void testOvsdbTopology() {
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
@@ -694,21 +694,21 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testOvsdbNodeOvsVersion() throws InterruptedException {
+    public void testOvsdbNodeOvsVersion() {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         assertNotNull(ovsdbNodeAugmentation.getOvsVersion());
     }
 
     @Test
-    public void testOvsdbNodeDbVersion() throws InterruptedException {
+    public void testOvsdbNodeDbVersion() {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         assertNotNull(ovsdbNodeAugmentation.getDbVersion());
     }
 
     @Test
-    public void testOpenVSwitchOtherConfig() throws InterruptedException {
+    public void testOpenVSwitchOtherConfig() {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
         Assert.assertNotNull(ovsdbNodeAugmentation);
         List<OpenvswitchOtherConfigs> otherConfigsList = ovsdbNodeAugmentation.getOpenvswitchOtherConfigs();
@@ -727,7 +727,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testOvsdbBridgeControllerInfo() throws InterruptedException {
+    public void testOvsdbBridgeControllerInfo() {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr,portNumber);
         String controllerTarget = SouthboundUtil.getControllerTarget(ovsdbNode);
         assertNotNull("Failed to get controller target", controllerTarget);
@@ -1286,7 +1286,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testAddDeleteBridge() throws InterruptedException {
+    public void testAddDeleteBridge() {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
 
         try (TestBridge testBridge = new TestBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME)) {
@@ -1865,7 +1865,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         int min = 0;
         int max = 4095;
         return Lists.newArrayList(
-                Collections.<Integer>emptySet(),
+                Collections.emptySet(),
                 Collections.singleton(2222),
                 Sets.newHashSet(min, max, min + 1, max - 1, (max - min) / 2));
     }
@@ -2010,7 +2010,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testGetOvsdbNodes() throws InterruptedException {
+    public void testGetOvsdbNodes() {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         InstanceIdentifier<Topology> topologyPath = InstanceIdentifier
                 .create(NetworkTopology.class)
@@ -2130,7 +2130,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testAddDeleteQos() throws InterruptedException {
+    public void testAddDeleteQos() {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         OvsdbNodeAugmentation ovsdbNodeAugmentation;
         Uri qosUri = new Uri("QOS-ROW");
@@ -2154,7 +2154,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     @Test
-    public void testAddDeleteQueue() throws InterruptedException {
+    public void testAddDeleteQueue() {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         Uri queueUri = new Uri("QUEUE-A1");
 

@@ -10,9 +10,9 @@ package org.opendaylight.ovsdb.southbound;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -217,14 +217,14 @@ public class OvsdbConnectionInstanceTest {
         TransactionBuilder transactionBuilder = mock(TransactionBuilder.class);
         when(client.transactBuilder(any(DatabaseSchema.class))).thenReturn(transactionBuilder);
         assertEquals("Error, did not return correct TransactionBuilder object", transactionBuilder,
-                ovsdbConnectionInstance.transactBuilder(any(DatabaseSchema.class)));
+                ovsdbConnectionInstance.transactBuilder(mock(DatabaseSchema.class)));
         verify(client).transactBuilder(any(DatabaseSchema.class));
 
         // test transact()
         ListenableFuture<List<OperationResult>> futureOperationResult = mock(ListenableFuture.class);
         when(client.transact(any(DatabaseSchema.class), any(List.class))).thenReturn(futureOperationResult);
         assertEquals("Error, did not return correct ListenableFuture<List<OperationResult>> object",
-                futureOperationResult, ovsdbConnectionInstance.transact(any(DatabaseSchema.class), any(List.class)));
+                futureOperationResult, ovsdbConnectionInstance.transact(mock(DatabaseSchema.class), mock(List.class)));
         verify(client).transact(any(DatabaseSchema.class), any(List.class));
 
         // test monitor()
@@ -232,7 +232,7 @@ public class OvsdbConnectionInstanceTest {
         when(client.monitor(any(DatabaseSchema.class), any(List.class), any(MonitorCallBack.class)))
                 .thenReturn(tableUpdates);
         assertEquals("Error, did not return correct TableUpdates object", tableUpdates, ovsdbConnectionInstance
-                .monitor(any(DatabaseSchema.class), any(List.class), any(MonitorCallBack.class)));
+                .monitor(mock(DatabaseSchema.class), mock(List.class), mock(MonitorCallBack.class)));
         verify(client).monitor(any(DatabaseSchema.class), any(List.class), any(MonitorCallBack.class));
 
         // test cancelMonitor()

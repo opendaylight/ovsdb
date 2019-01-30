@@ -12,9 +12,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerNotifyingDataChangeListener;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.NotifyingDataChangeListener;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class OvsdbItUtils {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbItUtils.class);
-    ControllerMdsalUtils mdsalUtils;
+    MdsalUtils mdsalUtils;
     SouthboundUtils southboundUtils;
     DataBroker dataBroker;
 
@@ -38,7 +39,7 @@ public class OvsdbItUtils {
      */
     public OvsdbItUtils(DataBroker dataBroker) {
         this.dataBroker = dataBroker;
-        mdsalUtils = new ControllerMdsalUtils(dataBroker);
+        mdsalUtils = new MdsalUtils(dataBroker);
         southboundUtils = new SouthboundUtils(mdsalUtils);
     }
 
@@ -48,8 +49,7 @@ public class OvsdbItUtils {
      * @param waitList For tracking outstanding md-sal events notifications
      * @return a new NodeInfo object
      */
-    public NodeInfo createNodeInfo(ConnectionInfo connectionInfo,
-            List<ControllerNotifyingDataChangeListener> waitList) {
+    public NodeInfo createNodeInfo(ConnectionInfo connectionInfo, List<NotifyingDataChangeListener> waitList) {
         return new NodeInfo(connectionInfo, this, waitList);
     }
 

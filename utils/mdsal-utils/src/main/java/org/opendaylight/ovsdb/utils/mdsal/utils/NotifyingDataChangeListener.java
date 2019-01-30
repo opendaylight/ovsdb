@@ -12,12 +12,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.opendaylight.mdsal.binding.api.DataBroker;
-import org.opendaylight.mdsal.binding.api.DataObjectModification;
-import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
-import org.opendaylight.mdsal.binding.api.DataTreeModification;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -47,7 +47,7 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
     private ListenerRegistration<?> listenerRegistration;
     private int mdsalTimeout = MDSAL_TIMEOUT_OPERATIONAL;
     private volatile InstanceIdentifier<?> iid;
-    private volatile LogicalDatastoreType type;
+    private volatile  LogicalDatastoreType type;
     private volatile boolean listen;
     private volatile int mask;
 
@@ -58,7 +58,7 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
     }
 
     /**
-     * Create a new ControllerNotifyingDataChangeListener.
+     * Create a new NotifyingDataChangeListener.
      *
      * @param type DataStore type
      * @param iid of the md-sal object we're waiting for
@@ -82,12 +82,13 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
     }
 
     /**
-     * Completely reset the state of this ControllerNotifyingDataChangeListener.
+     * Completely reset the state of this NotifyingDataChangeListener.
      *
      * @param newType DataStore type
      * @param newIid of the md-sal object we're waiting for
+     * @throws Exception on failure
      */
-    public void modify(LogicalDatastoreType newType, InstanceIdentifier<?> newIid) {
+    public void modify(LogicalDatastoreType newType, InstanceIdentifier<?> newIid) throws Exception {
         this.close();
         this.clear();
         this.type = newType;
@@ -161,7 +162,7 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void registerDataChangeListener(DataBroker dataBroker) {
-        listenerRegistration = dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.create(type,
+        listenerRegistration = dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(type,
                 (InstanceIdentifier)iid), this);
     }
 

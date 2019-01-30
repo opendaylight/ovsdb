@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IetfInetUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv6Address;
@@ -114,7 +114,7 @@ public class SouthboundUtils {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundUtils.class);
     private static final int OVSDB_UPDATE_TIMEOUT = 1000;
     public static final TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
-    private final ControllerMdsalUtils mdsalUtils;
+    private final MdsalUtils mdsalUtils;
     public static final String OPENFLOW_CONNECTION_PROTOCOL = "tcp";
     public static final String OPENFLOW_SECURE_PROTOCOL = "ssl";
     public static final short OPENFLOW_PORT = 6653;
@@ -129,7 +129,7 @@ public class SouthboundUtils {
     private static final Pattern PATTERN = Pattern.compile(FORMAT);
 
 
-    public SouthboundUtils(ControllerMdsalUtils mdsalUtils) {
+    public SouthboundUtils(MdsalUtils mdsalUtils) {
         this.mdsalUtils = mdsalUtils;
     }
 

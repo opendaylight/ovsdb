@@ -7,14 +7,14 @@
  */
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
-import com.google.common.util.concurrent.FluentFuture;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import org.opendaylight.mdsal.binding.api.DataBroker;
-import org.opendaylight.mdsal.binding.api.ReadTransaction;
-import org.opendaylight.mdsal.binding.api.WriteTransaction;
-import org.opendaylight.mdsal.common.api.CommitInfo;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ public class MdsalUtils {
     /**
      * Class constructor setting the data broker.
      *
-     * @param dataBroker the {@link DataBroker}
+     * @param dataBroker the {@link org.opendaylight.controller.md.sal.binding.api.DataBroker}
      */
     public MdsalUtils(DataBroker dataBroker) {
         this.databroker = dataBroker;
@@ -44,16 +44,16 @@ public class MdsalUtils {
      * @param <D> the data object type
      * @return the result of the request
      */
-    public <D extends DataObject> boolean delete(
+    public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean delete(
             final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
         boolean result = false;
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
         transaction.delete(store, path);
-        FluentFuture<? extends CommitInfo> future = transaction.commit();
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
         try {
-            future.get();
+            future.checkedGet();
             result = true;
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (TransactionCommitFailedException e) {
             LOG.warn("Failed to delete {} ", path, e);
         }
         return result;
@@ -67,16 +67,16 @@ public class MdsalUtils {
      * @param <D> the data object type
      * @return the result of the request
      */
-    public <D extends DataObject> boolean merge(
+    public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean merge(
             final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
         boolean result = false;
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
         transaction.merge(logicalDatastoreType, path, data, true);
-        FluentFuture<? extends CommitInfo> future = transaction.commit();
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
         try {
-            future.get();
+            future.checkedGet();
             result = true;
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (TransactionCommitFailedException e) {
             LOG.warn("Failed to merge {} ", path, e);
         }
         return result;
@@ -90,16 +90,16 @@ public class MdsalUtils {
      * @param <D> the data object type
      * @return the result of the request
      */
-    public <D extends DataObject> boolean put(
+    public <D extends org.opendaylight.yangtools.yang.binding.DataObject> boolean put(
             final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
         boolean result = false;
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
         transaction.put(logicalDatastoreType, path, data, true);
-        FluentFuture<? extends CommitInfo> future = transaction.commit();
+        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
         try {
-            future.get();
+            future.checkedGet();
             result = true;
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (TransactionCommitFailedException e) {
             LOG.warn("Failed to put {} ", path, e);
         }
         return result;
@@ -127,13 +127,13 @@ public class MdsalUtils {
     public <D extends DataObject> Optional<D> readOptional(
             final LogicalDatastoreType store, final InstanceIdentifier<? extends DataObject> path)  {
         int trialNo = 0;
-        ReadTransaction transaction = databroker.newReadOnlyTransaction();
+        ReadOnlyTransaction transaction = databroker.newReadOnlyTransaction();
         do {
             try {
-                Optional<D> result = transaction.read(store, (InstanceIdentifier<D>)path).get();
+                Optional<D> result = transaction.read(store, (InstanceIdentifier<D>)path).checkedGet();
                 transaction.close();
                 return result;
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (ReadFailedException e) {
                 if (trialNo == 0) {
                     logReadFailureError(path, " mdsal Read failed exception retrying the read after sleep");
                 }
@@ -147,10 +147,10 @@ public class MdsalUtils {
             }
         } while (trialNo++ < MDSAL_MAX_READ_TRIALS);
         logReadFailureError(path, " All read trials exceeded");
-        return Optional.empty();
+        return Optional.absent();
     }
 
-    private <D extends DataObject> void logReadFailureError(
+    private <D extends org.opendaylight.yangtools.yang.binding.DataObject> void logReadFailureError(
             InstanceIdentifier<D> path, String cause) {
         LOG.error("{}: Failed to read {} Cause : {}", Thread.currentThread().getStackTrace()[2], path, cause);
 

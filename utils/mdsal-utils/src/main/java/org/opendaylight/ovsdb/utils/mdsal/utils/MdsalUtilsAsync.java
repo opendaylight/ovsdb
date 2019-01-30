@@ -8,17 +8,17 @@
 
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
+import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
-import java.util.Optional;
-import org.opendaylight.mdsal.binding.api.DataBroker;
-import org.opendaylight.mdsal.binding.api.ReadTransaction;
-import org.opendaylight.mdsal.binding.api.WriteTransaction;
-import org.opendaylight.mdsal.common.api.CommitInfo;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class MdsalUtilsAsync {
     /**
      * Class constructor setting the data broker.
      *
-     * @param dataBroker the {@link DataBroker}
+     * @param dataBroker the {@link org.opendaylight.controller.md.sal.binding.api.DataBroker}
      */
     public MdsalUtilsAsync(final DataBroker dataBroker) {
         this.databroker = dataBroker;
@@ -45,15 +45,15 @@ public class MdsalUtilsAsync {
      *            {@link LogicalDatastoreType} which should be modified
      * @param path
      *            {@link InstanceIdentifier} to read from
-     * @return The {@link FluentFuture} object to which you can assign a
+     * @return The {@link CheckedFuture} object to which you can assign a
      *         callback
      */
-    public <D extends DataObject> FluentFuture<? extends CommitInfo> delete(
+    public <D extends DataObject> CheckedFuture<Void, TransactionCommitFailedException> delete(
                                     final LogicalDatastoreType store,
                                     final InstanceIdentifier<D> path)  {
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
         transaction.delete(store, path);
-        return transaction.commit();
+        return transaction.submit();
     }
 
     /**
@@ -82,16 +82,16 @@ public class MdsalUtilsAsync {
      *            {@link InstanceIdentifier} for path to read
      * @param <D>
      *            The data object type
-     * @return The {@link FluentFuture} object to which you can assign a
+     * @return The {@link CheckedFuture} object to which you can assign a
      *         callback
      */
-    public <D extends DataObject> FluentFuture<? extends CommitInfo> put(
+    public <D extends DataObject> CheckedFuture<Void, TransactionCommitFailedException> put(
                                         final LogicalDatastoreType logicalDatastoreType,
                                         final InstanceIdentifier<D> path,
                                         final D data)  {
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
         transaction.put(logicalDatastoreType, path, data, true);
-        return transaction.commit();
+        return transaction.submit();
     }
 
     /**
@@ -125,17 +125,17 @@ public class MdsalUtilsAsync {
      *            The data object type
      * @param withParent
      *            Whether or not to create missing parent.
-     * @return The {@link FluentFuture} object to which you can assign a
+     * @return The {@link CheckedFuture} object to which you can assign a
      *         callback
      */
-    public <D extends DataObject> FluentFuture<? extends CommitInfo> merge(
+    public <D extends DataObject> CheckedFuture<Void, TransactionCommitFailedException> merge(
                                         final LogicalDatastoreType logicalDatastoreType,
                                         final InstanceIdentifier<D> path,
                                         final D data,
                                         final boolean withParent)  {
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
         transaction.merge(logicalDatastoreType, path, data, withParent);
-        return transaction.commit();
+        return transaction.submit();
     }
 
     /**
@@ -171,14 +171,14 @@ public class MdsalUtilsAsync {
      *            {@link InstanceIdentifier} for path to read
      * @param <D>
      *            The data object type
-     * @return The {@link FluentFuture} object to which you can assign a
+     * @return The {@link CheckedFuture} object to which you can assign a
      *         callback
      */
-    public <D extends DataObject> FluentFuture<Optional<D>> read(
+    public <D extends DataObject> CheckedFuture<Optional<D>, ReadFailedException> read(
                                         final LogicalDatastoreType store,
                                         final InstanceIdentifier<D> path)  {
-        final ReadTransaction transaction = databroker.newReadOnlyTransaction();
-        final FluentFuture<Optional<D>> future = transaction.read(store, path);
+        final ReadOnlyTransaction transaction = databroker.newReadOnlyTransaction();
+        final CheckedFuture<Optional<D>, ReadFailedException> future = transaction.read(store, path);
         final FutureCallback<Optional<D>> closeTransactionCallback = new FutureCallback<Optional<D>>() {
             @Override
             public void onSuccess(final Optional<D> result) {
@@ -200,16 +200,16 @@ public class MdsalUtilsAsync {
      * level and throw an {@link IllegalStateException} if the transaction
      * failed.
      *
-     * @param transactionFuture
+     * @param transaction
      *            The transaction to commit.
      * @param operationDesc
      *            A description of the transaction to commit.
      */
-    void assignDefaultCallback(final FluentFuture<? extends CommitInfo> transactionFuture,
+    void assignDefaultCallback(final CheckedFuture<Void, TransactionCommitFailedException> transactionFuture,
             final String operationDesc) {
-        Futures.addCallback(transactionFuture, new FutureCallback<CommitInfo>() {
+        Futures.addCallback(transactionFuture, new FutureCallback<Void>() {
             @Override
-            public void onSuccess(final CommitInfo result) {
+            public void onSuccess(final Void result) {
                 LOG.debug("Transaction({}) SUCCESSFUL", operationDesc);
             }
 

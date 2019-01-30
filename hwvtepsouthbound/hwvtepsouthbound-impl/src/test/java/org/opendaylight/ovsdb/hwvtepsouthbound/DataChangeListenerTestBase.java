@@ -14,9 +14,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
-import static org.powermock.api.support.membermodification.MemberMatcher.field;
-import static org.powermock.api.support.membermodification.MemberModifier.suppress;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -72,7 +69,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.api.mockito.PowerMockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -164,21 +160,23 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     }
 
     private void mockConnectionManager() throws IllegalAccessException {
-        hwvtepConnectionManager = PowerMockito.mock(HwvtepConnectionManager.class, Mockito.CALLS_REAL_METHODS);
-        field(HwvtepConnectionManager.class, "db").set(hwvtepConnectionManager, dataBroker);
-        field(HwvtepConnectionManager.class, "txInvoker").set(hwvtepConnectionManager, transactionInvoker);
-        field(HwvtepConnectionManager.class, "entityOwnershipService").set(hwvtepConnectionManager,
-                entityOwnershipService);
-        suppress(PowerMockito.method(HwvtepConnectionManager.class, "getConnectionInstance",
-                HwvtepPhysicalSwitchAttributes.class));
-        suppress(PowerMockito.method(HwvtepConnectionManager.class, "getConnectionInstanceFromNodeIid",
-                InstanceIdentifier.class));
-        doReturn(connectionInstance).when(
-                hwvtepConnectionManager).getConnectionInstance(Mockito.any(HwvtepPhysicalSwitchAttributes.class));
-        doReturn(connectionInstance).when(
-                hwvtepConnectionManager).getConnectionInstance(Mockito.any(Node.class));
-        doReturn(connectionInstance).when(
-                hwvtepConnectionManager).getConnectionInstanceFromNodeIid(Mockito.any(InstanceIdentifier.class));
+        hwvtepConnectionManager = new HwvtepConnectionManager(dataBroker, transactionInvoker, entityOwnershipService,
+                null) {
+            @Override
+            public HwvtepConnectionInstance getConnectionInstance(HwvtepPhysicalSwitchAttributes node) {
+                return connectionInstance;
+            }
+
+            @Override
+            public HwvtepConnectionInstance getConnectionInstance(Node node) {
+                return connectionInstance;
+            }
+
+            @Override
+            public HwvtepConnectionInstance getConnectionInstanceFromNodeIid(InstanceIdentifier<Node> nodeIid) {
+                return connectionInstance;
+            }
+        };
     }
 
     void mockConnectionInstance() throws IllegalAccessException {

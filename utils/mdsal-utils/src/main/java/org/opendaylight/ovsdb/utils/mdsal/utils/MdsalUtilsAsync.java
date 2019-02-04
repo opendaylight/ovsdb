@@ -190,7 +190,7 @@ public class MdsalUtilsAsync {
                 transaction.close();
             }
         };
-        Futures.addCallback(future, closeTransactionCallback);
+        Futures.addCallback(future, closeTransactionCallback, MoreExecutors.directExecutor());
         return future;
     }
 

@@ -89,7 +89,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
         <groupId>org.apache.karaf.features</groupId>
         <artifactId>org.apache.karaf.features.core</artifactId>
-        <version>${karaf.version}</version>
         <scope>provided</scope>
     </dependency>
     <dependency>

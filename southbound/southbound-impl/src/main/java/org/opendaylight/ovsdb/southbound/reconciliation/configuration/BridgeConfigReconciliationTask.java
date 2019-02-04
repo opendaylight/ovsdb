@@ -13,6 +13,7 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,9 +58,9 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
     private final OvsdbConnectionInstance connectionInstance;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
-    public BridgeConfigReconciliationTask(ReconciliationManager reconciliationManager, OvsdbConnectionManager
-            connectionManager, InstanceIdentifier<?> nodeIid, OvsdbConnectionInstance connectionInstance,
-            InstanceIdentifierCodec instanceIdentifierCodec) {
+    public BridgeConfigReconciliationTask(ReconciliationManager reconciliationManager,
+            OvsdbConnectionManager connectionManager, InstanceIdentifier<?> nodeIid,
+            OvsdbConnectionInstance connectionInstance, InstanceIdentifierCodec instanceIdentifierCodec) {
         super(reconciliationManager, connectionManager, nodeIid, null);
         this.connectionInstance = connectionInstance;
         this.instanceIdentifierCodec = instanceIdentifierCodec;
@@ -115,7 +116,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                 LOG.warn("Read Config/DS for Topology failed! {}", nodeIid, throwable);
             }
 
-        });
+        }, MoreExecutors.directExecutor());
 
         return true;
     }

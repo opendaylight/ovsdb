@@ -1251,7 +1251,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      *
      * @param connectionInfo the connection information
      * @param bridgeName the bridge name
-     * @see <code>SouthboundIT.getBridge(ConnectionInfo, String, LogicalDatastoreType)</code>
+     * @see SouthboundIT#getBridge(ConnectionInfo, String, LogicalDatastoreType)
      * @return <code>LogicalDatastoreType.OPERATIONAL</code> type data store contents
      */
     private OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo, String bridgeName) {

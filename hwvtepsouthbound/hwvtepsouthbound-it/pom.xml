@@ -96,7 +96,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.apache.karaf.features</groupId>
       <artifactId>org.apache.karaf.features.core</artifactId>
-      <version>${karaf.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -147,7 +146,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <groupId>org.apache.servicemix.tooling</groupId>
         <artifactId>depends-maven-plugin</artifactId>
-        <version>1.2</version>
         <executions>
           <execution>
             <id>generate-depends-file</id>

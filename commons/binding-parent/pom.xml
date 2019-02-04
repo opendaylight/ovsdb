@@ -42,16 +42,8 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <!-- TODO Remove the dependencies when upgrading to odlparent 3.1.1 or later -->
-        <dependencies>
-          <dependency>
-            <groupId>org.opendaylight.odlparent</groupId>
-            <artifactId>findbugs</artifactId>
-            <version>4.0.9</version>
-          </dependency>
-        </dependencies>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
         <configuration>
           <failOnError>true</failOnError>
         </configuration>

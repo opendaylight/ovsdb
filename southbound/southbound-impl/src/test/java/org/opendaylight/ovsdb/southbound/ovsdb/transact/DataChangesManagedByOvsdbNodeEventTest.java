@@ -11,7 +11,6 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.support.membermodification.MemberMatcher.field;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,15 +21,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest()
+@RunWith(MockitoJUnitRunner.class)
 public class DataChangesManagedByOvsdbNodeEventTest {
 
     @Mock private InstanceIdentifier<?> iid;
@@ -42,7 +39,8 @@ public class DataChangesManagedByOvsdbNodeEventTest {
     @Before
     public void setUp() throws Exception {
         dataChangesManagedByOvsdbNodeEvent = mock(DataChangesManagedByOvsdbNodeEvent.class, Mockito.CALLS_REAL_METHODS);
-        field(DataChangesManagedByOvsdbNodeEvent.class, "event").set(dataChangesManagedByOvsdbNodeEvent, event);
+        Whitebox.getField(DataChangesManagedByOvsdbNodeEvent.class, "event").set(dataChangesManagedByOvsdbNodeEvent,
+            event);
     }
 
     @Test

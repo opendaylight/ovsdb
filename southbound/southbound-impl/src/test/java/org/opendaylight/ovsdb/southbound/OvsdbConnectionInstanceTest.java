@@ -19,8 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.support.membermodification.MemberMatcher.field;
-import static org.powermock.api.support.membermodification.MemberModifier.suppress;
+import static org.powermock.reflect.Whitebox.getField;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
@@ -34,13 +33,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
 import org.opendaylight.ovsdb.lib.LockStolenCallback;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
 import org.opendaylight.ovsdb.lib.MonitorHandle;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
-import org.opendaylight.ovsdb.lib.message.MonitorRequestBuilder;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -56,15 +55,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberMatcher;
-import org.powermock.api.support.membermodification.MemberModifier;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({OvsdbConnectionInstance.class, MonitorRequestBuilder.class})
+@RunWith(MockitoJUnitRunner.class)
 public class OvsdbConnectionInstanceTest {
 
     @Mock private OvsdbConnectionInstance ovsdbConnectionInstance;
@@ -78,11 +71,11 @@ public class OvsdbConnectionInstanceTest {
 
     @Before
     public void setUp() throws Exception {
-        ovsdbConnectionInstance = PowerMockito.mock(OvsdbConnectionInstance.class, Mockito.CALLS_REAL_METHODS);
-        field(OvsdbConnectionInstance.class, "txInvoker").set(ovsdbConnectionInstance, txInvoker);
-        field(OvsdbConnectionInstance.class, "connectionInfo").set(ovsdbConnectionInstance, key);
-        field(OvsdbConnectionInstance.class, "instanceIdentifier").set(ovsdbConnectionInstance, instanceIdentifier);
-        field(OvsdbConnectionInstance.class, "hasDeviceOwnership").set(ovsdbConnectionInstance, false);
+        ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class, Mockito.CALLS_REAL_METHODS);
+        getField(OvsdbConnectionInstance.class, "txInvoker").set(ovsdbConnectionInstance, txInvoker);
+        getField(OvsdbConnectionInstance.class, "connectionInfo").set(ovsdbConnectionInstance, key);
+        getField(OvsdbConnectionInstance.class, "instanceIdentifier").set(ovsdbConnectionInstance, instanceIdentifier);
+        getField(OvsdbConnectionInstance.class, "hasDeviceOwnership").set(ovsdbConnectionInstance, false);
     }
 
     @Test
@@ -95,7 +88,7 @@ public class OvsdbConnectionInstanceTest {
         TransactInvoker transactInvoker2 = mock(TransactInvoker.class);
         transactInvokers.put(mock(DatabaseSchema.class), transactInvoker1);
         transactInvokers.put(mock(DatabaseSchema.class), transactInvoker2);
-        field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , transactInvokers);
+        getField(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , transactInvokers);
 
         TransactCommand command = mock(TransactCommand.class);
         ovsdbConnectionInstance.transact(command, mock(BridgeOperationalState.class), mock(DataChangeEvent.class),
@@ -112,12 +105,12 @@ public class OvsdbConnectionInstanceTest {
         InstanceIdentifierCodec instanceIdentifierCodec = mock(InstanceIdentifierCodec.class);
 
         // callback not null case
-        MemberModifier.field(OvsdbConnectionInstance.class, "callback").set(ovsdbConnectionInstance , callback);
+        getField(OvsdbConnectionInstance.class, "callback").set(ovsdbConnectionInstance , callback);
         ovsdbConnectionInstance.registerCallbacks(instanceIdentifierCodec);
         verify(ovsdbConnectionInstance, times(0)).getDatabases();
 
         // callback null case
-        MemberModifier.field(OvsdbConnectionInstance.class, "callback").set(ovsdbConnectionInstance , null);
+        getField(OvsdbConnectionInstance.class, "callback").set(ovsdbConnectionInstance , null);
         ListenableFuture<List<String>> listenableFuture = mock(ListenableFuture.class);
         List<String> databases = new ArrayList<>();
         databases.add("Open_vSwitch");
@@ -130,11 +123,9 @@ public class OvsdbConnectionInstanceTest {
         doReturn(listenableDbSchema).when(ovsdbConnectionInstance).getSchema(anyString());
         when(listenableDbSchema.get()).thenReturn(dbSchema);
 
-        suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "monitorTables", String.class,
-                DatabaseSchema.class));
+        doNothing().when(ovsdbConnectionInstance).monitorTables(anyString(), any(DatabaseSchema.class));
         ovsdbConnectionInstance.registerCallbacks(instanceIdentifierCodec);
-        PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(1)).invoke("monitorTables", anyString(),
-                any(DatabaseSchema.class));
+        verify(ovsdbConnectionInstance, times(1)).monitorTables(anyString(), any(DatabaseSchema.class));
     }
 
     @Test
@@ -142,12 +133,12 @@ public class OvsdbConnectionInstanceTest {
     public void testCreateTransactInvokers() throws Exception {
         // transactInvokers not null case
         transactInvokers = new HashMap();
-        field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , transactInvokers);
+        getField(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , transactInvokers);
         ovsdbConnectionInstance.createTransactInvokers();
         verify(ovsdbConnectionInstance, times(0)).getSchema(anyString());
 
         // transactInvokers null case
-        MemberModifier.field(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , null);
+        getField(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , null);
 
         ListenableFuture<DatabaseSchema> listenableDbSchema = mock(ListenableFuture.class);
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
@@ -181,23 +172,20 @@ public class OvsdbConnectionInstanceTest {
         columns.add("statistics");
         when(tableSchema.getColumns()).thenReturn(columns);
 
-        suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "monitor", DatabaseSchema.class, List.class,
-                MonitorCallBack.class));
         TableUpdates tableUpdates = mock(TableUpdates.class);
-        when(ovsdbConnectionInstance.monitor(any(DatabaseSchema.class), any(List.class), any(MonitorCallBack.class)))
-                .thenReturn(tableUpdates);
-        MemberModifier.field(OvsdbConnectionInstance.class, "callback").set(ovsdbConnectionInstance, callback);
+        doReturn(tableUpdates).when(ovsdbConnectionInstance).monitor(any(DatabaseSchema.class), any(List.class),
+            any(MonitorCallBack.class));
+        getField(OvsdbConnectionInstance.class, "callback").set(ovsdbConnectionInstance, callback);
         doNothing().when(callback).update(any(TableUpdates.class), any(DatabaseSchema.class));
 
         Whitebox.invokeMethod(ovsdbConnectionInstance, "monitorTables", "database", dbSchema);
-        PowerMockito.verifyPrivate(ovsdbConnectionInstance, times(1)).invoke("monitorTables", anyString(),
-                any(DatabaseSchema.class));
+        verify(ovsdbConnectionInstance, times(1)).monitorTables(anyString(), any(DatabaseSchema.class));
     }
 
     @SuppressWarnings({ "unchecked" })
     @Test
     public void testOvsdbConnectionInstance() throws Exception {
-        MemberModifier.field(OvsdbConnectionInstance.class, "client").set(ovsdbConnectionInstance, client);
+        getField(OvsdbConnectionInstance.class, "client").set(ovsdbConnectionInstance, client);
 
         // test getDatabases()
         ListenableFuture<List<String>> listenableFuture = mock(ListenableFuture.class);
@@ -298,11 +286,10 @@ public class OvsdbConnectionInstanceTest {
                 ovsdbConnectionInstance.getInstanceIdentifier());
 
         // test getNodeId()
-        NodeKey nodeKey = mock(NodeKey.class);
         NodeId nodeId = mock(NodeId.class);
-        MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "getNodeKey"));
+        NodeKey nodeKey = new NodeKey(nodeId);
+        doReturn(nodeKey).when(ovsdbConnectionInstance).getNodeKey();
         when(ovsdbConnectionInstance.getNodeKey()).thenReturn(nodeKey);
-        when(nodeKey.getNodeId()).thenReturn(nodeId);
         assertEquals("Error, incorrect NodeId object", nodeId, ovsdbConnectionInstance.getNodeId());
 
         // test setInstanceIdentifier()
@@ -311,8 +298,6 @@ public class OvsdbConnectionInstanceTest {
                 Whitebox.getInternalState(ovsdbConnectionInstance, "instanceIdentifier"));
 
         // test monitor()
-        suppress(MemberMatcher.method(OvsdbConnectionInstance.class, "monitor", DatabaseSchema.class, List.class,
-                MonitorHandle.class, MonitorCallBack.class));
         when(ovsdbConnectionInstance.monitor(any(DatabaseSchema.class), any(List.class), any(MonitorHandle.class),
                 any(MonitorCallBack.class))).thenReturn(null);
         assertNull(ovsdbConnectionInstance.monitor(any(DatabaseSchema.class), any(List.class), any(MonitorHandle.class),

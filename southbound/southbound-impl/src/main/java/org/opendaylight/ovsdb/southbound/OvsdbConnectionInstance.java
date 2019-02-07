@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -157,7 +158,8 @@ public class OvsdbConnectionInstance {
         }
     }
 
-    private void monitorTables(String database, DatabaseSchema dbSchema) {
+    @VisibleForTesting
+    void monitorTables(String database, DatabaseSchema dbSchema) {
         Set<String> tables = dbSchema.getTables();
         if (tables != null) {
             List<MonitorRequest> monitorRequests = new ArrayList<>();

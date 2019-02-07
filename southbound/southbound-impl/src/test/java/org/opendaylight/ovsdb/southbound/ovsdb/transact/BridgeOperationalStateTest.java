@@ -8,14 +8,16 @@
 
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.support.membermodification.MemberModifier.suppress;
+import static org.powermock.reflect.Whitebox.getField;
 
 import com.google.common.base.Optional;
 import java.util.ArrayList;
@@ -27,52 +29,52 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberMatcher;
-import org.powermock.api.support.membermodification.MemberModifier;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ BridgeOperationalState.class, Optional.class, InstanceIdentifier.class, Node.class,
-    OvsdbBridgeAugmentation.class })
+@RunWith(MockitoJUnitRunner.class)
 public class BridgeOperationalStateTest {
+    private final Node nd = new NodeBuilder().setNodeId(new NodeId("foo")).build();
+    private final InstanceIdentifier<?> iid = InstanceIdentifier.create(Topology.class);
 
     @Mock private BridgeOperationalState briOperationState;
-    @Mock private InstanceIdentifier<ProtocolEntry> protocolEntry;
-    @Mock private InstanceIdentifier<?> iid;
-    @Mock private InstanceIdentifier<Node> iidNode;
-    @Mock private Node nd;
+    private InstanceIdentifier<ProtocolEntry> protocolEntry;
+    private InstanceIdentifier<Node> iidNode;
     private Map<InstanceIdentifier<Node>, Node> operationalNodes;
 
     @Before
     public void setUp() throws Exception {
+        iidNode = InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(new TopologyId("foo")))
+                .child(Node.class, new NodeKey(nd.getNodeId()));
+        protocolEntry = InstanceIdentifier.create(NetworkTopology.class).child(Topology.class).child(Node.class)
+                .augmentation(OvsdbBridgeAugmentation.class).child(ProtocolEntry.class);
+
         briOperationState = mock(BridgeOperationalState.class, Mockito.CALLS_REAL_METHODS);
-        iid = mock(InstanceIdentifier.class, Mockito.RETURNS_MOCKS);
-        protocolEntry = mock(InstanceIdentifier.class, Mockito.RETURNS_MOCKS);
-        iidNode = mock(InstanceIdentifier.class, Mockito.RETURNS_MOCKS);
-        nd = mock(Node.class, Mockito.RETURNS_MOCKS);
 
         operationalNodes = new HashMap<>();
         operationalNodes.put(iidNode, nd);
-        MemberModifier.field(BridgeOperationalState.class,"operationalNodes").set(briOperationState, operationalNodes);
-        PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
+        getField(BridgeOperationalState.class,"operationalNodes").set(briOperationState, operationalNodes);
     }
 
     @Test
-    public void testGetBridgeNode() throws Exception {
+    public void testGetBridgeNode() {
         Optional<Node> optNodes = briOperationState.getBridgeNode(iid);
-        verify(iid, times(1)).firstIdentifierOf(Node.class);
-        assertNotNull(optNodes);
-        assertTrue(optNodes.equals(Optional.absent()));
+        assertEquals(Optional.absent(), optNodes);
     }
 
     @Test
@@ -82,12 +84,11 @@ public class BridgeOperationalStateTest {
         assertNotNull(optOvsdbBri);
         assertTrue(optOvsdbBri.equals(Optional.absent()));
 
-        suppress(MemberMatcher.method(BridgeOperationalState.class, "getBridgeNode", InstanceIdentifier.class));
         Node node = mock(Node.class);
         Optional<Node> optNode = Optional.of(node);
-        when(briOperationState.getBridgeNode(any(InstanceIdentifier.class))).thenReturn(optNode);
+        doReturn(optNode).when(briOperationState).getBridgeNode(any(InstanceIdentifier.class));
         OvsdbBridgeAugmentation ovsdbBriAug = mock(OvsdbBridgeAugmentation.class);
-        when(node.augmentation(OvsdbBridgeAugmentation.class)).thenReturn(ovsdbBriAug);
+        doReturn(ovsdbBriAug).when(node).augmentation(OvsdbBridgeAugmentation.class);
         Optional<OvsdbBridgeAugmentation> ovsdbBriAugOptional = briOperationState.getOvsdbBridgeAugmentation(iid);
         assertNotNull(ovsdbBriAugOptional);
         assertTrue(ovsdbBriAugOptional.get() instanceof OvsdbBridgeAugmentation);
@@ -104,20 +105,16 @@ public class BridgeOperationalStateTest {
         List<TerminationPoint> termPntList = new ArrayList<>();
         termPntList.add(termPnt);
 
-        suppress(MemberMatcher.method(BridgeOperationalState.class, "getBridgeNode", InstanceIdentifier.class));
         Node node = mock(Node.class);
         Optional<Node> optNode = Optional.of(node);
-        when(briOperationState.getBridgeNode(any(InstanceIdentifier.class))).thenReturn(optNode);
+        doReturn(optNode).when(briOperationState).getBridgeNode(any(InstanceIdentifier.class));
         when(node.getTerminationPoint()).thenReturn(termPntList);
         TerminationPointKey termPntKey = mock(TerminationPointKey.class);
         when(termPnt.key()).thenReturn(termPntKey);
 
-        final InstanceIdentifier<?> iid2 = PowerMockito.mock(InstanceIdentifier.class);
-        //PowerMockito.suppress(MemberMatcher.method(InstanceIdentifier.class, "firstKeyOf", Class.class, Class.class));
-        //PowerMockito.when(iid2.firstKeyOf(TerminationPoint.class, TerminationPointKey.class)).thenReturn(termPntKey);
-        Optional<TerminationPoint> optTermPnt = briOperationState.getBridgeTerminationPoint(iid2);
-        assertNotNull(optTermPnt);
-        //assertTrue(optTermPnt.get() instanceof TerminationPoint);
+        Optional<TerminationPoint> optTermPnt = briOperationState.getBridgeTerminationPoint(
+            iidNode.child(TerminationPoint.class, termPntKey));
+        assertTrue(optTermPnt.isPresent());
     }
 
     @Test
@@ -129,13 +126,11 @@ public class BridgeOperationalStateTest {
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertTrue(optOvsdbTermPoint.equals(Optional.absent()));
 
-        PowerMockito.suppress(MemberMatcher.method(BridgeOperationalState.class, "getBridgeTerminationPoint",
-                InstanceIdentifier.class));
         TerminationPoint termPoint = mock(TerminationPoint.class);
         Optional<TerminationPoint> termPntOptional = Optional.of(termPoint);
-        when(briOperationState.getBridgeTerminationPoint(any(InstanceIdentifier.class))).thenReturn(termPntOptional);
+        doReturn(termPntOptional).when(briOperationState).getBridgeTerminationPoint(any(InstanceIdentifier.class));
         OvsdbTerminationPointAugmentation ovsdbTermPntAug = mock(OvsdbTerminationPointAugmentation.class);
-        when(termPoint.augmentation(OvsdbTerminationPointAugmentation.class)).thenReturn(ovsdbTermPntAug);
+        doReturn(ovsdbTermPntAug).when(termPoint).augmentation(OvsdbTerminationPointAugmentation.class);
         Optional<OvsdbTerminationPointAugmentation> ovsdbTermPointOpt = briOperationState
                 .getOvsdbTerminationPointAugmentation(iid);
         assertNotNull(ovsdbTermPointOpt);

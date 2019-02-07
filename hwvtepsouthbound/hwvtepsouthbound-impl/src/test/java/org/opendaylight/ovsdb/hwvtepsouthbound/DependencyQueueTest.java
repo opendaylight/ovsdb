@@ -17,13 +17,13 @@ import java.util.concurrent.CountDownLatch;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependentJob;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.McastMacsRemoteUpdateCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.UnMetDependencyGetter;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
@@ -34,14 +34,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({HwvtepConnectionInstance.class, HwvtepConnectionManager.class, Operations.class,
-    DependencyQueue.class})
+@RunWith(MockitoJUnitRunner.class)
 public class DependencyQueueTest extends DataChangeListenerTestBase {
 
     String[][] terminationPoints = new String[][]{
@@ -66,7 +61,7 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
                 .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
         macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
                 .child(RemoteMcastMacs.class, new RemoteMcastMacsKey(mac.key()));
-        setFinalStatic(DependencyQueue.class, "EXECUTOR_SERVICE", PowerMockito.mock(SameThreadScheduledExecutor.class,
+        setFinalStatic(DependencyQueue.class, "EXECUTOR_SERVICE", Mockito.mock(SameThreadScheduledExecutor.class,
                 Mockito.CALLS_REAL_METHODS));
     }
 

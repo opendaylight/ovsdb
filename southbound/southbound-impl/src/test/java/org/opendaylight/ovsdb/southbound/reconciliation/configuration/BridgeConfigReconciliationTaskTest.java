@@ -7,9 +7,12 @@
  */
 package org.opendaylight.ovsdb.southbound.reconciliation.configuration;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
@@ -25,6 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
@@ -52,13 +56,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@PrepareForTest({BridgeConfigReconciliationTask.class,
-        OvsdbConnectionInstance.class, InstanceIdentifier.class, Optional.class})
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class BridgeConfigReconciliationTaskTest {
     private static final String BR01 = "br01";
     private static final String BR02 = "br02";
@@ -101,14 +100,14 @@ public class BridgeConfigReconciliationTaskTest {
 
     @Test
     public void testReconcileConfiguration() throws Exception {
-        BridgeConfigReconciliationTask underTest = PowerMockito.spy(configurationReconciliationTask);
-        PowerMockito.doNothing().when(underTest, "reconcileBridgeConfigurations", any(Map.class));
-        assertEquals(true, underTest.reconcileConfiguration(ovsdbConnectionManager));
+        BridgeConfigReconciliationTask underTest = spy(configurationReconciliationTask);
+        doNothing().when(underTest).reconcileBridgeConfigurations(any(Map.class));
+        assertTrue(underTest.reconcileConfiguration(ovsdbConnectionManager));
         Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
         for (Node bridgeNode : topology.getNode()) {
             changes.putAll(createExpectedConfigurationChanges(bridgeNode));
         }
-        PowerMockito.verifyPrivate(underTest).invoke("reconcileBridgeConfigurations", changes);
+        verify(underTest).reconcileBridgeConfigurations(changes);
     }
 
     private Node createBridgeNode(final String bridgeName) {

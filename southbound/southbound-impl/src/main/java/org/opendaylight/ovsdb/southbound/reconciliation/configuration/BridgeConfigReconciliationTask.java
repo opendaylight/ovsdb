@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound.reconciliation.configuration;
 
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -154,7 +155,8 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
         return changes;
     }
 
-    private void reconcileBridgeConfigurations(final Map<InstanceIdentifier<?>, DataObject> changes) {
+    @VisibleForTesting
+    void reconcileBridgeConfigurations(final Map<InstanceIdentifier<?>, DataObject> changes) {
         DataChangeEvent changeEvents = new DataChangeEvent() {
             @Override
             public Map<InstanceIdentifier<?>, DataObject> getCreatedData() {

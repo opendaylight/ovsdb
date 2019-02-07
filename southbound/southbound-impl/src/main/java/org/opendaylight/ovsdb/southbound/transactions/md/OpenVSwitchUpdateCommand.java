@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -117,8 +118,8 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void removeOldConfigs(ReadWriteTransaction transaction,
-            Map<String, String> oldOtherConfigs, OpenVSwitch ovs) {
+    @VisibleForTesting
+    void removeOldConfigs(ReadWriteTransaction transaction, Map<String, String> oldOtherConfigs, OpenVSwitch ovs) {
         InstanceIdentifier<OvsdbNodeAugmentation> nodeAugmentataionIid = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
@@ -133,8 +134,8 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setNewOtherConfigs(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
-            Map<String, String> otherConfigs) {
+    @VisibleForTesting
+    void setNewOtherConfigs(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, Map<String, String> otherConfigs) {
         List<OpenvswitchOtherConfigs> otherConfigsList = new ArrayList<>();
         for (Entry<String, String> entry : otherConfigs.entrySet()) {
             String otherConfigKey = entry.getKey();
@@ -166,8 +167,8 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void removeExternalIds(ReadWriteTransaction transaction,
-            Map<String, String> oldExternalIds, OpenVSwitch ovs) {
+    @VisibleForTesting
+    void removeExternalIds(ReadWriteTransaction transaction, Map<String, String> oldExternalIds, OpenVSwitch ovs) {
         InstanceIdentifier<OvsdbNodeAugmentation> nodeAugmentataionIid = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
@@ -182,8 +183,8 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setNewExternalIds(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
-            Map<String, String> externalIds) {
+    @VisibleForTesting
+    void setNewExternalIds(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, Map<String, String> externalIds) {
         List<OpenvswitchExternalIds> externalIdsList = new ArrayList<>();
         for (Entry<String, String> entry : externalIds.entrySet()) {
             String externalIdKey = entry.getKey();
@@ -281,7 +282,8 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         return getOvsdbConnectionInstance().getInstanceIdentifier();
     }
 
-    private NodeId getNodeId(OpenVSwitch ovs) {
+    @VisibleForTesting
+    NodeId getNodeId(OpenVSwitch ovs) {
         NodeKey nodeKey = getInstanceIdentifier(ovs).firstKeyOf(Node.class);
         return nodeKey.getNodeId();
     }

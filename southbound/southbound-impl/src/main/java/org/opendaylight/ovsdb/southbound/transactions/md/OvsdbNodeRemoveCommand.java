@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.concurrent.ExecutionException;
@@ -69,7 +70,8 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
         }
     }
 
-    private boolean checkIfOnlyConnectedManager(OvsdbNodeAugmentation ovsdbNodeAugmentation) {
+    @VisibleForTesting
+    boolean checkIfOnlyConnectedManager(OvsdbNodeAugmentation ovsdbNodeAugmentation) {
         ManagerEntry onlyConnectedManager = null;
         if (ovsdbNodeAugmentation != null) {
             int connectedManager = 0;

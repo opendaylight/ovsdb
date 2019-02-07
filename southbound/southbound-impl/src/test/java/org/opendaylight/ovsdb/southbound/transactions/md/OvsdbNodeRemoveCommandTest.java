@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -36,13 +38,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-@PrepareForTest({OvsdbNodeRemoveCommand.class})
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class OvsdbNodeRemoveCommandTest {
 
     private static final long ONE_CONNECTED_MANAGER = 1;
@@ -51,7 +49,7 @@ public class OvsdbNodeRemoveCommandTest {
 
     @Before
     public void setUp() throws Exception {
-        ovsdbNodeRemoveCommand = PowerMockito.mock(OvsdbNodeRemoveCommand.class, Mockito.CALLS_REAL_METHODS);
+        ovsdbNodeRemoveCommand = mock(OvsdbNodeRemoveCommand.class, Mockito.CALLS_REAL_METHODS);
     }
 
     @Test
@@ -82,8 +80,7 @@ public class OvsdbNodeRemoveCommandTest {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
         when(ovsdbNode.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
 
-        PowerMockito.doReturn(true).when(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager",
-                any(OvsdbNodeAugmentation.class));
+        doReturn(true).when(ovsdbNodeRemoveCommand).checkIfOnlyConnectedManager(any(OvsdbNodeAugmentation.class));
 
         List<ManagedNodeEntry> listManagedNodeEntry = new ArrayList<>();
         ManagedNodeEntry managedNode = mock(ManagedNodeEntry.class);

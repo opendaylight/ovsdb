@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Version;
@@ -28,23 +29,18 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberModifier;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-@PrepareForTest({})
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class OvsdbOperationalCommandAggregatorTest {
 
     private static final int NUMBER_OF_COMMANDS = 15;
-    private List<TransactionCommand> commands = new ArrayList<>();
+    private final List<TransactionCommand> commands = new ArrayList<>();
     private OvsdbOperationalCommandAggregator ovsdbOperationalCommandAggregator;
 
     @Before
     public void setUp() throws Exception {
-        ovsdbOperationalCommandAggregator = PowerMockito.mock(OvsdbOperationalCommandAggregator.class,
+        ovsdbOperationalCommandAggregator = mock(OvsdbOperationalCommandAggregator.class,
                 Mockito.CALLS_REAL_METHODS);
 
         //mock commands field
@@ -63,7 +59,7 @@ public class OvsdbOperationalCommandAggregatorTest {
         commands.add(mock(OvsdbControllerRemovedCommand.class));
         commands.add(mock(OvsdbPortUpdateCommand.class));
         commands.add(mock(OvsdbPortRemoveCommand.class));
-        MemberModifier.field(OvsdbOperationalCommandAggregator.class, "commands").set(ovsdbOperationalCommandAggregator,
+        Whitebox.getField(OvsdbOperationalCommandAggregator.class, "commands").set(ovsdbOperationalCommandAggregator,
                 commands);
     }
 

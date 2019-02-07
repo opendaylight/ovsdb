@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -133,7 +134,8 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         }
     }
 
-    private List<TransactionCommand> extractResubmitCommands() {
+    @VisibleForTesting
+    List<TransactionCommand> extractResubmitCommands() {
         AsyncTransaction<?, ?> transaction = failedTransactionQueue.poll();
         List<TransactionCommand> commands = new ArrayList<>();
         if (transaction != null) {
@@ -148,7 +150,8 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         return commands;
     }
 
-    private void resetTransactionQueue() {
+    @VisibleForTesting
+    void resetTransactionQueue() {
         chain.close();
         chain = db.createTransactionChain(this);
         pendingTransactions = new ArrayList<>();
@@ -169,7 +172,8 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         return commands;
     }
 
-    private List<TransactionCommand> extractCommandsFromQueue() throws InterruptedException {
+    @VisibleForTesting
+    List<TransactionCommand> extractCommandsFromQueue() throws InterruptedException {
         List<TransactionCommand> result = new ArrayList<>();
         TransactionCommand command = inputQueue.take();
         while (command != null) {

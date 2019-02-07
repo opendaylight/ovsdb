@@ -11,23 +11,22 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
 
 import com.google.common.collect.Lists;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.Iterator;
 import java.util.List;
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
@@ -39,17 +38,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Unit tests for the data-tree change listener.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({HwvtepConnectionInstance.class, HwvtepConnectionManager.class, Operations.class})
+@RunWith(MockitoJUnitRunner.class)
 public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     static Logger LOG = LoggerFactory.getLogger(HwvtepDataChangeListenerTest.class);
@@ -92,7 +87,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     @Before
     public void setupListener() throws Exception {
-        setFinalStatic(DependencyQueue.class, "EXECUTOR_SERVICE", PowerMockito.mock(SameThreadScheduledExecutor.class,
+        setFinalStatic(DependencyQueue.class, "EXECUTOR_SERVICE", mock(SameThreadScheduledExecutor.class,
                 Mockito.CALLS_REAL_METHODS));
         opDataChangeListener = new HwvtepOperationalDataChangeListener(dataBroker, hwvtepConnectionManager,
                 connectionInstance);
@@ -101,21 +96,6 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     @After
     public void cleanupListener() throws Exception {
         opDataChangeListener.close();
-    }
-
-    @Override
-    void setFinalStatic(Class cls, String fieldName, Object newValue) throws Exception {
-        Field[] fields = FieldUtils.getAllFields(cls);
-        for (Field field : fields) {
-            if (fieldName.equals(field.getName())) {
-                field.setAccessible(true);
-                Field modifiersField = Field.class.getDeclaredField("modifiers");
-                modifiersField.setAccessible(true);
-                modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-                field.set(null, newValue);
-                break;
-            }
-        }
     }
 
     @Test

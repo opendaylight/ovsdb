@@ -12,15 +12,13 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
-import static org.powermock.api.support.membermodification.MemberMatcher.field;
-import static org.powermock.api.support.membermodification.MemberModifier.suppress;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -28,12 +26,10 @@ import java.lang.reflect.Modifier;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -43,6 +39,7 @@ import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
+import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.operations.Delete;
 import org.opendaylight.ovsdb.lib.operations.Insert;
@@ -72,7 +69,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.api.mockito.PowerMockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,7 +131,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         deleteNode(CONFIGURATION);
     }
 
-    void setFinalStatic(Class cls, String fieldName, Object newValue) throws Exception {
+    static final void setFinalStatic(Class<?> cls, String fieldName, Object newValue) throws SecurityException,
+            ReflectiveOperationException {
         Field[] fields = FieldUtils.getAllFields(cls);
         for (Field field : fields) {
             if (fieldName.equals(field.getName())) {
@@ -164,21 +161,13 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     }
 
     private void mockConnectionManager() throws IllegalAccessException {
-        hwvtepConnectionManager = PowerMockito.mock(HwvtepConnectionManager.class, Mockito.CALLS_REAL_METHODS);
-        field(HwvtepConnectionManager.class, "db").set(hwvtepConnectionManager, dataBroker);
-        field(HwvtepConnectionManager.class, "txInvoker").set(hwvtepConnectionManager, transactionInvoker);
-        field(HwvtepConnectionManager.class, "entityOwnershipService").set(hwvtepConnectionManager,
-                entityOwnershipService);
-        suppress(PowerMockito.method(HwvtepConnectionManager.class, "getConnectionInstance",
-                HwvtepPhysicalSwitchAttributes.class));
-        suppress(PowerMockito.method(HwvtepConnectionManager.class, "getConnectionInstanceFromNodeIid",
-                InstanceIdentifier.class));
-        doReturn(connectionInstance).when(
-                hwvtepConnectionManager).getConnectionInstance(Mockito.any(HwvtepPhysicalSwitchAttributes.class));
-        doReturn(connectionInstance).when(
-                hwvtepConnectionManager).getConnectionInstance(Mockito.any(Node.class));
-        doReturn(connectionInstance).when(
-                hwvtepConnectionManager).getConnectionInstanceFromNodeIid(Mockito.any(InstanceIdentifier.class));
+        hwvtepConnectionManager = spy(new HwvtepConnectionManager(dataBroker, transactionInvoker,
+            entityOwnershipService, mock(OvsdbConnection.class)));
+        doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstance(
+            any(HwvtepPhysicalSwitchAttributes.class));
+        doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstance(any(Node.class));
+        doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstanceFromNodeIid(
+            any(InstanceIdentifier.class));
     }
 
     void mockConnectionInstance() throws IllegalAccessException {
@@ -188,24 +177,14 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         ovsdbClient = mock(OvsdbClient.class);
         doReturn(true).when(ovsdbClient).isActive();
         doReturn(connectionInfo).when(ovsdbClient).getConnectionInfo();
+        doReturn(listenableDbSchema).when(ovsdbClient).getSchema(anyString());
 
         transactionInvoker = new TransactionInvokerImpl(dataBroker);
 
-        connectionInstance = PowerMockito.mock(HwvtepConnectionInstance.class, Mockito.CALLS_REAL_METHODS);
-        field(HwvtepConnectionInstance.class, "instanceIdentifier").set(connectionInstance, nodeIid);
-        field(HwvtepConnectionInstance.class, "txInvoker").set(connectionInstance, transactionInvoker);
-        field(HwvtepConnectionInstance.class, "client").set(connectionInstance, ovsdbClient);
-        SettableFuture<Boolean> reconciliationFt = SettableFuture.create();
-        reconciliationFt.set(Boolean.TRUE);
-        field(HwvtepConnectionInstance.class, "reconciliationFt").set(connectionInstance, reconciliationFt);
-        field(HwvtepConnectionInstance.class, "firstUpdateTriggered").set(connectionInstance,
-                new AtomicBoolean(Boolean.TRUE));
-        doReturn(nodeIid).when(connectionInstance).getInstanceIdentifier();
-        doReturn(listenableDbSchema).when(connectionInstance).getSchema(anyString());
-        doReturn(dataBroker).when(connectionInstance).getDataBroker();
-        doReturn(nodeIid).when(connectionInstance).getInstanceIdentifier();
-        field(HwvtepConnectionInstance.class, "deviceInfo").set(connectionInstance,
-                new HwvtepDeviceInfo(connectionInstance));
+        connectionInstance = new HwvtepConnectionInstance(null, null, ovsdbClient, nodeIid, transactionInvoker,
+            dataBroker);
+        connectionInstance.reconciliationFt.set(Boolean.TRUE);
+        connectionInstance.firstUpdateTriggered.set(true);
         connectionInstance.setControllerTxHistory(new TransactionHistory(10000, 7500));
         connectionInstance.setDeviceUpdateHistory(new TransactionHistory(10000, 7500));
         connectionInstance.createTransactInvokers();
@@ -225,17 +204,16 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(where).when(delete).where(any());
         Insert insert = mock(Insert.class);
         doReturn(insert).when(insert).withId(any(String.class));
-        Operations mockOp = PowerMockito.mock(Operations.class);
+        Operations mockOp = mock(Operations.class);
         doReturn(insert).when(mockOp).insert(insertOpCapture.capture());
         Update update = mock(Update.class);
         doReturn(update).when(mockOp).update(insertOpCapture.capture());
         doReturn(where).when(update).where(any());
         doReturn(delete).when(mockOp).delete(any());
 
-        Field opField = PowerMockito.field(Operations.class, "op");
         try {
-            opField.set(Operations.class, mockOp);
-        } catch (IllegalAccessException e) {
+            setFinalStatic(Operations.class, "op", mockOp);
+        } catch (SecurityException | ReflectiveOperationException e) {
             throw new AssertionError("Set of Operations.op field failed", e);
         }
 

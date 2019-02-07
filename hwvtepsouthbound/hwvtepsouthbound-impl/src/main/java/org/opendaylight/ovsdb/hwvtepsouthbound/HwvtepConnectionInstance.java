@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -77,8 +78,10 @@ public class HwvtepConnectionInstance {
     private final DataBroker dataBroker;
     private final HwvtepConnectionManager hwvtepConnectionManager;
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-    private final SettableFuture<Boolean> reconciliationFt = SettableFuture.create();
-    private final AtomicBoolean firstUpdateTriggered = new AtomicBoolean(false);
+    @VisibleForTesting
+    final SettableFuture<Boolean> reconciliationFt = SettableFuture.create();
+    @VisibleForTesting
+    final AtomicBoolean firstUpdateTriggered = new AtomicBoolean(false);
     private TransactionHistory controllerTxHistory;
     private TransactionHistory deviceUpdateHistory;
 

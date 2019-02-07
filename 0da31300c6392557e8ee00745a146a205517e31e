@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8d29b64b_c7a2bb75",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeRemovedCommandTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2019-02-07T16:00:53Z",
+      "side": 0,
+      "message": "this is funny",
+      "revId": "0da31300c6392557e8ee00745a146a205517e31e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

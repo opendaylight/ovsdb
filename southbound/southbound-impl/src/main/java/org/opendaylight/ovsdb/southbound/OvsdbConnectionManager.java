@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -99,7 +99,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     @Override
-    public void connected(@Nonnull final OvsdbClient externalClient) {
+    public void connected(@NonNull final OvsdbClient externalClient) {
         LOG.info("Library connected {} from {}:{} to {}:{}",
                 externalClient.getConnectionInfo().getType(),
                 externalClient.getConnectionInfo().getRemoteAddress(),
@@ -532,7 +532,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         return openVSwitchRow;
     }
 
-    private Entity getEntityFromConnectionInstance(@Nonnull OvsdbConnectionInstance ovsdbConnectionInstance) {
+    private Entity getEntityFromConnectionInstance(@NonNull OvsdbConnectionInstance ovsdbConnectionInstance) {
         InstanceIdentifier<Node> iid = ovsdbConnectionInstance.getInstanceIdentifier();
         if (iid == null) {
             /* Switch initiated connection won't have iid, till it gets OpenVSwitch
@@ -618,7 +618,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 }
                 Futures.addCallback(readNodeFuture, new FutureCallback<Optional<Node>>() {
                     @Override
-                    public void onSuccess(@Nonnull Optional<Node> node) {
+                    public void onSuccess(@NonNull Optional<Node> node) {
                         if (node.isPresent()) {
                             LOG.info("Disconnected/Failed connection {} was controller initiated, attempting "
                                     + "reconnection", ovsdbNode.getConnectionInfo());

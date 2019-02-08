@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
@@ -87,7 +87,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
     }
 
     @Override
-    public void onDataTreeChanged(@Nonnull Collection<DataTreeModification<Node>> changes) {
+    public void onDataTreeChanged(@NonNull Collection<DataTreeModification<Node>> changes) {
         LOG.trace("onDataTreeChanged: {}", changes);
 
         // Connect first if necessary
@@ -105,7 +105,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
         LOG.trace("onDataTreeChanged: exit");
     }
 
-    private void connect(@Nonnull Collection<DataTreeModification<Node>> changes) {
+    private void connect(@NonNull Collection<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
             if (change.getRootNode().getModificationType() == DataObjectModification.ModificationType.WRITE || change
                     .getRootNode().getModificationType() == DataObjectModification.ModificationType.SUBTREE_MODIFIED) {
@@ -134,7 +134,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
         }
     }
 
-    private void disconnect(@Nonnull Collection<DataTreeModification<Node>> changes) {
+    private void disconnect(@NonNull Collection<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
             if (change.getRootNode().getModificationType() == DataObjectModification.ModificationType.DELETE) {
                 DataObjectModification<OvsdbNodeAugmentation> ovsdbNodeModification =
@@ -180,7 +180,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
         }
     }
 
-    private void updateConnections(@Nonnull Collection<DataTreeModification<Node>> changes) {
+    private void updateConnections(@NonNull Collection<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
             if (change.getRootNode().getModificationType() == DataObjectModification.ModificationType.WRITE || change
                     .getRootNode().getModificationType() == DataObjectModification.ModificationType.SUBTREE_MODIFIED) {
@@ -206,7 +206,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
         }
     }
 
-    private void updateData(@Nonnull Collection<DataTreeModification<Node>> changes) {
+    private void updateData(@NonNull Collection<DataTreeModification<Node>> changes) {
         for (Entry<OvsdbConnectionInstance, Collection<DataTreeModification<Node>>> connectionInstanceEntry :
                 changesPerConnectionInstance(changes).entrySet()) {
             OvsdbConnectionInstance connectionInstance = connectionInstanceEntry.getKey();
@@ -217,7 +217,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
     }
 
     private Map<OvsdbConnectionInstance, Collection<DataTreeModification<Node>>> changesPerConnectionInstance(
-            @Nonnull Collection<DataTreeModification<Node>> changes) {
+            @NonNull Collection<DataTreeModification<Node>> changes) {
         Map<OvsdbConnectionInstance, Collection<DataTreeModification<Node>>> result = new HashMap<>();
         for (DataTreeModification<Node> change : changes) {
             OvsdbConnectionInstance client = null;

@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
@@ -139,7 +139,7 @@ public class BridgeUpdateCommand implements TransactCommand {
         bridge.setExternalIds(externalIdMap);
     }
 
-    private void setOpenDaylightOtherConfig(@Nonnull Bridge bridge, @Nonnull OvsdbBridgeAugmentation ovsdbManagedNode) {
+    private void setOpenDaylightOtherConfig(@NonNull Bridge bridge, @NonNull OvsdbBridgeAugmentation ovsdbManagedNode) {
         try {
             bridge.setOtherConfig(YangUtils.convertYangKeyValueListToMap(ovsdbManagedNode.getBridgeOtherConfigs(),
                     BridgeOtherConfigs::getBridgeOtherConfigKey, BridgeOtherConfigs::getBridgeOtherConfigValue));

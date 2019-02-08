@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -114,7 +114,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     @Override
-    public void connected(@Nonnull final OvsdbClient externalClient) {
+    public void connected(@NonNull final OvsdbClient externalClient) {
         LOG.info("Library connected {} from {}:{} to {}:{}",
                 externalClient.getConnectionInfo().getType(),
                 externalClient.getConnectionInfo().getRemoteAddress(),
@@ -434,7 +434,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         return globalRow;
     }
 
-    private Entity getEntityFromConnectionInstance(@Nonnull HwvtepConnectionInstance hwvtepConnectionInstance) {
+    private Entity getEntityFromConnectionInstance(@NonNull HwvtepConnectionInstance hwvtepConnectionInstance) {
         InstanceIdentifier<Node> iid = hwvtepConnectionInstance.getInstanceIdentifier();
         if (iid == null) {
             //TODO: Is Global the right one?
@@ -503,7 +503,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
                 Futures.addCallback(readNodeFuture, new FutureCallback<Optional<Node>>() {
                     @Override
-                    public void onSuccess(@Nonnull Optional<Node> node) {
+                    public void onSuccess(@NonNull Optional<Node> node) {
                         if (node.isPresent()) {
                             HwvtepGlobalAugmentation augmentation = node.get()
                                     .augmentation(HwvtepGlobalAugmentation.class);

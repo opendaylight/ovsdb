@@ -23,7 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
@@ -210,7 +210,7 @@ public class ReconciliationManager implements AutoCloseable {
      */
     class BridgeCreatedDataTreeChangeListener implements ClusteredDataTreeChangeListener<Node> {
         @Override
-        public void onDataTreeChanged(@Nonnull Collection<DataTreeModification<Node>> changes) {
+        public void onDataTreeChanged(@NonNull Collection<DataTreeModification<Node>> changes) {
             bridgeNodeCache.cleanUp();
             if (!bridgeNodeCache.asMap().isEmpty()) {
                 Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> nodes =

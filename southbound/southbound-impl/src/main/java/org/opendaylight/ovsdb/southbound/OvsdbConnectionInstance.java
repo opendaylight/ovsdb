@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.Nonnull;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipCandidateRegistration;
@@ -376,7 +376,7 @@ public class OvsdbConnectionInstance {
         }
     }
 
-    public void setDeviceOwnershipCandidateRegistration(@Nonnull EntityOwnershipCandidateRegistration registration) {
+    public void setDeviceOwnershipCandidateRegistration(@NonNull EntityOwnershipCandidateRegistration registration) {
         this.deviceOwnershipCandidateRegistration = registration;
     }
 

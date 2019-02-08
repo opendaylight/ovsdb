@@ -11,8 +11,8 @@ import com.google.common.base.Preconditions;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * YANG utility functions.
@@ -37,10 +37,10 @@ public final class YangUtils {
      * @param <V> The value type.
      * @return The map.
      */
-    @Nonnull
-    public static <T, K, V> Map<K, V> copyYangKeyValueListToMap(@Nonnull Map<K, V> map, @Nullable Iterable<T> yangList,
-                                                                @Nonnull Function<T, K> keyExtractor,
-                                                                @Nonnull Function<T, V> valueExtractor) {
+    @NonNull
+    public static <T, K, V> Map<K, V> copyYangKeyValueListToMap(@NonNull Map<K, V> map, @Nullable Iterable<T> yangList,
+                                                                @NonNull Function<T, K> keyExtractor,
+                                                                @NonNull Function<T, V> valueExtractor) {
         if (yangList != null) {
             for (T yangValue : yangList) {
                 K key = keyExtractor.apply(yangValue);
@@ -64,10 +64,10 @@ public final class YangUtils {
      * @param <V> The value type.
      * @return The map.
      */
-    @Nonnull
+    @NonNull
     public static <T, K, V> Map<K, V> convertYangKeyValueListToMap(@Nullable Iterable<T> yangList,
-                                                                   @Nonnull Function<T, K> keyExtractor,
-                                                                   @Nonnull Function<T, V> valueExtractor) {
+                                                                   @NonNull Function<T, K> keyExtractor,
+                                                                   @NonNull Function<T, V> valueExtractor) {
         return copyYangKeyValueListToMap(new HashMap<>(), yangList, keyExtractor, valueExtractor);
     }
 }

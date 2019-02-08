@@ -16,8 +16,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -121,7 +121,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         return psIid.augmentation(PhysicalSwitchAugmentation.class).child(TunnelIps.class, tunnelIps.key());
     }
 
-    private void updateTunnelIps(@Nonnull final PhysicalSwitch newPSwitch, @Nullable final PhysicalSwitch oldPSwitch,
+    private void updateTunnelIps(@NonNull final PhysicalSwitch newPSwitch, @Nullable final PhysicalSwitch oldPSwitch,
                                  final ReadWriteTransaction transaction) {
         Set<String> oldTunnelIps = oldPSwitch != null && oldPSwitch.getTunnelIpsColumn() != null ? oldPSwitch
                 .getTunnelIpsColumn().getData() : Collections.emptySet();

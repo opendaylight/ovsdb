@@ -30,10 +30,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
+import java.util.Properties;gs l
 import java.util.Set;
-import javax.annotation.Nullable;
 import javax.inject.Inject;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Assume;

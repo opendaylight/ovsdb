@@ -123,12 +123,12 @@ public class TransactCommandAggregator implements TransactCommand {
         extractDataChanged(mod.getModifiedChildren(), updatedData, deletedData);
         DataObjectModification<HwvtepGlobalAugmentation> aug = mod.getModifiedAugmentation(
                 HwvtepGlobalAugmentation.class);
-        if (aug != null && getModificationType(aug) != null) {
+        if (aug != null) {
             extractDataChanged(aug.getModifiedChildren(), updatedData, deletedData);
         }
         DataObjectModification<PhysicalSwitchAugmentation> psAug = mod.getModifiedAugmentation(
                 PhysicalSwitchAugmentation.class);
-        if (psAug != null && getModificationType(psAug) != null) {
+        if (psAug != null) {
             extractDataChanged(psAug.getModifiedChildren(), updatedData, deletedData);
         }
     }
@@ -140,12 +140,8 @@ public class TransactCommandAggregator implements TransactCommand {
             return;
         }
         for (DataObjectModification<? extends DataObject> child : children) {
-            DataObjectModification.ModificationType type = getModificationType(child);
-            if (type == null) {
-                continue;
-            }
             Class<? extends Identifiable> childClass = (Class<? extends Identifiable>) child.getDataType();
-            switch (type) {
+            switch (child.getModificationType()) {
                 case WRITE:
                 case SUBTREE_MODIFIED:
                     DataObject dataAfter = child.getDataAfter();
@@ -181,17 +177,6 @@ public class TransactCommandAggregator implements TransactCommand {
                                   Class<? extends Identifiable> childClass, Identifiable identifiable) {
         updatedData.computeIfAbsent(childClass, (cls) -> new ArrayList<>());
         updatedData.get(childClass).add(identifiable);
-    }
-
-    private DataObjectModification.ModificationType getModificationType(
-            DataObjectModification<? extends DataObject> mod) {
-        try {
-            return mod.getModificationType();
-        } catch (IllegalStateException e) {
-            //not sure why this getter throws this exception, could be some mdsal bug
-            LOG.warn("Failed to get the modification type for mod {}", mod);
-        }
-        return null;
     }
 
     @Override

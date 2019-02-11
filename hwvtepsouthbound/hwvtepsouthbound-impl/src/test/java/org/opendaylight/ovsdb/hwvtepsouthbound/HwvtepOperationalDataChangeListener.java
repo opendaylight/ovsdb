@@ -12,7 +12,6 @@ import java.util.Collection;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -69,7 +68,7 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
             }
             DataObjectModification<HwvtepGlobalAugmentation> aug =
                     mod.getModifiedAugmentation(HwvtepGlobalAugmentation.class);
-            if (aug != null && getModificationType(aug) != null) {
+            if (aug != null) {
                 for (DataObjectModification<? extends DataObject> child : aug.getModifiedChildren()) {
                     updateDeviceOpData(key, child);
                 }
@@ -78,13 +77,9 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
     }
 
     private void updateDeviceOpData(InstanceIdentifier<Node> key, DataObjectModification<? extends DataObject> mod) {
-        ModificationType type = getModificationType(mod);
-        if (type == null) {
-            return;
-        }
         Class<? extends Identifiable> childClass = (Class<? extends Identifiable>) mod.getDataType();
         InstanceIdentifier instanceIdentifier = getKey(key, mod, mod.getDataAfter());
-        switch (type) {
+        switch (mod.getModificationType()) {
             case WRITE:
                 connectionInstance.getDeviceInfo().updateDeviceOperData(childClass, instanceIdentifier,
                         new UUID("uuid"), mod.getDataAfter());
@@ -97,15 +92,6 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
             default:
                 break;
         }
-    }
-
-    private ModificationType getModificationType(DataObjectModification<? extends DataObject> mod) {
-        try {
-            return mod.getModificationType();
-        } catch (IllegalStateException e) {
-            LOG.debug("Failed to get the modification type ", e);
-        }
-        return null;
     }
 
     private InstanceIdentifier getKey(InstanceIdentifier<Node> key, DataObjectModification<? extends DataObject> child,

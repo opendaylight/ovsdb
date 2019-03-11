@@ -41,8 +41,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberMatcher;
-import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -151,8 +149,7 @@ public class SouthboundUtilTest {
         when(connectionInfo.getLocalIp()).thenReturn(null);
 
         //suppress call to getLocalControllerHostIpAddress()
-        MemberModifier.suppress(MemberMatcher.method(SouthboundUtil.class, "getLocalControllerHostIpAddress"));
-        PowerMockito.when(SouthboundUtil.class, "getLocalControllerHostIpAddress").thenReturn("127.0.0.1");
+        PowerMockito.doReturn("127.0.0.1").when(SouthboundUtil.class, "getLocalControllerHostIpAddress");
         testTarget = SouthboundConstants.OPENFLOW_CONNECTION_PROTOCOL + ":"
                 + "127.0.0.1" + ":" + SouthboundConstants.DEFAULT_OPENFLOW_PORT;
         assertEquals("Incorrect Local controller host IP", testTarget, SouthboundUtil.getControllerTarget(ovsdbNode));

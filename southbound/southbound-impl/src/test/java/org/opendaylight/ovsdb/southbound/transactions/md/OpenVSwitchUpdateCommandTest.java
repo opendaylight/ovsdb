@@ -332,7 +332,6 @@ public class OpenVSwitchUpdateCommandTest {
         when(openVSwitch.getDbVersionColumn()).thenReturn(column);
         when(column.getData()).thenReturn(ImmutableSet.of("7.6.1"));
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
-        when(ovsdbNodeBuilder.setOvsVersion(anyString())).thenReturn(ovsdbNodeBuilder);
 
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "setDbVersion", ovsdbNodeBuilder, openVSwitch);
         verify(ovsdbNodeBuilder).setDbVersion(anyString());

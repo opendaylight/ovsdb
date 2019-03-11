@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.net.InetAddresses;
@@ -100,7 +101,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateBridge(ReadWriteTransaction transaction,
+    @VisibleForTesting
+    void updateBridge(ReadWriteTransaction transaction,
             Bridge bridge, InstanceIdentifier<Node> connectionIId) {
         // Update the connection node to let it know it manages this bridge
         Node connectionNode = buildConnectionNode(bridge);
@@ -116,9 +118,10 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         deleteEntries(transaction, bridgeOtherConfigsToRemove(bridgeIid,bridge));
     }
 
-    private static <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
+    @VisibleForTesting
+    <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
             List<InstanceIdentifier<T>> entryIids) {
-        for (InstanceIdentifier<T> entryIid: entryIids) {
+        for (InstanceIdentifier<T> entryIid : entryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
         }
     }

@@ -9,9 +9,9 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -125,7 +125,7 @@ public class OvsdbBridgeUpdateCommandTest {
         MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "updateBridge",
                 ReadWriteTransaction.class, Bridge.class, InstanceIdentifier.class));
         ovsdbBridgeUpdateCommand.execute(transaction);
-        PowerMockito.verifyPrivate(ovsdbBridgeUpdateCommand).invoke("updateBridge", any(ReadWriteTransaction.class),
+        verify(ovsdbBridgeUpdateCommand).updateBridge(any(ReadWriteTransaction.class),
                 any(Bridge.class), any(InstanceIdentifier.class));
     }
 
@@ -154,8 +154,7 @@ public class OvsdbBridgeUpdateCommandTest {
         Bridge bridge = mock(Bridge.class);
         InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);
         Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "updateBridge", transaction, bridge, connectionIId);
-        PowerMockito.verifyPrivate(ovsdbBridgeUpdateCommand, times(3)).invoke("deleteEntries",
-                any(ReadWriteTransaction.class), any(Bridge.class));
+        verify(ovsdbBridgeUpdateCommand, times(3)).deleteEntries(any(ReadWriteTransaction.class), eq(null));
     }
 
     @SuppressWarnings("unchecked")
@@ -165,9 +164,9 @@ public class OvsdbBridgeUpdateCommandTest {
         List<InstanceIdentifier<DataObject>> entryIids = new ArrayList<>();
         InstanceIdentifier<DataObject> iid = mock(InstanceIdentifier.class);
         entryIids.add(iid);
-        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), (InstanceIdentifier<?>) any(List.class));
+        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "deleteEntries", transaction, entryIids);
-        verify(transaction).delete(any(LogicalDatastoreType.class), (InstanceIdentifier<?>) any(List.class));
+        verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -472,18 +471,5 @@ public class OvsdbBridgeUpdateCommandTest {
         Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "setOpenFlowNodeRef", ovsdbBridgeAugmentationBuilder, bridge);
         verify(controllerEntry, times(2)).isIsConnected();
         verify(ovsdbBridgeAugmentationBuilder).setBridgeOpenflowNodeRef(any(InstanceIdentifier.class));
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testGetInstanceIdentifier() throws Exception {
-        PowerMockito.mockStatic(SouthboundMapper.class);
-        when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(mock(OvsdbConnectionInstance.class));
-        InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
-        when(SouthboundMapper.createInstanceIdentifier(any(InstanceIdentifierCodec.class),
-                any(OvsdbConnectionInstance.class), any(Bridge.class)))
-                .thenReturn(iid);
-
-        assertEquals(iid, Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "getInstanceIdentifier", mock(Bridge.class)));
     }
 }

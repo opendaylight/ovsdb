@@ -8,8 +8,8 @@
 
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -126,7 +126,7 @@ public class OvsdbNodeUpdateCommandTest {
         verify(externalId).getExternalIdKey();
         verify(otherConfig).getOtherConfigKey();
         verify(ovs, times(2)).getExternalIdsColumn();
-        verify(transaction, times(2)).add(any(Operation.class));
+        verify(transaction, times(2)).add(eq(null));
     }
 
     static Operations setOpField() throws Exception {

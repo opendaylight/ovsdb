@@ -9,8 +9,9 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -96,8 +97,7 @@ public class OvsdbControllerUpdateCommandTest {
         // updatedBridgeRows null case
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         ovsdbControllerUpdateCommand.execute(transaction);
-        PowerMockito.verifyPrivate(ovsdbControllerUpdateCommand).invoke("updateController",
-                any(ReadWriteTransaction.class), any(Map.class));
+        verify(ovsdbControllerUpdateCommand).updateController(any(ReadWriteTransaction.class), any(Map.class));
 
         // updatedBridgeRows not null case
         Map<UUID, Bridge> updatedBridgeRows = new HashMap<>();
@@ -124,8 +124,8 @@ public class OvsdbControllerUpdateCommandTest {
         // suppress call to getControllerEntryIid()
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         Map<UUID, Controller> updatedControllerRows = new HashMap<>();
-        MemberModifier.suppress(MemberMatcher.method(OvsdbControllerUpdateCommand.class, "getControllerEntryIid",
-                ControllerEntry.class, String.class));
+        doReturn(mock(InstanceIdentifier.class)).when(ovsdbControllerUpdateCommand).getControllerEntryIid(
+                any(ControllerEntry.class), any(String.class));
         doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(ControllerEntry.class));
         Whitebox.invokeMethod(ovsdbControllerUpdateCommand, "updateController", transaction, updatedControllerRows,
@@ -202,8 +202,8 @@ public class OvsdbControllerUpdateCommandTest {
         PowerMockito.whenNew(TopologyKey.class).withAnyArguments().thenReturn(mock(TopologyKey.class));
         //PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
         when(controllerEntry.key()).thenReturn(mock(ControllerEntryKey.class));
-        assertEquals(KeyedInstanceIdentifier.class, (Whitebox
+        assertEquals(KeyedInstanceIdentifier.class, Whitebox
                 .invokeMethod(ovsdbControllerUpdateCommand, "getControllerEntryIid", controllerEntry, BRIDGE_NAME)
-                .getClass()));
+                .getClass());
     }
 }

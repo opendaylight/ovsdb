@@ -9,9 +9,10 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -74,23 +75,26 @@ public class OvsdbPortRemoveCommandTest {
     public void testExecute() throws Exception {
         when(ovsdbPortRemoveCommand.getUpdates()).thenReturn(mock(TableUpdates.class));
         when(ovsdbPortRemoveCommand.getDbSchema()).thenReturn(mock(DatabaseSchema.class));
-        PowerMockito.mockStatic(TyperUtils.class);
         UUID uuid = mock(UUID.class);
         Map<UUID, Port> portRemovedRows = new HashMap<>();
         Port port = mock(Port.class);
         portRemovedRows.put(uuid, port);
-        when(TyperUtils.extractRowsRemoved(eq(Port.class), any(TableUpdates.class), any(DatabaseSchema.class)))
-                .thenReturn(portRemovedRows);
+
+        PowerMockito.mockStatic(TyperUtils.class);
+        PowerMockito.doReturn(portRemovedRows).when(TyperUtils.class);
+        TyperUtils.extractRowsRemoved(eq(Port.class), any(TableUpdates.class), any(DatabaseSchema.class));
+
         Map<UUID, Bridge> bridgeUpdatedRows = new HashMap<>();
         Bridge updatedBridgeData = mock(Bridge.class);
         bridgeUpdatedRows.put(uuid, updatedBridgeData);
-        when(TyperUtils.extractRowsUpdated(eq(Bridge.class), any(TableUpdates.class), any(DatabaseSchema.class)))
-                .thenReturn(bridgeUpdatedRows);
+        PowerMockito.doReturn(bridgeUpdatedRows).when(TyperUtils.class);
+        TyperUtils.extractRowsUpdated(eq(Bridge.class), any(TableUpdates.class), any(DatabaseSchema.class));
+
         Map<UUID, Bridge> bridgeUpdatedOldRows = new HashMap<>();
         Bridge oldBridgeData = mock(Bridge.class);
         bridgeUpdatedOldRows.put(uuid, oldBridgeData);
-        when(TyperUtils.extractRowsOld(eq(Bridge.class), any(TableUpdates.class), any(DatabaseSchema.class)))
-                .thenReturn(bridgeUpdatedOldRows);
+        PowerMockito.doReturn(bridgeUpdatedOldRows).when(TyperUtils.class);
+        TyperUtils.extractRowsOld(eq(Bridge.class), any(TableUpdates.class), any(DatabaseSchema.class));
 
         Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         when(oldBridgeData.getPortsColumn()).thenReturn(column);
@@ -103,17 +107,19 @@ public class OvsdbPortRemoveCommandTest {
         when(uuidColumn.getData()).thenReturn(uuid);
 
         when(port.getName()).thenReturn(PORT_NAME);
-        PowerMockito.mockStatic(SouthboundMapper.class);
         InstanceIdentifier<Node> nodeIID = mock(InstanceIdentifier.class);
-        when(ovsdbPortRemoveCommand.getOvsdbConnectionInstance()).thenReturn(mock(OvsdbConnectionInstance.class));
-        when(SouthboundMapper.createInstanceIdentifier(any(InstanceIdentifierCodec.class),
-                any(OvsdbConnectionInstance.class), any(Bridge.class)))
-                .thenReturn(nodeIID);
+        doReturn(mock(OvsdbConnectionInstance.class)).when(ovsdbPortRemoveCommand).getOvsdbConnectionInstance();
+
+        PowerMockito.mockStatic(SouthboundMapper.class);
+        PowerMockito.doReturn(nodeIID).when(SouthboundMapper.class);
+        SouthboundMapper.createInstanceIdentifier(eq(null),
+            any(OvsdbConnectionInstance.class), any(Bridge.class));
+
         MemberModifier.suppress(MemberModifier.methodsDeclaredIn(InstanceIdentifier.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
 
         ovsdbPortRemoveCommand.execute(transaction);
-        verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(transaction).delete(any(LogicalDatastoreType.class), eq(null));
     }
 }

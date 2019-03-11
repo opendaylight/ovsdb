@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -124,7 +125,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateTerminationPoints(ReadWriteTransaction transaction, Node node) {
+    @VisibleForTesting
+    void updateTerminationPoints(ReadWriteTransaction transaction, Node node) {
         for (Entry<UUID, Port> portUpdate : portUpdatedRows.entrySet()) {
             String portName = null;
             portName = portUpdate.getValue().getNameColumn().getData();
@@ -184,7 +186,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
 
     }
 
-    private void buildTerminationPoint(ReadWriteTransaction transaction,
+    @VisibleForTesting
+    void buildTerminationPoint(ReadWriteTransaction transaction,
             InstanceIdentifier<TerminationPoint> tpPath,
             OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder,
             Node node, Entry<UUID, Port> portUpdate) {
@@ -249,7 +252,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         return Optional.absent();
     }
 
-    private void updateInterfaces(Interface interfaceUpdate,
+    @VisibleForTesting
+    void updateInterfaces(Interface interfaceUpdate,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Column<GenericTableSchema, String> typeColumn = interfaceUpdate.getTypeColumn();
@@ -257,7 +261,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         updateInterface(interfaceUpdate, type,ovsdbTerminationPointBuilder);
     }
 
-    private void updatePort(final ReadWriteTransaction transaction, final Node node,
+    @VisibleForTesting
+    void updatePort(final ReadWriteTransaction transaction, final Node node,
             final InstanceIdentifier<TerminationPoint> tpPath, final Entry<UUID, Port> port,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
@@ -269,7 +274,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         updatePortOtherConfig(port.getValue(), ovsdbTerminationPointBuilder);
     }
 
-    private void updateInterface(final Interface interf,
+    @VisibleForTesting
+    void updateInterface(final Interface interf,
             final String type,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
@@ -291,7 +297,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         updateInterfacePolicing(interf, ovsdbTerminationPointBuilder);
     }
 
-    private void updateVlan(final Port port,
+    @VisibleForTesting
+    void updateVlan(final Port port,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Collection<Long> vlanId = port.getTagColumn().getData();
@@ -303,7 +310,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateVlanTrunks(final Port port,
+    @VisibleForTesting
+    void updateVlanTrunks(final Port port,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Set<Long> portTrunks = port.getTrunksColumn().getData();
@@ -319,7 +327,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         ovsdbTerminationPointBuilder.setTrunks(modelTrunks);
     }
 
-    private void updateVlanMode(final Port port,
+    @VisibleForTesting
+    void updateVlanMode(final Port port,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Collection<String> vlanMode = port.getVlanModeColumn().getData();
@@ -344,7 +353,6 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void updateQos(final ReadWriteTransaction transaction, final Node node,
                            InstanceIdentifier<TerminationPoint> tpPath, final Entry<UUID, Port> port,
                            final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
@@ -480,7 +488,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateOfPort(final Interface interf,
+    @VisibleForTesting
+    void updateOfPort(final Interface interf,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Set<Long> ofPorts = interf.getOpenFlowPortColumn().getData();
@@ -497,7 +506,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateOfPortRequest(final Interface interf,
+    @VisibleForTesting
+    void updateOfPortRequest(final Interface interf,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Set<Long> ofPortRequests = null;
@@ -519,7 +529,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateInterfaceExternalIds(final Interface interf,
+    @VisibleForTesting
+    void updateInterfaceExternalIds(final Interface interf,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Map<String, String> interfaceExternalIds =
@@ -539,7 +550,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updatePortExternalIds(final Port port,
+    @VisibleForTesting
+    void updatePortExternalIds(final Port port,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Map<String, String> portExternalIds = port.getExternalIdsColumn().getData();
@@ -558,7 +570,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateOptions(final Interface interf,
+    @VisibleForTesting
+    void updateOptions(final Interface interf,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Map<String, String> optionsMap = interf.getOptionsColumn().getData();
@@ -578,7 +591,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updatePortOtherConfig(final Port port,
+    @VisibleForTesting
+    void updatePortOtherConfig(final Port port,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Map<String, String> portOtherConfigMap = port.getOtherConfigColumn().getData();
@@ -622,7 +636,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateInterfaceOtherConfig(final Interface interf,
+    @VisibleForTesting
+    void updateInterfaceOtherConfig(final Interface interf,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Map<String, String> interfaceOtherConfigMap = interf.getOtherConfigColumn().getData();
@@ -742,7 +757,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     }
 
     @SuppressWarnings("unchecked")
-    private InstanceIdentifier<TerminationPoint> getInstanceIdentifier(InstanceIdentifier<Node> bridgeIid,Port port) {
+    @VisibleForTesting
+    InstanceIdentifier<TerminationPoint> getInstanceIdentifier(InstanceIdentifier<Node> bridgeIid,Port port) {
         if (port.getExternalIdsColumn() != null
                 && port.getExternalIdsColumn().getData() != null
                 && port.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {

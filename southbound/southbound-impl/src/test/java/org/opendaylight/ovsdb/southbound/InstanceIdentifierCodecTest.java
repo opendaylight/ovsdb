@@ -25,7 +25,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -111,10 +110,6 @@ public class InstanceIdentifierCodecTest {
 
     @Test
     public void testBindingDeserializer() throws Exception {
-        YangInstanceIdentifier yiid = mock(YangInstanceIdentifier.class);
-        when(bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(yiid)).thenAnswer(
-                (Answer<InstanceIdentifier<?>>) invocation -> (InstanceIdentifier<?>) invocation.getArguments()[0]);
-
         assertNull("Error, did not return correct InstanceIdentifier<?> object",
             instanceIdCodec.bindingDeserializer(""));
     }

@@ -119,8 +119,6 @@ public class OvsdbNodeRemoveCommandTest {
 
         // case 3: onlyConnectedManager.getNumberOfConnections().longValue() > ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE
         ManagerEntry onlyConnectedManager = mock(ManagerEntry.class);
-        when(onlyConnectedManager.getNumberOfConnections()).thenReturn(ONE_CONNECTED_MANAGER + 1,
-                ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE);
         assertEquals(false,
                 Whitebox.invokeMethod(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", ovsdbNodeAugmentation));
 

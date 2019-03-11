@@ -121,7 +121,6 @@ public class BridgeConfigReconciliationTaskTest {
         when((InstanceIdentifier<Node>)ovsdbNodeRef.getValue()).thenReturn(iid);
         OvsdbBridgeName ovsdbBridgeName = new OvsdbBridgeName(bridgeName);
         when(bridgeNode.augmentation(OvsdbBridgeAugmentation.class)).thenReturn(ovsdbBridgeAugmentation);
-        when(ovsdbBridgeAugmentation.getBridgeName()).thenReturn(ovsdbBridgeName);
         ProtocolEntry protocolEntry = mock(ProtocolEntry.class);
         ProtocolEntryKey protocolEntryKey = mock(ProtocolEntryKey.class);
         Mockito.when(protocolEntry.getProtocol()).thenAnswer(

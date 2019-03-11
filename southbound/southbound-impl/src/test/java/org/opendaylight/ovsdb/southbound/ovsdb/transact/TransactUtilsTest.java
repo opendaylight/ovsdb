@@ -48,7 +48,6 @@ import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -92,19 +91,17 @@ public class TransactUtilsTest {
     public void testExtractCreatedOrUpdated() {
         Map<InstanceIdentifier<DataObject>, DataObject> result = new HashMap<>();
 
-        PowerMockito.suppress(
-                MemberMatcher.method(TransactUtils.class, "extractUpdated", DataChangeEvent.class, Class.class));
-        PowerMockito.when(TransactUtils.extractUpdated(any(DataChangeEvent.class), eq(DataObject.class)))
-                .thenReturn(result);
+        PowerMockito.doReturn(result).when(TransactUtils.class);
+        TransactUtils.extractUpdated(any(DataChangeEvent.class), eq(DataObject.class));
 
         Map<InstanceIdentifier<DataObject>, DataObject> map = new HashMap<>();
         InstanceIdentifier<DataObject> iid = mock(InstanceIdentifier.class);
+
         DataObject db = mock(DataObject.class);
         map.put(iid, db);
-        PowerMockito.suppress(
-                MemberMatcher.method(TransactUtils.class, "extractCreated", DataChangeEvent.class, Class.class));
-        PowerMockito.when(TransactUtils.extractCreated(any(DataChangeEvent.class), eq(DataObject.class)))
-                .thenReturn(map);
+
+        PowerMockito.doReturn(map).when(TransactUtils.class);
+        TransactUtils.extractCreated(any(DataChangeEvent.class), eq(DataObject.class));
 
         Map<InstanceIdentifier<DataObject>, DataObject> testResult = new HashMap<>();
         testResult.put(iid, db);
@@ -118,19 +115,16 @@ public class TransactUtilsTest {
     public void testExtractCreatedOrUpdatedOrRemoved() {
         Map<InstanceIdentifier<DataObject>, DataObject> result = new HashMap<>();
 
-        PowerMockito.suppress(MemberMatcher.method(TransactUtils.class, "extractCreatedOrUpdated",
-                DataChangeEvent.class, Class.class));
-        PowerMockito.when(TransactUtils.extractCreatedOrUpdated(any(DataChangeEvent.class), eq(DataObject.class)))
-                .thenReturn(result);
+        PowerMockito.doReturn(result).when(TransactUtils.class);
+        TransactUtils.extractCreatedOrUpdated(any(DataChangeEvent.class), eq(DataObject.class));
 
         Map<InstanceIdentifier<DataObject>, DataObject> map = new HashMap<>();
         InstanceIdentifier<DataObject> iid = mock(InstanceIdentifier.class);
         DataObject db = mock(DataObject.class);
         map.put(iid, db);
-        PowerMockito.suppress(MemberMatcher.method(TransactUtils.class, "extractRemovedObjects",
-                DataChangeEvent.class, Class.class));
-        PowerMockito.when(TransactUtils.extractRemovedObjects(any(DataChangeEvent.class), eq(DataObject.class)))
-                .thenReturn(map);
+
+        PowerMockito.doReturn(map).when(TransactUtils.class);
+        TransactUtils.extractRemovedObjects(any(DataChangeEvent.class), eq(DataObject.class));
 
         Map<InstanceIdentifier<DataObject>, DataObject> testResult = new HashMap<>();
         testResult.put(iid, db);
@@ -160,20 +154,17 @@ public class TransactUtilsTest {
         assertEquals(HashSet.class, TransactUtils.extractRemoved(changes, klazz).getClass());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testExtractRemovedObjects() {
         Set<InstanceIdentifier<DataObject>> iids = new HashSet<>();
-        PowerMockito.suppress(
-                MemberMatcher.method(TransactUtils.class, "extractRemoved", DataChangeEvent.class, Class.class));
-        PowerMockito.when(TransactUtils.extractRemoved(any(DataChangeEvent.class), eq(DataObject.class)))
-                .thenReturn(iids);
+
+        PowerMockito.doReturn(iids).when(TransactUtils.class);
+        TransactUtils.extractRemoved(any(DataChangeEvent.class), eq(DataObject.class));
 
         Map<InstanceIdentifier<DataObject>, DataObject> result = new HashMap<>();
-        PowerMockito.suppress(
-                MemberMatcher.method(TransactUtils.class, "extractOriginal", DataChangeEvent.class, Class.class));
-        PowerMockito.when(TransactUtils.extractOriginal(any(DataChangeEvent.class), eq(DataObject.class)))
-                .thenReturn(result);
+
+        PowerMockito.doReturn(result).when(TransactUtils.class);
+        TransactUtils.extractOriginal(any(DataChangeEvent.class), eq(DataObject.class));
 
         Class<DataObject> klazz = DataObject.class;
         DataChangeEvent changes = mock(DataChangeEvent.class);
@@ -226,15 +217,10 @@ public class TransactUtilsTest {
         ColumnSchema<GenericTableSchema, Map<String,String>> columnSchema = mock(ColumnSchema.class);
         InstanceIdentifierCodec instanceIdentifierCodec = mock(InstanceIdentifierCodec.class);
 
-        PowerMockito.suppress(MemberMatcher.method(TransactUtils.class, "stampInstanceIdentifierMutation",
-                TransactionBuilder.class,
-                InstanceIdentifier.class,
-                TableSchema.class,
-                ColumnSchema.class,
-                InstanceIdentifierCodec.class));
-        when(TransactUtils.stampInstanceIdentifierMutation(transaction, iid, tableSchema, columnSchema,
-                instanceIdentifierCodec))
-                .thenReturn(mock(Mutate.class));
+        PowerMockito.doReturn(mock(Mutate.class)).when(TransactUtils.class);
+        TransactUtils.stampInstanceIdentifierMutation(transaction, iid, tableSchema, columnSchema,
+            instanceIdentifierCodec);
+
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
         TransactUtils.stampInstanceIdentifier(transaction, iid, tableSchema, columnSchema, instanceIdentifierCodec);
         verify(transaction).add(any(Operation.class));

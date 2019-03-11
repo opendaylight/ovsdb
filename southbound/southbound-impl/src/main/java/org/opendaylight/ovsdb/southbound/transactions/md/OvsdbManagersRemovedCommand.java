@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,14 +55,16 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void deleteManagers(ReadWriteTransaction transaction,
+    @VisibleForTesting
+    void deleteManagers(ReadWriteTransaction transaction,
             List<InstanceIdentifier<ManagerEntry>> managerEntryIids) {
         for (InstanceIdentifier<ManagerEntry> managerEntryIid: managerEntryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, managerEntryIid);
         }
     }
 
-    private List<InstanceIdentifier<ManagerEntry>> managerEntriesToRemove(
+    @VisibleForTesting
+    List<InstanceIdentifier<ManagerEntry>> managerEntriesToRemove(
             InstanceIdentifier<Node> ovsdbNodeIid, OpenVSwitch openVSwitch) {
         Preconditions.checkNotNull(ovsdbNodeIid);
         Preconditions.checkNotNull(openVSwitch);

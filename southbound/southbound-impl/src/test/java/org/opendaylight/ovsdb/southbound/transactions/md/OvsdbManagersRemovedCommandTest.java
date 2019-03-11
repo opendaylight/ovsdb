@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,7 +44,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -91,16 +91,16 @@ public class OvsdbManagersRemovedCommandTest {
         when(ovsdbManagersRemovedCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         when(ovsdbConnectionInstance.getNodeId()).thenReturn(mock(NodeId.class));
         when(SouthboundMapper.createInstanceIdentifier(any(NodeId.class))).thenReturn(mock(InstanceIdentifier.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbManagersRemovedCommand.class, "deleteManagers",
-                ReadWriteTransaction.class, List.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbManagersRemovedCommand.class, "managerEntriesToRemove",
-                InstanceIdentifier.class, OpenVSwitch.class));
+
+        doNothing().when(ovsdbManagersRemovedCommand).deleteManagers(any(ReadWriteTransaction.class), any(List.class));
+        doReturn(mock(List.class)).when(ovsdbManagersRemovedCommand).managerEntriesToRemove(
+            any(InstanceIdentifier.class), any(OpenVSwitch.class));
+
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         ovsdbManagersRemovedCommand.execute(transaction);
-        PowerMockito.verifyPrivate(ovsdbManagersRemovedCommand).invoke("deleteManagers",
-                any(ReadWriteTransaction.class), any(List.class));
-        PowerMockito.verifyPrivate(ovsdbManagersRemovedCommand).invoke("managerEntriesToRemove",
-                any(InstanceIdentifier.class), any(OpenVSwitch.class));
+        verify(ovsdbManagersRemovedCommand).deleteManagers(any(ReadWriteTransaction.class), any(List.class));
+        verify(ovsdbManagersRemovedCommand).managerEntriesToRemove(any(InstanceIdentifier.class),
+            any(OpenVSwitch.class));
     }
 
     @SuppressWarnings("unchecked")

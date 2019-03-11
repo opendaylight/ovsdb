@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import java.util.HashMap;
 import java.util.List;
@@ -41,8 +42,8 @@ import org.slf4j.LoggerFactory;
 public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbControllerUpdateCommand.class);
 
-    private Map<UUID, Controller> updatedControllerRows;
-    private Map<UUID, Bridge> updatedBridgeRows;
+    private final Map<UUID, Controller> updatedControllerRows;
+    private final Map<UUID, Bridge> updatedBridgeRows;
 
     public OvsdbControllerUpdateCommand(OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
@@ -107,9 +108,9 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
      *
      * @param transaction the {@link ReadWriteTransaction}
      * @param newUpdatedControllerRows updated {@link Controller} rows
-
      */
-    private void updateController(ReadWriteTransaction transaction,
+    @VisibleForTesting
+    void updateController(ReadWriteTransaction transaction,
                                   Map<UUID, Controller> newUpdatedControllerRows) {
 
         Map<InstanceIdentifier<Node>, Node> bridgeNodes = getBridgeNodes(transaction);
@@ -170,7 +171,8 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
      * @param bridgeName the name of the bridge
      * @return the {@link InstanceIdentifier}
      */
-    private InstanceIdentifier<ControllerEntry> getControllerEntryIid(
+    @VisibleForTesting
+    InstanceIdentifier<ControllerEntry> getControllerEntryIid(
             ControllerEntry controllerEntry, String bridgeName) {
 
         OvsdbConnectionInstance client = getOvsdbConnectionInstance();

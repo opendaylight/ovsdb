@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -282,7 +283,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
     }
 
-    private void putConnectionInstance(ConnectionInfo key,OvsdbConnectionInstance instance) {
+    @VisibleForTesting
+    void putConnectionInstance(ConnectionInfo key,OvsdbConnectionInstance instance) {
         ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
         clients.put(connectionInfo, instance);
     }
@@ -292,7 +294,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         clients.remove(connectionInfo);
     }
 
-    private void putInstanceIdentifier(ConnectionInfo key,InstanceIdentifier<Node> iid) {
+    @VisibleForTesting
+    void putInstanceIdentifier(ConnectionInfo key, InstanceIdentifier<Node> iid) {
         ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
         instanceIdentifiers.put(connectionInfo, iid);
     }

@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Unit tests for the data-tree change listener.
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     static Logger LOG = LoggerFactory.getLogger(HwvtepDataChangeListenerTest.class);
@@ -121,7 +121,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
         //4 ucast macs + 2 termination points
-        verify(Operations.op,  times(6)).insert(any(UcastMacsRemote.class));
+        verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
         //TODO add finer grained validation
     }
 
@@ -132,7 +132,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
         //4 ucast macs + 2 termination points
-        verify(Operations.op,  times(6)).insert(any(UcastMacsRemote.class));
+        verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
         //TODO add finer grained validation
     }
 
@@ -193,7 +193,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
-        verify(Operations.op,  times(6)).insert(any(UcastMacsRemote.class));
+        verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
 
         addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
         addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
@@ -210,7 +210,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
-        verify(Operations.op,  times(6)).insert(any(UcastMacsRemote.class));
+        verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
 
         addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
         addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
@@ -233,7 +233,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
-        verify(Operations.op,  times(6)).insert(any(UcastMacsRemote.class));
+        verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
 
         addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
         addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
@@ -254,7 +254,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
-        verify(Operations.op,  times(6)).insert(any(UcastMacsRemote.class));
+        verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
 
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);

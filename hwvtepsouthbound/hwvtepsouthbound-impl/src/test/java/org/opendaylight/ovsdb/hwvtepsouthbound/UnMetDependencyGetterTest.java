@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.McastMacsRemoteUpdateCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.UnMetDependencyGetter;
@@ -30,7 +30,7 @@ import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.reflect.Whitebox;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class UnMetDependencyGetterTest extends DataChangeListenerTestBase {
 
     UnMetDependencyGetter<RemoteMcastMacs> mcastMacDataValidator;

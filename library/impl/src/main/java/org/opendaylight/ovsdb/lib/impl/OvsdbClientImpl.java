@@ -15,6 +15,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.Channel;
@@ -377,21 +378,20 @@ public class OvsdbClientImpl implements OvsdbClient {
             return;
         }
 
-        Futures.transform(rpc.get_schema(Collections.singletonList(dbNames.get(0))),
-            (Function<JsonNode, Void>) jsonNode -> {
-                try {
-                    schema.put(dbNames.get(0), DatabaseSchema.fromJson(dbNames.get(0), jsonNode));
-                    if (schema.size() > 1 && !sfuture.isCancelled()) {
-                        populateSchema(dbNames.subList(1, dbNames.size()), schema, sfuture);
-                    } else if (schema.size() == 1) {
-                        sfuture.set(schema);
-                    }
-                } catch (ParsingException e) {
-                    LOG.warn("Failed to populate schema {}:{}", dbNames, schema, e);
-                    sfuture.setException(e);
+        Futures.transform(rpc.get_schema(Collections.singletonList(dbNames.get(0))), jsonNode -> {
+            try {
+                schema.put(dbNames.get(0), DatabaseSchema.fromJson(dbNames.get(0), jsonNode));
+                if (schema.size() > 1 && !sfuture.isCancelled()) {
+                    populateSchema(dbNames.subList(1, dbNames.size()), schema, sfuture);
+                } else if (schema.size() == 1) {
+                    sfuture.set(schema);
                 }
-                return null;
-            });
+            } catch (ParsingException e) {
+                LOG.warn("Failed to populate schema {}:{}", dbNames, schema, e);
+                sfuture.setException(e);
+            }
+            return null;
+        }, MoreExecutors.directExecutor());
     }
 
     public void setRpc(OvsdbRPC rpc) {

@@ -28,14 +28,14 @@ public class HwvtepMonitorCallback implements MonitorCallBack {
 
     @Override
     public void update(TableUpdates result, DatabaseSchema dbSchema) {
-        LOG.trace("result: {} dbSchema: {}",result,dbSchema.getName());
+        LOG.trace("result: {} dbSchema: {}", result, dbSchema.getName());
         txInvoker.invoke(new HwvtepOperationalCommandAggregator(key, result, dbSchema));
         LOG.trace("update exit");
     }
 
     @Override
     public void exception(Throwable exception) {
-        LOG.warn("exception {}", exception);
+        LOG.warn("exception", exception);
     }
 
 }

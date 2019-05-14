@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Anil Vishnoi <vishnoianil@gmail.com>
+Code-Review+2: Robert Varga <nite@hq.sk>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Tue, 14 May 2019 21:13:10 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/81847
+Project: ovsdb
+Branch: refs/heads/master

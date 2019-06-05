@@ -20,7 +20,7 @@ There are currently two OVSDB Southbound plugins:
    database schema.
 
 These plugins are normally installed and used automatically by higher
-level applications such as odl-ovsdb-openstack; however, they can also
+level applications such as odl-netvirt-openstack; however, they can also
 be installed separately and used via their REST APIs as is described in
 the following sections.
 

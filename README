@@ -34,17 +34,18 @@ Pre-requisites : JDK 1.7+, Maven 3+
 
    3. Once karaf has started and you see the Opendaylight ascii art in the console, the last step
       is to start the OVSDB plugin framework with the following command in the karaf console:
-      "feature:install odl-ovsdb-openstack" (without quotation marks).
+      "feature:install odl-ovsdb-southbound-impl odl-ovsdb-hwvtepsouthbound" (without quotation marks).
 
    Sample output from Karaf console :
 
   opendaylight-user@root>feature:list -i | grep ovsdb
-   odl-ovsdb-southbound-api          | 1.2.1-SNAPSHOT   | x         | odl-ovsdb-southbound-1.2.1-SNAPSHOT     | OpenDaylight :: southbound :: api
-   odl-ovsdb-southbound-impl         | 1.2.1-SNAPSHOT   | x         | odl-ovsdb-southbound-1.2.1-SNAPSHOT     | OpenDaylight :: southbound :: impl
-   odl-ovsdb-southbound-impl-rest    | 1.2.1-SNAPSHOT   | x         | odl-ovsdb-southbound-1.2.1-SNAPSHOT     | OpenDaylight :: southbound :: impl :: REST
-   odl-ovsdb-southbound-impl-ui      | 1.2.1-SNAPSHOT   | x         | odl-ovsdb-southbound-1.2.1-SNAPSHOT     | OpenDaylight :: southbound :: impl :: UI
-   odl-ovsdb-library                 | 1.2.1-SNAPSHOT   | x         | odl-ovsdb-library-1.2.1-SNAPSHOT        | OpenDaylight :: library
-   odl-ovsdb-openstack               | 1.2.1-SNAPSHOT   | x         | ovsdb-1.2.1-SNAPSHOT                    | OpenDaylight :: OVSDB :: OpenStack Network Virtual
+   odl-ovsdb-southbound-impl                                       x 1.9.0.SNAPSHOT   x x        x Started x odl-ovsdb-southbound-impl-1.9.0-SNAPSHOT                        x ODL :: ovsdb :: odl-ovsdb-southbound-impl
+   odl-ovsdb-hwvtepsouthbound-api                                  x 1.9.0.SNAPSHOT   x          x Started x odl-ovsdb-hwvtepsouthbound-api                                  x ODL :: ovsdb :: odl-ovsdb-hwvtepsouthbound-api
+   odl-ovsdb-utils                                                 x 1.9.0.SNAPSHOT   x          x Started x odl-ovsdb-utils                                                 x ODL :: ovsdb :: odl-ovsdb-utils
+   odl-ovsdb-hwvtepsouthbound                                      x 1.9.0.SNAPSHOT   x x        x Started x odl-ovsdb-hwvtepsouthbound                                      x ODL :: ovsdb :: odl-ovsdb-hwvtepsouthbound
+   odl-ovsdb-library                                               x 1.9.0.SNAPSHOT   x          x Started x odl-ovsdb-library-1.9.0-SNAPSHOT                                x ODL :: ovsdb :: odl-ovsdb-library
+   odl-ovsdb-southbound-api                                        x 1.9.0.SNAPSHOT   x          x Started x odl-ovsdb-southbound-api                                        x ODL :: ovsdb :: odl-ovsdb-southbound-api
+  opendaylight-user@root>
 
 2. Building a bundle and deploying it in an Opendaylight Karaf distribution :
    This method can be used to update and test new code in a bundle. If the bundle of interest is rebuilt as a

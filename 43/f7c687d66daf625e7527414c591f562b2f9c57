@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Stephen Kitt <skitt@redhat.com>
+Submitted-by: Stephen Kitt <skitt@redhat.com>
+Submitted-at: Thu, 06 Jun 2019 07:29:04 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/82411
+Project: ovsdb
+Branch: refs/heads/stable/neon

@@ -16,6 +16,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -58,6 +59,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
     private static final Logger LOG = LoggerFactory.getLogger(BridgeConfigReconciliationTask.class);
     private final OvsdbConnectionInstance connectionInstance;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
+    private final List<String> reconciliatonBridges = Arrays.asList("/bridge/br-int");
 
     public BridgeConfigReconciliationTask(ReconciliationManager reconciliationManager,
             OvsdbConnectionManager connectionManager, InstanceIdentifier<?> nodeIid,
@@ -69,26 +71,40 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
 
     @Override
     public boolean reconcileConfiguration(final OvsdbConnectionManager connectionManagerOfDevice) {
-        CheckedFuture<Optional<Topology>, ReadFailedException> readTopologyFuture;
-        InstanceIdentifier<Topology> topologyInstanceIdentifier = SouthboundMapper.createTopologyInstanceIdentifier();
+        CheckedFuture<Optional<Node>, ReadFailedException> readTopologyFuture;
+        /*InstanceIdentifier<Topology> topologyInstanceIdentifier = SouthboundMapper.createTopologyInstanceIdentifier();
         try (ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
             // find all bridges of the specific device in the config data store
             // TODO: this query is not efficient. It retrieves all the Nodes in the datastore, loop over them and look
             // for the bridges of specific device. It is mre efficient if MDSAL allows query nodes using wildcard on
             // node id (ie: ovsdb://uuid/<device uuid>/bridge/*) r attributes
             readTopologyFuture = tx.read(CONFIGURATION, topologyInstanceIdentifier);
-        }
-        Futures.addCallback(readTopologyFuture, new FutureCallback<Optional<Topology>>() {
-            @Override
-            public void onSuccess(@Nullable Optional<Topology> optionalTopology) {
-                if (optionalTopology != null && optionalTopology.isPresent()) {
-                    @SuppressWarnings("unchecked")
-                    InstanceIdentifier<Node> ndIid = (InstanceIdentifier<Node>) nodeIid;
-                    Topology topology = optionalTopology.get();
-                    if (topology.getNode() != null) {
-                        final Map<InstanceIdentifier<?>, DataObject> brChanges = new HashMap<>();
-                        final List<Node> tpChanges = new ArrayList<>();
-                        for (Node node : topology.getNode()) {
+        }*/
+
+        // Reconciling Specific set of bridges in order to avoid full Topology Read.
+        // Current br-int bridge only is considered for reconciliation,
+        // if any other bridges need to be reconciled, then
+        // that bridge entry need to be done reconciliatonBridges.
+        String nodeIdVal = nodeIid.firstKeyOf(Node.class).getNodeId().getValue();
+        for (String bridge : reconciliatonBridges) {
+            String bridgeNodeIid = nodeIdVal + bridge;
+            LOG.trace("Reconciling the bridge {}", bridgeNodeIid);
+            try (ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
+                InstanceIdentifier<Node> nodeInstanceIdentifier =
+                        SouthboundMapper.createInstanceIdentifier(new NodeId(bridgeNodeIid));
+                readTopologyFuture = tx.read(CONFIGURATION, nodeInstanceIdentifier);
+            }
+            Futures.addCallback(readTopologyFuture, new FutureCallback<Optional<Node>>() {
+                @Override
+                public void onSuccess(@Nullable Optional<Node> optionalTopology) {
+                    if (optionalTopology != null && optionalTopology.isPresent()) {
+                        @SuppressWarnings("unchecked")
+                        InstanceIdentifier<Node> ndIid = (InstanceIdentifier<Node>) nodeIid;
+                        Node node = optionalTopology.get();
+                        if (node != null) {
+                            final Map<InstanceIdentifier<?>, DataObject> brChanges = new HashMap<>();
+                            final List<Node> tpChanges = new ArrayList<>();
+                            //for (Node node : topology.getNode()) {
                             LOG.debug("Reconcile Configuration for node {}", node.getNodeId());
                             OvsdbBridgeAugmentation bridge = node.augmentation(OvsdbBridgeAugmentation.class);
                             if (bridge != null && bridge.getManagedBy() != null
@@ -100,24 +116,28 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                                     && node.getTerminationPoint() != null && !node.getTerminationPoint().isEmpty()) {
                                 tpChanges.add(node);
                             }
+                            //}
+                            if (!brChanges.isEmpty()) {
+                                reconcileBridgeConfigurations(brChanges);
+                            }
+                            if (!tpChanges.isEmpty()) {
+                                reconciliationManager.reconcileTerminationPoints(
+                                        connectionManagerOfDevice, connectionInstance, tpChanges);
+                            }
                         }
-                        if (!brChanges.isEmpty()) {
-                            reconcileBridgeConfigurations(brChanges);
-                        }
-                        if (!tpChanges.isEmpty()) {
-                            reconciliationManager.reconcileTerminationPoints(
-                                    connectionManagerOfDevice, connectionInstance, tpChanges);
-                        }
+                    } else {
+                        LOG.info("Reconciliation of bridge {} missing in network-topology config DataStore",
+                                bridgeNodeIid);
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Throwable throwable) {
-                LOG.warn("Read Config/DS for Topology failed! {}", nodeIid, throwable);
-            }
+                @Override
+                public void onFailure(Throwable throwable) {
+                    LOG.warn("Read Config/DS for Topology failed! {}", bridgeNodeIid, throwable);
+                }
 
-        }, MoreExecutors.directExecutor());
+            }, MoreExecutors.directExecutor());
+        }
 
         return true;
     }

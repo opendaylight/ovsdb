@@ -10,7 +10,9 @@ package org.opendaylight.ovsdb.southbound;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.PostConstruct;
@@ -76,6 +78,8 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     private final AtomicBoolean registered = new AtomicBoolean(false);
     private ListenerRegistration<SouthboundProvider> operTopologyRegistration;
     private final OvsdbDiagStatusProvider ovsdbStatusProvider;
+    private static List<String> reconcileBridgeInclusionList = new ArrayList<>();
+    private static List<String> reconcileBridgeExclusionList = new ArrayList<>();
 
     @Inject
     public SouthboundProvider(@Reference final DataBroker dataBroker,
@@ -231,5 +235,21 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         } else {
             SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get("Manager").remove("status");
         }
+    }
+
+    public static void setBridgesReconciliationInclusionList(List<String> bridgeList) {
+        reconcileBridgeInclusionList = bridgeList;
+    }
+
+    public static void setBridgesReconciliationExclusionList(List<String> bridgeList) {
+        reconcileBridgeExclusionList = bridgeList;
+    }
+
+    public static List<String> getBridgesReconciliationInclusionList() {
+        return reconcileBridgeInclusionList;
+    }
+
+    public static List<String> getBridgesReconciliationExclusionList() {
+        return reconcileBridgeExclusionList;
     }
 }

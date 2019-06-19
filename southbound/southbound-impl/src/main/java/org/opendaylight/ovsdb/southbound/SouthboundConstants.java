@@ -84,6 +84,7 @@ public interface SouthboundConstants {
     String QOS_LINUX_CODEL = "linux-codel";
     String QOS_LINUX_FQ_CODEL = "linux-fq_codel";
     String QOS_EGRESS_POLICER = "egress-policer";
+    String URI_SEPERATOR = "/";
     ImmutableBiMap<Class<? extends QosTypeBase>,String> QOS_TYPE_MAP
         = new ImmutableBiMap.Builder<Class<? extends QosTypeBase>,String>()
             .put(QosTypeLinuxHtb.class,QOS_LINUX_HTB)

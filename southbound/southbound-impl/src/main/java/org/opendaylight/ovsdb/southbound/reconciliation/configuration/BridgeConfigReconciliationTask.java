@@ -29,6 +29,7 @@ import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangeEvent;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangesManagedByOvsdbNodeEvent;
@@ -40,6 +41,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -67,58 +69,146 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
         this.instanceIdentifierCodec = instanceIdentifierCodec;
     }
 
+
     @Override
     public boolean reconcileConfiguration(final OvsdbConnectionManager connectionManagerOfDevice) {
-        CheckedFuture<Optional<Topology>, ReadFailedException> readTopologyFuture;
-        InstanceIdentifier<Topology> topologyInstanceIdentifier = SouthboundMapper.createTopologyInstanceIdentifier();
-        try (ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
-            // find all bridges of the specific device in the config data store
-            // TODO: this query is not efficient. It retrieves all the Nodes in the datastore, loop over them and look
-            // for the bridges of specific device. It is mre efficient if MDSAL allows query nodes using wildcard on
-            // node id (ie: ovsdb://uuid/<device uuid>/bridge/*) r attributes
-            readTopologyFuture = tx.read(CONFIGURATION, topologyInstanceIdentifier);
+
+        String nodeIdVal = nodeIid.firstKeyOf(Node.class).getNodeId().getValue();
+        List<String> bridgeReconcileIncludeList = getNodeIdForBridges(nodeIdVal,
+            SouthboundProvider.getBridgesReconciliationInclusionList());
+        List<String> bridgeReconcileExcludeList = getNodeIdForBridges(nodeIdVal,
+            SouthboundProvider.getBridgesReconciliationExclusionList());
+
+        LOG.trace("bridgeReconcileIncludeList : {}", bridgeReconcileIncludeList);
+        LOG.trace("bridgeReconcileExcludeList : {}", bridgeReconcileExcludeList);
+        // (1) Both "bridge-reconciliation-inclusion-list" and "bridge-reconciliation-exclusion-list" are empty.
+        // it means it will keep the default behavior of reconciling on all bridges.
+        // (2) Only "bridge-reconciliation-inclusion-list" has list of bridge.
+        // than plugin will only reconcile specified bridges.
+        // (3) Only "bridge-reconciliation-exclusion-list" has list of bridge.
+        // than plugin will reconcile all the bridge, except excluding the specified bridges.
+        // (4) Both bridge-reconciliation-inclusion-list and bridge-reconciliation-exclusion-list has bridges specified.
+        // this is invalid scenario, so it should log the warning saying this is not valid configuration,
+        // but plugin will give priority to "bridge-reconciliation-exclusion-list" and reconcile all the bridges
+        // except the one specified in the exclusion-list.
+
+        Boolean reconcileAllBridges = Boolean.FALSE;
+        if ((bridgeReconcileIncludeList.isEmpty() && bridgeReconcileExcludeList.isEmpty())
+            || (bridgeReconcileIncludeList.isEmpty() && !bridgeReconcileExcludeList.isEmpty())) {
+            // Case 1 & 3
+            reconcileAllBridges = Boolean.TRUE;
+        } else if (!bridgeReconcileIncludeList.isEmpty() && !bridgeReconcileExcludeList.isEmpty()) {
+            // Case 4
+            LOG.warn(
+                "Not a valid case of having both inclusion list : {} and exclusion list : {} for reconcile."
+                    + "OvsDb Plugin will reconcile all the bridge excluding exclusion list bridges",
+                bridgeReconcileIncludeList, bridgeReconcileExcludeList);
+            reconcileAllBridges = Boolean.TRUE;
         }
-        Futures.addCallback(readTopologyFuture, new FutureCallback<Optional<Topology>>() {
-            @Override
-            public void onSuccess(@Nullable Optional<Topology> optionalTopology) {
-                if (optionalTopology != null && optionalTopology.isPresent()) {
-                    @SuppressWarnings("unchecked")
-                    InstanceIdentifier<Node> ndIid = (InstanceIdentifier<Node>) nodeIid;
-                    Topology topology = optionalTopology.get();
-                    if (topology.getNode() != null) {
-                        final Map<InstanceIdentifier<?>, DataObject> brChanges = new HashMap<>();
-                        final List<Node> tpChanges = new ArrayList<>();
-                        for (Node node : topology.getNode()) {
-                            LOG.debug("Reconcile Configuration for node {}", node.getNodeId());
-                            OvsdbBridgeAugmentation bridge = node.augmentation(OvsdbBridgeAugmentation.class);
-                            if (bridge != null && bridge.getManagedBy() != null
-                                    && bridge.getManagedBy().getValue().equals(ndIid)) {
-                                brChanges.putAll(extractBridgeConfigurationChanges(node, bridge));
-                                tpChanges.add(node);
-                            } else if (node.key().getNodeId().getValue().startsWith(
-                                    nodeIid.firstKeyOf(Node.class).getNodeId().getValue())
-                                    && node.getTerminationPoint() != null && !node.getTerminationPoint().isEmpty()) {
-                                tpChanges.add(node);
+
+        List<Node> bridgeNodeList = new ArrayList<>();
+
+        if (reconcileAllBridges) {
+            // case 1, 3 & 4
+            LOG.trace("Reconciling all bridges with exclusion list {}", bridgeReconcileExcludeList);
+            CheckedFuture<Optional<Topology>, ReadFailedException> readTopologyFuture;
+            InstanceIdentifier<Topology> topologyInstanceIdentifier = SouthboundMapper
+                .createTopologyInstanceIdentifier();
+            try (ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
+                // find all bridges of the specific device in the config data store
+                // TODO: this query is not efficient. It retrieves all the Nodes in the datastore, loop over them and
+                // look for the bridges of specific device. It is mre efficient if MDSAL allows query nodes using
+                // wildcard on node id (ie: ovsdb://uuid/<device uuid>/bridge/*) r attributes
+                readTopologyFuture = tx.read(CONFIGURATION, topologyInstanceIdentifier);
+            }
+            Futures.addCallback(readTopologyFuture, new FutureCallback<Optional<Topology>>() {
+                @Override
+                public void onSuccess(@Nullable Optional<Topology> optionalTopology) {
+                    if (optionalTopology != null && optionalTopology.isPresent()) {
+                        @SuppressWarnings("unchecked")
+                        Topology topology = optionalTopology.get();
+                        if (topology.getNode() != null) {
+                            for (Node node : topology.getNode()) {
+                                String bridgeNodeIid = node.getNodeId().getValue();
+                                LOG.trace("bridgeNodeIid : {}", bridgeNodeIid);
+                                if (bridgeReconcileExcludeList.contains(bridgeNodeIid)) {
+                                    LOG.trace(
+                                        "Ignoring reconcilation on bridge:{} as its part of exclusion list",
+                                        bridgeNodeIid);
+                                    continue;
+                                }
+                                bridgeNodeList.add(node);
                             }
-                        }
-                        if (!brChanges.isEmpty()) {
-                            reconcileBridgeConfigurations(brChanges);
-                        }
-                        if (!tpChanges.isEmpty()) {
-                            reconciliationManager.reconcileTerminationPoints(
-                                    connectionManagerOfDevice, connectionInstance, tpChanges);
                         }
                     }
                 }
+
+                @Override
+                public void onFailure(Throwable throwable) {
+                    LOG.warn("Read Config/DS for Topology failed! {}", nodeIid, throwable);
+                }
+
+            }, MoreExecutors.directExecutor());
+        } else {
+            // Case 3
+            // Reconciling Specific set of bridges in order to avoid full Topology Read.
+            CheckedFuture<Optional<Node>, ReadFailedException> readNodeFuture;
+            LOG.trace("Reconcile Bridge from InclusionList {} only", bridgeReconcileIncludeList);
+            for (String bridgeNodeIid : bridgeReconcileIncludeList) {
+                try (ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
+                    InstanceIdentifier<Node> nodeInstanceIdentifier =
+                        SouthboundMapper.createInstanceIdentifier(new NodeId(bridgeNodeIid));
+                    readNodeFuture = tx.read(CONFIGURATION, nodeInstanceIdentifier);
+                }
+                Futures.addCallback(readNodeFuture, new FutureCallback<Optional<Node>>() {
+                    @Override
+                    public void onSuccess(@Nullable Optional<Node> optionalTopology) {
+                        if (optionalTopology != null && optionalTopology.isPresent()) {
+                            @SuppressWarnings("unchecked")
+
+                            Node node = optionalTopology.get();
+                            if (node != null) {
+                                bridgeNodeList.add(node);
+                            }
+                        } else {
+                            LOG.info("Reconciliation of bridge {} missing in network-topology config DataStore",
+                                bridgeNodeIid);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        LOG.warn("Read Config/DS for Topology failed! {}", bridgeNodeIid, throwable);
+                    }
+                }, MoreExecutors.directExecutor());
             }
+        }
 
-            @Override
-            public void onFailure(Throwable throwable) {
-                LOG.warn("Read Config/DS for Topology failed! {}", nodeIid, throwable);
+        final Map<InstanceIdentifier<?>, DataObject> brChanges = new HashMap<>();
+        final List<Node> tpChanges = new ArrayList<>();
+        for (Node node : bridgeNodeList) {
+            InstanceIdentifier<Node> ndIid = (InstanceIdentifier<Node>) nodeIid;
+            OvsdbBridgeAugmentation bridge = node.augmentation(OvsdbBridgeAugmentation.class);
+            if (bridge != null && bridge.getManagedBy() != null
+                && bridge.getManagedBy().getValue().equals(ndIid)) {
+                brChanges.putAll(extractBridgeConfigurationChanges(node, bridge));
+                tpChanges.add(node);
+            } else if (node.key().getNodeId().getValue().startsWith(
+                nodeIid.firstKeyOf(Node.class).getNodeId().getValue())
+                && node.getTerminationPoint() != null && !node.getTerminationPoint().isEmpty()) {
+                tpChanges.add(node);
+            } else {
+                LOG.trace("Ignoring Reconcilation of Bridge: {}", node.key().getNodeId().getValue());
             }
+        }
 
-        }, MoreExecutors.directExecutor());
-
+        if (!brChanges.isEmpty()) {
+            reconcileBridgeConfigurations(brChanges);
+        }
+        if (!tpChanges.isEmpty()) {
+            reconciliationManager.reconcileTerminationPoints(
+                    connectionManagerOfDevice, connectionInstance, tpChanges);
+        }
         return true;
     }
 
@@ -198,5 +288,16 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
     @Override
     public long retryDelayInMills() {
         return 0;
+    }
+
+    private List<String> getNodeIdForBridges(String nodeIdVal, List<String> bridgeList) {
+        List<String> nodeIdBridgeList = new ArrayList<>();
+        for (String bridge : bridgeList) {
+            String bridgeNodeIid = new StringBuilder().append(nodeIdVal)
+                .append(SouthboundConstants.URI_SEPERATOR).append(SouthboundConstants.BRIDGE_URI_PREFIX)
+                .append(SouthboundConstants.URI_SEPERATOR).append(bridge).toString();
+            nodeIdBridgeList.add(bridgeNodeIid);
+        }
+        return nodeIdBridgeList;
     }
 }

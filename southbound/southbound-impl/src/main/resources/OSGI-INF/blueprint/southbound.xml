@@ -7,6 +7,8 @@
     <cm:property-placeholder persistent-id="org.opendaylight.ovsdb.southbound" update-strategy="none">
     <cm:default-properties>
       <cm:property name="skip-monitoring-manager-status" value="false"/>
+      <cm:property name="bridge-reconciliation-inclusion-list" value=""/>
+      <cm:property name="bridge-reconciliation-exclusion-list" value=""/>
     </cm:default-properties>
   </cm:property-placeholder>
 
@@ -17,6 +19,8 @@
                            update-method="updateConfigParameter"/>
     <argument ref="southboundProvider" />
     <property name="skipMonitoringManagerStatus" value="${skip-monitoring-manager-status}"/>
+    <property name="bridgesReconciliationInclusionList" value="${bridge-reconciliation-inclusion-list}"/>
+    <property name="bridgesReconciliationExclusionList" value="${bridge-reconciliation-exclusion-list}"/>
   </bean>
 
 </blueprint>

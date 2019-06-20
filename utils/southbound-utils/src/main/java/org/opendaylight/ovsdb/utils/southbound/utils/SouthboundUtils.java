@@ -75,6 +75,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
@@ -188,6 +189,9 @@ public class SouthboundUtils {
             return mdsalUtils.merge(store, path, data);
         }
     }
+
+
+
 
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundUtils.class);
     private static final int OVSDB_UPDATE_TIMEOUT = 1000;
@@ -739,6 +743,7 @@ public class SouthboundUtils {
             bridgeOtherConfigsBuilder.setBridgeOtherConfigValue("true");
             otherConfigs.add(bridgeOtherConfigsBuilder.build());
             ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
+            ovsdbBridgeAugmentationBuilder.setBridgeExternalIds(setBridgeExternalIds());
             setManagedByForBridge(ovsdbBridgeAugmentationBuilder, ovsdbNode.key());
             if (dpType != null) {
                 ovsdbBridgeAugmentationBuilder.setDatapathType(dpType);
@@ -1389,4 +1394,15 @@ public class SouthboundUtils {
         }
         return false;
     }
+
+    private List<BridgeExternalIds> setBridgeExternalIds() {
+        List<BridgeExternalIds> externalIdsList = new ArrayList<>();
+        externalIdsList.add(new BridgeExternalIdsBuilder()
+                .setBridgeExternalIdKey("created_by")
+                .setBridgeExternalIdValue("odl")
+                .build());
+        return externalIdsList;
+    }
+
+
 }

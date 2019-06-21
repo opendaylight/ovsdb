@@ -474,12 +474,12 @@ public class TransactUtils {
             return "";
         }
 
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (byte b : bytes) {
             short u8byte = (short) (b & 0xff);
             String tmp = Integer.toHexString(u8byte);
             if (tmp.length() == 1) {
-                buf.append("0");
+                buf.append('0');
             }
             buf.append(tmp);
         }

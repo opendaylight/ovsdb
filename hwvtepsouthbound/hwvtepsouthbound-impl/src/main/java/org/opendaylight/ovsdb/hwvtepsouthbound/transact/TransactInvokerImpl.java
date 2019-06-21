@@ -69,7 +69,7 @@ public class TransactInvokerImpl implements TransactInvoker {
     }
 
     void printError(TransactionBuilder tb) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (Operation op : tb.getOperations()) {
             if (op instanceof Insert) {
                 Insert insert = (Insert)op;
@@ -94,7 +94,7 @@ public class TransactInvokerImpl implements TransactInvoker {
                         sb.append(entry.getKey()).append(" : ").append(entry.getValue()).append(" , ");
                     }
                 }
-                sb.append("]");
+                sb.append(']');
             }
         }
         LOG.error("Failed transaction {}", sb);

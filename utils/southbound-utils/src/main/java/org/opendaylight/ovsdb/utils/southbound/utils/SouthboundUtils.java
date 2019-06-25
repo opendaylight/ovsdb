@@ -75,6 +75,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
@@ -201,7 +202,8 @@ public class SouthboundUtils {
     private static final String PATCH_PORT_TYPE = "patch";
     // External ID key used for mapping between an OVSDB port and an interface name
     private static final String EXTERNAL_INTERFACE_ID_KEY = "iface-id";
-
+    private static final String CREATED_BY = "created_by";
+    private static final String ODL = "odl";
     private static final String FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)";
     private static final Pattern PATTERN = Pattern.compile(FORMAT);
 
@@ -739,6 +741,7 @@ public class SouthboundUtils {
             bridgeOtherConfigsBuilder.setBridgeOtherConfigValue("true");
             otherConfigs.add(bridgeOtherConfigsBuilder.build());
             ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
+            ovsdbBridgeAugmentationBuilder.setBridgeExternalIds(setBridgeExternalIds());
             setManagedByForBridge(ovsdbBridgeAugmentationBuilder, ovsdbNode.key());
             if (dpType != null) {
                 ovsdbBridgeAugmentationBuilder.setDatapathType(dpType);
@@ -1388,5 +1391,14 @@ public class SouthboundUtils {
             }
         }
         return false;
+    }
+
+    private List<BridgeExternalIds> setBridgeExternalIds() {
+        List<BridgeExternalIds> externalIdsList = new ArrayList<>();
+        externalIdsList.add(new BridgeExternalIdsBuilder()
+                .setBridgeExternalIdKey(CREATED_BY)
+                .setBridgeExternalIdValue(ODL)
+                .build());
+        return externalIdsList;
     }
 }

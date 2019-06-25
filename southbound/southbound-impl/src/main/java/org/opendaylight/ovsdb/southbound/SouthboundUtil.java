@@ -27,6 +27,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -149,5 +153,17 @@ public final class SouthboundUtil {
 
     public static void schemaMismatchLog(String column, String table, SchemaVersionMismatchException ex) {
         LOG.debug(SCHEMA_VERSION_MISMATCH, column, table, SouthboundConstants.OPEN_V_SWITCH, ex.getMessage());
+    }
+
+    public static PortExternalIds createExternalIdsForPort(String key, String value) {
+        return new PortExternalIdsBuilder()
+            .setExternalIdKey(key)
+            .setExternalIdValue(value).build();
+    }
+
+    public static InterfaceExternalIds createExternalIdsForInterface(String key, String value) {
+        return new InterfaceExternalIdsBuilder()
+            .setExternalIdKey(key)
+            .setExternalIdValue(value).build();
     }
 }

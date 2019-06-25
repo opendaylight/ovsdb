@@ -12,6 +12,8 @@ import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,6 +40,7 @@ import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -101,7 +104,8 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 // Configure port with the above interface details
                 String portUuid = "Port_" + SouthboundMapper.getRandomUuid();
                 Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
-                createPort(terminationPoint, port, interfaceUuid);
+                final String opendaylightIid = instanceIdentifierCodec.serialize(terminationPointIid);
+                createPort(terminationPoint, port, interfaceUuid, opendaylightIid);
                 transaction.add(op.insert(port).withId(portUuid));
                 LOG.info("Created Termination Point : {} with Uuid : {}",
                         terminationPoint.getName(),portUuid);
@@ -148,7 +152,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
 
     private void createPort(
             final OvsdbTerminationPointAugmentation terminationPoint,
-            final Port port, final String interfaceUuid) {
+            final Port port, final String interfaceUuid, final String opendaylightIid) {
 
         port.setName(terminationPoint.getName());
         port.setInterfaces(Collections.singleton(new UUID(interfaceUuid)));
@@ -156,7 +160,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         createPortVlanTag(terminationPoint, port);
         createPortVlanTrunk(terminationPoint, port);
         createPortVlanMode(terminationPoint, port);
-        createPortExternalIds(terminationPoint, port);
+        createPortExternalIds(terminationPoint, port, opendaylightIid);
     }
 
     private void createOfPort(
@@ -201,12 +205,17 @@ public class TerminationPointCreateCommand implements TransactCommand {
         List<InterfaceExternalIds> interfaceExternalIds =
                 terminationPoint.getInterfaceExternalIds();
         if (interfaceExternalIds != null && !interfaceExternalIds.isEmpty()) {
-            try {
-                ovsInterface.setExternalIds(YangUtils.convertYangKeyValueListToMap(interfaceExternalIds,
-                        InterfaceExternalIds::getExternalIdKey, InterfaceExternalIds::getExternalIdValue));
-            } catch (NullPointerException e) {
-                LOG.warn("Incomplete OVSDB interface external_ids", e);
-            }
+            interfaceExternalIds.add(SouthboundUtil.createExternalIdsForInterface(
+                SouthboundConstants.CREATED_BY, SouthboundConstants.ODL));
+        } else {
+            interfaceExternalIds = Arrays.asList(SouthboundUtil.createExternalIdsForInterface(
+                SouthboundConstants.CREATED_BY, SouthboundConstants.ODL));
+        }
+        try {
+            ovsInterface.setExternalIds(YangUtils.convertYangKeyValueListToMap(interfaceExternalIds,
+                    InterfaceExternalIds::getExternalIdKey, InterfaceExternalIds::getExternalIdValue));
+        } catch (NullPointerException e) {
+            LOG.warn("Incomplete OVSDB interface external_ids", e);
         }
     }
 
@@ -270,16 +279,29 @@ public class TerminationPointCreateCommand implements TransactCommand {
 
     private void createPortExternalIds(
             final OvsdbTerminationPointAugmentation terminationPoint,
-            final Port port) {
+            final Port port, final String opendaylightIid) {
 
+        // Set the iid external_id
         List<PortExternalIds> portExternalIds = terminationPoint.getPortExternalIds();
         if (portExternalIds != null && !portExternalIds.isEmpty()) {
-            try {
-                port.setExternalIds(YangUtils.convertYangKeyValueListToMap(portExternalIds,
-                        PortExternalIds::getExternalIdKey, PortExternalIds::getExternalIdValue));
-            } catch (NullPointerException e) {
-                LOG.warn("Incomplete OVSDB port external_ids", e);
-            }
+            portExternalIds.add(SouthboundUtil.createExternalIdsForPort(
+                SouthboundConstants.CREATED_BY, SouthboundConstants.ODL));
+            portExternalIds.add(SouthboundUtil.createExternalIdsForPort(
+                SouthboundConstants.IID_EXTERNAL_ID_KEY, opendaylightIid));
+        } else {
+            portExternalIds = new ArrayList<PortExternalIds>();
+            portExternalIds.add(SouthboundUtil.createExternalIdsForPort(
+                SouthboundConstants.CREATED_BY, SouthboundConstants.ODL));
+            portExternalIds.add(SouthboundUtil.createExternalIdsForPort(
+                SouthboundConstants.IID_EXTERNAL_ID_KEY, opendaylightIid));
+        }
+        try {
+            port.setExternalIds(YangUtils.convertYangKeyValueListToMap(portExternalIds,
+                PortExternalIds::getExternalIdKey, PortExternalIds::getExternalIdValue));
+            //YangUtils.copyYangKeyValueListToMap(externalIdMap, terminationPoint.getPortExternalIds(),
+             //       PortExternalIds::getExternalIdKey, PortExternalIds::getExternalIdValue);
+        } catch (NullPointerException e) {
+            LOG.warn("Incomplete OVSDB port external_ids", e);
         }
     }
 
@@ -372,5 +394,4 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 .where(port.getNameColumn().getSchema().opEqual(interfaceName))
                 .build());
     }
-
 }

@@ -194,11 +194,14 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                 brChanges.putAll(extractBridgeConfigurationChanges(node, bridge));
                 tpChanges.add(node);
             } else if (node.key().getNodeId().getValue().startsWith(
-                nodeIid.firstKeyOf(Node.class).getNodeId().getValue())
-                && node.getTerminationPoint() != null && !node.getTerminationPoint().isEmpty()) {
+                nodeIid.firstKeyOf(Node.class).getNodeId().getValue())) {
+                //&& node.getTerminationPoint() != null && !node.getTerminationPoint().isEmpty()) {
+                // Above check removed to handle delete reconciliation with ManagedBy
+                // param not set in config DS
                 tpChanges.add(node);
             } else {
                 LOG.trace("Ignoring Reconcilation of Bridge: {}", node.key().getNodeId().getValue());
+
             }
         }
 

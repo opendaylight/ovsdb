@@ -41,6 +41,7 @@ public class BridgeOperationalState {
         try (ReadOnlyTransaction transaction = db.newReadOnlyTransaction()) {
             Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
                     TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
+            LOG.trace("delete Reconciliation: {}", nodeCreateOrUpdate);
             for (Entry<InstanceIdentifier<Node>, Node> entry: nodeCreateOrUpdate.entrySet()) {
                 CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture =
                         transaction.read(LogicalDatastoreType.OPERATIONAL, entry.getKey());
@@ -76,6 +77,7 @@ public class BridgeOperationalState {
 
     public Optional<Node> getBridgeNode(InstanceIdentifier<?> iid) {
         InstanceIdentifier<Node> nodeIid = iid.firstIdentifierOf(Node.class);
+        LOG.trace("delete Reconciliation: nodeIid {}", nodeIid);
         return Optional.fromNullable(operationalNodes.get(nodeIid));
     }
 

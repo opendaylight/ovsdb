@@ -60,13 +60,17 @@ public class TerminationPointDeleteCommand implements TransactCommand {
                                  OvsdbTerminationPointAugmentation> originals,
                          Map<InstanceIdentifier<Node>, Node> originalNodes,
                          Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> removedTps) {
+        LOG.trace("delete Reconciliation: {}", removedTps.size());
         for (InstanceIdentifier<OvsdbTerminationPointAugmentation> removedTpIid: removedTps) {
             LOG.debug("Received request to delete termination point {}", removedTpIid);
 
             OvsdbTerminationPointAugmentation original = originals.get(removedTpIid);
+            LOG.trace("delete Reconciliation: removedTpIid {}, original {}", removedTpIid, original);
             Node originalNode = originalNodes.get(removedTpIid.firstIdentifierOf(Node.class));
+            LOG.trace("delete Reconciliation: originalNode {}", originalNode);
             OvsdbBridgeAugmentation originalOvsdbBridgeAugmentation =
                     originalNode.augmentation(OvsdbBridgeAugmentation.class);
+            LOG.trace("delete Reconciliation: originalOvsdbBridgeAugmentation {}", originalOvsdbBridgeAugmentation);
             String bridgeName = null;
             if (originalOvsdbBridgeAugmentation != null) {
                 bridgeName = originalOvsdbBridgeAugmentation.getBridgeName().getValue();
@@ -78,11 +82,11 @@ public class TerminationPointDeleteCommand implements TransactCommand {
                     LOG.error("Bridge does not exist for termination point {}", removedTpIid);
                 }
             }
-
+            LOG.trace("delete Reconciliation: bridgeName {}", bridgeName);
             Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class,null);
             Optional<OvsdbTerminationPointAugmentation> tpAugmentation =
                     state.getOvsdbTerminationPointAugmentation(removedTpIid);
-
+            LOG.trace("delete Reconciliation: tpAugmentation {}", tpAugmentation);
             if (tpAugmentation.isPresent()) {
                 OvsdbTerminationPointAugmentation tp = tpAugmentation.get();
                 if (tp.getPortUuid() != null) {

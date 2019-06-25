@@ -109,7 +109,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
             TerminationPointCreateCommand.stampInstanceIdentifier(transaction,
                     iid.firstIdentifierOf(OvsdbTerminationPointAugmentation.class), terminationPoint.getName(),
                     instanceIdentifierCodec);
-
+            final String opendaylightIid = instanceIdentifierCodec.serialize(iid);
             // Update port
             // Bug#6136
             Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = state.getOvsdbBridgeAugmentation(iid);
@@ -118,7 +118,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
                 if (operBridge != null) {
                     Port port = TyperUtils.getTypedRowWrapper(
                         transaction.getDatabaseSchema(), Port.class);
-                    updatePort(terminationPoint, port, operBridge);
+                    updatePort(terminationPoint, port, operBridge, opendaylightIid);
                     Port extraPort = TyperUtils.getTypedRowWrapper(
                         transaction.getDatabaseSchema(), Port.class);
                     extraPort.setName("");
@@ -150,13 +150,14 @@ public class TerminationPointUpdateCommand implements TransactCommand {
     private void updatePort(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port port,
-            final OvsdbBridgeAugmentation operBridge) {
+            final OvsdbBridgeAugmentation operBridge,
+            final String opendaylightIid) {
 
         updatePortOtherConfig(terminationPoint, port);
         updatePortVlanTag(terminationPoint, port);
         updatePortVlanTrunk(terminationPoint, port);
         updatePortVlanMode(terminationPoint, port);
-        updatePortExternalIds(terminationPoint, port);
+        updatePortExternalIds(terminationPoint, port, opendaylightIid);
         updatePortQos(terminationPoint, port, operBridge);
     }
 
@@ -333,17 +334,18 @@ public class TerminationPointUpdateCommand implements TransactCommand {
 
     private void updatePortExternalIds(
             final OvsdbTerminationPointAugmentation terminationPoint,
-            final Port port) {
+            final Port port,
+            final String opendaylightIid) {
 
-        List<PortExternalIds> portExternalIds = terminationPoint.getPortExternalIds();
-        if (portExternalIds != null && !portExternalIds.isEmpty()) {
-            try {
-                port.setExternalIds(YangUtils.convertYangKeyValueListToMap(portExternalIds,
-                        PortExternalIds::getExternalIdKey, PortExternalIds::getExternalIdValue));
-            } catch (NullPointerException e) {
-                LOG.warn("Incomplete OVSDB port external_ids", e);
-            }
+        Map<String, String> externalIdMap = new HashMap<>();
+        externalIdMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, opendaylightIid);
+        try {
+            YangUtils.copyYangKeyValueListToMap(externalIdMap, terminationPoint.getPortExternalIds(),
+                    PortExternalIds::getExternalIdKey, PortExternalIds::getExternalIdValue);
+        } catch (NullPointerException e) {
+            LOG.warn("Incomplete OVSDB port external_ids", e);
         }
+        port.setExternalIds(externalIdMap);
     }
 
     private void updatePortVlanTag(

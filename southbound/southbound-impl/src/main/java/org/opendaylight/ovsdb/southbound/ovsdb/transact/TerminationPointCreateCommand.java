@@ -101,7 +101,8 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 // Configure port with the above interface details
                 String portUuid = "Port_" + SouthboundMapper.getRandomUuid();
                 Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
-                createPort(terminationPoint, port, interfaceUuid);
+                final String opendaylightIid = instanceIdentifierCodec.serialize(terminationPointIid);
+                createPort(terminationPoint, port, interfaceUuid, opendaylightIid);
                 transaction.add(op.insert(port).withId(portUuid));
                 LOG.info("Created Termination Point : {} with Uuid : {}",
                         terminationPoint.getName(),portUuid);
@@ -148,7 +149,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
 
     private void createPort(
             final OvsdbTerminationPointAugmentation terminationPoint,
-            final Port port, final String interfaceUuid) {
+            final Port port, final String interfaceUuid, final String opendaylightIid) {
 
         port.setName(terminationPoint.getName());
         port.setInterfaces(Collections.singleton(new UUID(interfaceUuid)));
@@ -156,7 +157,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         createPortVlanTag(terminationPoint, port);
         createPortVlanTrunk(terminationPoint, port);
         createPortVlanMode(terminationPoint, port);
-        createPortExternalIds(terminationPoint, port);
+        createPortExternalIds(terminationPoint, port, opendaylightIid);
     }
 
     private void createOfPort(
@@ -270,17 +271,18 @@ public class TerminationPointCreateCommand implements TransactCommand {
 
     private void createPortExternalIds(
             final OvsdbTerminationPointAugmentation terminationPoint,
-            final Port port) {
+            final Port port, final String opendaylightIid) {
 
-        List<PortExternalIds> portExternalIds = terminationPoint.getPortExternalIds();
-        if (portExternalIds != null && !portExternalIds.isEmpty()) {
-            try {
-                port.setExternalIds(YangUtils.convertYangKeyValueListToMap(portExternalIds,
-                        PortExternalIds::getExternalIdKey, PortExternalIds::getExternalIdValue));
-            } catch (NullPointerException e) {
-                LOG.warn("Incomplete OVSDB port external_ids", e);
-            }
+        // Set the iid external_id
+        Map<String, String> externalIdMap = new HashMap<>();
+        externalIdMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, opendaylightIid);
+        try {
+            YangUtils.copyYangKeyValueListToMap(externalIdMap, terminationPoint.getPortExternalIds(),
+                    PortExternalIds::getExternalIdKey, PortExternalIds::getExternalIdValue);
+        } catch (NullPointerException e) {
+            LOG.warn("Incomplete OVSDB port external_ids", e);
         }
+        port.setExternalIds(externalIdMap);
     }
 
     private void createPortVlanTag(

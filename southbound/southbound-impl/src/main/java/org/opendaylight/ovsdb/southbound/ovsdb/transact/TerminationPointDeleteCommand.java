@@ -62,9 +62,9 @@ public class TerminationPointDeleteCommand implements TransactCommand {
                          Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> removedTps) {
         for (InstanceIdentifier<OvsdbTerminationPointAugmentation> removedTpIid: removedTps) {
             LOG.debug("Received request to delete termination point {}", removedTpIid);
-
             OvsdbTerminationPointAugmentation original = originals.get(removedTpIid);
             Node originalNode = originalNodes.get(removedTpIid.firstIdentifierOf(Node.class));
+            LOG.trace("Termination point's associated original node {}", originalNode);
             OvsdbBridgeAugmentation originalOvsdbBridgeAugmentation =
                     originalNode.augmentation(OvsdbBridgeAugmentation.class);
             String bridgeName = null;
@@ -78,11 +78,9 @@ public class TerminationPointDeleteCommand implements TransactCommand {
                     LOG.error("Bridge does not exist for termination point {}", removedTpIid);
                 }
             }
-
             Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class,null);
             Optional<OvsdbTerminationPointAugmentation> tpAugmentation =
                     state.getOvsdbTerminationPointAugmentation(removedTpIid);
-
             if (tpAugmentation.isPresent()) {
                 OvsdbTerminationPointAugmentation tp = tpAugmentation.get();
                 if (tp.getPortUuid() != null) {

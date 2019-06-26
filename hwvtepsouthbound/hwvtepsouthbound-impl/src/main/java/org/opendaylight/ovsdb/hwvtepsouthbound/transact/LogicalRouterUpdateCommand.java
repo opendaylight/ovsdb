@@ -21,6 +21,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalRouter;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Acls;
@@ -78,6 +79,7 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
                 transaction.add(op.comment("Logical Router: Creating " + lrouter.getHwvtepNodeName().getValue()));
                 UUID lrUuid = new UUID(TransactUtils.getLogicalRouterId(lrouter));
                 updateCurrentTxData(LogicalRouters.class, routerKey, lrUuid, lrouter);
+                updateControllerTxHistory(TransactionType.ADD, logicalRouter);
             } else {
                 LogicalRouters updatedLRouter = operationalRouterOptional.get();
                 String existingLogicalRouterName = updatedLRouter.getHwvtepNodeName().getValue();
@@ -89,6 +91,7 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
                         .where(extraLogicalRouter.getNameColumn().getSchema().opEqual(existingLogicalRouterName))
                         .build());
                 transaction.add(op.comment("Logical Router: Updating " + existingLogicalRouterName));
+                updateControllerTxHistory(TransactionType.UPDATE, logicalRouter);
             }
         }
 

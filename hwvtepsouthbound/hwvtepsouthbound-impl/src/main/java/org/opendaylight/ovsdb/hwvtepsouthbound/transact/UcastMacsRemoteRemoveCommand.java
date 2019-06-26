@@ -20,6 +20,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
@@ -90,6 +91,7 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                     .where(ucastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
             transaction.add(op.comment("UcastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));
             updateCurrentTxDeleteData(RemoteUcastMacs.class, macKey, mac);
+            LOG.info("CONTROLLER - {} {}", TransactionType.DELETE, ucastMacsRemote);
         } else {
             LOG.warn("Unable to delete remoteUcastMacs {} because it was not found in the operational store",
                     mac.getMacEntryKey().getValue());

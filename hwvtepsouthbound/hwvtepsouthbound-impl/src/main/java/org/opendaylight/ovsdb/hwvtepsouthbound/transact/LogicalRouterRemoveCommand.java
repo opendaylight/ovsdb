@@ -23,6 +23,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalRouter;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRouters;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -87,6 +88,7 @@ public class LogicalRouterRemoveCommand extends AbstractTransactCommand<LogicalR
                 transaction.add(op.delete(logicalRouter.getSchema())
                         .where(logicalRouter.getUuidColumn().getSchema().opEqual(logicalRouterUuid)).build());
                 transaction.add(op.comment("Logical Router: Deleting " + lrouter.getHwvtepNodeName().getValue()));
+                updateControllerTxHistory(TransactionType.DELETE, logicalRouter);
             } else {
                 LOG.warn("Unable to delete logical router {} because it was not found in the operational data store",
                         lrouter.getHwvtepNodeName().getValue());

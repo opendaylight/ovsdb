@@ -145,8 +145,13 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         ConnectionInfo key = HwvtepSouthboundMapper.createConnectionInfo(client);
         HwvtepConnectionInstance hwvtepConnectionInstance = getConnectionInstance(key);
         if (hwvtepConnectionInstance != null) {
-            deviceUpdateHistory.get(hwvtepConnectionInstance.getInstanceIdentifier()).addToHistory(
-                    TransactionType.DELETE, new ClientConnected(client.getConnectionInfo().getRemotePort()));
+            if (hwvtepConnectionInstance.getInstanceIdentifier() != null) {
+                int port = hwvtepConnectionInstance.getOvsdbClient().getConnectionInfo().getRemotePort();
+                deviceUpdateHistory.get(hwvtepConnectionInstance.getInstanceIdentifier()).addToHistory(
+                        TransactionType.DELETE, new ClientConnected(client.getConnectionInfo().getRemotePort()));
+                LOG.info("CONTROLLER - {} {}", TransactionType.DELETE, new ClientConnected(port));
+            }
+
 
             // Unregister Entity ownership as soon as possible ,so this instance should
             // not be used as a candidate in Entity election (given that this instance is
@@ -452,6 +457,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             TransactionHistory deviceLog = deviceUpdateHistory.get(iid);
             int port = hwvtepConnectionInstance.getOvsdbClient().getConnectionInfo().getRemotePort();
             deviceLog.addToHistory(TransactionType.ADD, new ClientConnected(port));
+            LOG.info("CONTROLLER - {} {}", TransactionType.ADD, new ClientConnected(port));
             hwvtepConnectionInstance.setControllerTxHistory(controllerLog);
             hwvtepConnectionInstance.setDeviceUpdateHistory(deviceLog);
         }

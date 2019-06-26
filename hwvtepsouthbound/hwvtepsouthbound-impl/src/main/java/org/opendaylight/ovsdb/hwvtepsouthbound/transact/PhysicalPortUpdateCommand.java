@@ -95,6 +95,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                         .build());
                 transaction.add(op.comment("Physical Port: Updating " + existingPhysicalPortName));
                 updateControllerTxHistory(TransactionType.UPDATE, physicalPort);
+                LOG.info("CONTROLLER - {} {}", TransactionType.UPDATE, physicalPort);
             }
         }
     }

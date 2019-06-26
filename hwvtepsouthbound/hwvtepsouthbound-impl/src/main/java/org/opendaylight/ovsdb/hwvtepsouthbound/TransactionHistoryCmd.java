@@ -28,6 +28,7 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
     @Option(name = "-nodeid", description = "Node Id",
             required = false, multiValued = false)
     String nodeid;
+    private static final String SEPERATOR = "#######################################################";
 
     private final HwvtepSouthboundProvider hwvtepProvider;
 
@@ -58,18 +59,17 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
     private void printLogs(Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxLogs,
                            Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateLogs,
                            InstanceIdentifier<Node> iid) {
-        session.getConsole().println("Printing for iid " + iid);
-        session.getConsole().println("======================================");
-        session.getConsole().println("======================================");
-        session.getConsole().print("printing logs for node ");
-        session.getConsole().println(iid);
-
+        session.getConsole().println(SEPERATOR + " START " + SEPERATOR);
         List<HwvtepTransactionLogElement> controllerTxLog = controllerTxLogs.get(iid).getElements()
                 .stream().map(ele -> new HwvtepTransactionLogElement(ele, false)).collect(Collectors.toList());
         List<HwvtepTransactionLogElement> deviceUpdateLog = deviceUpdateLogs.get(iid).getElements()
-                .stream().map(ele -> new HwvtepTransactionLogElement(ele, false)).collect(Collectors.toList());
-        //deviceUpdateLog.forEach( (log) -> log.setDeviceLog(true));
-        printLogs(mergeLogsByDate(controllerTxLog, deviceUpdateLog));
+                .stream().map(ele -> new HwvtepTransactionLogElement(ele, true)).collect(Collectors.toList());
+        List<Pair<HwvtepTransactionLogElement, Boolean>> allLogs = mergeLogsByDate(controllerTxLog, deviceUpdateLog);
+        session.getConsole().print("Printing for Node :  ");
+        session.getConsole().println(iid.firstKeyOf(Node.class).getNodeId().getValue());
+        printLogs(allLogs);
+        session.getConsole().println(SEPERATOR + " END " + SEPERATOR);
+        session.getConsole().println();
     }
 
     private void printLogs(List<Pair<HwvtepTransactionLogElement, Boolean>> logs) {

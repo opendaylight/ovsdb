@@ -8,23 +8,22 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionElement;
-import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 
 public class HwvtepTransactionLogElement extends TransactionElement {
 
     private final boolean isDeviceLog;
-
-    public HwvtepTransactionLogElement(TransactionType transactionType,
-                                       Object data,
-                                       boolean isDeviceLog) {
-        super(transactionType, data);
-        this.isDeviceLog = isDeviceLog;
-    }
+    private long date;
 
     public HwvtepTransactionLogElement(TransactionElement element,
                                        boolean isDeviceLog) {
         super(element.getTransactionType(), element.getData());
         this.isDeviceLog = isDeviceLog;
+        this.date = element.getDate();
+    }
+
+    @Override
+    public long getDate() {
+        return date;
     }
 
     @Override

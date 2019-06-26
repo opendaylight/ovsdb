@@ -30,6 +30,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocatorSet;
 import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeVxlanOverIpv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
@@ -127,6 +128,7 @@ public final class TransactUtils {
     public static UUID createPhysicalLocatorSet(HwvtepOperationalState hwvtepOperationalState,
             TransactionBuilder transaction, List<LocatorSet> locatorList) {
         Set<UUID> locators = new HashSet<>();
+        Set<String> locatorsInfo = new HashSet<String>();
         for (LocatorSet locator: locatorList) {
             @SuppressWarnings("unchecked")
             InstanceIdentifier<TerminationPoint> iid =
@@ -134,6 +136,7 @@ public final class TransactUtils {
             UUID locatorUuid = createPhysicalLocator(transaction, hwvtepOperationalState, iid);
             if (locatorUuid != null) {
                 locators.add(locatorUuid);
+                addLocatorToTransactionHistory(hwvtepOperationalState, locatorsInfo, iid);
             }
         }
         PhysicalLocatorSet physicalLocatorSet = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
@@ -141,6 +144,9 @@ public final class TransactUtils {
         physicalLocatorSet.setLocators(locators);
         String locatorSetUuid = "PhysicalLocatorSet_" + HwvtepSouthboundMapper.getRandomUUID();
         transaction.add(op.insert(physicalLocatorSet).withId(locatorSetUuid));
+        hwvtepOperationalState.getDeviceInfo().addToControllerTx(TransactionType.ADD,
+                new StringBuilder(physicalLocatorSet.toString()).append(" Uuid ").append(locatorSetUuid)
+                        .append(" ").append(locatorsInfo.toString()));
         return new UUID(locatorSetUuid);
     }
 
@@ -164,14 +170,15 @@ public final class TransactUtils {
         String ip = tepKey.substring(tepKey.indexOf(":") + 1);
         builder.setDstIp(IpAddressBuilder.getDefaultInstance(ip));
         locatorAugmentation = builder.build();
-        locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation);
+        locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation, operationalState);
         operationalState.updateCurrentTxData(TerminationPoint.class, iid, locatorUuid);
         operationalState.getDeviceInfo().markKeyAsInTransit(TerminationPoint.class, iid);
         return locatorUuid;
     }
 
     public static UUID createPhysicalLocator(TransactionBuilder transaction,
-            HwvtepPhysicalLocatorAugmentation inputLocator) {
+                                             HwvtepPhysicalLocatorAugmentation inputLocator,
+                                             HwvtepOperationalState hwvtepOperationalState) {
         LOG.debug("Creating a physical locator: {}", inputLocator.getDstIp());
         PhysicalLocator physicalLocator = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                 PhysicalLocator.class);
@@ -179,6 +186,8 @@ public final class TransactUtils {
         setDstIp(physicalLocator, inputLocator);
         String locatorUuid = "PhysicalLocator_" + HwvtepSouthboundMapper.getRandomUUID();
         transaction.add(op.insert(physicalLocator).withId(locatorUuid));
+        hwvtepOperationalState.getDeviceInfo().addToControllerTx(TransactionType.ADD,
+                new StringBuilder(physicalLocator.toString()).append(" Uuid ").append(locatorUuid));
         return new UUID(locatorUuid);
     }
 
@@ -249,5 +258,22 @@ public final class TransactUtils {
     public static UUID getAclUUID(final InstanceIdentifier<Acls> aclIid) {
         return new UUID(HwvtepSouthboundConstants.ACL_UUID_PREFIX
                 + sanitizeUUID(aclIid.firstKeyOf(Acls.class).getAclName()));
+    }
+
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private static void addLocatorToTransactionHistory(HwvtepOperationalState hwvtepOperationalState,
+                                                 Set<String> locatorsInfo, InstanceIdentifier<TerminationPoint> iid) {
+        try {
+            HwvtepDeviceInfo.DeviceData deviceData = hwvtepOperationalState.getDeviceInfo().getDeviceOperData(
+                    TerminationPoint.class, iid);
+            if (deviceData != null) {
+                PhysicalLocator locator = (PhysicalLocator) deviceData.getData();
+                locatorsInfo.add(new StringBuilder(locator.getUuid().toString()).append(" ")
+                        .append(locator.getDstIpColumn().getData()).toString());
+            }
+        }
+        catch (Exception exp) {
+            LOG.warn("Failed to add to Transaction Histroy ",exp);
+        }
     }
 }

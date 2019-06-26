@@ -92,7 +92,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
             transaction.add(op.comment("Logical Switch: Creating " + lswitch.getHwvtepNodeName().getValue()));
             UUID lsUuid = new UUID(TransactUtils.getLogicalSwitchId(lswitch));
             updateCurrentTxData(LogicalSwitches.class, lsKey, lsUuid, lswitch);
-            updateControllerTxHistory(TransactionType.ADD, lswitch);
+            updateControllerTxHistory(TransactionType.ADD, logicalSwitch);
         } else {
             String existingLogicalSwitchName = lswitch.getHwvtepNodeName().getValue();
             // Name is immutable, and so we *can't* update it.  So we use extraBridge for the schema stuff
@@ -104,7 +104,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
                     .where(extraLogicalSwitch.getNameColumn().getSchema().opEqual(existingLogicalSwitchName))
                     .build());
             transaction.add(op.comment("Logical Switch: Updating " + existingLogicalSwitchName));
-            updateControllerTxHistory(TransactionType.UPDATE, lswitch);
+            updateControllerTxHistory(TransactionType.UPDATE, logicalSwitch);
         }
     }
 

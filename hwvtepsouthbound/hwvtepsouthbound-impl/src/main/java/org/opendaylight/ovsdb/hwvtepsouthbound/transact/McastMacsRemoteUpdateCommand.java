@@ -26,6 +26,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
@@ -97,6 +98,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             transaction.add(op.insert(mcastMacsRemote));
             transaction.add(op.comment("McastMacRemote: Creating " + mac.getMacEntryKey().getValue()));
             updateCurrentTxData(RemoteMcastMacs.class, macKey, TXUUID, mac);
+            updateControllerTxHistory(TransactionType.ADD, mcastMacsRemote);
         } else if (operationalMacOptional.getUuid() != null) {
             UUID macEntryUUID = operationalMacOptional.getUuid();
             McastMacsRemote extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
@@ -107,6 +109,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
                     .where(extraMac.getUuidColumn().getSchema().opEqual(macEntryUUID))
                     .build());
             transaction.add(op.comment("McastMacRemote: Updating " + macEntryUUID));
+            updateControllerTxHistory(TransactionType.UPDATE, mcastMacsRemote);
             //add to updates so that tep ref counts can be updated upon success
             addToUpdates(macKey, mac);
         } else {

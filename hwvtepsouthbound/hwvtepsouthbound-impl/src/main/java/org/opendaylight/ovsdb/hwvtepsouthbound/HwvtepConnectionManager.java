@@ -145,8 +145,11 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         ConnectionInfo key = HwvtepSouthboundMapper.createConnectionInfo(client);
         HwvtepConnectionInstance hwvtepConnectionInstance = getConnectionInstance(key);
         if (hwvtepConnectionInstance != null) {
-            deviceUpdateHistory.get(hwvtepConnectionInstance.getInstanceIdentifier()).addToHistory(
-                    TransactionType.DELETE, new ClientConnected(client.getConnectionInfo().getRemotePort()));
+            if (hwvtepConnectionInstance.getInstanceIdentifier() != null) {
+                deviceUpdateHistory.get(hwvtepConnectionInstance.getInstanceIdentifier()).addToHistory(
+                        TransactionType.DELETE, new ClientConnected(client.getConnectionInfo().getRemotePort()));
+            }
+
 
             // Unregister Entity ownership as soon as possible ,so this instance should
             // not be used as a candidate in Entity election (given that this instance is

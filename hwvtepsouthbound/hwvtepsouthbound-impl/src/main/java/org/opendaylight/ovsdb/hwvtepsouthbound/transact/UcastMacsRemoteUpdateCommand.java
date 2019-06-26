@@ -93,6 +93,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             LOG.trace("doDeviceTransaction: creating RemotUcastMac entry: {}", ucastMacsRemote);
             transaction.add(op.insert(ucastMacsRemote));
             getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteUcastMacs.class, macKey);
+            updateCurrentTxData(RemoteUcastMacs.class, macKey, new UUID("uuid"), remoteUcastMac);
         } else if (deviceData.getUuid() != null) {
             UUID macEntryUUID = deviceData.getUuid();
             UcastMacsRemote extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),

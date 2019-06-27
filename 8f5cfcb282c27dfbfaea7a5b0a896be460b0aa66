@@ -16,6 +16,24 @@
       "revId": "8f5cfcb282c27dfbfaea7a5b0a896be460b0aa66",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4425a515_f7ebb018",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/BridgeConfigReconciliationTask.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2019-06-27T12:09:22Z",
+      "side": 1,
+      "message": "Added an config parameter using which user can config the list of bridges on which reconciliation need to be triggered on switch reconnect.",
+      "parentUuid": "1a403f55_a19bcfde",
+      "revId": "8f5cfcb282c27dfbfaea7a5b0a896be460b0aa66",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

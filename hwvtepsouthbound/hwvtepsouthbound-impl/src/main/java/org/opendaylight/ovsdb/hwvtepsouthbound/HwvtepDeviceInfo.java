@@ -117,7 +117,7 @@ public class HwvtepDeviceInfo {
             new ConcurrentHashMap<>();
     private final Map<Class<? extends Identifiable>, Map<InstanceIdentifier, DeviceData>> opKeyVsData =
             new ConcurrentHashMap<>();
-    private final Map<Class<? extends Identifiable>, Map<UUID, Object>> uuidVsData = new ConcurrentHashMap<>();
+    private final Map<Class<? extends Identifiable>, Map<UUID, DeviceData>> uuidVsData = new ConcurrentHashMap<>();
     private final DependencyQueue dependencyQueue;
     private TransactionHistory controllerTxHistory;
     private TransactionHistory deviceUpdateHistory;
@@ -133,11 +133,11 @@ public class HwvtepDeviceInfo {
     }
 
     public Map<UUID, LogicalSwitch> getLogicalSwitches() {
-        Map<UUID, Object> switches = uuidVsData.get(LogicalSwitches.class);
+        Map<UUID, DeviceData> switches = uuidVsData.get(LogicalSwitches.class);
         Map<UUID, LogicalSwitch> result = new HashMap<>();
         if (switches != null) {
-            for (Map.Entry<UUID, Object> entry : switches.entrySet()) {
-                result.put(entry.getKey(), (LogicalSwitch) entry.getValue());
+            for (Map.Entry<UUID, DeviceData> entry : switches.entrySet()) {
+                result.put(entry.getKey(), (LogicalSwitch) entry.getValue().getData());
             }
         }
         return result;
@@ -164,11 +164,11 @@ public class HwvtepDeviceInfo {
     }
 
     public Map<UUID, PhysicalLocator> getPhysicalLocators() {
-        Map<UUID, Object> locators = uuidVsData.get(TerminationPoint.class);
+        Map<UUID, DeviceData> locators = uuidVsData.get(TerminationPoint.class);
         Map<UUID, PhysicalLocator> result = new HashMap<>();
         if (locators != null) {
-            for (Map.Entry<UUID, Object> entry : locators.entrySet()) {
-                result.put(entry.getKey(), (PhysicalLocator) entry.getValue());
+            for (Map.Entry<UUID, DeviceData> entry : locators.entrySet()) {
+                result.put(entry.getKey(), (PhysicalLocator) entry.getValue().getData());
             }
         }
         return result;
@@ -232,9 +232,9 @@ public class HwvtepDeviceInfo {
     public void updateDeviceOperData(Class<? extends Identifiable> cls, InstanceIdentifier key,
             UUID uuid, Object data) {
         LOG.debug("Updating device data {}", key);
-        HwvtepSouthboundUtil.updateData(opKeyVsData, cls, key,
-                new DeviceData(key, uuid, data, DeviceDataStatus.AVAILABLE));
-        HwvtepSouthboundUtil.updateData(uuidVsData, cls, uuid, data);
+        DeviceData deviceData = new DeviceData(key, uuid, data, DeviceDataStatus.AVAILABLE);
+        HwvtepSouthboundUtil.updateData(opKeyVsData, cls, key, deviceData);
+        HwvtepSouthboundUtil.updateData(uuidVsData, cls, uuid, deviceData);
     }
 
     public void clearDeviceOperData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
@@ -260,7 +260,7 @@ public class HwvtepDeviceInfo {
     }
 
     public Object getDeviceOperData(Class<? extends Identifiable> cls, UUID uuid) {
-        return HwvtepSouthboundUtil.getData(uuidVsData, cls, uuid);
+        return HwvtepSouthboundUtil.getData(uuidVsData, cls, uuid).getData();
     }
 
     public DeviceData getDeviceOperData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
@@ -269,6 +269,14 @@ public class HwvtepDeviceInfo {
 
     public Map<InstanceIdentifier, DeviceData> getDeviceOperData(Class<? extends Identifiable> cls) {
         return opKeyVsData.get(cls);
+    }
+
+    public InstanceIdentifier getDeviceOperKey(final Class<? extends Identifiable> cls, final UUID uuid) {
+        DeviceData deviceData = HwvtepSouthboundUtil.getData(uuidVsData, cls, uuid);
+        if (deviceData != null) {
+            return deviceData.getKey();
+        }
+        return null;
     }
 
     public UUID getUUID(Class<? extends Identifiable> cls, InstanceIdentifier key) {

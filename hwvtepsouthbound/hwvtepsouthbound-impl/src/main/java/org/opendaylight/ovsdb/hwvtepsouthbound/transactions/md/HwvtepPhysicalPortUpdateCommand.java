@@ -113,7 +113,12 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
             String portName = portUpdate.getNameColumn().getData();
             Optional<InstanceIdentifier<Node>> switchIid = getTerminationPointSwitch(portUpdateEntry.getKey());
             if (!switchIid.isPresent()) {
-                switchIid = getTerminationPointSwitch(transaction, node, portName);
+                switchIid = getFromDeviceOperCache(portUpdate.getUuid());
+                if (!switchIid.isPresent()) {
+                    LOG.debug("Failed to find node from the DeviceOperCache for port {}. Get it from the DS.",
+                            portUpdate);
+                    switchIid = getTerminationPointSwitch(transaction, node, portName);
+                }
             }
             if (switchIid.isPresent()) {
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(portName));
@@ -158,6 +163,8 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                 }
                 // Update with Deleted portfaultstatus
                 deleteEntries(transaction,getPortFaultStatusToRemove(tpPath, portUpdate));
+            } else {
+                LOG.warn("switchIid was not found for port {}", portUpdate);
             }
         }
     }
@@ -295,18 +302,23 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
             Node node, String tpName) {
         HwvtepGlobalAugmentation hwvtepNode = node.augmentation(HwvtepGlobalAugmentation.class);
         List<Switches> switchNodes = hwvtepNode.getSwitches();
-        for (Switches managedNodeEntry : switchNodes) {
-            @SuppressWarnings("unchecked")
-            Node switchNode = HwvtepSouthboundUtil
-                    .readNode(transaction, (InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue()).get();
-            TerminationPointKey tpKey = new TerminationPointKey(new TpId(tpName));
-            if (switchNode.getTerminationPoint() != null) {
-                for (TerminationPoint terminationPoint : switchNode.getTerminationPoint()) {
-                    if (terminationPoint.key().equals(tpKey)) {
-                        return Optional.of((InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue());
+        if (switchNodes != null && !switchNodes.isEmpty()) {
+            for (Switches managedNodeEntry : switchNodes) {
+                @SuppressWarnings("unchecked")
+                Node switchNode = HwvtepSouthboundUtil
+                        .readNode(transaction,
+                                (InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue()).get();
+                TerminationPointKey tpKey = new TerminationPointKey(new TpId(tpName));
+                if (switchNode.getTerminationPoint() != null) {
+                    for (TerminationPoint terminationPoint : switchNode.getTerminationPoint()) {
+                        if (terminationPoint.key().equals(tpKey)) {
+                            return Optional.of((InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue());
+                        }
                     }
                 }
             }
+        } else {
+            LOG.trace("PhyscialSwitch not present for the Port {}", tpName);
         }
         return Optional.absent();
     }
@@ -341,5 +353,16 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
             }
         }
         return result;
+    }
+
+    private  Optional<InstanceIdentifier<Node>> getFromDeviceOperCache(final UUID uuid) {
+
+        InstanceIdentifier<TerminationPoint> terminationPointIid =
+                (InstanceIdentifier<TerminationPoint>)getOvsdbConnectionInstance()
+                        .getDeviceInfo().getDeviceOperKey(TerminationPoint.class, uuid);
+        if (terminationPointIid != null) {
+            return Optional.of(terminationPointIid.firstIdentifierOf(Node.class));
+        }
+        return Optional.absent();
     }
 }

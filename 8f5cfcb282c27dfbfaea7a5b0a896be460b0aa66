@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a403f55_a19bcfde",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/BridgeConfigReconciliationTask.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-27T00:04:57Z",
+      "side": 1,
+      "message": "This is good improviement, but this hardcoding is very specific to the NetVirt project. If we really want to control what configuration (node, bridge, port) should be reconciled, we should define a config yang model or a config knob in the configuration file, where we should provide a list of resources that need to be reconciled or the resources that need to be ignored, rather then hardcoding the specific bridge/resource.",
+      "revId": "8f5cfcb282c27dfbfaea7a5b0a896be460b0aa66",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

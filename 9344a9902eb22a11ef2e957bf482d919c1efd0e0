@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eee200f0_62ef85cf",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-27T00:17:33Z",
+      "side": 1,
+      "message": "can you please rephrase it to some meaningful log message. Also not sure if this log message is required at the info level?",
+      "revId": "9344a9902eb22a11ef2e957bf482d919c1efd0e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6ed7859_4474aa4d",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-27T00:17:33Z",
+      "side": 1,
+      "message": "can you please rephrase it to some meaningful log message. Also not sure if this log message is required at the info level?",
+      "revId": "9344a9902eb22a11ef2e957bf482d919c1efd0e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d0b3611_35fab116",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-27T00:17:33Z",
+      "side": 1,
+      "message": "can you please rephrase it to some meaningful log message. Also not sure if this log message is required at the info level?",
+      "revId": "9344a9902eb22a11ef2e957bf482d919c1efd0e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e9075c27_08d9a711",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-27T00:17:33Z",
+      "side": 1,
+      "message": "can you please rephrase it to some meaningful log message. Also not sure if this log message is required at the info level?",
+      "revId": "9344a9902eb22a11ef2e957bf482d919c1efd0e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "522a4004_afe7968b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteRemoveCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-27T00:17:33Z",
+      "side": 1,
+      "message": "can you please rephrase it to some meaningful log message. Also not sure if this log message is required at the info level?",
+      "revId": "9344a9902eb22a11ef2e957bf482d919c1efd0e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1a1a4bb1_62bcb4f1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2019-06-28T05:32:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bef40210_a931fcb0",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 1
+      },
+      "revId": "33db89accb1e160ae084c602b65e6ef4e47d1211",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b59f72a_8160ffe8",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/McastMacsRemoteRemoveCommand.java",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2019-06-28T04:37:45Z",
       "side": 1,
       "message": "I think mcastMacsRemote can itself be passed as parameter here(as other objects like logicalSwitch etc) instead of converting to String and passing StringBuilder",
+      "range": {
+        "startLine": 111,
+        "startChar": 62,
+        "endLine": 111,
+        "endChar": 106
+      },
+      "revId": "33db89accb1e160ae084c602b65e6ef4e47d1211",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c0e4ab2e_9389233b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/McastMacsRemoteRemoveCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2019-06-28T05:32:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8b59f72a_8160ffe8",
       "range": {
         "startLine": 111,
         "startChar": 62,

@@ -41,6 +41,7 @@ import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipChangeState;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.serviceutils.upgrade.UpgradeState;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
@@ -77,7 +78,8 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class),
                 new TestSystemReadyMonitor(IMMEDIATE),
-                Mockito.mock(DiagStatusService.class))) {
+                Mockito.mock(DiagStatusService.class),
+                Mockito.mock(UpgradeState.class))) {
 
             // Initiate the session
             southboundProvider.init();
@@ -104,7 +106,8 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class),
                 new TestSystemReadyMonitor(IMMEDIATE),
-                Mockito.mock(DiagStatusService.class))) {
+                Mockito.mock(DiagStatusService.class),
+                Mockito.mock(UpgradeState.class))) {
 
             // Initiate the session
             southboundProvider.init();
@@ -133,7 +136,8 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class),
                 new TestSystemReadyMonitor(IMMEDIATE),
-                Mockito.mock(DiagStatusService.class))) {
+                Mockito.mock(DiagStatusService.class),
+                Mockito.mock(UpgradeState.class))) {
 
             southboundProvider.init();
 
@@ -157,7 +161,8 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class),
                 new TestSystemReadyMonitor(IMMEDIATE),
-                Mockito.mock(DiagStatusService.class))) {
+                Mockito.mock(DiagStatusService.class),
+                Mockito.mock(UpgradeState.class))) {
 
             southboundProvider.init();
 

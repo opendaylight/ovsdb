@@ -1,0 +1,141 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4809b2fb_0b863752",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProviderConfigurator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-28T18:21:42Z",
+      "side": 1,
+      "message": "before creating the StringTokenizer object, please check if the string is empty, if it\u0027s empty there is no point in creating the StringTokenizer object, as it\u0027s just garbase. Also please mark the input string as final.",
+      "revId": "85f8d90a1741ef9fe4be86d9ea0e8fba5fd4f6c7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9bc86ffd_c073c96f",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/BridgeConfigReconciliationTask.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-28T18:21:42Z",
+      "side": 1,
+      "message": "if bridgeReconciliationList is empty, you don\u0027t want to reconcile any configuration? I believe that as a default behavior is not correct. We should keep the default behavior as it is now and trigger this new behavior of specific bridge reconciliation when user specify it in the config file.",
+      "revId": "85f8d90a1741ef9fe4be86d9ea0e8fba5fd4f6c7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f22b6e40_2e17a0fc",
+        "filename": "southbound/southbound-impl/src/main/resources/initial/southbound.cfg",
+        "patchSetId": 6
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-28T18:21:42Z",
+      "side": 1,
+      "message": "command --\u003e comma?",
+      "range": {
+        "startLine": 16,
+        "startChar": 55,
+        "endLine": 16,
+        "endChar": 62
+      },
+      "revId": "85f8d90a1741ef9fe4be86d9ea0e8fba5fd4f6c7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1061fce3_c5888ebb",
+        "filename": "southbound/southbound-impl/src/main/resources/initial/southbound.cfg",
+        "patchSetId": 6
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-28T18:21:42Z",
+      "side": 1,
+      "message": "Manager -\u003e manager",
+      "range": {
+        "startLine": 17,
+        "startChar": 67,
+        "endLine": 17,
+        "endChar": 74
+      },
+      "revId": "85f8d90a1741ef9fe4be86d9ea0e8fba5fd4f6c7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "998598ec_d15f8940",
+        "filename": "southbound/southbound-impl/src/main/resources/initial/southbound.cfg",
+        "patchSetId": 6
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-28T18:21:42Z",
+      "side": 1,
+      "message": "Param --\u003eparameter",
+      "range": {
+        "startLine": 17,
+        "startChar": 30,
+        "endLine": 17,
+        "endChar": 35
+      },
+      "revId": "85f8d90a1741ef9fe4be86d9ea0e8fba5fd4f6c7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "945a64bd_ba1dcac7",
+        "filename": "southbound/southbound-impl/src/main/resources/initial/southbound.cfg",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-28T18:21:42Z",
+      "side": 1,
+      "message": "we should keep the list empty as a default, and as i mentioned in the other comment, the default behavior should be same as it exist today. If user user wants to reconcile specific switches, they can configure it and than plugin will reconcile only thsoe bridges.",
+      "revId": "85f8d90a1741ef9fe4be86d9ea0e8fba5fd4f6c7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1cdef87e_fb84193d",
+        "filename": "southbound/southbound-impl/src/main/resources/initial/southbound.cfg",
+        "patchSetId": 6
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-28T18:21:42Z",
+      "side": 1,
+      "message": "I think we should also add a config knob (bridge-reconciliation-exclusion-list, where user can specify the bridges that they don\u0027t want to reconcile. This will be useful in case there are multiple bridges and user want to reconcile most of them except the few. Once you introduce this configuration, it will give 4 options to user \n(1) Both \"bridge-reconciliation-inclusion-list\" and \"bridge-reconciliation-exclusion-list\" are empty : it means it will keep the default behavior.\n(2) Only \"bridge-reconciliation-inclusion-list\" has list of bridge : than pluging will only reconcile specified bridges.\n(3) Only \"bridge-reconciliation-exclusion-list\" has list of bridge : than plugin will reconcile all the bridge, except the specified bridges.\n(4) Both \"bridge-reconciliation-inclusion-list\" and \"bridge-reconcliation-exclusion-list\" has bridges specified : this is invalid scenario, so it should log the warning saying this is not valid configuration, but plugin will give priority to \"bridge-reconciliation-exclusion-list\" and reconcile all the bridges except the one specified in the exclusion-list.",
+      "revId": "85f8d90a1741ef9fe4be86d9ea0e8fba5fd4f6c7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

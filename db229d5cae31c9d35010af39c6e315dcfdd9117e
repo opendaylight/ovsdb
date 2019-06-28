@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "83546a5d_fc13820c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDeviceInfo.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-28T18:01:23Z",
+      "side": 1,
+      "message": "mark the parameter final.",
+      "revId": "db229d5cae31c9d35010af39c6e315dcfdd9117e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4f35ff3_96d90bb6",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-28T18:01:23Z",
+      "side": 1,
+      "message": "I believe there is no need to check this condition here, you can put this block of code in the } else { block for the above if condition?",
+      "revId": "db229d5cae31c9d35010af39c6e315dcfdd9117e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "651c90fe_0d822334",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-28T18:01:23Z",
+      "side": 1,
+      "message": "add a log.trace() in the else block.",
+      "revId": "db229d5cae31c9d35010af39c6e315dcfdd9117e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "38d3f857_8d595d18",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-06-28T18:01:23Z",
+      "side": 1,
+      "message": "mark the input parameter final.",
+      "revId": "db229d5cae31c9d35010af39c6e315dcfdd9117e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

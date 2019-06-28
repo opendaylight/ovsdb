@@ -55,6 +55,7 @@ import org.opendaylight.ovsdb.southbound.reconciliation.configuration.BridgeConf
 import org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeRemoveCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
+import org.opendaylight.serviceutils.upgrade.UpgradeState;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
@@ -66,7 +67,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
-    private final Map<ConnectionInfo, OvsdbConnectionInstance> clients =
+
+  private final Map<ConnectionInfo, OvsdbConnectionInstance> clients =
             new ConcurrentHashMap<>();
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionManager.class);
     private static final String ENTITY_TYPE = "ovsdb";
@@ -85,11 +87,13 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private final OvsdbConnection ovsdbConnection;
     private final ReconciliationManager reconciliationManager;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
+    private final UpgradeState upgradeState;
 
     public OvsdbConnectionManager(DataBroker db,TransactionInvoker txInvoker,
                                   EntityOwnershipService entityOwnershipService,
                                   OvsdbConnection ovsdbConnection,
-                                  InstanceIdentifierCodec instanceIdentifierCodec) {
+                                  InstanceIdentifierCodec instanceIdentifierCodec,
+                                  UpgradeState upgradeState) {
         this.db = db;
         this.txInvoker = txInvoker;
         this.entityOwnershipService = entityOwnershipService;
@@ -97,6 +101,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         this.ovsdbConnection = ovsdbConnection;
         this.reconciliationManager = new ReconciliationManager(db, instanceIdentifierCodec);
         this.instanceIdentifierCodec = instanceIdentifierCodec;
+        this.upgradeState = upgradeState;
     }
 
     @Override
@@ -453,8 +458,10 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             //*this* instance of southbound plugin is owner of the device,
             //so register for monitor callbacks
             ovsdbConnectionInstance.registerCallbacks(instanceIdentifierCodec);
-
-            reconcileBridgeConfigurations(ovsdbConnectionInstance);
+            LOG.trace("isUpgradeInProgress {}", upgradeState.isUpgradeInProgress());
+            if (!upgradeState.isUpgradeInProgress()) {
+                reconcileBridgeConfigurations(ovsdbConnectionInstance);
+            }
         } else {
             //You were owner of the device, but now you are not. With the current ownership
             //grant mechanism, this scenario should not occur. Because this scenario will occur
@@ -645,7 +652,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
     }
 
-    private void reconcileBridgeConfigurations(final OvsdbConnectionInstance client) {
+    public void reconcileBridgeConfigurations(final OvsdbConnectionInstance client) {
         final InstanceIdentifier<Node> nodeIid = client.getInstanceIdentifier();
         final ReconciliationTask task = new BridgeConfigReconciliationTask(
                 reconciliationManager, OvsdbConnectionManager.this, nodeIid, client, instanceIdentifierCodec);
@@ -684,5 +691,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         initiated connection disconnects.
         */
         ON_DISCONNECT
+    }
+
+    public Map<ConnectionInfo, OvsdbConnectionInstance> getClients() {
+      return clients;
     }
 }

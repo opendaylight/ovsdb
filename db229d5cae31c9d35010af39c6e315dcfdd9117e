@@ -72,6 +72,41 @@
     },
     {
       "key": {
+        "uuid": "7f06e44c_241124b4",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-07-01T18:52:24Z",
+      "side": 1,
+      "message": "Sorry my bad, i overlooked the part that you are setting the switchIid in the above code block. Now it make sense.",
+      "parentUuid": "e2c30175_9343a47d",
+      "revId": "db229d5cae31c9d35010af39c6e315dcfdd9117e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f27b284_7e192712",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-07-01T18:52:24Z",
+      "side": 1,
+      "message": "Add the else block with log message(warn) here that switchIid was not found.",
+      "revId": "db229d5cae31c9d35010af39c6e315dcfdd9117e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "651c90fe_0d822334",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalPortUpdateCommand.java",
         "patchSetId": 2

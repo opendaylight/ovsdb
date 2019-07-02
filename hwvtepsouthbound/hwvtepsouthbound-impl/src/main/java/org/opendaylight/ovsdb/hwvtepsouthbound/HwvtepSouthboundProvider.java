@@ -17,6 +17,7 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.aries.blueprint.annotation.service.Reference;
+import org.apache.aries.blueprint.annotation.service.Service;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
@@ -47,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
+@Service(classes = HwvtepSouthboundProvider.class) // only because HwvtepCacheDisplayCmd needs a @Reference to this
 public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundProvider.class);

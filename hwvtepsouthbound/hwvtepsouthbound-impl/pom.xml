@@ -111,6 +111,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>powermock-reflect</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.karaf.shell</groupId>
+      <artifactId>org.apache.karaf.shell.core</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -127,7 +131,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Karaf-Commands>org.opendaylight.ovsdb.hwvtepsouthbound.TransactionHistoryCmd</Karaf-Commands>
+            <Karaf-Commands>org.opendaylight.ovsdb.hwvtepsouthbound.cli*</Karaf-Commands>
             <Private-Package>org.opendaylight.ovsdb.schema.hardwarevtep</Private-Package>
             <Export-Package>org.opendaylight.ovsdb.hwvtepsouthbound.*,org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.hwvtepsouthbound.impl.rev150901.*</Export-Package>
           </instructions>

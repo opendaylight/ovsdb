@@ -20,6 +20,7 @@ import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -646,5 +647,9 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         initiated connection disconnects.
         */
         ON_DISCONNECT
+    }
+
+    public Map<InstanceIdentifier<Node>, HwvtepConnectionInstance> getAllConnectedInstances() {
+        return Collections.unmodifiableMap(nodeIidVsConnectionInstance);
     }
 }

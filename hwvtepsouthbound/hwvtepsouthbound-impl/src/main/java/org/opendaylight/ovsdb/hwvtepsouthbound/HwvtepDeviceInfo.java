@@ -9,10 +9,13 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import com.google.common.collect.Sets;
+
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
 import java.util.concurrent.ConcurrentHashMap;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependentJob;
@@ -210,6 +213,10 @@ public class HwvtepDeviceInfo {
             return deviceData.getData();
         }
         return null;
+    }
+
+    public Map<Class<? extends Identifiable>, Map<InstanceIdentifier, DeviceData>> getConfigData() {
+        return Collections.unmodifiableMap(configKeyVsData);
     }
 
     public void clearConfigData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
@@ -422,5 +429,13 @@ public class HwvtepDeviceInfo {
 
     public void addToDeviceUpdate(TransactionType transactionType, Object object) {
         deviceUpdateHistory.addToHistory(transactionType, object);
+    }
+
+    public Map<Class<? extends Identifiable>, Map<InstanceIdentifier, DeviceData>> getOperData() {
+        return Collections.unmodifiableMap(opKeyVsData);
+    }
+
+    public Map<Class<? extends Identifiable>, Map<UUID, DeviceData>> getUuidData() {
+        return Collections.unmodifiableMap(uuidVsData);
     }
 }

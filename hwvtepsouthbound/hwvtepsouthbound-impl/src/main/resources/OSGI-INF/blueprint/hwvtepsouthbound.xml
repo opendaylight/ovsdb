@@ -9,5 +9,10 @@
             <argument ref="hwvtepSouthboundProvider" />
         </action>
     </command>
+    <command>
+        <action class="org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepCacheDisplayCmd">
+            <argument ref="hwvtepSouthboundProvider" />
+        </action>
+    </command>
     </command-bundle>
 </blueprint>

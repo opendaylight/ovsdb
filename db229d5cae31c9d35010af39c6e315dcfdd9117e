@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "03847426_629bfb5f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2019-07-02T05:53:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2f27b284_7e192712",
+      "revId": "db229d5cae31c9d35010af39c6e315dcfdd9117e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "651c90fe_0d822334",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalPortUpdateCommand.java",
         "patchSetId": 2

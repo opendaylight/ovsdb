@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3d869f8c_e65c5b83",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2019-07-03T05:44:13Z",
+      "side": 1,
+      "message": "Right. This list will be populated from inputs from cfg file only. The SouthBoundProviderConfigurator reads the cfg file inputs and set this SouthBoundProvider list. This getter is added to read these in BridgeReconciliationTask.",
+      "parentUuid": "894a86ee_cd76c88a",
+      "revId": "e9ca393ee7b3b5db2f080437dd3b4fdf4d1264e1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b1fdca1_b76e1440",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
         "patchSetId": 10
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "ea9cc481_f3dd7487",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2019-07-03T05:44:13Z",
+      "side": 1,
+      "message": "Same comment as above",
+      "parentUuid": "8b1fdca1_b76e1440",
+      "revId": "e9ca393ee7b3b5db2f080437dd3b4fdf4d1264e1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "912e2407_d9a24976",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/BridgeConfigReconciliationTask.java",
         "patchSetId": 10
@@ -47,6 +83,24 @@
       "writtenOn": "2019-07-03T04:54:50Z",
       "side": 1,
       "message": "Is this the Case 2 ?",
+      "revId": "e9ca393ee7b3b5db2f080437dd3b4fdf4d1264e1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da419ea7_c2a2d961",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/BridgeConfigReconciliationTask.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2019-07-03T05:44:13Z",
+      "side": 1,
+      "message": "Right will be updated.",
+      "parentUuid": "912e2407_d9a24976",
       "revId": "e9ca393ee7b3b5db2f080437dd3b4fdf4d1264e1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

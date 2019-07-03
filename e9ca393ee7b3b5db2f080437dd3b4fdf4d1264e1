@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "894a86ee_cd76c88a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2019-07-03T04:54:50Z",
+      "side": 1,
+      "message": "This list should be populated only through the cfg file.\nIf the List is returned here and there could chance of adding the entries to this list.\nIn my view this should return the UnmodifiableList",
+      "revId": "e9ca393ee7b3b5db2f080437dd3b4fdf4d1264e1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b1fdca1_b76e1440",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundProvider.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2019-07-03T04:54:50Z",
+      "side": 1,
+      "message": "This list should be populated only through the cfg file.\nIf the List is returned here and there could chance of adding the entries to this list.\nIn my view this should return the UnmodifiableList",
+      "revId": "e9ca393ee7b3b5db2f080437dd3b4fdf4d1264e1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "912e2407_d9a24976",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/BridgeConfigReconciliationTask.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2019-07-03T04:54:50Z",
+      "side": 1,
+      "message": "Is this the Case 2 ?",
+      "revId": "e9ca393ee7b3b5db2f080437dd3b4fdf4d1264e1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

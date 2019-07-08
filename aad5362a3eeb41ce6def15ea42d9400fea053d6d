@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4cc7e161_03176f36",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-07-08T19:13:24Z",
+      "side": 1,
+      "message": "This doesn\u0027t looks right to me. Here \"created_by:odl\" is pushed by ifm/itm, and OVS just blindly push it to OVS termination point, but when it comes to reconciliation, it need to be aware of the fact that consumer can push the created_by:odl. This functionality is not dependent on the consumer. If the intention is to reconcile the bridge and termination point that is created by OVSDB plugin, then OVSDB plugin should internally push the \"Created_by:odl\" for the bridges/termination-point and consumer should not worry about it at all. So the right way to implement this functionality is, to modify ovsdb plugin to push the \"created_by:odl\" external-id for bridge/termination-point and use this to to reconcile as this patch currently doing.",
+      "revId": "aad5362a3eeb41ce6def15ea42d9400fea053d6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

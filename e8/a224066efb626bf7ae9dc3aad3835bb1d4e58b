@@ -1,0 +1,9 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Stephen Kitt <skitt@redhat.com>
+Code-Review+1: Manojna Vijayakrishna <manojna.vijayakrishna@ericsson.com>
+Code-Review+2: Anil Vishnoi <vishnoianil@gmail.com>
+Submitted-by: Anil Vishnoi <vishnoianil@gmail.com>
+Submitted-at: Mon, 08 Jul 2019 18:47:15 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/82885
+Project: ovsdb
+Branch: refs/heads/master

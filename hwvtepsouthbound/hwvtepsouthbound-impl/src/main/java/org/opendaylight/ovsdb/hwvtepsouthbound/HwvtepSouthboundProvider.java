@@ -38,6 +38,7 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration.Hwvt
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.utils.mdsal.utils.ShardStatusMonitor;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
@@ -87,6 +88,27 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
      */
     @PostConstruct
     public void init() {
+        boolean isDatastoreAvailable = false;
+        int retryCount = 0;
+        try {
+            while (retryCount < 1000) {
+                isDatastoreAvailable = ShardStatusMonitor.getShardStatus(ShardStatusMonitor.TOPOLOGY_SHARDS);
+                if (isDatastoreAvailable) {
+                    break;
+                }
+                LOG.error("Hwvtep: retrying shard status check for the {} time", ++retryCount);
+                Thread.sleep(2000);
+            }
+            if (isDatastoreAvailable) {
+                LOG.error("Hwvtep is UP");
+                init2();
+            }
+        } catch (InterruptedException e) {
+            LOG.error("Hwvtep is DOWN");
+        }
+    }
+
+    private void init2() {
         LOG.info("HwvtepSouthboundProvider Session Initiated");
         txInvoker = new TransactionInvokerImpl(dataBroker);
         cm = new HwvtepConnectionManager(dataBroker, txInvoker, entityOwnershipService, ovsdbConnection);

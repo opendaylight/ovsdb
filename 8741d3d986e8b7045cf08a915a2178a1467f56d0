@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0d99c1f2_979b1a90",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/ShardStatusMonitor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2019-07-25T04:56:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2686b88a_3b61d001",
+      "range": {
+        "startLine": 65,
+        "startChar": 75,
+        "endLine": 65,
+        "endChar": 88
+      },
+      "revId": "8741d3d986e8b7045cf08a915a2178a1467f56d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a7c80f15_6d27697d",
         "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/ShardStatusMonitor.java",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2019-07-24T11:04:28Z",
       "side": 1,
       "message": "as Constant",
+      "range": {
+        "startLine": 112,
+        "startChar": 19,
+        "endLine": 112,
+        "endChar": 32
+      },
+      "revId": "8741d3d986e8b7045cf08a915a2178a1467f56d0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "def1403a_7ca8ca69",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/ShardStatusMonitor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2019-07-25T04:56:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a7c80f15_6d27697d",
       "range": {
         "startLine": 112,
         "startChar": 19,

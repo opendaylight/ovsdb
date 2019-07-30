@@ -8,15 +8,19 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
+import com.google.common.base.Optional;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -99,14 +103,22 @@ public abstract class UnMetDependencyGetter<T extends Identifiable> {
     class ConfigDependencyGetter extends DependencyGetter {
         @Override
         boolean isDependencyMet(HwvtepOperationalState opState, HwvtepDeviceInfo deviceInfo,
-                Class<? extends Identifiable> cls, InstanceIdentifier<? extends DataObject> key) {
-            return deviceInfo.isConfigDataAvailable(cls, key) || isConfigDataAvailable(opState, key);
+                                Class<? extends Identifiable> cls, InstanceIdentifier<? extends DataObject> key) {
+            return deviceInfo.isConfigDataAvailable(cls, key) || isConfigDataAvailable(opState, cls, key);
         }
 
-        boolean isConfigDataAvailable(HwvtepOperationalState opState, InstanceIdentifier<? extends DataObject> key) {
+        boolean isConfigDataAvailable(HwvtepOperationalState opState,
+                                      Class<? extends Identifiable> cls,
+                                      InstanceIdentifier<? extends DataObject> key) {
             DataBroker db = opState.getConnectionInstance().getDataBroker();
-            ControllerMdsalUtils mdsalUtils = new ControllerMdsalUtils(db);
-            return mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, key) != null;
+            ReadOnlyTransaction tx = db.newReadOnlyTransaction();
+            Optional data = HwvtepSouthboundUtil.readNode(tx, LogicalDatastoreType.CONFIGURATION, key);
+            tx.close();
+            if (data.isPresent()) {
+                opState.getDeviceInfo().updateConfigData(cls, key, data.get());
+                return true;
+            }
+            return false;
         }
     }
 

@@ -10,18 +10,24 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
 
+import com.google.common.base.Optional;
+
 import java.util.ArrayList;
 import java.util.Collection;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationTask;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactCommandAggregator;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -31,7 +37,6 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
     private final HwvtepConnectionInstance connectionInstance;
     private final DataBroker db;
     private final Node psNode;
-    private final ControllerMdsalUtils mdsalUtils;
 
     public HwvtepReconciliationTask(ReconciliationManager reconciliationManager,
                                     HwvtepConnectionManager connectionManager,
@@ -43,7 +48,6 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
         this.db = db;
         this.psNode = psNode;
         this.connectionInstance = connectionInstance;
-        this.mdsalUtils = new ControllerMdsalUtils(db);
     }
 
     private void transactChangesToDevice(final Collection<DataTreeModification<Node>> changes,
@@ -61,9 +65,10 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
         InstanceIdentifier<Node> psNodeIid = HwvtepSouthboundMapper.createInstanceIdentifier(psNode.getNodeId());
         InstanceIdentifier<Node> nodeId = (InstanceIdentifier<Node>)nodeIid;
 
-        Node globalConfigNode = mdsalUtils.read(CONFIGURATION, nodeId);
-        Node globalOpNode = mdsalUtils.read(OPERATIONAL, nodeId);
-        Node psConfigNode = mdsalUtils.read(CONFIGURATION, psNodeIid);
+        ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction();
+        Node globalConfigNode = readNode(tx, CONFIGURATION, nodeId);
+        Node globalOpNode = readNode(tx, OPERATIONAL, nodeId);
+        Node psConfigNode = readNode(tx, CONFIGURATION, psNodeIid);
 
         DataTreeModification<Node> change = null;
         Collection<DataTreeModification<Node>> changes = new ArrayList<>();
@@ -100,5 +105,14 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
     @Override
     public long retryDelayInMills() {
         return 0;
+    }
+
+    private Node readNode(ReadTransaction transaction,
+                          LogicalDatastoreType logicalDatastoreType, InstanceIdentifier<Node> iid) {
+        Optional<Node> optional = HwvtepSouthboundUtil.readNode(transaction, logicalDatastoreType, iid);
+        if (optional.isPresent()) {
+            return optional.get();
+        }
+        return null;
     }
 }

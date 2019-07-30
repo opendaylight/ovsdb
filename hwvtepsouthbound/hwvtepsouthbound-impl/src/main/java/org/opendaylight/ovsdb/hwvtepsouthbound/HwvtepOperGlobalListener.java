@@ -28,7 +28,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +39,7 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
     private ListenerRegistration<HwvtepOperGlobalListener> registration;
     private final HwvtepConnectionManager hcm;
     private final DataBroker db;
-    private final Map<YangInstanceIdentifier, Node> connectedNodes = new ConcurrentHashMap<>();
+    private static final Map<InstanceIdentifier<Node>, Node> CONNECTED_NODES = new ConcurrentHashMap<>();
 
     HwvtepOperGlobalListener(DataBroker db, HwvtepConnectionManager hcm) {
         LOG.info("Registering HwvtepOperGlobalListener");
@@ -69,15 +68,13 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
             InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             DataObjectModification<Node> mod = change.getRootNode();
             InstanceIdentifier<Node> nodeIid = change.getRootPath().getRootIdentifier();
-            YangInstanceIdentifier entityId =
-                    HwvtepSouthboundUtil.getInstanceIdentifierCodec().getYangInstanceIdentifier(nodeIid);
             Node node = getCreated(mod);
             if (node != null) {
-                connectedNodes.put(entityId, node);
+                CONNECTED_NODES.put(key, node);
             }
             node = getRemoved(mod);
             if (node != null) {
-                connectedNodes.remove(entityId);
+                CONNECTED_NODES.remove(key);
                 HwvtepConnectionInstance connectionInstance = hcm.getConnectionInstanceFromNodeIid(nodeIid);
                 if (Objects.equals(connectionInstance.getConnectionInfo().getRemotePort(),
                         HwvtepSouthboundUtil.getRemotePort(node))) {
@@ -107,8 +104,8 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
         return null;
     }
 
-    public Map<YangInstanceIdentifier, Node> getConnectedNodes() {
-        return Collections.unmodifiableMap(connectedNodes);
+    public Map<InstanceIdentifier<Node>, Node> getConnectedNodes() {
+        return Collections.unmodifiableMap(CONNECTED_NODES);
     }
 
     private InstanceIdentifier<Node> getWildcardPath() {
@@ -117,5 +114,9 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
                         .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                         .child(Node.class);
         return path;
+    }
+
+    public static Node getNode(InstanceIdentifier<Node> key) {
+        return CONNECTED_NODES.get(key);
     }
 }

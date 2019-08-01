@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Anil Vishnoi <vishnoianil@gmail.com>
+Code-Review+1: Robert Varga <nite@hq.sk>
+Submitted-by: Anil Vishnoi <vishnoianil@gmail.com>
+Submitted-at: Thu, 01 Aug 2019 22:07:00 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/ovsdb/+/81915
+Project: ovsdb
+Branch: refs/heads/stable/neon

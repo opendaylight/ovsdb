@@ -1,0 +1,130 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30d6043c_52c974b0",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointDeleteCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-08-01T22:29:55Z",
+      "side": 1,
+      "message": "please rephrase the trace message \"Termination point\u0027s associated original node\"",
+      "revId": "fcc015a76c5dd00de7beac04c9aeb74acdf7e6fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8083cbee_f239de75",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationTask.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-08-01T22:29:55Z",
+      "side": 1,
+      "message": "please rephrase these log message in the simple readable format like at line :68 and as i mentioned in one of my other comment in the patch.",
+      "revId": "fcc015a76c5dd00de7beac04c9aeb74acdf7e6fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4427d82_0cac95e7",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationTask.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-08-01T22:29:55Z",
+      "side": 1,
+      "message": "use constant from SouthboundConstants.java?",
+      "range": {
+        "startLine": 123,
+        "startChar": 70,
+        "endLine": 123,
+        "endChar": 82
+      },
+      "revId": "fcc015a76c5dd00de7beac04c9aeb74acdf7e6fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "417ed497_2dffa85d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/reconciliation/configuration/TerminationPointConfigReconciliationTask.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-08-01T22:29:55Z",
+      "side": 1,
+      "message": "use constant from SouthboundConstants.java?",
+      "range": {
+        "startLine": 124,
+        "startChar": 75,
+        "endLine": 124,
+        "endChar": 80
+      },
+      "revId": "fcc015a76c5dd00de7beac04c9aeb74acdf7e6fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0611ae2_898e95c8",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 1398,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-08-01T22:29:55Z",
+      "side": 1,
+      "message": "use constant from SouthboundConstants.java?",
+      "range": {
+        "startLine": 1398,
+        "startChar": 40,
+        "endLine": 1398,
+        "endChar": 52
+      },
+      "revId": "fcc015a76c5dd00de7beac04c9aeb74acdf7e6fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3502fbb_6dbbd096",
+        "filename": "utils/southbound-utils/src/main/java/org/opendaylight/ovsdb/utils/southbound/utils/SouthboundUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 1399,
+      "author": {
+        "id": 7788
+      },
+      "writtenOn": "2019-08-01T22:29:55Z",
+      "side": 1,
+      "message": "same here.",
+      "range": {
+        "startLine": 1399,
+        "startChar": 42,
+        "endLine": 1399,
+        "endChar": 47
+      },
+      "revId": "fcc015a76c5dd00de7beac04c9aeb74acdf7e6fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

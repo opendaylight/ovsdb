@@ -84,6 +84,11 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private final OvsdbDeviceEntityOwnershipListener ovsdbDeviceEntityOwnershipListener;
     private final OvsdbConnection ovsdbConnection;
     private final ReconciliationManager reconciliationManager;
+
+    public InstanceIdentifierCodec getInstanceIdentifierCodec() {
+        return instanceIdentifierCodec;
+    }
+
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
     public OvsdbConnectionManager(DataBroker db,TransactionInvoker txInvoker,

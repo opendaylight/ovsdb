@@ -45,6 +45,7 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangeEvent;
@@ -55,6 +56,7 @@ import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactUtils;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
@@ -231,6 +233,34 @@ public class OvsdbConnectionInstance {
             }
 
             invoke(transaction);
+        }
+    }
+
+    public void updateTerminationPointWithQosParameters(String terminationPoint,
+        Long ingressPolicingBurst, Long ingressPolicingRate) {
+        for (Map.Entry<DatabaseSchema,TransactInvoker> entry: transactInvokers.entrySet()) {
+
+            TransactionBuilder transaction = new TransactionBuilder(this.client, entry.getKey());
+            // Update interface
+            Interface ovsInterface =
+                TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
+            updateInterfacePolicing(ovsInterface,ingressPolicingBurst, ingressPolicingRate);
+            Interface extraInterface = TyperUtils.getTypedRowWrapper(
+                transaction.getDatabaseSchema(), Interface.class);
+            extraInterface.setName("");
+            transaction.add(op.update(ovsInterface)
+                .where(extraInterface.getNameColumn().getSchema().opEqual(terminationPoint))
+                .build());
+        }
+    }
+
+    private static void updateInterfacePolicing(final Interface ovsInterface,
+        Long ingressPolicingBurst, Long ingressPolicingRate) {
+        if (ingressPolicingRate != null) {
+            ovsInterface.setIngressPolicingRate(ingressPolicingRate);
+        }
+        if (ingressPolicingBurst != null) {
+            ovsInterface.setIngressPolicingBurst(ingressPolicingBurst);
         }
     }
 

@@ -1,0 +1,32 @@
+module south-bound-rpc {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:southboundrpc";
+    prefix "southboundrpc";
+
+    import network-topology {prefix "topo"; revision-date "2013-10-21"; }
+    import yang-ext { prefix "ext"; }
+    import ietf-inet-types { prefix inet; revision-date 2013-07-15; }
+    import ietf-yang-types { prefix yang; revision-date "2013-07-15";}
+
+    revision "2019-08-20" {
+        description "Initial revision of southbound model";
+    }
+
+    rpc configure-termination-point-with-qos {
+      description "Configure Termination Point entities with Qos";
+      input {
+            leaf node-ref {
+                type topo:node-ref;
+            }
+            leaf termination-point-name {
+                type string;
+            }
+            leaf ingress-policing-rate {
+                type uint32;
+            }
+            leaf ingress-policing-burst {
+                type uint32;
+            }
+      }
+    }
+}

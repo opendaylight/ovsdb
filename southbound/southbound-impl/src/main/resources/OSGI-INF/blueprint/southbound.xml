@@ -23,4 +23,9 @@
     <property name="bridgesReconciliationExclusionList" value="${bridge-reconciliation-exclusion-list}"/>
   </bean>
 
+  <odl:rpc-implementation ref="southBoundRpcServiceImpl"/>
+
+  <service ref="southBoundRpcServiceImpl"
+    interface="org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.southboundrpc.rev190820.SouthBoundRpcService"/>
+
 </blueprint>

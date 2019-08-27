@@ -1,0 +1,104 @@
+/*
+ * Copyright © 2019 Ericsson India Global Services Pvt Ltd. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.ovsdb.southbound.rpc;
+
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import java.util.List;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
+import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.southbound.SouthboundProvider;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.southboundrpc.rev190820.ConfigureTerminationPointWithQosInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.southboundrpc.rev190820.ConfigureTerminationPointWithQosOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.southboundrpc.rev190820.SouthBoundRpcService;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class SouthBoundRpcServiceImpl implements SouthBoundRpcService {
+
+    /**
+     * The connection manager.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(SouthBoundRpcServiceImpl.class);
+    private final SouthboundProvider southboundProvider;
+
+    public SouthBoundRpcServiceImpl(SouthboundProvider southboundProvider) {
+        this.southboundProvider = southboundProvider;
+    }
+
+    @Override
+    public ListenableFuture<RpcResult<ConfigureTerminationPointWithQosOutput>> configureTerminationPointWithQos(
+        ConfigureTerminationPointWithQosInput input) {
+
+        RpcResultBuilder<ConfigureTerminationPointWithQosOutput> rpcResultBuilder = null;
+        NodeId parentNodeId = input.getNodeRef();
+        long ingressPolicyBurst = input.getIngressPolicingBurst();
+        long ingressPolicyRate = input.getIngressPolicingRate();
+        LOG.trace(
+            "configureTerminationPointWithQos called for {} for configure ingressPolicyBurst {}, "
+                + "ingressPolicyRate {} on node {}",
+            input.getTerminationPointName(), ingressPolicyBurst, ingressPolicyRate,parentNodeId.toString());
+        ReadWriteTransaction transaction = SouthboundProvider.getDb().newReadWriteTransaction();
+        InstanceIdentifier<Node> parentNodeIid = SouthboundMapper
+            .createInstanceIdentifier(parentNodeId);
+        Optional<Node> ovsdbNodeOpt = SouthboundUtil.readNode(transaction, parentNodeIid);
+        if (ovsdbNodeOpt.isPresent()) {
+            Node ovsdbNode = ovsdbNodeOpt.get();
+            List<TerminationPoint> terminationPointListForNode = ovsdbNode.getTerminationPoint();
+            boolean isterminationPointPresentinOper = Boolean.FALSE;
+
+            for (TerminationPoint port : terminationPointListForNode) {
+                if (port.getTpId().getValue().equals(input.getTerminationPointName())) {
+                    isterminationPointPresentinOper = Boolean.TRUE;
+                    break;
+                }
+            }
+            if (isterminationPointPresentinOper) {
+                OvsdbConnectionInstance connectionInstance = southboundProvider.getCm()
+                    .getConnectionInstance(parentNodeIid);
+                if (connectionInstance != null && connectionInstance.getHasDeviceOwnership()) {
+                    LOG.trace("Found connectionInstance {} and has Ownership", connectionInstance);
+                    connectionInstance
+                        .updateTerminationPointWithQosParameters(input.getTerminationPointName(),
+                            ingressPolicyBurst,
+                            ingressPolicyRate);
+                }
+            } else {
+                LOG.trace("Termination Point {} missing in Oper DS on Node {}",
+                    input.getTerminationPointName(), parentNodeId);
+                String errMsg = String
+                    .format("Termination Point {%s} missing in Oper DS on Node {%s}",
+                        input.getTerminationPointName(), parentNodeId.getValue());
+                rpcResultBuilder = RpcResultBuilder.<ConfigureTerminationPointWithQosOutput>failed()
+                    .withError(RpcError.ErrorType.APPLICATION, errMsg);
+                return Futures.immediateFuture(rpcResultBuilder.build());
+            }
+        } else {
+            LOG.error("Node {} not found in Oper DS for Updating Termination Point {}",
+                parentNodeId.getValue(),
+                input.getTerminationPointName());
+            String errMsg = String.format("Node {%s} missing in Oper DS on Node {%s}",
+                parentNodeId.getValue(), input.getTerminationPointName());
+            rpcResultBuilder = RpcResultBuilder.<ConfigureTerminationPointWithQosOutput>failed()
+                .withError(RpcError.ErrorType.APPLICATION, errMsg);
+            return Futures.immediateFuture(rpcResultBuilder.build());
+        }
+        return Futures.immediateFuture(
+            RpcResultBuilder.<ConfigureTerminationPointWithQosOutput>success().build());
+    }
+}

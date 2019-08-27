@@ -65,6 +65,11 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     // FIXME: get rid of this static
     @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
     private static DataBroker db;
+
+    public OvsdbConnectionManager getCm() {
+        return cm;
+    }
+
     private OvsdbConnectionManager cm;
     private TransactionInvoker txInvoker;
     private OvsdbDataTreeChangeListener ovsdbDataTreeChangeListener;

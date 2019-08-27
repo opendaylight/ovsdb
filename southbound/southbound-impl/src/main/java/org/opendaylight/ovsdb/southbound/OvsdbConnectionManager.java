@@ -76,7 +76,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private final TransactionInvoker txInvoker;
     private final Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers =
             new ConcurrentHashMap<>();
-    private final Map<InstanceIdentifier<Node>, OvsdbConnectionInstance> nodeIdVsConnectionInstance =
+    public final Map<InstanceIdentifier<Node>, OvsdbConnectionInstance> nodeIdVsConnectionInstance =
             new ConcurrentHashMap<>();
     private final Map<Entity, OvsdbConnectionInstance> entityConnectionMap =
             new ConcurrentHashMap<>();
@@ -84,6 +84,11 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private final OvsdbDeviceEntityOwnershipListener ovsdbDeviceEntityOwnershipListener;
     private final OvsdbConnection ovsdbConnection;
     private final ReconciliationManager reconciliationManager;
+
+    public InstanceIdentifierCodec getInstanceIdentifierCodec() {
+        return instanceIdentifierCodec;
+    }
+
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
     public OvsdbConnectionManager(DataBroker db,TransactionInvoker txInvoker,

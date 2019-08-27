@@ -134,7 +134,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
-    private void updateInterface(
+    public static void updateInterface(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
         updateOfPort(terminationPoint, ovsInterface);
@@ -206,7 +206,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         return operNode;
     }
 
-    private void updateOfPort(
+    private static void updateOfPort(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -216,7 +216,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
-    private void updateOfPortRequest(
+    private static void updateOfPortRequest(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -226,7 +226,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
-    private void updateInterfaceOptions(
+    private static void updateInterfaceOptions(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -241,7 +241,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
-    private void updateInterfaceExternalIds(
+    private static void updateInterfaceExternalIds(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -257,7 +257,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
-    private void updateInterfaceLldp(
+    private static void updateInterfaceLldp(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -277,7 +277,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
-    private void updateInterfaceOtherConfig(
+    private static void updateInterfaceOtherConfig(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -297,7 +297,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
-    private void updateInterfaceBfd(
+    private static void updateInterfaceBfd(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -317,7 +317,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
-    private void updateInterfacePolicing(
+    private static void updateInterfacePolicing(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 

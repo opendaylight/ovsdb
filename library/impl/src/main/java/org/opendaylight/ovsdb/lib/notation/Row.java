@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.notation;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -24,7 +23,9 @@ public class Row<E extends TableSchema<E>> {
     private TableSchema<E> tableSchema;
     protected Map<String, Column<E, ?>> columns = new HashMap<>();
 
-    public Row() {}
+    public Row() {
+
+    }
 
     public Row(TableSchema<E> tableSchema) {
         this.tableSchema = tableSchema;

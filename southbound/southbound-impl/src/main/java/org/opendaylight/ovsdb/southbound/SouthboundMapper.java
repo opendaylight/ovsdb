@@ -70,11 +70,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class SouthboundMapper {
-
-    private SouthboundMapper() { }
-
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundMapper.class);
     private static final String N_CONNECTIONS_STR = "n_connections";
+
+    private SouthboundMapper() {
+
+    }
 
     public static IpAddress createIpAddress(InetAddress address) {
         IpAddress ip = null;

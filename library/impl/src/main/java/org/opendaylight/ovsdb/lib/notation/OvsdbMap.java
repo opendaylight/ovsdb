@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.notation;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -19,10 +18,11 @@ import org.opendaylight.ovsdb.lib.notation.json.OvsdbMapSerializer;
 @JsonDeserialize(converter = Converter.MapConverter.class)
 @JsonSerialize(using = OvsdbMapSerializer.class)
 public class OvsdbMap<K, V> extends ForwardingMap<K, V> {
-
     private final Map<K, V> target = new HashMap<>();
 
-    public OvsdbMap() {}
+    public OvsdbMap() {
+
+    }
 
     public OvsdbMap(Map<K, V> value) {
         this.target.putAll(value);

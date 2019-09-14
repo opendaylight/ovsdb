@@ -51,8 +51,9 @@ import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 // This class needs to be mocked
 @SuppressWarnings("checkstyle:FinalClass")
 public class TransactUtils {
+    private TransactUtils() {
 
-    private TransactUtils() { }
+    }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> hasDataBefore() {
         return input -> input != null && input.getDataBefore() != null;

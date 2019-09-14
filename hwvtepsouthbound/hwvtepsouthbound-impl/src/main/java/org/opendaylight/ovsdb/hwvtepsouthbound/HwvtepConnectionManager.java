@@ -184,7 +184,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         LOG.info("Connecting to {}", HwvtepSouthboundUtil.connectionInfoToString(hwvtepGlobal.getConnectionInfo()));
         InetAddress ip = HwvtepSouthboundMapper.createInetAddress(hwvtepGlobal.getConnectionInfo().getRemoteIp());
         OvsdbClient client = ovsdbConnectionService
-                        .connect(ip, hwvtepGlobal.getConnectionInfo().getRemotePort().getValue());
+                        .connect(ip, hwvtepGlobal.getConnectionInfo().getRemotePort().getValue().toJava());
         if (client != null) {
             putInstanceIdentifier(hwvtepGlobal.getConnectionInfo(), iid.firstIdentifierOf(Node.class));
             HwvtepConnectionInstance hwvtepConnectionInstance = connectedButCallBacksNotRegistered(client);

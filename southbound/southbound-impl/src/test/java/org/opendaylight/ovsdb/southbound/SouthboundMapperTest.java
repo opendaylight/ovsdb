@@ -304,9 +304,9 @@ public class SouthboundMapperTest {
 
         ConnectionInfo returnedConnectionInfo = SouthboundMapper.createConnectionInfo(client);
         assertEquals(IpAddressBuilder.getDefaultInstance("1.2.3.4"), returnedConnectionInfo.getRemoteIp());
-        assertEquals(8080, (int) returnedConnectionInfo.getRemotePort().getValue());
+        assertEquals(8080, returnedConnectionInfo.getRemotePort().getValue().toJava());
         assertEquals(IpAddressBuilder.getDefaultInstance("1.2.3.5"), returnedConnectionInfo.getLocalIp());
-        assertEquals(8081, (int) returnedConnectionInfo.getLocalPort().getValue());
+        assertEquals(8081, returnedConnectionInfo.getLocalPort().getValue().toJava());
     }
 
     @Test

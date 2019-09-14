@@ -54,6 +54,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.Uint16;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
@@ -336,7 +337,7 @@ public class OvsdbConnectionManagerTest {
 //        when(OvsdbConnectionService.getService()).thenReturn(ovsdbConnection);
         PortNumber port = mock(PortNumber.class);
         when(connectionInfo.getRemotePort()).thenReturn(port);
-        when(port.getValue()).thenReturn(8080);
+        when(port.getValue()).thenReturn(Uint16.valueOf(8080));
         OvsdbClient client = mock(OvsdbClient.class);
         when(ovsdbConnection.connect(any(InetAddress.class), anyInt())).thenReturn(client);
 

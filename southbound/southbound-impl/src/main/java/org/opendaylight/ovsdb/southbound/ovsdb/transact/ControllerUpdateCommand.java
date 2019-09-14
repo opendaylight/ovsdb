@@ -70,10 +70,11 @@ public class ControllerUpdateCommand implements TransactCommand {
                             TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Controller.class);
                     controller.setTarget(controllerEntry.getTarget().getValue());
                     if (controllerEntry.getMaxBackoff() != null) {
-                        controller.setMaxBackoff(Collections.singleton(controllerEntry.getMaxBackoff()));
+                        controller.setMaxBackoff(Collections.singleton(controllerEntry.getMaxBackoff().toJava()));
                     }
                     if (controllerEntry.getInactivityProbe() != null) {
-                        controller.setInactivityProbe(Collections.singleton(controllerEntry.getInactivityProbe()));
+                        controller.setInactivityProbe(Collections.singleton(
+                            controllerEntry.getInactivityProbe().toJava()));
                     }
                     String controllerNamedUuidString = SouthboundMapper.getRandomUuid();
                     UUID controllerNamedUuid = new UUID(controllerNamedUuidString);

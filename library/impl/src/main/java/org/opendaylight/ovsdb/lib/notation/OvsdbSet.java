@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.notation;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -22,7 +21,9 @@ public class OvsdbSet<T> extends ForwardingSet<T> {
 
     Set<T> target = new HashSet<>();
 
-    public OvsdbSet() {}
+    public OvsdbSet() {
+
+    }
 
     public OvsdbSet(Set<T> backing) {
         this.target = backing;

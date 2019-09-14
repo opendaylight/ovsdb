@@ -94,7 +94,7 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
             This is to handle the controller initiated connection scenario, where all the controller will connect, but
             switch will have only one manager.
             */
-            if (onlyConnectedManager.getNumberOfConnections() > ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE) {
+            if (onlyConnectedManager.getNumberOfConnections().toJava() > ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE) {
                 return false;
             }
         }

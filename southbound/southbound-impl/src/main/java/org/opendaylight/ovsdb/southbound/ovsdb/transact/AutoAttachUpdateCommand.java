@@ -108,7 +108,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
                     final Map<Long, Long> newMappings = new HashMap<>();
                     for (final Mappings mappings : mappingsList) {
                         final Long mappingsValue = new Long(mappings.getMappingsValue().toString());
-                        newMappings.put(mappings.getMappingsKey(), mappingsValue);
+                        newMappings.put(mappings.getMappingsKey().toJava(), mappingsValue);
                     }
                     autoAttachWrapper.setMappings(newMappings);
                 }

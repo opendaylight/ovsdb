@@ -1351,7 +1351,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
                         terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
-                    Long ifIndex = ovsdbTerminationPointAugmentation.getIfindex();
+                    Long ifIndex = ovsdbTerminationPointAugmentation.getIfindex().toJava();
                     Assert.assertNotNull(ifIndex);
                     LOG.info("ifIndex: {} for the port:{}", ifIndex, portName);
                 }
@@ -1389,7 +1389,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
                         terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
-                    Long ofPort = ovsdbTerminationPointAugmentation.getOfport();
+                    Long ofPort = ovsdbTerminationPointAugmentation.getOfport().toJava();
                     // if ephemeral port 45002 is in use, ofPort is set to 1
                     Assert.assertTrue(ofPort.equals(ofportExpected) || ofPort.equals(1L));
                     LOG.info("ofPort: {}", ofPort);
@@ -1435,12 +1435,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
                         terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
-                    Long ofPort = ovsdbTerminationPointAugmentation.getOfport();
+                    Long ofPort = ovsdbTerminationPointAugmentation.getOfport().toJava();
                     // if ephemeral port 45008 is in use, ofPort is set to 1
                     Assert.assertTrue(ofPort.equals(ofportExpected) || ofPort.equals(1L));
                     LOG.info("ofPort: {}", ofPort);
 
-                    Integer ofPortRequest = ovsdbTerminationPointAugmentation.getOfportRequest();
+                    Integer ofPortRequest = ovsdbTerminationPointAugmentation.getOfportRequest().toJava();
                     Assert.assertTrue(ofPortRequest.equals(ofPortRequestExpected));
                     LOG.info("ofPortRequest: {}", ofPortRequest);
                 }
@@ -1750,7 +1750,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                     VlanId actualVlanId = ovsdbTerminationPointAugmentation.getVlanTag();
                     Assert.assertNotNull(actualVlanId);
-                    Integer actualVlanIdInt = actualVlanId.getValue();
+                    Integer actualVlanIdInt = actualVlanId.getValue().toJava();
                     Assert.assertEquals(createdVlanId, actualVlanIdInt);
                 }
             }
@@ -1783,7 +1783,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                     VlanId actualVlanId = ovsdbTerminationPointAugmentation.getVlanTag();
                     Assert.assertNotNull(actualVlanId);
-                    Integer actualVlanIdInt = actualVlanId.getValue();
+                    Integer actualVlanIdInt = actualVlanId.getValue().toJava();
                     Assert.assertEquals(updatedVlanId, actualVlanIdInt);
                 }
             }
@@ -2380,7 +2380,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         LogicalDatastoreType.OPERATIONAL);
                 Queues operQueue = getQueue(new Uri(testQueueId), ovsdbNodeAugmentation);
                 Assert.assertNotNull(operQueue);
-                Short operDscp = operQueue.getDscp();
+                Short operDscp = operQueue.getDscp().toJava();
                 Assert.assertNotNull(operDscp);
                 Assert.assertEquals(dscp, operDscp);
             }

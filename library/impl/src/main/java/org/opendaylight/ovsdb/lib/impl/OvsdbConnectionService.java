@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.impl;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -15,6 +14,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.AdaptiveRecvByteBufAllocator;
@@ -413,6 +413,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         }, CONNECTION_NOTIFIER_SERVICE);
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private static void handleNewPassiveConnection(final Channel channel) {
         if (!channel.isOpen()) {
             LOG.warn("Channel {} is not open, skipped further processing of the connection.",channel);
@@ -540,6 +542,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         return null;
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private static List<OvsdbClient> getPassiveClientsFromSameNode(OvsdbClient ovsdbClient) {
         List<OvsdbClient> passiveClients = new ArrayList<>();
         for (OvsdbClient client : CONNECTIONS.keySet()) {

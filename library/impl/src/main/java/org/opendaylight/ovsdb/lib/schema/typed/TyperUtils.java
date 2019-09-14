@@ -73,6 +73,8 @@ public final class TyperUtils {
         return tableSchema.column(columnName, metaClass);
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private static String getColumnName(Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
@@ -97,11 +99,15 @@ public final class TyperUtils {
         return null;
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private static boolean isGetTableSchema(Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         return typedColumn != null && typedColumn.method().equals(MethodType.GETTABLESCHEMA);
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private static boolean isGetRow(Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
@@ -194,6 +200,8 @@ public final class TyperUtils {
         return true;
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private static void checkColumnSchemaVersion(DatabaseSchema dbSchema, Method method) {
         Version fromVersion = getColumnFromVersion(method);
         Version untilVersion = getColumnUntilVersion(method);

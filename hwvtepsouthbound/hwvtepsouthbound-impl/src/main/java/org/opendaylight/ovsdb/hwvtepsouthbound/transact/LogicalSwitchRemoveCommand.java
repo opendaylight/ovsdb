@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -77,6 +78,8 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
         }
     }
 
+    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
+            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void removeLogicalSwitch(final TransactionBuilder transaction,
                                      final InstanceIdentifier<Node> nodeIid, final List<LogicalSwitches> lswitchList) {
         for (LogicalSwitches lswitch: lswitchList) {

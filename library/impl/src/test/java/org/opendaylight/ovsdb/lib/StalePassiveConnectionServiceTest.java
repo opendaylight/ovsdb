@@ -29,7 +29,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.ovsdb.lib.impl.StalePassiveConnectionService;
 import org.slf4j.Logger;

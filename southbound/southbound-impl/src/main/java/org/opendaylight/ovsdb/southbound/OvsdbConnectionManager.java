@@ -226,7 +226,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         // TODO and connected when writing to the operational store
         InetAddress ip = SouthboundMapper.createInetAddress(ovsdbNode.getConnectionInfo().getRemoteIp());
         OvsdbClient client = ovsdbConnection.connect(ip,
-                ovsdbNode.getConnectionInfo().getRemotePort().getValue());
+                ovsdbNode.getConnectionInfo().getRemotePort().getValue().toJava());
         // For connections from the controller to the ovs instance, the library doesn't call
         // this method for us
         if (client != null) {
@@ -624,7 +624,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 }
                 Futures.addCallback(readNodeFuture, new FutureCallback<Optional<Node>>() {
                     @Override
-                    public void onSuccess(@NonNull Optional<Node> node) {
+                    public void onSuccess(Optional<Node> node) {
                         if (node.isPresent()) {
                             LOG.info("Disconnected/Failed connection {} was controller initiated, attempting "
                                     + "reconnection", ovsdbNode.getConnectionInfo());

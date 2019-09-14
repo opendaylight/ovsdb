@@ -5,19 +5,18 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.message;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
-
 public class TableUpdates extends Response {
-
     private final Map<String, TableUpdate> map = new HashMap<>();
 
-    public TableUpdates() {}
+    public TableUpdates() {
+
+    }
 
     public TableUpdates(Map<String, TableUpdate> map) {
         this.map.putAll(map);

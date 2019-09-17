@@ -37,6 +37,42 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_b9af172b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListenerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "This is not mdsal transaction.\nThis transaction is towards device.\nHere we are checking if the corresponding json rpc insert call is made towards the device.\nin this case based on the no of inputs so many insert calls have to be made as per json rpc spec.\nthis is not tied to implementation.\nCan you suggest what is the alternative i can use here ?",
+      "parentUuid": "1a622d24_5981a349",
+      "revId": "d484ebed649ba7ea8872133987ad98cbc40f8b56",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_1dd1bcfb",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListenerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "we have a config listener HwvtepDataChangeListener which is supposed to listen for hwvtep topology config mdsal events and upon receiving the config mdsal events, it will make use of the ovsdbclient to send the update to actual device.\n\nHere in the test case we are writing some data in config data store. if the HwvtepDataChangeListener works correctly it will triger ovsdbclient.transact\n\nSo here we are trying to verify if ovsdbclient.transact is called or not, with right parameters or not, and how many no of times it is called.\n\nIf we had a ovsdbClient stub that could be used , but there is no such stub from the other library , for that reason ovsdbclient is mocked and verifying whether right interactions are made with it or not.\n\nEven better would be to write a ovsdbClientStub itself which i m planning as a followup patch.",
+      "parentUuid": "1a622d24_b9af172b",
+      "revId": "d484ebed649ba7ea8872133987ad98cbc40f8b56",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_b995578a",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListenerTest.java",
         "patchSetId": 3

@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a561d44_66e0a4fa",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/LogicalSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "get this id from util method so that every one uses that util method",
+      "range": {
+        "startLine": 75,
+        "startChar": 65,
+        "endLine": 75,
+        "endChar": 79
+      },
+      "revId": "dd91e2b71c321bf5c5b0da8303b092f03e5eb27d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561d44_7db78bf5",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/McastMacsRemoteUpdateCommand.java",
         "patchSetId": 1

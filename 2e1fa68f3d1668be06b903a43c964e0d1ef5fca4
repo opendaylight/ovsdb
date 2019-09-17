@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_5d103d01",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_cc94af39",
+      "range": {
+        "startLine": 7,
+        "startChar": 42,
+        "endLine": 7,
+        "endChar": 45
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_8c73d74c",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/pom.xml",
         "patchSetId": 2
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_3d1581f1",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_8c73d74c",
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_54c4a191",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/AbstractTransactCommand.java",
         "patchSetId": 2
@@ -53,6 +95,30 @@
       "writtenOn": "2016-12-09T07:02:49Z",
       "side": 1,
       "message": "please specify the reason as well, for other contributor to understand it better.",
+      "range": {
+        "startLine": 61,
+        "startChar": 8,
+        "endLine": 61,
+        "endChar": 12
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_9df935cb",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/AbstractTransactCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_54c4a191",
       "range": {
         "startLine": 61,
         "startChar": 8,
@@ -88,6 +154,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_7df6d9d8",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/AbstractTransactCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_34c12581",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 1
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_2cff2369",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/DependencyQueue.java",
         "patchSetId": 2
@@ -99,6 +189,30 @@
       "writtenOn": "2016-12-09T07:02:49Z",
       "side": 1,
       "message": "please limit the queue to 120 char.",
+      "range": {
+        "startLine": 30,
+        "startChar": 4,
+        "endLine": 30,
+        "endChar": 56
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_dd03adb6",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/DependencyQueue.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_2cff2369",
       "range": {
         "startLine": 30,
         "startChar": 4,
@@ -134,6 +248,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_bd0071ab",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/DependencyQueue.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_ec952be5",
+      "range": {
+        "startLine": 31,
+        "startChar": 25,
+        "endLine": 31,
+        "endChar": 56
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_0c04e779",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/DependencyQueue.java",
         "patchSetId": 2
@@ -145,6 +283,30 @@
       "writtenOn": "2016-12-09T07:02:49Z",
       "side": 1,
       "message": "please limit the queue to 120.",
+      "range": {
+        "startLine": 33,
+        "startChar": 4,
+        "endLine": 33,
+        "endChar": 51
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_1d2d2547",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/DependencyQueue.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_0c04e779",
       "range": {
         "startLine": 33,
         "startChar": 4,
@@ -180,6 +342,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_fd3149a3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/DependencyQueue.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_6cf8fb7c",
+      "range": {
+        "startLine": 34,
+        "startChar": 4,
+        "endLine": 34,
+        "endChar": 63
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_94be39fe",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/DependencyQueue.java",
         "patchSetId": 2
@@ -191,6 +377,30 @@
       "writtenOn": "2016-12-09T07:02:49Z",
       "side": 1,
       "message": "given that it\u0027s a matter of millisecond, it\u0027s good to move this in while loop and get the latest currentTime and pass it to isExpired.",
+      "range": {
+        "startLine": 100,
+        "startChar": 8,
+        "endLine": 100,
+        "endChar": 54
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_5d279d64",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/DependencyQueue.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_94be39fe",
       "range": {
         "startLine": 100,
         "startChar": 8,
@@ -226,6 +436,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_3d2c6147",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/McastMacsRemoteUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_d43711af",
+      "range": {
+        "startLine": 44,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 19
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_b43c1595",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteUpdateCommand.java",
         "patchSetId": 2
@@ -237,6 +471,54 @@
       "writtenOn": "2016-12-09T07:02:49Z",
       "side": 1,
       "message": "please make it final.",
+      "range": {
+        "startLine": 42,
+        "startChar": 4,
+        "endLine": 42,
+        "endChar": 18
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_9d20154b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_b43c1595",
+      "range": {
+        "startLine": 42,
+        "startChar": 4,
+        "endLine": 42,
+        "endChar": 18
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_fdd82955",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_b43c1595",
       "range": {
         "startLine": 42,
         "startChar": 4,
@@ -272,6 +554,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_7d1d390f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_74527dde",
+      "range": {
+        "startLine": 71,
+        "startChar": 61,
+        "endLine": 71,
+        "endChar": 76
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_d45ef1e8",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteUpdateCommand.java",
         "patchSetId": 2
@@ -283,6 +589,54 @@
       "writtenOn": "2016-12-09T07:02:49Z",
       "side": 1,
       "message": "please remove the commented code.",
+      "range": {
+        "startLine": 91,
+        "startChar": 8,
+        "endLine": 91,
+        "endChar": 65
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_bd17d1ec",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_d45ef1e8",
+      "range": {
+        "startLine": 91,
+        "startChar": 8,
+        "endLine": 91,
+        "endChar": 65
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_dd1a8d16",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_d45ef1e8",
       "range": {
         "startLine": 91,
         "startChar": 8,
@@ -318,6 +672,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_1dd4051f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_b46375b0",
+      "range": {
+        "startLine": 101,
+        "startChar": 27,
+        "endLine": 101,
+        "endChar": 34
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_145989fe",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UnMetDependencyGetter.java",
         "patchSetId": 2
@@ -341,6 +719,30 @@
     },
     {
       "key": {
+        "uuid": "1a622d24_5dde7d40",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UnMetDependencyGetter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_145989fe",
+      "range": {
+        "startLine": 40,
+        "startChar": 4,
+        "endLine": 40,
+        "endChar": 11
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a622d24_f45dedea",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UnMetDependencyGetter.java",
         "patchSetId": 2
@@ -352,6 +754,30 @@
       "writtenOn": "2016-12-09T07:02:49Z",
       "side": 1,
       "message": "does it make sense if we make these methods abstract?",
+      "range": {
+        "startLine": 125,
+        "startChar": 1,
+        "endLine": 131,
+        "endChar": 5
+      },
+      "revId": "2e1fa68f3d1668be06b903a43c964e0d1ef5fca4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a622d24_3de3c108",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UnMetDependencyGetter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a622d24_f45dedea",
       "range": {
         "startLine": 125,
         "startChar": 1,

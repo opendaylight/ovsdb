@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba068154_4c7c3b21",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/TransactionCommand.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "instead of forcing the other implementations of this class to implement this , added this default method.\n\nThe only usage of this method is from the test class which is written in this patch to track the progress of the transaction.",
+      "parentUuid": "da01753e_ab1cc514",
+      "revId": "905c086f2cf6cdcec491a08715a00bf7b935eb68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da01753e_eb688d89",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/TransactionInvokerImplTest.java",
         "patchSetId": 11
@@ -30,6 +48,24 @@
       "writtenOn": "2017-04-03T11:16:26Z",
       "side": 1,
       "message": "personally I would just directly throw new NullPointerException() here instead... ;-)",
+      "revId": "905c086f2cf6cdcec491a08715a00bf7b935eb68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba068154_8c9f435f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/TransactionInvokerImplTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da01753e_eb688d89",
       "revId": "905c086f2cf6cdcec491a08715a00bf7b935eb68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ba068154_6c9c9f6a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/TransactionInvokerImplTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da01753e_cbf829c7",
+      "revId": "905c086f2cf6cdcec491a08715a00bf7b935eb68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da01753e_abf5e5cc",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/TransactionInvokerImplTest.java",
         "patchSetId": 11
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "ba068154_cc882b25",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/TransactionInvokerImplTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da01753e_abf5e5cc",
+      "revId": "905c086f2cf6cdcec491a08715a00bf7b935eb68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da01753e_ebffeda8",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/TransactionInvokerImplTest.java",
         "patchSetId": 11
@@ -81,6 +153,24 @@
       "writtenOn": "2017-04-03T11:16:26Z",
       "side": 1,
       "message": "private static class ?",
+      "revId": "905c086f2cf6cdcec491a08715a00bf7b935eb68",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba068154_ac8de733",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/TransactionInvokerImplTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da01753e_ebffeda8",
       "revId": "905c086f2cf6cdcec491a08715a00bf7b935eb68",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

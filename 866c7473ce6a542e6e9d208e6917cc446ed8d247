@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_3394bf36",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/DataObjectModificationImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_408d1f31",
+      "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_a08233fe",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/DataTreeModificationImpl.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2016-08-02T14:31:15Z",
       "side": 1,
       "message": "This needs a license header.",
+      "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_739e3758",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/DataTreeModificationImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_a08233fe",
       "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_b39f2f50",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_80b577cf",
+      "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_e0c9cb5b",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2016-08-02T14:31:15Z",
       "side": 1,
       "message": "The \"throws\" clause should be more specific.",
+      "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_13ad4389",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_e0c9cb5b",
       "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "7a6b29fe_f3a9a77c",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_60ddbb14",
+      "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a6b29fe_602bfbeb",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2016-08-02T14:31:15Z",
       "side": 1,
       "message": "Please make this return changes instead of taking a collection to modify.",
+      "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_73b597cc",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/reconciliation/configuration/HwvtepReconcilationTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a6b29fe_602bfbeb",
       "revId": "866c7473ce6a542e6e9d208e6917cc446ed8d247",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

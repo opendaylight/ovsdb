@@ -25,6 +25,54 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_dc3f52b4",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fafc7978_ee4eea36",
+      "range": {
+        "startLine": 106,
+        "startChar": 16,
+        "endLine": 106,
+        "endChar": 84
+      },
+      "revId": "1e8ade53002ffe3e255efbeb3f63d6bbf7e39e21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_ee4eea36",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "Let me add a check here that if it is in reconciliation path  return immediately ( where db and changes are initialized to null as you can see in the above constructor which is used in case of reconciliation)\nAnd as suggested , will move the syntactic changes out of this review",
+      "parentUuid": "fafc7978_4ac0c94f",
+      "range": {
+        "startLine": 106,
+        "startChar": 16,
+        "endLine": 106,
+        "endChar": 84
+      },
+      "revId": "1e8ade53002ffe3e255efbeb3f63d6bbf7e39e21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_8a111106",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
         "patchSetId": 2
@@ -48,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_5c7362b4",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/HwvtepOperationalState.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "db is initialized in the contructor.",
+      "parentUuid": "fafc7978_8a111106",
+      "range": {
+        "startLine": 108,
+        "startChar": 12,
+        "endLine": 108,
+        "endChar": 55
+      },
+      "revId": "1e8ade53002ffe3e255efbeb3f63d6bbf7e39e21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_2a758531",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteRemoveCommand.java",
         "patchSetId": 2
@@ -59,6 +131,30 @@
       "writtenOn": "2017-03-09T14:46:11Z",
       "side": 1,
       "message": "can you please explain the reason for this change?",
+      "range": {
+        "startLine": 53,
+        "startChar": 8,
+        "endLine": 68,
+        "endChar": 107
+      },
+      "revId": "1e8ade53002ffe3e255efbeb3f63d6bbf7e39e21",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_0e024eb3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteRemoveCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 7785
+      },
+      "writtenOn": "2019-09-17T20:22:31Z",
+      "side": 1,
+      "message": "We are trying to get the ucast mac from device info cache instead of referring from operational datastore.\nDevice info cache is in sync with operational datastore.\nWhenever the remote ucast mac is received from the device it is added to the device cache along with putting in operational datastore.",
+      "parentUuid": "fafc7978_2a758531",
       "range": {
         "startLine": 53,
         "startChar": 8,

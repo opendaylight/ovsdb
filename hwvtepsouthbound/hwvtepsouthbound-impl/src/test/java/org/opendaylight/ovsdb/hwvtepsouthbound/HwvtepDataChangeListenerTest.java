@@ -228,6 +228,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     @Test
     public <T extends DataObject> void testUpdateMacsWithZeroLocators() throws Exception {
+        LOG.info("testUpdateMacsWithZeroLocators start");
         addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
@@ -243,8 +244,10 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         addData(OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
 
         resetOperations();
+        LOG.info("testUpdateMacsWithZeroLocators setting locator set to Empty");
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMac3WithZeroLocators);
         verify(Operations.op,  times(2)).delete(Matchers.any());
+        LOG.info("testUpdateMacsWithZeroLocators end");
     }
 
     @Test

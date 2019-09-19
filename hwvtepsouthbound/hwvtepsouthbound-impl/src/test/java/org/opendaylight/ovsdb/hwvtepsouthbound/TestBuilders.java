@@ -8,6 +8,8 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import static org.opendaylight.ovsdb.hwvtepsouthbound.DataChangeListenerTestBase.LOG;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,6 +63,7 @@ public final class TestBuilders {
         List<RemoteMcastMacs> remoteMcastMacses = new ArrayList<>();
         for (String[] row : data) {
             String[] teps = Arrays.copyOfRange(row, 2, row.length);
+            LOG.info("addRemoteMcastMacs teps {}", teps);
             remoteMcastMacses.add(TestBuilders.buildRemoteMcastMacs(iid, row[0], row[1], teps));
         }
         augmentationBuilder.setRemoteMcastMacs(remoteMcastMacses);

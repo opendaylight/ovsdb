@@ -105,6 +105,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         Map inTransitDependencies = new HashMap<>();
         Map configDependencies = new HashMap<>();
 
+        LOG.info("isRemoveCommand() {}, unMetDependencyGetter {}", isRemoveCommand(), unMetDependencyGetter);
         if (!isRemoveCommand() && unMetDependencyGetter != null) {
             inTransitDependencies = unMetDependencyGetter.getInTransitDependencies(getOperationalState(), data);
             configDependencies = unMetDependencyGetter.getUnMetConfigDependencies(getOperationalState(), data);
@@ -120,9 +121,14 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
             inTransitDependencies.put(classType, Collections.singletonList(key));
         }
 
+        LOG.info("HwvtepSouthboundUtil.isEmptyMap(configDependencies) {},"
+                + "HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies) {}",
+            HwvtepSouthboundUtil.isEmptyMap(configDependencies), HwvtepSouthboundUtil.isEmptyMap(
+            inTransitDependencies));
         if (HwvtepSouthboundUtil.isEmptyMap(configDependencies) && HwvtepSouthboundUtil.isEmptyMap(
                 inTransitDependencies)) {
             doDeviceTransaction(transaction, nodeIid, data, key, extraData);
+
             if (isRemoveCommand()) {
                 getDeviceInfo().clearConfigData((Class<? extends Identifiable>) classType, key);
             } else {

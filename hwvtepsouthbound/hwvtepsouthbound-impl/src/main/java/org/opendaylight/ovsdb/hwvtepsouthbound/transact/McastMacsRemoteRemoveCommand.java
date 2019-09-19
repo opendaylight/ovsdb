@@ -53,17 +53,26 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
         //Remove the ones whose locator set got emptied
         Map<InstanceIdentifier<Node>, List<RemoteMcastMacs>> updated =
                 extractUpdated(getChanges(),RemoteMcastMacs.class);
+        LOG.info("McastMacsRemoteRemoveCommand updated : {}", updated);
+        LOG.info("McastMacsRemoteRemoveCommand HwvtepSouthboundUtil.isEmptyMap : {}", HwvtepSouthboundUtil.isEmptyMap(updated));
         if (!HwvtepSouthboundUtil.isEmptyMap(updated)) {
             for (Entry<InstanceIdentifier<Node>, List<RemoteMcastMacs>> entry:
                     updated.entrySet()) {
+                LOG.info("McastMacsRemoteRemoveCommand Process Mcast Mac for {}", entry);
                 List<RemoteMcastMacs> updatedList = entry.getValue();
                 List<RemoteMcastMacs> tobeRemovedList = new ArrayList<>();
+                LOG.info("McastMacsRemoteRemoveCommand updatedList : {}", updatedList);
+                LOG.info("McastMacsRemoteRemoveCommand HwvtepSouthboundUtil.isEmpty : {}", HwvtepSouthboundUtil.isEmpty(updatedList));
                 if (!HwvtepSouthboundUtil.isEmpty(updatedList)) {
                     for (RemoteMcastMacs mac: updatedList) {
+                        LOG.info("McastMacsRemoteRemoveCommand mac : {}", mac);
+                        LOG.info("McastMacsRemoteRemoveCommand mac-locator set : {}", mac);
                         if (HwvtepSouthboundUtil.isEmpty(mac.getLocatorSet())) {
+                            LOG.info("McastMacsRemoteRemoveCommand mac {} added to tobeRemovedList", mac);
                             tobeRemovedList.add(mac);
                         }
                     }
+                    LOG.info("McastMacsRemoteRemoveCommand tobeRemovedList : {}", tobeRemovedList);
                     removeMcastMacRemote(transaction, entry.getKey(), tobeRemovedList);
                 }
             }
@@ -94,7 +103,7 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                                     final RemoteMcastMacs mac,
                                     final InstanceIdentifier macIid,
                                     final Object... extraData) {
-        LOG.debug("Removing remoteMcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
+        LOG.info("Removing remoteMcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
         HwvtepDeviceInfo.DeviceData operationalMacOptional =
                 getDeviceInfo().getDeviceOperData(RemoteMcastMacs.class, macIid);
         McastMacsRemote mcastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
@@ -103,8 +112,9 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
             //when mac entry is deleted, its referenced locator set and locators are deleted automatically.
             //TODO: locator in config DS is not deleted
             UUID macEntryUUID = operationalMacOptional.getUuid();
+            LOG.info("Calling delete on mac {}", macEntryUUID);
             mcastMacsRemote.getUuidColumn().setData(macEntryUUID);
-            transaction.add(op.delete(mcastMacsRemote.getSchema())
+                transaction.add(op.delete(mcastMacsRemote.getSchema())
                     .where(mcastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
             transaction.add(op.comment("McastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));
             updateCurrentTxDeleteData(RemoteMcastMacs.class, macIid, mac);

@@ -10,7 +10,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,7 +24,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
@@ -159,7 +159,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast macs + 2 locator sets + 3 termination points
-        verify(Operations.op,  times(7)).insert(Matchers.<McastMacsRemote>any());
+        verify(Operations.op,  times(7)).insert(ArgumentMatchers.<McastMacsRemote>any());
     }
 
     @Test
@@ -169,7 +169,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast macs + 2 locator sets + 3 termination points
-        verify(Operations.op,  times(7)).insert(Matchers.<McastMacsRemote>any());
+        verify(Operations.op,  times(7)).insert(ArgumentMatchers.<McastMacsRemote>any());
     }
 
     @Test
@@ -183,7 +183,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
         resetOperations();
         deleteData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
-        verify(Operations.op,  times(2)).delete(Matchers.any());
+        verify(Operations.op,  times(2)).delete(ArgumentMatchers.any());
     }
 
     @Test
@@ -200,7 +200,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast mac + 2 locator sets ( termination point already added )
-        verify(Operations.op,  times(4)).insert(Matchers.<McastMacsRemote>any());
+        verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
     }
 
     @Test
@@ -216,14 +216,14 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
-        verify(Operations.op,  times(4)).insert(Matchers.<McastMacsRemote>any());
+        verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
         addData(OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
 
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMac2);
-        verify(Operations.op,  times(2)).insert(Matchers.<McastMacsRemote>any());
-        verify(Operations.op,  times(2)).update(Matchers.<McastMacsRemote>any());
-        verify(Operations.op,  times(0)).delete(Matchers.any());
+        verify(Operations.op,  times(2)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(Operations.op,  times(2)).update(ArgumentMatchers.<McastMacsRemote>any());
+        verify(Operations.op,  times(0)).delete(ArgumentMatchers.any());
     }
 
     @Test
@@ -239,12 +239,12 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
-        verify(Operations.op,  times(4)).insert(Matchers.<McastMacsRemote>any());
+        verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
         addData(OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
 
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMac3WithZeroLocators);
-        verify(Operations.op,  times(2)).delete(Matchers.any());
+        verify(Operations.op,  times(2)).delete(ArgumentMatchers.any());
     }
 
     @Test
@@ -259,21 +259,21 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast mac + 2 locator sets ( termination point already added )
-        verify(Operations.op,  times(0)).insert(Matchers.<McastMacsRemote>any());
+        verify(Operations.op,  times(0)).insert(ArgumentMatchers.<McastMacsRemote>any());
         resetOperations();
         addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
         addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         connectionInstance.getDeviceInfo().onOperDataAvailable();
         //2 mcast mac + 2 locator sets ( termination point already added )
-        verify(Operations.op,  times(4)).insert(Matchers.<McastMacsRemote>any());
+        verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
 
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMac2);
-        verify(Operations.op,  times(0)).insert(Matchers.<McastMacsRemote>any());
+        verify(Operations.op,  times(0)).insert(ArgumentMatchers.<McastMacsRemote>any());
         addData(OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
         connectionInstance.getDeviceInfo().onOperDataAvailable();
-        verify(Operations.op,  times(2)).insert(Matchers.<McastMacsRemote>any());
-        verify(Operations.op,  times(2)).update(Matchers.<McastMacsRemote>any());
+        verify(Operations.op,  times(2)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(Operations.op,  times(2)).update(ArgumentMatchers.<McastMacsRemote>any());
     }
 
     private void verifyThatLogicalSwitchCreated() {

@@ -267,13 +267,17 @@ public final class TransactUtils {
             HwvtepDeviceInfo.DeviceData deviceData = hwvtepOperationalState.getDeviceInfo().getDeviceOperData(
                     TerminationPoint.class, iid);
             if (deviceData != null) {
-                PhysicalLocator locator = (PhysicalLocator) deviceData.getData();
-                locatorsInfo.add(new StringBuilder(locator.getUuid().toString()).append(" ")
-                        .append(locator.getDstIpColumn().getData()).toString());
+                Object data = deviceData.getData();
+                if (data instanceof PhysicalLocator) {
+                    PhysicalLocator locator = (PhysicalLocator) data;
+                    locatorsInfo.add(new StringBuilder(locator.getUuid().toString()).append(" ")
+                            .append(locator.getDstIpColumn().getData()).toString());
+                } else {
+                    LOG.debug("Ignoring unknown data {}", data);
+                }
             }
-        }
-        catch (Exception exp) {
-            LOG.warn("Failed to add to Transaction Histroy ",exp);
+        } catch (Exception exp) {
+            LOG.warn("Failed to add to Transaction History", exp);
         }
     }
 }

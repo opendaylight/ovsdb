@@ -12,7 +12,6 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,11 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -183,20 +179,18 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         port.setQos(uuidSet);
     }
 
+    @SuppressWarnings("IllegalCatch")
     private static OvsdbNodeAugmentation getOperNode(final OvsdbBridgeAugmentation operBridge) {
         @SuppressWarnings("unchecked")
         InstanceIdentifier<Node> iidNode = (InstanceIdentifier<Node>)operBridge.getManagedBy().getValue();
         OvsdbNodeAugmentation operNode = null;
-        ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction();
-        CheckedFuture<Optional<Node>, ReadFailedException> future =
-                transaction.read(LogicalDatastoreType.OPERATIONAL, iidNode);
-        try {
-            Optional<Node> nodeOptional = future.get();
+        try (ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
+            Optional<Node> nodeOptional = SouthboundUtil.readNode(transaction, iidNode);
             if (nodeOptional.isPresent()) {
                 operNode = nodeOptional.get().augmentation(OvsdbNodeAugmentation.class);
             }
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.warn("Error reading from datastore", e);
+        } catch (Exception exp) {
+            LOG.error("Error in getting the brideNode for {}", iidNode, exp);
         }
         return operNode;
     }

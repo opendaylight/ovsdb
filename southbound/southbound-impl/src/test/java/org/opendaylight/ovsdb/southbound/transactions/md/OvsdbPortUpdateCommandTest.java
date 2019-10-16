@@ -35,7 +35,9 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -75,8 +77,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.TrunksBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
@@ -177,7 +181,11 @@ public class OvsdbPortUpdateCommandTest {
         when(port.getNameColumn()).thenReturn(bridgeColumn);
         when(bridgeColumn.getData()).thenReturn(TERMINATION_POINT_NAME);
 
-        Optional<InstanceIdentifier<Node>> bridgeIid = Optional.of(mock(InstanceIdentifier.class));
+        InstanceIdentifier<Node> nodeIid = InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class, new NodeKey(new NodeId("nodeId")));
+
+        Optional<InstanceIdentifier<Node>> bridgeIid = Optional.of(nodeIid);
         PowerMockito.doReturn(bridgeIid).when(ovsdbPortUpdateCommand, "getTerminationPointBridge", any(UUID.class));
 
         NodeId bridgeId = mock(NodeId.class);
@@ -342,6 +350,10 @@ public class OvsdbPortUpdateCommandTest {
         PowerMockito.doReturn(optionalNode).when(ovsdbPortUpdateCommand, "readNode", any(ReadWriteTransaction.class),
                 any(InstanceIdentifier.class));
 
+        PowerMockito.mockStatic(SouthboundUtil.class);
+        PowerMockito.when(SouthboundUtil.readNode(Matchers.any(ReadWriteTransaction.class),
+                Matchers.any(InstanceIdentifier.class)))
+                .thenReturn(optionalNode);
         TerminationPointBuilder tpBuilder = mock(TerminationPointBuilder.class);
         PowerMockito.whenNew(TerminationPointBuilder.class).withNoArguments().thenReturn(tpBuilder);
         PowerMockito.whenNew(TpId.class).withAnyArguments().thenReturn(mock(TpId.class));
@@ -395,8 +407,12 @@ public class OvsdbPortUpdateCommandTest {
         PowerMockito.whenNew(Uuid.class).withAnyArguments().thenReturn(mock(Uuid.class));
         when(ovsdbTerminationPointBuilder.setInterfaceUuid(any(Uuid.class))).thenReturn(ovsdbTerminationPointBuilder);
         PowerMockito.mockStatic(SouthboundMapper.class);
-        PowerMockito.when(SouthboundMapper.createInterfaceType(anyString()))
-                .thenAnswer((Answer<Class<? extends InterfaceTypeBase>>) invocation -> InterfaceTypeInternal.class);
+        PowerMockito.when(SouthboundMapper.createInterfaceType(Matchers.anyString()))
+                .thenAnswer(new Answer<Class<? extends InterfaceTypeBase>>() {
+                    public Class<? extends InterfaceTypeBase> answer(InvocationOnMock invocation) throws Exception {
+                        return InterfaceTypeInternal.class;
+                    }
+                });
         when(ovsdbTerminationPointBuilder.setInterfaceType(any(Class.class))).thenReturn(ovsdbTerminationPointBuilder);
         suppress(method(OvsdbPortUpdateCommand.class, "updateOfPort", Interface.class,
                 OvsdbTerminationPointAugmentationBuilder.class));

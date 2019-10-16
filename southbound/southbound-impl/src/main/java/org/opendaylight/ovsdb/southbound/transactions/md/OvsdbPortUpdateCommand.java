@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -38,6 +38,7 @@ import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -209,15 +210,13 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         updateInterfaces(interfaceUpdate, tpAugmentationBuilder);
     }
 
+    @SuppressWarnings("IllegalCatch")
     private Optional<Node> readNode(final ReadWriteTransaction transaction, final InstanceIdentifier<Node> nodePath) {
         Optional<Node> node = Optional.absent();
         try {
-            node = transaction.read(
-                    LogicalDatastoreType.OPERATIONAL, nodePath)
-                    .checkedGet();
-        } catch (final ReadFailedException e) {
-            LOG.warn("Read Operational/DS for Node fail! {}",
-                    nodePath, e);
+            node = SouthboundUtil.readNode(transaction, nodePath);
+        } catch (Exception exp) {
+            LOG.error("Error in getting the Node for {}", nodePath, exp);
         }
         return node;
     }
@@ -242,7 +241,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         TpId tpId = new TpId(tpName);
 
         for (ManagedNodeEntry managedNodeEntry : managedNodes) {
-            Optional<Node> optManagedNode = readNode(transaction,
+            Optional<Node> optManagedNode = SouthboundUtil.readNode(transaction,
                     (InstanceIdentifier<Node>)managedNodeEntry.getBridgeRef().getValue());
             if (optManagedNode.isPresent()) {
                 Node managedNode = optManagedNode.get();

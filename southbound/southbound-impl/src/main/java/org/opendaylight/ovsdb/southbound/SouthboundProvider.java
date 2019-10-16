@@ -71,6 +71,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     private OvsdbConnectionManager cm;
     private TransactionInvoker txInvoker;
     private OvsdbDataTreeChangeListener ovsdbDataTreeChangeListener;
+    private OvsdbOperGlobalListener ovsdbOperGlobalListener;
     private final EntityOwnershipService entityOwnershipService;
     private EntityOwnershipCandidateRegistration registration;
     private SouthboundPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
@@ -117,6 +118,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         cm = new OvsdbConnectionManager(db, txInvoker, entityOwnershipService, ovsdbConnection,
                 instanceIdentifierCodec, upgradeState);
         ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(db, cm, instanceIdentifierCodec);
+        ovsdbOperGlobalListener = new OvsdbOperGlobalListener(db, cm, txInvoker);
 
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
@@ -153,6 +155,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         }
         cm.close();
         ovsdbDataTreeChangeListener.close();
+        ovsdbOperGlobalListener.close();
         registration.close();
         providerOwnershipChangeListener.close();
         if (operTopologyRegistration != null) {

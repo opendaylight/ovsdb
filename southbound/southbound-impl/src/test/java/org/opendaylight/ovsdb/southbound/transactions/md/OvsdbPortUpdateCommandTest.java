@@ -35,7 +35,9 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -177,9 +179,12 @@ public class OvsdbPortUpdateCommandTest {
         when(port.getNameColumn()).thenReturn(bridgeColumn);
         when(bridgeColumn.getData()).thenReturn(TERMINATION_POINT_NAME);
 
-        Optional<InstanceIdentifier<Node>> bridgeIid = Optional.of(mock(InstanceIdentifier.class));
+        Optional<InstanceIdentifier<Node>> bridgeIid = mock(Optional.class);
         PowerMockito.doReturn(bridgeIid).when(ovsdbPortUpdateCommand, "getTerminationPointBridge", any(UUID.class));
 
+        //bridgeIid.isPresent() is true
+        when(bridgeIid.isPresent()).thenReturn(true);
+        when(bridgeIid.get()).thenReturn(mock(InstanceIdentifier.class));
         NodeId bridgeId = mock(NodeId.class);
         PowerMockito.mockStatic(SouthboundMapper.class);
         PowerMockito.when(SouthboundMapper.createManagedNodeId(any(InstanceIdentifier.class))).thenReturn(bridgeId);
@@ -342,6 +347,10 @@ public class OvsdbPortUpdateCommandTest {
         PowerMockito.doReturn(optionalNode).when(ovsdbPortUpdateCommand, "readNode", any(ReadWriteTransaction.class),
                 any(InstanceIdentifier.class));
 
+        PowerMockito.mockStatic(SouthboundUtil.class);
+        PowerMockito.when(SouthboundUtil.readNode(Matchers.any(ReadWriteTransaction.class),
+                Matchers.any(InstanceIdentifier.class)))
+                .thenReturn(optionalNode);
         TerminationPointBuilder tpBuilder = mock(TerminationPointBuilder.class);
         PowerMockito.whenNew(TerminationPointBuilder.class).withNoArguments().thenReturn(tpBuilder);
         PowerMockito.whenNew(TpId.class).withAnyArguments().thenReturn(mock(TpId.class));
@@ -395,8 +404,12 @@ public class OvsdbPortUpdateCommandTest {
         PowerMockito.whenNew(Uuid.class).withAnyArguments().thenReturn(mock(Uuid.class));
         when(ovsdbTerminationPointBuilder.setInterfaceUuid(any(Uuid.class))).thenReturn(ovsdbTerminationPointBuilder);
         PowerMockito.mockStatic(SouthboundMapper.class);
-        PowerMockito.when(SouthboundMapper.createInterfaceType(anyString()))
-                .thenAnswer((Answer<Class<? extends InterfaceTypeBase>>) invocation -> InterfaceTypeInternal.class);
+        PowerMockito.when(SouthboundMapper.createInterfaceType(Matchers.anyString()))
+                .thenAnswer(new Answer<Class<? extends InterfaceTypeBase>>() {
+                    public Class<? extends InterfaceTypeBase> answer(InvocationOnMock invocation) throws Exception {
+                        return InterfaceTypeInternal.class;
+                    }
+                });
         when(ovsdbTerminationPointBuilder.setInterfaceType(any(Class.class))).thenReturn(ovsdbTerminationPointBuilder);
         suppress(method(OvsdbPortUpdateCommand.class, "updateOfPort", Interface.class,
                 OvsdbTerminationPointAugmentationBuilder.class));

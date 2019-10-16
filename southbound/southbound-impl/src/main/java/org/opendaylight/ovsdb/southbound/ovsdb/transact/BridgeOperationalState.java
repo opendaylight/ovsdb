@@ -9,17 +9,11 @@
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
@@ -35,48 +29,22 @@ import org.slf4j.LoggerFactory;
 
 public class BridgeOperationalState {
     private static final Logger LOG = LoggerFactory.getLogger(BridgeOperationalState.class);
-    private final Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
+    private DataBroker db;
 
     public BridgeOperationalState(DataBroker db, DataChangeEvent changes) {
-        try (ReadOnlyTransaction transaction = db.newReadOnlyTransaction()) {
-            Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
-                    TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
-            for (Entry<InstanceIdentifier<Node>, Node> entry: nodeCreateOrUpdate.entrySet()) {
-                CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture =
-                        transaction.read(LogicalDatastoreType.OPERATIONAL, entry.getKey());
-                try {
-                    Optional<Node> nodeOptional = nodeFuture.get();
-                    if (nodeOptional.isPresent()) {
-                        operationalNodes.put(entry.getKey(), nodeOptional.get());
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    LOG.warn("Error reading from datastore",e);
-                }
-            }
-        }
+        this.db = db;
     }
 
     public BridgeOperationalState(DataBroker db, Collection<DataTreeModification<Node>> changes) {
-        try (ReadOnlyTransaction transaction = db.newReadOnlyTransaction()) {
-            Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdateOrRemove =
-                    TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
-            for (Entry<InstanceIdentifier<Node>, Node> entry : nodeCreateOrUpdateOrRemove.entrySet()) {
-                try {
-                    Optional<Node> nodeOptional =
-                            transaction.read(LogicalDatastoreType.OPERATIONAL, entry.getKey()).checkedGet();
-                    if (nodeOptional.isPresent()) {
-                        operationalNodes.put(entry.getKey(), nodeOptional.get());
-                    }
-                } catch (ReadFailedException e) {
-                    LOG.warn("Error reading from datastore", e);
-                }
-            }
-        }
+        this.db = db;
     }
 
     public Optional<Node> getBridgeNode(InstanceIdentifier<?> iid) {
         InstanceIdentifier<Node> nodeIid = iid.firstIdentifierOf(Node.class);
-        return Optional.fromNullable(operationalNodes.get(nodeIid));
+        ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
+        Optional<Node> bridgeNode = SouthboundUtil.readNode(transaction, nodeIid);
+        transaction.close();
+        return bridgeNode;
     }
 
     public Optional<OvsdbBridgeAugmentation> getOvsdbBridgeAugmentation(InstanceIdentifier<?> iid) {

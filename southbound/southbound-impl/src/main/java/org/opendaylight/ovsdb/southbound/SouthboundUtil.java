@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
@@ -28,6 +28,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,15 +86,21 @@ public final class SouthboundUtil {
         }
     }
 
-    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNode(
-            ReadWriteTransaction transaction, final InstanceIdentifier<D> connectionIid) {
-        Optional<D> node = Optional.absent();
+    public static <D extends DataObject> Optional<D> readNode(ReadTransaction transaction,
+                                                              InstanceIdentifier<D> connectionIid) {
+        Optional<D> node;
         try {
-            node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid).checkedGet();
-        } catch (final ReadFailedException e) {
+            if (OvsdbOperGlobalListener.OPER_NODE_CACHE.containsKey(connectionIid)) {
+                node = Optional.of((D)OvsdbOperGlobalListener.OPER_NODE_CACHE.get(connectionIid));
+            } else {
+                node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid).checkedGet();
+            }
+        } catch (ReadFailedException e) {
             LOG.warn("Read Operational/DS for Node failed! {}", connectionIid, e);
+            throw new RuntimeException(e);
         }
         return node;
+
     }
 
     @VisibleForTesting
@@ -149,5 +156,19 @@ public final class SouthboundUtil {
 
     public static void schemaMismatchLog(String column, String table, SchemaVersionMismatchException ex) {
         LOG.debug(SCHEMA_VERSION_MISMATCH, column, table, SouthboundConstants.OPEN_V_SWITCH, ex.getMessage());
+    }
+
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    public static String getOvsdbNodeId(InstanceIdentifier<Node> nodeIid) {
+        String nodeId = "";
+        if (nodeIid != null) {
+            try {
+                nodeId = nodeIid.toString();
+                nodeId = nodeIid.firstKeyOf(Node.class).getNodeId().getValue();
+            } catch (Exception exp) {
+                LOG.debug("Exception in getting the value from {} ", nodeIid);
+            }
+        }
+        return nodeId;
     }
 }

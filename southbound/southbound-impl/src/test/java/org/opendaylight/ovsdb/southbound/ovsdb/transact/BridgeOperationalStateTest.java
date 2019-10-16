@@ -21,15 +21,17 @@ import static org.powermock.reflect.Whitebox.getField;
 
 import com.google.common.base.Optional;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
@@ -45,16 +47,20 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ SouthboundUtil.class })
 public class BridgeOperationalStateTest {
     private final Node nd = new NodeBuilder().setNodeId(new NodeId("foo")).build();
     private final InstanceIdentifier<?> iid = InstanceIdentifier.create(Topology.class);
 
     @Mock private BridgeOperationalState briOperationState;
+    @Mock private DataBroker db;
     private InstanceIdentifier<ProtocolEntry> protocolEntry;
     private InstanceIdentifier<Node> iidNode;
-    private Map<InstanceIdentifier<Node>, Node> operationalNodes;
 
     @Before
     public void setUp() throws Exception {
@@ -66,20 +72,32 @@ public class BridgeOperationalStateTest {
 
         briOperationState = mock(BridgeOperationalState.class, Mockito.CALLS_REAL_METHODS);
 
-        operationalNodes = new HashMap<>();
-        operationalNodes.put(iidNode, nd);
-        getField(BridgeOperationalState.class,"operationalNodes").set(briOperationState, operationalNodes);
+        getField(BridgeOperationalState.class,"db").set(briOperationState, db);
     }
 
     @Test
     public void testGetBridgeNode() {
-        Optional<Node> optNodes = briOperationState.getBridgeNode(iid);
+        PowerMockito.mockStatic(SouthboundUtil.class);
+        PowerMockito.when(SouthboundUtil.readNode(any(ReadTransaction.class), any(InstanceIdentifier.class)))
+              .thenReturn(Optional.absent());
+        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
+        PowerMockito.when(db.newReadOnlyTransaction()).thenReturn(transaction);
+        InstanceIdentifier<Node> nodeIid = InstanceIdentifier.create(NetworkTopology.class).child(Topology.class)
+                .child(Node.class);
+        Optional<Node> optNodes = briOperationState.getBridgeNode(nodeIid);
         assertEquals(Optional.absent(), optNodes);
     }
 
     @Test
     public void testGetOvsdbBridgeAugmentation() throws Exception {
-        Optional<OvsdbBridgeAugmentation> optOvsdbBri = briOperationState.getOvsdbBridgeAugmentation(iid);
+        PowerMockito.mockStatic(SouthboundUtil.class);
+        PowerMockito.when(SouthboundUtil.readNode(any(ReadTransaction.class), any(InstanceIdentifier.class)))
+                .thenReturn(Optional.absent());
+        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
+        PowerMockito.when(db.newReadOnlyTransaction()).thenReturn(transaction);
+        InstanceIdentifier<Node> nodeIid = InstanceIdentifier.create(NetworkTopology.class).child(Topology.class)
+                .child(Node.class);
+        Optional<OvsdbBridgeAugmentation> optOvsdbBri = briOperationState.getOvsdbBridgeAugmentation(nodeIid);
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertNotNull(optOvsdbBri);
         assertTrue(optOvsdbBri.equals(Optional.absent()));
@@ -96,7 +114,14 @@ public class BridgeOperationalStateTest {
 
     @Test
     public void testGetBridgeTerminationPoint() throws Exception {
-        Optional<TerminationPoint> optTerm = briOperationState.getBridgeTerminationPoint(iid);
+        PowerMockito.mockStatic(SouthboundUtil.class);
+        PowerMockito.when(SouthboundUtil.readNode(any(ReadTransaction.class), any(InstanceIdentifier.class)))
+                .thenReturn(Optional.absent());
+        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
+        PowerMockito.when(db.newReadOnlyTransaction()).thenReturn(transaction);
+        InstanceIdentifier<Node> nodeIid = InstanceIdentifier.create(NetworkTopology.class).child(Topology.class)
+                .child(Node.class);
+        Optional<TerminationPoint> optTerm = briOperationState.getBridgeTerminationPoint(nodeIid);
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertNotNull(optTerm);
         assertTrue(optTerm.equals(Optional.absent()));
@@ -119,8 +144,15 @@ public class BridgeOperationalStateTest {
 
     @Test
     public void testGetOvsdbTerminationPointAugmentation() {
+        PowerMockito.mockStatic(SouthboundUtil.class);
+        PowerMockito.when(SouthboundUtil.readNode(any(ReadTransaction.class), any(InstanceIdentifier.class)))
+                .thenReturn(Optional.absent());
+        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
+        PowerMockito.when(db.newReadOnlyTransaction()).thenReturn(transaction);
+        InstanceIdentifier<Node> nodeIid = InstanceIdentifier.create(NetworkTopology.class).child(Topology.class)
+                .child(Node.class);
         Optional<OvsdbTerminationPointAugmentation> optOvsdbTermPoint = briOperationState
-                .getOvsdbTerminationPointAugmentation(iid);
+                .getOvsdbTerminationPointAugmentation(nodeIid);
         assertNotNull(optOvsdbTermPoint);
         verify(briOperationState, times(1)).getBridgeTerminationPoint(any(InstanceIdentifier.class));
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
@@ -139,7 +171,14 @@ public class BridgeOperationalStateTest {
 
     @Test
     public void testGetControllerEntry() {
-        Optional<ControllerEntry> optController = briOperationState.getControllerEntry(iid);
+        PowerMockito.mockStatic(SouthboundUtil.class);
+        PowerMockito.when(SouthboundUtil.readNode(any(ReadTransaction.class), any(InstanceIdentifier.class)))
+                .thenReturn(Optional.absent());
+        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
+        PowerMockito.when(db.newReadOnlyTransaction()).thenReturn(transaction);
+        InstanceIdentifier<Node> nodeIid = InstanceIdentifier.create(NetworkTopology.class).child(Topology.class)
+                .child(Node.class);
+        Optional<ControllerEntry> optController = briOperationState.getControllerEntry(nodeIid);
         verify(briOperationState, times(1)).getOvsdbBridgeAugmentation(any(InstanceIdentifier.class));
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertNotNull(optController);
@@ -148,7 +187,15 @@ public class BridgeOperationalStateTest {
 
     @Test
     public void testGetProtocolEntry() throws Exception {
-        Optional<ProtocolEntry> optProtocolEntry = briOperationState.getProtocolEntry(protocolEntry);
+        PowerMockito.mockStatic(SouthboundUtil.class);
+        PowerMockito.when(SouthboundUtil.readNode(any(ReadTransaction.class), any(InstanceIdentifier.class)))
+                .thenReturn(Optional.absent());
+        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
+        PowerMockito.when(db.newReadOnlyTransaction()).thenReturn(transaction);
+        InstanceIdentifier<ProtocolEntry> protocolEntryIid = InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class).child(Node.class)
+                .augmentation(OvsdbBridgeAugmentation.class).child(ProtocolEntry.class);
+        Optional<ProtocolEntry> optProtocolEntry = briOperationState.getProtocolEntry(protocolEntryIid);
         verify(briOperationState, times(1)).getOvsdbBridgeAugmentation(any(InstanceIdentifier.class));
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertNotNull(optProtocolEntry);

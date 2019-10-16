@@ -12,7 +12,6 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,11 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -35,6 +31,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -195,16 +192,12 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         InstanceIdentifier<Node> iidNode = (InstanceIdentifier<Node>)operBridge.getManagedBy().getValue();
         OvsdbNodeAugmentation operNode = null;
         ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction();
-        CheckedFuture<Optional<Node>, ReadFailedException> future =
-                transaction.read(LogicalDatastoreType.OPERATIONAL, iidNode);
-        try {
-            Optional<Node> nodeOptional = future.get();
-            if (nodeOptional.isPresent()) {
-                operNode = nodeOptional.get().augmentation(OvsdbNodeAugmentation.class);
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.warn("Error reading from datastore", e);
+        Optional<Node> nodeOptional = SouthboundUtil.readNode(transaction, iidNode);
+        if (nodeOptional.isPresent()) {
+            operNode = nodeOptional.get().augmentation(OvsdbNodeAugmentation.class);
         }
+        transaction.close();
+
         return operNode;
     }
 

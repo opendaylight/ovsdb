@@ -38,6 +38,7 @@ import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -242,7 +243,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         TpId tpId = new TpId(tpName);
 
         for (ManagedNodeEntry managedNodeEntry : managedNodes) {
-            Optional<Node> optManagedNode = readNode(transaction,
+            Optional<Node> optManagedNode = SouthboundUtil.readNode(transaction,
                     (InstanceIdentifier<Node>)managedNodeEntry.getBridgeRef().getValue());
             if (optManagedNode.isPresent()) {
                 Node managedNode = optManagedNode.get();

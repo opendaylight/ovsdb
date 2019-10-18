@@ -24,25 +24,26 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.binding.api.Transaction;
+import org.opendaylight.mdsal.binding.api.TransactionChain;
+import org.opendaylight.mdsal.binding.api.TransactionChainListener;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class TransactionInvokerImpl implements TransactionInvoker,TransactionChainListener, Runnable, AutoCloseable {
+public class TransactionInvokerImpl implements TransactionInvoker, TransactionChainListener, Runnable, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionInvokerImpl.class);
     private static final int QUEUE_SIZE = 10000;
-    private BindingTransactionChain chain;
+    private TransactionChain chain;
     private final DataBroker db;
     private final BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
     private final BlockingQueue<ReadWriteTransaction> successfulTransactionQueue
         = new LinkedBlockingQueue<>(QUEUE_SIZE);
-    private final BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQueue
+    private final BlockingQueue<Transaction> failedTransactionQueue
         = new LinkedBlockingQueue<>(QUEUE_SIZE);
     private final ExecutorService executor;
     private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand
@@ -67,14 +68,14 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     }
 
     @Override
-    public void onTransactionChainFailed(TransactionChain<?, ?> chainArg,
-            AsyncTransaction<?, ?> transaction, Throwable cause) {
+    public void onTransactionChainFailed(@NonNull TransactionChain transactionChain, @NonNull Transaction transaction,
+            @NonNull Throwable cause) {
         LOG.error("Failed to write operational topology", cause);
         offerFailedTransaction(transaction);
     }
 
     @Override
-    public void onTransactionChainSuccessful(TransactionChain<?, ?> chainArg) {
+    public void onTransactionChainSuccessful(TransactionChain chainArg) {
         // NO OP
     }
 
@@ -98,9 +99,9 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                     transactionInFlight = transaction;
                     recordPendingTransaction(command, transaction);
                     command.execute(transaction);
-                    Futures.addCallback(transaction.submit(), new FutureCallback<Void>() {
+                    Futures.addCallback(transaction.commit(), new FutureCallback<CommitInfo>() {
                         @Override
-                        public void onSuccess(final Void result) {
+                        public void onSuccess(final CommitInfo result) {
                             if (!successfulTransactionQueue.offer(transaction)) {
                                 LOG.error("successfulTransactionQueue is full (size: {}) - could not offer {}",
                                         successfulTransactionQueue.size(), transaction);
@@ -128,7 +129,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         }
     }
 
-    private void offerFailedTransaction(AsyncTransaction<?, ?> transaction) {
+    private void offerFailedTransaction(Transaction transaction) {
         if (!failedTransactionQueue.offer(transaction)) {
             LOG.warn("failedTransactionQueue is full (size: {})", failedTransactionQueue.size());
         }
@@ -136,7 +137,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     @VisibleForTesting
     List<TransactionCommand> extractResubmitCommands() {
-        AsyncTransaction<?, ?> transaction = failedTransactionQueue.poll();
+        Transaction transaction = failedTransactionQueue.poll();
         List<TransactionCommand> commands = new ArrayList<>();
         if (transaction != null) {
             int index = pendingTransactions.lastIndexOf(transaction);

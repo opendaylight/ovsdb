@@ -9,16 +9,16 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import com.google.common.base.Optional;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -138,7 +138,7 @@ public class AutoAttachRemovedCommand implements TransactCommand {
         }
         OvsdbBridgeAugmentation bridge = null;
         final InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
-        try (ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
+        try (ReadTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
             final Optional<Node> nodeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, nodeIid).get();
             if (nodeOptional.isPresent()) {
                 final List<ManagedNodeEntry> managedNodes =
@@ -149,7 +149,7 @@ public class AutoAttachRemovedCommand implements TransactCommand {
                             .firstIdentifierOf(Node.class).augmentation(OvsdbBridgeAugmentation.class);
                     final Optional<OvsdbBridgeAugmentation> optionalBridge =
                             transaction.read(LogicalDatastoreType.OPERATIONAL, brIid).get();
-                    bridge = optionalBridge.orNull();
+                    bridge = optionalBridge.orElse(null);
                     if (bridge != null && bridge.getAutoAttach() != null
                             && bridge.getAutoAttach().equals(aaUuid)) {
                         return bridge;

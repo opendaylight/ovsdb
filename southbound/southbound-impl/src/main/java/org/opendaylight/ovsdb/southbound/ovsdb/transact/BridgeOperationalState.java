@@ -8,18 +8,17 @@
 
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
@@ -38,11 +37,11 @@ public class BridgeOperationalState {
     private final Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
 
     public BridgeOperationalState(DataBroker db, DataChangeEvent changes) {
-        try (ReadOnlyTransaction transaction = db.newReadOnlyTransaction()) {
+        try (ReadTransaction transaction = db.newReadOnlyTransaction()) {
             Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdate =
                     TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
             for (Entry<InstanceIdentifier<Node>, Node> entry: nodeCreateOrUpdate.entrySet()) {
-                CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture =
+                FluentFuture<Optional<Node>> nodeFuture =
                         transaction.read(LogicalDatastoreType.OPERATIONAL, entry.getKey());
                 try {
                     Optional<Node> nodeOptional = nodeFuture.get();
@@ -57,17 +56,17 @@ public class BridgeOperationalState {
     }
 
     public BridgeOperationalState(DataBroker db, Collection<DataTreeModification<Node>> changes) {
-        try (ReadOnlyTransaction transaction = db.newReadOnlyTransaction()) {
+        try (ReadTransaction transaction = db.newReadOnlyTransaction()) {
             Map<InstanceIdentifier<Node>, Node> nodeCreateOrUpdateOrRemove =
                     TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, Node.class);
             for (Entry<InstanceIdentifier<Node>, Node> entry : nodeCreateOrUpdateOrRemove.entrySet()) {
                 try {
                     Optional<Node> nodeOptional =
-                            transaction.read(LogicalDatastoreType.OPERATIONAL, entry.getKey()).checkedGet();
+                            transaction.read(LogicalDatastoreType.OPERATIONAL, entry.getKey()).get();
                     if (nodeOptional.isPresent()) {
                         operationalNodes.put(entry.getKey(), nodeOptional.get());
                     }
-                } catch (ReadFailedException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     LOG.warn("Error reading from datastore", e);
                 }
             }
@@ -76,15 +75,15 @@ public class BridgeOperationalState {
 
     public Optional<Node> getBridgeNode(InstanceIdentifier<?> iid) {
         InstanceIdentifier<Node> nodeIid = iid.firstIdentifierOf(Node.class);
-        return Optional.fromNullable(operationalNodes.get(nodeIid));
+        return Optional.ofNullable(operationalNodes.get(nodeIid));
     }
 
     public Optional<OvsdbBridgeAugmentation> getOvsdbBridgeAugmentation(InstanceIdentifier<?> iid) {
         Optional<Node> nodeOptional = getBridgeNode(iid);
         if (nodeOptional.isPresent()) {
-            return Optional.fromNullable(nodeOptional.get().augmentation(OvsdbBridgeAugmentation.class));
+            return Optional.ofNullable(nodeOptional.get().augmentation(OvsdbBridgeAugmentation.class));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<TerminationPoint> getBridgeTerminationPoint(InstanceIdentifier<?> iid) {
@@ -103,15 +102,15 @@ public class BridgeOperationalState {
                 LOG.debug("TerminationPoints or Operational BridgeNode missing for {}", iid);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<OvsdbTerminationPointAugmentation> getOvsdbTerminationPointAugmentation(InstanceIdentifier<?> iid) {
         Optional<TerminationPoint> tpOptional = getBridgeTerminationPoint(iid);
         if (tpOptional.isPresent()) {
-            return Optional.fromNullable(tpOptional.get().augmentation(OvsdbTerminationPointAugmentation.class));
+            return Optional.ofNullable(tpOptional.get().augmentation(OvsdbTerminationPointAugmentation.class));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<ControllerEntry> getControllerEntry(InstanceIdentifier<?> iid) {
@@ -128,7 +127,7 @@ public class BridgeOperationalState {
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<ProtocolEntry> getProtocolEntry(InstanceIdentifier<ProtocolEntry> iid) {
@@ -145,7 +144,7 @@ public class BridgeOperationalState {
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
 }

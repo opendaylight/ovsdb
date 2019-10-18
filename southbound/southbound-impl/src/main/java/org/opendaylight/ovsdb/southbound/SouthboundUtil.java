@@ -8,20 +8,17 @@
 package org.opendaylight.ovsdb.southbound;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
@@ -51,50 +48,48 @@ public final class SouthboundUtil {
         try {
             OvsdbNodeRef ref = mn.getManagedBy();
             if (ref != null && ref.getValue() != null) {
-                ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
-                @SuppressWarnings("unchecked")
-                // Note: erasure makes this safe in combination with the typecheck below
-                InstanceIdentifier<Node> path = (InstanceIdentifier<Node>) ref.getValue();
+                try (ReadTransaction transaction = db.newReadOnlyTransaction()) {
+                    @SuppressWarnings("unchecked")
+                    // Note: erasure makes this safe in combination with the typecheck below
+                        InstanceIdentifier<Node> path = (InstanceIdentifier<Node>) ref.getValue();
 
-                CheckedFuture<Optional<Node>, ReadFailedException> nf = transaction.read(
-                        LogicalDatastoreType.OPERATIONAL, path);
-                transaction.close();
-                Optional<Node> optional = nf.get();
-                if (optional != null && optional.isPresent()) {
-                    OvsdbNodeAugmentation ovsdbNode = null;
-                    Node node = optional.get();
-                    if (node instanceof OvsdbNodeAugmentation) {
-                        ovsdbNode = (OvsdbNodeAugmentation) node;
-                    } else if (node != null) {
-                        ovsdbNode = node.augmentation(OvsdbNodeAugmentation.class);
-                    }
-                    if (ovsdbNode != null) {
-                        return Optional.of(ovsdbNode);
-                    } else {
-                        LOG.warn("OvsdbManagedNode {} claims to be managed by {} but "
+                    Optional<Node> optional = transaction.read(LogicalDatastoreType.OPERATIONAL, path).get();
+                    if (optional != null && optional.isPresent()) {
+                        OvsdbNodeAugmentation ovsdbNode = null;
+                        Node node = optional.get();
+                        if (node instanceof OvsdbNodeAugmentation) {
+                            ovsdbNode = (OvsdbNodeAugmentation) node;
+                        } else {
+                            ovsdbNode = node.augmentation(OvsdbNodeAugmentation.class);
+                        }
+                        if (ovsdbNode != null) {
+                            return Optional.of(ovsdbNode);
+                        } else {
+                            LOG.warn("OvsdbManagedNode {} claims to be managed by {} but "
                                 + "that OvsdbNode does not exist", mn, ref.getValue());
-                        return Optional.absent();
+                            return Optional.empty();
+                        }
+                    } else {
+                        LOG.warn("Mysteriously got back a thing which is *not* a topology Node: {}", optional);
+                        return Optional.empty();
                     }
-                } else {
-                    LOG.warn("Mysteriously got back a thing which is *not* a topology Node: {}", optional);
-                    return Optional.absent();
                 }
             } else {
                 LOG.warn("Cannot find client for OvsdbManagedNode without a specified ManagedBy {}", mn);
-                return Optional.absent();
+                return Optional.empty();
             }
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Failed to get OvsdbNode that manages OvsdbManagedNode {}", mn, e);
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
     public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNode(
             ReadWriteTransaction transaction, final InstanceIdentifier<D> connectionIid) {
-        Optional<D> node = Optional.absent();
+        Optional<D> node = Optional.empty();
         try {
-            node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid).checkedGet();
-        } catch (final ReadFailedException e) {
+            node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid).get();
+        } catch (final InterruptedException | ExecutionException e) {
             LOG.warn("Read Operational/DS for Node failed! {}", connectionIid, e);
         }
         return node;

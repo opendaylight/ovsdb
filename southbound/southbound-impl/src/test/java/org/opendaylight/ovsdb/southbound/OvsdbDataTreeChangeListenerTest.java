@@ -15,10 +15,10 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
@@ -69,9 +69,9 @@ public class OvsdbDataTreeChangeListenerTest extends AbstractConcurrentDataBroke
                 .build();
         final InstanceIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
         WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-        transaction.put(LogicalDatastoreType.CONFIGURATION, iid, SouthboundUtils.createNode(connectionInfo),
-                WriteTransaction.CREATE_MISSING_PARENTS);
-        transaction.submit().get();
+        transaction.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, iid,
+            SouthboundUtils.createNode(connectionInfo));
+        transaction.commit().get();
 
         // Then the listener tries to open a connection
         Mockito.verify(ovsdbConnection, Mockito.timeout(5000)).connect(inetAddress, port);

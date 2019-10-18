@@ -10,8 +10,6 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,12 +19,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -366,18 +364,14 @@ public class TerminationPointCreateCommand implements TransactCommand {
             Node node = nodes.get(nodeIid);
             bridge = node.augmentation(OvsdbBridgeAugmentation.class);
             if (bridge == null) {
-                ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction();
-                CheckedFuture<Optional<Node>, ReadFailedException> future =
-                        transaction.read(LogicalDatastoreType.OPERATIONAL, nodeIid);
-                try {
-                    Optional<Node> nodeOptional = future.get();
+                try (ReadTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
+                    Optional<Node> nodeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, nodeIid).get();
                     if (nodeOptional.isPresent()) {
                         bridge = nodeOptional.get().augmentation(OvsdbBridgeAugmentation.class);
                     }
                 } catch (InterruptedException | ExecutionException e) {
                     LOG.warn("Error reading from datastore",e);
                 }
-                transaction.close();
             }
         }
         return bridge;

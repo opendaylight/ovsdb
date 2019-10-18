@@ -19,11 +19,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.getField;
 
-import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,7 +74,7 @@ public class BridgeOperationalStateTest {
     @Test
     public void testGetBridgeNode() {
         Optional<Node> optNodes = briOperationState.getBridgeNode(iid);
-        assertEquals(Optional.absent(), optNodes);
+        assertEquals(Optional.empty(), optNodes);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class BridgeOperationalStateTest {
         Optional<OvsdbBridgeAugmentation> optOvsdbBri = briOperationState.getOvsdbBridgeAugmentation(iid);
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertNotNull(optOvsdbBri);
-        assertTrue(optOvsdbBri.equals(Optional.absent()));
+        assertTrue(optOvsdbBri.equals(Optional.empty()));
 
         Node node = mock(Node.class);
         Optional<Node> optNode = Optional.of(node);
@@ -99,7 +99,7 @@ public class BridgeOperationalStateTest {
         Optional<TerminationPoint> optTerm = briOperationState.getBridgeTerminationPoint(iid);
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertNotNull(optTerm);
-        assertTrue(optTerm.equals(Optional.absent()));
+        assertTrue(optTerm.equals(Optional.empty()));
 
         TerminationPoint termPnt = mock(TerminationPoint.class);
         List<TerminationPoint> termPntList = new ArrayList<>();
@@ -124,7 +124,7 @@ public class BridgeOperationalStateTest {
         assertNotNull(optOvsdbTermPoint);
         verify(briOperationState, times(1)).getBridgeTerminationPoint(any(InstanceIdentifier.class));
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
-        assertTrue(optOvsdbTermPoint.equals(Optional.absent()));
+        assertTrue(optOvsdbTermPoint.equals(Optional.empty()));
 
         TerminationPoint termPoint = mock(TerminationPoint.class);
         Optional<TerminationPoint> termPntOptional = Optional.of(termPoint);
@@ -143,7 +143,7 @@ public class BridgeOperationalStateTest {
         verify(briOperationState, times(1)).getOvsdbBridgeAugmentation(any(InstanceIdentifier.class));
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertNotNull(optController);
-        assertTrue(optController.equals(Optional.absent()));
+        assertTrue(optController.equals(Optional.empty()));
     }
 
     @Test
@@ -152,6 +152,6 @@ public class BridgeOperationalStateTest {
         verify(briOperationState, times(1)).getOvsdbBridgeAugmentation(any(InstanceIdentifier.class));
         verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
         assertNotNull(optProtocolEntry);
-        assertTrue(optProtocolEntry.equals(Optional.absent()));
+        assertTrue(optProtocolEntry.equals(Optional.empty()));
     }
 }

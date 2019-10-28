@@ -113,7 +113,7 @@ public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
         }
         ovs = LibraryIntegrationTestUtils.getTestConnection(this);
         assertNotNull("Failed to get connection to ovsdb node", ovs);
-        LOG.info("Connection Info: {}", ovs.getConnectionInfo().toString());
+        LOG.info("Connection Info: {}", ovs.getConnectionInfo());
         testGetDBs();
         dbSchema = ovs.getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
     }

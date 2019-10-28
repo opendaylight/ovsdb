@@ -138,7 +138,7 @@ public class JsonRpcEndpoint {
 
     public void processResult(JsonNode response) throws NoSuchMethodException {
 
-        LOG.trace("Response : {}", response.toString());
+        LOG.trace("Response : {}", response);
         CallContext returnCtxt = methodContext.remove(response.get("id").asText());
         if (returnCtxt == null) {
             return;
@@ -154,7 +154,7 @@ public class JsonRpcEndpoint {
             Object result1 = objectMapper.convertValue(result, javaType);
             JsonNode error = response.get("error");
             if (error != null && !error.isNull()) {
-                LOG.error("Error : {}", error.toString());
+                LOG.error("Error : {}", error);
             }
 
             returnCtxt.getFuture().set(result1);
@@ -216,7 +216,7 @@ public class JsonRpcEndpoint {
             return;
         }
 
-        LOG.error("No handler for Request : {} on {}", requestJson.toString(), context);
+        LOG.error("No handler for Request : {} on {}", requestJson, context);
     }
 
     public Map<String, CallContext> getMethodContext() {

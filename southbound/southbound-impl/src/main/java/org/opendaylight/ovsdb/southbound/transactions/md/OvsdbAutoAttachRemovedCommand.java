@@ -60,10 +60,10 @@ public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
                             .augmentation(OvsdbNodeAugmentation.class)
                             .child(Autoattach.class, autoAttachKey);
                     transaction.delete(LogicalDatastoreType.OPERATIONAL, iid);
-                    LOG.debug("AutoAttach table {} for Ovsdb Node {} is deleted", autoAttachUuid.toString(),
+                    LOG.debug("AutoAttach table {} for Ovsdb Node {} is deleted", autoAttachUuid,
                             ovsdbNode.get().getNodeId());
                 } else {
-                    LOG.warn("AutoAttach table {} not found for Ovsdb Node {} to delete", autoAttachUuid.toString(),
+                    LOG.warn("AutoAttach table {} not found for Ovsdb Node {} to delete", autoAttachUuid,
                             ovsdbNode.get().getNodeId());
                 }
             }

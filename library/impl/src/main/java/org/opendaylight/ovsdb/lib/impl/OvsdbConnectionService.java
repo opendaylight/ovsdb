@@ -509,7 +509,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     }
 
     public static void channelClosed(final OvsdbClient client) {
-        LOG.info("Connection closed {}", client.getConnectionInfo().toString());
+        LOG.info("Connection closed {}", client.getConnectionInfo());
         CONNECTIONS.remove(client);
         if (client.isConnectionPublished()) {
             for (OvsdbConnectionListener listener : CONNECTION_LISTENERS) {

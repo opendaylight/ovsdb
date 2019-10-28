@@ -880,7 +880,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             ovsdbBridgeAugmentationBuilder.setControllerEntry(controllerEntries);
             ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
             bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
-            LOG.debug("Built with the intent to store bridge data {}", ovsdbBridgeAugmentationBuilder.toString());
+            LOG.debug("Built with the intent to store bridge data {}", ovsdbBridgeAugmentationBuilder);
             Assert.assertTrue(
                     mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build()));
             try {
@@ -2074,7 +2074,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 helper.writeValues(bridgeCreateAugmentationBuilder, updateFromTestCase.inputValues);
                 bridgeCreateNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class,
                         bridgeCreateAugmentationBuilder.build());
-                LOG.debug("Built with the intent to store bridge data {}", bridgeCreateAugmentationBuilder.toString());
+                LOG.debug("Built with the intent to store bridge data {}", bridgeCreateAugmentationBuilder);
                 Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid,
                         bridgeCreateNodeBuilder.build()));
                 Thread.sleep(OVSDB_UPDATE_TIMEOUT);

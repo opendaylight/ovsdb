@@ -1,0 +1,7 @@
+Code-Review+2: Robert Varga <nite@hq.sk>
+Verified+1: Robert Varga <nite@hq.sk>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Wed, 30 Oct 2019 15:41:10 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/ovsdb/+/85255
+Project: ovsdb
+Branch: refs/heads/stable/neon

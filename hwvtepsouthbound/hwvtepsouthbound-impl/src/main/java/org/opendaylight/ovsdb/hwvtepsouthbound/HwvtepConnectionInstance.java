@@ -13,6 +13,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,7 +78,9 @@ public class HwvtepConnectionInstance {
     private final HwvtepDeviceInfo deviceInfo;
     private final DataBroker dataBroker;
     private final HwvtepConnectionManager hwvtepConnectionManager;
-    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+    private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors
+        .newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
+        .setNameFormat("HwvtepReconciliationFT-%d").build());
     @VisibleForTesting
     final SettableFuture<Boolean> reconciliationFt = SettableFuture.create();
     @VisibleForTesting
@@ -121,7 +124,7 @@ public class HwvtepConnectionInstance {
 
             if (firstUpdate) {
                 LOG.info("Scheduling the reconciliation timeout task {}", nodeId);
-                scheduledExecutorService.schedule(() -> reconciliationFt.set(Boolean.TRUE),
+                SCHEDULED_EXECUTOR_SERVICE.schedule(() -> reconciliationFt.set(Boolean.TRUE),
                         HwvtepSouthboundConstants.CONFIG_NODE_UPDATE_MAX_DELAY_MS, TimeUnit.MILLISECONDS);
             }
         }

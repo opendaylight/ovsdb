@@ -203,7 +203,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
                     operTopologyRegistration.close();
                     operTopologyRegistration = null;
                 }
-            }).start();
+            }, "oper-topo-registration-close-thread").start();
             ovsdbStatusProvider.reportStatus(ServiceState.OPERATIONAL, "OVSDB initialization complete");
         }
     }

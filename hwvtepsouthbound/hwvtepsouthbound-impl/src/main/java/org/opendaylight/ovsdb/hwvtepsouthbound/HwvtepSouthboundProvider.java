@@ -195,7 +195,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
                 operTopologyRegistration.close();
                 operTopologyRegistration = null;
             }
-        }).start();
+        }, "hwvtep-oper-topology-registration-%d").start();
     }
 
     private static class HwvtepsbPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {

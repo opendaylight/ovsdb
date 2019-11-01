@@ -245,7 +245,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         final String ovsdbListenerIp = this.listenerIp;
         if (!singletonCreated.getAndSet(true)) {
             LOG.info("startOvsdbManager: Starting");
-            new Thread(() -> ovsdbManager(ovsdbListenerIp, ovsdbListenerPort)).start();
+            new Thread(() -> ovsdbManager(ovsdbListenerIp, ovsdbListenerPort), "ovsdb-manager").start();
             return true;
         } else {
             return false;
@@ -263,7 +263,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                                                          final String[] protocols, final String[] cipherSuites) {
         if (!singletonCreated.getAndSet(true)) {
             new Thread(() -> ovsdbManagerWithSsl(ovsdbListenIp, ovsdbListenPort,
-                    certificateManagerSrv, protocols, cipherSuites)).start();
+                    certificateManagerSrv, protocols, cipherSuites), "ovsdb-manager-ssl-thread").start();
             return true;
         } else {
             return false;

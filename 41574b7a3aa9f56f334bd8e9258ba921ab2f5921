@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_baa9597d",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/ProtocolRemovedCommandTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-11-13T04:28:12Z",
+      "side": 1,
+      "message": "this is causing an NPE:   ProtocolRemovedCommandTest.testProtocolRemovedCommand:73 NullPointer Please fix that",
+      "range": {
+        "startLine": 73,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 70
+      },
+      "revId": "41574b7a3aa9f56f334bd8e9258ba921ab2f5921",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_5ab625de",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/ProtocolRemovedCommandTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-11-13T04:28:12Z",
+      "side": 1,
+      "message": "I don\u0027t see any tests here, could you assert and/or verify that the behaviour is as expected?",
+      "range": {
+        "startLine": 80,
+        "startChar": 0,
+        "endLine": 95,
+        "endChar": 2
+      },
+      "revId": "41574b7a3aa9f56f334bd8e9258ba921ab2f5921",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

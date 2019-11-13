@@ -16,6 +16,24 @@
       "revId": "528fa2b16cb3891eabc40b832124e684495cd626",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_e8900245",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManagerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Yes that is correct. I am removing this line. Thanks",
+      "parentUuid": "3a79b1b5_48ffb6aa",
+      "revId": "528fa2b16cb3891eabc40b832124e684495cd626",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_35901b95",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "This class is used from library/schema IT utils. As I did not make significant changes so was not sure about changing CR, thats why retained it as is.",
+      "parentUuid": "5a3f45e8_752623bc",
+      "range": {
+        "startLine": 2,
+        "startChar": 13,
+        "endLine": 2,
+        "endChar": 33
+      },
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a3f45e8_fa76a0d7",
         "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
         "patchSetId": 6
@@ -83,6 +107,30 @@
       "writtenOn": "2016-03-24T13:45:28Z",
       "side": 1,
       "message": "all those var could be final",
+      "range": {
+        "startLine": 48,
+        "startChar": 7,
+        "endLine": 51,
+        "endChar": 99
+      },
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_75d0e353",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done.. \n\nSince the patch is already merged I\u0027ll create a new patch to address the comments",
+      "parentUuid": "5a3f45e8_fa76a0d7",
       "range": {
         "startLine": 48,
         "startChar": 7,
@@ -284,6 +332,30 @@
       "side": 1,
       "message": "I meant the this.client and client",
       "parentUuid": "5a3f45e8_35e77b42",
+      "range": {
+        "startLine": 128,
+        "startChar": 32,
+        "endLine": 128,
+        "endChar": 91
+      },
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_35e77b42",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Objects.equals(obj, obj1) compares null references too unlike Object.equals(obj)",
+      "parentUuid": "5a3f45e8_151a3f6e",
       "range": {
         "startLine": 128,
         "startChar": 32,

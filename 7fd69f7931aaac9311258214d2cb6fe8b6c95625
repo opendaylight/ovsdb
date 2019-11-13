@@ -34,6 +34,42 @@
       "revId": "7fd69f7931aaac9311258214d2cb6fe8b6c95625",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_6c71700b",
+        "filename": "library/it/src/test/java/org/opendaylight/ovsdb/integrationtest/schema/openvswitch/OpenVSwitchIT.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 1061,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_2c6be81e",
+      "revId": "7fd69f7931aaac9311258214d2cb6fe8b6c95625",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_cc7cfcee",
+        "filename": "library/it/src/test/java/org/opendaylight/ovsdb/integrationtest/schema/openvswitch/OpenVSwitchIT.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 1061,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "executeTransaction() checks if the transaction was executed successfully.\n\nI think you mean rad the schema using OvsdbClient and verify if autoattach was actually deleted. Did I understand you correctly?",
+      "parentUuid": "9a3d3df0_ac0a5887",
+      "revId": "7fd69f7931aaac9311258214d2cb6fe8b6c95625",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

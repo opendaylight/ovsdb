@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_e0ff1ca9",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-22T08:21:21Z",
+      "side": 1,
+      "message": "Since this is a constant (at least, I don\u0027t see it changing in the code), this should be\n\n    private static final Version AUTO_ATTACH_FROM_VERSION \u003d Version.fromString(\"7.11.2\");",
+      "revId": "734eb0674b87840483b9d1081fcd392f68ec6541",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_402c104b",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-22T08:21:21Z",
+      "side": 1,
+      "message": "The rest of the class doesn\u0027t use private getters like these, and I don\u0027t think there\u0027s much point to them.",
+      "revId": "734eb0674b87840483b9d1081fcd392f68ec6541",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_a01cf414",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-22T08:21:21Z",
+      "side": 1,
+      "message": "If we get an exception here it\u0027s probably safer to fail the test straight away. In addition, exceptions should be logged like this\n\n    LOG.error(\"Error setting up SouthboundIT\", e);\n\nwith the exception a separate parameter so that it gets logged with a stacktrace. See https://wiki.opendaylight.org/view/BestPractices/Logging_Best_Practices for details (including the nice \"{}\" construct with SLF4J).",
+      "revId": "734eb0674b87840483b9d1081fcd392f68ec6541",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

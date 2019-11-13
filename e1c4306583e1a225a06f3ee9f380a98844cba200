@@ -1,0 +1,22 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_233469dd",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 959,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-30T11:50:24Z",
+      "side": 1,
+      "message": "Agreed, this would be good to keep the check.\n\nAlso, would it make sense to just move the schema check earlier? Something more intuitive for knowing what schema version is required, i.e. this is the minimum for autoattach, next this is the minimum for crud, etc?",
+      "parentUuid": "3a4c51b2_b647181d",
+      "revId": "e1c4306583e1a225a06f3ee9f380a98844cba200",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_553cc793",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T14:20:03Z",
+      "side": 1,
+      "message": "ok fair enough, my bad, I thought it was yours",
+      "parentUuid": "5a3f45e8_35901b95",
+      "range": {
+        "startLine": 2,
+        "startChar": 13,
+        "endLine": 2,
+        "endChar": 33
+      },
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a3f45e8_fa76a0d7",
         "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
         "patchSetId": 6
@@ -236,6 +260,30 @@
       "writtenOn": "2016-03-24T13:45:28Z",
       "side": 1,
       "message": "kind of confusing.",
+      "range": {
+        "startLine": 128,
+        "startChar": 32,
+        "endLine": 128,
+        "endChar": 91
+      },
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_b541cb0d",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T14:20:03Z",
+      "side": 1,
+      "message": "I meant the this.client and client",
+      "parentUuid": "5a3f45e8_35e77b42",
       "range": {
         "startLine": 128,
         "startChar": 32,

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_26d8dbee",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbDataChangeListenerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-09-24T12:37:27Z",
+      "side": 1,
+      "message": "to make it more easy to read those two can be combined:\n// bridge and client not null\n\nBecause in the end there is only one test made here.\nWhat I\u0027m suggesting is you remove the carrier return, and merge the two comments into one.",
+      "range": {
+        "startLine": 221,
+        "startChar": 0,
+        "endLine": 228,
+        "endChar": 77
+      },
+      "revId": "b2bb5730596de95b17a95854dda387be99cf625c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

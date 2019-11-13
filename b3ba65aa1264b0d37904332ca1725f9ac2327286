@@ -1,0 +1,250 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_9a72fce3",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 435,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T13:45:28Z",
+      "side": 1,
+      "message": "this could be DEBUG level",
+      "range": {
+        "startLine": 435,
+        "startChar": 16,
+        "endLine": 435,
+        "endChar": 20
+      },
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_752623bc",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T13:45:28Z",
+      "side": 1,
+      "message": "shouldn\u0027t it be Inocybe copyright?",
+      "range": {
+        "startLine": 2,
+        "startChar": 13,
+        "endLine": 2,
+        "endChar": 33
+      },
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_fa76a0d7",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T13:45:28Z",
+      "side": 1,
+      "message": "all those var could be final",
+      "range": {
+        "startLine": 48,
+        "startChar": 7,
+        "endLine": 51,
+        "endChar": 99
+      },
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_da73e4e5",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T13:45:28Z",
+      "side": 1,
+      "message": "DEBUG",
+      "range": {
+        "startLine": 52,
+        "startChar": 12,
+        "endLine": 52,
+        "endChar": 16
+      },
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_f53993d9",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T13:45:28Z",
+      "side": 1,
+      "message": "final",
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_7a4a9084",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T13:45:28Z",
+      "side": 1,
+      "message": "log ERROR might be a better way to handle the exception",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 36
+      },
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_552b2782",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T13:45:28Z",
+      "side": 1,
+      "message": "final",
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_5a4fd492",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T13:45:28Z",
+      "side": 1,
+      "message": "likewise",
+      "range": {
+        "startLine": 73,
+        "startChar": 0,
+        "endLine": 74,
+        "endChar": 36
+      },
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_d53617e7",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T13:45:28Z",
+      "side": 1,
+      "message": "final",
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_35349bdd",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T13:45:28Z",
+      "side": 1,
+      "message": "final",
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_15319fec",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T13:45:28Z",
+      "side": 1,
+      "message": "final",
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_151a3f6e",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIntegrationTestUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2016-03-24T13:45:28Z",
+      "side": 1,
+      "message": "kind of confusing.",
+      "range": {
+        "startLine": 128,
+        "startChar": 32,
+        "endLine": 128,
+        "endChar": 91
+      },
+      "revId": "b3ba65aa1264b0d37904332ca1725f9ac2327286",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

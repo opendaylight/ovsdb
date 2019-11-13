@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_d67d3d70",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 1015,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-01-31T01:05:03Z",
+      "side": 1,
+      "message": "Is there more detailed description that can be used? Many of the descriptions in this yang are copied directly from the open_vswitch vsitch.xml file - this file is what gets compiled into the ovsdb schema pdf so you can use that text also.",
+      "revId": "79cbaf49f25b360a2f3978126599f618591d9aa0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

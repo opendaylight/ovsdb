@@ -55,6 +55,42 @@
     },
     {
       "key": {
+        "uuid": "fa57193c_5b92d09f",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "I missed your earlier comment about logging as WARN. Not sure why i was throwing an exception and logging it. Makes more sense to log a warning since we are dropping the exception anyway.",
+      "parentUuid": "fa57193c_7846bd7d",
+      "revId": "2b17044a6984cae62242c0d4f5ef63c999595468",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_ad6935c0",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Hey Anil, I have added some context to what is supported and not supported for Autoattach table from OvS side. This block avoids any CRUD operation to be performed on Autoattach table (CRUD is not possible since the table does not yet external_ids column from OVS side). We are throwing an exception just to alert the same to the user and logging the message instead of the entire exception since we know this is not supported yet.",
+      "parentUuid": "fa57193c_2465421e",
+      "revId": "2b17044a6984cae62242c0d4f5ef63c999595468",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_84736ee6",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
         "patchSetId": 3

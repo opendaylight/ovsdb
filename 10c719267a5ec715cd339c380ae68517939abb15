@@ -22,6 +22,23 @@
       "revId": "10c719267a5ec715cd339c380ae68517939abb15",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_34a44956",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-05-21T01:16:06Z",
+      "side": 1,
+      "message": "Move the above log message in this if block, and return from here. So that it will only log this message only when user will try to make some configuration related to auto-attach.",
+      "revId": "10c719267a5ec715cd339c380ae68517939abb15",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

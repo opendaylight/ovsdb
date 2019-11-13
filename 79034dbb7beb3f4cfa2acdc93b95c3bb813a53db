@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_e42e4ba4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
+        "patchSetId": 27
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-05T02:12:17Z",
+      "side": 1,
+      "message": "this line does not do anything so it can be removed. There are some other places in southbound that have the same line and don\u0027t do anything either but we haven\u0027t cleaned them up.",
+      "revId": "79034dbb7beb3f4cfa2acdc93b95c3bb813a53db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -34,6 +34,24 @@
       "revId": "66f0fd0f8a43ad1be97b9e59a6492b433acd1123",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_de16cea6",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Ok. I had retained warn as it would be reported unlike debug that will have to be enabled in karaf.",
+      "parentUuid": "fa57193c_deba4ebf",
+      "revId": "66f0fd0f8a43ad1be97b9e59a6492b433acd1123",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba51214e_29ff1969",
+        "filename": "southbound/southbound-api/src/main/yang/ovsdb.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 810,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-06-20T22:17:19Z",
+      "side": 1,
+      "message": "we don\u0027t use config anywhere else - does this add any value to have it here?",
+      "revId": "ac563b8ded3a2f9568aef1524bad5aa1c950aeb7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_a9f20998",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-06-20T22:17:19Z",
+      "side": 1,
+      "message": "might as well capitalize Index so it is consistent with the other namings",
+      "revId": "ac563b8ded3a2f9568aef1524bad5aa1c950aeb7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_0904d579",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-06-20T22:17:19Z",
+      "side": 1,
+      "message": "Use SouthboundItil#schemaMismatchLog() instead of this log here.",
+      "revId": "ac563b8ded3a2f9568aef1524bad5aa1c950aeb7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_69f8f17c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-06-20T22:17:19Z",
+      "side": 1,
+      "message": "schemaMismatchLog()",
+      "revId": "ac563b8ded3a2f9568aef1524bad5aa1c950aeb7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_49f52d82",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-06-20T22:17:19Z",
+      "side": 1,
+      "message": "schemaMismatchLog()",
+      "revId": "ac563b8ded3a2f9568aef1524bad5aa1c950aeb7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_54a1fd45",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-05-21T01:16:06Z",
+      "side": 1,
+      "message": "Please move this comment down in the if block.",
+      "range": {
+        "startLine": 67,
+        "startChar": 8,
+        "endLine": 71,
+        "endChar": 9
+      },
+      "revId": "10c719267a5ec715cd339c380ae68517939abb15",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

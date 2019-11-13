@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_5fec19bb",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 28
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_7c8f6b75",
+      "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_1c945f89",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
         "patchSetId": 28
@@ -30,6 +48,24 @@
       "writtenOn": "2016-03-08T08:12:42Z",
       "side": 1,
       "message": "I\u0027d recommend\n\n    for (Map.Entry\u003cInstanceIdentifier\u003cOvsdbNodeAugmentation\u003e, OvsdbNodeAugmentation\u003e originalEntry : original.entrySet()) {\n        InstanceIdentifier\u003cOvsdbNodeAugmentation\u003e ovsdbNodeIid \u003d originalEntry.getKey();\n        OvsdbNodeAugmentation ovsdbNodeAugmentation \u003d original.getValue();",
+      "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_7ff11d94",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 28
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_1c945f89",
       "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -71,6 +107,42 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_3f42f5ad",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 28
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Stephen, I can\u0027t move this block up since I am using the augmenation to invoke deleteAtutoAttach(). However, I get your point. I would perform the check after origAutoattachList\u0027s initialisation and return if it is null or empty..",
+      "parentUuid": "9a3d3df0_5c8a6764",
+      "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_82548aca",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 28
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Ah yeah! Sure",
+      "parentUuid": "9a3d3df0_02099a2b",
+      "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_bcec532b",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
         "patchSetId": 28
@@ -82,6 +154,24 @@
       "writtenOn": "2016-03-08T08:12:42Z",
       "side": 1,
       "message": "ReadOnlyTransaction is AutoCloseable, so this could be done with a try-with-resources block (ensuring the transaction is closed without needing to call close() at the end).",
+      "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_9f506133",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 28
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Thanks for this Stephen! Makes the code much cleaner.",
+      "parentUuid": "9a3d3df0_bcec532b",
       "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -105,6 +195,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_df002968",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 28
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_fcf25b04",
+      "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_9cefcf1d",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
         "patchSetId": 28
@@ -116,6 +224,24 @@
       "writtenOn": "2016-03-08T08:12:42Z",
       "side": 1,
       "message": "Within a try-with-resources block,\n\n    return bridge;\n\nwould be more readable here from my point of view, and it would avoid using null just below.",
+      "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_bf4d659c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 28
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_9cefcf1d",
       "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -139,6 +265,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_df46697a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
+        "patchSetId": 28
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_dcf5d7ed",
+      "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_1cdbbf7c",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
         "patchSetId": 28
@@ -150,6 +294,24 @@
       "writtenOn": "2016-03-08T08:12:42Z",
       "side": 1,
       "message": "Since both loops do the same work, perhaps extractCreatedOrUpdated()?",
+      "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_ff436d69",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
+        "patchSetId": 28
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Yeah makes sense. I will change this",
+      "parentUuid": "9a3d3df0_1cdbbf7c",
       "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -191,6 +353,24 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_1f5c514a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
+        "patchSetId": 28
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "I think protecting against null would be needed when updating. For example: if the user only intends to only update system-description, the system-name would be null in that case. Not checking for null may overwrite when not needed",
+      "parentUuid": "9a3d3df0_9cd6af4d",
+      "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_5ce1c728",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
         "patchSetId": 28
@@ -202,6 +382,24 @@
       "writtenOn": "2016-03-08T08:12:42Z",
       "side": 1,
       "message": "This can be moved inside the if block to reduce scope.",
+      "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_7f575d26",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
+        "patchSetId": 28
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_5ce1c728",
       "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -236,6 +434,24 @@
       "writtenOn": "2016-03-08T08:12:42Z",
       "side": 1,
       "message": "These two ifs can be merged.",
+      "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_bf1ba57f",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbAutoAttachRemovedCommand.java",
+        "patchSetId": 28
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_3cc7a397",
       "revId": "2c7f6616cca59633e0a96fba66327b04128dc112",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_122ffaa2",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 957,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-23T17:18:22Z",
+      "side": 1,
+      "message": "I hadn\u0027t thought this through completely... Changing the first assumeTrue() is sufficient to ensure we test the code that needs to work whatever the OVS schema. When we get here we know everything is OK for older schema, which is effectively what you\u0027re representing; I\u0027d recommend simplifying it a little, since there\u0027s no real need for a separate method:\n\n    Assume.assumeFalse(isOldSchema);\n    Assert.assertNotNull(operAa);\n\nand remove the whole (if operAa \u003d\u003d null) block below.",
+      "revId": "088e2453475027bfbb5d91613b6462e87769371b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

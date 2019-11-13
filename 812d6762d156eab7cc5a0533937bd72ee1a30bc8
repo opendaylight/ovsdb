@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7ac40928_ee3b9f36",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/ProtocolRemovedCommandTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Please add copyright",
+      "revId": "812d6762d156eab7cc5a0533937bd72ee1a30bc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7ac40928_2e9e8757",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/ProtocolRemovedCommandTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "please make sure you set your eclipse preferences to remove trailing spaces and to use spaces instead of tabs",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 1
+      },
+      "revId": "812d6762d156eab7cc5a0533937bd72ee1a30bc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7ac40928_aea9177d",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/ProtocolRemovedCommandTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "There is no test-case here. You would need to invoke the method you are testing using the mock object you created in setUpBeforeClass() and do a verify or assert statement to check for expected behaviour. Same for the other method. Also, please rename to testSetProtocolRemovedCommand.",
+      "range": {
+        "startLine": 54,
+        "startChar": 13,
+        "endLine": 54,
+        "endChar": 38
+      },
+      "revId": "812d6762d156eab7cc5a0533937bd72ee1a30bc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

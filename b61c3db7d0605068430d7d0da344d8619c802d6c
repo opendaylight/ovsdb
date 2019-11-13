@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_28aefa85",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/OvsdbConnectionManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 3576
+      },
+      "writtenOn": "2015-09-18T20:50:20Z",
+      "side": 1,
+      "message": "Nothing wrong here, just a shout out to commend you for using static imports for the Mockito and Matchers methods.  I rarely see this done in the ODL codebase, and it\u0027s a good place to use static imports.",
+      "revId": "b61c3db7d0605068430d7d0da344d8619c802d6c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

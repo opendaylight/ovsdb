@@ -16,6 +16,24 @@
       "revId": "088e2453475027bfbb5d91613b6462e87769371b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_c66e7396",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 957,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Ya it makes sense. I\u0027d just have to halt the test for old schema after being able to instantiate TestAutoAttach without exception to ensure a sanity check for all schema versions.",
+      "parentUuid": "5a3f45e8_122ffaa2",
+      "revId": "088e2453475027bfbb5d91613b6462e87769371b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

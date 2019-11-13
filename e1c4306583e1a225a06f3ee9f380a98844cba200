@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "3a4c51b2_b647181d",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 959,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-30T07:22:00Z",
+      "side": 1,
+      "message": "It might be safer to have this as a separate assumption, since the existing assumption is supposed to be kept:\n\n    Assume.assumeFalse(isOldSchema);\n\n    // FIXME: Remove once CRUD is supported\n    Assume.assumeFalse(operAa \u003d\u003d null);\n\n(This also makes it clearer that the latter is equivalent to the assertion below, which becomes enforceable once CRUD is supported.)",
+      "revId": "e1c4306583e1a225a06f3ee9f380a98844cba200",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a4c51b2_233469dd",
         "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
         "patchSetId": 1
@@ -14,6 +31,24 @@
       "side": 1,
       "message": "Agreed, this would be good to keep the check.\n\nAlso, would it make sense to just move the schema check earlier? Something more intuitive for knowing what schema version is required, i.e. this is the minimum for autoattach, next this is the minimum for crud, etc?",
       "parentUuid": "3a4c51b2_b647181d",
+      "revId": "e1c4306583e1a225a06f3ee9f380a98844cba200",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a4c51b2_63baf1e2",
+        "filename": "southbound/southbound-it/src/test/java/org/opendaylight/ovsdb/southbound/it/SouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 959,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2016-03-30T12:40:14Z",
+      "side": 1,
+      "message": "\u003e Also, would it make sense to just move the schema check\n\u003e earlier? Something more intuitive for knowing what schema\n\u003e version is required, i.e. this is the minimum for\n\u003e autoattach, next this is the minimum for crud, etc?\n\nI asked Rashmi to move it here so that the test also verifies the behaviour when the schema is too old (to avoid the failures we had in the first Beryllium release).\n\n(So for full CSIT here we need to test against an old OVS and a new OVS...)",
+      "parentUuid": "3a4c51b2_233469dd",
       "revId": "e1c4306583e1a225a06f3ee9f380a98844cba200",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ba51214e_cfe93a1c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointCreateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba51214e_2f9396a4",
+      "range": {
+        "startLine": 152,
+        "startChar": 4,
+        "endLine": 152,
+        "endChar": 30
+      },
+      "revId": "1d6cc06ba95217ea7625dca215fcc98efc5f379c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba51214e_8f90e296",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2016-06-21T21:53:17Z",
       "side": 1,
       "message": "we don\u0027t have to write this logic because config false won\u0027t allow application to write ifindex in the data store. It will through SchemaValidationFailedException.",
+      "range": {
+        "startLine": 148,
+        "startChar": 17,
+        "endLine": 148,
+        "endChar": 30
+      },
+      "revId": "1d6cc06ba95217ea7625dca215fcc98efc5f379c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba51214e_afee8620",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba51214e_8f90e296",
       "range": {
         "startLine": 148,
         "startChar": 17,

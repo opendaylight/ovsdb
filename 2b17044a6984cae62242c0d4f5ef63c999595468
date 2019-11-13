@@ -1,0 +1,63 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa57193c_2465421e",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-05-19T07:57:08Z",
+      "side": 1,
+      "message": "okay make sense, but i am just trying to understand what this if block is doing. If the intention is to not log the exception, why are we throwing the exception and then catching it again and then not logging it ? Why not just Log (WARN) the statement saying auto attach is not supported and return?",
+      "parentUuid": "fa57193c_61ad6c9c",
+      "revId": "2b17044a6984cae62242c0d4f5ef63c999595468",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_7846bd7d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-05-19T23:30:20Z",
+      "side": 1,
+      "message": "Understood, just wondering why can\u0027t we do this \nif(true) {\nLOG.Warn(\"CRUD operations not supported from ODL for auto_attach column for this version of ovsdb schema due to missing external_ids column\");\nreturn;\n}",
+      "parentUuid": "fa57193c_ad6935c0",
+      "revId": "2b17044a6984cae62242c0d4f5ef63c999595468",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa57193c_84736ee6",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-05-19T07:57:08Z",
+      "side": 1,
+      "message": "please refer to my other comment on AutoAttachRemoveCommand.java.",
+      "range": {
+        "startLine": 73,
+        "startChar": 8,
+        "endLine": 81,
+        "endChar": 9
+      },
+      "revId": "2b17044a6984cae62242c0d4f5ef63c999595468",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

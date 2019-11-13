@@ -48,6 +48,75 @@
     },
     {
       "key": {
+        "uuid": "fafc7978_9ca3e39d",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepBuilderUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "please mention the author name",
+      "range": {
+        "startLine": 56,
+        "startChar": 14,
+        "endLine": 56,
+        "endChar": 21
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_3ced97c4",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepBuilderUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "does it really require the extension?",
+      "range": {
+        "startLine": 58,
+        "startChar": 40,
+        "endLine": 58,
+        "endChar": 59
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_dcad6b8a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepBuilderUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "please use the correct class name.",
+      "range": {
+        "startLine": 60,
+        "startChar": 62,
+        "endLine": 60,
+        "endChar": 86
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fafc7978_bcaa276e",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepBuilderUtils.java",
         "patchSetId": 1
@@ -64,6 +133,322 @@
         "startChar": 24,
         "endLine": 72,
         "endChar": 31
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_fcbb0fc2",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepBuilderUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "replace UUid with Uuid",
+      "range": {
+        "startLine": 81,
+        "startChar": 74,
+        "endLine": 81,
+        "endChar": 78
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_9cd123fe",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepBuilderUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "why error ?",
+      "range": {
+        "startLine": 137,
+        "startChar": 12,
+        "endLine": 137,
+        "endChar": 18
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_5cb17be0",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepBuilderUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "define the constant variable for the string.",
+      "range": {
+        "startLine": 176,
+        "startChar": 26,
+        "endLine": 176,
+        "endChar": 45
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_3cb637da",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepBuilderUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "please do not cross beyond 120 char.please do not cross beyond 120 char. Please do it through out the file",
+      "range": {
+        "startLine": 195,
+        "startChar": 111,
+        "endLine": 195,
+        "endChar": 165
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_9ccac34d",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepBuilderUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "define variable for holding this constant.",
+      "range": {
+        "startLine": 259,
+        "startChar": 16,
+        "endLine": 259,
+        "endChar": 19
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_7cc71f46",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepBuilderUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "same here.",
+      "range": {
+        "startLine": 260,
+        "startChar": 45,
+        "endLine": 260,
+        "endChar": 50
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_bcc18730",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepBuilderUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "please use appropriate name for local variables.",
+      "range": {
+        "startLine": 267,
+        "startChar": 30,
+        "endLine": 267,
+        "endChar": 31
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_1cded311",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepBuilderUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "please define it at the start of the class and also use it in above method.",
+      "range": {
+        "startLine": 319,
+        "startChar": 4,
+        "endLine": 319,
+        "endChar": 50
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_fce2efd3",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepBuilderUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 348,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "Log message does not say there is any error, so either change the log message or the log level",
+      "range": {
+        "startLine": 348,
+        "startChar": 12,
+        "endLine": 348,
+        "endChar": 17
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_5ce85bb4",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepBuilderUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 354,
+        "startChar": 12,
+        "endLine": 354,
+        "endChar": 17
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_7cceff5b",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepSouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "modify it to 2015-2017",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_dcdbab19",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepSouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "please don\u0027t use wildcard import",
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_bcd8671e",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepSouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 579,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "to be consistent, please use \"config\" or \"configuration\" rather then CFG.",
+      "range": {
+        "startLine": 579,
+        "startChar": 55,
+        "endLine": 579,
+        "endChar": 58
+      },
+      "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fafc7978_1c05337a",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-it/src/test/java/org/opendaylight/ovsdb/hwvtepsouthbound/it/HwvtepSouthboundIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 589,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2017-02-01T02:51:42Z",
+      "side": 1,
+      "message": "To be consistent,please start the log message with capital letter. Also please do it thoughout the patch.",
+      "range": {
+        "startLine": 589,
+        "startChar": 23,
+        "endLine": 589,
+        "endChar": 24
       },
       "revId": "8a632d82f02ed797eb6962bbbfd9240b84b36531",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",

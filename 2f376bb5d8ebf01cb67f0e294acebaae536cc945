@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da5c1566_fb94d945",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundConstants.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 65
+      },
+      "writtenOn": "2016-06-02T21:25:56Z",
+      "side": 1,
+      "message": "can you please rename this to \"AUTO_ATTACH_SUPPORTED_OVS_SCHEMA_VERSION\"",
+      "range": {
+        "startLine": 57,
+        "startChar": 31,
+        "endLine": 58,
+        "endChar": 54
+      },
+      "revId": "2f376bb5d8ebf01cb67f0e294acebaae536cc945",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_f85595fa",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_44a4a9a5",
+      "range": {
+        "startLine": 97,
+        "startChar": 28,
+        "endLine": 97,
+        "endChar": 34
+      },
+      "revId": "f2bb3d370905d546a42eea93f9157adb92146b9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_249fe551",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
         "patchSetId": 21
@@ -59,6 +83,30 @@
       "writtenOn": "2016-02-12T20:29:57Z",
       "side": 1,
       "message": "Please fix identation",
+      "range": {
+        "startLine": 104,
+        "startChar": 34,
+        "endLine": 120,
+        "endChar": 85
+      },
+      "revId": "f2bb3d370905d546a42eea93f9157adb92146b9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_38437d43",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_249fe551",
       "range": {
         "startLine": 104,
         "startChar": 34,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_18403933",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_84aeb183",
+      "range": {
+        "startLine": 156,
+        "startChar": 24,
+        "endLine": 156,
+        "endChar": 28
+      },
+      "revId": "f2bb3d370905d546a42eea93f9157adb92146b9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_64a9ed7a",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
         "patchSetId": 21
@@ -105,6 +177,30 @@
       "writtenOn": "2016-02-12T20:29:57Z",
       "side": 1,
       "message": "FIXME",
+      "range": {
+        "startLine": 63,
+        "startChar": 11,
+        "endLine": 63,
+        "endChar": 15
+      },
+      "revId": "f2bb3d370905d546a42eea93f9157adb92146b9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_98544900",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_64a9ed7a",
       "range": {
         "startLine": 63,
         "startChar": 11,
@@ -140,6 +236,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_b8766da2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_44cb0953",
+      "range": {
+        "startLine": 137,
+        "startChar": 24,
+        "endLine": 137,
+        "endChar": 49
+      },
+      "revId": "f2bb3d370905d546a42eea93f9157adb92146b9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_04e901b8",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
         "patchSetId": 21
@@ -151,6 +271,30 @@
       "writtenOn": "2016-02-12T20:29:57Z",
       "side": 1,
       "message": "seems to be a duplicated method in AutoAttachRemovedCommand, maybe this can be moved to an utility class in so.\nAlthough implementation look slightly different",
+      "range": {
+        "startLine": 154,
+        "startChar": 0,
+        "endLine": 176,
+        "endChar": 5
+      },
+      "revId": "f2bb3d370905d546a42eea93f9157adb92146b9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_d871b1a9",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "It is different implementation so will keep it.",
+      "parentUuid": "9a3d3df0_04e901b8",
       "range": {
         "startLine": 154,
         "startChar": 0,
@@ -255,6 +399,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_186799ea",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbAutoAttachUpdateCommand.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "I agree, reworking the code accordingly",
+      "parentUuid": "9a3d3df0_2469a525",
+      "range": {
+        "startLine": 100,
+        "startChar": 28,
+        "endLine": 100,
+        "endChar": 33
+      },
+      "revId": "f2bb3d370905d546a42eea93f9157adb92146b9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_847871f3",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
         "patchSetId": 21
@@ -266,6 +434,24 @@
       "writtenOn": "2016-02-12T20:29:57Z",
       "side": 1,
       "message": "you should log the whole error here instead of logging only the message",
+      "revId": "f2bb3d370905d546a42eea93f9157adb92146b9f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_582f6188",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbBridgeUpdateCommand.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 5153
+      },
+      "writtenOn": "2019-11-13T21:42:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3d3df0_847871f3",
       "revId": "f2bb3d370905d546a42eea93f9157adb92146b9f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fa57193c_deba4ebf",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-05-20T14:23:05Z",
+      "side": 1,
+      "message": "Do we really want to log this as a warning? Debug is fine with me since we know why this fails and doesn\u0027t cause any problems. it really isn\u0027t a failure of any sort.",
+      "revId": "66f0fd0f8a43ad1be97b9e59a6492b433acd1123",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa57193c_94fa75bb",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
         "patchSetId": 6

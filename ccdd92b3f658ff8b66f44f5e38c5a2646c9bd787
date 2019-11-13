@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a3d3df0_29448c19",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-04T15:48:20Z",
+      "side": 1,
+      "message": "could you use the getAutoAttachUuid() method below and something like isUpdate \u003d getAutoAttachUuid() !\u003d null, or just get rid of isUpdate and use the returned Uuid in place of !isUpdate",
+      "revId": "ccdd92b3f658ff8b66f44f5e38c5a2646c9bd787",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_894e7839",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-04T15:48:20Z",
+      "side": 1,
+      "message": "would it more readable to break this block into a updateAutoAttach() method or deleteAutoAttach? Thsi method is pretty large with many nested if\u0027s making it hard to read. Also calling everything update instead of delete is misleading.",
+      "revId": "ccdd92b3f658ff8b66f44f5e38c5a2646c9bd787",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_295becf6",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachRemovedCommand.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-04T15:48:20Z",
+      "side": 1,
+      "message": "Not needed for this review, but it would be nice to make this method generic for other users. I think we use this similar loop across managedNodes.",
+      "revId": "ccdd92b3f658ff8b66f44f5e38c5a2646c9bd787",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_a9453c44",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
         "patchSetId": 25
@@ -13,6 +64,155 @@
       "writtenOn": "2016-03-04T15:48:20Z",
       "side": 1,
       "message": "Can these logs be removed or bumped to debug/trace? Same for other logs in this file and others.",
+      "revId": "ccdd92b3f658ff8b66f44f5e38c5a2646c9bd787",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_a95c1c1a",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-04T15:48:20Z",
+      "side": 1,
+      "message": "remove these debugs. they seem like development tracing - but it seems like once this is working, then these logs don\u0027t add much value. Or move to trace. Same comment for similar logs.",
+      "range": {
+        "startLine": 109,
+        "startChar": 24,
+        "endLine": 109,
+        "endChar": 29
+      },
+      "revId": "ccdd92b3f658ff8b66f44f5e38c5a2646c9bd787",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_e932a4a5",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-04T15:48:20Z",
+      "side": 1,
+      "message": "Why not add the transaction comments here as they were added to the remove transactions?",
+      "revId": "ccdd92b3f658ff8b66f44f5e38c5a2646c9bd787",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_696694ee",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-04T15:48:20Z",
+      "side": 1,
+      "message": "seems like there should be another getBridge() method somewhere. it would be better to use an existing method rather than creating another here.",
+      "revId": "ccdd92b3f658ff8b66f44f5e38c5a2646c9bd787",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_04652fb4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/AutoAttachUpdateCommand.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-04T20:24:03Z",
+      "side": 1,
+      "message": "Sorry, I didn\u0027t mean to refer to the other getBridge that you added. What I thought is maybe this one here had already been implemented in some helper or utils method somewhere in the southbound. This code here is pretty basic so I thought we might already have a method for it.\n\nAnother thing to look at is the following code. it relies on the bridgeOperationState to be set for every AbstractTransactCommand() so I think there should always be a bridge but can\u0027t recall. Idea is only to avoid having to read form mdsal if we already have the bridge.\n\nInstanceIdentifier\u003cOvsdbBridgeAugmentation\u003e bridgeIid \u003d\n                        entry.getKey().firstIdentifierOf(OvsdbBridgeAugmentation.class);\n                Optional\u003cOvsdbBridgeAugmentation\u003e bridgeOptional \u003d\n                        getOperationalState().getOvsdbBridgeAugmentation(bridgeIid);",
+      "parentUuid": "9a3d3df0_a91a5cc3",
+      "revId": "ccdd92b3f658ff8b66f44f5e38c5a2646c9bd787",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_a9eb7cda",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbAutoAttachUpdateCommand.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-04T15:48:20Z",
+      "side": 1,
+      "message": "remove the {}. The LOG will automatically append the \u0027e\u0027.\n\nAlso is this a debug or a warn?",
+      "range": {
+        "startLine": 97,
+        "startChar": 110,
+        "endLine": 97,
+        "endChar": 115
+      },
+      "revId": "ccdd92b3f658ff8b66f44f5e38c5a2646c9bd787",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_4999106d",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbAutoAttachUpdateCommand.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-04T15:48:20Z",
+      "side": 1,
+      "message": "Curious, this block is a bit different than the previous blocks. A single if() for all conditions which the previous blocks could also do. Also this block checks if !empty but the others do not.",
+      "revId": "ccdd92b3f658ff8b66f44f5e38c5a2646c9bd787",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_89a678ac",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbAutoAttachUpdateCommand.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-04T15:48:20Z",
+      "side": 1,
+      "message": "are these logs needed or more of development tracing?",
+      "revId": "ccdd92b3f658ff8b66f44f5e38c5a2646c9bd787",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_69a17493",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbAutoAttachUpdateCommand.java",
+        "patchSetId": 25
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2016-03-04T15:48:20Z",
+      "side": 1,
+      "message": "combine these two lines",
       "revId": "ccdd92b3f658ff8b66f44f5e38c5a2646c9bd787",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

@@ -16,6 +16,24 @@
       "revId": "bab77dbdfd2e11fe0ef2ab8b5f5a0e0c5564a2a3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_09becbad",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OpenVSwitchUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 7866
+      },
+      "writtenOn": "2019-11-15T19:59:02Z",
+      "side": 1,
+      "message": "You are right. Your comment is better approach.",
+      "parentUuid": "7a6b29fe_5b1c1b6a",
+      "revId": "bab77dbdfd2e11fe0ef2ab8b5f5a0e0c5564a2a3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

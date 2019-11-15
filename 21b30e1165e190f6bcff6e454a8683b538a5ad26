@@ -16,6 +16,24 @@
       "revId": "21b30e1165e190f6bcff6e454a8683b538a5ad26",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_402ecdfb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 7866
+      },
+      "writtenOn": "2019-11-15T19:59:02Z",
+      "side": 1,
+      "message": "Thank you so much for sharing the link.\nI will follow it from now on-wards.\nUpdated commit message. Please check the same.",
+      "parentUuid": "7a6b29fe_00bdf501",
+      "revId": "21b30e1165e190f6bcff6e454a8683b538a5ad26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

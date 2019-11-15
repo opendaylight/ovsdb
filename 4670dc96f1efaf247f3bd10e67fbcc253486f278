@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_a58408b2",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OpenVSwitchUpdateCommand.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 3276
+      },
+      "writtenOn": "2016-10-04T15:41:54Z",
+      "side": 1,
+      "message": "tabsToSpace: tab is causing build failure",
+      "range": {
+        "startLine": 112,
+        "startChar": 0,
+        "endLine": 112,
+        "endChar": 1
+      },
+      "revId": "4670dc96f1efaf247f3bd10e67fbcc253486f278",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

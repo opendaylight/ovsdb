@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,7 +12,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.google.common.reflect.Invokable;
 import com.google.common.reflect.Reflection;
 import com.google.common.reflect.TypeToken;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -54,7 +52,7 @@ public class JsonRpcEndpoint {
         JsonRpc10Request request;
         SettableFuture<Object> future;
 
-        public CallContext(JsonRpc10Request request, Method method, SettableFuture<Object> future) {
+        public CallContext(final JsonRpc10Request request, final Method method, final SettableFuture<Object> future) {
             this.method = method;
             this.request = request;
             this.future = future;
@@ -73,17 +71,17 @@ public class JsonRpcEndpoint {
         }
     }
 
-    ObjectMapper objectMapper;
-    Channel nettyChannel;
-    Map<String, CallContext> methodContext = new ConcurrentHashMap<>();
-    Map<Object, OvsdbRPC.Callback> requestCallbacks = new HashMap<>();
+    final Map<String, CallContext> methodContext = new ConcurrentHashMap<>();
+    final Map<Object, OvsdbRPC.Callback> requestCallbacks = new HashMap<>();
+    final ObjectMapper objectMapper;
+    final Channel nettyChannel;
 
-    public JsonRpcEndpoint(ObjectMapper objectMapper, Channel channel) {
+    public JsonRpcEndpoint(final ObjectMapper objectMapper, final Channel channel) {
         this.objectMapper = objectMapper;
         this.nettyChannel = channel;
     }
 
-    public <T> T getClient(final Object context, Class<T> klazz) {
+    public <T> T getClient(final Object context, final Class<T> klazz) {
 
         return Reflection.newProxy(klazz, (proxy, method, args) -> {
             if (method.getName().equals(OvsdbRPC.REGISTER_CALLBACK_METHOD)) {
@@ -136,7 +134,7 @@ public class JsonRpcEndpoint {
         );
     }
 
-    public void processResult(JsonNode response) throws NoSuchMethodException {
+    public void processResult(final JsonNode response) throws NoSuchMethodException {
 
         LOG.trace("Response : {}", response);
         CallContext returnCtxt = methodContext.remove(response.get("id").asText());
@@ -164,28 +162,22 @@ public class JsonRpcEndpoint {
         }
     }
 
-    public void processRequest(Object context, JsonNode requestJson) {
+    public void processRequest(final Object context, final JsonNode requestJson) {
         JsonRpc10Request request = new JsonRpc10Request(requestJson.get("id").asText());
         request.setMethod(requestJson.get("method").asText());
         LOG.trace("Request : {} {} {}", requestJson.get("id"), requestJson.get("method"),
                 requestJson.get("params"));
         OvsdbRPC.Callback callback = requestCallbacks.get(context);
         if (callback != null) {
-            Method[] methods = callback.getClass().getDeclaredMethods();
-            for (Method method : methods) {
-                if (method.getName().equals(request.getMethod())) {
-                    Class<?>[] parameters = method.getParameterTypes();
-                    JsonNode params = requestJson.get("params");
-                    Object param = objectMapper.convertValue(params, parameters[1]);
-                    try {
-                        Invokable from = Invokable.from(method);
-                        from.setAccessible(true);
-                        from.invoke(callback, context, param);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        LOG.error("Unable to invoke callback {}", method.getName(), e);
-                    }
-                    return;
+            final String method = request.getMethod();
+            final JsonRpcCallbackInvoker invoker = JsonRpcCallbackInvoker.forMethod(method);
+            if (invoker != null) {
+                try {
+                    invoker.invokeMethod(objectMapper, callback, context, requestJson.get("params"));
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    LOG.error("Unable to invoke {} on callback {}", method, callback, e);
                 }
+                return;
             }
         }
 
@@ -223,7 +215,7 @@ public class JsonRpcEndpoint {
         return methodContext;
     }
 
-    public static void setReaperInterval(int interval) {
+    public static void setReaperInterval(final int interval) {
         reaperInterval = interval;
         LOG.info("Ovsdb Rpc Task interval is set to {} millisecond", reaperInterval);
     }

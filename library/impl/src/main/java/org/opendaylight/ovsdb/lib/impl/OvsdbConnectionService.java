@@ -66,8 +66,6 @@ import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.jsonrpc.ExceptionHandler;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
-import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcServiceBinderHandler;
-import org.opendaylight.ovsdb.lib.message.OvsdbRPC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -232,17 +230,13 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static OvsdbClient getChannelClient(final Channel channel, final ConnectionType type,
             final SocketConnectionType socketConnType) {
 
-        JsonRpcEndpoint factory = new JsonRpcEndpoint(OBJECT_MAPPER, channel);
-        JsonRpcServiceBinderHandler binderHandler = new JsonRpcServiceBinderHandler(factory);
-        binderHandler.setContext(channel);
-        channel.pipeline().addLast(binderHandler);
+        JsonRpcEndpoint endpoint = new JsonRpcEndpoint(OBJECT_MAPPER, channel);
+        channel.pipeline().addLast(endpoint);
 
-        OvsdbRPC rpc = factory.getClient(channel, OvsdbRPC.class);
-        OvsdbClientImpl client = new OvsdbClientImpl(rpc, channel, type, socketConnType);
+        OvsdbClientImpl client = new OvsdbClientImpl(endpoint, channel, type, socketConnType);
         client.setConnectionPublished(true);
         CONNECTIONS.put(client, channel);
-        ChannelFuture closeFuture = channel.closeFuture();
-        closeFuture.addListener(new ChannelConnectionHandler(client));
+        channel.closeFuture().addListener(new ChannelConnectionHandler(client));
         return client;
     }
 

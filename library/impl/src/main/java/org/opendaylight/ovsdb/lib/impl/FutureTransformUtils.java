@@ -20,14 +20,14 @@ import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 
 public final class FutureTransformUtils {
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private FutureTransformUtils() {
     }
 
     public static ListenableFuture<List<OperationResult>> transformTransactResponse(
-            ListenableFuture<List<JsonNode>> transactResponseFuture, final List<Operation> operations) {
-        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            final ListenableFuture<List<JsonNode>> transactResponseFuture, final List<Operation> operations) {
         return Futures.transform(transactResponseFuture, jsonNodes -> {
             final List<OperationResult> operationResults = new ArrayList<>();
             for (int index = 0; index < jsonNodes.size(); index++) {

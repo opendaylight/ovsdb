@@ -31,27 +31,27 @@ public final class Converter {
 
     public static class MapConverter extends StdConverter<JsonNode, OvsdbMap<Object, Object>> {
         @Override
-        public OvsdbMap<Object, Object> convert(JsonNode value) {
+        public OvsdbMap<Object, Object> convert(final JsonNode value) {
             return mapDeser.deserialize(value);
         }
     }
 
     public static class SetConverter extends StdConverter<JsonNode, OvsdbSet<Object>> {
         @Override
-        public OvsdbSet<Object> convert(JsonNode value) {
+        public OvsdbSet<Object> convert(final JsonNode value) {
             return setDeser.deserialize(value);
         }
     }
 
     public static class UpdateNotificationConverter extends StdConverter<JsonNode, UpdateNotification> {
         @Override
-        public UpdateNotification convert(JsonNode value) {
+        public UpdateNotification convert(final JsonNode value) {
             return unDeser.deserialize(value);
         }
     }
 
     static class MapDeser {
-        public OvsdbMap<Object, Object> deserialize(JsonNode node) {
+        public OvsdbMap<Object, Object> deserialize(final JsonNode node) {
             if (node.isArray() && node.size() == 2) {
                 if (node.get(0).isTextual() && "map".equals(node.get(0).asText())) {
                     OvsdbMap<Object, Object> map = new OvsdbMap<>();
@@ -72,7 +72,7 @@ public final class Converter {
     }
 
     static class SetDeser {
-        public OvsdbSet<Object> deserialize(JsonNode node) {
+        public OvsdbSet<Object> deserialize(final JsonNode node) {
             OvsdbSet<Object> set = new OvsdbSet<>();
             if (node.isArray()) {
                 if (node.size() == 2) {
@@ -96,15 +96,15 @@ public final class Converter {
     }
 
     static class UpdateNotificationDeser {
-        public UpdateNotification deserialize(JsonNode node) {
+        private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        public UpdateNotification deserialize(final JsonNode node) {
             UpdateNotification un = new UpdateNotification();
             if (node.isArray() && node.size() == 2) {
                 un.setContext(node.get(0).asText());
                 un.setUpdates(node.get(1));
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                TableUpdates updates = objectMapper.convertValue(node.get(1), TableUpdates.class);
-                un.setUpdate(updates);
+                un.setUpdate(OBJECT_MAPPER.convertValue(node.get(1), TableUpdates.class));
                 return un;
             }
             return null;
@@ -113,7 +113,7 @@ public final class Converter {
 
     static class AtomDeser {
 
-        public Object deserialize(JsonNode node) {
+        public Object deserialize(final JsonNode node) {
             if (!node.isArray()) {
                 switch (node.getNodeType()) {
                     case BOOLEAN:

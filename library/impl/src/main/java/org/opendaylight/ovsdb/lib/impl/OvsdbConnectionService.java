@@ -126,8 +126,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private volatile int listenerPort = 6640;
 
     @Inject
-    public OvsdbConnectionService(@Reference(filter = "type=default-certificate-manager") final
-                                              ICertificateManager certManagerSrv) {
+    public OvsdbConnectionService(@Reference(filter = "type=default-certificate-manager")
+            final ICertificateManager certManagerSrv) {
         this.certManagerSrv = certManagerSrv;
     }
 
@@ -151,7 +151,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     public OvsdbClient connectWithSsl(final InetAddress address, final int port,
-                               final ICertificateManager certificateManagerSrv) {
+            final ICertificateManager certificateManagerSrv) {
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(new NioEventLoopGroup());
@@ -231,11 +231,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     private static OvsdbClient getChannelClient(final Channel channel, final ConnectionType type,
             final SocketConnectionType socketConnType) {
-
         JsonRpcEndpoint factory = new JsonRpcEndpoint(OBJECT_MAPPER, channel);
-        JsonRpcServiceBinderHandler binderHandler = new JsonRpcServiceBinderHandler(factory);
-        binderHandler.setContext(channel);
-        channel.pipeline().addLast(binderHandler);
+        channel.pipeline().addLast(new JsonRpcServiceBinderHandler(factory, channel));
 
         OvsdbRPC rpc = factory.getClient(channel, OvsdbRPC.class);
         OvsdbClientImpl client = new OvsdbClientImpl(rpc, channel, type, socketConnType);

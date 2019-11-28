@@ -5,8 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.jsonrpc;
+
+import static java.util.Objects.requireNonNull;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
@@ -17,19 +18,13 @@ import org.slf4j.LoggerFactory;
 
 public class JsonRpcServiceBinderHandler extends ChannelInboundHandlerAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(JsonRpcServiceBinderHandler.class);
-    JsonRpcEndpoint factory = null;
-    Object context = null;
 
-    public Object getContext() {
-        return context;
-    }
+    private final JsonRpcEndpoint factory;
+    private final Object context;
 
-    public void setContext(Object context) {
+    public JsonRpcServiceBinderHandler(final JsonRpcEndpoint factory, final Object context) {
+        this.factory = requireNonNull(factory);
         this.context = context;
-    }
-
-    public JsonRpcServiceBinderHandler(JsonRpcEndpoint factory) {
-        this.factory = factory;
     }
 
     @Override
@@ -61,7 +56,7 @@ public class JsonRpcServiceBinderHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+    public void channelReadComplete(final ChannelHandlerContext ctx) throws Exception {
         ctx.flush();
     }
 }

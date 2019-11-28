@@ -12,16 +12,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 public final class JsonUtils {
-
-    private static ObjectMapper mapper = new ObjectMapper();
-    private static ObjectWriter prettyWriter = mapper.writerWithDefaultPrettyPrinter();
+    private static final ObjectWriter PRETTY_WRITER = new ObjectMapper().writerWithDefaultPrettyPrinter();
 
     private JsonUtils() {
     }
 
-    public static String prettyString(Object jsonNode) {
+    public static String prettyString(final Object jsonNode) {
         try {
-            return prettyWriter.writeValueAsString(jsonNode);
+            return PRETTY_WRITER.writeValueAsString(jsonNode);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

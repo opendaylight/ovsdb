@@ -111,6 +111,9 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     private static final Set<OvsdbConnectionListener> CONNECTION_LISTENERS = ConcurrentHashMap.newKeySet();
     private static final Map<OvsdbClient, Channel> CONNECTIONS = new ConcurrentHashMap<>();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .setSerializationInclusion(Include.NON_NULL);
 
     private volatile boolean useSSL = false;
     private final ICertificateManager certManagerSrv;
@@ -124,7 +127,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     @Inject
     public OvsdbConnectionService(@Reference(filter = "type=default-certificate-manager")
-                                              ICertificateManager certManagerSrv) {
+            final ICertificateManager certManagerSrv) {
         this.certManagerSrv = certManagerSrv;
     }
 
@@ -148,7 +151,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     public OvsdbClient connectWithSsl(final InetAddress address, final int port,
-                               final ICertificateManager certificateManagerSrv) {
+            final ICertificateManager certificateManagerSrv) {
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(new NioEventLoopGroup());
@@ -158,7 +161,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
             bootstrap.handler(new ChannelInitializer<SocketChannel>() {
                 @Override
-                public void initChannel(SocketChannel channel) throws Exception {
+                public void initChannel(final SocketChannel channel) throws Exception {
                     if (certificateManagerSrv != null && certificateManagerSrv.getServerContext() != null) {
                         SSLContext sslContext = certificateManagerSrv.getServerContext();
                         /* First add ssl handler if ssl context is given */
@@ -191,7 +194,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     }
 
     @Override
-    public void disconnect(OvsdbClient client) {
+    public void disconnect(final OvsdbClient client) {
         if (client == null) {
             return;
         }
@@ -206,7 +209,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     }
 
     @Override
-    public void registerConnectionListener(OvsdbConnectionListener listener) {
+    public void registerConnectionListener(final OvsdbConnectionListener listener) {
         LOG.info("registerConnectionListener: registering {}", listener.getClass().getSimpleName());
         CONNECTION_LISTENERS.add(listener);
         notifyAlreadyExistingConnectionsToListener(listener);
@@ -222,17 +225,14 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     }
 
     @Override
-    public void unregisterConnectionListener(OvsdbConnectionListener listener) {
+    public void unregisterConnectionListener(final OvsdbConnectionListener listener) {
         CONNECTION_LISTENERS.remove(listener);
     }
 
-    private static OvsdbClient getChannelClient(Channel channel, ConnectionType type,
-        SocketConnectionType socketConnType) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.setSerializationInclusion(Include.NON_NULL);
+    private static OvsdbClient getChannelClient(final Channel channel, final ConnectionType type,
+            final SocketConnectionType socketConnType) {
 
-        JsonRpcEndpoint factory = new JsonRpcEndpoint(objectMapper, channel);
+        JsonRpcEndpoint factory = new JsonRpcEndpoint(OBJECT_MAPPER, channel);
         JsonRpcServiceBinderHandler binderHandler = new JsonRpcServiceBinderHandler(factory);
         binderHandler.setContext(channel);
         channel.pipeline().addLast(binderHandler);
@@ -272,7 +272,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     @Override
     public synchronized boolean startOvsdbManagerWithSsl(final String ovsdbListenIp, final int ovsdbListenPort,
                                                          final ICertificateManager certificateManagerSrv,
-                                                         String[] protocols, String[] cipherSuites) {
+                                                         final String[] protocols, final String[] cipherSuites) {
         if (!singletonCreated.getAndSet(true)) {
             new Thread(() -> ovsdbManagerWithSsl(ovsdbListenIp, ovsdbListenPort,
                     certificateManagerSrv, protocols, cipherSuites)).start();
@@ -303,7 +303,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * If the SSL flag is enabled, the method internally will establish TLS communication using the default
      * ODL certificateManager SSLContext and attributes.
      */
-    private void ovsdbManager(String ip, int port) {
+    private void ovsdbManager(final String ip, final int port) {
         if (useSSL) {
             if (certManagerSrv == null) {
                 LOG.error("Certificate Manager service is not available cannot establish the SSL communication.");
@@ -321,7 +321,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * passive connection with Ssl and handle channel callbacks.
      */
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void ovsdbManagerWithSsl(String ip, int port, final ICertificateManager certificateManagerSrv,
+    private void ovsdbManagerWithSsl(final String ip, final int port, final ICertificateManager certificateManagerSrv,
                                             final String[] protocols, final String[] cipherSuites) {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -333,7 +333,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
-                        public void initChannel(SocketChannel channel) throws Exception {
+                        public void initChannel(final SocketChannel channel) throws Exception {
                             LOG.debug("New Passive channel created : {}", channel);
                             if (certificateManagerSrv != null && certificateManagerSrv.getServerContext() != null) {
                                 /* Add SSL handler first if SSL context is provided */
@@ -390,12 +390,12 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         }
     }
 
-    private static void handleNewPassiveConnection(OvsdbClient client) {
+    private static void handleNewPassiveConnection(final OvsdbClient client) {
         ListenableFuture<List<String>> echoFuture = client.echo();
         LOG.debug("Send echo message to probe the OVSDB switch {}",client.getConnectionInfo());
         Futures.addCallback(echoFuture, new FutureCallback<List<String>>() {
             @Override
-            public void onSuccess(@Nullable List<String> result) {
+            public void onSuccess(@Nullable final List<String> result) {
                 LOG.debug("Probe was successful to OVSDB switch {}",client.getConnectionInfo());
                 List<OvsdbClient> clientsFromSameNode = getPassiveClientsFromSameNode(client);
                 if (clientsFromSameNode.size() == 0) {
@@ -406,7 +406,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             }
 
             @Override
-            public void onFailure(Throwable failureException) {
+            public void onFailure(final Throwable failureException) {
                 LOG.error("Probe failed to OVSDB switch. Disconnecting the channel {}", client.getConnectionInfo());
                 client.disconnect();
             }
@@ -531,7 +531,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     }
 
     @Override
-    public OvsdbClient getClient(Channel channel) {
+    public OvsdbClient getClient(final Channel channel) {
         for (Entry<OvsdbClient, Channel> entry : CONNECTIONS.entrySet()) {
             OvsdbClient client = entry.getKey();
             Channel ctx = entry.getValue();
@@ -544,7 +544,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
             justification = "https://github.com/spotbugs/spotbugs/issues/811")
-    private static List<OvsdbClient> getPassiveClientsFromSameNode(OvsdbClient ovsdbClient) {
+    private static List<OvsdbClient> getPassiveClientsFromSameNode(final OvsdbClient ovsdbClient) {
         List<OvsdbClient> passiveClients = new ArrayList<>();
         for (OvsdbClient client : CONNECTIONS.keySet()) {
             if (!client.equals(ovsdbClient)
@@ -567,7 +567,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         }
     }
 
-    public void setOvsdbRpcTaskTimeout(int timeout) {
+    public void setOvsdbRpcTaskTimeout(final int timeout) {
         JsonRpcEndpoint.setReaperInterval(timeout);
     }
 
@@ -576,7 +576,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      *
      * @param flag boolean for using ssl
      */
-    public void setUseSsl(boolean flag) {
+    public void setUseSsl(final boolean flag) {
         useSSL = flag;
     }
 
@@ -587,22 +587,22 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * change at the run time will have no impact.
      * @param maxFrameLength Max frame length (default : 100000)
      */
-    public void setJsonRpcDecoderMaxFrameLength(int maxFrameLength) {
+    public void setJsonRpcDecoderMaxFrameLength(final int maxFrameLength) {
         jsonRpcDecoderMaxFrameLength = maxFrameLength;
         LOG.info("Json Rpc Decoder Max Frame Length set to : {}", jsonRpcDecoderMaxFrameLength);
     }
 
-    public void setOvsdbListenerIp(String ip) {
+    public void setOvsdbListenerIp(final String ip) {
         LOG.info("OVSDB IP for listening connection is set to : {}", ip);
         listenerIp = ip;
     }
 
-    public void setOvsdbListenerPort(int portNumber) {
+    public void setOvsdbListenerPort(final int portNumber) {
         LOG.info("OVSDB port for listening connection is set to : {}", portNumber);
         listenerPort = portNumber;
     }
 
-    public void updateConfigParameter(Map<String, Object> configParameters) {
+    public void updateConfigParameter(final Map<String, Object> configParameters) {
         if (configParameters != null && !configParameters.isEmpty()) {
             LOG.debug("Config parameters received : {}", configParameters.entrySet());
             for (Map.Entry<String, Object> paramEntry : configParameters.entrySet()) {

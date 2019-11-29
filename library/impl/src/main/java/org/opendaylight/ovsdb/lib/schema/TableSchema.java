@@ -23,7 +23,6 @@ import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
-import org.opendaylight.ovsdb.lib.schema.BaseType.UuidBaseType;
 
 public abstract class TableSchema<E extends TableSchema<E>> {
 

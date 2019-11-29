@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,22 +16,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GenericTableSchema extends TableSchema<GenericTableSchema> {
-
     private static final Logger LOG = LoggerFactory.getLogger(GenericTableSchema.class);
 
-    public GenericTableSchema() {
+    public GenericTableSchema(final String name) {
+        super(name);
     }
 
-    public GenericTableSchema(String tableName) {
-        super(tableName);
+    public GenericTableSchema(final String name, final Map<String, ColumnSchema> columns) {
+        super(name, columns);
     }
 
-    public GenericTableSchema(TableSchema tableSchema) {
+    public GenericTableSchema(final TableSchema tableSchema) {
         super(tableSchema.getName(), tableSchema.getColumnSchemas());
     }
 
-    public GenericTableSchema fromJson(String tableName, JsonNode json) {
-
+    public static GenericTableSchema fromJson(final String tableName, final JsonNode json) {
         if (!json.isObject() || !json.has("columns")) {
             throw new BadSchemaException("bad tableschema root, expected \"columns\" as child");
         }
@@ -44,8 +42,6 @@ public class GenericTableSchema extends TableSchema<GenericTableSchema> {
             columns.put(column.getKey(), ColumnSchema.fromJson(column.getKey(), column.getValue()));
         }
 
-        this.setName(tableName);
-        this.setColumns(columns);
-        return this;
+        return new GenericTableSchema(tableName, columns);
     }
 }

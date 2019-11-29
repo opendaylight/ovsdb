@@ -9,7 +9,9 @@ package org.opendaylight.ovsdb.lib.jsonrpc;
 
 import static java.util.Objects.requireNonNull;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,6 +56,9 @@ public class JsonRpcEndpoint extends ChannelInboundHandlerAdapter implements Ovs
         List.class, JsonNode.class);
     private static final JavaType JT_LIST_STRING = TypeFactory.defaultInstance().constructParametricType(
         List.class, String.class);
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .setSerializationInclusion(Include.NON_NULL);
 
     private static int reaperInterval = 1000;
 
@@ -68,13 +73,11 @@ public class JsonRpcEndpoint extends ChannelInboundHandlerAdapter implements Ovs
     }
 
     private final Map<String, CallContext> methodContext = new ConcurrentHashMap<>();
-    private final ObjectMapper objectMapper;
     private final Channel nettyChannel;
 
     private volatile Callback currentCallback = null;
 
-    public JsonRpcEndpoint(final ObjectMapper objectMapper, final Channel channel) {
-        this.objectMapper = requireNonNull(objectMapper);
+    public JsonRpcEndpoint(final Channel channel) {
         this.nettyChannel = requireNonNull(channel);
     }
 
@@ -222,7 +225,7 @@ public class JsonRpcEndpoint extends ChannelInboundHandlerAdapter implements Ovs
             case "update": {
                 final UpdateNotification arg;
                 try {
-                    arg = objectMapper.convertValue(params, UpdateNotification.class);
+                    arg = OBJECT_MAPPER.convertValue(params, UpdateNotification.class);
                 } catch (IllegalArgumentException e) {
                     return reportedMalformedParameters(requestId, e);
                 }
@@ -233,7 +236,7 @@ public class JsonRpcEndpoint extends ChannelInboundHandlerAdapter implements Ovs
             case "locked": {
                 final List<String> arg;
                 try {
-                    arg = objectMapper.convertValue(params, JT_LIST_STRING);
+                    arg = OBJECT_MAPPER.convertValue(params, JT_LIST_STRING);
                 } catch (IllegalArgumentException e) {
                     return reportedMalformedParameters(requestId, e);
                 }
@@ -244,7 +247,7 @@ public class JsonRpcEndpoint extends ChannelInboundHandlerAdapter implements Ovs
             case "stolen": {
                 final List<String> arg;
                 try {
-                    arg = objectMapper.convertValue(params, JT_LIST_STRING);
+                    arg = OBJECT_MAPPER.convertValue(params, JT_LIST_STRING);
                 } catch (IllegalArgumentException e) {
                     return reportedMalformedParameters(requestId, e);
                 }
@@ -273,7 +276,7 @@ public class JsonRpcEndpoint extends ChannelInboundHandlerAdapter implements Ovs
 
         final String jsonString;
         try {
-            jsonString = objectMapper.writeValueAsString(response);
+            jsonString = OBJECT_MAPPER.writeValueAsString(response);
         } catch (JsonProcessingException e) {
             LOG.error("Exception while processing JSON response {}", response, e);
             return;
@@ -296,7 +299,7 @@ public class JsonRpcEndpoint extends ChannelInboundHandlerAdapter implements Ovs
             LOG.error("Request {} failed with error {}", requestId, error);
         }
 
-        final Object mappedResult = objectMapper.convertValue(result, returnCtxt.resultType);
+        final Object mappedResult = OBJECT_MAPPER.convertValue(result, returnCtxt.resultType);
         if (!returnCtxt.future.set(mappedResult)) {
             LOG.debug("Request {} did not accept result {}", requestId, mappedResult);
         }
@@ -305,7 +308,7 @@ public class JsonRpcEndpoint extends ChannelInboundHandlerAdapter implements Ovs
     private <T> ListenableFuture<T> sendRequest(final JsonRpc10Request request, final JavaType resultType) {
         final String requestString;
         try {
-            requestString = objectMapper.writeValueAsString(request);
+            requestString = OBJECT_MAPPER.writeValueAsString(request);
         } catch (JsonProcessingException e) {
             return Futures.immediateFailedFuture(e);
         }

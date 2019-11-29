@@ -5,16 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.error;
 
 public class UnsupportedArgumentException extends RuntimeException {
+    private static final long serialVersionUID = -160548497974342130L;
 
-    public UnsupportedArgumentException(String message) {
+    public UnsupportedArgumentException(final String message) {
         super(message);
     }
 
-    public UnsupportedArgumentException(String message, Throwable cause) {
+    public UnsupportedArgumentException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }

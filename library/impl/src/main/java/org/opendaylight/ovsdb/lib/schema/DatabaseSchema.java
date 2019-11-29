@@ -5,17 +5,21 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.reflect.Invokable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import com.google.common.base.Throwables;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.ovsdb.lib.error.ParsingException;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.slf4j.Logger;
@@ -25,19 +29,28 @@ import org.slf4j.LoggerFactory;
  * Represents an ovsdb database schema, which is comprised of a set of tables.
  */
 public class DatabaseSchema {
+    private static final MethodType CTOR_LOOKUP_TYPE = MethodType.methodType(void.class, TableSchema.class);
+
+    private static final LoadingCache<Class<?>, MethodHandle> CONSTRUCTORS = CacheBuilder.newBuilder().weakKeys()
+            .build(new CacheLoader<Class<?>, MethodHandle>() {
+                @Override
+                public MethodHandle load(final Class<?> key) throws NoSuchMethodException, IllegalAccessException  {
+                    return MethodHandles.lookup().findConstructor(key, CTOR_LOOKUP_TYPE);
+                }
+            });
 
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseSchema.class);
 
     private String name;
 
     private Version version;
-    private Map<String, TableSchema> tables;
+    private final Map<String, TableSchema> tables;
 
-    public DatabaseSchema(Map<String, TableSchema> tables) {
+    public DatabaseSchema(final Map<String, TableSchema> tables) {
         this.tables = tables;
     }
 
-    public DatabaseSchema(String name, Version version, Map<String, TableSchema> tables) {
+    public DatabaseSchema(final String name, final Version version, final Map<String, TableSchema> tables) {
         this.name = name;
         this.version = version;
         this.tables = tables;
@@ -47,11 +60,11 @@ public class DatabaseSchema {
         return this.tables.keySet();
     }
 
-    public boolean hasTable(String table) {
+    public boolean hasTable(final String table) {
         return this.getTables().contains(table);
     }
 
-    public <E extends TableSchema<E>> E table(String tableName, Class<E> clazz) {
+    public <E extends TableSchema<E>> E table(final String tableName, final Class<E> clazz) {
         TableSchema<E> table = tables.get(tableName);
 
         if (clazz.isInstance(table)) {
@@ -61,27 +74,24 @@ public class DatabaseSchema {
         return createTableSchema(clazz, table);
     }
 
-    protected <E extends TableSchema<E>> E createTableSchema(Class<E> clazz, TableSchema<E> table) {
-        Constructor<E> declaredConstructor;
+    protected <E extends TableSchema<E>> E createTableSchema(final Class<E> clazz, final TableSchema<E> table) {
+        final MethodHandle ctor;
         try {
-            declaredConstructor = clazz.getDeclaredConstructor(TableSchema.class);
-        } catch (NoSuchMethodException e) {
-            String message = String.format("Class %s does not have public constructor that accepts TableSchema object",
-                    clazz);
-            throw new IllegalArgumentException(message, e);
+            ctor = CONSTRUCTORS.get(clazz);
+        } catch (ExecutionException e) {
+            throw new IllegalArgumentException("Failed to load constructor of " + clazz, e);
         }
-        Invokable<E, E> invokable = Invokable.from(declaredConstructor);
+
         try {
-            return invokable.invoke(null, table);
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            String message = String.format("Not able to create instance of class %s using public constructor "
-                    + "that accepts TableSchema object", clazz);
-            throw new IllegalArgumentException(message, e);
+            return (E) ctor.invokeExact(table);
+        } catch (Throwable e) {
+            Throwables.throwIfUnchecked(e);
+            throw new IllegalArgumentException("Failed to instantiate " + clazz + " with " + table, e);
         }
     }
 
     //todo : this needs to move to a custom factory
-    public static DatabaseSchema fromJson(String dbName, JsonNode json) {
+    public static DatabaseSchema fromJson(final String dbName, final JsonNode json) {
         if (!json.isObject() || !json.has("tables")) {
             throw new ParsingException("bad DatabaseSchema root, expected \"tables\" as child but was not found");
         }
@@ -107,7 +117,7 @@ public class DatabaseSchema {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -115,7 +125,7 @@ public class DatabaseSchema {
         return version;
     }
 
-    public void setVersion(Version version) {
+    public void setVersion(final Version version) {
         this.version = version;
     }
 

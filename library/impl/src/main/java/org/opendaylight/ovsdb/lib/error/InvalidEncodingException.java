@@ -5,17 +5,17 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.error;
 
 /**
  * InvalidEncodingException in cases where something is not UTF-8 Encoded.
  */
 public class InvalidEncodingException extends RuntimeException {
+    private static final long serialVersionUID = -6333965543652086978L;
 
     private final String actual;
 
-    public InvalidEncodingException(String actual, String message) {
+    public InvalidEncodingException(final String actual, final String message) {
         super(message);
         this.actual = actual;
     }

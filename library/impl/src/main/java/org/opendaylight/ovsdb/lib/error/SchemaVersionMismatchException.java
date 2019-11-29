@@ -15,8 +15,10 @@ import org.opendaylight.ovsdb.lib.notation.Version;
  * and the version requirements are not met.
  */
 public class SchemaVersionMismatchException extends RuntimeException {
+    private static final long serialVersionUID = -5194270510726950745L;
 
-    public SchemaVersionMismatchException(Version schemaVersion, Version fromVersion, Version untilVersion) {
+    public SchemaVersionMismatchException(final Version schemaVersion, final Version fromVersion,
+            final Version untilVersion) {
         super("The schema version used to access the table/column (" + schemaVersion + ") does not match the required"
                 + " version (from " + fromVersion + " to " + untilVersion + ")");
     }

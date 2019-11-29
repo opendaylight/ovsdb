@@ -5,53 +5,26 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableList;
+import java.util.function.Function;
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonUtils;
-import org.opendaylight.ovsdb.lib.notation.OvsdbMap;
-import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
-
 
 public abstract class ColumnType {
-    BaseType baseType;
-    long min = 1;
-    long max = 1;
+    private static final ImmutableList<Function<JsonNode, ColumnType>> FACTORIES = ImmutableList.of(
+        AtomicColumnType::fromJsonNode, KeyValuedColumnType::fromJsonNode);
 
-    public long getMin() {
-        return min;
-    }
+    private final BaseType baseType;
+    private final long min;
+    private final long max;
 
-    void setMin(long min) {
-        this.min = min;
-    }
-
-    public long getMax() {
-        return max;
-    }
-
-    void setMax(long max) {
-        this.max = max;
-    }
-
-    private static ColumnType[] columns = new ColumnType[] {
-        new AtomicColumnType(),
-        new KeyValuedColumnType()
-    };
-
-
-    public ColumnType() {
-
-    }
-
-    public ColumnType(BaseType baseType) {
+    ColumnType(final BaseType baseType, final long min, final long max) {
         this.baseType = baseType;
-    }
-
-    public BaseType getBaseType() {
-        return baseType;
+        this.min = min;
+        this.max = max;
     }
 
     /**
@@ -71,9 +44,9 @@ public abstract class ColumnType {
                  "max": "unlimited"
             }</pre>
      */
-    public static ColumnType fromJson(JsonNode json) {
-        for (ColumnType colType : columns) {
-            ColumnType columnType = colType.fromJsonNode(json);
+    public static ColumnType fromJson(final JsonNode json) {
+        for (Function<JsonNode, ColumnType> factory : FACTORIES) {
+            ColumnType columnType = factory.apply(json);
             if (null != columnType) {
                 return columnType;
             }
@@ -83,14 +56,17 @@ public abstract class ColumnType {
                 JsonUtils.prettyString(json)));
     }
 
+    public BaseType getBaseType() {
+        return baseType;
+    }
 
-    /**
-     * Creates a ColumnType from the JsonNode if the implementation  knows how to, returns null otherwise.
-     *
-     * @param json the JSONNode object that needs to converted
-     * @return a valid SubType or Null (if the JsonNode does not represent the subtype)
-     */
-    protected abstract ColumnType fromJsonNode(JsonNode json);
+    public long getMin() {
+        return min;
+    }
+
+    public long getMax() {
+        return max;
+    }
 
     /*
      * Per RFC 7047, Section 3.2 <type> :
@@ -108,7 +84,9 @@ public abstract class ColumnType {
 
     public abstract Object valueFromJson(JsonNode value);
 
-    public abstract void validate(Object value);
+    public void validate(final Object value) {
+        baseType.validate(value);
+    }
 
     @Override
     public String toString() {
@@ -124,14 +102,14 @@ public abstract class ColumnType {
         final int prime = 31;
         int result = 1;
         result = prime * result
-                + ((baseType == null) ? 0 : baseType.hashCode());
-        result = prime * result + (int) (max ^ (max >>> 32));
-        result = prime * result + (int) (min ^ (min >>> 32));
+                + (baseType == null ? 0 : baseType.hashCode());
+        result = prime * result + (int) (max ^ max >>> 32);
+        result = prime * result + (int) (min ^ min >>> 32);
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -158,174 +136,21 @@ public abstract class ColumnType {
         return true;
     }
 
-    public static class AtomicColumnType extends ColumnType {
-        public AtomicColumnType() {
-        }
-
-        public AtomicColumnType(BaseType baseType) {
-            super(baseType);
-        }
-
-        @Override
-        public AtomicColumnType fromJsonNode(JsonNode json) {
-            if (json.isObject() && json.has("value")) {
-                return null;
+    static long maxFromJson(final JsonNode json) {
+        final JsonNode maxNode = json.get("max");
+        if (maxNode != null) {
+            if (maxNode.isLong()) {
+                return maxNode.asLong();
             }
-            BaseType jsonBaseType = BaseType.fromJson(json, "key");
-
-            if (jsonBaseType != null) {
-
-                AtomicColumnType atomicColumnType = new AtomicColumnType(jsonBaseType);
-
-                JsonNode minNode = json.get("min");
-                if (minNode != null) {
-                    atomicColumnType.setMin(minNode.asLong());
-                }
-
-                JsonNode maxNode = json.get("max");
-                if (maxNode != null) {
-                    if (maxNode.isNumber()) {
-                        atomicColumnType.setMax(maxNode.asLong());
-                    } else if ("unlimited".equals(maxNode.asText())) {
-                        atomicColumnType.setMax(Long.MAX_VALUE);
-                    }
-                }
-                return atomicColumnType;
-            }
-
-            return null;
-        }
-
-        @Override
-        public Object valueFromJson(JsonNode value) {
-            if (isMultiValued()) {
-                OvsdbSet<Object> result = new OvsdbSet<>();
-                if (value.isArray()) {
-                    if (value.size() == 2) {
-                        if (value.get(0).isTextual() && "set".equals(value.get(0).asText())) {
-                            for (JsonNode node: value.get(1)) {
-                                result.add(getBaseType().toValue(node));
-                            }
-                        } else {
-                            result.add(getBaseType().toValue(value));
-                        }
-                    }
-                } else {
-                    result.add(getBaseType().toValue(value));
-                }
-                return result;
-            } else {
-                return getBaseType().toValue(value);
+            if (maxNode.isTextual() && "unlimited".equals(maxNode.asText())) {
+                return Long.MAX_VALUE;
             }
         }
-
-        @Override
-        public void validate(Object value) {
-            this.baseType.validate(value);
-        }
-
+        return 1;
     }
 
-    public static class KeyValuedColumnType extends ColumnType {
-        BaseType keyType;
-
-        public BaseType getKeyType() {
-            return keyType;
-        }
-
-        public KeyValuedColumnType() {
-        }
-
-        public KeyValuedColumnType(BaseType keyType, BaseType valueType) {
-            super(valueType);
-            this.keyType = keyType;
-        }
-
-        @Override
-        public KeyValuedColumnType fromJsonNode(JsonNode json) {
-            if (json.isValueNode() || !json.has("value")) {
-                return null;
-            }
-            BaseType jsonKeyType = BaseType.fromJson(json, "key");
-            BaseType valueType = BaseType.fromJson(json, "value");
-
-            KeyValuedColumnType keyValueColumnType = new KeyValuedColumnType(jsonKeyType, valueType);
-            JsonNode minNode = json.get("min");
-            if (minNode != null) {
-                keyValueColumnType.setMin(minNode.asLong());
-            }
-
-            JsonNode maxNode = json.get("max");
-            if (maxNode != null) {
-                if (maxNode.isLong()) {
-                    keyValueColumnType.setMax(maxNode.asLong());
-                } else if (maxNode.isTextual() && "unlimited".equals(maxNode.asText())) {
-                    keyValueColumnType.setMax(Long.MAX_VALUE);
-                }
-            }
-
-            return keyValueColumnType;
-        }
-
-        @Override
-        public Object valueFromJson(JsonNode node) {
-            if (node.isArray() && node.size() == 2) {
-                if (node.get(0).isTextual() && "map".equals(node.get(0).asText())) {
-                    OvsdbMap<Object, Object> map = new OvsdbMap<>();
-                    for (JsonNode pairNode : node.get(1)) {
-                        if (pairNode.isArray() && node.size() == 2) {
-                            Object key = getKeyType().toValue(pairNode.get(0));
-                            Object value = getBaseType().toValue(pairNode.get(1));
-                            map.put(key, value);
-                        }
-                    }
-                    return map;
-                } else if (node.size() == 0) {
-                    return null;
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public void validate(Object value) {
-            this.baseType.validate(value);
-        }
-
-        @Override
-        public String toString() {
-            return "KeyValuedColumnType [keyType=" + keyType + " " + super.toString() + "]";
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = super.hashCode();
-            result = prime * result
-                    + ((keyType == null) ? 0 : keyType.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!super.equals(obj)) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            KeyValuedColumnType other = (KeyValuedColumnType) obj;
-            if (keyType == null) {
-                if (other.keyType != null) {
-                    return false;
-                }
-            } else if (!keyType.equals(other.keyType)) {
-                return false;
-            }
-            return true;
-        }
+    static long minFromJson(final JsonNode json) {
+        final JsonNode minNode = json.get("min");
+        return minNode == null ? 1 : minNode.asLong();
     }
 }

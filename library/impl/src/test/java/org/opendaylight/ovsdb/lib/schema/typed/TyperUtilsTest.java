@@ -46,7 +46,8 @@ public class TyperUtilsTest {
     public void testGetTableSchemaWithIncludedTypedTable() {
         // Given ...
         GenericTableSchema testTableSchema = new GenericTableSchema("TestTypedTable");
-        DatabaseSchema dbSchema = new DatabaseSchema(ImmutableMap.of(testTableSchema.getName(), testTableSchema));
+        DatabaseSchema dbSchema = new DatabaseSchema("testDb", Version.NULL,
+            ImmutableMap.of(testTableSchema.getName(), testTableSchema));
 
         // When ...
         GenericTableSchema tableSchema = TyperUtils.getTableSchema(dbSchema, TestTypedTable.class);
@@ -63,7 +64,8 @@ public class TyperUtilsTest {
     public void testGetTableSchemaWithIncludedUntypedTable() {
         // Given ...
         GenericTableSchema testTableSchema = new GenericTableSchema("TestUntypedTable");
-        DatabaseSchema dbSchema = new DatabaseSchema(ImmutableMap.of(testTableSchema.getName(), testTableSchema));
+        DatabaseSchema dbSchema = new DatabaseSchema("testDb", Version.NULL,
+            ImmutableMap.of(testTableSchema.getName(), testTableSchema));
 
         // When ...
         GenericTableSchema tableSchema = TyperUtils.getTableSchema(dbSchema, TestUntypedTable.class);
@@ -79,7 +81,7 @@ public class TyperUtilsTest {
     @Test(expected = IllegalArgumentException.class)
     public void testGetTableSchemaWithoutIncludedTypedTable() {
         // Given ...
-        DatabaseSchema dbSchema = new DatabaseSchema(Collections.emptyMap());
+        DatabaseSchema dbSchema = new DatabaseSchema("testDb", Version.NULL, Collections.emptyMap());
 
         // When ...
         TyperUtils.getTableSchema(dbSchema, TestTypedTable.class);
@@ -92,7 +94,7 @@ public class TyperUtilsTest {
     @Test(expected = IllegalArgumentException.class)
     public void testGetTableSchemaWithoutIncludedUntypedTable() {
         // Given ...
-        DatabaseSchema dbSchema = new DatabaseSchema(Collections.emptyMap());
+        DatabaseSchema dbSchema = new DatabaseSchema("testDb", Version.NULL, Collections.emptyMap());
 
         // When ...
         TyperUtils.getTableSchema(dbSchema, TestUntypedTable.class);
@@ -172,7 +174,7 @@ public class TyperUtilsTest {
      */
     // We extract the real cause, which “loses” the original cause, but that’s fine
     @SuppressWarnings("checkstyle:AvoidHidingCauseException")
-    private void callCheckVersion(Version schema, Version from, Version to) throws SchemaVersionMismatchException {
+    private static void callCheckVersion(final Version schema, final Version from, final Version to) {
         try {
             Method method =
                     TyperUtils.class.getDeclaredMethod("checkVersion", Version.class, Version.class, Version.class);

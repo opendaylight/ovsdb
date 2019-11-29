@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,20 +25,16 @@ import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.schema.BaseType.UuidBaseType;
 import org.opendaylight.ovsdb.lib.schema.ColumnType.AtomicColumnType;
 
-
 public abstract class TableSchema<E extends TableSchema<E>> {
 
     private String name;
     private Map<String, ColumnSchema> columns;
 
-    public TableSchema() {
-    }
-
-    protected TableSchema(String name) {
+    protected TableSchema(final String name) {
         this.name = name;
     }
 
-    public TableSchema(String name, Map<String, ColumnSchema> columns) {
+    protected TableSchema(final String name, final Map<String, ColumnSchema> columns) {
         this.name = name;
         this.columns = columns;
     }
@@ -52,16 +47,15 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         return columns;
     }
 
-    public boolean hasColumn(String column) {
+    public boolean hasColumn(final String column) {
         return this.getColumns().contains(column);
     }
 
-
-    public ColumnType getColumnType(String column) {
+    public ColumnType getColumnType(final String column) {
         return this.columns.get(column).getType();
     }
 
-    public <E extends TableSchema<E>> E as(Class<E> clazz) {
+    public <E extends TableSchema<E>> E as(final Class<E> clazz) {
         try {
             Constructor<E> instance = clazz.getConstructor(TableSchema.class);
             return instance.newInstance(this);
@@ -75,7 +69,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         return new Insert<>(this);
     }
 
-    public <D> ColumnSchema<E, Set<D>> multiValuedColumn(String column, Class<D> type) {
+    public <D> ColumnSchema<E, Set<D>> multiValuedColumn(final String column, final Class<D> type) {
         //todo exception handling
 
         ColumnSchema<E, Set<D>> columnSchema = columns.get(column);
@@ -83,7 +77,8 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         return columnSchema;
     }
 
-    public <K,V> ColumnSchema<E, Map<K,V>> multiValuedColumn(String column, Class<K> keyType, Class<V> valueType) {
+    public <K,V> ColumnSchema<E, Map<K,V>> multiValuedColumn(final String column, final Class<K> keyType,
+            final Class<V> valueType) {
         //todo exception handling
 
         ColumnSchema<E, Map<K, V>> columnSchema = columns.get(column);
@@ -91,7 +86,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         return columnSchema;
     }
 
-    public <D> ColumnSchema<E, D> column(String column, Class<D> type) {
+    public <D> ColumnSchema<E, D> column(final String column, final Class<D> type) {
         //todo exception handling
 
         ColumnSchema<E, D> columnSchema = columns.get(column);
@@ -101,24 +96,23 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         return columnSchema;
     }
 
-    public ColumnSchema column(String column) {
+    public ColumnSchema column(final String column) {
         return this.columns.get(column);
     }
-
 
     public String getName() {
         return name;
     }
 
-    protected void setName(String name) {
+    protected void setName(final String name) {
         this.name = name;
     }
 
-    protected void setColumns(Map<String, ColumnSchema> columns) {
+    protected void setColumns(final Map<String, ColumnSchema> columns) {
         this.columns = columns;
     }
 
-    public TableUpdate<E> updatesFromJson(JsonNode value) {
+    public TableUpdate<E> updatesFromJson(final JsonNode value) {
         TableUpdate<E> tableUpdate = new TableUpdate<>();
         Iterator<Entry<String, JsonNode>> fields = value.fields();
         while (fields.hasNext()) {
@@ -136,7 +130,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         return tableUpdate;
     }
 
-    public Row<E> createRow(ObjectNode rowNode) {
+    public Row<E> createRow(final ObjectNode rowNode) {
         List<Column<E, ?>> newColumns = new ArrayList<>();
         for (Iterator<Map.Entry<String, JsonNode>> iter = rowNode.fields(); iter.hasNext();) {
             Map.Entry<String, JsonNode> next = iter.next();
@@ -155,7 +149,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
         return new Row<>(this, newColumns);
     }
 
-    public List<Row<E>> createRows(JsonNode rowsNode) {
+    public List<Row<E>> createRows(final JsonNode rowsNode) {
         List<Row<E>> rows = new ArrayList<>();
         for (JsonNode rowNode : rowsNode.get("rows")) {
             rows.add(createRow((ObjectNode)rowNode));

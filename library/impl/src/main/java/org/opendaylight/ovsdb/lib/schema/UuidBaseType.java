@@ -15,18 +15,28 @@ final class UuidBaseType extends BaseType<UuidBaseType> {
     // These enum types correspond to JSON values and need to be in lower-case currently
     public enum RefType { strong, weak }
 
-    static final UuidBaseType SINGLETON = new UuidBaseType();
+    static final UuidBaseType SINGLETON = new UuidBaseType(null, null);
+    static final BaseTypeFactory<UuidBaseType> FACTORY = new BaseTypeFactory<UuidBaseType>() {
+        @Override
+        UuidBaseType create(final JsonNode typeDefinition) {
+            final JsonNode refTableNode = typeDefinition.get("refTable");
+            final String refTable = refTableNode != null ? refTableNode.asText() : null;
 
-    private String refTable;
-    private UuidBaseType.RefType refType;
+            final JsonNode refTypeJson = typeDefinition.get("refType");
+            final RefType refType = refTypeJson != null ? RefType.valueOf(refTypeJson.asText()) : RefType.strong;
 
-    @Override
-    void fillConstraints(final JsonNode node) {
-        JsonNode refTableNode = node.get("refTable");
-        refTable = refTableNode != null ? refTableNode.asText() : null;
+            // FIXME: this is weird from refTable/refType perspective -- if there is no table, we should not default
+            //        to strong reference and squash to singleton
+            return new UuidBaseType(refTable, refType);
+        }
+    };
 
-        JsonNode refTypeJson = node.get("refType");
-        refType = refTypeJson != null ? RefType.valueOf(refTypeJson.asText()) : RefType.strong;
+    private final String refTable;
+    private final RefType refType;
+
+    UuidBaseType(final String refTable, final RefType refType) {
+        this.refTable = refTable;
+        this.refType = refType;
     }
 
     @Override

@@ -31,13 +31,13 @@ public class DatabaseSchema {
     private String name;
 
     private Version version;
-    private Map<String, TableSchema> tables;
+    private final Map<String, TableSchema> tables;
 
-    public DatabaseSchema(Map<String, TableSchema> tables) {
+    public DatabaseSchema(final Map<String, TableSchema> tables) {
         this.tables = tables;
     }
 
-    public DatabaseSchema(String name, Version version, Map<String, TableSchema> tables) {
+    public DatabaseSchema(final String name, final Version version, final Map<String, TableSchema> tables) {
         this.name = name;
         this.version = version;
         this.tables = tables;
@@ -47,11 +47,11 @@ public class DatabaseSchema {
         return this.tables.keySet();
     }
 
-    public boolean hasTable(String table) {
+    public boolean hasTable(final String table) {
         return this.getTables().contains(table);
     }
 
-    public <E extends TableSchema<E>> E table(String tableName, Class<E> clazz) {
+    public <E extends TableSchema<E>> E table(final String tableName, final Class<E> clazz) {
         TableSchema<E> table = tables.get(tableName);
 
         if (clazz.isInstance(table)) {
@@ -61,7 +61,7 @@ public class DatabaseSchema {
         return createTableSchema(clazz, table);
     }
 
-    protected <E extends TableSchema<E>> E createTableSchema(Class<E> clazz, TableSchema<E> table) {
+    protected <E extends TableSchema<E>> E createTableSchema(final Class<E> clazz, final TableSchema<E> table) {
         Constructor<E> declaredConstructor;
         try {
             declaredConstructor = clazz.getDeclaredConstructor(TableSchema.class);
@@ -81,7 +81,7 @@ public class DatabaseSchema {
     }
 
     //todo : this needs to move to a custom factory
-    public static DatabaseSchema fromJson(String dbName, JsonNode json) {
+    public static DatabaseSchema fromJson(final String dbName, final JsonNode json) {
         if (!json.isObject() || !json.has("tables")) {
             throw new ParsingException("bad DatabaseSchema root, expected \"tables\" as child but was not found");
         }
@@ -97,7 +97,7 @@ public class DatabaseSchema {
             LOG.trace("Read schema for table[{}]:{}", table.getKey(), table.getValue());
 
             //todo : this needs to done by a factory
-            tables.put(table.getKey(), new GenericTableSchema().fromJson(table.getKey(), table.getValue()));
+            tables.put(table.getKey(), GenericTableSchema.fromJson(table.getKey(), table.getValue()));
         }
 
         return new DatabaseSchema(dbName, dbVersion, tables);
@@ -107,7 +107,7 @@ public class DatabaseSchema {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -115,7 +115,7 @@ public class DatabaseSchema {
         return version;
     }
 
-    public void setVersion(Version version) {
+    public void setVersion(final Version version) {
         this.version = version;
     }
 

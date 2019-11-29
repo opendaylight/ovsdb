@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -26,11 +27,12 @@ import org.opendaylight.ovsdb.lib.schema.BaseType.UuidBaseType;
 
 public abstract class TableSchema<E extends TableSchema<E>> {
 
-    private String name;
-    private Map<String, ColumnSchema> columns;
+    private final String name;
+    private final Map<String, ColumnSchema> columns;
 
     protected TableSchema(final String name) {
         this.name = name;
+        this.columns = new HashMap<>();
     }
 
     protected TableSchema(final String name, final Map<String, ColumnSchema> columns) {
@@ -101,14 +103,6 @@ public abstract class TableSchema<E extends TableSchema<E>> {
 
     public String getName() {
         return name;
-    }
-
-    protected void setName(final String name) {
-        this.name = name;
-    }
-
-    protected void setColumns(final Map<String, ColumnSchema> columns) {
-        this.columns = columns;
     }
 
     public TableUpdate<E> updatesFromJson(final JsonNode value) {

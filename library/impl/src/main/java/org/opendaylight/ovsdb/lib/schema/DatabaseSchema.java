@@ -25,17 +25,11 @@ import org.slf4j.LoggerFactory;
  * Represents an ovsdb database schema, which is comprised of a set of tables.
  */
 public class DatabaseSchema {
-
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseSchema.class);
 
-    private String name;
-
-    private Version version;
+    private final String name;
+    private final Version version;
     private final Map<String, TableSchema> tables;
-
-    public DatabaseSchema(final Map<String, TableSchema> tables) {
-        this.tables = tables;
-    }
 
     public DatabaseSchema(final String name, final Version version, final Map<String, TableSchema> tables) {
         this.name = name;
@@ -107,16 +101,8 @@ public class DatabaseSchema {
         return name;
     }
 
-    public void setName(final String name) {
-        this.name = name;
-    }
-
     public Version getVersion() {
         return version;
-    }
-
-    public void setVersion(final Version version) {
-        this.version = version;
     }
 
     public void populateInternallyGeneratedColumns() {

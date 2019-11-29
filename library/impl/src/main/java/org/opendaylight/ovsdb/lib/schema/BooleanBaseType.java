@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.lib.schema;
 import com.fasterxml.jackson.databind.JsonNode;
 
 final class BooleanBaseType extends BaseType {
+    static final BooleanBaseType SINGLETON = new BooleanBaseType();
 
     @Override
     void fillConstraints(final JsonNode node) {

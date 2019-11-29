@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.Set;
 
 final class RealBaseType extends BaseType<RealBaseType> {
+    static final RealBaseType SINGLETON = new RealBaseType();
+
     private double min = Double.MIN_VALUE;
     private double max = Double.MAX_VALUE;
     private Set<Double> enums;
@@ -21,15 +23,15 @@ final class RealBaseType extends BaseType<RealBaseType> {
     void fillConstraints(final JsonNode type) {
         JsonNode typeMaxNode = type.get("maxReal");
         if (typeMaxNode != null) {
-            setMax(typeMaxNode.asLong());
+            max = typeMaxNode.asLong();
         }
         JsonNode typeMinNode = type.get("minReal");
         if (typeMinNode != null) {
-            setMin(typeMinNode.asLong());
+            min = typeMinNode.asLong();
         }
         Optional<Set<Double>> typeEnumsOpt = populateEnum(type);
         if (typeEnumsOpt.isPresent()) {
-            setEnums(typeEnumsOpt.get());
+            enums = typeEnumsOpt.get();
         }
     }
 
@@ -60,24 +62,12 @@ final class RealBaseType extends BaseType<RealBaseType> {
         return min;
     }
 
-    public void setMin(final double min) {
-        this.min = min;
-    }
-
     public double getMax() {
         return max;
     }
 
-    public void setMax(final double max) {
-        this.max = max;
-    }
-
     public Set<Double> getEnums() {
         return enums;
-    }
-
-    public void setEnums(final Set<Double> enums) {
-        this.enums = enums;
     }
 
     @Override

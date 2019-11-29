@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.Set;
 
 final class IntegerBaseType extends BaseType<IntegerBaseType> {
+    static final IntegerBaseType SINGLETON = new IntegerBaseType();
+
     private long min = Long.MIN_VALUE;
     private long max = Long.MAX_VALUE;
     private Set<Integer> enums;
@@ -21,15 +23,15 @@ final class IntegerBaseType extends BaseType<IntegerBaseType> {
     void fillConstraints(final JsonNode type) {
         JsonNode typeMaxNode = type.get("maxInteger");
         if (typeMaxNode != null) {
-            setMax(typeMaxNode.asLong());
+            max = typeMaxNode.asLong();
         }
         JsonNode typeMinNode = type.get("minInteger");
         if (typeMinNode != null) {
-            setMin(typeMinNode.asLong());
+            min = typeMinNode.asLong();
         }
         Optional<Set<Integer>> typeEnumsOpt = populateEnum(type);
         if (typeEnumsOpt.isPresent()) {
-            setEnums(typeEnumsOpt.get());
+            enums = typeEnumsOpt.get();
         }
     }
 
@@ -60,24 +62,12 @@ final class IntegerBaseType extends BaseType<IntegerBaseType> {
         return min;
     }
 
-    public void setMin(final long min) {
-        this.min = min;
-    }
-
     public long getMax() {
         return max;
     }
 
-    public void setMax(final long max) {
-        this.max = max;
-    }
-
     public Set<Integer> getEnums() {
         return enums;
-    }
-
-    public void setEnums(final Set<Integer> enums) {
-        this.enums = enums;
     }
 
     @Override

@@ -13,6 +13,8 @@ import java.util.Set;
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 final class StringBaseType extends BaseType<StringBaseType> {
+    static final StringBaseType SINGLETON = new StringBaseType();
+
     private int minLength = Integer.MIN_VALUE;
     private int maxLength = Integer.MAX_VALUE;
     private Set<String> enums;
@@ -21,15 +23,15 @@ final class StringBaseType extends BaseType<StringBaseType> {
     void fillConstraints(final JsonNode type) {
         JsonNode typeMaxNode = type.get("maxLength");
         if (typeMaxNode != null) {
-            setMaxLength(typeMaxNode.asInt());
+            maxLength = typeMaxNode.asInt();
         }
         JsonNode typeMinNode = type.get("minLength");
         if (typeMinNode != null) {
-            setMinLength(typeMinNode.asInt());
+            minLength = typeMinNode.asInt();
         }
         Optional<Set<String>> typeEnumsOpt = populateEnum(type);
         if (typeEnumsOpt.isPresent()) {
-            setEnums(typeEnumsOpt.get());
+            enums = typeEnumsOpt.get();
         }
     }
 
@@ -73,16 +75,8 @@ final class StringBaseType extends BaseType<StringBaseType> {
         return maxLength;
     }
 
-    public void setMaxLength(final int maxLength) {
-        this.maxLength = maxLength;
-    }
-
     public Set<String> getEnums() {
         return enums;
-    }
-
-    public void setEnums(final Set<String> enums) {
-        this.enums = enums;
     }
 
     @Override

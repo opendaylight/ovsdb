@@ -8,31 +8,24 @@
 package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.HashSet;
-import java.util.Optional;
+import com.google.common.collect.ImmutableSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 final class StringBaseType extends BaseType<StringBaseType> {
-    static final StringBaseType SINGLETON = new StringBaseType();
+    // FIXME: negative minimum leng
+    static final StringBaseType SINGLETON = new StringBaseType(Integer.MIN_VALUE, Integer.MAX_VALUE, null);
+    static final BaseTypeFactory<StringBaseType> FACTORY = new Factory();
 
-    private int minLength = Integer.MIN_VALUE;
-    private int maxLength = Integer.MAX_VALUE;
-    private Set<String> enums;
+    private final int minLength;
+    private final int maxLength;
+    private final ImmutableSet<String> enums;
 
-    @Override
-    void fillConstraints(final JsonNode type) {
-        JsonNode typeMaxNode = type.get("maxLength");
-        if (typeMaxNode != null) {
-            maxLength = typeMaxNode.asInt();
-        }
-        JsonNode typeMinNode = type.get("minLength");
-        if (typeMinNode != null) {
-            minLength = typeMinNode.asInt();
-        }
-        Optional<Set<String>> typeEnumsOpt = populateEnum(type);
-        if (typeEnumsOpt.isPresent()) {
-            enums = typeEnumsOpt.get();
-        }
+    StringBaseType(final int min, final int max, final ImmutableSet<String> enums) {
+        this.minLength = min;
+        this.maxLength = max;
+        this.enums = enums;
     }
 
     @Override
@@ -43,24 +36,6 @@ final class StringBaseType extends BaseType<StringBaseType> {
     @Override
     public void validate(final Object value) {
 
-    }
-
-    private static Optional<Set<String>> populateEnum(final JsonNode node) {
-        if (node.has("enum")) {
-            Set<String> nodesEnums = new HashSet<>();
-            JsonNode enumVal = node.get("enum");
-            if (enumVal.isArray()) {
-                JsonNode anEnum = enumVal.get(1);
-                for (JsonNode enm : anEnum) {
-                    nodesEnums.add(enm.asText());
-                }
-            } else if (enumVal.isTextual()) {
-                nodesEnums.add(enumVal.asText());
-            }
-            return Optional.of(nodesEnums);
-        } else {
-            return Optional.empty();
-        }
     }
 
     public int getMinLength() {
@@ -116,5 +91,38 @@ final class StringBaseType extends BaseType<StringBaseType> {
             return false;
         }
         return true;
+    }
+
+    private static final class Factory extends BaseTypeFactory<StringBaseType> {
+        @Override
+        StringBaseType create(final JsonNode typeDefinition) {
+            final JsonNode typeMaxNode = typeDefinition.get("maxLength");
+            final int max = typeMaxNode != null ? typeMaxNode.asInt() : Integer.MAX_VALUE;
+
+            final JsonNode typeMinNode = typeDefinition.get("minLength");
+            final int min = typeMinNode != null ? typeMinNode.asInt() : Integer.MIN_VALUE;
+
+            final JsonNode typeEnumNode = typeDefinition.get("enum");
+            final ImmutableSet<String> enums = typeEnumNode != null ? parseEnums(typeEnumNode) : null;
+
+            return min == Integer.MIN_VALUE && max == Integer.MAX_VALUE && enums == null ? SINGLETON
+                    : new StringBaseType(min, max, enums);
+        }
+
+
+        private static ImmutableSet<String> parseEnums(final JsonNode enumVal) {
+            if (enumVal.isTextual()) {
+                return ImmutableSet.of(enumVal.asText());
+            }
+            if (enumVal.isArray()) {
+                final List<String> tmp = new ArrayList<>();
+                JsonNode anEnum = enumVal.get(1);
+                for (JsonNode enm : anEnum) {
+                    tmp.add(enm.asText());
+                }
+                return ImmutableSet.copyOf(tmp);
+            }
+            return ImmutableSet.of();
+        }
     }
 }

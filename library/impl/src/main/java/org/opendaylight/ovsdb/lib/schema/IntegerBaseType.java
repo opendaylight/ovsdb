@@ -8,31 +8,21 @@
 package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.HashSet;
-import java.util.Optional;
+import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 
 final class IntegerBaseType extends BaseType<IntegerBaseType> {
-    static final IntegerBaseType SINGLETON = new IntegerBaseType();
+    static final IntegerBaseType SINGLETON = new IntegerBaseType(Long.MIN_VALUE, Long.MAX_VALUE, null);
+    static final BaseTypeFactory<IntegerBaseType> FACTORY = new Factory();
 
-    private long min = Long.MIN_VALUE;
-    private long max = Long.MAX_VALUE;
-    private Set<Integer> enums;
+    private final long min;
+    private final long max;
+    private final ImmutableSet<Integer> enums;
 
-    @Override
-    void fillConstraints(final JsonNode type) {
-        JsonNode typeMaxNode = type.get("maxInteger");
-        if (typeMaxNode != null) {
-            max = typeMaxNode.asLong();
-        }
-        JsonNode typeMinNode = type.get("minInteger");
-        if (typeMinNode != null) {
-            min = typeMinNode.asLong();
-        }
-        Optional<Set<Integer>> typeEnumsOpt = populateEnum(type);
-        if (typeEnumsOpt.isPresent()) {
-            enums = typeEnumsOpt.get();
-        }
+    IntegerBaseType(final long min, final long max, final ImmutableSet<Integer> enums) {
+        this.min = min;
+        this.max = max;
+        this.enums = enums;
     }
 
     @Override
@@ -43,19 +33,6 @@ final class IntegerBaseType extends BaseType<IntegerBaseType> {
     @Override
     public void validate(final Object value) {
 
-    }
-
-    private static Optional<Set<Integer>> populateEnum(final JsonNode node) {
-        if (node.has("enum")) {
-            Set<Integer> nodesEnums = new HashSet<>();
-            JsonNode anEnum = node.get("enum").get(1);
-            for (JsonNode enm : anEnum) {
-                nodesEnums.add(enm.asInt());
-            }
-            return Optional.of(nodesEnums);
-        } else {
-            return Optional.empty();
-        }
     }
 
     public long getMin() {
@@ -111,5 +88,27 @@ final class IntegerBaseType extends BaseType<IntegerBaseType> {
             return false;
         }
         return true;
+    }
+
+    private static final class Factory extends BaseTypeFactory.WithEnum<IntegerBaseType, Integer> {
+        @Override
+        IntegerBaseType create(final JsonNode typeDefinition) {
+            final JsonNode typeMaxNode = typeDefinition.get("maxInteger");
+            final long max = typeMaxNode != null ? typeMaxNode.asLong() : Long.MAX_VALUE;
+
+            final JsonNode typeMinNode = typeDefinition.get("minInteger");
+            final long min = typeMinNode != null ? typeMinNode.asLong() : Long.MIN_VALUE;
+
+            final JsonNode typeEnumNode = typeDefinition.get("enum");
+            final ImmutableSet<Integer> enums = typeEnumNode != null ? parseEnums(typeEnumNode) : null;
+
+            return min == Long.MIN_VALUE && max == Long.MAX_VALUE && enums == null ? SINGLETON
+                    : new IntegerBaseType(min, max, enums);
+        }
+
+        @Override
+        Integer getEnumValue(final JsonNode jsonEnum) {
+            return jsonEnum.asInt();
+        }
     }
 }

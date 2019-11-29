@@ -7,9 +7,6 @@
  */
 package org.opendaylight.ovsdb.lib.impl;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -109,9 +106,6 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     private static final Set<OvsdbConnectionListener> CONNECTION_LISTENERS = ConcurrentHashMap.newKeySet();
     private static final Map<OvsdbClient, Channel> CONNECTIONS = new ConcurrentHashMap<>();
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .setSerializationInclusion(Include.NON_NULL);
 
     private volatile boolean useSSL = false;
     private final ICertificateManager certManagerSrv;
@@ -230,7 +224,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static OvsdbClient getChannelClient(final Channel channel, final ConnectionType type,
             final SocketConnectionType socketConnType) {
 
-        JsonRpcEndpoint endpoint = new JsonRpcEndpoint(OBJECT_MAPPER, channel);
+        JsonRpcEndpoint endpoint = new JsonRpcEndpoint(channel);
         channel.pipeline().addLast(endpoint);
 
         OvsdbClientImpl client = new OvsdbClientImpl(endpoint, channel, type, socketConnType);

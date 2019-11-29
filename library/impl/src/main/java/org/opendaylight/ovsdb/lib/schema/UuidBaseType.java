@@ -15,16 +15,18 @@ final class UuidBaseType extends BaseType<UuidBaseType> {
     // These enum types correspond to JSON values and need to be in lower-case currently
     public enum RefType { strong, weak }
 
+    static final UuidBaseType SINGLETON = new UuidBaseType();
+
     private String refTable;
     private UuidBaseType.RefType refType;
 
     @Override
     void fillConstraints(final JsonNode node) {
         JsonNode refTableNode = node.get("refTable");
-        setRefTable(refTableNode != null ? refTableNode.asText() : null);
+        refTable = refTableNode != null ? refTableNode.asText() : null;
 
         JsonNode refTypeJson = node.get("refType");
-        setRefType(refTypeJson != null ? RefType.valueOf(refTypeJson.asText()) : RefType.strong);
+        refType = refTypeJson != null ? RefType.valueOf(refTypeJson.asText()) : RefType.strong;
     }
 
     @Override
@@ -54,16 +56,8 @@ final class UuidBaseType extends BaseType<UuidBaseType> {
         return refTable;
     }
 
-    public void setRefTable(final String refTable) {
-        this.refTable = refTable;
-    }
-
     public UuidBaseType.RefType getRefType() {
         return refType;
-    }
-
-    public void setRefType(final UuidBaseType.RefType refType) {
-        this.refType = refType;
     }
 
     @Override

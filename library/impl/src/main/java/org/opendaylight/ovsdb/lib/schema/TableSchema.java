@@ -25,6 +25,9 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
 
 public abstract class TableSchema<E extends TableSchema<E>> {
+    private static final AtomicColumnType UUID_COLUMN_TYPE = new AtomicColumnType(UuidBaseType.SINGLETON);
+    private static final ColumnSchema UUID_COLUMN_SCHMEMA = new ColumnSchema("_uuid", UUID_COLUMN_TYPE);
+    private static final ColumnSchema VERSION_COLUMN_SCHMEMA = new ColumnSchema("_version", UUID_COLUMN_TYPE);
 
     private final String name;
     private final Map<String, ColumnSchema> columns;
@@ -161,7 +164,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
      * for better application experience using the library.
      */
     public void populateInternallyGeneratedColumns() {
-        columns.put("_uuid", new ColumnSchema("_uuid", new AtomicColumnType(new UuidBaseType())));
-        columns.put("_version", new ColumnSchema("_version", new AtomicColumnType(new UuidBaseType())));
+        columns.put("_uuid", UUID_COLUMN_SCHMEMA);
+        columns.put("_version", VERSION_COLUMN_SCHMEMA);
     }
 }

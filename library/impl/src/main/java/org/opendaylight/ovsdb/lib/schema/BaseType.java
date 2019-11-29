@@ -14,9 +14,13 @@ import org.slf4j.Logger;
 public abstract class BaseType<E extends BaseType<E>> {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(BaseType.class);
 
+    BaseType() {
+        // Prevent external instantiation
+    }
+
     public static BaseType fromJson(final JsonNode json, final String keyorval) {
         if (json.isValueNode()) {
-            return fromString(json.asText().trim());
+            return singletonFor(json.asText().trim());
         }
 
         final JsonNode type = json.get(keyorval);
@@ -25,13 +29,13 @@ public abstract class BaseType<E extends BaseType<E>> {
         }
         if (type.isTextual()) {
             //json like  "string"
-            return fromString(type.asText());
+            return singletonFor(type.asText());
         }
         if (type.isObject()) {
             //json like  {"type" : "string", "enum": ["set", ["access", "native-tagged"]]}" for key or value
             final JsonNode nestedType = type.get("type");
             if (nestedType != null) {
-                final BaseType ret = fromString(nestedType.asText());
+                final BaseType ret = builderFor(nestedType.asText());
                 if (ret != null) {
                     ret.fillConstraints(type);
                     return ret;
@@ -48,7 +52,27 @@ public abstract class BaseType<E extends BaseType<E>> {
 
     public abstract void validate(Object value);
 
-    private static BaseType fromString(final String type) {
+    // Find a simple singleton instance
+    private static BaseType singletonFor(final String type) {
+        switch (type) {
+            case "boolean":
+                return BooleanBaseType.SINGLETON;
+            case "integer":
+                return IntegerBaseType.SINGLETON;
+            case "real":
+                return RealBaseType.SINGLETON;
+            case "string":
+                return StringBaseType.SINGLETON;
+            case "uuid":
+                return UuidBaseType.SINGLETON;
+            default:
+                LOG.debug("Unknown base type {}", type);
+                return null;
+        }
+    }
+
+    // Create a new instance for customization
+    private static BaseType builderFor(final String type) {
         switch (type) {
             case "boolean":
                 return new BooleanBaseType();

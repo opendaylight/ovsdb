@@ -33,20 +33,17 @@ public abstract class BaseType<E extends BaseType<E>> {
         }
         if (type.isObject()) {
             //json like  {"type" : "string", "enum": ["set", ["access", "native-tagged"]]}" for key or value
-            final JsonNode nestedType = type.get("type");
-            if (nestedType != null) {
-                final BaseType ret = builderFor(nestedType.asText());
-                if (ret != null) {
-                    ret.fillConstraints(type);
-                    return ret;
+            final JsonNode typeName = type.get("type");
+            if (typeName != null) {
+                final BaseTypeFactory<?> factory = factoryFor(typeName.asText());
+                if (factory != null) {
+                    return factory.create(type);
                 }
             }
         }
 
         return null;
     }
-
-    abstract void fillConstraints(JsonNode type);
 
     public abstract Object toValue(JsonNode value);
 
@@ -71,23 +68,22 @@ public abstract class BaseType<E extends BaseType<E>> {
         }
     }
 
-    // Create a new instance for customization
-    private static BaseType builderFor(final String type) {
+    // Find a factory for custom instantiation
+    private static BaseTypeFactory<?> factoryFor(final String type) {
         switch (type) {
             case "boolean":
-                return new BooleanBaseType();
+                return BooleanBaseType.FACTORY;
             case "integer":
-                return new IntegerBaseType();
+                return IntegerBaseType.FACTORY;
             case "real":
-                return new RealBaseType();
+                return RealBaseType.FACTORY;
             case "string":
-                return new StringBaseType();
+                return StringBaseType.FACTORY;
             case "uuid":
-                return new UuidBaseType();
+                return UuidBaseType.FACTORY;
             default:
                 LOG.debug("Unknown base type {}", type);
                 return null;
         }
     }
-
 }

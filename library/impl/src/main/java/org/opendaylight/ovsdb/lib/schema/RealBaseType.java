@@ -8,31 +8,21 @@
 package org.opendaylight.ovsdb.lib.schema;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.HashSet;
-import java.util.Optional;
+import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 
 final class RealBaseType extends BaseType<RealBaseType> {
-    static final RealBaseType SINGLETON = new RealBaseType();
+    static final RealBaseType SINGLETON = new RealBaseType(Double.MIN_VALUE, Double.MAX_VALUE, null);
+    static final BaseTypeFactory<RealBaseType> FACTORY = new Factory();
 
-    private double min = Double.MIN_VALUE;
-    private double max = Double.MAX_VALUE;
-    private Set<Double> enums;
+    private final double min;
+    private final double max;
+    private final ImmutableSet<Double> enums;
 
-    @Override
-    void fillConstraints(final JsonNode type) {
-        JsonNode typeMaxNode = type.get("maxReal");
-        if (typeMaxNode != null) {
-            max = typeMaxNode.asLong();
-        }
-        JsonNode typeMinNode = type.get("minReal");
-        if (typeMinNode != null) {
-            min = typeMinNode.asLong();
-        }
-        Optional<Set<Double>> typeEnumsOpt = populateEnum(type);
-        if (typeEnumsOpt.isPresent()) {
-            enums = typeEnumsOpt.get();
-        }
+    RealBaseType(final double min, final double max, final ImmutableSet<Double> enums) {
+        this.min = min;
+        this.max = max;
+        this.enums = enums;
     }
 
     @Override
@@ -43,19 +33,6 @@ final class RealBaseType extends BaseType<RealBaseType> {
     @Override
     public void validate(final Object value) {
 
-    }
-
-    private static Optional<Set<Double>> populateEnum(final JsonNode node) {
-        if (node.has("enum")) {
-            Set<Double> nodesEnums = new HashSet<>();
-            JsonNode anEnum = node.get("enum").get(1);
-            for (JsonNode enm : anEnum) {
-                nodesEnums.add(enm.asDouble());
-            }
-            return Optional.of(nodesEnums);
-        } else {
-            return Optional.empty();
-        }
     }
 
     public double getMin() {
@@ -114,5 +91,29 @@ final class RealBaseType extends BaseType<RealBaseType> {
             return false;
         }
         return true;
+    }
+
+    private static final class Factory extends BaseTypeFactory.WithEnum<RealBaseType, Double> {
+        @Override
+        RealBaseType create(final JsonNode typeDefinition) {
+            // FIXME: is asLong() appropriate here?
+            final JsonNode typeMaxNode = typeDefinition.get("maxReal");
+            final double max = typeMaxNode != null ? typeMaxNode.asLong() : Double.MAX_VALUE;
+
+            final JsonNode typeMinNode = typeDefinition.get("minReal");
+            final double min = typeMinNode != null ? typeMinNode.asLong() : Double.MIN_VALUE;
+
+            final JsonNode typeEnumNode = typeDefinition.get("enum");
+            final ImmutableSet<Double> enums = typeEnumNode != null ? parseEnums(typeEnumNode) : null;
+
+            // TODO: improve accuracy here -- requires understanding the FIXME above
+            return typeMinNode == null && typeMaxNode == null && enums == null ? SINGLETON
+                    : new RealBaseType(min, max, enums);
+        }
+
+        @Override
+        Double getEnumValue(final JsonNode jsonEnum) {
+            return jsonEnum.asDouble();
+        }
     }
 }

@@ -5,24 +5,23 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.error;
 
 /**
  * This exception is thrown when a ColumnSchema cannot be found.
  */
 public class ColumnSchemaNotFoundException extends RuntimeException {
+    private static final long serialVersionUID = -5273616784432907818L;
 
-    public ColumnSchemaNotFoundException(String message) {
+    public ColumnSchemaNotFoundException(final String message) {
         super(message);
     }
 
-    public ColumnSchemaNotFoundException(String message, Throwable cause) {
+    public ColumnSchemaNotFoundException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public static String createMessage(String columnName, String tableName) {
+    public static String createMessage(final String columnName, final String tableName) {
         return "Unable to locate ColumnSchema for " +  columnName + " in " + tableName;
     }
-
 }

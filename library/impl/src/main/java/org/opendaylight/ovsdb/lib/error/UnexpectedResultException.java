@@ -5,18 +5,19 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.error;
 
 /**
  * This exception is thrown when a result does not meet any of the known formats in RFC7047.
  */
 public class UnexpectedResultException extends RuntimeException {
-    public UnexpectedResultException(String message) {
+    private static final long serialVersionUID = 7440870601052355685L;
+
+    public UnexpectedResultException(final String message) {
         super(message);
     }
 
-    public UnexpectedResultException(String message, Throwable cause) {
+    public UnexpectedResultException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }

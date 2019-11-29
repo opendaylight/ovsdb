@@ -5,30 +5,31 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.error;
 
 /**
  * The ParsingException is thrown when JSON could not be successfully parsed.
  */
 public class ParsingException extends RuntimeException {
+    private static final long serialVersionUID = -3950575478467855764L;
 
     public ParsingException() {
     }
 
-    public ParsingException(String message) {
+    public ParsingException(final String message) {
         super(message);
     }
 
-    public ParsingException(String message, Throwable cause) {
+    public ParsingException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public ParsingException(Throwable cause) {
+    public ParsingException(final Throwable cause) {
         super(cause);
     }
 
-    public ParsingException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public ParsingException(final String message, final Throwable cause, final boolean enableSuppression,
+            final boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

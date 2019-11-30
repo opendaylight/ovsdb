@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.lib.notation;
 
+import com.google.common.collect.Range;
 import com.google.errorprone.annotations.Var;
 
 /**
@@ -18,11 +19,11 @@ import com.google.errorprone.annotations.Var;
 public class Version implements Comparable<Version> {
     private static final String FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)";
 
-    private int major;
-    private int minor;
-    private int patch;
+    private final int major;
+    private final int minor;
+    private final int patch;
 
-    public Version(int major, int minor, int patch) {
+    public Version(final int major, final int minor, final int patch) {
         this.major = major;
         this.minor = minor;
         this.patch = patch;
@@ -31,7 +32,7 @@ public class Version implements Comparable<Version> {
     public static final Version NULL = new Version(0,0,0);
     public static final String NULL_VERSION_STRING = "0.0.0";
 
-    public static Version fromString(String version) {
+    public static Version fromString(final String version) {
         final int firstDot = version.indexOf('.');
         final int secondDot = version.indexOf('.', firstDot + 1);
         if (firstDot == -1 || secondDot == -1) {
@@ -51,7 +52,7 @@ public class Version implements Comparable<Version> {
      * has identified this as the top #3 (!) memory allocator overall - 1 GB avoidable String.
      * @author Michael Vorburger.ch
      */
-    private static int parse(String string, int start, int end) {
+    private static int parse(final String string, final int start, final int end) {
         @Var int result = 0;
         for (int i = start; i < end && i < string.length(); i++) {
             char character = string.charAt(i);
@@ -73,51 +74,27 @@ public class Version implements Comparable<Version> {
         return major;
     }
 
-    public void setMajor(int major) {
-        this.major = major;
-    }
-
     public int getMinor() {
         return minor;
-    }
-
-    public void setMinor(int minor) {
-        this.minor = minor;
     }
 
     public int getPatch() {
         return patch;
     }
 
-    public void setPatch(int patch) {
-        this.patch = patch;
-    }
-
-
     // ToDo: While format is X.X.X semantics are schema dependent.
     // Therefore we should allow equals to be overridden by the schema
     @Override
-    public boolean equals(Object object) {
-        if (this == object) {
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (object == null || getClass() != object.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
 
-        Version version = (Version) object;
-
-        if (major != version.major) {
-            return false;
-        }
-        if (minor != version.minor) {
-            return false;
-        }
-        if (patch != version.patch) {
-            return false;
-        }
-
-        return true;
+        final Version other = (Version) obj;
+        return major == other.major && minor == other.minor && patch == other.patch;
     }
 
     @Override
@@ -131,7 +108,7 @@ public class Version implements Comparable<Version> {
     // ToDo: While format is X.X.X semantics are schema dependent
     // Therefore we should allow compareTo to be overridden by the schema
     @Override
-    public int compareTo(Version version) {
+    public int compareTo(final Version version) {
         if (this.equals(version)) {
             return 0;
         }
@@ -154,5 +131,12 @@ public class Version implements Comparable<Version> {
         }
         // must be less than
         return -1;
+    }
+
+    public static Range<Version> createRangeOf(final Version from, final Version to) {
+        if (from == null || Version.NULL.equals(from)) {
+            return to == null || Version.NULL.equals(to) ? Range.all() : Range.atMost(to);
+        }
+        return to == null || Version.NULL.equals(to) ? Range.atLeast(from) : Range.closed(from, to);
     }
 }

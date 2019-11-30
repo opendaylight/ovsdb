@@ -54,6 +54,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.slf4j.Logger;
@@ -64,7 +65,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbClientImpl.class);
     private ExecutorService executorService;
     private OvsdbRPC rpc;
-    private final Map<String, DatabaseSchema> schemas = new HashMap<>();
+    private final Map<String, TypedDatabaseSchema> schemas = new HashMap<>();
     private final Map<String, CallbackContext> monitorCallbacks = new HashMap<>();
     private OvsdbRPC.Callback rpcCallback;
     private OvsdbConnectionInfo connectionInfo;
@@ -342,19 +343,19 @@ public class OvsdbClientImpl implements OvsdbClient {
 
     @Override
     public ListenableFuture<DatabaseSchema> getSchema(final String database) {
-        final DatabaseSchema existing = schemas.get(database);
+        final TypedDatabaseSchema existing = schemas.get(database);
         if (existing != null) {
             return Futures.immediateFuture(existing);
         }
 
         return Futures.transform(getSchemaFromDevice(Collections.singletonList(database)), result -> {
-            DatabaseSchema dbSchema = result.get(database);
+            final DatabaseSchema dbSchema = result.get(database);
             if (dbSchema == null) {
                 return null;
             }
 
-            dbSchema = dbSchema.withInternallyGeneratedColumns();
-            final DatabaseSchema raced = schemas.putIfAbsent(database, dbSchema);
+            final TypedDatabaseSchema typedSchema = TypedDatabaseSchema.of(dbSchema.withInternallyGeneratedColumns());
+            final TypedDatabaseSchema raced = schemas.putIfAbsent(database, typedSchema);
             return raced != null ? raced : dbSchema;
         }, executorService);
     }

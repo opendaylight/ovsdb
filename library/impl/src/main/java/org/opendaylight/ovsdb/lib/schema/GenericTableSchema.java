@@ -44,4 +44,16 @@ public class GenericTableSchema extends TableSchema<GenericTableSchema> {
 
         return new GenericTableSchema(tableName, columns);
     }
+
+    @Override
+    public GenericTableSchema withInternallyGeneratedColumns() {
+        if (haveInternallyGeneratedColumns()) {
+            return this;
+        }
+
+        final Map<String, ColumnSchema> columns = new HashMap<>(getColumnSchemas());
+        columns.put(UUID_COLUMN_SCHMEMA.getName(), UUID_COLUMN_SCHMEMA);
+        columns.put(VERSION_COLUMN_SCHMEMA.getName(), VERSION_COLUMN_SCHMEMA);
+        return new GenericTableSchema(getName(), columns);
+    }
 }

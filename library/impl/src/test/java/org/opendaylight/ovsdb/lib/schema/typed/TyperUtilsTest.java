@@ -10,25 +10,19 @@ package org.opendaylight.ovsdb.lib.schema.typed;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import com.google.common.collect.Range;
 import java.util.Collections;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchemaImpl;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Test class for {@link TyperUtils}.
  */
 public class TyperUtilsTest {
-    private static final Logger LOG = LoggerFactory.getLogger(TyperUtilsTest.class);
-
     @TypedTable(name = "TestTypedTable", database = "Open_vSwitch")
     private class TestTypedTable {
 
@@ -101,7 +95,7 @@ public class TyperUtilsTest {
     }
 
     /**
-     * Test that {@link TyperUtils#checkVersion(Version, Version, Version)} detects an old version. (The aim here isn't
+     * Test that {@link TyperUtils#checkVersion(Version, Range)} detects an old version. (The aim here isn't
      * to test {@link Version#compareTo(Version)}, that should be done in
      * {@link org.opendaylight.ovsdb.lib.notation.VersionTest}).
      */
@@ -111,7 +105,7 @@ public class TyperUtilsTest {
     }
 
     /**
-     * Test that {@link TyperUtils#checkVersion(Version, Version, Version)} detects a new version.
+     * Test that {@link TyperUtils#checkVersion(Version, Range)} detects a new version.
      */
     @Test(expected = SchemaVersionMismatchException.class)
     public void testCheckNewVersionFails() throws SchemaVersionMismatchException {
@@ -119,7 +113,7 @@ public class TyperUtilsTest {
     }
 
     /**
-     * Test that {@link TyperUtils#checkVersion(Version, Version, Version)} accepts null boundaries.
+     * Test that {@link TyperUtils#checkVersion(Version, Range)} accepts null boundaries.
      */
     @Test
     public void testCheckNullVersionsSucceed() throws SchemaVersionMismatchException {
@@ -128,7 +122,7 @@ public class TyperUtilsTest {
     }
 
     /**
-     * Test that {@link TyperUtils#checkVersion(Version, Version, Version)} accepts the lower boundary version.
+     * Test that {@link TyperUtils#checkVersion(Version, Range)} accepts the lower boundary version.
      */
     @Test
     public void testCheckLowerVersionBoundarySucceeds() throws SchemaVersionMismatchException {
@@ -137,7 +131,7 @@ public class TyperUtilsTest {
     }
 
     /**
-     * Test that {@link TyperUtils#checkVersion(Version, Version, Version)} accepts the upper boundary version.
+     * Test that {@link TyperUtils#checkVersion(Version, Range)} accepts the upper boundary version.
      */
     @Test
     public void testCheckUpperVersionBoundarySucceeds() throws SchemaVersionMismatchException {
@@ -146,7 +140,7 @@ public class TyperUtilsTest {
     }
 
     /**
-     * Test that {@link TyperUtils#checkVersion(Version, Version, Version)} accepts both boundary versions.
+     * Test that {@link TyperUtils#checkVersion(Version, Range)} accepts both boundary versions.
      */
     @Test
     public void testCheckSingleVersionBoundarySucceeds() throws SchemaVersionMismatchException {
@@ -155,7 +149,7 @@ public class TyperUtilsTest {
     }
 
     /**
-     * Test that {@link TyperUtils#checkVersion(Version, Version, Version)} accepts a version within the boundaries
+     * Test that {@link TyperUtils#checkVersion(Version, Range)} accepts a version within the boundaries
      * (strictly).
      */
     @Test
@@ -165,32 +159,14 @@ public class TyperUtilsTest {
     }
 
     /**
-     * Call {@link TyperUtils#checkVersion(Version, Version, Version)}.
+     * Call {@link TyperUtils#checkVersion(Version, Range)}.
      *
      * @param schema The schema version (to be checked).
      * @param from The minimum supported version.
      * @param to The maximum supported version.
      * @throws SchemaVersionMismatchException if the schema version isn't supported.
      */
-    // We extract the real cause, which “loses” the original cause, but that’s fine
-    @SuppressWarnings("checkstyle:AvoidHidingCauseException")
     private static void callCheckVersion(final Version schema, final Version from, final Version to) {
-        try {
-            Method method =
-                    TyperUtils.class.getDeclaredMethod("checkVersion", Version.class, Version.class, Version.class);
-            method.setAccessible(true);
-            method.invoke(TyperUtils.class, schema, from, to);
-        } catch (NoSuchMethodException e) {
-            LOG.error("Can't find TyperUtils::checkVersion(), TyperUtilsTest::callCheckVersion() may be obsolete", e);
-        } catch (IllegalAccessException e) {
-            LOG.error("Error invoking TyperUtils::checkVersion(), please check TyperUtilsTest::callCheckVersion()", e);
-        } catch (InvocationTargetException e) {
-            final Throwable cause = e.getCause();
-            if (cause instanceof SchemaVersionMismatchException) {
-                throw (SchemaVersionMismatchException) cause;
-            }
-            LOG.error("Unexpected exception thrown by TyperUtils::checkVersion()", cause);
-            Assert.fail("Unexpected exception thrown by TyperUtils::checkVersion()");
-        }
+        TyperUtils.checkVersion(schema, Version.createRangeOf(from, to));
     }
 }

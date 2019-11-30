@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.schema.typed;
 
 import static org.junit.Assert.assertEquals;
@@ -19,6 +18,7 @@ import org.junit.Test;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchemaImpl;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,7 @@ public class TyperUtilsTest {
     public void testGetTableSchemaWithIncludedTypedTable() {
         // Given ...
         GenericTableSchema testTableSchema = new GenericTableSchema("TestTypedTable");
-        DatabaseSchema dbSchema = new DatabaseSchema("testDb", Version.NULL,
+        DatabaseSchema dbSchema = new DatabaseSchemaImpl("testDb", Version.NULL,
             ImmutableMap.of(testTableSchema.getName(), testTableSchema));
 
         // When ...
@@ -64,7 +64,7 @@ public class TyperUtilsTest {
     public void testGetTableSchemaWithIncludedUntypedTable() {
         // Given ...
         GenericTableSchema testTableSchema = new GenericTableSchema("TestUntypedTable");
-        DatabaseSchema dbSchema = new DatabaseSchema("testDb", Version.NULL,
+        DatabaseSchema dbSchema = new DatabaseSchemaImpl("testDb", Version.NULL,
             ImmutableMap.of(testTableSchema.getName(), testTableSchema));
 
         // When ...
@@ -81,7 +81,7 @@ public class TyperUtilsTest {
     @Test(expected = IllegalArgumentException.class)
     public void testGetTableSchemaWithoutIncludedTypedTable() {
         // Given ...
-        DatabaseSchema dbSchema = new DatabaseSchema("testDb", Version.NULL, Collections.emptyMap());
+        DatabaseSchema dbSchema = new DatabaseSchemaImpl("testDb", Version.NULL, Collections.emptyMap());
 
         // When ...
         TyperUtils.getTableSchema(dbSchema, TestTypedTable.class);
@@ -94,7 +94,7 @@ public class TyperUtilsTest {
     @Test(expected = IllegalArgumentException.class)
     public void testGetTableSchemaWithoutIncludedUntypedTable() {
         // Given ...
-        DatabaseSchema dbSchema = new DatabaseSchema("testDb", Version.NULL, Collections.emptyMap());
+        DatabaseSchema dbSchema = new DatabaseSchemaImpl("testDb", Version.NULL, Collections.emptyMap());
 
         // When ...
         TyperUtils.getTableSchema(dbSchema, TestUntypedTable.class);

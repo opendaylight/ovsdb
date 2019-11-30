@@ -55,7 +55,7 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedReflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -418,11 +418,8 @@ public class OvsdbClientImpl implements OvsdbClient {
      * @return DatabaseSchema that matches a Typed Table Class
      */
     private <T> TypedDatabaseSchema getDatabaseSchemaForTypedTable(final Class<T> klazz) {
-        TypedTable typedTable = klazz.getAnnotation(TypedTable.class);
-        if (typedTable != null) {
-            return this.getDatabaseSchema(typedTable.database());
-        }
-        return null;
+        final String dbName = TypedReflections.getTableDatabase(klazz);
+        return dbName == null ? null : getDatabaseSchema(dbName);
     }
 
     /**

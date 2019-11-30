@@ -348,12 +348,12 @@ public class OvsdbClientImpl implements OvsdbClient {
         }
 
         return Futures.transform(getSchemaFromDevice(Collections.singletonList(database)), result -> {
-            final DatabaseSchema dbSchema = result.get(database);
+            DatabaseSchema dbSchema = result.get(database);
             if (dbSchema == null) {
                 return null;
             }
 
-            dbSchema.populateInternallyGeneratedColumns();
+            dbSchema = dbSchema.withInternallyGeneratedColumns();
             final DatabaseSchema raced = schemas.putIfAbsent(database, dbSchema);
             return raced != null ? raced : dbSchema;
         }, executorService);

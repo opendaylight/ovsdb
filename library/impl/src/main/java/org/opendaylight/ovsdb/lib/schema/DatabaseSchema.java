@@ -8,7 +8,11 @@
 
 package org.opendaylight.ovsdb.lib.schema;
 
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.common.reflect.Invokable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -29,20 +33,20 @@ public class DatabaseSchema {
 
     private final String name;
     private final Version version;
-    private final Map<String, TableSchema> tables;
+    private final ImmutableMap<String, TableSchema> tables;
 
     public DatabaseSchema(final String name, final Version version, final Map<String, TableSchema> tables) {
-        this.name = name;
-        this.version = version;
-        this.tables = tables;
+        this.name = requireNonNull(name);
+        this.version = requireNonNull(version);
+        this.tables = ImmutableMap.copyOf(tables);
     }
 
     public Set<String> getTables() {
-        return this.tables.keySet();
+        return tables.keySet();
     }
 
     public boolean hasTable(final String table) {
-        return this.getTables().contains(table);
+        return tables.containsKey(table);
     }
 
     public <E extends TableSchema<E>> E table(final String tableName, final Class<E> clazz) {
@@ -105,9 +109,17 @@ public class DatabaseSchema {
         return version;
     }
 
-    public void populateInternallyGeneratedColumns() {
+    public DatabaseSchema withInternallyGeneratedColumns() {
+        return haveInternallyGeneratedColumns() ? this : new DatabaseSchema(name, version,
+            Maps.transformValues(tables, TableSchema::withInternallyGeneratedColumns));
+    }
+
+    protected final boolean haveInternallyGeneratedColumns() {
         for (TableSchema tableSchema : tables.values()) {
-            tableSchema.populateInternallyGeneratedColumns();
+            if (!tableSchema.haveInternallyGeneratedColumns()) {
+                return false;
+            }
         }
+        return true;
     }
 }

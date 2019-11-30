@@ -7,12 +7,14 @@
  */
 package org.opendaylight.ovsdb.lib.schema;
 
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.ImmutableMap;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -26,24 +28,23 @@ import org.opendaylight.ovsdb.lib.operations.Insert;
 
 public abstract class TableSchema<E extends TableSchema<E>> {
     private static final AtomicColumnType UUID_COLUMN_TYPE = new AtomicColumnType(UuidBaseType.SINGLETON);
-    private static final ColumnSchema UUID_COLUMN_SCHMEMA = new ColumnSchema("_uuid", UUID_COLUMN_TYPE);
-    private static final ColumnSchema VERSION_COLUMN_SCHMEMA = new ColumnSchema("_version", UUID_COLUMN_TYPE);
+    protected static final ColumnSchema UUID_COLUMN_SCHMEMA = new ColumnSchema("_uuid", UUID_COLUMN_TYPE);
+    protected static final ColumnSchema VERSION_COLUMN_SCHMEMA = new ColumnSchema("_version", UUID_COLUMN_TYPE);
 
     private final String name;
-    private final Map<String, ColumnSchema> columns;
+    private final ImmutableMap<String, ColumnSchema> columns;
 
     protected TableSchema(final String name) {
-        this.name = name;
-        this.columns = new HashMap<>();
+        this(name, ImmutableMap.of());
     }
 
     protected TableSchema(final String name, final Map<String, ColumnSchema> columns) {
-        this.name = name;
-        this.columns = columns;
+        this.name = requireNonNull(name);
+        this.columns = ImmutableMap.copyOf(columns);
     }
 
     public Set<String> getColumns() {
-        return this.columns.keySet();
+        return columns.keySet();
     }
 
     public Map<String, ColumnSchema> getColumnSchemas() {
@@ -51,11 +52,11 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     }
 
     public boolean hasColumn(final String column) {
-        return this.getColumns().contains(column);
+        return columns.containsKey(column);
     }
 
     public ColumnType getColumnType(final String column) {
-        return this.columns.get(column).getType();
+        return columns.get(column).getType();
     }
 
     public <E extends TableSchema<E>> E as(final Class<E> clazz) {
@@ -100,7 +101,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     }
 
     public ColumnSchema column(final String column) {
-        return this.columns.get(column);
+        return columns.get(column);
     }
 
     public String getName() {
@@ -163,8 +164,9 @@ public abstract class TableSchema<E extends TableSchema<E>> {
      * a specific Schema implementation detail & hence adding it by default in the Library
      * for better application experience using the library.
      */
-    public void populateInternallyGeneratedColumns() {
-        columns.put("_uuid", UUID_COLUMN_SCHMEMA);
-        columns.put("_version", VERSION_COLUMN_SCHMEMA);
+    public abstract E withInternallyGeneratedColumns();
+
+    protected final boolean haveInternallyGeneratedColumns() {
+        return hasColumn(UUID_COLUMN_SCHMEMA.getName()) && hasColumn(VERSION_COLUMN_SCHMEMA.getName());
     }
 }

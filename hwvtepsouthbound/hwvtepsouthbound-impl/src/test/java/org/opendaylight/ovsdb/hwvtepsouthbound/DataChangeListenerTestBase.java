@@ -5,11 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -49,6 +48,7 @@ import org.opendaylight.ovsdb.lib.operations.Update;
 import org.opendaylight.ovsdb.lib.operations.Where;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -80,8 +80,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
 
     EntityOwnershipService entityOwnershipService;
     OvsdbClient ovsdbClient;
-    DatabaseSchema dbSchema;
-    ListenableFuture<DatabaseSchema> listenableDbSchema = mock(ListenableFuture.class);
+    TypedDatabaseSchema dbSchema;
+    ListenableFuture<TypedDatabaseSchema> listenableDbSchema = mock(ListenableFuture.class);
     TransactionInvoker transactionInvoker;
     OvsdbConnectionInfo connectionInfo;
     Operations operations;
@@ -131,8 +131,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         deleteNode(CONFIGURATION);
     }
 
-    static final void setFinalStatic(Class<?> cls, String fieldName, Object newValue) throws SecurityException,
-            ReflectiveOperationException {
+    static final void setFinalStatic(final Class<?> cls, final String fieldName, final Object newValue)
+            throws SecurityException, ReflectiveOperationException {
         Field[] fields = FieldUtils.getAllFields(cls);
         for (Field field : fields) {
             if (fieldName.equals(field.getName())) {
@@ -151,8 +151,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
                 "hwvtep_schema.json")) {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(resourceAsStream);
-            dbSchema = DatabaseSchema.fromJson(HwvtepSchemaConstants.HARDWARE_VTEP,
-                    jsonNode.get("result"));
+            dbSchema = TypedDatabaseSchema.of(DatabaseSchema.fromJson(HwvtepSchemaConstants.HARDWARE_VTEP,
+                    jsonNode.get("result")));
             listenableDbSchema = mock(ListenableFuture.class);
             doReturn(dbSchema).when(listenableDbSchema).get();
         } catch (IOException | ExecutionException | InterruptedException e) {
@@ -222,7 +222,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(ft).when(ovsdbClient).transact(any(DatabaseSchema.class), transactCaptor.capture());
     }
 
-    void addNode(LogicalDatastoreType logicalDatastoreType) throws Exception {
+    void addNode(final LogicalDatastoreType logicalDatastoreType) throws Exception {
         NodeBuilder nodeBuilder = prepareNode(nodeIid);
         HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
         nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, builder.build());
@@ -231,14 +231,14 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         transaction.submit();
     }
 
-    void deleteNode(LogicalDatastoreType logicalDatastoreType) {
+    void deleteNode(final LogicalDatastoreType logicalDatastoreType) {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         tx.delete(logicalDatastoreType, nodeIid);
         tx.submit();
     }
 
-    Node addData(LogicalDatastoreType logicalDatastoreType, Class<? extends DataObject> dataObject,
-            String[]... data) {
+    Node addData(final LogicalDatastoreType logicalDatastoreType, final Class<? extends DataObject> dataObject,
+            final String[]... data) {
         NodeBuilder nodeBuilder = prepareNode(nodeIid);
         HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
         if (LogicalSwitches.class == dataObject) {
@@ -257,8 +257,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         return mergeNode(logicalDatastoreType, nodeIid, nodeBuilder);
     }
 
-    void deleteData(LogicalDatastoreType logicalDatastoreType, Class<? extends DataObject> dataObject,
-            String[]... data) {
+    void deleteData(final LogicalDatastoreType logicalDatastoreType, final Class<? extends DataObject> dataObject,
+            final String[]... data) {
         NodeBuilder nodeBuilder = prepareNode(nodeIid);
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
@@ -293,13 +293,14 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         tx.submit();
     }
 
-    NodeBuilder prepareNode(InstanceIdentifier<Node> iid) {
+    NodeBuilder prepareNode(final InstanceIdentifier<Node> iid) {
         NodeBuilder nodeBuilder = new NodeBuilder();
         nodeBuilder.setNodeId(iid.firstKeyOf(Node.class).getNodeId());
         return nodeBuilder;
     }
 
-    Node mergeNode(LogicalDatastoreType datastoreType, InstanceIdentifier<Node> id, NodeBuilder nodeBuilder) {
+    Node mergeNode(final LogicalDatastoreType datastoreType, final InstanceIdentifier<Node> id,
+            final NodeBuilder nodeBuilder) {
         Node node = nodeBuilder.build();
         WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         transaction.merge(datastoreType, id, node, WriteTransaction.CREATE_MISSING_PARENTS);
@@ -307,7 +308,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         return node;
     }
 
-    public InstanceIdentifier<Node> createInstanceIdentifier(String nodeIdString) {
+    public InstanceIdentifier<Node> createInstanceIdentifier(final String nodeIdString) {
         NodeId nodeId = new NodeId(new Uri(nodeIdString));
         NodeKey nodeKey = new NodeKey(nodeId);
         TopologyKey topoKey = new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID);

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -20,6 +19,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 
 /**
  * The main interface to interact with a device speaking ovsdb protocol in an asynchronous fashion and hence most
@@ -38,7 +38,7 @@ public interface OvsdbClient {
      * @param database name of the database schema
      * @return DatabaseSchema future
      */
-    ListenableFuture<DatabaseSchema> getSchema(String database);
+    ListenableFuture<TypedDatabaseSchema> getSchema(String database);
 
     /**
      * Allows for a mini DSL way of collecting the transactions to be executed against the ovsdb instance.
@@ -161,7 +161,7 @@ public interface OvsdbClient {
 
     void disconnect();
 
-    DatabaseSchema getDatabaseSchema(String dbName);
+    TypedDatabaseSchema getDatabaseSchema(String dbName);
 
     /**
      * User friendly convenient methods that make use of TyperUtils.getTypedRowWrapper to create a Typed Row Proxy

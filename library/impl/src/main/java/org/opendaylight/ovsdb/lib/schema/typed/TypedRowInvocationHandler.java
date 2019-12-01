@@ -167,7 +167,7 @@ final class TypedRowInvocationHandler implements InvocationHandler {
         return row == null ? tableName : tableName + " : " + row.toString();
     }
 
-    private static boolean isGetColumn(final Method method) {
+    static boolean isGetColumn(final Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.method().equals(MethodType.GETCOLUMN);
@@ -176,7 +176,7 @@ final class TypedRowInvocationHandler implements InvocationHandler {
         return method.getName().startsWith(GET_STARTS_WITH) && method.getName().endsWith(GETCOLUMN_ENDS_WITH);
     }
 
-    private static boolean isGetData(final Method method) {
+    static boolean isGetData(final Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.method().equals(MethodType.GETDATA);
@@ -185,7 +185,7 @@ final class TypedRowInvocationHandler implements InvocationHandler {
         return method.getName().startsWith(GET_STARTS_WITH) && !method.getName().endsWith(GETCOLUMN_ENDS_WITH);
     }
 
-    private static boolean isGetRow(final Method method) {
+    static boolean isGetRow(final Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.method().equals(MethodType.GETROW);
@@ -194,12 +194,12 @@ final class TypedRowInvocationHandler implements InvocationHandler {
         return method.getName().startsWith(GET_STARTS_WITH) && method.getName().endsWith(GETROW_ENDS_WITH);
     }
 
-    private static boolean isGetTableSchema(final Method method) {
+    static boolean isGetTableSchema(final Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         return typedColumn != null && typedColumn.method().equals(MethodType.GETTABLESCHEMA);
     }
 
-    private static boolean isSetData(final Method method) {
+    static boolean isSetData(final Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.method().equals(MethodType.SETDATA);
@@ -212,7 +212,7 @@ final class TypedRowInvocationHandler implements InvocationHandler {
         TyperUtils.checkVersion(dbSchema.getVersion(), TypedReflections.getColumnVersionRange(method));
     }
 
-    private static String getColumnName(final Method method) {
+    static String getColumnName(final Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.name();

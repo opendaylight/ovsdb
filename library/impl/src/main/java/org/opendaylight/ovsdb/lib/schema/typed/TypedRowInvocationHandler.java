@@ -10,55 +10,45 @@ package org.opendaylight.ovsdb.lib.schema.typed;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Objects;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.ovsdb.lib.error.UnsupportedMethodException;
 import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.MethodDispatch.Invoker;
 
+/*
+ * Theory of operation: we have a set of Invoker, which are indexed by method and point to implementations we should
+ * be invoking. This mapping is data-invariant, end hence we allow rebiding to a different row (which may not be null).
+ */
 final class TypedRowInvocationHandler implements InvocationHandler {
-    // As the mode of invocation for a particular method is invariant, we keep the set of dynamically-supported method
-    // in a per-Class cache, thus skipping reflective operations at invocation time.
-    private static final LoadingCache<Class<?>, ImmutableMap<Method, MethodInvoker>> METHOD_INVOKERS =
-            CacheBuilder.newBuilder().weakKeys().weakValues()
-                .build(new CacheLoader<Class<?>, ImmutableMap<Method, MethodInvoker>>() {
-                    @Override
-                    public ImmutableMap<Method, MethodInvoker> load(final Class<?> key) {
-                        final String tableName = TypedReflections.getTableName(key);
-                        final ImmutableMap.Builder<Method, MethodInvoker> builder = ImmutableMap.builder();
-                        for (Method method : key.getMethods()) {
-                            final MethodInvoker invoker = MethodInvoker.of(tableName, method);
-                            if (invoker != null) {
-                                builder.put(method, invoker);
-                            }
-                        }
-                        return builder.build();
-                    }
-                });
 
-    private final Class<?> target;
-    private final DatabaseSchema dbSchema;
-    private final Row<GenericTableSchema> row;
-    private final ImmutableMap<Method, MethodInvoker> invokers;
+    private final @NonNull ImmutableMap<Method, Invoker> invokers;
+    private final @NonNull String tableName;
+    private final @Nullable Row<GenericTableSchema> row;
 
-    TypedRowInvocationHandler(final Class<?> target, final DatabaseSchema dbSchema,
-            final Row<GenericTableSchema> row) {
-        this.target = requireNonNull(target);
-        this.dbSchema = requireNonNull(dbSchema);
+    private TypedRowInvocationHandler(final @NonNull String tableName,
+            @NonNull final ImmutableMap<Method, Invoker> invokers, final Row<GenericTableSchema> row) {
+        this.tableName = requireNonNull(tableName);
+        this.invokers = requireNonNull(invokers);
         this.row = row;
-        this.invokers = METHOD_INVOKERS.getUnchecked(target);
+    }
+
+    TypedRowInvocationHandler(final @NonNull String tableName, @NonNull final ImmutableMap<Method, Invoker> invokers) {
+        this(tableName, invokers, null);
+    }
+
+    TypedRowInvocationHandler bindToRow(final @Nullable Row<GenericTableSchema> newRow) {
+        return row == newRow ? this : new TypedRowInvocationHandler(tableName, invokers, newRow);
     }
 
     @Override
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Exception {
-        final MethodInvoker invoker = invokers.get(method);
-        return invoker != null ? invoker.invokeMethod(dbSchema, row, proxy, args)
-                : invokeObjectMethod(proxy, method, args);
+        final Invoker invoker = invokers.get(method);
+        return invoker != null ? invoker.invokeMethod(row, proxy, args) : invokeObjectMethod(proxy, method, args);
     }
 
     private Object invokeObjectMethod(final Object proxy, final Method method, final Object[] args) {
@@ -78,8 +68,6 @@ final class TypedRowInvocationHandler implements InvocationHandler {
                 break;
             case "toString":
                 if (args == null || args.length == 0) {
-                    final GenericTableSchema schema = TyperUtils.getTableSchema(dbSchema, target);
-                    final String tableName = schema != null ? schema.getName() : "";
                     return row == null ? tableName : tableName + " : " + row.toString();
                 }
                 break;

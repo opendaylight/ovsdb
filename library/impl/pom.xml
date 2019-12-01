@@ -27,7 +27,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <properties>
     <!-- Fails build for copy/pasted code -->
-    <pmd.cpd.fail>true</pmd.cpd.fail>
+    <!--pmd.cpd.fail>true</pmd.cpd.fail-->
 
     <sonar.jacoco.itReportPath>../it/target/jacoco-it.exec</sonar.jacoco.itReportPath>
   </properties>

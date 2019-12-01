@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound;
 
 import static org.junit.Assert.assertEquals;
@@ -45,6 +44,7 @@ import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangeEvent;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommand;
@@ -187,7 +187,7 @@ public class OvsdbConnectionInstanceTest {
         verify(client).getDatabases();
 
         // test getSchema()
-        ListenableFuture<DatabaseSchema> futureDatabaseSchema = mock(ListenableFuture.class);
+        ListenableFuture<TypedDatabaseSchema> futureDatabaseSchema = mock(ListenableFuture.class);
         when(client.getSchema(anyString())).thenReturn(futureDatabaseSchema);
         assertEquals("Error, did not return correct ListenableFuture<DatabaseSchema> object", futureDatabaseSchema,
                 ovsdbConnectionInstance.getSchema(anyString()));
@@ -252,7 +252,7 @@ public class OvsdbConnectionInstanceTest {
         verify(client).disconnect();
 
         // test getDatabaseSchema()
-        DatabaseSchema databaseSchema = mock(DatabaseSchema.class);
+        TypedDatabaseSchema databaseSchema = mock(TypedDatabaseSchema.class);
         when(client.getDatabaseSchema(anyString())).thenReturn(databaseSchema);
         assertEquals("Error, did not return correct DatabaseSchema object", databaseSchema,
                 ovsdbConnectionInstance.getDatabaseSchema(anyString()));

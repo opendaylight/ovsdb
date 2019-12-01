@@ -49,7 +49,9 @@ public interface TypedDatabaseSchema extends DatabaseSchema {
      *
      * @param klazz Typed Class that represents a Table
      */
-    <T> T getTypedRowWrapper(Class<T> klazz);
+    default <T> T getTypedRowWrapper(final Class<T> klazz) {
+        return getTypedRowWrapper(klazz, new Row<>());
+    }
 
     /**
      * Returns a Typed Proxy implementation for the klazz passed as a parameter.

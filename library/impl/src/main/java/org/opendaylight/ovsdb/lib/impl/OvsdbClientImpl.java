@@ -320,7 +320,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
-    public ListenableFuture<DatabaseSchema> getSchema(final String database) {
+    public ListenableFuture<TypedDatabaseSchema> getSchema(final String database) {
         final TypedDatabaseSchema existing = schemas.get(database);
         if (existing != null) {
             return Futures.immediateFuture(existing);

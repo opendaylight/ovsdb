@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -51,6 +50,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
@@ -85,8 +85,9 @@ public class HwvtepConnectionInstance {
     private TransactionHistory controllerTxHistory;
     private TransactionHistory deviceUpdateHistory;
 
-    HwvtepConnectionInstance(HwvtepConnectionManager hwvtepConnectionManager, ConnectionInfo key, OvsdbClient client,
-                              InstanceIdentifier<Node> iid, TransactionInvoker txInvoker, DataBroker dataBroker) {
+    HwvtepConnectionInstance(final HwvtepConnectionManager hwvtepConnectionManager, final ConnectionInfo key,
+            final OvsdbClient client, final InstanceIdentifier<Node> iid, final TransactionInvoker txInvoker,
+            final DataBroker dataBroker) {
         this.hwvtepConnectionManager = hwvtepConnectionManager;
         this.connectionInfo = key;
         this.client = client;
@@ -106,13 +107,13 @@ public class HwvtepConnectionInstance {
             LOG.info("Job waiting for reconciliation {}", nodeId);
             Futures.addCallback(reconciliationFt, new FutureCallback<Boolean>() {
                 @Override
-                public void onSuccess(Boolean notUsed) {
+                public void onSuccess(final Boolean notUsed) {
                     LOG.info("Running the job waiting for reconciliation {}", nodeId);
                     transact(command, false);
                 }
 
                 @Override
-                public void onFailure(Throwable throwable) {
+                public void onFailure(final Throwable throwable) {
                     LOG.info("Running the job waiting for reconciliation {}", nodeId);
                     transact(command, false);
                 }
@@ -126,7 +127,7 @@ public class HwvtepConnectionInstance {
         }
     }
 
-    public synchronized void transact(TransactCommand command, boolean reconcile) {
+    public synchronized void transact(final TransactCommand command, final boolean reconcile) {
         try {
             for (TransactInvoker transactInvoker : transactInvokers.values()) {
                 transactInvoker.invoke(command);
@@ -138,7 +139,8 @@ public class HwvtepConnectionInstance {
         }
     }
 
-    public ListenableFuture<List<OperationResult>> transact(DatabaseSchema dbSchema, List<Operation> operations) {
+    public ListenableFuture<List<OperationResult>> transact(final DatabaseSchema dbSchema,
+            final List<Operation> operations) {
         return client.transact(dbSchema, operations);
     }
 
@@ -178,7 +180,7 @@ public class HwvtepConnectionInstance {
         }
     }
 
-    private void monitorAllTables(String database, DatabaseSchema dbSchema) {
+    private void monitorAllTables(final String database, final DatabaseSchema dbSchema) {
         Set<String> tables = dbSchema.getTables();
         if (tables != null) {
             List<MonitorRequest> monitorRequests = new ArrayList<>();
@@ -224,37 +226,39 @@ public class HwvtepConnectionInstance {
         return client.getDatabases();
     }
 
-    public ListenableFuture<DatabaseSchema> getSchema(String database) {
+    public ListenableFuture<TypedDatabaseSchema> getSchema(final String database) {
         return client.getSchema(database);
     }
 
-    public TransactionBuilder transactBuilder(DatabaseSchema dbSchema) {
+    public TransactionBuilder transactBuilder(final DatabaseSchema dbSchema) {
         return client.transactBuilder(dbSchema);
     }
 
-    public <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
-                    List<MonitorRequest> monitorRequests, MonitorCallBack monitorCallBack) {
+    public <E extends TableSchema<E>> TableUpdates monitor(final DatabaseSchema schema,
+                    final List<MonitorRequest> monitorRequests, final MonitorCallBack monitorCallBack) {
         return client.monitor(schema, monitorRequests, monitorCallBack);
     }
 
-    public <E extends TableSchema<E>> TableUpdates monitor(DatabaseSchema schema,
-            List<MonitorRequest> monitorRequests, MonitorHandle monitorHandle, MonitorCallBack monitorCallBack) {
+    public <E extends TableSchema<E>> TableUpdates monitor(final DatabaseSchema schema,
+            final List<MonitorRequest> monitorRequests, final MonitorHandle monitorHandle,
+            final MonitorCallBack monitorCallBack) {
         return null;
     }
 
-    public void cancelMonitor(MonitorHandle handler) {
+    public void cancelMonitor(final MonitorHandle handler) {
         client.cancelMonitor(handler);
     }
 
-    public void lock(String lockId, LockAquisitionCallback lockedCallBack, LockStolenCallback stolenCallback) {
+    public void lock(final String lockId, final LockAquisitionCallback lockedCallBack,
+            final LockStolenCallback stolenCallback) {
         client.lock(lockId, lockedCallBack, stolenCallback);
     }
 
-    public ListenableFuture<Boolean> steal(String lockId) {
+    public ListenableFuture<Boolean> steal(final String lockId) {
         return client.steal(lockId);
     }
 
-    public ListenableFuture<Boolean> unLock(String lockId) {
+    public ListenableFuture<Boolean> unLock(final String lockId) {
         return client.unLock(lockId);
     }
 
@@ -270,19 +274,19 @@ public class HwvtepConnectionInstance {
         client.disconnect();
     }
 
-    public DatabaseSchema getDatabaseSchema(String dbName) {
+    public DatabaseSchema getDatabaseSchema(final String dbName) {
         return client.getDatabaseSchema(dbName);
     }
 
-    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(Class<T> klazz) {
+    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(final Class<T> klazz) {
         return client.createTypedRowWrapper(klazz);
     }
 
-    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(DatabaseSchema dbSchema, Class<T> klazz) {
+    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz) {
         return client.createTypedRowWrapper(dbSchema, klazz);
     }
 
-    public <T extends TypedBaseTable<?>> T getTypedRowWrapper(Class<T> klazz, Row<GenericTableSchema> row) {
+    public <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row) {
         return client.getTypedRowWrapper(klazz, row);
     }
 
@@ -290,7 +294,7 @@ public class HwvtepConnectionInstance {
         return connectionInfo;
     }
 
-    public void setMDConnectionInfo(ConnectionInfo key) {
+    public void setMDConnectionInfo(final ConnectionInfo key) {
         this.connectionInfo = key;
     }
 
@@ -307,7 +311,7 @@ public class HwvtepConnectionInstance {
         return getNodeKey().getNodeId();
     }
 
-    public void setInstanceIdentifier(InstanceIdentifier<Node> iid) {
+    public void setInstanceIdentifier(final InstanceIdentifier<Node> iid) {
         this.instanceIdentifier = iid;
         hwvtepConnectionManager.putConnectionInstance(instanceIdentifier, this);
     }
@@ -316,11 +320,11 @@ public class HwvtepConnectionInstance {
         return this.connectedEntity;
     }
 
-    public void setConnectedEntity(Entity entity) {
+    public void setConnectedEntity(final Entity entity) {
         this.connectedEntity = entity;
     }
 
-    public Boolean hasOvsdbClient(OvsdbClient otherClient) {
+    public Boolean hasOvsdbClient(final OvsdbClient otherClient) {
         return client.equals(otherClient);
     }
 
@@ -328,13 +332,14 @@ public class HwvtepConnectionInstance {
         return hasDeviceOwnership;
     }
 
-    public void setHasDeviceOwnership(Boolean hasDeviceOwnership) {
+    public void setHasDeviceOwnership(final Boolean hasDeviceOwnership) {
         if (hasDeviceOwnership != null) {
             this.hasDeviceOwnership = hasDeviceOwnership;
         }
     }
 
-    public void setDeviceOwnershipCandidateRegistration(@NonNull EntityOwnershipCandidateRegistration registration) {
+    public void setDeviceOwnershipCandidateRegistration(
+            @NonNull final EntityOwnershipCandidateRegistration registration) {
         this.deviceOwnershipCandidateRegistration = registration;
     }
 
@@ -345,7 +350,7 @@ public class HwvtepConnectionInstance {
         }
     }
 
-    public void setHwvtepGlobalAugmentation(HwvtepGlobalAugmentation hwvtepGlobalData) {
+    public void setHwvtepGlobalAugmentation(final HwvtepGlobalAugmentation hwvtepGlobalData) {
         this.initialCreatedData = hwvtepGlobalData;
     }
 
@@ -374,7 +379,7 @@ public class HwvtepConnectionInstance {
         return callback;
     }
 
-    public void setCallback(MonitorCallBack callback) {
+    public void setCallback(final MonitorCallBack callback) {
         this.callback = callback;
     }
 
@@ -382,7 +387,7 @@ public class HwvtepConnectionInstance {
         return controllerTxHistory;
     }
 
-    public void setControllerTxHistory(TransactionHistory controllerTxLog) {
+    public void setControllerTxHistory(final TransactionHistory controllerTxLog) {
         deviceInfo.setControllerTxHistory(controllerTxLog);
         this.controllerTxHistory = controllerTxLog;
     }
@@ -391,7 +396,7 @@ public class HwvtepConnectionInstance {
         return deviceUpdateHistory;
     }
 
-    public void setDeviceUpdateHistory(TransactionHistory deviceUpdateLog) {
+    public void setDeviceUpdateHistory(final TransactionHistory deviceUpdateLog) {
         deviceInfo.setDeviceUpdateHistory(deviceUpdateLog);
         this.deviceUpdateHistory = deviceUpdateLog;
     }

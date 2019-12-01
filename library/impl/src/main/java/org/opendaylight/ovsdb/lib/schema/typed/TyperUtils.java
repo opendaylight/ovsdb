@@ -13,7 +13,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Range;
 import com.google.common.reflect.Reflection;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -33,7 +32,6 @@ import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 /**
  * Utility methods for typed OVSDB schema data.
@@ -293,11 +291,8 @@ public final class TyperUtils {
                 return proxy;
             }
 
-            private Object processGetTableSchema() {
-                if (dbSchema == null) {
-                    return null;
-                }
-                return getTableSchema(dbSchema, klazz);
+            private GenericTableSchema processGetTableSchema() {
+                return dbSchema == null ? null : getTableSchema(dbSchema, klazz);
             }
 
             private Boolean isHashCodeMethod(final Method method, final Object[] args) {
@@ -328,49 +323,29 @@ public final class TyperUtils {
                 } else if (isGetColumn(method)) {
                     return processGetColumn(method);
                 } else if (isHashCodeMethod(method, args)) {
-                    return hashCode();
+                    return processHashCode();
                 } else if (isEqualsMethod(method, args)) {
-                    return proxy.getClass().isInstance(args[0]) && this.equals(args[0]);
+                    return proxy.getClass().isInstance(args[0]) && processEquals(args[0]);
                 } else if (isToStringMethod(method, args)) {
-                    return this.toString();
+                    return processToString();
                 }
                 throw new UnsupportedMethodException("Method not supported " + method.toString());
             }
 
-            @Override
-            @SuppressFBWarnings({"EQ_CHECK_FOR_OPERAND_NOT_COMPATIBLE_WITH_THIS", "EQ_UNUSUAL"})
-            public boolean equals(final Object obj) {
-                if (!(obj instanceof TypedBaseTable)) {
-                    return false;
-                }
-                TypedBaseTable<?> typedRowObj = (TypedBaseTable<?>)obj;
-                return Objects.equal(row, typedRowObj.getRow());
+            private boolean processEquals(final Object obj) {
+                return obj instanceof TypedBaseTable && Objects.equal(row, ((TypedBaseTable<?>)obj).getRow());
             }
 
-            @Override
-            public int hashCode() {
-                if (row == null) {
-                    return 0;
-                }
-                return row.hashCode();
+            private int processHashCode() {
+                return row == null ? 0 : row.hashCode();
             }
 
-            @Override
-            public String toString() {
-                String tableName;
-                TableSchema<?> schema = (TableSchema<?>)processGetTableSchema();
-                if (schema != null) {
-                    tableName = schema.getName();
-                } else {
-                    tableName = "";
-                }
-                if (row == null) {
-                    return tableName;
-                }
-                return tableName + " : " + row.toString();
+            private String processToString() {
+                final GenericTableSchema schema = processGetTableSchema();
+                final String tableName = schema != null ? schema.getName() : "";
+                return row == null ? tableName : tableName + " : " + row.toString();
             }
-        }
-        );
+        });
     }
 
     /**

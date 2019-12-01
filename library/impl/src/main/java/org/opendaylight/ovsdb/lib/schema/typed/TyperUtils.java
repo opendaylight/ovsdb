@@ -7,13 +7,12 @@
  */
 package org.opendaylight.ovsdb.lib.schema.typed;
 
-import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Range;
-import com.google.common.reflect.Reflection;
-import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
-import org.opendaylight.ovsdb.lib.message.TableUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -26,6 +25,14 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
  * Utility methods for typed OVSDB schema data.
  */
 public final class TyperUtils {
+    private static final LoadingCache<DatabaseSchema, TypedDatabaseSchema> TYPED_CACHE = CacheBuilder.newBuilder()
+            .weakKeys().weakValues().build(new CacheLoader<DatabaseSchema, TypedDatabaseSchema>() {
+                @Override
+                public TypedDatabaseSchema load(final DatabaseSchema key) {
+                    return new TypedDatabaseSchemaImpl(key);
+                }
+            });
+
     private TyperUtils() {
         // Prevent instantiating a utility class
     }
@@ -42,28 +49,9 @@ public final class TyperUtils {
         return dbSchema.table(TypedReflections.getTableName(klazz), GenericTableSchema.class);
     }
 
-    public static ColumnSchema<GenericTableSchema, Object> getColumnSchema(final GenericTableSchema tableSchema,
+    static ColumnSchema<GenericTableSchema, Object> getColumnSchema(final GenericTableSchema tableSchema,
             final String columnName, final Class<Object> metaClass) {
         return tableSchema.column(columnName, metaClass);
-    }
-
-    /**
-     * Method that checks validity of the parameter passed to getTypedRowWrapper.
-     * This method checks for a valid Database Schema matching the expected Database for a given table
-     * and checks for the presence of the Table in Database Schema.
-     *
-     * @param dbSchema DatabaseSchema as learnt from a OVSDB connection
-     * @param klazz Typed Class that represents a Table
-     * @return true if valid, false otherwise
-     */
-    private static <T> boolean isValid(final DatabaseSchema dbSchema, final Class<T> klazz) {
-        final String dbName = TypedReflections.getTableDatabase(klazz);
-        if (dbName != null && !dbSchema.getName().equalsIgnoreCase(dbName)) {
-            return false;
-        }
-
-        checkVersion(dbSchema.getVersion(), TypedReflections.getTableVersionRange(klazz));
-        return true;
     }
 
     static void checkVersion(final Version schemaVersion, final Range<Version> range) {
@@ -116,13 +104,7 @@ public final class TyperUtils {
      */
     public static <T> T getTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz,
                                            final Row<GenericTableSchema> row) {
-        if (dbSchema == null || !isValid(dbSchema, klazz)) {
-            return null;
-        }
-        if (row != null) {
-            row.setTableSchema(getTableSchema(dbSchema, klazz));
-        }
-        return Reflection.newProxy(klazz, new TypedRowInvocationHandler(klazz, dbSchema, row));
+        return dbSchema == null ? null : getTyped(dbSchema).getTypedRowWrapper(klazz, row);
     }
 
     /**
@@ -140,19 +122,7 @@ public final class TyperUtils {
      */
     public static <T> Map<UUID,T> extractRowsUpdated(final Class<T> klazz, final TableUpdates updates,
             final DatabaseSchema dbSchema) {
-        Preconditions.checkNotNull(klazz);
-        Preconditions.checkNotNull(updates);
-        Preconditions.checkNotNull(dbSchema);
-        Map<UUID,T> result = new HashMap<>();
-        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates =
-                extractRowUpdates(klazz,updates,dbSchema);
-        for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
-            if (rowUpdate != null && rowUpdate.getNew() != null) {
-                Row<GenericTableSchema> row = rowUpdate.getNew();
-                result.put(rowUpdate.getUuid(),TyperUtils.getTypedRowWrapper(dbSchema,klazz,row));
-            }
-        }
-        return result;
+        return getTyped(dbSchema).extractRowsUpdated(klazz, updates);
     }
 
     /**
@@ -170,19 +140,7 @@ public final class TyperUtils {
      */
     public static <T> Map<UUID, T> extractRowsOld(final Class<T> klazz, final TableUpdates updates,
             final DatabaseSchema dbSchema) {
-        Preconditions.checkNotNull(klazz);
-        Preconditions.checkNotNull(updates);
-        Preconditions.checkNotNull(dbSchema);
-        Map<UUID,T> result = new HashMap<>();
-        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates =
-                extractRowUpdates(klazz,updates,dbSchema);
-        for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
-            if (rowUpdate != null && rowUpdate.getOld() != null) {
-                Row<GenericTableSchema> row = rowUpdate.getOld();
-                result.put(rowUpdate.getUuid(),TyperUtils.getTypedRowWrapper(dbSchema,klazz,row));
-            }
-        }
-        return result;
+        return getTyped(dbSchema).extractRowsOld(klazz, updates);
     }
 
     /**
@@ -200,50 +158,11 @@ public final class TyperUtils {
      */
     public static <T> Map<UUID,T> extractRowsRemoved(final Class<T> klazz, final TableUpdates updates,
             final DatabaseSchema dbSchema) {
-        Preconditions.checkNotNull(klazz);
-        Preconditions.checkNotNull(updates);
-        Preconditions.checkNotNull(dbSchema);
-        Map<UUID,T> result = new HashMap<>();
-        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates =
-                extractRowUpdates(klazz,updates,dbSchema);
-        for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
-            if (rowUpdate != null && rowUpdate.getNew() == null && rowUpdate.getOld() != null) {
-                Row<GenericTableSchema> row = rowUpdate.getOld();
-                result.put(rowUpdate.getUuid(),TyperUtils.getTypedRowWrapper(dbSchema,klazz,row));
-            }
-        }
-        return result;
+        return getTyped(dbSchema).extractRowsRemoved(klazz, updates);
     }
 
-    /**
-     * This method extracts all RowUpdates of Class&lt;T&gt; klazz from a TableUpdates
-     * that correspond to rows of type klazz.
-     * Example:
-     * <code>
-     * Map&lt;UUID,TableUpdate&lt;GenericTableSchema&gt;.RowUpdate&lt;GenericTableSchema&gt;&gt; updatedBridges =
-     *     extractRowsUpdates(Bridge.class,updates,dbSchema)
-     * </code>
-     *
-     * @param klazz Class for row type to be extracted
-     * @param updates TableUpdates from which to extract rowUpdates
-     * @param dbSchema Dbschema for the TableUpdates
-     * @return Map&lt;UUID,TableUpdate&lt;GenericTableSchema&gt;.RowUpdate&lt;GenericTableSchema&gt;&gt;
-     *     for the type of things being sought
-     */
-    static Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> extractRowUpdates(
-            final Class<?> klazz,final TableUpdates updates,final DatabaseSchema dbSchema) {
-        Preconditions.checkNotNull(klazz);
-        Preconditions.checkNotNull(updates);
-        Preconditions.checkNotNull(dbSchema);
-        Map<UUID, TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> result =
-                new HashMap<>();
-        TableUpdate<GenericTableSchema> update = updates.getUpdate(TyperUtils.getTableSchema(dbSchema, klazz));
-        if (update != null) {
-            Map<UUID, TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rows = update.getRows();
-            if (rows != null) {
-                result = rows;
-            }
-        }
-        return result;
+    private static TypedDatabaseSchema getTyped(final DatabaseSchema dbSchema) {
+        return dbSchema instanceof TypedDatabaseSchema ? (TypedDatabaseSchema) dbSchema
+                : TYPED_CACHE.getUnchecked(dbSchema);
     }
 }

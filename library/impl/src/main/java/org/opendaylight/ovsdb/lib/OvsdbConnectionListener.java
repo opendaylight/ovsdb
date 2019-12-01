@@ -8,6 +8,8 @@
 
 package org.opendaylight.ovsdb.lib;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * Applications interested in Passive ovsdb connection events should implement this interface.
  */
@@ -16,7 +18,7 @@ public interface OvsdbConnectionListener {
      * Event thrown to the connection listener when a new Passive connection is established.
      * @param client OvsdbClient that represents the connection.
      */
-    void connected(OvsdbClient client);
+    void connected(@NonNull OvsdbClient client);
 
     /**
      * Event thrown to the connection listener when an existing connection is terminated.

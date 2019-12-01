@@ -50,16 +50,14 @@ public final class TyperUtils {
         return getTyped(dbSchema).getTableSchema(klazz);
     }
 
-    static ColumnSchema<GenericTableSchema, Object> getColumnSchema(final GenericTableSchema tableSchema,
-            final String columnName, final Class<Object> metaClass) {
+    static <T> ColumnSchema<GenericTableSchema, T> getColumnSchema(final GenericTableSchema tableSchema,
+            final String columnName, final Class<T> metaClass) {
         return tableSchema.column(columnName, metaClass);
     }
 
     static void checkVersion(final Version schemaVersion, final Range<Version> range) {
         if (!range.contains(schemaVersion)) {
-            throw new SchemaVersionMismatchException(schemaVersion,
-                range.hasLowerBound() ? range.lowerEndpoint() : Version.NULL,
-                        range.hasUpperBound() ? range.upperEndpoint() : Version.NULL);
+            throw new SchemaVersionMismatchException(schemaVersion, range);
         }
     }
 

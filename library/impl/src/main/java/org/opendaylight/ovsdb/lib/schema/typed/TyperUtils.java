@@ -42,8 +42,8 @@ public final class TyperUtils {
         return dbSchema.table(TypedReflections.getTableName(klazz), GenericTableSchema.class);
     }
 
-    public static ColumnSchema<GenericTableSchema, Object> getColumnSchema(final GenericTableSchema tableSchema,
-            final String columnName, final Class<Object> metaClass) {
+    public static <T> ColumnSchema<GenericTableSchema, T> getColumnSchema(final GenericTableSchema tableSchema,
+            final String columnName, final Class<T> metaClass) {
         return tableSchema.column(columnName, metaClass);
     }
 

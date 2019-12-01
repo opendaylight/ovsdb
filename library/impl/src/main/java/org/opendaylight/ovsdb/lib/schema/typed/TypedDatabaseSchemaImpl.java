@@ -9,6 +9,9 @@ package org.opendaylight.ovsdb.lib.schema.typed;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.reflect.Reflection;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +24,14 @@ import org.opendaylight.ovsdb.lib.schema.ForwardingDatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 
 final class TypedDatabaseSchemaImpl extends ForwardingDatabaseSchema implements TypedDatabaseSchema {
+    private final LoadingCache<Class<?>, TypedRowInvocationHandler> handlers = CacheBuilder.newBuilder()
+            .weakKeys().weakValues().build(new CacheLoader<Class<?>, TypedRowInvocationHandler>() {
+                @Override
+                public TypedRowInvocationHandler load(final Class<?> key) {
+                    return MethodDispatch.forTarget(key).bindToSchema(TypedDatabaseSchemaImpl.this);
+                }
+            });
+
     private final DatabaseSchema delegate;
 
     TypedDatabaseSchemaImpl(final DatabaseSchema delegate) {
@@ -40,7 +51,11 @@ final class TypedDatabaseSchemaImpl extends ForwardingDatabaseSchema implements 
 
     @Override
     public GenericTableSchema getTableSchema(final Class<?> klazz) {
-        return table(TypedReflections.getTableName(klazz), GenericTableSchema.class);
+        return getTableSchema(TypedReflections.getTableName(klazz));
+    }
+
+    private GenericTableSchema getTableSchema(final String tableName) {
+        return table(tableName, GenericTableSchema.class);
     }
 
     @Override
@@ -54,10 +69,12 @@ final class TypedDatabaseSchemaImpl extends ForwardingDatabaseSchema implements 
         }
         TyperUtils.checkVersion(getVersion(), TypedReflections.getTableVersionRange(klazz));
 
+        TypedRowInvocationHandler handler = handlers.getUnchecked(klazz);
         if (row != null) {
-            row.setTableSchema(getTableSchema(klazz));
+            row.setTableSchema(getTableSchema(handler.getTableName()));
+            handler = handler.bindToRow(row);
         }
-        return Reflection.newProxy(klazz, new TypedRowInvocationHandler(klazz, this, row));
+        return Reflection.newProxy(klazz, handler);
     }
 
     @Override

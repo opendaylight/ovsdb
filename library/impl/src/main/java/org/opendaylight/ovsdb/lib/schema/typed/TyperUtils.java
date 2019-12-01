@@ -17,7 +17,6 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.notation.Version;
-import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 
@@ -50,16 +49,9 @@ public final class TyperUtils {
         return getTyped(dbSchema).getTableSchema(klazz);
     }
 
-    static ColumnSchema<GenericTableSchema, Object> getColumnSchema(final GenericTableSchema tableSchema,
-            final String columnName, final Class<Object> metaClass) {
-        return tableSchema.column(columnName, metaClass);
-    }
-
     static void checkVersion(final Version schemaVersion, final Range<Version> range) {
         if (!range.contains(schemaVersion)) {
-            throw new SchemaVersionMismatchException(schemaVersion,
-                range.hasLowerBound() ? range.lowerEndpoint() : Version.NULL,
-                        range.hasUpperBound() ? range.upperEndpoint() : Version.NULL);
+            throw new SchemaVersionMismatchException(schemaVersion, range);
         }
     }
 

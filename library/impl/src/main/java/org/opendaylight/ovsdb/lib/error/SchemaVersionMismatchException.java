@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.lib.error;
 
+import com.google.common.collect.Range;
 import org.opendaylight.ovsdb.lib.notation.Version;
 
 /**
@@ -17,9 +18,8 @@ import org.opendaylight.ovsdb.lib.notation.Version;
 public class SchemaVersionMismatchException extends RuntimeException {
     private static final long serialVersionUID = -5194270510726950745L;
 
-    public SchemaVersionMismatchException(final Version schemaVersion, final Version fromVersion,
-            final Version untilVersion) {
+    public SchemaVersionMismatchException(final Version schemaVersion, final Range<Version> range) {
         super("The schema version used to access the table/column (" + schemaVersion + ") does not match the required"
-                + " version (from " + fromVersion + " to " + untilVersion + ")");
+                + " version range " + range);
     }
 }

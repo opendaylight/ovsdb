@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.Range;
 import java.lang.reflect.Method;
+import java.util.Locale;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
@@ -60,14 +61,14 @@ abstract class MethodInvoker {
     }
 
     private abstract static class ColumnMethodInvoker<T> extends TableMethodInvoker {
-        final Class<T> columnType;
+        private final Class<T> columnType;
         final String columnName;
 
         ColumnMethodInvoker(final Method method, final Class<T> columnType, final String tableName) {
             super(TypedReflections.getColumnVersionRange(method), tableName);
-            this.columnName = TypedRowInvocationHandler.getColumnName(method);
+            this.columnName = getColumnName(method);
             if (columnName == null) {
-                throw new TyperException("Error processing GetColumn : " + method.getName());
+                throw new TyperException("Failed to find column name for method " + method.getName());
             }
 
             this.columnType = requireNonNull(columnType);
@@ -84,6 +85,8 @@ abstract class MethodInvoker {
                     dbSchema.getName()));
             }
 
+            // When the row is null, that might indicate that the user maybe interested
+            // only in the ColumnSchema and not on the Data.
             return row == null ? invokeMethod(tableSchema, proxy, args)
                     : invokeRowMethod(tableSchema, row, proxy, args);
         }
@@ -106,6 +109,30 @@ abstract class MethodInvoker {
         // TODO: this is Method/DatabaseSchema invariant and should therefore be cached in TypedDatabaseSchema
         final @Nullable ColumnSchema<GenericTableSchema, T> findColumnSchema(final GenericTableSchema tableSchema) {
             return TyperUtils.getColumnSchema(tableSchema, columnName, columnType);
+        }
+
+        private static String getColumnName(final Method method) {
+            TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
+            if (typedColumn != null) {
+                return typedColumn.name();
+            }
+
+            /*
+             * Attempting to get the column name by parsing the method name with a following convention :
+             * 1. GETDATA : get<ColumnName>
+             * 2. SETDATA : set<ColumnName>
+             * 3. GETCOLUMN : get<ColumnName>Column
+             * where <ColumnName> is the name of the column that we are interested in.
+             */
+            int index = GET_STARTS_WITH.length();
+            if (isGetData(method) || isSetData(method)) {
+                return method.getName().substring(index, method.getName().length()).toLowerCase(Locale.ROOT);
+            } else if (isGetColumn(method)) {
+                return method.getName().substring(index, method.getName().indexOf(GETCOLUMN_ENDS_WITH,
+                        index)).toLowerCase(Locale.ROOT);
+            }
+
+            return null;
         }
     }
 
@@ -168,41 +195,48 @@ abstract class MethodInvoker {
     }
 
     private static final class SetData<T> extends ColumnMethodInvoker<T> {
-        SetData(final Class<T> target, final Method method, final String tableName) {
+        SetData(final Method method, final Class<T> target, final String tableName) {
             super(method, target, tableName);
         }
 
         @Override
-        @Nullable T invokeMethod(final GenericTableSchema tableSchema, final Object proxy, final Object[] args) {
+        @Nullable Object invokeMethod(final GenericTableSchema tableSchema, final Object proxy, final Object[] args) {
             throw new UnsupportedOperationException("No backing row supplied");
         }
 
         @Override
-        @Nullable T invokeRowMethod(final GenericTableSchema tableSchema, final Row<GenericTableSchema> row,
+        @Nullable Object invokeRowMethod(final GenericTableSchema tableSchema, final Row<GenericTableSchema> row,
                 final Object proxy, final Object[] args) {
             row.addColumn(columnName, new Column(findColumnSchema(tableSchema), args[0]));
-            return (T) proxy;
+            return proxy;
         }
     }
 
-    static @Nullable MethodInvoker of(final Class<?> klazz, final Method method) {
-        final String tableName = TypedReflections.getTableName(klazz);
+    private static final String GET_STARTS_WITH = "get";
+    private static final String SET_STARTS_WITH = "set";
+    private static final String GETCOLUMN_ENDS_WITH = "Column";
+    private static final String GETROW_ENDS_WITH = "Row";
 
+    static @Nullable MethodInvoker of(final String tableName, final Method method) {
         // FIXME: order retained for being bug-by-bug compatible. We should inline checking so that we can properly
         //        reuse whatever extraction bits are needed.
-        if (TypedRowInvocationHandler.isGetTableSchema(method)) {
+        if (isGetTableSchema(method)) {
             return new GetTableSchema(tableName);
         }
-        if (TypedRowInvocationHandler.isGetRow(method)) {
+        if (isGetRow(method)) {
             return GET_ROW;
         }
-        if (TypedRowInvocationHandler.isSetData(method)) {
-            return new SetData<>(klazz, method, tableName);
+        if (isSetData(method)) {
+            final Class<?>[] paramTypes = method.getParameterTypes();
+            if (paramTypes.length != 1) {
+                throw new TyperException("Setter method : " + method.getName() + " requires 1 argument");
+            }
+            return new SetData<>(method, paramTypes[0], tableName);
         }
-        if (TypedRowInvocationHandler.isGetData(method)) {
+        if (isGetData(method)) {
             return new GetData<>(method, tableName);
         }
-        if (TypedRowInvocationHandler.isGetColumn(method)) {
+        if (isGetColumn(method)) {
             return new GetColumn<>(method, tableName);
         }
 
@@ -211,4 +245,47 @@ abstract class MethodInvoker {
 
     abstract @Nullable Object invokeMethod(DatabaseSchema dbSchema, Row<GenericTableSchema> row, Object proxy,
             Object[] args);
+
+
+    static boolean isGetColumn(final Method method) {
+        TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
+        if (typedColumn != null) {
+            return typedColumn.method().equals(MethodType.GETCOLUMN);
+        }
+
+        return method.getName().startsWith(GET_STARTS_WITH) && method.getName().endsWith(GETCOLUMN_ENDS_WITH);
+    }
+
+    static boolean isGetData(final Method method) {
+        TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
+        if (typedColumn != null) {
+            return typedColumn.method().equals(MethodType.GETDATA);
+        }
+
+        return method.getName().startsWith(GET_STARTS_WITH) && !method.getName().endsWith(GETCOLUMN_ENDS_WITH);
+    }
+
+    static boolean isGetRow(final Method method) {
+        TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
+        if (typedColumn != null) {
+            return typedColumn.method().equals(MethodType.GETROW);
+        }
+
+        return method.getName().startsWith(GET_STARTS_WITH) && method.getName().endsWith(GETROW_ENDS_WITH);
+    }
+
+    private static boolean isGetTableSchema(final Method method) {
+        TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
+        return typedColumn != null && typedColumn.method().equals(MethodType.GETTABLESCHEMA);
+    }
+
+    private static boolean isSetData(final Method method) {
+        TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
+        if (typedColumn != null) {
+            return typedColumn.method().equals(MethodType.SETDATA);
+        }
+
+        return method.getName().startsWith(SET_STARTS_WITH);
+    }
+
 }

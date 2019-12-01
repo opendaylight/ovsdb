@@ -478,8 +478,8 @@ public final class TyperUtils {
      * @return Map&lt;UUID,TableUpdate&lt;GenericTableSchema&gt;.RowUpdate&lt;GenericTableSchema&gt;&gt;
      *     for the type of things being sought
      */
-    public static Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>>
-        extractRowUpdates(final Class<?> klazz,final TableUpdates updates,final DatabaseSchema dbSchema) {
+    static Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> extractRowUpdates(
+            final Class<?> klazz,final TableUpdates updates,final DatabaseSchema dbSchema) {
         Preconditions.checkNotNull(klazz);
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);

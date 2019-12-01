@@ -44,6 +44,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
@@ -78,8 +79,8 @@ public class OvsdbConnectionInstance {
     private EntityOwnershipCandidateRegistration deviceOwnershipCandidateRegistration;
     private OvsdbNodeAugmentation initialCreateData = null;
 
-    OvsdbConnectionInstance(ConnectionInfo key, OvsdbClient client, TransactionInvoker txInvoker,
-                            InstanceIdentifier<Node> iid) {
+    OvsdbConnectionInstance(final ConnectionInfo key, final OvsdbClient client, final TransactionInvoker txInvoker,
+                            final InstanceIdentifier<Node> iid) {
         this.connectionInfo = key;
         this.client = client;
         this.txInvoker = txInvoker;
@@ -95,8 +96,8 @@ public class OvsdbConnectionInstance {
      * @param events The events to process.
      * @param instanceIdentifierCodec The instance identifier codec to use.
      */
-    public void transact(TransactCommand command, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void transact(final TransactCommand command, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         for (TransactInvoker transactInvoker : transactInvokers.values()) {
             transactInvoker.invoke(command, state, events, instanceIdentifierCodec);
         }
@@ -110,19 +111,20 @@ public class OvsdbConnectionInstance {
      * @param modifications The modifications to process.
      * @param instanceIdentifierCodec The instance identifier codec to use.
      */
-    public void transact(TransactCommand command, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void transact(final TransactCommand command, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         for (TransactInvoker transactInvoker : transactInvokers.values()) {
             transactInvoker.invoke(command, state, modifications, instanceIdentifierCodec);
         }
     }
 
     public ListenableFuture<List<OperationResult>> transact(
-            DatabaseSchema dbSchema, List<Operation> operations) {
+            final DatabaseSchema dbSchema, final List<Operation> operations) {
         return client.transact(dbSchema, operations);
     }
 
-    public void registerCallbacks(InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void registerCallbacks(final InstanceIdentifierCodec instanceIdentifierCodec) {
         if (this.callback == null) {
             if (this.initialCreateData != null) {
                 this.updateConnectionAttributes(instanceIdentifierCodec);
@@ -159,7 +161,7 @@ public class OvsdbConnectionInstance {
     }
 
     @VisibleForTesting
-    void monitorTables(String database, DatabaseSchema dbSchema) {
+    void monitorTables(final String database, final DatabaseSchema dbSchema) {
         Set<String> tables = dbSchema.getTables();
         if (tables != null) {
             List<MonitorRequest> monitorRequests = new ArrayList<>();
@@ -185,7 +187,7 @@ public class OvsdbConnectionInstance {
         }
     }
 
-    private void updateConnectionAttributes(InstanceIdentifierCodec instanceIdentifierCodec) {
+    private void updateConnectionAttributes(final InstanceIdentifierCodec instanceIdentifierCodec) {
         LOG.debug("Update attributes of ovsdb node ip: {} port: {}",
                     this.initialCreateData.getConnectionInfo().getRemoteIp(),
                     this.initialCreateData.getConnectionInfo().getRemotePort());
@@ -234,15 +236,15 @@ public class OvsdbConnectionInstance {
         }
     }
 
-    private void stampInstanceIdentifier(TransactionBuilder transaction,InstanceIdentifier<Node> iid,
-            InstanceIdentifierCodec instanceIdentifierCodec) {
+    private static void stampInstanceIdentifier(final TransactionBuilder transaction,final InstanceIdentifier<Node> iid,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
         ovs.setExternalIds(Collections.emptyMap());
         TransactUtils.stampInstanceIdentifier(transaction, iid, ovs.getSchema(), ovs.getExternalIdsColumn().getSchema(),
                 instanceIdentifierCodec);
     }
 
-    private void invoke(TransactionBuilder txBuilder) {
+    private static void invoke(final TransactionBuilder txBuilder) {
         ListenableFuture<List<OperationResult>> result = txBuilder.execute();
         LOG.debug("invoke: tb: {}", txBuilder);
         if (txBuilder.getOperations().size() > 0) {
@@ -256,45 +258,44 @@ public class OvsdbConnectionInstance {
         }
     }
 
-
     public ListenableFuture<List<String>> getDatabases() {
         return client.getDatabases();
     }
 
-    public ListenableFuture<DatabaseSchema> getSchema(String database) {
+    public ListenableFuture<TypedDatabaseSchema> getSchema(final String database) {
         return client.getSchema(database);
     }
 
-    public TransactionBuilder transactBuilder(DatabaseSchema dbSchema) {
+    public TransactionBuilder transactBuilder(final DatabaseSchema dbSchema) {
         return client.transactBuilder(dbSchema);
     }
 
     public <E extends TableSchema<E>> TableUpdates monitor(
-            DatabaseSchema schema, List<MonitorRequest> monitorRequests,
-            MonitorHandle monitorHandle, MonitorCallBack callbackArgument) {
+            final DatabaseSchema schema, final List<MonitorRequest> monitorRequests,
+            final MonitorHandle monitorHandle, final MonitorCallBack callbackArgument) {
         return null;
     }
 
     public <E extends TableSchema<E>> TableUpdates monitor(
-            DatabaseSchema schema, List<MonitorRequest> monitorRequests,
-            MonitorCallBack callbackArgument) {
+            final DatabaseSchema schema, final List<MonitorRequest> monitorRequests,
+            final MonitorCallBack callbackArgument) {
         return client.monitor(schema, monitorRequests, callbackArgument);
     }
 
-    public void cancelMonitor(MonitorHandle handler) {
+    public void cancelMonitor(final MonitorHandle handler) {
         client.cancelMonitor(handler);
     }
 
-    public void lock(String lockId, LockAquisitionCallback lockedCallBack,
-            LockStolenCallback stolenCallback) {
+    public void lock(final String lockId, final LockAquisitionCallback lockedCallBack,
+            final LockStolenCallback stolenCallback) {
         client.lock(lockId, lockedCallBack, stolenCallback);
     }
 
-    public ListenableFuture<Boolean> steal(String lockId) {
+    public ListenableFuture<Boolean> steal(final String lockId) {
         return client.steal(lockId);
     }
 
-    public ListenableFuture<Boolean> unLock(String lockId) {
+    public ListenableFuture<Boolean> unLock(final String lockId) {
         return client.unLock(lockId);
     }
 
@@ -306,21 +307,21 @@ public class OvsdbConnectionInstance {
         client.disconnect();
     }
 
-    public DatabaseSchema getDatabaseSchema(String dbName) {
+    public DatabaseSchema getDatabaseSchema(final String dbName) {
         return client.getDatabaseSchema(dbName);
     }
 
-    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(Class<T> klazz) {
+    public <T extends TypedBaseTable<?>> T createTypedRowWrapper(final Class<T> klazz) {
         return client.createTypedRowWrapper(klazz);
     }
 
     public <T extends TypedBaseTable<?>> T createTypedRowWrapper(
-            DatabaseSchema dbSchema, Class<T> klazz) {
+            final DatabaseSchema dbSchema, final Class<T> klazz) {
         return client.createTypedRowWrapper(dbSchema, klazz);
     }
 
-    public <T extends TypedBaseTable<?>> T getTypedRowWrapper(Class<T> klazz,
-            Row<GenericTableSchema> row) {
+    public <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz,
+            final Row<GenericTableSchema> row) {
         return client.getTypedRowWrapper(klazz, row);
     }
 
@@ -332,7 +333,7 @@ public class OvsdbConnectionInstance {
         return connectionInfo;
     }
 
-    public void setMDConnectionInfo(ConnectionInfo key) {
+    public void setMDConnectionInfo(final ConnectionInfo key) {
         this.connectionInfo = key;
     }
 
@@ -348,7 +349,7 @@ public class OvsdbConnectionInstance {
         return getNodeKey().getNodeId();
     }
 
-    public void setInstanceIdentifier(InstanceIdentifier<Node> iid) {
+    public void setInstanceIdentifier(final InstanceIdentifier<Node> iid) {
         this.instanceIdentifier = iid;
     }
 
@@ -356,11 +357,11 @@ public class OvsdbConnectionInstance {
         return this.connectedEntity;
     }
 
-    public void setConnectedEntity(Entity entity) {
+    public void setConnectedEntity(final Entity entity) {
         this.connectedEntity = entity;
     }
 
-    public Boolean hasOvsdbClient(OvsdbClient otherClient) {
+    public Boolean hasOvsdbClient(final OvsdbClient otherClient) {
         return client.equals(otherClient);
     }
 
@@ -368,7 +369,7 @@ public class OvsdbConnectionInstance {
         return hasDeviceOwnership;
     }
 
-    public void setHasDeviceOwnership(Boolean hasDeviceOwnership) {
+    public void setHasDeviceOwnership(final Boolean hasDeviceOwnership) {
         if (hasDeviceOwnership != null) {
             LOG.debug("Ownership status for {} old {} new {}",
                     instanceIdentifier, this.hasDeviceOwnership, hasDeviceOwnership);
@@ -376,7 +377,8 @@ public class OvsdbConnectionInstance {
         }
     }
 
-    public void setDeviceOwnershipCandidateRegistration(@NonNull EntityOwnershipCandidateRegistration registration) {
+    public void setDeviceOwnershipCandidateRegistration(
+            @NonNull final EntityOwnershipCandidateRegistration registration) {
         this.deviceOwnershipCandidateRegistration = registration;
     }
 
@@ -391,7 +393,7 @@ public class OvsdbConnectionInstance {
         return this.initialCreateData;
     }
 
-    public void setOvsdbNodeAugmentation(OvsdbNodeAugmentation ovsdbNodeCreateData) {
+    public void setOvsdbNodeAugmentation(final OvsdbNodeAugmentation ovsdbNodeCreateData) {
         this.initialCreateData = ovsdbNodeCreateData;
     }
 

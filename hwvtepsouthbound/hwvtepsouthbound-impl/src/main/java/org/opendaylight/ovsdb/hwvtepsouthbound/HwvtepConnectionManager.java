@@ -115,7 +115,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     @Override
-    public void connected(@NonNull final OvsdbClient externalClient) {
+    public void connected(final OvsdbClient externalClient) {
         LOG.info("Library connected {} from {}:{} to {}:{}",
                 externalClient.getConnectionInfo().getType(),
                 externalClient.getConnectionInfo().getRemoteAddress(),
@@ -508,7 +508,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
                 Futures.addCallback(readNodeFuture, new FutureCallback<Optional<Node>>() {
                     @Override
-                    public void onSuccess(@NonNull final Optional<Node> node) {
+                    public void onSuccess(final Optional<Node> node) {
                         if (node.isPresent()) {
                             HwvtepGlobalAugmentation augmentation = node.get()
                                     .augmentation(HwvtepGlobalAugmentation.class);

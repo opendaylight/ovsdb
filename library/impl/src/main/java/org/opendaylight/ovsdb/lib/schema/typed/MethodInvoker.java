@@ -108,7 +108,7 @@ abstract class MethodInvoker {
 
         // TODO: this is Method/DatabaseSchema invariant and should therefore be cached in TypedDatabaseSchema
         final @Nullable ColumnSchema<GenericTableSchema, T> findColumnSchema(final GenericTableSchema tableSchema) {
-            return TyperUtils.getColumnSchema(tableSchema, columnName, columnType);
+            return tableSchema.column(columnName, columnType);
         }
 
         private static String getColumnName(final Method method) {

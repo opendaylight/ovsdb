@@ -12,6 +12,7 @@ import io.netty.handler.logging.LoggingHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import junit.framework.TestCase;
 import org.junit.Test;
 
@@ -59,33 +60,33 @@ public class TestClient extends TestCase {
     /**
      * Create and write a json string for specified number of times.
      */
-    private void writeJson(OutputStream outputStream, int times) throws IOException {
-        outputStream.write("{".getBytes("UTF-8"));
+    private static void writeJson(final OutputStream outputStream, final int times) throws IOException {
+        outputStream.write("{".getBytes(StandardCharsets.UTF_8));
         for (int i = 0; i < times; i++) {
             counter++;
             String string = ",\"key1" + counter + "\":\"planet of apes" + counter + "\", \"key2" + counter
                     + "\":{\"k1\":\"ovs-db rocks the world\"}";
-            outputStream.write(string.substring(i == 0 ? 1 : 0).getBytes("UTF-8"));
+            outputStream.write(string.substring(i == 0 ? 1 : 0).getBytes(StandardCharsets.UTF_8));
         }
-        outputStream.write("}".getBytes("UTF-8"));
+        outputStream.write("}".getBytes(StandardCharsets.UTF_8));
     }
 
     /**
      * Writes a partial JSON and flush to simulate the case where netty gets half the message and has to frame it
      * accordingly.
      */
-    private void writePartialFirst(OutputStream outputStream) throws IOException {
+    private static void writePartialFirst(final OutputStream outputStream) throws IOException {
         counter++;
         String string = "                       {\"part" + counter + "\":";
-        outputStream.write(string.getBytes("UTF-8"));
+        outputStream.write(string.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
      * Finishes the JSON started by writePartialFirst.
      */
-    private void writePartialLast(OutputStream outputStream) throws IOException {
+    private static void writePartialLast(final OutputStream outputStream) throws IOException {
         String string = "\"val" + counter + "\"}";
-        outputStream.write(string.getBytes("UTF-8"));
+        outputStream.write(string.getBytes(StandardCharsets.UTF_8));
     }
 
 }

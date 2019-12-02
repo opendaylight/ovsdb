@@ -28,7 +28,7 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.Manager;
@@ -77,7 +77,7 @@ public final class SouthboundMapper {
 
     }
 
-    public static IpAddress createIpAddress(InetAddress address) {
+    public static IpAddress createIpAddress(final InetAddress address) {
         IpAddress ip = null;
         if (address instanceof Inet4Address) {
             ip = createIpAddress((Inet4Address)address);
@@ -87,11 +87,11 @@ public final class SouthboundMapper {
         return ip;
     }
 
-    public static IpAddress createIpAddress(Inet4Address address) {
+    public static IpAddress createIpAddress(final Inet4Address address) {
         return IetfInetUtil.INSTANCE.ipAddressFor(address);
     }
 
-    public static IpAddress createIpAddress(Inet6Address address) {
+    public static IpAddress createIpAddress(final Inet6Address address) {
         Ipv6Address ipv6 = new Ipv6Address(address.getHostAddress());
         return new IpAddress(ipv6);
     }
@@ -102,14 +102,15 @@ public final class SouthboundMapper {
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(final NodeId nodeId) {
         return createTopologyInstanceIdentifier()
                 .child(Node.class,new NodeKey(nodeId));
     }
 
     @SuppressWarnings("unchecked")
-    public static InstanceIdentifier<Node> createInstanceIdentifier(InstanceIdentifierCodec instanceIdentifierCodec,
-            OvsdbConnectionInstance client, Bridge bridge) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(
+            final InstanceIdentifierCodec instanceIdentifierCodec, final OvsdbConnectionInstance client,
+            final Bridge bridge) {
         InstanceIdentifier<Node> iid;
         if (bridge.getExternalIdsColumn() != null
                 && bridge.getExternalIdsColumn().getData() != null
@@ -123,8 +124,9 @@ public final class SouthboundMapper {
     }
 
     @SuppressWarnings("unchecked")
-    public static InstanceIdentifier<Node> createInstanceIdentifier(InstanceIdentifierCodec instanceIdentifierCodec,
-            OvsdbConnectionInstance client, Controller controller, String bridgeName) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(
+            final InstanceIdentifierCodec instanceIdentifierCodec, final OvsdbConnectionInstance client,
+            final Controller controller, final String bridgeName) {
         InstanceIdentifier<Node> iid;
         if (controller.getExternalIdsColumn() != null
                 && controller.getExternalIdsColumn().getData() != null
@@ -138,7 +140,7 @@ public final class SouthboundMapper {
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(
-            OvsdbConnectionInstance client, String bridgeName) {
+            final OvsdbConnectionInstance client, final String bridgeName) {
         String nodeString = client.getNodeKey().getNodeId().getValue()
                 + "/bridge/" + bridgeName;
         NodeId nodeId = new NodeId(new Uri(nodeString));
@@ -146,12 +148,12 @@ public final class SouthboundMapper {
 
     }
 
-    public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
+    public static NodeId createManagedNodeId(final InstanceIdentifier<Node> iid) {
         NodeKey nodeKey = iid.firstKeyOf(Node.class);
         return nodeKey.getNodeId();
     }
 
-    public static InetAddress createInetAddress(IpAddress ip) throws UnknownHostException {
+    public static InetAddress createInetAddress(final IpAddress ip) throws UnknownHostException {
         if (ip.getIpv4Address() != null) {
             return InetAddresses.forString(ip.getIpv4Address().getValue());
         } else if (ip.getIpv6Address() != null) {
@@ -161,7 +163,7 @@ public final class SouthboundMapper {
         }
     }
 
-    public static DatapathId createDatapathId(Bridge bridge) {
+    public static DatapathId createDatapathId(final Bridge bridge) {
         Preconditions.checkNotNull(bridge);
         if (bridge.getDatapathIdColumn() == null) {
             return null;
@@ -170,7 +172,7 @@ public final class SouthboundMapper {
         }
     }
 
-    public static DatapathId createDatapathId(Set<String> dpids) {
+    public static DatapathId createDatapathId(final Set<String> dpids) {
         Preconditions.checkNotNull(dpids);
         if (dpids.isEmpty()) {
             return null;
@@ -181,7 +183,7 @@ public final class SouthboundMapper {
         }
     }
 
-    public static DatapathId createDatapathId(String dpid) {
+    public static DatapathId createDatapathId(final String dpid) {
         Preconditions.checkNotNull(dpid);
         DatapathId datapath;
         if (dpid.matches("^[0-9a-fA-F]{16}")) {
@@ -194,7 +196,7 @@ public final class SouthboundMapper {
         return datapath;
     }
 
-    public static String createDatapathType(OvsdbBridgeAugmentation mdsalbridge) {
+    public static String createDatapathType(final OvsdbBridgeAugmentation mdsalbridge) {
         String datapathtype = SouthboundConstants.DATAPATH_TYPE_MAP.get(DatapathTypeSystem.class);
 
         if (mdsalbridge.getDatapathType() != null && !mdsalbridge.getDatapathType().equals(DatapathTypeBase.class)) {
@@ -206,7 +208,7 @@ public final class SouthboundMapper {
         return datapathtype;
     }
 
-    public static  Class<? extends DatapathTypeBase> createDatapathType(String type) {
+    public static  Class<? extends DatapathTypeBase> createDatapathType(final String type) {
         Preconditions.checkNotNull(type);
         if (type.isEmpty()) {
             return DatapathTypeSystem.class;
@@ -217,7 +219,7 @@ public final class SouthboundMapper {
         }
     }
 
-    public static Set<String> createOvsdbBridgeProtocols(OvsdbBridgeAugmentation ovsdbBridgeNode) {
+    public static Set<String> createOvsdbBridgeProtocols(final OvsdbBridgeAugmentation ovsdbBridgeNode) {
         Set<String> protocols = new HashSet<>();
         if (ovsdbBridgeNode.getProtocolEntry() != null && ovsdbBridgeNode.getProtocolEntry().size() > 0) {
             for (ProtocolEntry protocol : ovsdbBridgeNode.getProtocolEntry()) {
@@ -231,19 +233,19 @@ public final class SouthboundMapper {
         return protocols;
     }
 
-    public static  Class<? extends InterfaceTypeBase> createInterfaceType(String type) {
+    public static  Class<? extends InterfaceTypeBase> createInterfaceType(final String type) {
         Preconditions.checkNotNull(type);
         return SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get(type);
     }
 
-    public static String createOvsdbInterfaceType(Class<? extends InterfaceTypeBase> mdsaltype) {
+    public static String createOvsdbInterfaceType(final Class<? extends InterfaceTypeBase> mdsaltype) {
         Preconditions.checkNotNull(mdsaltype);
         ImmutableBiMap<Class<? extends InterfaceTypeBase>, String> mapper =
                 SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.inverse();
         return mapper.get(mdsaltype);
     }
 
-    public static List<ProtocolEntry> createMdsalProtocols(Bridge bridge) {
+    public static List<ProtocolEntry> createMdsalProtocols(final Bridge bridge) {
         Set<String> protocols = null;
         try {
             protocols = bridge.getProtocolsColumn().getData();
@@ -271,8 +273,8 @@ public final class SouthboundMapper {
      * @param updatedControllerRows the list of {@link Controller} controllers with updates
      * @return list of {@link ControllerEntry} entries
      */
-    public static List<ControllerEntry> createControllerEntries(Bridge bridge,
-                                                                Map<UUID, Controller> updatedControllerRows) {
+    public static List<ControllerEntry> createControllerEntries(final Bridge bridge,
+                                                                final Map<UUID, Controller> updatedControllerRows) {
 
         LOG.debug("createControllerEntries Bridge: {}\n, updatedControllerRows: {}",
                 bridge, updatedControllerRows);
@@ -294,8 +296,8 @@ public final class SouthboundMapper {
      * @param updatedControllerRows the list of {@link Controller} controllers with updates
      * @return list of {@link ControllerEntry} entries
      */
-    public static List<ControllerEntry> createControllerEntries(Node bridgeNode,
-                                                                Map<UUID, Controller> updatedControllerRows) {
+    public static List<ControllerEntry> createControllerEntries(final Node bridgeNode,
+                                                                final Map<UUID, Controller> updatedControllerRows) {
 
         LOG.debug("createControllerEntries Bridge 2: {}\n, updatedControllerRows: {}",
                 bridgeNode, updatedControllerRows);
@@ -324,7 +326,7 @@ public final class SouthboundMapper {
      * @param controllerEntries the list of {@link ControllerEntry} to update
      * @param controller the updated OVSDB {@link Controller}
      */
-    public static void addControllerEntries(List<ControllerEntry> controllerEntries,
+    public static void addControllerEntries(final List<ControllerEntry> controllerEntries,
                                             final Controller controller) {
 
         if (controller != null && controller.getTargetColumn() != null) {
@@ -350,13 +352,14 @@ public final class SouthboundMapper {
     }
 
     // This is not called from anywhere but test. Do we need this?
-    public static Map<UUID, Controller> createOvsdbController(OvsdbBridgeAugmentation omn,DatabaseSchema dbSchema) {
+    public static Map<UUID, Controller> createOvsdbController(final OvsdbBridgeAugmentation omn,
+            final DatabaseSchema dbSchema) {
         List<ControllerEntry> controllerEntries = omn.getControllerEntry();
         Map<UUID,Controller> controllerMap = new HashMap<>();
         if (controllerEntries != null && !controllerEntries.isEmpty()) {
             for (ControllerEntry controllerEntry : controllerEntries) {
                 String controllerNamedUuid = "Controller_" + getRandomUuid();
-                Controller controller = TyperUtils.getTypedRowWrapper(dbSchema, Controller.class);
+                Controller controller = TypedDatabaseSchema.of(dbSchema).getTypedRowWrapper(Controller.class);
                 controller.setTarget(controllerEntry.getTarget().getValue());
                 controllerMap.put(new UUID(controllerNamedUuid), controller);
             }
@@ -368,7 +371,7 @@ public final class SouthboundMapper {
         return "Random_" + java.util.UUID.randomUUID().toString().replace("-", "");
     }
 
-    public static ConnectionInfo createConnectionInfo(OvsdbClient client) {
+    public static ConnectionInfo createConnectionInfo(final OvsdbClient client) {
         ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
         connectionInfoBuilder.setRemoteIp(createIpAddress(client.getConnectionInfo().getRemoteAddress()));
         connectionInfoBuilder.setRemotePort(new PortNumber(client.getConnectionInfo().getRemotePort()));
@@ -377,7 +380,7 @@ public final class SouthboundMapper {
         return connectionInfoBuilder.build();
     }
 
-    public static ConnectionInfo suppressLocalIpPort(ConnectionInfo connectionInfo) {
+    public static ConnectionInfo suppressLocalIpPort(final ConnectionInfo connectionInfo) {
         ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
         connectionInfoBuilder.setRemoteIp(connectionInfo.getRemoteIp());
         connectionInfoBuilder.setRemotePort(connectionInfo.getRemotePort());
@@ -392,8 +395,8 @@ public final class SouthboundMapper {
      * @param updatedManagerRows the list of {@link Manager} managers with updates
      * @return list of {@link ManagerEntry} entries
      */
-    public static List<ManagerEntry> createManagerEntries(OpenVSwitch ovsdbNode,
-                                                                Map<UUID, Manager> updatedManagerRows) {
+    public static List<ManagerEntry> createManagerEntries(final OpenVSwitch ovsdbNode,
+                                                                final Map<UUID, Manager> updatedManagerRows) {
 
         LOG.debug("createManagerEntries OpenVSwitch: {}\n, updatedManagerRows: {}",
                 ovsdbNode, updatedManagerRows);
@@ -415,8 +418,8 @@ public final class SouthboundMapper {
      * @param updatedManagerRows the list of {@link Manager} managers with updates
      * @return list of {@link ManagerEntry} entries
      */
-    public static List<ManagerEntry> createManagerEntries(Node ovsdbNode,
-                                                                Map<Uri, Manager> updatedManagerRows) {
+    public static List<ManagerEntry> createManagerEntries(final Node ovsdbNode,
+                                                                final Map<Uri, Manager> updatedManagerRows) {
 
         LOG.debug("createManagerEntries based on OVSDB Node: {}\n, updatedManagerRows: {}",
                 ovsdbNode, updatedManagerRows);
@@ -444,7 +447,7 @@ public final class SouthboundMapper {
      * @param managerEntries the list of {@link ManagerEntry} to update
      * @param manager the updated OVSDB {@link Manager}
      */
-    public static void addManagerEntries(List<ManagerEntry> managerEntries,
+    public static void addManagerEntries(final List<ManagerEntry> managerEntries,
                                             final Manager manager) {
 
         if (manager != null && manager.getTargetColumn() != null) {
@@ -475,7 +478,7 @@ public final class SouthboundMapper {
      * @param type the QoS type to match {@link String}
      * @return class matching the input QoS type {@link QosTypeBase}
      */
-    public static  Class<? extends QosTypeBase> createQosType(String type) {
+    public static  Class<? extends QosTypeBase> createQosType(final String type) {
         Preconditions.checkNotNull(type);
         if (type.isEmpty()) {
             LOG.info("QoS type not supplied");
@@ -492,7 +495,7 @@ public final class SouthboundMapper {
         }
     }
 
-    public static String createQosType(Class<? extends QosTypeBase> qosTypeClass) {
+    public static String createQosType(final Class<? extends QosTypeBase> qosTypeClass) {
         String qosType = SouthboundConstants.QOS_TYPE_MAP.get(QosTypeBase.class);
 
         if (qosTypeClass != null && !qosTypeClass.equals(QosTypeBase.class)) {
@@ -505,8 +508,8 @@ public final class SouthboundMapper {
     }
 
 
-    public static InstanceIdentifier<Node> getInstanceIdentifier(InstanceIdentifierCodec instanceIdentifierCodec,
-            OpenVSwitch ovs) {
+    public static InstanceIdentifier<Node> getInstanceIdentifier(final InstanceIdentifierCodec instanceIdentifierCodec,
+            final OpenVSwitch ovs) {
         if (ovs.getExternalIdsColumn() != null
                 && ovs.getExternalIdsColumn().getData() != null
                 && ovs.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {

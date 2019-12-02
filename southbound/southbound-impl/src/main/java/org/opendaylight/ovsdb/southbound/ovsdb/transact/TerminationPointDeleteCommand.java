@@ -18,7 +18,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -38,28 +37,28 @@ public class TerminationPointDeleteCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointDeleteCommand.class);
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractOriginal(events, OvsdbTerminationPointAugmentation.class),
                 TransactUtils.extractOriginal(events, Node.class),
                 TransactUtils.extractRemoved(events, OvsdbTerminationPointAugmentation.class));
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications,
-            InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state,
                 TransactUtils.extractOriginal(modifications, OvsdbTerminationPointAugmentation.class),
                 TransactUtils.extractOriginal(modifications, Node.class),
                 TransactUtils.extractRemoved(modifications, OvsdbTerminationPointAugmentation.class));
     }
 
-    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
-                                 OvsdbTerminationPointAugmentation> originals,
-                         Map<InstanceIdentifier<Node>, Node> originalNodes,
-                         Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> removedTps) {
+    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
+                OvsdbTerminationPointAugmentation> originals,
+            final Map<InstanceIdentifier<Node>, Node> originalNodes,
+            final Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> removedTps) {
         for (InstanceIdentifier<OvsdbTerminationPointAugmentation> removedTpIid: removedTps) {
             LOG.debug("Received request to delete termination point {}", removedTpIid);
             OvsdbTerminationPointAugmentation original = originals.get(removedTpIid);
@@ -78,15 +77,14 @@ public class TerminationPointDeleteCommand implements TransactCommand {
                     LOG.error("Bridge does not exist for termination point {}", removedTpIid);
                 }
             }
-            Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class,null);
+            Port port = transaction.getTypedRowSchema(Port.class);
             Optional<OvsdbTerminationPointAugmentation> tpAugmentation =
                     state.getOvsdbTerminationPointAugmentation(removedTpIid);
             if (tpAugmentation.isPresent()) {
                 OvsdbTerminationPointAugmentation tp = tpAugmentation.get();
                 if (tp.getPortUuid() != null) {
                     UUID portUuid = new UUID(tp.getPortUuid().getValue());
-                    Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                            Bridge.class,null);
+                    Bridge bridge = transaction.getTypedRowSchema(Bridge.class);
 
                     transaction.add(op.delete(port.getSchema())
                             .where(port.getUuidColumn().getSchema().opEqual(portUuid)).build());

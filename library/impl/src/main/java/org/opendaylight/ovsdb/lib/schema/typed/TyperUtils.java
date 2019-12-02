@@ -72,6 +72,7 @@ public final class TyperUtils {
      * @param dbSchema DatabaseSchema as learnt from a OVSDB connection
      * @param klazz Typed Class that represents a Table
      */
+    @Deprecated
     public static <T> T getTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz) {
         return getTypedRowWrapper(dbSchema, klazz, new Row<>());
     }
@@ -95,6 +96,7 @@ public final class TyperUtils {
      * @param row The actual Row that the wrapper is operating on. It can be null if the caller
      *            is just interested in getting ColumnSchema.
      */
+    @Deprecated
     public static <T> T getTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz,
                                            final Row<GenericTableSchema> row) {
         return dbSchema == null ? null : getTyped(dbSchema).getTypedRowWrapper(klazz, row);

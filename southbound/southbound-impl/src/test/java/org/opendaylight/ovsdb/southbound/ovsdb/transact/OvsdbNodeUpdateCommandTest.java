@@ -33,9 +33,7 @@ import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
@@ -51,8 +49,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({TransactUtils.class, TyperUtils.class, OvsdbNodeUpdateCommand.class, InstanceIdentifier.class,
-    Operations.class})
+@PrepareForTest({TransactUtils.class, OvsdbNodeUpdateCommand.class, InstanceIdentifier.class, Operations.class})
 public class OvsdbNodeUpdateCommandTest {
 
     private static final String EXTERNAL_ID_KEY = "external id key";
@@ -87,10 +84,7 @@ public class OvsdbNodeUpdateCommandTest {
 
         OpenVSwitch ovs = mock(OpenVSwitch.class);
         TransactionBuilder transaction = mock(TransactionBuilder.class);
-        when(transaction.getDatabaseSchema()).thenReturn(mock(DatabaseSchema.class));
-        PowerMockito.mockStatic(TyperUtils.class);
-        PowerMockito.when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(OpenVSwitch.class)))
-                .thenReturn(ovs);
+        when(transaction.getTypedRowWrapper(eq(OpenVSwitch.class))).thenReturn(ovs);
 
         List<OpenvswitchExternalIds> externalIds = new ArrayList<>();
         OpenvswitchExternalIds externalId = mock(OpenvswitchExternalIds.class);

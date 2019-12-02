@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
@@ -22,7 +21,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalRouter;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -35,13 +33,13 @@ import org.slf4j.LoggerFactory;
 public class LogicalRouterRemoveCommand extends AbstractTransactCommand<LogicalRouters, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(LogicalRouterRemoveCommand.class);
 
-    public LogicalRouterRemoveCommand(HwvtepOperationalState state,
-            Collection<DataTreeModification<Node>> changes) {
+    public LogicalRouterRemoveCommand(final HwvtepOperationalState state,
+            final Collection<DataTreeModification<Node>> changes) {
         super(state, changes);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction) {
+    public void execute(final TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, List<LogicalRouters>> removed =
               extractRemoved(getChanges(),LogicalRouters.class);
 
@@ -49,7 +47,7 @@ public class LogicalRouterRemoveCommand extends AbstractTransactCommand<LogicalR
             if (!HwvtepSouthboundUtil.isEmpty(created.getValue())) {
                 getOperationalState().getDeviceInfo().scheduleTransaction(new TransactCommand() {
                     @Override
-                    public void execute(TransactionBuilder transactionBuilder) {
+                    public void execute(final TransactionBuilder transactionBuilder) {
                         HwvtepConnectionInstance connectionInstance = getDeviceInfo().getConnectionInstance();
                         HwvtepOperationalState operState = new HwvtepOperationalState(
                                 connectionInstance.getDataBroker(), connectionInstance, Collections.EMPTY_LIST);
@@ -61,12 +59,12 @@ public class LogicalRouterRemoveCommand extends AbstractTransactCommand<LogicalR
 
 
                     @Override
-                    public void onSuccess(TransactionBuilder deviceTransaction) {
+                    public void onSuccess(final TransactionBuilder deviceTransaction) {
                         LogicalRouterRemoveCommand.this.onSuccess(deviceTransaction);
                     }
 
                     @Override
-                    public void onFailure(TransactionBuilder deviceTransaction) {
+                    public void onFailure(final TransactionBuilder deviceTransaction) {
                         LogicalRouterRemoveCommand.this.onFailure(deviceTransaction);
                     }
                 });
@@ -76,7 +74,7 @@ public class LogicalRouterRemoveCommand extends AbstractTransactCommand<LogicalR
 
     @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
             justification = "https://github.com/spotbugs/spotbugs/issues/811")
-    private void removeLogicalRouter(TransactionBuilder transaction,
+    private void removeLogicalRouter(final TransactionBuilder transaction,
             final InstanceIdentifier<Node> instanceIdentifier, final List<LogicalRouters> routerList) {
         for (LogicalRouters lrouter: routerList) {
             LOG.debug("Removing logical router named: {}", lrouter.getHwvtepNodeName().getValue());
@@ -85,8 +83,7 @@ public class LogicalRouterRemoveCommand extends AbstractTransactCommand<LogicalR
 
             if (operationalRouterOptional.isPresent()
                     && operationalRouterOptional.get().getLogicalRouterUuid() != null) {
-                LogicalRouter logicalRouter = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                        LogicalRouter.class, null);
+                LogicalRouter logicalRouter = transaction.getTypedRowSchema(LogicalRouter.class);
                 UUID logicalRouterUuid = new UUID(operationalRouterOptional.get().getLogicalRouterUuid().getValue());
                 transaction.add(op.delete(logicalRouter.getSchema())
                         .where(logicalRouter.getUuidColumn().getSchema().opEqual(logicalRouterUuid)).build());

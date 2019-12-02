@@ -17,7 +17,6 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.notation.Version;
-import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 
@@ -45,13 +44,9 @@ public final class TyperUtils {
      *     using their {@link TypedTable} annotation, if they have one, or by name.
      * @return the table schema.
      */
+    @Deprecated
     public static GenericTableSchema getTableSchema(final DatabaseSchema dbSchema, final Class<?> klazz) {
-        return dbSchema.table(TypedReflections.getTableName(klazz), GenericTableSchema.class);
-    }
-
-    static <T> ColumnSchema<GenericTableSchema, T> getColumnSchema(final GenericTableSchema tableSchema,
-            final String columnName, final Class<T> metaClass) {
-        return tableSchema.column(columnName, metaClass);
+        return getTyped(dbSchema).getTableSchema(klazz);
     }
 
     static void checkVersion(final Version schemaVersion, final Range<Version> range) {

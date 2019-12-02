@@ -29,7 +29,6 @@ import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Tunnel;
@@ -51,13 +50,13 @@ import org.slf4j.LoggerFactory;
 public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalSwitchUpdateCommand.class);
 
-    public PhysicalSwitchUpdateCommand(HwvtepOperationalState state,
-            Collection<DataTreeModification<Node>> changes) {
+    public PhysicalSwitchUpdateCommand(final HwvtepOperationalState state,
+            final Collection<DataTreeModification<Node>> changes) {
         super(state, changes);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction) {
+    public void execute(final TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> created =
                 extractCreated(getChanges(),PhysicalSwitchAugmentation.class);
         if (!created.isEmpty()) {
@@ -77,13 +76,12 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
     }
 
 
-    private void updatePhysicalSwitch(TransactionBuilder transaction,
-            InstanceIdentifier<Node> iid, PhysicalSwitchAugmentation physicalSwitchAugmentation) {
+    private void updatePhysicalSwitch(final TransactionBuilder transaction,
+            final InstanceIdentifier<Node> iid, final PhysicalSwitchAugmentation physicalSwitchAugmentation) {
         LOG.debug("Creating a physical switch named: {}", physicalSwitchAugmentation.getHwvtepNodeName());
         Optional<PhysicalSwitchAugmentation> operationalPhysicalSwitchOptional =
                 getOperationalState().getPhysicalSwitchAugmentation(iid);
-        PhysicalSwitch physicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                PhysicalSwitch.class);
+        PhysicalSwitch physicalSwitch = transaction.getTypedRowWrapper(PhysicalSwitch.class);
         setDescription(physicalSwitch, physicalSwitchAugmentation);
         setManagementIps(physicalSwitch, physicalSwitchAugmentation);
         setTunnuleIps(physicalSwitch, operationalPhysicalSwitchOptional.get());
@@ -101,7 +99,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
             transaction.add(op.comment("Physical Switch: Creating "
                     + physicalSwitchAugmentation.getHwvtepNodeName().getValue()));
             //update global table
-            Global global = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Global.class);
+            Global global = transaction.getTypedRowWrapper(Global.class);
             global.setSwitches(Collections.singleton(new UUID(pswitchUuid)));
 
             LOG.trace("execute: create physical switch: {}", physicalSwitch);
@@ -122,8 +120,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
                 existingPhysicalSwitchName = operationalPhysicalSwitchOptional.get().getHwvtepNodeName().getValue();
             }
             // Name is immutable, and so we *can't* update it.  So we use extraPhysicalSwitch for the schema stuff
-            PhysicalSwitch extraPhysicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                    PhysicalSwitch.class);
+            PhysicalSwitch extraPhysicalSwitch = transaction.getTypedRowWrapper(PhysicalSwitch.class);
             extraPhysicalSwitch.setName("");
             LOG.trace("execute: updating physical switch: {}", physicalSwitch);
             transaction.add(op.update(physicalSwitch)
@@ -133,8 +130,9 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void setName(PhysicalSwitch physicalSwitch, PhysicalSwitchAugmentation physicalSwitchAugmentation,
-            Optional<PhysicalSwitchAugmentation> operationalPhysicalSwitchOptional) {
+    private static void setName(final PhysicalSwitch physicalSwitch,
+            final PhysicalSwitchAugmentation physicalSwitchAugmentation,
+            final Optional<PhysicalSwitchAugmentation> operationalPhysicalSwitchOptional) {
         if (physicalSwitchAugmentation.getHwvtepNodeName() != null) {
             physicalSwitch.setName(physicalSwitchAugmentation.getHwvtepNodeName().getValue());
         } else if (operationalPhysicalSwitchOptional.isPresent()
@@ -143,14 +141,15 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void setDescription(PhysicalSwitch physicalSwitch, PhysicalSwitchAugmentation physicalSwitchAugmentation) {
+    private static void setDescription(final PhysicalSwitch physicalSwitch,
+            final PhysicalSwitchAugmentation physicalSwitchAugmentation) {
         if (physicalSwitchAugmentation.getHwvtepNodeDescription() != null) {
             physicalSwitch.setDescription(physicalSwitchAugmentation.getHwvtepNodeDescription());
         }
     }
 
-    private void setManagementIps(PhysicalSwitch physicalSwitch,
-            PhysicalSwitchAugmentation physicalSwitchAugmentation) {
+    private static void setManagementIps(final PhysicalSwitch physicalSwitch,
+            final PhysicalSwitchAugmentation physicalSwitchAugmentation) {
         Set<String> ipSet = new HashSet<>();
         if (physicalSwitchAugmentation.getManagementIps() != null) {
             for (ManagementIps ip: physicalSwitchAugmentation.getManagementIps()) {
@@ -160,7 +159,8 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void setTunnuleIps(PhysicalSwitch physicalSwitch, PhysicalSwitchAugmentation physicalSwitchAugmentation) {
+    private static void setTunnuleIps(final PhysicalSwitch physicalSwitch,
+            final PhysicalSwitchAugmentation physicalSwitchAugmentation) {
         Set<String> ipSet = new HashSet<>();
         if (physicalSwitchAugmentation.getTunnelIps() != null) {
             for (TunnelIps ip: physicalSwitchAugmentation.getTunnelIps()) {
@@ -171,15 +171,15 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
     }
 
     @SuppressWarnings("unchecked")
-    private void setTunnels(TransactionBuilder transaction, InstanceIdentifier<Node> iid,
-                    PhysicalSwitch physicalSwitch, PhysicalSwitchAugmentation physicalSwitchAugmentation,
-                    boolean switchExists) {
+    private void setTunnels(final TransactionBuilder transaction, final InstanceIdentifier<Node> iid,
+            final PhysicalSwitch physicalSwitch, final PhysicalSwitchAugmentation physicalSwitchAugmentation,
+            final boolean switchExists) {
         //TODO: revisit this code for optimizations
         //TODO: needs more testing
         if (physicalSwitchAugmentation.getTunnels() != null) {
             for (Tunnels tunnel : physicalSwitchAugmentation.getTunnels()) {
                 Optional<Tunnels> opTunnelOpt = getOperationalState().getTunnels(iid, tunnel.key());
-                Tunnel newTunnel = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Tunnel.class);
+                Tunnel newTunnel = transaction.getTypedRowWrapper(Tunnel.class);
 
                 UUID localUUID = getLocatorUUID(transaction,
                                 (InstanceIdentifier<TerminationPoint>) tunnel.getLocalLocatorRef().getValue());
@@ -201,9 +201,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
                             LOG.warn("Tunnel configuration requires pre-existing physicalSwitch");
                         } else {
                             // TODO: Can we reuse physicalSwitch instead?
-                            PhysicalSwitch phySwitch =
-                                            TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                                                            PhysicalSwitch.class);
+                            PhysicalSwitch phySwitch = transaction.getTypedRowWrapper(PhysicalSwitch.class);
                             phySwitch.setTunnels(Collections.singleton(new UUID(tunnelUuid)));
                             phySwitch.setName(physicalSwitchAugmentation.getHwvtepNodeName().getValue());
                             transaction.add(op.mutate(phySwitch)
@@ -216,8 +214,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
                         }
                     } else {
                         UUID uuid = new UUID(opTunnelOpt.get().getTunnelUuid().getValue());
-                        Tunnel extraTunnel =
-                                TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Tunnel.class, null);
+                        Tunnel extraTunnel = transaction.getTypedRowSchema(Tunnel.class);
                         extraTunnel.getUuidColumn().setData(uuid);
                         transaction.add(op.update(newTunnel)
                                         .where(extraTunnel.getUuidColumn().getSchema().opEqual(uuid))
@@ -229,7 +226,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void setBfdParams(Tunnel tunnel, Tunnels psAugTunnel) {
+    private static void setBfdParams(final Tunnel tunnel, final Tunnels psAugTunnel) {
         List<BfdParams> bfdParams = psAugTunnel.getBfdParams();
         if (bfdParams != null) {
             Map<String, String> bfdParamMap = new HashMap<>();
@@ -244,7 +241,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void setBfdLocalConfigs(Tunnel tunnel, Tunnels psAugTunnel) {
+    private static void setBfdLocalConfigs(final Tunnel tunnel, final Tunnels psAugTunnel) {
         List<BfdLocalConfigs> bfdLocalConfigs = psAugTunnel.getBfdLocalConfigs();
         if (bfdLocalConfigs != null) {
             Map<String, String> configLocalMap = new HashMap<>();
@@ -259,7 +256,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void setBfdRemoteConfigs(Tunnel tunnel, Tunnels psAugTunnel) {
+    private static void setBfdRemoteConfigs(final Tunnel tunnel, final Tunnels psAugTunnel) {
         List<BfdRemoteConfigs> bfdRemoteConfigs = psAugTunnel.getBfdRemoteConfigs();
         if (bfdRemoteConfigs != null) {
             Map<String, String> configRemoteMap = new HashMap<>();
@@ -274,7 +271,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private UUID getLocatorUUID(TransactionBuilder transaction, InstanceIdentifier<TerminationPoint> iid) {
+    private UUID getLocatorUUID(final TransactionBuilder transaction, final InstanceIdentifier<TerminationPoint> iid) {
         UUID locatorUUID = null;
         Optional<HwvtepPhysicalLocatorAugmentation> opLocOptional =
                         getOperationalState().getPhysicalLocatorAugmentation(iid);
@@ -296,8 +293,8 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         return locatorUUID;
     }
 
-    private Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractCreated(
-            Collection<DataTreeModification<Node>> changes, Class<PhysicalSwitchAugmentation> class1) {
+    private static Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractCreated(
+            final Collection<DataTreeModification<Node>> changes, final Class<PhysicalSwitchAugmentation> class1) {
         Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
@@ -316,8 +313,8 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         return result;
     }
 
-    private Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractUpdatedSwitches(
-            Collection<DataTreeModification<Node>> changes, Class<PhysicalSwitchAugmentation> class1) {
+    private static Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractUpdatedSwitches(
+            final Collection<DataTreeModification<Node>> changes, final Class<PhysicalSwitchAugmentation> class1) {
         Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {

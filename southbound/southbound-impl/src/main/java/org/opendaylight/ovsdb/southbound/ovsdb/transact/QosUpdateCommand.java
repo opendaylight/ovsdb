@@ -18,7 +18,6 @@ import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
@@ -44,22 +43,23 @@ public class QosUpdateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(QosUpdateCommand.class);
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, QosEntries.class),
                 instanceIdentifierCodec);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, QosEntries.class),
                 instanceIdentifierCodec);
     }
 
-    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Map<InstanceIdentifier<QosEntries>, QosEntries> createdOrUpdated,
-            InstanceIdentifierCodec instanceIdentifierCodec) {
+    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Map<InstanceIdentifier<QosEntries>, QosEntries> createdOrUpdated,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         for (Entry<InstanceIdentifier<QosEntries>, QosEntries> qosMapEntry: createdOrUpdated.entrySet()) {
             InstanceIdentifier<OvsdbNodeAugmentation> iid =
                     qosMapEntry.getKey().firstIdentifierOf(OvsdbNodeAugmentation.class);
@@ -70,7 +70,7 @@ public class QosUpdateCommand implements TransactCommand {
                 state.getBridgeNode(iid).get().augmentation(OvsdbNodeAugmentation.class);
 
             QosEntries qosEntry = qosMapEntry.getValue();
-            Qos qos = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Qos.class);
+            Qos qos = transaction.getTypedRowWrapper(Qos.class);
 
             if (qosEntry.getQosType() != null) {
                 qos.setType(SouthboundMapper.createQosType(qosEntry.getQosType()));
@@ -118,8 +118,7 @@ public class QosUpdateCommand implements TransactCommand {
                 LOG.info("Added QoS Uuid: {} for node : {} ", namedUuid, operNode.getConnectionInfo());
             } else {
                 UUID uuid = new UUID(operQosUuid.getValue());
-                Qos extraQos = TyperUtils.getTypedRowWrapper(
-                        transaction.getDatabaseSchema(), Qos.class, null);
+                Qos extraQos = transaction.getTypedRowSchema(Qos.class);
                 extraQos.getUuidColumn().setData(uuid);
                 transaction.add(op.update(qos)
                         .where(extraQos.getUuidColumn().getSchema().opEqual(uuid)).build());
@@ -128,7 +127,7 @@ public class QosUpdateCommand implements TransactCommand {
         }
     }
 
-    private String getQueueUuid(OvsdbQueueRef queueRef, OvsdbNodeAugmentation operNode) {
+    private String getQueueUuid(final OvsdbQueueRef queueRef, final OvsdbNodeAugmentation operNode) {
         QueuesKey queueKey = queueRef.getValue().firstKeyOf(Queues.class);
         if (operNode.getQueues() != null && !operNode.getQueues().isEmpty()) {
             for (Queues queue : operNode.getQueues()) {
@@ -141,7 +140,7 @@ public class QosUpdateCommand implements TransactCommand {
                 + TransactUtils.bytesToHexString(queueKey.getQueueId().getValue().getBytes(UTF_8));
     }
 
-    private Uuid getQosEntryUuid(List<QosEntries> operQosEntries, Uri qosId) {
+    private Uuid getQosEntryUuid(final List<QosEntries> operQosEntries, final Uri qosId) {
         if (operQosEntries != null && !operQosEntries.isEmpty()) {
             for (QosEntries qosEntry : operQosEntries) {
                 if (qosEntry.getQosId().equals(qosId)) {

@@ -8,9 +8,9 @@
 
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -35,7 +35,6 @@ import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.operations.Where;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
@@ -51,7 +50,7 @@ import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-@PrepareForTest({TyperUtils.class, TransactUtils.class, TerminationPointCreateCommand.class})
+@PrepareForTest({TransactUtils.class, TerminationPointCreateCommand.class})
 @RunWith(PowerMockRunner.class)
 public class TerminationPointCreateCommandTest {
 
@@ -80,8 +79,7 @@ public class TerminationPointCreateCommandTest {
         Interface ovsInterface = mock(Interface.class);
         PowerMockito.mockStatic(TyperUtils.class);
         TransactionBuilder transaction = mock(TransactionBuilder.class);
-        when(transaction.getDatabaseSchema()).thenReturn(mock(DatabaseSchema.class));
-        when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Interface.class))).thenReturn(ovsInterface);
+        when(transaction.getTypedRowWrapper(eq(Interface.class))).thenReturn(ovsInterface);
         //createInterface()
         Operations op = (Operations) setField("op");
         Insert<GenericTableSchema> insert = mock(Insert.class);
@@ -92,11 +90,11 @@ public class TerminationPointCreateCommandTest {
         when(ovsInterface.getName()).thenReturn(INTERFACE_NAME);
 
         Port port = mock(Port.class);
-        when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Port.class))).thenReturn(port);
+        when(transaction.getTypedRowWrapper(eq(Port.class))).thenReturn(port);
         when(op.insert(any(Port.class))).thenReturn(insert);
 
         Bridge bridge = mock(Bridge.class);
-        when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Bridge.class))).thenReturn(bridge);
+        when(transaction.getTypedRowWrapper(eq(Bridge.class))).thenReturn(bridge);
         doNothing().when(bridge).setName(anyString());
         PowerMockito.whenNew(UUID.class).withAnyArguments().thenReturn(mock(UUID.class));
         doNothing().when(bridge).setPorts(any(HashSet.class));
@@ -114,10 +112,8 @@ public class TerminationPointCreateCommandTest {
     public void testStampInstanceIdentifier() {
         TransactionBuilder transaction = mock(TransactionBuilder.class);
 
-        when(transaction.getDatabaseSchema()).thenReturn(mock(DatabaseSchema.class));
-        PowerMockito.mockStatic(TyperUtils.class);
         Port port = mock(Port.class);
-        PowerMockito.when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Port.class))).thenReturn(port);
+        when(transaction.getTypedRowWrapper(eq(Port.class))).thenReturn(port);
         doNothing().when(port).setName(anyString());
         doNothing().when(port).setExternalIds(any(HashMap.class));
         when(port.getSchema()).thenReturn(mock(GenericTableSchema.class));
@@ -150,7 +146,7 @@ public class TerminationPointCreateCommandTest {
         verify(transaction).add(any(Operation.class));
     }
 
-    private Object setField(String fieldName) throws Exception {
+    private Object setField(final String fieldName) throws Exception {
         Field field = Operations.class.getDeclaredField(fieldName);
         field.setAccessible(true);
         field.set(field.get(Operations.class), mock(Operations.class));

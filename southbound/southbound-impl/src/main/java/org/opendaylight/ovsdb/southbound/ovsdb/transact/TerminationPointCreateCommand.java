@@ -32,7 +32,6 @@ import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
@@ -67,24 +66,25 @@ public class TerminationPointCreateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointCreateCommand.class);
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractCreated(events, OvsdbTerminationPointAugmentation.class),
                 TransactUtils.extractCreatedOrUpdated(events, Node.class), instanceIdentifierCodec);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state,
                 TransactUtils.extractCreated(modifications, OvsdbTerminationPointAugmentation.class),
                 TransactUtils.extractCreatedOrUpdated(modifications, Node.class), instanceIdentifierCodec);
     }
 
-    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
                     createdTerminationPoints,
-            Map<InstanceIdentifier<Node>, Node> nodes, InstanceIdentifierCodec instanceIdentifierCodec) {
+            final Map<InstanceIdentifier<Node>, Node> nodes, final InstanceIdentifierCodec instanceIdentifierCodec) {
         for (Entry<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> entry :
                 createdTerminationPoints.entrySet()) {
             OvsdbTerminationPointAugmentation terminationPoint = entry.getValue();
@@ -96,8 +96,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
             if (!terminationPointOptional.isPresent()) {
                 // Configure interface
                 String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUuid();
-                Interface ovsInterface =
-                        TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
+                Interface ovsInterface = transaction.getTypedRowWrapper(Interface.class);
                 createInterface(terminationPoint, ovsInterface);
                 transaction.add(op.insert(ovsInterface).withId(interfaceUuid));
 
@@ -105,14 +104,14 @@ public class TerminationPointCreateCommand implements TransactCommand {
 
                 // Configure port with the above interface details
                 String portUuid = "Port_" + SouthboundMapper.getRandomUuid();
-                Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
+                Port port = transaction.getTypedRowWrapper(Port.class);
                 final String opendaylightIid = instanceIdentifierCodec.serialize(terminationPointIid);
                 createPort(terminationPoint, port, interfaceUuid, opendaylightIid);
                 transaction.add(op.insert(port).withId(portUuid));
                 LOG.info("Created Termination Point : {} with Uuid : {}",
                         terminationPoint.getName(),portUuid);
                 //Configure bridge with the above port details
-                Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
+                Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
                 if (getBridge(entry.getKey(), nodes) != null) {
                     bridge.setName(getBridge(entry.getKey(), nodes).getBridgeName().getValue());
                     bridge.setPorts(Collections.singleton(new UUID(portUuid)));
@@ -143,9 +142,8 @@ public class TerminationPointCreateCommand implements TransactCommand {
         createInterfaceBfd(terminationPoint, ovsInterface);
     }
 
-    private void createInterfaceType(final OvsdbTerminationPointAugmentation terminationPoint,
-                                     final Interface ovsInterface) {
-
+    private static void createInterfaceType(final OvsdbTerminationPointAugmentation terminationPoint,
+            final Interface ovsInterface) {
         Class<? extends InterfaceTypeBase> mdsaltype = terminationPoint.getInterfaceType();
         if (mdsaltype != null) {
             ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(mdsaltype));
@@ -291,7 +289,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
             portExternalIds.add(SouthboundUtil.createExternalIdsForPort(
                 SouthboundConstants.IID_EXTERNAL_ID_KEY, opendaylightIid));
         } else {
-            portExternalIds = new ArrayList<PortExternalIds>();
+            portExternalIds = new ArrayList<>();
             portExternalIds.add(SouthboundUtil.createExternalIdsForPort(
                 SouthboundConstants.CREATED_BY, SouthboundConstants.ODL));
             portExternalIds.add(SouthboundUtil.createExternalIdsForPort(
@@ -360,7 +358,8 @@ public class TerminationPointCreateCommand implements TransactCommand {
         }
     }
 
-    private OvsdbBridgeAugmentation getBridge(InstanceIdentifier<?> key, Map<InstanceIdentifier<Node>, Node> nodes) {
+    private OvsdbBridgeAugmentation getBridge(final InstanceIdentifier<?> key,
+            final Map<InstanceIdentifier<Node>, Node> nodes) {
         OvsdbBridgeAugmentation bridge = null;
         InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
         if (nodes != null && nodes.get(nodeIid) != null) {
@@ -384,10 +383,10 @@ public class TerminationPointCreateCommand implements TransactCommand {
         return bridge;
     }
 
-    public static void stampInstanceIdentifier(TransactionBuilder transaction,
-            InstanceIdentifier<OvsdbTerminationPointAugmentation> iid, String interfaceName,
-            InstanceIdentifierCodec instanceIdentifierCodec) {
-        Port port = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
+    public static void stampInstanceIdentifier(final TransactionBuilder transaction,
+            final InstanceIdentifier<OvsdbTerminationPointAugmentation> iid, final String interfaceName,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
+        Port port = transaction.getTypedRowWrapper(Port.class);
         port.setName(interfaceName);
         port.setExternalIds(Collections.emptyMap());
         Mutate mutate = TransactUtils.stampInstanceIdentifierMutation(transaction, iid, port.getSchema(),

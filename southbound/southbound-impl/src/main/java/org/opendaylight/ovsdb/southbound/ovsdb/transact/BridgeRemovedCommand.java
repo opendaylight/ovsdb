@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
@@ -19,7 +18,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -33,33 +31,33 @@ public class BridgeRemovedCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(BridgeRemovedCommand.class);
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractRemoved(events, OvsdbBridgeAugmentation.class),
                 TransactUtils.extractOriginal(events, OvsdbBridgeAugmentation.class));
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractRemoved(modifications, OvsdbBridgeAugmentation.class),
                 TransactUtils.extractOriginal(modifications, OvsdbBridgeAugmentation.class));
     }
 
-    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Set<InstanceIdentifier<OvsdbBridgeAugmentation>> removed,
-                         Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> originals) {
+    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Set<InstanceIdentifier<OvsdbBridgeAugmentation>> removed,
+            final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> originals) {
         for (InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbManagedNodeIid: removed) {
             LOG.debug("Received request to delete ovsdb node : {}",
                     ovsdbManagedNodeIid);
             OvsdbBridgeAugmentation original = originals.get(ovsdbManagedNodeIid);
-            Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class,null);
+            Bridge bridge = transaction.getTypedRowSchema(Bridge.class);
             Optional<OvsdbBridgeAugmentation> ovsdbAugmentationOptional = state
                     .getOvsdbBridgeAugmentation(ovsdbManagedNodeIid);
             if (ovsdbAugmentationOptional.isPresent() && ovsdbAugmentationOptional.get().getBridgeUuid() != null) {
                 UUID bridgeUuid = new UUID(ovsdbAugmentationOptional.get().getBridgeUuid().getValue());
-                OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                        OpenVSwitch.class,null);
+                OpenVSwitch ovs = transaction.getTypedRowSchema(OpenVSwitch.class);
                 transaction.add(op.delete(bridge.getSchema())
                         .where(bridge.getUuidColumn().getSchema().opEqual(bridgeUuid)).build());
                 transaction.add(op.comment("Bridge: Deleting " + original.getBridgeName()));

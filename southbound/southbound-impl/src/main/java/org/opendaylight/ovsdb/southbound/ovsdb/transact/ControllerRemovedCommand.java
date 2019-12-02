@@ -18,7 +18,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -32,22 +31,23 @@ public class ControllerRemovedCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(ControllerRemovedCommand.class);
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractRemoved(events, ControllerEntry.class),
                 TransactUtils.extractCreatedOrUpdatedOrRemoved(events, OvsdbBridgeAugmentation.class));
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractRemoved(modifications, ControllerEntry.class),
                 TransactUtils.extractCreatedOrUpdatedOrRemoved(modifications, OvsdbBridgeAugmentation.class));
     }
 
-    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Set<InstanceIdentifier<ControllerEntry>> removedControllers,
-                         Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation>
+    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+                         final Set<InstanceIdentifier<ControllerEntry>> removedControllers,
+                         final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation>
                                  modifiedBridges) {
         for (InstanceIdentifier<ControllerEntry> controllerIid : removedControllers) {
             LOG.debug("Removing Registered...ODL controller : {} ", controllerIid);
@@ -57,14 +57,11 @@ public class ControllerRemovedCommand implements TransactCommand {
             Optional<ControllerEntry> controllerEntryOptional = state.getControllerEntry(controllerIid);
             if (ovsdbBridge != null && controllerEntryOptional.isPresent()) {
                 ControllerEntry controllerEntry = controllerEntryOptional.get();
-                Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
+                Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
                 bridge.setController(Collections.singleton(new UUID(controllerEntry.getControllerUuid().getValue())));
                 transaction.add(op.mutate(bridge).addMutation(bridge.getControllerColumn().getSchema(),
                         Mutator.DELETE, bridge.getControllerColumn().getData()));
             }
         }
-
-
     }
-
 }

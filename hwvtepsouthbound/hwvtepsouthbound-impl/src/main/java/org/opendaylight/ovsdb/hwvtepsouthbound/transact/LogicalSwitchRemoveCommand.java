@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
@@ -22,7 +21,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsLocal;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
@@ -39,13 +37,13 @@ import org.slf4j.LoggerFactory;
 public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalSwitches, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(LogicalSwitchRemoveCommand.class);
 
-    public LogicalSwitchRemoveCommand(HwvtepOperationalState state,
-            Collection<DataTreeModification<Node>> changes) {
+    public LogicalSwitchRemoveCommand(final HwvtepOperationalState state,
+            final Collection<DataTreeModification<Node>> changes) {
         super(state, changes);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction) {
+    public void execute(final TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, List<LogicalSwitches>> removeds =
                 extractRemoved(getChanges(),LogicalSwitches.class);
 
@@ -54,7 +52,7 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
                 HwvtepConnectionInstance connectionInstance = getDeviceInfo().getConnectionInstance();
                 getDeviceInfo().scheduleTransaction(new TransactCommand() {
                     @Override
-                    public void execute(TransactionBuilder transactionBuilder) {
+                    public void execute(final TransactionBuilder transactionBuilder) {
                         HwvtepOperationalState operState = new HwvtepOperationalState(
                                 connectionInstance.getDataBroker(), connectionInstance, Collections.EMPTY_LIST);
                         hwvtepOperationalState = operState;
@@ -64,12 +62,12 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
                     }
 
                     @Override
-                    public void onSuccess(TransactionBuilder deviceTransaction) {
+                    public void onSuccess(final TransactionBuilder deviceTransaction) {
                         LogicalSwitchRemoveCommand.this.onSuccess(deviceTransaction);
                     }
 
                     @Override
-                    public void onFailure(TransactionBuilder deviceTransaction) {
+                    public void onFailure(final TransactionBuilder deviceTransaction) {
                         LogicalSwitchRemoveCommand.this.onFailure(deviceTransaction);
                     }
                 });
@@ -104,31 +102,26 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
         LOG.debug("Removing logical switch named: {}", lswitch.getHwvtepNodeName().getValue());
         HwvtepDeviceInfo.DeviceData deviceData  = getOperationalState().getDeviceInfo().getDeviceOperData(
                 LogicalSwitches.class, lsKey);
-        LogicalSwitch logicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                LogicalSwitch.class, null);
+        LogicalSwitch logicalSwitch = transaction.getTypedRowSchema(LogicalSwitch.class);
 
         if (deviceData != null && deviceData.getUuid() != null) {
             UUID logicalSwitchUuid = deviceData.getUuid();
             transaction.add(op.delete(logicalSwitch.getSchema())
                     .where(logicalSwitch.getUuidColumn().getSchema().opEqual(logicalSwitchUuid)).build());
 
-            UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                    UcastMacsRemote.class, null);
+            UcastMacsRemote ucastMacsRemote = transaction.getTypedRowSchema(UcastMacsRemote.class);
             transaction.add(op.delete(ucastMacsRemote.getSchema())
                     .where(ucastMacsRemote.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
 
-            UcastMacsLocal ucastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                    UcastMacsLocal.class, null);
+            UcastMacsLocal ucastMacsLocal = transaction.getTypedRowSchema(UcastMacsLocal.class);
             transaction.add(op.delete(ucastMacsLocal.getSchema())
                     .where(ucastMacsLocal.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
 
-            McastMacsRemote mcastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                    McastMacsRemote.class, null);
+            McastMacsRemote mcastMacsRemote = transaction.getTypedRowSchema(McastMacsRemote.class);
             transaction.add(op.delete(mcastMacsRemote.getSchema())
                     .where(mcastMacsRemote.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
 
-            McastMacsLocal mcastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                    McastMacsLocal.class, null);
+            McastMacsLocal mcastMacsLocal = transaction.getTypedRowSchema(McastMacsLocal.class);
             transaction.add(op.delete(mcastMacsLocal.getSchema())
                     .where(mcastMacsLocal.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUuid)).build());
             updateCurrentTxDeleteData(LogicalSwitches.class, lsKey, lswitch);
@@ -140,12 +133,12 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
     }
 
     @Override
-    protected List<LogicalSwitches> getData(HwvtepGlobalAugmentation augmentation) {
+    protected List<LogicalSwitches> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getLogicalSwitches();
     }
 
     @Override
-    protected boolean areEqual(LogicalSwitches sw1, LogicalSwitches sw2) {
+    protected boolean areEqual(final LogicalSwitches sw1, final LogicalSwitches sw2) {
         return sw1.key().equals(sw2.key()) && Objects.equals(sw1.getTunnelKey(), sw2.getTunnelKey());
     }
 

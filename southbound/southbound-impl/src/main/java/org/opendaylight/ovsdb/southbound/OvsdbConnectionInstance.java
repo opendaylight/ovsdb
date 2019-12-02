@@ -45,7 +45,6 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangeEvent;
@@ -196,7 +195,7 @@ public class OvsdbConnectionInstance {
             TransactionBuilder transaction = new TransactionBuilder(this.client, entry.getKey());
 
             // OpenVSwitchPart
-            OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
+            OpenVSwitch ovs = transaction.getTypedRowWrapper(OpenVSwitch.class);
 
             List<OpenvswitchExternalIds> externalIds = this.initialCreateData.getOpenvswitchExternalIds();
 
@@ -238,7 +237,7 @@ public class OvsdbConnectionInstance {
 
     private static void stampInstanceIdentifier(final TransactionBuilder transaction,final InstanceIdentifier<Node> iid,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
-        OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
+        OpenVSwitch ovs = transaction.getTypedRowWrapper(OpenVSwitch.class);
         ovs.setExternalIds(Collections.emptyMap());
         TransactUtils.stampInstanceIdentifier(transaction, iid, ovs.getSchema(), ovs.getExternalIdsColumn().getSchema(),
                 instanceIdentifierCodec);

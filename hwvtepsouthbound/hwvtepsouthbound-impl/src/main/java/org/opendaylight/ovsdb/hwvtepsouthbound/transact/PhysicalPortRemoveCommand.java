@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
@@ -20,7 +19,6 @@ import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
@@ -33,13 +31,13 @@ import org.slf4j.LoggerFactory;
 public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortRemoveCommand.class);
 
-    public PhysicalPortRemoveCommand(HwvtepOperationalState state,
-            Collection<DataTreeModification<Node>> changes) {
+    public PhysicalPortRemoveCommand(final HwvtepOperationalState state,
+            final Collection<DataTreeModification<Node>> changes) {
         super(state, changes);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction) {
+    public void execute(final TransactionBuilder transaction) {
         //TODO reuse from base class instead of extractRemovedPorts
         Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> removeds =
                 extractRemovedPorts(getChanges(), HwvtepPhysicalPortAugmentation.class);
@@ -59,13 +57,11 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
             Optional<HwvtepPhysicalPortAugmentation> operationalPhysicalPortOptional =
                     getOperationalState().getPhysicalPortAugmentation(psNodeiid, port.getHwvtepNodeName());
             if (operationalPhysicalPortOptional.isPresent()) {
-                PhysicalPort physicalPort = TyperUtils.getTypedRowWrapper(
-                        transaction.getDatabaseSchema(),PhysicalPort.class);
+                PhysicalPort physicalPort = transaction.getTypedRowWrapper(PhysicalPort.class);
                 physicalPort.setVlanBindings(new HashMap<>());
                 HwvtepPhysicalPortAugmentation updatedPhysicalPort = operationalPhysicalPortOptional.get();
                 String existingPhysicalPortName = updatedPhysicalPort.getHwvtepNodeName().getValue();
-                PhysicalPort extraPhyscialPort =
-                        TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalPort.class);
+                PhysicalPort extraPhyscialPort = transaction.getTypedRowWrapper(PhysicalPort.class);
                 extraPhyscialPort.setName("");
                 LOG.trace("execute: updating physical port: {}", physicalPort);
                 transaction.add(op.update(physicalPort)
@@ -80,7 +76,7 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
     }
 
     protected Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> extractRemovedPorts(
-            Collection<DataTreeModification<Node>> changes, Class<HwvtepPhysicalPortAugmentation> class1) {
+            final Collection<DataTreeModification<Node>> changes, final Class<HwvtepPhysicalPortAugmentation> class1) {
         Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {

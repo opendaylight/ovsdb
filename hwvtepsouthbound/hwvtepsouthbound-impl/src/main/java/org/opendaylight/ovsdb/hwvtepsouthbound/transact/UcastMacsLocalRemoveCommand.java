@@ -19,7 +19,6 @@ import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacs;
@@ -31,13 +30,13 @@ import org.slf4j.LoggerFactory;
 public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalUcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(UcastMacsLocalRemoveCommand.class);
 
-    public UcastMacsLocalRemoveCommand(HwvtepOperationalState state,
-            Collection<DataTreeModification<Node>> changes) {
+    public UcastMacsLocalRemoveCommand(final HwvtepOperationalState state,
+            final Collection<DataTreeModification<Node>> changes) {
         super(state, changes);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction) {
+    public void execute(final TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, List<LocalUcastMacs>> removeds =
                 extractRemoved(getChanges(),LocalUcastMacs.class);
         if (!removeds.isEmpty()) {
@@ -48,14 +47,13 @@ public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalUc
         }
     }
 
-    private void removeUcastMacLocal(TransactionBuilder transaction,
-            InstanceIdentifier<Node> instanceIdentifier, List<LocalUcastMacs> macList) {
+    private void removeUcastMacLocal(final TransactionBuilder transaction,
+            final InstanceIdentifier<Node> instanceIdentifier, final List<LocalUcastMacs> macList) {
         for (LocalUcastMacs mac: macList) {
             LOG.debug("Removing remoteUcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
             Optional<LocalUcastMacs> operationalMacOptional =
                     getOperationalState().getLocalUcastMacs(instanceIdentifier, mac.key());
-            UcastMacsLocal ucastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                    UcastMacsLocal.class, null);
+            UcastMacsLocal ucastMacsLocal = transaction.getTypedRowSchema(UcastMacsLocal.class);
             if (operationalMacOptional.isPresent() && operationalMacOptional.get().getMacEntryUuid() != null) {
                 //when mac entry is deleted, its referenced locators are deleted automatically.
                 //locators in config DS is not deleted and user need to be removed explicitly by user.
@@ -72,7 +70,7 @@ public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalUc
     }
 
     @Override
-    protected List<LocalUcastMacs> getData(HwvtepGlobalAugmentation augmentation) {
+    protected List<LocalUcastMacs> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getLocalUcastMacs();
     }
 
@@ -90,12 +88,12 @@ public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalUc
 
     public static class MacDependencyGetter extends UnMetDependencyGetter<LocalUcastMacs> {
         @Override
-        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(LocalUcastMacs data) {
+        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final LocalUcastMacs data) {
             return Collections.singletonList(data.getLogicalSwitchRef().getValue());
         }
 
         @Override
-        public List<InstanceIdentifier<?>> getTerminationPointDependencies(LocalUcastMacs data) {
+        public List<InstanceIdentifier<?>> getTerminationPointDependencies(final LocalUcastMacs data) {
             return Collections.emptyList();
         }
     }

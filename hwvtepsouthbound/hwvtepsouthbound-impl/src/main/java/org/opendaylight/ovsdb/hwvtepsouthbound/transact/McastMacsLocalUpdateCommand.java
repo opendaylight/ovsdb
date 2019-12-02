@@ -19,7 +19,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsLocal;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -33,13 +32,13 @@ import org.slf4j.LoggerFactory;
 public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsLocalUpdateCommand.class);
 
-    public McastMacsLocalUpdateCommand(HwvtepOperationalState state,
-            Collection<DataTreeModification<Node>> changes) {
+    public McastMacsLocalUpdateCommand(final HwvtepOperationalState state,
+            final Collection<DataTreeModification<Node>> changes) {
         super(state, changes);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction) {
+    public void execute(final TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, List<LocalMcastMacs>> updateds =
                 extractUpdated(getChanges(),LocalMcastMacs.class);
         if (!updateds.isEmpty()) {
@@ -50,14 +49,13 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMc
         }
     }
 
-    private void updateMcastMacsLocal(TransactionBuilder transaction,
-            InstanceIdentifier<Node> instanceIdentifier, List<LocalMcastMacs> localMcastMacs) {
+    private void updateMcastMacsLocal(final TransactionBuilder transaction,
+            final InstanceIdentifier<Node> instanceIdentifier, final List<LocalMcastMacs> localMcastMacs) {
         for (LocalMcastMacs localMcastMac: localMcastMacs) {
             LOG.debug("Creating localMcastMac, mac address: {}", localMcastMac.getMacEntryKey().getValue());
             final Optional<LocalMcastMacs> operationalMacOptional =
                     getOperationalState().getLocalMcastMacs(instanceIdentifier, localMcastMac.key());
-            McastMacsLocal mcastMacsLocal = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                    McastMacsLocal.class);
+            McastMacsLocal mcastMacsLocal = transaction.getTypedRowWrapper(McastMacsLocal.class);
             setIpAddress(mcastMacsLocal, localMcastMac);
             setLocatorSet(transaction, mcastMacsLocal, localMcastMac);
             setLogicalSwitch(mcastMacsLocal, localMcastMac);
@@ -68,8 +66,7 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMc
                 transaction.add(op.comment("McastMacLocal: Creating " + localMcastMac.getMacEntryKey().getValue()));
             } else if (operationalMacOptional.get().getMacEntryUuid() != null) {
                 UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
-                McastMacsLocal extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                                McastMacsLocal.class, null);
+                McastMacsLocal extraMac = transaction.getTypedRowSchema(McastMacsLocal.class);
                 extraMac.getUuidColumn().setData(macEntryUUID);
                 LOG.trace("execute: update LocalMcastMac entry: {}", mcastMacsLocal);
                 transaction.add(op.update(mcastMacsLocal)
@@ -83,7 +80,7 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMc
         }
     }
 
-    private void setLogicalSwitch(McastMacsLocal mcastMacsLocal, LocalMcastMacs inputMac) {
+    private void setLogicalSwitch(final McastMacsLocal mcastMacsLocal, final LocalMcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
             @SuppressWarnings("unchecked")
             InstanceIdentifier<LogicalSwitches> lswitchIid =
@@ -102,7 +99,8 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMc
         }
     }
 
-    private void setLocatorSet(TransactionBuilder transaction, McastMacsLocal mcastMacsLocal, LocalMcastMacs inputMac) {
+    private void setLocatorSet(final TransactionBuilder transaction, final McastMacsLocal mcastMacsLocal,
+            final LocalMcastMacs inputMac) {
         if (inputMac.getLocatorSet() != null && !inputMac.getLocatorSet().isEmpty()) {
             UUID locatorSetUuid = TransactUtils.createPhysicalLocatorSet(getOperationalState(), transaction,
                     inputMac.getLocatorSet());
@@ -110,14 +108,14 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMc
         }
     }
 
-    private void setIpAddress(McastMacsLocal mcastMacsLocal, LocalMcastMacs inputMac) {
+    private static void setIpAddress(final McastMacsLocal mcastMacsLocal, final LocalMcastMacs inputMac) {
         if (inputMac.getIpaddr() != null) {
             mcastMacsLocal.setIpAddress(inputMac.getIpaddr().getIpv4Address().getValue());
         }
     }
 
-    private void setMac(McastMacsLocal mcastMacsLocal, LocalMcastMacs inputMac,
-            Optional<LocalMcastMacs> inputSwitchOptional) {
+    private static void setMac(final McastMacsLocal mcastMacsLocal, final LocalMcastMacs inputMac,
+            final Optional<LocalMcastMacs> inputSwitchOptional) {
         if (inputMac.getMacEntryKey() != null) {
             if (inputMac.getMacEntryKey().equals(HwvtepSouthboundConstants.UNKNOWN_DST_MAC)) {
                 mcastMacsLocal.setMac(HwvtepSouthboundConstants.UNKNOWN_DST_STRING);
@@ -130,7 +128,7 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMc
     }
 
     @Override
-    protected List<LocalMcastMacs> getData(HwvtepGlobalAugmentation augmentation) {
+    protected List<LocalMcastMacs> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getLocalMcastMacs();
     }
 }

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil.schemaMismatchLog;
@@ -23,7 +22,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -36,13 +34,13 @@ import org.slf4j.LoggerFactory;
 public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalSwitches, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(LogicalSwitchUpdateCommand.class);
 
-    public LogicalSwitchUpdateCommand(HwvtepOperationalState state,
-            Collection<DataTreeModification<Node>> changes) {
+    public LogicalSwitchUpdateCommand(final HwvtepOperationalState state,
+            final Collection<DataTreeModification<Node>> changes) {
         super(state, changes);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction) {
+    public void execute(final TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, List<LogicalSwitches>> updateds =
                 extractUpdated(getChanges(),LogicalSwitches.class);
         if (!updateds.isEmpty()) {
@@ -80,8 +78,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
         LOG.debug("Creating logical switch named: {}", lswitch.getHwvtepNodeName());
         final HwvtepDeviceInfo.DeviceData operationalSwitchOptional =
                 getDeviceInfo().getDeviceOperData(LogicalSwitches.class, lsKey);
-        LogicalSwitch logicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                LogicalSwitch.class);
+        LogicalSwitch logicalSwitch = transaction.getTypedRowWrapper(LogicalSwitch.class);
         setDescription(logicalSwitch, lswitch);
         setTunnelKey(logicalSwitch, lswitch);
         setReplicationMode(logicalSwitch, lswitch);
@@ -96,8 +93,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
         } else {
             String existingLogicalSwitchName = lswitch.getHwvtepNodeName().getValue();
             // Name is immutable, and so we *can't* update it.  So we use extraBridge for the schema stuff
-            LogicalSwitch extraLogicalSwitch = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                    LogicalSwitch.class);
+            LogicalSwitch extraLogicalSwitch = transaction.getTypedRowWrapper(LogicalSwitch.class);
             extraLogicalSwitch.setName("");
             LOG.trace("execute: updating LogicalSwitch entry: {}", logicalSwitch);
             transaction.add(op.update(logicalSwitch)
@@ -108,19 +104,19 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
         }
     }
 
-    private void setDescription(LogicalSwitch logicalSwitch, LogicalSwitches inputSwitch) {
+    private static void setDescription(final LogicalSwitch logicalSwitch, final LogicalSwitches inputSwitch) {
         if (inputSwitch.getHwvtepNodeDescription() != null) {
             logicalSwitch.setDescription(inputSwitch.getHwvtepNodeDescription());
         }
     }
 
-    private void setName(LogicalSwitch logicalSwitch, LogicalSwitches inputSwitch) {
+    private static void setName(final LogicalSwitch logicalSwitch, final LogicalSwitches inputSwitch) {
         if (inputSwitch.getHwvtepNodeName() != null) {
             logicalSwitch.setName(inputSwitch.getHwvtepNodeName().getValue());
         }
     }
 
-    private void setTunnelKey(LogicalSwitch logicalSwitch, LogicalSwitches inputSwitch) {
+    private static void setTunnelKey(final LogicalSwitch logicalSwitch, final LogicalSwitches inputSwitch) {
         if (inputSwitch.getTunnelKey() != null) {
             Set<Long> tunnel = new HashSet<>();
             tunnel.add(Long.valueOf(inputSwitch.getTunnelKey()));
@@ -128,7 +124,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
         }
     }
 
-    private void setReplicationMode(LogicalSwitch logicalSwitch, LogicalSwitches inputSwitch) {
+    private static void setReplicationMode(final LogicalSwitch logicalSwitch, final LogicalSwitches inputSwitch) {
         if (inputSwitch.getReplicationMode() != null) {
             Set<String> mode = new HashSet<>();
             mode.add(inputSwitch.getReplicationMode());
@@ -142,12 +138,12 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
     }
 
     @Override
-    protected List<LogicalSwitches> getData(HwvtepGlobalAugmentation augmentation) {
+    protected List<LogicalSwitches> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getLogicalSwitches();
     }
 
     @Override
-    protected boolean areEqual(LogicalSwitches sw1, LogicalSwitches sw2) {
+    protected boolean areEqual(final LogicalSwitches sw1, final LogicalSwitches sw2) {
         return sw1.key().equals(sw2.key()) && Objects.equals(sw1.getTunnelKey(), sw2.getTunnelKey());
     }
 }

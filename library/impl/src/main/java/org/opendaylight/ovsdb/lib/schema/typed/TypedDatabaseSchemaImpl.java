@@ -16,6 +16,7 @@ import com.google.common.reflect.Reflection;
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
+import org.opendaylight.ovsdb.lib.message.TableUpdate.RowUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -79,10 +80,8 @@ final class TypedDatabaseSchemaImpl extends ForwardingDatabaseSchema implements 
 
     @Override
     public <T> Map<UUID, T> extractRowsOld(final Class<T> klazz, final TableUpdates updates) {
-        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates = extractRowUpdates(
-            requireNonNull(klazz), requireNonNull(updates));
         Map<UUID,T> result = new HashMap<>();
-        for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
+        for (RowUpdate<GenericTableSchema> rowUpdate : extractRowUpdates(klazz, updates).values()) {
             if (rowUpdate != null && rowUpdate.getOld() != null) {
                 Row<GenericTableSchema> row = rowUpdate.getOld();
                 result.put(rowUpdate.getUuid(), getTypedRowWrapper(klazz, row));
@@ -93,13 +92,10 @@ final class TypedDatabaseSchemaImpl extends ForwardingDatabaseSchema implements 
 
     @Override
     public <T> Map<UUID, T> extractRowsUpdated(final Class<T> klazz, final TableUpdates updates) {
-        final Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates =
-                extractRowUpdates(klazz, updates);
-        final Map<UUID,T> result = new HashMap<>();
-        for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
+        final Map<UUID, T> result = new HashMap<>();
+        for (RowUpdate<GenericTableSchema> rowUpdate : extractRowUpdates(klazz, updates).values()) {
             if (rowUpdate != null && rowUpdate.getNew() != null) {
-                Row<GenericTableSchema> row = rowUpdate.getNew();
-                result.put(rowUpdate.getUuid(), getTypedRowWrapper(klazz, row));
+                result.put(rowUpdate.getUuid(), getTypedRowWrapper(klazz, rowUpdate.getNew()));
             }
         }
         return result;
@@ -107,13 +103,10 @@ final class TypedDatabaseSchemaImpl extends ForwardingDatabaseSchema implements 
 
     @Override
     public <T> Map<UUID, T> extractRowsRemoved(final Class<T> klazz, final TableUpdates updates) {
-        final Map<UUID, TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates =
-                extractRowUpdates(klazz, updates);
         final Map<UUID, T> result = new HashMap<>();
-        for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
+        for (RowUpdate<GenericTableSchema> rowUpdate : extractRowUpdates(klazz, updates).values()) {
             if (rowUpdate != null && rowUpdate.getNew() == null && rowUpdate.getOld() != null) {
-                Row<GenericTableSchema> row = rowUpdate.getOld();
-                result.put(rowUpdate.getUuid(), getTypedRowWrapper(klazz, row));
+                result.put(rowUpdate.getUuid(), getTypedRowWrapper(klazz, rowUpdate.getOld()));
             }
         }
         return result;
@@ -132,13 +125,13 @@ final class TypedDatabaseSchemaImpl extends ForwardingDatabaseSchema implements 
      * @return Map&lt;UUID,TableUpdate&lt;GenericTableSchema&gt;.RowUpdate&lt;GenericTableSchema&gt;&gt;
      *     for the type of things being sought
      */
-    private Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> extractRowUpdates(
-            final Class<?> klazz, final TableUpdates updates) {
+    private Map<UUID, RowUpdate<GenericTableSchema>> extractRowUpdates(final Class<?> klazz,
+            final TableUpdates updates) {
         TableUpdate<GenericTableSchema> update = updates.getUpdate(table(TypedReflections.getTableName(klazz),
             GenericTableSchema.class));
-        Map<UUID, TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> result = new HashMap<>();
+        Map<UUID, RowUpdate<GenericTableSchema>> result = new HashMap<>();
         if (update != null) {
-            Map<UUID, TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rows = update.getRows();
+            Map<UUID, RowUpdate<GenericTableSchema>> rows = update.getRows();
             if (rows != null) {
                 result = rows;
             }

@@ -54,8 +54,8 @@ import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.Select;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
@@ -401,7 +401,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     private static Global getHwvtepGlobalTableEntry(final HwvtepConnectionInstance connectionInstance) {
-        final DatabaseSchema dbSchema;
+        final TypedDatabaseSchema dbSchema;
         try {
             dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -410,7 +410,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             return null;
         }
 
-        GenericTableSchema hwvtepSchema = TyperUtils.getTableSchema(dbSchema, Global.class);
+        GenericTableSchema hwvtepSchema = dbSchema.getTableSchema(Global.class);
         Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
         selectOperation.setColumns(new ArrayList<>(hwvtepSchema.getColumns()));
 

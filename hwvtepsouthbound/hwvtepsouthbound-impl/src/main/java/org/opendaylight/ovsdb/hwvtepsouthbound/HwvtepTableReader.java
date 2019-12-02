@@ -31,6 +31,7 @@ import org.opendaylight.ovsdb.lib.operations.Select;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.ACL;
 import org.opendaylight.ovsdb.schema.hardwarevtep.ACLEntry;
@@ -88,7 +89,7 @@ public class HwvtepTableReader {
 
     private final HwvtepConnectionInstance connectionInstance;
 
-    public HwvtepTableReader(HwvtepConnectionInstance connectionInstance) {
+    public HwvtepTableReader(final HwvtepConnectionInstance connectionInstance) {
         this.connectionInstance = connectionInstance;
         DatabaseSchema dbSchema = null;
         try {
@@ -116,7 +117,7 @@ public class HwvtepTableReader {
 
     class RemoteMcastMacWhereClauseGetter implements Function<InstanceIdentifier, List<Condition>> {
         @Override
-        public List<Condition> apply(InstanceIdentifier iid) {
+        public List<Condition> apply(final InstanceIdentifier iid) {
             InstanceIdentifier<RemoteMcastMacs> macIid = iid;
             String mac = macIid.firstKeyOf(RemoteMcastMacs.class).getMacEntryKey().getValue();
             InstanceIdentifier<LogicalSwitches> lsIid = (InstanceIdentifier<LogicalSwitches>) macIid.firstKeyOf(
@@ -137,7 +138,7 @@ public class HwvtepTableReader {
 
     class RemoteUcastMacWhereClauseGetter implements Function<InstanceIdentifier, List<Condition>> {
         @Override
-        public List<Condition> apply(InstanceIdentifier iid) {
+        public List<Condition> apply(final InstanceIdentifier iid) {
             InstanceIdentifier<RemoteUcastMacs> macIid = iid;
             String mac = macIid.firstKeyOf(RemoteUcastMacs.class).getMacEntryKey().getValue();
             InstanceIdentifier<LogicalSwitches> lsIid = (InstanceIdentifier<LogicalSwitches>) macIid.firstKeyOf(
@@ -158,7 +159,7 @@ public class HwvtepTableReader {
 
     class LogicalSwitchWhereClauseGetter implements Function<InstanceIdentifier, List<Condition>> {
         @Override
-        public List<Condition> apply(InstanceIdentifier iid) {
+        public List<Condition> apply(final InstanceIdentifier iid) {
             InstanceIdentifier<LogicalSwitches> lsIid = iid;
             String lsName = lsIid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
             LogicalSwitch logicalSwitch = (LogicalSwitch) tables.get(LogicalSwitch.class);
@@ -168,7 +169,7 @@ public class HwvtepTableReader {
 
     class LocatorWhereClauseGetter implements Function<InstanceIdentifier, List<Condition>> {
         @Override
-        public List<Condition> apply(InstanceIdentifier iid) {
+        public List<Condition> apply(final InstanceIdentifier iid) {
             InstanceIdentifier<TerminationPoint> tepIid = iid;
             String locatorIp = tepIid.firstKeyOf(TerminationPoint.class).getTpId().getValue();
             locatorIp = locatorIp.substring(locatorIp.indexOf(":") + 1);
@@ -179,129 +180,122 @@ public class HwvtepTableReader {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public Optional<TypedBaseTable> getHwvtepTableEntryUUID(Class<? extends Identifiable> cls,
-                                                            InstanceIdentifier iid,
-                                                            UUID existingUUID) {
+    public Optional<TypedBaseTable> getHwvtepTableEntryUUID(final Class<? extends Identifiable> cls,
+                                                            final InstanceIdentifier iid,
+                                                            final UUID existingUUID) {
+        final TypedDatabaseSchema dbSchema;
         try {
-            DatabaseSchema dbSchema = null;
-            TypedBaseTable globalRow = null;
-            Class<TypedBaseTable> tableClass = tableMap.get(cls);
-            try {
-                dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
-            } catch (InterruptedException | ExecutionException e) {
-                LOG.warn("Not able to fetch schema for database {} from device {}",
-                        HwvtepSchemaConstants.HARDWARE_VTEP, connectionInstance.getConnectionInfo(), e);
-            }
-
-            if (dbSchema != null) {
-                GenericTableSchema hwvtepSchema = TyperUtils.getTableSchema(dbSchema, tableClass);
-
-                List<String> hwvtepTableColumn = new ArrayList<>();
-                hwvtepTableColumn.addAll(hwvtepSchema.getColumns());
-                Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
-                selectOperation.setColumns(hwvtepTableColumn);
-
-                if (existingUUID != null) {
-                    TypedBaseTable table = tables.get(tableClass);
-                    LOG.info("Setting uuid condition {} ", existingUUID);
-                    selectOperation.where(table.getUuidColumn().getSchema().opEqual(existingUUID));
-                } else {
-                    if (whereClauseGetterMap.get(cls) != null) {
-                        List<Condition> conditions = whereClauseGetterMap.get(cls).apply(iid);
-                        if (conditions != null) {
-                            if (conditions.size() == 2) {
-                                selectOperation.where(conditions.get(0)).and(conditions.get(1));
-                            } else {
-                                selectOperation.where(conditions.get(0));
-                            }
-                        } else {
-                            LOG.error("Could not get where conditions for cls {} key {}", cls, iid);
-                            return Optional.empty();
-                        }
-                    } else {
-                        LOG.error("Could not get where class for cls {} ", cls);
-                        return Optional.empty();
-                    }
-                }
-                ArrayList<Operation> operations = new ArrayList<>();
-                operations.add(selectOperation);
-                try {
-                    List<OperationResult> results = connectionInstance.transact(dbSchema, operations).get();
-                    if (results != null && !results.isEmpty()) {
-                        OperationResult selectResult = results.get(0);
-                        if (selectResult.getRows() != null && !selectResult.getRows().isEmpty()) {
-                            globalRow = TyperUtils.getTypedRowWrapper(
-                                    dbSchema, tableClass, selectResult.getRows().get(0));
-                        }
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    LOG.warn("Not able to fetch hardware_vtep table row from device {}",
-                            connectionInstance.getConnectionInfo(), e);
-                }
-            }
-            LOG.trace("Fetched {} from hardware_vtep schema", globalRow);
-            if (globalRow != null && globalRow.getUuid() != null) {
-                return Optional.of(globalRow);
-            }
-            return Optional.empty();
-        } catch (RuntimeException e) {
-            LOG.error("Failed to get the hwvtep row for iid {}", iid, e);
+            dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.warn("Not able to fetch schema for database {} from device {}",
+                HwvtepSchemaConstants.HARDWARE_VTEP, connectionInstance.getConnectionInfo(), e);
             return Optional.empty();
         }
+
+        final Class<TypedBaseTable> tableClass = tableMap.get(cls);
+        final GenericTableSchema hwvtepSchema = dbSchema.getTableSchema(tableClass);
+
+        final Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
+        selectOperation.setColumns(new ArrayList<>(hwvtepSchema.getColumns()));
+
+        if (existingUUID == null) {
+            final Function<InstanceIdentifier, List<Condition>> whereClausule = whereClauseGetterMap.get(cls);
+            if (whereClausule == null) {
+                LOG.error("Could not get where class for cls {} ", cls);
+                return Optional.empty();
+            }
+            final List<Condition> conditions = whereClausule.apply(iid);
+            if (conditions == null) {
+                LOG.error("Could not get where conditions for cls {} key {}", cls, iid);
+                return Optional.empty();
+            }
+
+            if (conditions.size() == 2) {
+                selectOperation.where(conditions.get(0)).and(conditions.get(1));
+            } else {
+                selectOperation.where(conditions.get(0));
+            }
+        } else {
+            TypedBaseTable table = tables.get(tableClass);
+            LOG.info("Setting uuid condition {} ", existingUUID);
+            selectOperation.where(table.getUuidColumn().getSchema().opEqual(existingUUID));
+        }
+
+        ArrayList<Operation> operations = new ArrayList<>();
+        operations.add(selectOperation);
+
+        final List<OperationResult> results;
+        try {
+            results = connectionInstance.transact(dbSchema, operations).get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.warn("Not able to fetch hardware_vtep table row from device {}",
+                connectionInstance.getConnectionInfo(), e);
+            return Optional.empty();
+        }
+        if (results == null || results.isEmpty()) {
+            return Optional.empty();
+        }
+
+        final List<Row<GenericTableSchema>> selectResult = results.get(0).getRows();
+        if (selectResult == null || selectResult.isEmpty()) {
+            return Optional.empty();
+        }
+
+        final TypedBaseTable globalRow = dbSchema.getTypedRowWrapper(tableClass, selectResult.get(0));
+        LOG.trace("Fetched {} from hardware_vtep schema", globalRow);
+        return globalRow != null && globalRow.getUuid() != null ?  Optional.of(globalRow) : Optional.empty();
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public List<TypedBaseTable> getHwvtepTableEntries(Class<? extends Identifiable> cls) {
+    public List<TypedBaseTable> getHwvtepTableEntries(final Class<? extends Identifiable> cls) {
+        final TypedDatabaseSchema dbSchema;
         try {
-            List<TypedBaseTable> tableRows = new ArrayList<>();
-            DatabaseSchema dbSchema = null;
-            TypedBaseTable globalRow = null;
-            Class<TypedBaseTable> tableClass = tableMap.get(cls);
-            try {
-                dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
-            } catch (InterruptedException | ExecutionException e) {
-                LOG.error("Not able to fetch schema for database {} from device {}",
-                        HwvtepSchemaConstants.HARDWARE_VTEP, connectionInstance.getConnectionInfo(), e);
-            }
+            dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.error("Not able to fetch schema for database {} from device {}",
+                HwvtepSchemaConstants.HARDWARE_VTEP, connectionInstance.getConnectionInfo(), e);
+            return null;
+        }
 
-            if (dbSchema != null) {
-                GenericTableSchema hwvtepSchema = TyperUtils.getTableSchema(dbSchema, tableClass);
+        final Class<TypedBaseTable> tableClass = tableMap.get(cls);
+        final GenericTableSchema hwvtepSchema = dbSchema.getTableSchema(tableClass);
+        final Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
+        selectOperation.setColumns(new ArrayList<>(hwvtepSchema.getColumns()));
 
-                List<String> hwvtepTableColumn = new ArrayList<>();
-                hwvtepTableColumn.addAll(hwvtepSchema.getColumns());
-                Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
-                selectOperation.setColumns(hwvtepTableColumn);
+        final List<OperationResult> results;
+        try {
+            results = connectionInstance.transact(dbSchema, Lists.newArrayList(selectOperation)).get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.error("Not able to fetch hardware_vtep table row from device {}",
+                connectionInstance.getConnectionInfo(), e);
+            return Collections.emptyList();
+        }
+        if (results == null || results.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-                ArrayList<Operation> operations = Lists.newArrayList(selectOperation);
-                try {
-                    List<OperationResult> results = connectionInstance.transact(dbSchema, operations).get();
-                    if (results != null && !results.isEmpty()) {
-                        for (OperationResult selectResult : results) {
-                            if (selectResult.getRows() != null && !selectResult.getRows().isEmpty()) {
-                                for (Row<GenericTableSchema> row : selectResult.getRows()) {
-                                    tableRows.add(TyperUtils.getTypedRowWrapper(dbSchema, tableClass, row));
-                                }
-                            }
-                        }
+        try {
+            final List<TypedBaseTable> tableRows = new ArrayList<>();
+            for (OperationResult selectResult : results) {
+                if (selectResult.getRows() != null && !selectResult.getRows().isEmpty()) {
+                    for (Row<GenericTableSchema> row : selectResult.getRows()) {
+                        tableRows.add(dbSchema.getTypedRowWrapper(tableClass, row));
                     }
-                } catch (InterruptedException | ExecutionException e) {
-                    LOG.error("Not able to fetch hardware_vtep table row from device {}",
-                            connectionInstance.getConnectionInfo(), e);
                 }
             }
             return tableRows;
         } catch (RuntimeException e) {
             LOG.error("Failed to get the hwvtep ", e);
+            return Collections.emptyList();
         }
-        return Collections.emptyList();
     }
 
     public TableUpdates readAllTables() throws ExecutionException, InterruptedException {
         Map<String, TableUpdate> tableUpdates =  new HashMap<>();
-        DatabaseSchema dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
+        TypedDatabaseSchema dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
 
         List<Operation> operations = Arrays.asList(alltables).stream()
-                .map(tableClass -> TyperUtils.getTableSchema(dbSchema, tableClass))
+                .map(tableClass -> dbSchema.getTableSchema(tableClass))
                 .map(tableSchema -> buildSelectOperationFor(tableSchema))
                 .collect(Collectors.toList());
 
@@ -323,13 +317,13 @@ public class HwvtepTableReader {
         return new TableUpdates(tableUpdates);
     }
 
-    private Select<GenericTableSchema> buildSelectOperationFor(GenericTableSchema tableSchema) {
+    private Select<GenericTableSchema> buildSelectOperationFor(final GenericTableSchema tableSchema) {
         Select<GenericTableSchema> selectOpearation = op.select(tableSchema);
         selectOpearation.setColumns(new ArrayList<>(tableSchema.getColumns()));
         return selectOpearation;
     }
 
-    private UUID getRowUuid(Row<GenericTableSchema> row) {
+    private UUID getRowUuid(final Row<GenericTableSchema> row) {
         return row.getColumns().stream()
                 .filter(column -> column.getSchema().getName().equals("_uuid"))
                 .map(column -> (UUID) column.getData())

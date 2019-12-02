@@ -47,7 +47,6 @@ import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.Select;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask;
@@ -527,7 +526,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
 
         return results == null || results.isEmpty() ? null
-                : TyperUtils.getTypedRowWrapper(dbSchema, OpenVSwitch.class, results.get(0).getRows().get(0));
+                : dbSchema.getTypedRowWrapper(OpenVSwitch.class, results.get(0).getRows().get(0));
     }
 
     private Entity getEntityFromConnectionInstance(@NonNull final OvsdbConnectionInstance ovsdbConnectionInstance) {

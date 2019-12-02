@@ -19,7 +19,6 @@ import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.utils.yang.YangUtils;
@@ -35,22 +34,23 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbNodeUpdateCommand.class);
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, TransactUtils.extractCreatedOrUpdated(events, OvsdbNodeAugmentation.class),
                 instanceIdentifierCodec);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, TransactUtils.extractCreatedOrUpdated(modifications, OvsdbNodeAugmentation.class),
                 instanceIdentifierCodec);
     }
 
-    private void execute(TransactionBuilder transaction,
-            Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated,
-            InstanceIdentifierCodec instanceIdentifierCodec) {
+    private static void execute(final TransactionBuilder transaction,
+            final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry:
             updated.entrySet()) {
             OvsdbNodeAugmentation ovsdbNode = ovsdbNodeEntry.getValue();
@@ -63,7 +63,7 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
             }
 
             // OpenVSwitchPart
-            OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
+            OpenVSwitch ovs = transaction.getTypedRowWrapper(OpenVSwitch.class);
 
             stampInstanceIdentifier(transaction, ovsdbNodeEntry.getKey().firstIdentifierOf(Node.class),
                     instanceIdentifierCodec);
@@ -97,9 +97,9 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
         }
     }
 
-    private void stampInstanceIdentifier(TransactionBuilder transaction, InstanceIdentifier<Node> iid,
-            InstanceIdentifierCodec instanceIdentifierCodec) {
-        OpenVSwitch ovs = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), OpenVSwitch.class);
+    private static void stampInstanceIdentifier(final TransactionBuilder transaction,
+            final InstanceIdentifier<Node> iid, final InstanceIdentifierCodec instanceIdentifierCodec) {
+        OpenVSwitch ovs = transaction.getTypedRowWrapper(OpenVSwitch.class);
         ovs.setExternalIds(Collections.emptyMap());
         TransactUtils.stampInstanceIdentifier(transaction, iid, ovs.getSchema(),
                 ovs.getExternalIdsColumn().getSchema(), instanceIdentifierCodec);

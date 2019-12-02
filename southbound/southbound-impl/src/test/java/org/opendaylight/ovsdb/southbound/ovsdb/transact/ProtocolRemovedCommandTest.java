@@ -5,10 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,9 +29,7 @@ import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -47,7 +44,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({InstanceIdentifier.class, TransactUtils.class, TyperUtils.class })
+@PrepareForTest({InstanceIdentifier.class, TransactUtils.class })
 public class ProtocolRemovedCommandTest {
 
     private final Set<InstanceIdentifier<ProtocolEntry>> removed = new HashSet<>();
@@ -84,16 +81,15 @@ public class ProtocolRemovedCommandTest {
         when(column.getData()).thenReturn(new HashSet<>());
         when(mutate.addMutation(any(ColumnSchema.class), any(Mutator.class), any(Set.class))).thenReturn(mutate);
 
-        PowerMockito.mockStatic(TyperUtils.class);
-        when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), any(Class.class))).thenReturn(bridge);
-
         TransactionBuilder transaction = mock(TransactionBuilder.class);
+        when(transaction.getTypedRowWrapper(any(Class.class))).thenReturn(bridge);
+
         protocolRemovedCommand.execute(transaction, bridgeOpState, mock(DataChangeEvent.class),
                 mock(InstanceIdentifierCodec.class));
         Mockito.verify(transaction).add(any(Operation.class));
     }
 
-    private Object setField(String fieldName) throws Exception {
+    private Object setField(final String fieldName) throws Exception {
         Field field = Operations.class.getDeclaredField(fieldName);
         field.setAccessible(true);
         field.set(field.get(Operations.class), mock(Operations.class));

@@ -8,61 +8,55 @@
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import java.util.Collection;
+import java.util.function.Supplier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This transactional command aggregates all the Southbound commands.
  */
 public class TransactCommandAggregator implements TransactCommand {
-    private static final Logger LOG = LoggerFactory.getLogger(TransactCommandAggregator.class);
+    // Type capture to allow using an array
+    private interface CommandSupplier extends Supplier<TransactCommand> {
 
-    private static final Class<? extends TransactCommand>[] COMMAND_CLASSES =
-            new Class[] {
-                BridgeUpdateCommand.class,
-                OpenVSwitchBridgeAddCommand.class,
-                ControllerUpdateCommand.class,
-                ControllerRemovedCommand.class,
-                ProtocolUpdateCommand.class,
-                ProtocolRemovedCommand.class,
-                BridgeRemovedCommand.class,
-                TerminationPointCreateCommand.class,
-                TerminationPointDeleteCommand.class,
-                OvsdbNodeUpdateCommand.class,
-                AutoAttachUpdateCommand.class,
-                AutoAttachRemovedCommand.class,
-                QosUpdateCommand.class,
-                QosRemovedCommand.class,
-                QueueUpdateCommand.class,
-                QueueRemovedCommand.class,
-                TerminationPointUpdateCommand.class,
-            };
+    }
+
+    private static final CommandSupplier[] COMMAND_SUPPLIERS = new CommandSupplier[] {
+        BridgeUpdateCommand::new,
+        OpenVSwitchBridgeAddCommand::new,
+        ControllerUpdateCommand::new,
+        ControllerRemovedCommand::new,
+        ProtocolUpdateCommand::new,
+        ProtocolRemovedCommand::new,
+        BridgeRemovedCommand::new,
+        TerminationPointCreateCommand::new,
+        TerminationPointDeleteCommand::new,
+        OvsdbNodeUpdateCommand::new,
+        AutoAttachUpdateCommand::new,
+        AutoAttachRemovedCommand::new,
+        QosUpdateCommand::new,
+        QosRemovedCommand::new,
+        QueueUpdateCommand::new,
+        QueueRemovedCommand::new,
+        TerminationPointUpdateCommand::new
+    };
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
-        for (Class<? extends TransactCommand> commandClass : COMMAND_CLASSES) {
-            try {
-                commandClass.newInstance().execute(transaction, state, events, instanceIdentifierCodec);
-            } catch (InstantiationException | IllegalAccessException e) {
-                LOG.error("Error instantiating {}", commandClass, e);
-            }
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
+        for (CommandSupplier supplier : COMMAND_SUPPLIERS) {
+            supplier.get().execute(transaction, state, events, instanceIdentifierCodec);
         }
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
-        for (Class<? extends TransactCommand> commandClass : COMMAND_CLASSES) {
-            try {
-                commandClass.newInstance().execute(transaction, state, modifications, instanceIdentifierCodec);
-            } catch (InstantiationException | IllegalAccessException e) {
-                LOG.error("Error instantiating {}", commandClass, e);
-            }
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
+        for (CommandSupplier supplier : COMMAND_SUPPLIERS) {
+            supplier.get().execute(transaction, state, modifications, instanceIdentifierCodec);
         }
     }
 }

@@ -45,8 +45,9 @@ public final class TyperUtils {
      *     using their {@link TypedTable} annotation, if they have one, or by name.
      * @return the table schema.
      */
+    @Deprecated
     public static GenericTableSchema getTableSchema(final DatabaseSchema dbSchema, final Class<?> klazz) {
-        return dbSchema.table(TypedReflections.getTableName(klazz), GenericTableSchema.class);
+        return getTyped(dbSchema).getTableSchema(klazz);
     }
 
     static ColumnSchema<GenericTableSchema, Object> getColumnSchema(final GenericTableSchema tableSchema,

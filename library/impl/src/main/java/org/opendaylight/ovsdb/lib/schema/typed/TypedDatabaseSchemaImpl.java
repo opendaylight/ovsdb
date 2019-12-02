@@ -40,7 +40,7 @@ final class TypedDatabaseSchemaImpl extends ForwardingDatabaseSchema implements 
 
     @Override
     public GenericTableSchema getTableSchema(final Class<?> klazz) {
-        return TyperUtils.getTableSchema(this, klazz);
+        return table(TypedReflections.getTableName(klazz), GenericTableSchema.class);
     }
 
     @Override

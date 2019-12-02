@@ -71,7 +71,7 @@ public class OvsdbConnectionInstance {
     private final OvsdbClient client;
     private ConnectionInfo connectionInfo;
     private final TransactionInvoker txInvoker;
-    private Map<DatabaseSchema,TransactInvoker> transactInvokers;
+    private Map<TypedDatabaseSchema, TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
     private InstanceIdentifier<Node> instanceIdentifier;
     private volatile boolean hasDeviceOwnership = false;
@@ -150,7 +150,7 @@ public class OvsdbConnectionInstance {
         if (transactInvokers == null) {
             try {
                 transactInvokers = new HashMap<>();
-                DatabaseSchema dbSchema = getSchema(SouthboundConstants.OPEN_V_SWITCH).get();
+                TypedDatabaseSchema dbSchema = getSchema(SouthboundConstants.OPEN_V_SWITCH).get();
                 if (dbSchema != null) {
                     transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
                 }
@@ -191,7 +191,7 @@ public class OvsdbConnectionInstance {
         LOG.debug("Update attributes of ovsdb node ip: {} port: {}",
                     this.initialCreateData.getConnectionInfo().getRemoteIp(),
                     this.initialCreateData.getConnectionInfo().getRemotePort());
-        for (Map.Entry<DatabaseSchema,TransactInvoker> entry: transactInvokers.entrySet()) {
+        for (Map.Entry<TypedDatabaseSchema, TransactInvoker> entry: transactInvokers.entrySet()) {
 
             TransactionBuilder transaction = new TransactionBuilder(this.client, entry.getKey());
 

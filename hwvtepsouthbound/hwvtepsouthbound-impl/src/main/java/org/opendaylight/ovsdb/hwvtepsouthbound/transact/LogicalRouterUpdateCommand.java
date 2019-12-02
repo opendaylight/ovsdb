@@ -19,7 +19,6 @@ import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalRouter;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -39,13 +38,13 @@ import org.slf4j.LoggerFactory;
 public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalRouters, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(LogicalRouterUpdateCommand.class);
 
-    public LogicalRouterUpdateCommand(HwvtepOperationalState state,
-            Collection<DataTreeModification<Node>> changes) {
+    public LogicalRouterUpdateCommand(final HwvtepOperationalState state,
+            final Collection<DataTreeModification<Node>> changes) {
         super(state, changes);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction) {
+    public void execute(final TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, List<LogicalRouters>> updateMap =
                 extractUpdated(getChanges(),LogicalRouters.class);
 
@@ -55,8 +54,8 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
         }
     }
 
-    private void updateLogicalRouter(TransactionBuilder transaction, final InstanceIdentifier<Node> instanceIdentifier,
-            final List<LogicalRouters> routerList) {
+    private void updateLogicalRouter(final TransactionBuilder transaction,
+            final InstanceIdentifier<Node> instanceIdentifier, final List<LogicalRouters> routerList) {
         for (LogicalRouters lrouter: routerList) {
             InstanceIdentifier<LogicalRouters> routerKey = instanceIdentifier
                     .augmentation(HwvtepGlobalAugmentation.class).child(LogicalRouters.class, lrouter.key());
@@ -64,8 +63,7 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
 
             final Optional<LogicalRouters> operationalRouterOptional =
                     getOperationalState().getLogicalRouters(instanceIdentifier, lrouter.key());
-            LogicalRouter logicalRouter = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                    LogicalRouter.class);
+            LogicalRouter logicalRouter = transaction.getTypedRowWrapper(LogicalRouter.class);
             setDescription(logicalRouter, lrouter);
 
             setSwitchBindings(transaction, logicalRouter, lrouter.getSwitchBindings());
@@ -83,8 +81,7 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
             } else {
                 LogicalRouters updatedLRouter = operationalRouterOptional.get();
                 String existingLogicalRouterName = updatedLRouter.getHwvtepNodeName().getValue();
-                LogicalRouter extraLogicalRouter = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                        LogicalRouter.class);
+                LogicalRouter extraLogicalRouter = transaction.getTypedRowWrapper(LogicalRouter.class);
                 extraLogicalRouter.setName("");
                 LOG.trace("Updating LogicalRouter entry: {}", logicalRouter);
                 transaction.add(op.update(logicalRouter)
@@ -106,7 +103,7 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
     }
 
     private void setName(final LogicalRouter logicalRouter, final LogicalRouters inputRouter,
-            Optional<LogicalRouters> inputRouterOptional) {
+            final Optional<LogicalRouters> inputRouterOptional) {
         if (inputRouter.getHwvtepNodeName() != null) {
             logicalRouter.setName(inputRouter.getHwvtepNodeName().getValue());
         } else if (inputRouterOptional.isPresent() && inputRouterOptional.get().getHwvtepNodeName() != null) {

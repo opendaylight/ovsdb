@@ -5,12 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -32,9 +31,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.operations.Update;
 import org.opendaylight.ovsdb.lib.operations.Where;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -50,7 +47,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ TerminationPointUpdateCommand.class, TransactUtils.class, TyperUtils.class, VlanMode.class,
+@PrepareForTest({ TerminationPointUpdateCommand.class, TransactUtils.class, VlanMode.class,
         TerminationPointCreateCommand.class, InstanceIdentifier.class, Operations.class })
 public class TerminationPointUpdateCommandTest {
 
@@ -104,12 +101,10 @@ public class TerminationPointUpdateCommandTest {
 
         // Test updateInterface()
         Interface ovsInterface = mock(Interface.class);
-        when(transaction.getDatabaseSchema()).thenReturn(mock(DatabaseSchema.class));
-        PowerMockito.mockStatic(TyperUtils.class);
-        when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Interface.class))).thenReturn(ovsInterface);
+        when(transaction.getTypedRowWrapper(eq(Interface.class))).thenReturn(ovsInterface);
 
         Interface extraInterface = mock(Interface.class);
-        when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Interface.class))).thenReturn(extraInterface);
+        when(transaction.getTypedRowWrapper(eq(Interface.class))).thenReturn(extraInterface);
         doNothing().when(extraInterface).setName(anyString());
 
         Operations op = OvsdbNodeUpdateCommandTest.setOpField();
@@ -130,9 +125,9 @@ public class TerminationPointUpdateCommandTest {
 
         // Test updatePort()
         Port port = mock(Port.class);
-        when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Port.class))).thenReturn(port);
+        when(transaction.getTypedRowWrapper(eq(Port.class))).thenReturn(port);
         Port extraPort = mock(Port.class);
-        when(TyperUtils.getTypedRowWrapper(any(DatabaseSchema.class), eq(Port.class))).thenReturn(extraPort);
+        when(transaction.getTypedRowWrapper(eq(Port.class))).thenReturn(extraPort);
         doNothing().when(extraPort).setName(anyString());
         when(op.update(any(Port.class))).thenReturn(update);
         when(extraPort.getNameColumn()).thenReturn(column);

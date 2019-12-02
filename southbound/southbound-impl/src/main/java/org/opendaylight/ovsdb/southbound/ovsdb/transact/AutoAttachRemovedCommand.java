@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
@@ -23,7 +22,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.AutoAttach;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -45,22 +43,23 @@ public class AutoAttachRemovedCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(AutoAttachRemovedCommand.class);
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractOriginal(modifications, OvsdbNodeAugmentation.class),
                 TransactUtils.extractUpdated(modifications, OvsdbNodeAugmentation.class));
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractOriginal(events, OvsdbNodeAugmentation.class),
                 TransactUtils.extractUpdated(events, OvsdbNodeAugmentation.class));
     }
 
-    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> original,
-                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
+    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+                         final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> original,
+                         final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
 
         for (final Map.Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originalEntry :
                 original.entrySet()) {
@@ -92,25 +91,22 @@ public class AutoAttachRemovedCommand implements TransactCommand {
         }
     }
 
-    private void deleteAutoAttach(TransactionBuilder transaction,
-            InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid,
-            Uuid autoattachUuid) {
+    private void deleteAutoAttach(final TransactionBuilder transaction,
+            final InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid,
+            final Uuid autoattachUuid) {
 
         LOG.debug("Received request to delete Autoattach entry {}", autoattachUuid);
         final OvsdbBridgeAugmentation bridgeAugmentation = getBridge(ovsdbNodeIid, autoattachUuid);
         if (autoattachUuid != null && bridgeAugmentation != null) {
             final UUID uuid = new UUID(autoattachUuid.getValue());
-            final AutoAttach autoattach =
-                    TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), AutoAttach.class, null);
+            final AutoAttach autoattach = transaction.getTypedRowSchema(AutoAttach.class);
             transaction.add(op.delete(autoattach.getSchema())
                     .where(autoattach.getUuidColumn().getSchema().opEqual(uuid))
                     .build());
             transaction.add(op.comment("AutoAttach: Deleting {} " + uuid
                     + " attached to " + bridgeAugmentation.getBridgeName().getValue()));
 
-            final Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                    Bridge.class,null);
-
+            final Bridge bridge = transaction.getTypedRowSchema(Bridge.class);
             transaction.add(op.mutate(bridge.getSchema())
                     .addMutation(bridge.getAutoAttachColumn().getSchema(),
                             Mutator.DELETE, Collections.singleton(uuid))
@@ -125,7 +121,7 @@ public class AutoAttachRemovedCommand implements TransactCommand {
         }
     }
 
-    private Uuid getAutoAttachUuid(List<Autoattach> currentAutoAttach, Uri autoAttachId) {
+    private Uuid getAutoAttachUuid(final List<Autoattach> currentAutoAttach, final Uri autoAttachId) {
         if (currentAutoAttach != null && !currentAutoAttach.isEmpty()) {
             for (final Autoattach autoAttach : currentAutoAttach) {
                 if (autoAttach.getAutoattachId().equals(autoAttachId)) {
@@ -136,7 +132,7 @@ public class AutoAttachRemovedCommand implements TransactCommand {
         return null;
     }
 
-    private OvsdbBridgeAugmentation getBridge(InstanceIdentifier<OvsdbNodeAugmentation> key, Uuid aaUuid) {
+    private OvsdbBridgeAugmentation getBridge(final InstanceIdentifier<OvsdbNodeAugmentation> key, final Uuid aaUuid) {
         if (aaUuid == null) {
             return null;
         }

@@ -20,7 +20,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
@@ -36,22 +35,23 @@ public class ProtocolUpdateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(ProtocolUpdateCommand.class);
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, ProtocolEntry.class),
                 TransactUtils.extractCreatedOrUpdated(events, OvsdbBridgeAugmentation.class));
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, ProtocolEntry.class),
                 TransactUtils.extractCreatedOrUpdated(modifications, OvsdbBridgeAugmentation.class));
     }
 
-    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Map<InstanceIdentifier<ProtocolEntry>, ProtocolEntry> protocols,
-                         Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> bridges) {
+    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Map<InstanceIdentifier<ProtocolEntry>, ProtocolEntry> protocols,
+            final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> bridges) {
         for (Entry<InstanceIdentifier<ProtocolEntry>, ProtocolEntry> entry: protocols.entrySet()) {
             Optional<ProtocolEntry> operationalProtocolEntryOptional =
                     state.getProtocolEntry(entry.getKey());
@@ -72,7 +72,7 @@ public class ProtocolUpdateCommand implements TransactCommand {
                         && entry.getValue().getProtocol() != null) {
                     String protocolString = SouthboundConstants.OVSDB_PROTOCOL_MAP.get(entry.getValue().getProtocol());
                     if (protocolString != null) {
-                        Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
+                        Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
                         bridge.setName(ovsdbBridge.getBridgeName().getValue());
                         try {
                             bridge.setProtocols(Collections.singleton(protocolString));

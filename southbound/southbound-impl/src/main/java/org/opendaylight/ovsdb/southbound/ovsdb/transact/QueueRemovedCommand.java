@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
@@ -16,7 +15,6 @@ import java.util.Map;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Queue;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
@@ -32,22 +30,23 @@ public class QueueRemovedCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(QueueRemovedCommand.class);
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractOriginal(events, OvsdbNodeAugmentation.class),
                 TransactUtils.extractUpdated(events, OvsdbNodeAugmentation.class));
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractOriginal(modifications, OvsdbNodeAugmentation.class),
                 TransactUtils.extractUpdated(modifications, OvsdbNodeAugmentation.class));
     }
 
-    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originals,
-                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
+    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+                         final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originals,
+                         final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
         for (Map.Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originalEntry : originals
                 .entrySet()) {
             InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = originalEntry.getKey();
@@ -77,9 +76,7 @@ public class QueueRemovedCommand implements TransactCommand {
                             LOG.debug("Received request to delete Queue entry {}", origQueue.getQueueId());
                             Uuid queueUuid = getQueueUuid(operQueues, origQueue.getQueueId());
                             if (queueUuid != null) {
-                                Queue queue =
-                                        TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Queue.class,
-                                                null);
+                                Queue queue = transaction.getTypedRowSchema(Queue.class);
                                 transaction.add(op.delete(queue.getSchema())
                                         .where(queue.getUuidColumn().getSchema().opEqual(
                                                 new UUID(queueUuid.getValue())))
@@ -97,7 +94,7 @@ public class QueueRemovedCommand implements TransactCommand {
         }
     }
 
-    private Uuid getQueueUuid(List<Queues> operQueues, Uri queueId) {
+    private Uuid getQueueUuid(final List<Queues> operQueues, final Uri queueId) {
         if (operQueues != null && !operQueues.isEmpty()) {
             for (Queues queueEntry : operQueues) {
                 if (queueEntry.getQueueId().equals(queueId)) {

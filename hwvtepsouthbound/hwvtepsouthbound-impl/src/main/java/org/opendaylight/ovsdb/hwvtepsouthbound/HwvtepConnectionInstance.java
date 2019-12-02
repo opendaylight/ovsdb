@@ -68,7 +68,7 @@ public class HwvtepConnectionInstance {
     private final HwvtepTableReader hwvtepTableReader;
     private InstanceIdentifier<Node> instanceIdentifier;
     private final TransactionInvoker txInvoker;
-    private Map<DatabaseSchema,TransactInvoker> transactInvokers;
+    private Map<TypedDatabaseSchema, TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
     private volatile boolean hasDeviceOwnership = false;
     private Entity connectedEntity;
@@ -170,9 +170,9 @@ public class HwvtepConnectionInstance {
         if (transactInvokers == null) {
             try {
                 transactInvokers = new HashMap<>();
-                DatabaseSchema dbSchema = getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
+                TypedDatabaseSchema dbSchema = getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
                 if (dbSchema != null) {
-                    transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
+                    transactInvokers.put(dbSchema, new TransactInvokerImpl(this, dbSchema));
                 }
             } catch (InterruptedException | ExecutionException e) {
                 LOG.warn("Exception attempting to createTransactionInvokers {}", connectionInfo, e);

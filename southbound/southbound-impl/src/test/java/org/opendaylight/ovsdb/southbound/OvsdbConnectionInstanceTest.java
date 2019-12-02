@@ -134,7 +134,7 @@ public class OvsdbConnectionInstanceTest {
         getField(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , null);
 
         ListenableFuture<DatabaseSchema> listenableDbSchema = mock(ListenableFuture.class);
-        DatabaseSchema dbSchema = mock(DatabaseSchema.class);
+        TypedDatabaseSchema dbSchema = mock(TypedDatabaseSchema.class);
         doReturn(listenableDbSchema).when(ovsdbConnectionInstance).getSchema(anyString());
         when(listenableDbSchema.get()).thenReturn(dbSchema);
 

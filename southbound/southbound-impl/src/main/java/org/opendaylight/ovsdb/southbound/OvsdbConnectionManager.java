@@ -45,8 +45,8 @@ import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.Select;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
@@ -500,40 +500,34 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     }
 
-    private OpenVSwitch getOpenVswitchTableEntry(final OvsdbConnectionInstance connectionInstance) {
-        DatabaseSchema dbSchema = null;
-        OpenVSwitch openVSwitchRow = null;
+    private static OpenVSwitch getOpenVswitchTableEntry(final OvsdbConnectionInstance connectionInstance) {
+        final TypedDatabaseSchema dbSchema;
         try {
             dbSchema = connectionInstance.getSchema(OvsdbSchemaContants.DATABASE_NAME).get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Not able to fetch schema for database {} from device {}",
                     OvsdbSchemaContants.DATABASE_NAME,connectionInstance.getConnectionInfo(),e);
+            return null;
         }
-        if (dbSchema != null) {
-            GenericTableSchema openVSwitchSchema = TyperUtils.getTableSchema(dbSchema, OpenVSwitch.class);
 
-            List<String> openVSwitchTableColumn = new ArrayList<>();
-            openVSwitchTableColumn.addAll(openVSwitchSchema.getColumns());
-            Select<GenericTableSchema> selectOperation = op.select(openVSwitchSchema);
-            selectOperation.setColumns(openVSwitchTableColumn);
+        final GenericTableSchema openVSwitchSchema = dbSchema.getTableSchema(OpenVSwitch.class);
+        final Select<GenericTableSchema> selectOperation = op.select(openVSwitchSchema);
+        selectOperation.setColumns(new ArrayList<>(openVSwitchSchema.getColumns()));
 
-            List<Operation> operations = new ArrayList<>();
-            operations.add(selectOperation);
-            operations.add(op.comment("Fetching Open_VSwitch table rows"));
-            try {
-                List<OperationResult> results = connectionInstance.transact(dbSchema, operations).get();
-                if (results != null) {
-                    OperationResult selectResult = results.get(0);
-                    openVSwitchRow = TyperUtils.getTypedRowWrapper(
-                            dbSchema,OpenVSwitch.class,selectResult.getRows().get(0));
-
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                LOG.warn("Not able to fetch OpenVswitch table row from device {}",
-                        connectionInstance.getConnectionInfo(),e);
-            }
+        List<Operation> operations = new ArrayList<>();
+        operations.add(selectOperation);
+        operations.add(op.comment("Fetching Open_VSwitch table rows"));
+        final List<OperationResult> results;
+        try {
+            results = connectionInstance.transact(dbSchema, operations).get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.warn("Not able to fetch OpenVswitch table row from device {}", connectionInstance.getConnectionInfo(),
+                e);
+            return null;
         }
-        return openVSwitchRow;
+
+        return results == null || results.isEmpty() ? null
+                : TyperUtils.getTypedRowWrapper(dbSchema, OpenVSwitch.class, results.get(0).getRows().get(0));
     }
 
     private Entity getEntityFromConnectionInstance(@NonNull final OvsdbConnectionInstance ovsdbConnectionInstance) {

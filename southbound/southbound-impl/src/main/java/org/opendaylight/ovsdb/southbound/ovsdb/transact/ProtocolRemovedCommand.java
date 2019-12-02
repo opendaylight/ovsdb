@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
@@ -20,7 +19,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
@@ -36,22 +34,23 @@ public class ProtocolRemovedCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(ProtocolRemovedCommand.class);
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractRemoved(events, ProtocolEntry.class),
                 TransactUtils.extractCreatedOrUpdatedOrRemoved(events, OvsdbBridgeAugmentation.class));
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractRemoved(modifications, ProtocolEntry.class),
                 TransactUtils.extractCreatedOrUpdatedOrRemoved(modifications, OvsdbBridgeAugmentation.class));
     }
 
-    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Set<InstanceIdentifier<ProtocolEntry>> removed,
-                         Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updatedBridges) {
+    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Set<InstanceIdentifier<ProtocolEntry>> removed,
+            final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updatedBridges) {
         for (InstanceIdentifier<ProtocolEntry> protocolIid : removed) {
             InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid =
                     protocolIid.firstIdentifierOf(OvsdbBridgeAugmentation.class);
@@ -61,7 +60,7 @@ public class ProtocolRemovedCommand implements TransactCommand {
                     && protocolEntryOptional.isPresent()) {
                 ProtocolEntry protocolEntry = protocolEntryOptional.get();
                 if (protocolEntry != null && protocolEntry.getProtocol() != null) {
-                    Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
+                    Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
                     String protocolString = SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocolEntry.getProtocol());
                     if (protocolString != null) {
                         bridge.setProtocols(Collections.singleton(protocolString));

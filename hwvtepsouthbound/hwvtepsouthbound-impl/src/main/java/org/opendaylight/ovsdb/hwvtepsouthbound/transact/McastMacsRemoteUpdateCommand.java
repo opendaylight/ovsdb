@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
@@ -24,7 +23,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -40,13 +38,13 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsRemoteUpdateCommand.class);
     private static final McastMacUnMetDependencyGetter MCAST_MAC_DATA_VALIDATOR = new McastMacUnMetDependencyGetter();
 
-    public McastMacsRemoteUpdateCommand(HwvtepOperationalState state,
-            Collection<DataTreeModification<Node>> changes) {
+    public McastMacsRemoteUpdateCommand(final HwvtepOperationalState state,
+            final Collection<DataTreeModification<Node>> changes) {
         super(state, changes);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction) {
+    public void execute(final TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, List<RemoteMcastMacs>> updateds =
                 extractUpdated(getChanges(),RemoteMcastMacs.class);
         if (!updateds.isEmpty()) {
@@ -57,8 +55,8 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
         }
     }
 
-    private void updateMcastMacRemote(TransactionBuilder transaction,
-            InstanceIdentifier<Node> instanceIdentifier, List<RemoteMcastMacs> macList) {
+    private void updateMcastMacRemote(final TransactionBuilder transaction,
+            final InstanceIdentifier<Node> instanceIdentifier, final List<RemoteMcastMacs> macList) {
         for (RemoteMcastMacs mac: macList) {
             //add / update only if locator set got changed
             if (!HwvtepSouthboundUtil.isEmpty(mac.getLocatorSet())) {
@@ -68,27 +66,26 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    public void onConfigUpdate(TransactionBuilder transaction,
-                                  InstanceIdentifier<Node> nodeIid,
-                                  RemoteMcastMacs remoteMcastMac,
-                                  InstanceIdentifier macKey,
-                                  Object... extraData) {
+    public void onConfigUpdate(final TransactionBuilder transaction,
+                               final InstanceIdentifier<Node> nodeIid,
+                               final RemoteMcastMacs remoteMcastMac,
+                               final InstanceIdentifier macKey,
+                               final Object... extraData) {
         InstanceIdentifier<RemoteMcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
                 .child(RemoteMcastMacs.class, remoteMcastMac.key());
         processDependencies(MCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteMcastMac);
     }
 
     @Override
-    public void doDeviceTransaction(TransactionBuilder transaction,
-                                       InstanceIdentifier<Node> instanceIdentifier,
-                                       RemoteMcastMacs mac,
-                                       InstanceIdentifier macKey,
-                                       Object... extraData) {
+    public void doDeviceTransaction(final TransactionBuilder transaction,
+                                       final InstanceIdentifier<Node> instanceIdentifier,
+                                       final RemoteMcastMacs mac,
+                                       final InstanceIdentifier macKey,
+                                       final Object... extraData) {
         LOG.debug("Creating remoteMcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
         final HwvtepDeviceInfo.DeviceData operationalMacOptional =
                 getDeviceInfo().getDeviceOperData(RemoteMcastMacs.class, macKey);
-        McastMacsRemote mcastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                McastMacsRemote.class);
+        McastMacsRemote mcastMacsRemote = transaction.getTypedRowWrapper(McastMacsRemote.class);
         setIpAddress(mcastMacsRemote, mac);
         setLocatorSet(transaction, mcastMacsRemote, mac);
         setLogicalSwitch(transaction, mcastMacsRemote, mac);
@@ -101,8 +98,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             updateControllerTxHistory(TransactionType.ADD, mcastMacsRemote);
         } else if (operationalMacOptional.getUuid() != null) {
             UUID macEntryUUID = operationalMacOptional.getUuid();
-            McastMacsRemote extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                    McastMacsRemote.class, null);
+            McastMacsRemote extraMac = transaction.getTypedRowSchema(McastMacsRemote.class);
             extraMac.getUuidColumn().setData(macEntryUUID);
             LOG.trace("execute: update RemoteMcastMac entry: {}", mcastMacsRemote);
             transaction.add(op.update(mcastMacsRemote)
@@ -129,8 +125,8 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
         }
     }
 
-    private void setLocatorSet(TransactionBuilder transaction, McastMacsRemote mcastMacsRemote,
-            RemoteMcastMacs inputMac) {
+    private void setLocatorSet(final TransactionBuilder transaction, final McastMacsRemote mcastMacsRemote,
+            final RemoteMcastMacs inputMac) {
         if (inputMac.getLocatorSet() != null && !inputMac.getLocatorSet().isEmpty()) {
             UUID locatorSetUuid = TransactUtils.createPhysicalLocatorSet(getOperationalState(),
                     transaction, inputMac.getLocatorSet());
@@ -138,13 +134,13 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
         }
     }
 
-    private void setIpAddress(McastMacsRemote mcastMacsRemote, RemoteMcastMacs inputMac) {
+    private void setIpAddress(final McastMacsRemote mcastMacsRemote, final RemoteMcastMacs inputMac) {
         if (inputMac.getIpaddr() != null) {
             mcastMacsRemote.setIpAddress(inputMac.getIpaddr().getIpv4Address().getValue());
         }
     }
 
-    private void setMac(McastMacsRemote mcastMacsRemote, RemoteMcastMacs inputMac) {
+    private void setMac(final McastMacsRemote mcastMacsRemote, final RemoteMcastMacs inputMac) {
         if (inputMac.getMacEntryKey() != null) {
             if (inputMac.getMacEntryKey().equals(HwvtepSouthboundConstants.UNKNOWN_DST_MAC)) {
                 mcastMacsRemote.setMac(HwvtepSouthboundConstants.UNKNOWN_DST_STRING);
@@ -155,19 +151,19 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    protected List<RemoteMcastMacs> getData(HwvtepGlobalAugmentation augmentation) {
+    protected List<RemoteMcastMacs> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getRemoteMcastMacs();
     }
 
     @Override
-    protected boolean areEqual(RemoteMcastMacs macs1, RemoteMcastMacs macs2) {
+    protected boolean areEqual(final RemoteMcastMacs macs1, final RemoteMcastMacs macs2) {
         return macs1.key().equals(macs2.key()) && Objects.equals(macs1.getLocatorSet(), macs2.getLocatorSet());
     }
 
     static class McastMacUnMetDependencyGetter extends UnMetDependencyGetter<RemoteMcastMacs> {
 
         @Override
-        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(RemoteMcastMacs data) {
+        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final RemoteMcastMacs data) {
             if (data == null) {
                 return Collections.emptyList();
             }
@@ -175,7 +171,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
         }
 
         @Override
-        public List<InstanceIdentifier<?>> getTerminationPointDependencies(RemoteMcastMacs data) {
+        public List<InstanceIdentifier<?>> getTerminationPointDependencies(final RemoteMcastMacs data) {
             if (data == null || HwvtepSouthboundUtil.isEmpty(data.getLocatorSet())) {
                 return Collections.emptyList();
             }
@@ -188,7 +184,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     }
 
     @SuppressFBWarnings("UC_USELESS_OBJECT")
-    private void updateLocatorRefCounts(MdsalUpdate mdsalUpdate) {
+    private void updateLocatorRefCounts(final MdsalUpdate mdsalUpdate) {
         //decrement the refcounts from old mcast mac
         //increment the refcounts for new mcast mac
         RemoteMcastMacs newMac = (RemoteMcastMacs) mdsalUpdate.getNewData();

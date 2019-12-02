@@ -20,7 +20,6 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Queue;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
@@ -42,21 +41,23 @@ public class QueueUpdateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(QueueUpdateCommand.class);
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, Queues.class),
                 instanceIdentifierCodec);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, Queues.class),
                 instanceIdentifierCodec);
     }
 
-    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Map<InstanceIdentifier<Queues>, Queues> createdOrUpdated, InstanceIdentifierCodec instanceIdentifierCodec) {
+    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Map<InstanceIdentifier<Queues>, Queues> createdOrUpdated,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         for (Entry<InstanceIdentifier<Queues>, Queues> queueMapEntry: createdOrUpdated.entrySet()) {
             InstanceIdentifier<OvsdbNodeAugmentation> iid =
                     queueMapEntry.getKey().firstIdentifierOf(OvsdbNodeAugmentation.class);
@@ -65,7 +66,7 @@ public class QueueUpdateCommand implements TransactCommand {
             }
 
             Queues queueEntry = queueMapEntry.getValue();
-            Queue queue = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Queue.class);
+            Queue queue = transaction.getTypedRowWrapper(Queue.class);
 
             if (queueEntry.getDscp() != null) {
                 try {
@@ -110,8 +111,7 @@ public class QueueUpdateCommand implements TransactCommand {
                         namedUuid, operNode);
             } else {
                 UUID uuid = new UUID(operQueueUuid.getValue());
-                Queue extraQueue = TyperUtils.getTypedRowWrapper(
-                        transaction.getDatabaseSchema(), Queue.class, null);
+                Queue extraQueue = transaction.getTypedRowSchema(Queue.class);
                 extraQueue.getUuidColumn().setData(uuid);
                 transaction.add(op.update(queue)
                         .where(extraQueue.getUuidColumn().getSchema().opEqual(uuid)).build());
@@ -121,7 +121,7 @@ public class QueueUpdateCommand implements TransactCommand {
         }
     }
 
-    private Uuid getQueueEntryUuid(List<Queues> operQueues, Uri queueId) {
+    private static Uuid getQueueEntryUuid(final List<Queues> operQueues, final Uri queueId) {
         if (operQueues != null && !operQueues.isEmpty()) {
             for (Queues queueEntry : operQueues) {
                 if (queueEntry.getQueueId().equals(queueId)) {

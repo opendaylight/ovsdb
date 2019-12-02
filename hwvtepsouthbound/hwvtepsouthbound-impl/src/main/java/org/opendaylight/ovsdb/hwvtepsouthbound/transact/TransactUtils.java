@@ -26,7 +26,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocatorSet;
 import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
@@ -52,7 +51,7 @@ public final class TransactUtils {
     private TransactUtils(){
     }
 
-    public static Node getCreated(DataObjectModification<Node> mod) {
+    public static Node getCreated(final DataObjectModification<Node> mod) {
         if (mod.getModificationType() == ModificationType.WRITE
                         && mod.getDataBefore() == null) {
             return mod.getDataAfter();
@@ -60,14 +59,14 @@ public final class TransactUtils {
         return null;
     }
 
-    public static Node getRemoved(DataObjectModification<Node> mod) {
+    public static Node getRemoved(final DataObjectModification<Node> mod) {
         if (mod.getModificationType() == ModificationType.DELETE) {
             return mod.getDataBefore();
         }
         return null;
     }
 
-    public static Node getUpdated(DataObjectModification<Node> mod) {
+    public static Node getUpdated(final DataObjectModification<Node> mod) {
         Node node = null;
         switch (mod.getModificationType()) {
             case SUBTREE_MODIFIED:
@@ -84,7 +83,7 @@ public final class TransactUtils {
         return node;
     }
 
-    public static Node getOriginal(DataObjectModification<Node> mod) {
+    public static Node getOriginal(final DataObjectModification<Node> mod) {
         Node node = null;
         switch (mod.getModificationType()) {
             case SUBTREE_MODIFIED:
@@ -104,7 +103,7 @@ public final class TransactUtils {
 
     //TODO: change this function to be generic
     public static Map<InstanceIdentifier<Node>, Node> extractCreatedOrUpdatedOrRemoved(
-            Collection<DataTreeModification<Node>> changes, Class<Node> class1) {
+            final Collection<DataTreeModification<Node>> changes, final Class<Node> class1) {
         Map<InstanceIdentifier<Node>, Node> result = new HashMap<>();
         for (DataTreeModification<Node> change : changes) {
             final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
@@ -125,10 +124,10 @@ public final class TransactUtils {
         return result;
     }
 
-    public static UUID createPhysicalLocatorSet(HwvtepOperationalState hwvtepOperationalState,
-            TransactionBuilder transaction, List<LocatorSet> locatorList) {
+    public static UUID createPhysicalLocatorSet(final HwvtepOperationalState hwvtepOperationalState,
+            final TransactionBuilder transaction, final List<LocatorSet> locatorList) {
         Set<UUID> locators = new HashSet<>();
-        Set<String> locatorsInfo = new HashSet<String>();
+        Set<String> locatorsInfo = new HashSet<>();
         for (LocatorSet locator: locatorList) {
             @SuppressWarnings("unchecked")
             InstanceIdentifier<TerminationPoint> iid =
@@ -139,8 +138,7 @@ public final class TransactUtils {
                 addLocatorToTransactionHistory(hwvtepOperationalState, locatorsInfo, iid);
             }
         }
-        PhysicalLocatorSet physicalLocatorSet = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                PhysicalLocatorSet.class);
+        PhysicalLocatorSet physicalLocatorSet = transaction.getTypedRowWrapper(PhysicalLocatorSet.class);
         physicalLocatorSet.setLocators(locators);
         String locatorSetUuid = "PhysicalLocatorSet_" + HwvtepSouthboundMapper.getRandomUUID();
         transaction.add(op.insert(physicalLocatorSet).withId(locatorSetUuid));
@@ -150,8 +148,9 @@ public final class TransactUtils {
         return new UUID(locatorSetUuid);
     }
 
-    public static UUID createPhysicalLocator(TransactionBuilder transaction, HwvtepOperationalState operationalState,
-                                             InstanceIdentifier<TerminationPoint> iid) {
+    public static UUID createPhysicalLocator(final TransactionBuilder transaction,
+                                             final HwvtepOperationalState operationalState,
+                                             final InstanceIdentifier<TerminationPoint> iid) {
         UUID locatorUuid = null;
         HwvtepDeviceInfo.DeviceData deviceData = operationalState.getDeviceInfo().getDeviceOperData(
                 TerminationPoint.class, iid);
@@ -176,12 +175,11 @@ public final class TransactUtils {
         return locatorUuid;
     }
 
-    public static UUID createPhysicalLocator(TransactionBuilder transaction,
-                                             HwvtepPhysicalLocatorAugmentation inputLocator,
-                                             HwvtepOperationalState hwvtepOperationalState) {
+    public static UUID createPhysicalLocator(final TransactionBuilder transaction,
+                                             final HwvtepPhysicalLocatorAugmentation inputLocator,
+                                             final HwvtepOperationalState hwvtepOperationalState) {
         LOG.debug("Creating a physical locator: {}", inputLocator.getDstIp());
-        PhysicalLocator physicalLocator = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                PhysicalLocator.class);
+        PhysicalLocator physicalLocator = transaction.getTypedRowWrapper(PhysicalLocator.class);
         setEncapsulationType(physicalLocator, inputLocator);
         setDstIp(physicalLocator, inputLocator);
         String locatorUuid = "PhysicalLocator_" + HwvtepSouthboundMapper.getRandomUUID();
@@ -191,8 +189,8 @@ public final class TransactUtils {
         return new UUID(locatorUuid);
     }
 
-    private static void setEncapsulationType(PhysicalLocator physicalLocator,
-            HwvtepPhysicalLocatorAugmentation inputLocator) {
+    private static void setEncapsulationType(final PhysicalLocator physicalLocator,
+            final HwvtepPhysicalLocatorAugmentation inputLocator) {
         if (inputLocator.getEncapsulationType() != null) {
             String encapType = HwvtepSouthboundConstants.ENCAPS_TYPE_MAP.get(
                     HwvtepSouthboundMapper.createEncapsulationType(""));
@@ -200,27 +198,27 @@ public final class TransactUtils {
         }
     }
 
-    private static void setDstIp(PhysicalLocator physicalLocator,
-            HwvtepPhysicalLocatorAugmentation inputLocator) {
+    private static void setDstIp(final PhysicalLocator physicalLocator,
+            final HwvtepPhysicalLocatorAugmentation inputLocator) {
         if (inputLocator.getDstIp() != null) {
             physicalLocator.setDstIp(inputLocator.getDstIp().getIpv4Address().getValue());
         }
     }
 
-    static String sanitizeUUID(HwvtepNodeName hwvtepNodeName) {
+    static String sanitizeUUID(final HwvtepNodeName hwvtepNodeName) {
         return sanitizeUUID(hwvtepNodeName.getValue());
     }
 
-    static String sanitizeUUID(String nodeName) {
+    static String sanitizeUUID(final String nodeName) {
         //ovs is not accepting '-' in the named uuids
         return nodeName.replaceAll("-", "_");
     }
 
-    public static String getLogicalSwitchId(LogicalSwitches lswitch) {
+    public static String getLogicalSwitchId(final LogicalSwitches lswitch) {
         return HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX + sanitizeUUID(lswitch.getHwvtepNodeName());
     }
 
-    public static UUID getLogicalSwitchUUID(InstanceIdentifier<LogicalSwitches> lswitchIid) {
+    public static UUID getLogicalSwitchUUID(final InstanceIdentifier<LogicalSwitches> lswitchIid) {
         return new UUID(HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX
                 + sanitizeUUID(lswitchIid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName()));
     }
@@ -261,8 +259,8 @@ public final class TransactUtils {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private static void addLocatorToTransactionHistory(HwvtepOperationalState hwvtepOperationalState,
-                                                 Set<String> locatorsInfo, InstanceIdentifier<TerminationPoint> iid) {
+    private static void addLocatorToTransactionHistory(final HwvtepOperationalState hwvtepOperationalState,
+            final Set<String> locatorsInfo, final InstanceIdentifier<TerminationPoint> iid) {
         try {
             HwvtepDeviceInfo.DeviceData deviceData = hwvtepOperationalState.getDeviceInfo().getDeviceOperData(
                     TerminationPoint.class, iid);

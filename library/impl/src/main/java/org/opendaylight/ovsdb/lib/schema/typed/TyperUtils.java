@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.schema.typed;
 
 import com.google.common.base.Objects;
@@ -23,6 +22,7 @@ import org.opendaylight.ovsdb.lib.error.TableSchemaNotFoundException;
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.error.UnsupportedMethodException;
 import org.opendaylight.ovsdb.lib.message.TableUpdate;
+import org.opendaylight.ovsdb.lib.message.TableUpdate.RowUpdate;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
@@ -47,7 +47,7 @@ public final class TyperUtils {
         // Prevent instantiating a utility class
     }
 
-    private static <T> String getTableName(Class<T> klazz) {
+    private static <T> String getTableName(final Class<T> klazz) {
         TypedTable typedTable = klazz.getAnnotation(TypedTable.class);
         if (typedTable != null) {
             return typedTable.name();
@@ -63,17 +63,17 @@ public final class TyperUtils {
      *     using their {@link TypedTable} annotation, if they have one, or by name.
      * @return the table schema.
      */
-    public static GenericTableSchema getTableSchema(DatabaseSchema dbSchema, Class<?> klazz) {
+    public static GenericTableSchema getTableSchema(final DatabaseSchema dbSchema, final Class<?> klazz) {
         String tableName = getTableName(klazz);
         return dbSchema.table(tableName, GenericTableSchema.class);
     }
 
     public static ColumnSchema<GenericTableSchema, Object>
-        getColumnSchema(GenericTableSchema tableSchema, String columnName, Class<Object> metaClass) {
+        getColumnSchema(final GenericTableSchema tableSchema, final String columnName, final Class<Object> metaClass) {
         return tableSchema.column(columnName, metaClass);
     }
 
-    private static String getColumnName(Method method) {
+    private static String getColumnName(final Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.name();
@@ -97,12 +97,12 @@ public final class TyperUtils {
         return null;
     }
 
-    private static boolean isGetTableSchema(Method method) {
+    private static boolean isGetTableSchema(final Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         return typedColumn != null && typedColumn.method().equals(MethodType.GETTABLESCHEMA);
     }
 
-    private static boolean isGetRow(Method method) {
+    private static boolean isGetRow(final Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.method().equals(MethodType.GETROW);
@@ -111,7 +111,7 @@ public final class TyperUtils {
         return method.getName().startsWith(GET_STARTS_WITH) && method.getName().endsWith(GETROW_ENDS_WITH);
     }
 
-    private static boolean isGetColumn(Method method) {
+    private static boolean isGetColumn(final Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.method().equals(MethodType.GETCOLUMN);
@@ -120,7 +120,7 @@ public final class TyperUtils {
         return method.getName().startsWith(GET_STARTS_WITH) && method.getName().endsWith(GETCOLUMN_ENDS_WITH);
     }
 
-    private static boolean isGetData(Method method) {
+    private static boolean isGetData(final Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.method().equals(MethodType.GETDATA);
@@ -129,7 +129,7 @@ public final class TyperUtils {
         return method.getName().startsWith(GET_STARTS_WITH) && !method.getName().endsWith(GETCOLUMN_ENDS_WITH);
     }
 
-    private static boolean isSetData(Method method) {
+    private static boolean isSetData(final Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return typedColumn.method().equals(MethodType.SETDATA);
@@ -138,7 +138,7 @@ public final class TyperUtils {
         return method.getName().startsWith(SET_STARTS_WITH);
     }
 
-    public static Version getColumnFromVersion(Method method) {
+    public static Version getColumnFromVersion(final Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return Version.fromString(typedColumn.fromVersion());
@@ -154,7 +154,7 @@ public final class TyperUtils {
         return Version.NULL;
     }
 
-    public static Version getColumnUntilVersion(Method method) {
+    public static Version getColumnUntilVersion(final Method method) {
         TypedColumn typedColumn = method.getAnnotation(TypedColumn.class);
         if (typedColumn != null) {
             return Version.fromString(typedColumn.untilVersion());
@@ -179,7 +179,7 @@ public final class TyperUtils {
      * @param klazz Typed Class that represents a Table
      * @return true if valid, false otherwise
      */
-    private static <T> boolean isValid(DatabaseSchema dbSchema, final Class<T> klazz) {
+    private static <T> boolean isValid(final DatabaseSchema dbSchema, final Class<T> klazz) {
         if (dbSchema == null) {
             return false;
         }
@@ -194,21 +194,22 @@ public final class TyperUtils {
         return true;
     }
 
-    private static void checkColumnSchemaVersion(DatabaseSchema dbSchema, Method method) {
+    private static void checkColumnSchemaVersion(final DatabaseSchema dbSchema, final Method method) {
         Version fromVersion = getColumnFromVersion(method);
         Version untilVersion = getColumnUntilVersion(method);
         Version schemaVersion = dbSchema.getVersion();
         checkVersion(schemaVersion, fromVersion, untilVersion);
     }
 
-    private static <T> void checkTableSchemaVersion(DatabaseSchema dbSchema, Class<T> klazz) {
+    private static <T> void checkTableSchemaVersion(final DatabaseSchema dbSchema, final Class<T> klazz) {
         Version fromVersion = getTableFromVersion(klazz);
         Version untilVersion = getTableUntilVersion(klazz);
         Version schemaVersion = dbSchema.getVersion();
         checkVersion(schemaVersion, fromVersion, untilVersion);
     }
 
-    private static void checkVersion(Version schemaVersion, Version fromVersion, Version untilVersion) {
+    private static void checkVersion(final Version schemaVersion, final Version fromVersion,
+            final Version untilVersion) {
         if (!fromVersion.equals(Version.NULL) && schemaVersion.compareTo(fromVersion) < 0 || !untilVersion.equals(
                 Version.NULL) && schemaVersion.compareTo(untilVersion) > 0) {
             throw new SchemaVersionMismatchException(schemaVersion, fromVersion, untilVersion);
@@ -264,7 +265,7 @@ public final class TyperUtils {
             row.setTableSchema(getTableSchema(dbSchema, klazz));
         }
         return Reflection.newProxy(klazz, new InvocationHandler() {
-            private Object processGetData(Method method) {
+            private Object processGetData(final Method method) {
                 String columnName = getColumnName(method);
                 checkColumnSchemaVersion(dbSchema, method);
                 if (columnName == null) {
@@ -292,7 +293,7 @@ public final class TyperUtils {
                 return row;
             }
 
-            private Object processGetColumn(Method method) {
+            private Object processGetColumn(final Method method) {
                 String columnName = getColumnName(method);
                 checkColumnSchemaVersion(dbSchema, method);
                 if (columnName == null) {
@@ -318,7 +319,7 @@ public final class TyperUtils {
                 return row.getColumn(columnSchema);
             }
 
-            private Object processSetData(Object proxy, Method method, Object[] args) {
+            private Object processSetData(final Object proxy, final Method method, final Object[] args) {
                 if (args == null || args.length != 1) {
                     throw new TyperException("Setter method : " + method.getName() + " requires 1 argument");
                 }
@@ -343,23 +344,23 @@ public final class TyperUtils {
                 return getTableSchema(dbSchema, klazz);
             }
 
-            private Boolean isHashCodeMethod(Method method, Object[] args) {
+            private Boolean isHashCodeMethod(final Method method, final Object[] args) {
                 return (args == null || args.length == 0) && method.getName().equals("hashCode");
             }
 
-            private Boolean isEqualsMethod(Method method, Object[] args) {
+            private Boolean isEqualsMethod(final Method method, final Object[] args) {
                 return args != null
                         && args.length == 1
                         && method.getName().equals("equals")
                         && Object.class.equals(method.getParameterTypes()[0]);
             }
 
-            private Boolean isToStringMethod(Method method, Object[] args) {
+            private Boolean isToStringMethod(final Method method, final Object[] args) {
                 return (args == null || args.length == 0) && method.getName().equals("toString");
             }
 
             @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
+            public Object invoke(final Object proxy, final Method method, final Object[] args) throws Exception {
                 if (isGetTableSchema(method)) {
                     return processGetTableSchema();
                 } else if (isGetRow(method)) {
@@ -382,7 +383,7 @@ public final class TyperUtils {
 
             @Override
             @SuppressFBWarnings({"EQ_CHECK_FOR_OPERAND_NOT_COMPATIBLE_WITH_THIS", "EQ_UNUSUAL"})
-            public boolean equals(Object obj) {
+            public boolean equals(final Object obj) {
                 if (!(obj instanceof TypedBaseTable)) {
                     return false;
                 }
@@ -427,14 +428,13 @@ public final class TyperUtils {
      * @param dbSchema Dbschema for the TableUpdates
      * @return Map&lt;UUID,T&gt; for the type of things being sought
      */
-    public static <T> Map<UUID,T> extractRowsUpdated(Class<T> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
+    public static <T> Map<UUID,T> extractRowsUpdated(final Class<T> klazz, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         Preconditions.checkNotNull(klazz);
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);
-        Map<UUID,T> result = new HashMap<>();
-        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates =
-                extractRowUpdates(klazz,updates,dbSchema);
-        for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
+        Map<UUID, T> result = new HashMap<>();
+        for (RowUpdate<GenericTableSchema> rowUpdate : extractRowUpdates(klazz, updates, dbSchema).values()) {
             if (rowUpdate != null && rowUpdate.getNew() != null) {
                 Row<GenericTableSchema> row = rowUpdate.getNew();
                 result.put(rowUpdate.getUuid(),TyperUtils.getTypedRowWrapper(dbSchema,klazz,row));
@@ -456,14 +456,13 @@ public final class TyperUtils {
      * @param dbSchema Dbschema for the TableUpdates
      * @return Map&lt;UUID,T&gt; for the type of things being sought
      */
-    public static <T> Map<UUID, T> extractRowsOld(Class<T> klazz, TableUpdates updates, DatabaseSchema dbSchema) {
+    public static <T> Map<UUID, T> extractRowsOld(final Class<T> klazz, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         Preconditions.checkNotNull(klazz);
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);
-        Map<UUID,T> result = new HashMap<>();
-        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates =
-                extractRowUpdates(klazz,updates,dbSchema);
-        for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
+        Map<UUID, T> result = new HashMap<>();
+        for (RowUpdate<GenericTableSchema> rowUpdate : extractRowUpdates(klazz, updates, dbSchema).values()) {
             if (rowUpdate != null && rowUpdate.getOld() != null) {
                 Row<GenericTableSchema> row = rowUpdate.getOld();
                 result.put(rowUpdate.getUuid(),TyperUtils.getTypedRowWrapper(dbSchema,klazz,row));
@@ -485,14 +484,13 @@ public final class TyperUtils {
      * @param dbSchema Dbschema for the TableUpdates
      * @return Map&lt;UUID,T&gt; for the type of things being sought
      */
-    public static <T> Map<UUID,T> extractRowsRemoved(Class<T> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
+    public static <T> Map<UUID,T> extractRowsRemoved(final Class<T> klazz,
+            final TableUpdates updates, final DatabaseSchema dbSchema) {
         Preconditions.checkNotNull(klazz);
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);
-        Map<UUID,T> result = new HashMap<>();
-        Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rowUpdates =
-                extractRowUpdates(klazz,updates,dbSchema);
-        for (TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema> rowUpdate : rowUpdates.values()) {
+        Map<UUID, T> result = new HashMap<>();
+        for (RowUpdate<GenericTableSchema> rowUpdate : extractRowUpdates(klazz,updates,dbSchema).values()) {
             if (rowUpdate != null && rowUpdate.getNew() == null && rowUpdate.getOld() != null) {
                 Row<GenericTableSchema> row = rowUpdate.getOld();
                 result.put(rowUpdate.getUuid(),TyperUtils.getTypedRowWrapper(dbSchema,klazz,row));
@@ -516,16 +514,15 @@ public final class TyperUtils {
      * @return Map&lt;UUID,TableUpdate&lt;GenericTableSchema&gt;.RowUpdate&lt;GenericTableSchema&gt;&gt;
      *     for the type of things being sought
      */
-    public static Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>>
-        extractRowUpdates(Class<?> klazz,TableUpdates updates,DatabaseSchema dbSchema) {
+    public static Map<UUID, RowUpdate<GenericTableSchema>> extractRowUpdates(final Class<?> klazz,
+            final TableUpdates updates, final DatabaseSchema dbSchema) {
         Preconditions.checkNotNull(klazz);
         Preconditions.checkNotNull(updates);
         Preconditions.checkNotNull(dbSchema);
-        Map<UUID, TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> result =
-                new HashMap<>();
+        Map<UUID, RowUpdate<GenericTableSchema>> result = new HashMap<>();
         TableUpdate<GenericTableSchema> update = updates.getUpdate(TyperUtils.getTableSchema(dbSchema, klazz));
         if (update != null) {
-            Map<UUID, TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> rows = update.getRows();
+            Map<UUID, RowUpdate<GenericTableSchema>> rows = update.getRows();
             if (rows != null) {
                 result = rows;
             }

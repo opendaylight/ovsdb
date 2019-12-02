@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.message;
 
 import java.util.HashMap;
@@ -15,18 +14,18 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 
 public class TableUpdate<E extends TableSchema<E>> {
-    private Map<UUID, RowUpdate<E>> rows;
+    private final Map<UUID, RowUpdate<E>> rows = new HashMap<>();
 
     public Map<UUID, RowUpdate<E>> getRows() {
         return rows;
     }
 
-    public class RowUpdate<E extends TableSchema<E>> {
-        private UUID uuid;
+    public static class RowUpdate<E extends TableSchema<E>> {
+        private final UUID uuid;
         private Row<E> oldRow;
         private Row<E> newRow;
 
-        public RowUpdate(UUID uuid, Row<E> oldRow, Row<E> newRow) {
+        public RowUpdate(final UUID uuid, final Row<E> oldRow, final Row<E> newRow) {
             this.uuid = uuid;
             this.oldRow = oldRow;
             this.newRow = newRow;
@@ -40,7 +39,7 @@ public class TableUpdate<E extends TableSchema<E>> {
             return oldRow;
         }
 
-        public void setOld(Row<E> old) {
+        public void setOld(final Row<E> old) {
             this.oldRow = old;
         }
 
@@ -49,7 +48,7 @@ public class TableUpdate<E extends TableSchema<E>> {
         }
 
         @SuppressWarnings("checkstyle:HiddenField")
-        public void setNew(Row<E> newRow) {
+        public void setNew(final Row<E> newRow) {
             this.newRow = newRow;
         }
 
@@ -60,28 +59,18 @@ public class TableUpdate<E extends TableSchema<E>> {
         }
     }
 
-    public TableUpdate() {
-        rows = new HashMap<>();
-    }
-
-    public void addRow(UUID uuid, Row<E> oldRow, Row<E> newRow) {
+    public void addRow(final UUID uuid, final Row<E> oldRow, final Row<E> newRow) {
         rows.put(uuid, new RowUpdate<>(uuid, oldRow, newRow));
     }
 
-    public Row<E> getOld(UUID uuid) {
+    public Row<E> getOld(final UUID uuid) {
         RowUpdate<E> rowUpdate = rows.get(uuid);
-        if (rowUpdate == null) {
-            return null;
-        }
-        return rowUpdate.getOld();
+        return rowUpdate != null ? rowUpdate.getOld() : null;
     }
 
-    public Row<E> getNew(UUID uuid) {
+    public Row<E> getNew(final UUID uuid) {
         RowUpdate<E> rowUpdate = rows.get(uuid);
-        if (rowUpdate == null) {
-            return null;
-        }
-        return rowUpdate.getNew();
+        return rowUpdate != null ? rowUpdate.getNew() : null;
     }
 
     @Override

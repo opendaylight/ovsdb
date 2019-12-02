@@ -17,11 +17,11 @@ public class ColumnSchemaNotFoundException extends RuntimeException {
         super(message);
     }
 
-    public ColumnSchemaNotFoundException(final String message, final Throwable cause) {
-        super(message, cause);
+    public ColumnSchemaNotFoundException(final String columnName, final String tableName) {
+        this("Unable to locate ColumnSchema for " +  columnName + " in " + tableName);
     }
 
-    public static String createMessage(final String columnName, final String tableName) {
-        return "Unable to locate ColumnSchema for " +  columnName + " in " + tableName;
+    public ColumnSchemaNotFoundException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 }

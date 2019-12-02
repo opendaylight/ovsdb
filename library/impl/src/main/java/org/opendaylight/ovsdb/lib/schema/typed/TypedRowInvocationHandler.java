@@ -48,15 +48,12 @@ final class TypedRowInvocationHandler implements InvocationHandler {
         }
         GenericTableSchema tableSchema = TyperUtils.getTableSchema(dbSchema, target);
         if (tableSchema == null) {
-            String message = TableSchemaNotFoundException.createMessage(TypedReflections.getTableName(target),
-                        dbSchema.getName());
-            throw new TableSchemaNotFoundException(message);
+            throw new TableSchemaNotFoundException(TypedReflections.getTableName(target), dbSchema.getName());
         }
         ColumnSchema<GenericTableSchema, Object> columnSchema =
                 TyperUtils.getColumnSchema(tableSchema, columnName, (Class<Object>) method.getReturnType());
         if (columnSchema == null) {
-            String message = ColumnSchemaNotFoundException.createMessage(columnName, tableSchema.getName());
-            throw new ColumnSchemaNotFoundException(message);
+            throw new ColumnSchemaNotFoundException(columnName, tableSchema.getName());
         }
         if (row == null || row.getColumn(columnSchema) == null) {
             return null;
@@ -76,15 +73,12 @@ final class TypedRowInvocationHandler implements InvocationHandler {
         }
         GenericTableSchema tableSchema = TyperUtils.getTableSchema(dbSchema, target);
         if (tableSchema == null) {
-            String message = TableSchemaNotFoundException.createMessage(TypedReflections.getTableName(target),
-                dbSchema.getName());
-            throw new TableSchemaNotFoundException(message);
+            throw new TableSchemaNotFoundException(TypedReflections.getTableName(target), dbSchema.getName());
         }
         ColumnSchema<GenericTableSchema, Object> columnSchema =
                 TyperUtils.getColumnSchema(tableSchema, columnName, (Class<Object>) method.getReturnType());
         if (columnSchema == null) {
-            String message = ColumnSchemaNotFoundException.createMessage(columnName, tableSchema.getName());
-            throw new ColumnSchemaNotFoundException(message);
+            throw new ColumnSchemaNotFoundException(columnName, tableSchema.getName());
         }
         // When the row is null, that might indicate that the user maybe interested
         // only in the ColumnSchema and not on the Data.

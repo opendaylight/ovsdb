@@ -17,11 +17,11 @@ public class TableSchemaNotFoundException extends RuntimeException {
         super(message);
     }
 
-    public TableSchemaNotFoundException(final String message, final Throwable cause) {
-        super(message, cause);
+    public TableSchemaNotFoundException(final String tableName, final String schemaName) {
+        this("Unable to locate TableSchema for " +  tableName + " in " + schemaName);
     }
 
-    public static String createMessage(final String tableName, final String schemaName) {
-        return "Unable to locate TableSchema for " +  tableName + " in " + schemaName;
+    public TableSchemaNotFoundException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 }

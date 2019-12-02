@@ -24,7 +24,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
@@ -43,13 +42,13 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortUpdateCommand.class);
     private static final VlanBindingsUnMetDependencyGetter DEPENDENCY_GETTER = new VlanBindingsUnMetDependencyGetter();
 
-    public PhysicalPortUpdateCommand(HwvtepOperationalState state,
-            Collection<DataTreeModification<Node>> changes) {
+    public PhysicalPortUpdateCommand(final HwvtepOperationalState state,
+            final Collection<DataTreeModification<Node>> changes) {
         super(state, changes);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction) {
+    public void execute(final TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> createds =
                 extractCreated(getChanges(),HwvtepPhysicalPortAugmentation.class);
         if (!createds.isEmpty()) {
@@ -80,14 +79,12 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                 //create a physical port always happens from device
                 LOG.error("Physical port {} not present in oper datastore", port.getHwvtepNodeName().getValue());
             } else {
-                PhysicalPort physicalPort = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                        PhysicalPort.class);
+                PhysicalPort physicalPort = transaction.getTypedRowWrapper(PhysicalPort.class);
                 physicalPort.setName(port.getHwvtepNodeName().getValue());
                 setVlanBindings(psNodeiid, physicalPort, port, transaction);
                 setDescription(physicalPort, port);
                 String existingPhysicalPortName = port.getHwvtepNodeName().getValue();
-                PhysicalPort extraPhyscialPort =
-                        TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalPort.class);
+                PhysicalPort extraPhyscialPort = transaction.getTypedRowWrapper(PhysicalPort.class);
                 extraPhyscialPort.setName("");
                 LOG.trace("execute: updating physical port: {}", physicalPort);
                 transaction.add(op.update(physicalPort)
@@ -99,7 +96,8 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void setDescription(PhysicalPort physicalPort, HwvtepPhysicalPortAugmentation inputPhysicalPort) {
+    private static void setDescription(final PhysicalPort physicalPort,
+            final HwvtepPhysicalPortAugmentation inputPhysicalPort) {
         if (inputPhysicalPort.getHwvtepNodeDescription() != null) {
             physicalPort.setDescription(inputPhysicalPort.getHwvtepNodeDescription());
         }
@@ -179,19 +177,15 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
         getDeviceInfo().addJobToQueue(configWaitingJob);
     }
 
-    private InstanceIdentifier<TerminationPoint> getTpIid(final InstanceIdentifier<Node> psNodeiid,
-                                                          final String portName) {
-        return psNodeiid.child(
-                TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
+    private static InstanceIdentifier<TerminationPoint> getTpIid(final InstanceIdentifier<Node> psNodeiid,
+                                                                 final String portName) {
+        return psNodeiid.child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
     }
 
-    private InstanceIdentifier<VlanBindings> getVlanBindingIid(
-            final InstanceIdentifier<Node> psNodeiid,
-            final PhysicalPort physicalPort,
-            final VlanBindings vlanBinding) {
-
-        return psNodeiid.child(
-                TerminationPoint.class, new TerminationPointKey(new TpId(physicalPort.getName())))
+    private static InstanceIdentifier<VlanBindings> getVlanBindingIid(final InstanceIdentifier<Node> psNodeiid,
+                                                                      final PhysicalPort physicalPort,
+                                                                      final VlanBindings vlanBinding) {
+        return getTpIid(psNodeiid, physicalPort.getName())
                 .augmentation(HwvtepPhysicalPortAugmentation.class)
                 .child(VlanBindings.class, new VlanBindingsKey(vlanBinding.getVlanIdKey()));
     }
@@ -199,7 +193,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
     static class VlanBindingsUnMetDependencyGetter extends UnMetDependencyGetter<VlanBindings> {
 
         @Override
-        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(VlanBindings data) {
+        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final VlanBindings data) {
             if (data == null) {
                 return Collections.emptyList();
             }
@@ -207,13 +201,13 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
         }
 
         @Override
-        public List<InstanceIdentifier<?>> getTerminationPointDependencies(VlanBindings data) {
+        public List<InstanceIdentifier<?>> getTerminationPointDependencies(final VlanBindings data) {
             return Collections.emptyList();
         }
     }
 
-    private Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> extractCreated(
-            Collection<DataTreeModification<Node>> changes, Class<HwvtepPhysicalPortAugmentation> class1) {
+    private static Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> extractCreated(
+            final Collection<DataTreeModification<Node>> changes, final Class<HwvtepPhysicalPortAugmentation> class1) {
         Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
@@ -238,8 +232,8 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
         return result;
     }
 
-    private Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> extractUpdatedPorts(
-            Collection<DataTreeModification<Node>> changes, Class<HwvtepPhysicalPortAugmentation> class1) {
+    private static Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> extractUpdatedPorts(
+            final Collection<DataTreeModification<Node>> changes, final Class<HwvtepPhysicalPortAugmentation> class1) {
         Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {

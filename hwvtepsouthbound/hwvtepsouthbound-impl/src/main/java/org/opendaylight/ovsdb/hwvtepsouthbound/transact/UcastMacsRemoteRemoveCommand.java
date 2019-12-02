@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
@@ -18,7 +17,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
@@ -31,13 +29,13 @@ import org.slf4j.LoggerFactory;
 public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<RemoteUcastMacs, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(UcastMacsRemoteRemoveCommand.class);
 
-    public UcastMacsRemoteRemoveCommand(HwvtepOperationalState state,
-            Collection<DataTreeModification<Node>> changes) {
+    public UcastMacsRemoteRemoveCommand(final HwvtepOperationalState state,
+            final Collection<DataTreeModification<Node>> changes) {
         super(state, changes);
     }
 
     @Override
-    public void execute(TransactionBuilder transaction) {
+    public void execute(final TransactionBuilder transaction) {
         Map<InstanceIdentifier<Node>, List<RemoteUcastMacs>> removeds =
                 extractRemoved(getChanges(),RemoteUcastMacs.class);
         if (!removeds.isEmpty()) {
@@ -79,8 +77,7 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                 .child(RemoteUcastMacs.class, mac.key());
         HwvtepDeviceInfo.DeviceData deviceData =
                 getOperationalState().getDeviceInfo().getDeviceOperData(RemoteUcastMacs.class, macIid);
-        UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
-                UcastMacsRemote.class, null);
+        UcastMacsRemote ucastMacsRemote = transaction.getTypedRowSchema(UcastMacsRemote.class);
         if (deviceData != null && deviceData.getUuid() != null) {
             //when mac entry is deleted, its referenced locators are deleted automatically.
             //locators in config DS is not deleted and need to be removed explicitly by user.
@@ -97,7 +94,7 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    protected List<RemoteUcastMacs> getData(HwvtepGlobalAugmentation augmentation) {
+    protected List<RemoteUcastMacs> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getRemoteUcastMacs();
     }
 

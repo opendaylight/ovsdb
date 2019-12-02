@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
@@ -25,7 +24,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.AutoAttach;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -54,19 +52,20 @@ public class AutoAttachUpdateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(AutoAttachUpdateCommand.class);
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, OvsdbNodeAugmentation.class));
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, OvsdbNodeAugmentation.class));
     }
 
-    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> createdOrUpdated) {
+    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+                         final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> createdOrUpdated) {
 
         for (final Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry
                 : createdOrUpdated.entrySet()) {
@@ -74,9 +73,9 @@ public class AutoAttachUpdateCommand implements TransactCommand {
         }
     }
 
-    private void updateAutoAttach(TransactionBuilder transaction, BridgeOperationalState state,
-            InstanceIdentifier<OvsdbNodeAugmentation> iid,
-            OvsdbNodeAugmentation ovsdbNode) {
+    private void updateAutoAttach(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final InstanceIdentifier<OvsdbNodeAugmentation> iid,
+            final OvsdbNodeAugmentation ovsdbNode) {
 
         if (!state.getBridgeNode(iid).isPresent()) {
             return;
@@ -94,8 +93,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
                     state.getBridgeNode(iid).get().augmentation(OvsdbNodeAugmentation.class);
             final List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
             for (final Autoattach autoAttach : autoAttachList) {
-                final AutoAttach autoAttachWrapper =
-                        TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), AutoAttach.class);
+                final AutoAttach autoAttachWrapper = transaction.getTypedRowWrapper(AutoAttach.class);
                 if (autoAttach.getSystemName() != null) {
                     autoAttachWrapper.setSystemName(autoAttach.getSystemName());
                 }
@@ -133,8 +131,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
                 final Uuid aaUuid = getAutoAttachUuid(currentAutoAttach, autoAttach.getAutoattachId());
                 if (aaUuid != null) {
                     final UUID uuid = new UUID(aaUuid.getValue());
-                    final AutoAttach newAutoAttach = TyperUtils.getTypedRowWrapper(
-                            transaction.getDatabaseSchema(), AutoAttach.class, null);
+                    final AutoAttach newAutoAttach = transaction.getTypedRowSchema(AutoAttach.class);
                     newAutoAttach.getUuidColumn().setData(uuid);
                     LOG.trace("Updating autoattach table entries {}", uuid);
                     transaction.add(op.update(autoAttachWrapper)
@@ -143,7 +140,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
                 } else {
                     final Uri bridgeUri = autoAttach.getBridgeId();
                     final String namedUuid = SouthboundMapper.getRandomUuid();
-                    final Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
+                    final Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
                     transaction.add(op.insert(autoAttachWrapper).withId(namedUuid));
                     final OvsdbBridgeAugmentation ovsdbBridgeAugmentation = getBridge(iid, bridgeUri);
                     if (ovsdbBridgeAugmentation != null) {
@@ -165,8 +162,8 @@ public class AutoAttachUpdateCommand implements TransactCommand {
         }
     }
 
-    private OvsdbBridgeAugmentation getBridge(InstanceIdentifier<OvsdbNodeAugmentation> key,
-            Uri bridgeUri) {
+    private OvsdbBridgeAugmentation getBridge(final InstanceIdentifier<OvsdbNodeAugmentation> key,
+            final Uri bridgeUri) {
         final InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
@@ -186,7 +183,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
         return bridge;
     }
 
-    private Uuid getAutoAttachUuid(List<Autoattach> currentAutoAttach, Uri autoattachId) {
+    private Uuid getAutoAttachUuid(final List<Autoattach> currentAutoAttach, final Uri autoattachId) {
         if (currentAutoAttach != null && !currentAutoAttach.isEmpty()) {
             for (final Autoattach autoAttach : currentAutoAttach) {
                 if (autoAttach.getAutoattachId().equals(autoattachId)) {

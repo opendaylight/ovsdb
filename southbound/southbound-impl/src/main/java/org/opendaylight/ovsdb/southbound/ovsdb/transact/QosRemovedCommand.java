@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
@@ -16,7 +15,6 @@ import java.util.Map;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
@@ -32,24 +30,25 @@ public class QosRemovedCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(QosRemovedCommand.class);
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state,
                 TransactUtils.extractOriginal(events, OvsdbNodeAugmentation.class),
                 TransactUtils.extractUpdated(events, OvsdbNodeAugmentation.class));
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state,
                 TransactUtils.extractOriginal(modifications, OvsdbNodeAugmentation.class),
                 TransactUtils.extractUpdated(modifications, OvsdbNodeAugmentation.class));
     }
 
-    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originals,
-                        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
+    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originals,
+            final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
         for (Map.Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originalEntry : originals
                 .entrySet()) {
             InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = originalEntry.getKey();
@@ -78,8 +77,7 @@ public class QosRemovedCommand implements TransactCommand {
                             LOG.debug("Received request to delete QoS entry {}", origQosEntry.getQosId());
                             Uuid qosUuid = getQosEntryUuid(operQosEntries, origQosEntry.getQosId());
                             if (qosUuid != null) {
-                                Qos qos =
-                                        TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Qos.class, null);
+                                Qos qos = transaction.getTypedRowSchema(Qos.class);
                                 transaction.add(op.delete(qos.getSchema())
                                         .where(qos.getUuidColumn().getSchema().opEqual(new UUID(qosUuid.getValue())))
                                         .build());
@@ -97,7 +95,7 @@ public class QosRemovedCommand implements TransactCommand {
         }
     }
 
-    private Uuid getQosEntryUuid(List<QosEntries> operQosEntries, Uri qosId) {
+    private static Uuid getQosEntryUuid(final List<QosEntries> operQosEntries, final Uri qosId) {
         if (operQosEntries != null && !operQosEntries.isEmpty()) {
             for (QosEntries qosEntry : operQosEntries) {
                 if (qosEntry.getQosId().equals(qosId)) {
@@ -107,5 +105,4 @@ public class QosRemovedCommand implements TransactCommand {
         }
         return null;
     }
-
 }

@@ -18,7 +18,6 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -34,22 +33,23 @@ public class ControllerUpdateCommand implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(ControllerUpdateCommand.class);
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, ControllerEntry.class),
                 TransactUtils.extractCreatedOrUpdated(events, OvsdbBridgeAugmentation.class));
     }
 
     @Override
-    public void execute(TransactionBuilder transaction, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, ControllerEntry.class),
                 TransactUtils.extractCreatedOrUpdated(modifications, OvsdbBridgeAugmentation.class));
     }
 
-    private void execute(TransactionBuilder transaction, BridgeOperationalState state,
-                         Map<InstanceIdentifier<ControllerEntry>, ControllerEntry> controllers,
-                         Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> bridges) {
+    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Map<InstanceIdentifier<ControllerEntry>, ControllerEntry> controllers,
+            final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> bridges) {
         LOG.info("Register ODL controllers : {}  bridges detail : {}",
                 controllers, bridges);
         for (Entry<InstanceIdentifier<ControllerEntry>, ControllerEntry> entry: controllers.entrySet()) {
@@ -66,8 +66,7 @@ public class ControllerUpdateCommand implements TransactCommand {
                         && entry.getValue() != null
                         && entry.getValue().getTarget() != null) {
                     ControllerEntry controllerEntry = entry.getValue();
-                    Controller controller =
-                            TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Controller.class);
+                    Controller controller = transaction.getTypedRowWrapper(Controller.class);
                     controller.setTarget(controllerEntry.getTarget().getValue());
                     if (controllerEntry.getMaxBackoff() != null) {
                         controller.setMaxBackoff(Collections.singleton(controllerEntry.getMaxBackoff()));
@@ -79,7 +78,7 @@ public class ControllerUpdateCommand implements TransactCommand {
                     UUID controllerNamedUuid = new UUID(controllerNamedUuidString);
                     transaction.add(op.insert(controller).withId(controllerNamedUuidString));
 
-                    Bridge bridge = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Bridge.class);
+                    Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
                     bridge.setName(ovsdbBridge.getBridgeName().getValue());
                     bridge.setController(Collections.singleton(controllerNamedUuid));
                     LOG.trace("Added controller : {} for bridge : {}",
@@ -95,5 +94,4 @@ public class ControllerUpdateCommand implements TransactCommand {
         LOG.trace("Executed transaction: {}", transaction.build());
 
     }
-
 }

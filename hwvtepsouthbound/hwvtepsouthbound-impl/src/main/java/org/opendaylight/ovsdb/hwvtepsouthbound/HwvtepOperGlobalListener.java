@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import java.util.Collection;
@@ -33,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
-
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperGlobalListener.class);
 
     private final Timer timer = new Timer();
@@ -42,7 +40,7 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
     private final DataBroker db;
     private final Map<YangInstanceIdentifier, Node> connectedNodes = new ConcurrentHashMap<>();
 
-    HwvtepOperGlobalListener(DataBroker db, HwvtepConnectionManager hcm) {
+    HwvtepOperGlobalListener(final DataBroker db, final HwvtepConnectionManager hcm) {
         LOG.info("Registering HwvtepOperGlobalListener");
         this.db = db;
         this.hcm = hcm;
@@ -64,7 +62,7 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
     }
 
     @Override
-    public void onDataTreeChanged(Collection<DataTreeModification<Node>> changes) {
+    public void onDataTreeChanged(final Collection<DataTreeModification<Node>> changes) {
         changes.forEach(change -> {
             InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             DataObjectModification<Node> mod = change.getRootNode();
@@ -79,8 +77,8 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
             if (node != null) {
                 connectedNodes.remove(entityId);
                 HwvtepConnectionInstance connectionInstance = hcm.getConnectionInstanceFromNodeIid(nodeIid);
-                if (Objects.equals(connectionInstance.getConnectionInfo().getRemotePort(),
-                        HwvtepSouthboundUtil.getRemotePort(node))) {
+                if (connectionInstance != null && Objects.equals(connectionInstance.getConnectionInfo().getRemotePort(),
+                            HwvtepSouthboundUtil.getRemotePort(node))) {
                     //Oops some one deleted the node held by me This should never happen
                     try {
                         connectionInstance.refreshOperNode();
@@ -93,14 +91,14 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
         });
     }
 
-    private Node getCreated(DataObjectModification<Node> mod) {
+    private static Node getCreated(final DataObjectModification<Node> mod) {
         if (mod.getModificationType() == ModificationType.WRITE && mod.getDataBefore() == null) {
             return mod.getDataAfter();
         }
         return null;
     }
 
-    private Node getRemoved(DataObjectModification<Node> mod) {
+    private static Node getRemoved(final DataObjectModification<Node> mod) {
         if (mod.getModificationType() == ModificationType.DELETE) {
             return mod.getDataBefore();
         }
@@ -111,11 +109,9 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
         return Collections.unmodifiableMap(connectedNodes);
     }
 
-    private InstanceIdentifier<Node> getWildcardPath() {
-        InstanceIdentifier<Node> path = InstanceIdentifier
-                        .create(NetworkTopology.class)
-                        .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
-                        .child(Node.class);
-        return path;
+    private static InstanceIdentifier<Node> getWildcardPath() {
+        return InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+                .child(Node.class);
     }
 }

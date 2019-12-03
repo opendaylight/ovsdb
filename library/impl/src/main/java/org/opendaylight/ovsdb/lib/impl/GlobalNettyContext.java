@@ -13,9 +13,16 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.AdaptiveRecvByteBufAllocator;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
+import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.ServerSocketChannel;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import java.util.concurrent.ThreadFactory;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -27,22 +34,82 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class GlobalNettyContext implements AutoCloseable {
-    private static final Logger LOG = LoggerFactory.getLogger(GlobalNettyContext.class);
+    private abstract static class Provider {
+        abstract String name();
 
-    private final EventLoopGroup bossGroup = new NioEventLoopGroup(0,
-        new ThreadFactoryBuilder().setNameFormat("OVSDB listener-%d").build());
-    private final EventLoopGroup workerGroup = new NioEventLoopGroup(0,
-        new ThreadFactoryBuilder().setNameFormat("OVSDB connection-%d").build());
+        abstract EventLoopGroup createGroup(ThreadFactory threadFactory);
+
+        abstract Class<? extends SocketChannel> channelClass();
+
+        abstract Class<? extends ServerSocketChannel> serverChannelClass();
+    }
+
+    private static final class EpollProvider extends Provider {
+        @Override
+        String name() {
+            return "Epoll";
+        }
+
+        @Override
+        EventLoopGroup createGroup(final ThreadFactory threadFactory) {
+            return new EpollEventLoopGroup(0, threadFactory);
+        }
+
+        @Override
+        Class<? extends SocketChannel> channelClass() {
+            return EpollSocketChannel.class;
+        }
+
+        @Override
+        Class<? extends ServerSocketChannel> serverChannelClass() {
+            return EpollServerSocketChannel.class;
+        }
+    }
+
+    private static final class NioProvider extends Provider {
+        @Override
+        String name() {
+            return "NIO";
+        }
+
+        @Override
+        EventLoopGroup createGroup(final ThreadFactory threadFactory) {
+            return new NioEventLoopGroup(0, threadFactory);
+        }
+
+        @Override
+        Class<? extends SocketChannel> channelClass() {
+            return NioSocketChannel.class;
+        }
+
+        @Override
+        Class<? extends ServerSocketChannel> serverChannelClass() {
+            return NioServerSocketChannel.class;
+        }
+    }
+
+    private static final Logger LOG = LoggerFactory.getLogger(GlobalNettyContext.class);
+    private static final ThreadFactory BOSS_FACTORY = new ThreadFactoryBuilder().setNameFormat("OVSDB listener-%d")
+            .build();
+    private static final ThreadFactory WORKER_FACTORY = new ThreadFactoryBuilder().setNameFormat("OVSDB connection-%d")
+            .build();
+
+    private final Provider provider;
+    private final EventLoopGroup bossGroup;
+    private final EventLoopGroup workerGroup;
 
     @Inject
     public GlobalNettyContext() {
-        LOG.info("OVSDB global Netty context instantiated");
+        provider = Epoll.isAvailable() ? new EpollProvider() : new NioProvider();
+        bossGroup = provider.createGroup(BOSS_FACTORY);
+        workerGroup = provider.createGroup(WORKER_FACTORY);
+        LOG.info("OVSDB global Netty context instantiated with {} provider", provider.name());
     }
 
     Bootstrap newClient() {
         return new Bootstrap()
                 .group(workerGroup)
-                .channel(NioSocketChannel.class)
+                .channel(provider.channelClass())
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(65535, 65535, 65535));
     }
@@ -50,7 +117,7 @@ public class GlobalNettyContext implements AutoCloseable {
     ServerBootstrap newServer() {
         return new ServerBootstrap()
                 .group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
+                .channel(provider.serverChannelClass())
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(65535, 65535, 65535))
                 .option(ChannelOption.SO_BACKLOG, 100);

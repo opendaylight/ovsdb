@@ -56,7 +56,6 @@ import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.Select;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
@@ -428,9 +427,8 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
 
         final Global globalRow;
-        if (results != null) {
-            OperationResult selectResult = results.get(0);
-            globalRow = TyperUtils.getTypedRowWrapper(dbSchema,Global.class,selectResult.getRows().get(0));
+        if (results != null && !results.isEmpty()) {
+            globalRow = dbSchema.getTypedRowWrapper(Global.class, results.get(0).getRows().get(0));
         } else {
             globalRow = null;
         }

@@ -67,8 +67,7 @@ import org.slf4j.LoggerFactory;
 public class HwvtepTableReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepTableReader.class);
-
-    private final Class[] alltables = new Class[] {
+    private static final Class<?>[] ALL_TABLES = new Class[] {
         ACLEntry.class,
         ACL.class,
         ArpSourcesLocal.class,
@@ -334,9 +333,9 @@ public class HwvtepTableReader {
 
     public TableUpdates readAllTables() throws ExecutionException, InterruptedException {
         TypedDatabaseSchema dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
-        List<Operation> operations = Arrays.asList(alltables).stream()
+        List<Operation> operations = Arrays.stream(ALL_TABLES)
                 .map(tableClass -> dbSchema.getTableSchema(tableClass))
-                .map(tableSchema -> buildSelectOperationFor(tableSchema))
+                .map(HwvtepTableReader::buildSelectOperationFor)
                 .collect(Collectors.toList());
         List<OperationResult> results = connectionInstance.transact(dbSchema, operations).get();
 
@@ -356,9 +355,9 @@ public class HwvtepTableReader {
     }
 
     private static Select<GenericTableSchema> buildSelectOperationFor(final GenericTableSchema tableSchema) {
-        Select<GenericTableSchema> selectOpearation = op.select(tableSchema);
-        selectOpearation.setColumns(tableSchema.getColumnList());
-        return selectOpearation;
+        Select<GenericTableSchema> selectOperation = op.select(tableSchema);
+        selectOperation.setColumns(tableSchema.getColumnList());
+        return selectOperation;
     }
 
     private static UUID getRowUuid(final Row<GenericTableSchema> row) {

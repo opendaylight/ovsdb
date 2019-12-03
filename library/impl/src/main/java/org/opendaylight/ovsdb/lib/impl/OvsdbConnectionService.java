@@ -105,7 +105,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final Set<OvsdbConnectionListener> CONNECTION_LISTENERS = ConcurrentHashMap.newKeySet();
     private static final Map<OvsdbClient, Channel> CONNECTIONS = new ConcurrentHashMap<>();
 
-    private final GlobalNettyContext globalContext;
+    private final NettyBootstrapFactory globalContext;
 
     private volatile boolean useSSL = false;
     private final ICertificateManager certManagerSrv;
@@ -118,7 +118,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private volatile int listenerPort = 6640;
 
     @Inject
-    public OvsdbConnectionService(final GlobalNettyContext globalContext,
+    public OvsdbConnectionService(final NettyBootstrapFactory globalContext,
             @Reference(filter = "type=default-certificate-manager") final ICertificateManager certManagerSrv) {
         this.globalContext = requireNonNull(globalContext);
         this.certManagerSrv = certManagerSrv;

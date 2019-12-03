@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import com.google.common.base.Optional;
@@ -20,7 +19,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Manager;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -42,20 +40,21 @@ public class HwvtepManagerUpdateCommand extends AbstractTransactionCommand {
     private final Map<UUID, Manager> updatedMgrRows;
     private final Map<UUID, Manager> oldMgrRows;
 
-    public HwvtepManagerUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepManagerUpdateCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedMgrRows = TyperUtils.extractRowsUpdated(Manager.class, getUpdates(), getDbSchema());
-        oldMgrRows = TyperUtils.extractRowsOld(Manager.class, getUpdates(), getDbSchema());
+        updatedMgrRows = extractRowsUpdated(Manager.class);
+        oldMgrRows = extractRowsOld(Manager.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         for (Manager manager : updatedMgrRows.values()) {
             updateManager(transaction, manager);
         }
     }
 
-    private void updateManager(ReadWriteTransaction transaction, Manager manager) {
+    private void updateManager(final ReadWriteTransaction transaction, final Manager manager) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
@@ -66,7 +65,7 @@ public class HwvtepManagerUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private Node buildConnectionNode(Manager manager) {
+    private Node buildConnectionNode(final Manager manager) {
         // Update node with Manager reference
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
@@ -99,5 +98,3 @@ public class HwvtepManagerUpdateCommand extends AbstractTransactionCommand {
         // TODO Deletion of other config
     }
 }
-
-

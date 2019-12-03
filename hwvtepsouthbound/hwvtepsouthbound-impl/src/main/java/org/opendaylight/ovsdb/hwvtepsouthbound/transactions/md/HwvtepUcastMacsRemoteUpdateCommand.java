@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.ArrayList;
@@ -19,7 +18,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
@@ -39,25 +37,25 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
-
     private final Map<UUID, UcastMacsRemote> updatedUMacsRemoteRows;
     private final Map<UUID, PhysicalLocator> updatedPLocRows;
 
-    public HwvtepUcastMacsRemoteUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public HwvtepUcastMacsRemoteUpdateCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedUMacsRemoteRows = TyperUtils.extractRowsUpdated(UcastMacsRemote.class, getUpdates(), getDbSchema());
-        updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());
+        updatedUMacsRemoteRows = extractRowsUpdated(UcastMacsRemote.class);
+        updatedPLocRows = extractRowsUpdated(PhysicalLocator.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         if (updatedUMacsRemoteRows != null && !updatedUMacsRemoteRows.isEmpty()) {
             updateUcastMacsRemote(transaction, updatedUMacsRemoteRows.values());
         }
     }
 
-    private void updateUcastMacsRemote(ReadWriteTransaction transaction, Collection<UcastMacsRemote> ucastMacsRemote) {
+    private void updateUcastMacsRemote(final ReadWriteTransaction transaction,
+            final Collection<UcastMacsRemote> ucastMacsRemote) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Node connectionNode = buildConnectionNode(ucastMacsRemote);
         transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);

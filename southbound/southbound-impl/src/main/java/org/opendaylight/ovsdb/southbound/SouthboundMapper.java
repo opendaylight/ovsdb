@@ -28,7 +28,6 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.Manager;
@@ -359,7 +358,7 @@ public final class SouthboundMapper {
         if (controllerEntries != null && !controllerEntries.isEmpty()) {
             for (ControllerEntry controllerEntry : controllerEntries) {
                 String controllerNamedUuid = "Controller_" + getRandomUuid();
-                Controller controller = TypedDatabaseSchema.of(dbSchema).getTypedRowWrapper(Controller.class);
+                Controller controller = dbSchema.getTypedRowWrapper(Controller.class);
                 controller.setTarget(controllerEntry.getTarget().getValue());
                 controllerMap.put(new UUID(controllerNamedUuid), controller);
             }

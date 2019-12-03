@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Map;
@@ -19,7 +18,6 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
@@ -32,17 +30,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GlobalUpdateCommand extends AbstractTransactionCommand {
-
     private static final Logger LOG = LoggerFactory.getLogger(GlobalUpdateCommand.class);
-    private final Map<UUID, Global> updatedHwvtepRows =
-            TyperUtils.extractRowsUpdated(Global.class, getUpdates(), getDbSchema());
 
-    public GlobalUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    private final Map<UUID, Global> updatedHwvtepRows;
+
+    public GlobalUpdateCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
+        updatedHwvtepRows = extractRowsUpdated(Global.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         for (Global hwvtepGlobal : updatedHwvtepRows.values()) {
             final InstanceIdentifier<Node> nodePath = getInstanceIdentifier(hwvtepGlobal);
             LOG.trace("Processing hardware_vtep update for nodePath: {}", nodePath);
@@ -66,7 +65,7 @@ public class GlobalUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private InstanceIdentifier<Node> getInstanceIdentifier(Global hwvtep) {
+    private InstanceIdentifier<Node> getInstanceIdentifier(final Global hwvtep) {
         InstanceIdentifier<Node> iid = getOvsdbConnectionInstance().getInstanceIdentifier();
         if (iid == null) {
             LOG.warn("InstanceIdentifier was null when it shouldn't be");
@@ -77,7 +76,7 @@ public class GlobalUpdateCommand extends AbstractTransactionCommand {
         return getOvsdbConnectionInstance().getInstanceIdentifier();
     }
 
-    private NodeId getNodeId(Global hwvtep) {
+    private NodeId getNodeId(final Global hwvtep) {
         NodeKey nodeKey = getInstanceIdentifier(hwvtep).firstKeyOf(Node.class);
         return nodeKey.getNodeId();
     }

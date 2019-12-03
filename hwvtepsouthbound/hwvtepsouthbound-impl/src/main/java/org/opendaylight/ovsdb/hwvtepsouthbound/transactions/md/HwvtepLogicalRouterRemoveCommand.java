@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
@@ -14,7 +13,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalRouter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
@@ -27,15 +25,14 @@ import org.slf4j.LoggerFactory;
 public class HwvtepLogicalRouterRemoveCommand extends AbstractTransactionCommand<LogicalRouters> {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepLogicalRouterRemoveCommand.class);
 
-    public HwvtepLogicalRouterRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public HwvtepLogicalRouterRemoveCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
-        Collection<LogicalRouter> deletedLRRows =
-                TyperUtils.extractRowsRemoved(LogicalRouter.class, getUpdates(), getDbSchema()).values();
+    public void execute(final ReadWriteTransaction transaction) {
+        Collection<LogicalRouter> deletedLRRows = extractRowsRemoved(LogicalRouter.class).values();
         if (deletedLRRows != null) {
             for (LogicalRouter router : deletedLRRows) {
                 HwvtepNodeName routerNode = new HwvtepNodeName(router.getName());

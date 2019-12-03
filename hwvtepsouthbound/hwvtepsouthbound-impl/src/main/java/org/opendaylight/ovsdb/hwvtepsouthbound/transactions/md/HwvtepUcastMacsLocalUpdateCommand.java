@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.ArrayList;
@@ -19,7 +18,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
@@ -37,30 +35,26 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransactionCommand {
-
-    private static final Logger LOG = LoggerFactory.getLogger(HwvtepUcastMacsLocalUpdateCommand.class);
     private final Map<UUID, UcastMacsLocal> updatedUMacsLocalRows;
     private final Map<UUID, PhysicalLocator> updatedPLocRows;
 
-    public HwvtepUcastMacsLocalUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public HwvtepUcastMacsLocalUpdateCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedUMacsLocalRows = TyperUtils.extractRowsUpdated(UcastMacsLocal.class, getUpdates(), getDbSchema());
-        updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());
+        updatedUMacsLocalRows = extractRowsUpdated(UcastMacsLocal.class);
+        updatedPLocRows = extractRowsUpdated(PhysicalLocator.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         if (updatedUMacsLocalRows != null && !updatedUMacsLocalRows.isEmpty()) {
             updateData(transaction, updatedUMacsLocalRows.values());
         }
     }
 
-    private void updateData(ReadWriteTransaction transaction, Collection<UcastMacsLocal> ucml) {
+    private void updateData(final ReadWriteTransaction transaction, final Collection<UcastMacsLocal> ucml) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Node connectionNode = buildConnectionNode(ucml);
         transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);

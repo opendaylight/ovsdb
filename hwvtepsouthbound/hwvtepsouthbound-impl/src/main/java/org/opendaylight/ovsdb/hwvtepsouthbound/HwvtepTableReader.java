@@ -266,12 +266,9 @@ public class HwvtepTableReader {
             selectOperation.where(table.getUuidColumn().getSchema().opEqual(existingUUID));
         }
 
-        ArrayList<Operation> operations = new ArrayList<>();
-        operations.add(selectOperation);
-
         final List<OperationResult> results;
         try {
-            results = connectionInstance.transact(dbSchema, operations).get();
+            results = connectionInstance.transact(dbSchema, Collections.singletonList(selectOperation)).get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Not able to fetch hardware_vtep table row from device {}",
                 connectionInstance.getConnectionInfo(), e);
@@ -309,7 +306,7 @@ public class HwvtepTableReader {
 
         final List<OperationResult> results;
         try {
-            results = connectionInstance.transact(dbSchema, Lists.newArrayList(selectOperation)).get();
+            results = connectionInstance.transact(dbSchema, Collections.singletonList(selectOperation)).get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Not able to fetch hardware_vtep table row from device {}",
                 connectionInstance.getConnectionInfo(), e);

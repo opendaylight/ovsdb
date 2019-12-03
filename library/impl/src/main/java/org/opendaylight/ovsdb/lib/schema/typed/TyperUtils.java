@@ -7,9 +7,6 @@
  */
 package org.opendaylight.ovsdb.lib.schema.typed;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Range;
 import java.util.Map;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
@@ -23,14 +20,6 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
  * Utility methods for typed OVSDB schema data.
  */
 public final class TyperUtils {
-    private static final LoadingCache<DatabaseSchema, TypedDatabaseSchema> TYPED_CACHE = CacheBuilder.newBuilder()
-            .weakKeys().weakValues().build(new CacheLoader<DatabaseSchema, TypedDatabaseSchema>() {
-                @Override
-                public TypedDatabaseSchema load(final DatabaseSchema key) {
-                    return new TypedDatabaseSchemaImpl(key);
-                }
-            });
-
     private TyperUtils() {
         // Prevent instantiating a utility class
     }
@@ -106,10 +95,5 @@ public final class TyperUtils {
     public static <T> Map<UUID,T> extractRowsRemoved(final Class<T> klazz, final TableUpdates updates,
             final DatabaseSchema dbSchema) {
         return getTyped(dbSchema).extractRowsRemoved(klazz, updates);
-    }
-
-    private static TypedDatabaseSchema getTyped(final DatabaseSchema dbSchema) {
-        return dbSchema instanceof TypedDatabaseSchema ? (TypedDatabaseSchema) dbSchema
-                : TYPED_CACHE.getUnchecked(dbSchema);
     }
 }

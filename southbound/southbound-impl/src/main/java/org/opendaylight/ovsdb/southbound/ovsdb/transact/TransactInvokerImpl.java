@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 public class TransactInvokerImpl implements TransactInvoker {
     private static final Logger LOG = LoggerFactory.getLogger(TransactInvokerImpl.class);
     private final OvsdbConnectionInstance connectionInstance;
-    private final TypedDatabaseSchema dbSchema;
+    private final DatabaseSchema dbSchema;
 
-    public TransactInvokerImpl(final OvsdbConnectionInstance connectionInstance, final TypedDatabaseSchema dbSchema) {
+    public TransactInvokerImpl(final OvsdbConnectionInstance connectionInstance, final DatabaseSchema dbSchema) {
         this.connectionInstance = connectionInstance;
         this.dbSchema = dbSchema;
     }

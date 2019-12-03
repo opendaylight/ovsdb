@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.ovsdb.lib.schema.typed;
+package org.opendaylight.ovsdb.lib.schema;
 
 import static java.util.Objects.requireNonNull;
 
@@ -17,8 +17,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.ovsdb.lib.error.UnsupportedMethodException;
 import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.MethodDispatch.Invoker;
+import org.opendaylight.ovsdb.lib.schema.MethodDispatch.Invoker;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 
 /*
  * Theory of operation: we have a set of Invoker, which are indexed by method and point to implementations we should

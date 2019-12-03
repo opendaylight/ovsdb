@@ -23,16 +23,17 @@ import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.operations.Update;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TransactInvokerImpl implements TransactInvoker {
     private static final Logger LOG = LoggerFactory.getLogger(TransactInvokerImpl.class);
-    private final HwvtepConnectionInstance connectionInstance;
-    private final TypedDatabaseSchema dbSchema;
 
-    public TransactInvokerImpl(final HwvtepConnectionInstance connectionInstance, final TypedDatabaseSchema dbSchema) {
+    private final HwvtepConnectionInstance connectionInstance;
+    private final DatabaseSchema dbSchema;
+
+    public TransactInvokerImpl(final HwvtepConnectionInstance connectionInstance, final DatabaseSchema dbSchema) {
         this.connectionInstance = connectionInstance;
         this.dbSchema = requireNonNull(dbSchema);
     }

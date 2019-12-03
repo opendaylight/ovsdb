@@ -47,7 +47,6 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
@@ -65,7 +64,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
     protected static final String ASSERT_TRANS_OPERATION_COUNT = "Transaction should match number of operations";
     protected static final String ASSERT_TRANS_UUID = "Transaction UUID should not be null";
     protected static Version schemaVersion;
-    protected static TypedDatabaseSchema dbSchema;
+    protected static DatabaseSchema dbSchema;
     private static boolean schemaSupported = false;
     private static AtomicBoolean setup = new AtomicBoolean(false);
     protected static OvsdbClient ovsdbClient;
@@ -81,7 +80,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         return ovsdbClient;
     }
 
-    protected TypedDatabaseSchema getDbSchema() {
+    protected DatabaseSchema getDbSchema() {
         return dbSchema;
     }
 

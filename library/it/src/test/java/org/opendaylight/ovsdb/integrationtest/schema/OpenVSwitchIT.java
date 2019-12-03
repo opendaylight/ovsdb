@@ -37,7 +37,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.AutoAttach;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
@@ -240,7 +240,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     private void controllerDelete() throws ExecutionException, InterruptedException {
         Controller controller = getClient().getTypedRowWrapper(Controller.class, null);
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
-        TypedDatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
+        DatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
 
         TransactionBuilder transactionBuilder = getClient().transactBuilder(dbSchema)
                 .add(op.delete(controller.getSchema())
@@ -621,7 +621,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     private void mirrorDelete() throws ExecutionException, InterruptedException {
         Mirror mirror = getClient().getTypedRowWrapper(Mirror.class, null);
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
-        TypedDatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
+        DatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
 
         TransactionBuilder transactionBuilder = getClient().transactBuilder(dbSchema)
                 .add(op.delete(mirror.getSchema())
@@ -689,7 +689,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     private void netFlowDelete() throws ExecutionException, InterruptedException {
         NetFlow netFlow = getClient().getTypedRowWrapper(NetFlow.class, null);
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
-        TypedDatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
+        DatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
 
         TransactionBuilder transactionBuilder = getClient().transactBuilder(dbSchema)
                 .add(op.delete(netFlow.getSchema())
@@ -787,7 +787,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         Port port = getClient().getTypedRowWrapper(Port.class, null);
         Interface intf = getClient().getTypedRowWrapper(Interface.class, null);
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
-        TypedDatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
+        DatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
 
         TransactionBuilder transactionBuilder = getClient().transactBuilder(dbSchema)
                 .add(op.delete(port.getSchema())
@@ -859,7 +859,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     public void autoAttachDelete() throws ExecutionException, InterruptedException {
         AutoAttach autoattach = getClient().getTypedRowWrapper(AutoAttach.class, null);
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
-        TypedDatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
+        DatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
         TransactionBuilder transactionBuilder = getClient().transactBuilder(dbSchema)
                 .add(op.delete(autoattach.getSchema())
                         .where(autoattach.getUuidColumn().getSchema().opEqual(testAutoattachUuid))
@@ -973,7 +973,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         Interface intf = getClient().getTypedRowWrapper(Interface.class, null);
         Qos qos = getClient().getTypedRowWrapper(Qos.class, null);
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
-        TypedDatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
+        DatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
 
         TransactionBuilder transactionBuilder = getClient().transactBuilder(dbSchema)
                 .add(op.delete(port.getSchema())
@@ -1064,7 +1064,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     private void queueDelete() throws ExecutionException, InterruptedException {
         Queue queue = getClient().getTypedRowWrapper(Queue.class, null);
         Qos qos = getClient().getTypedRowWrapper(Qos.class, null);
-        TypedDatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
+        DatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
 
         TransactionBuilder transactionBuilder = getClient().transactBuilder(dbSchema)
                 .add(op.delete(queue.getSchema())
@@ -1139,7 +1139,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
     private void sFlowDelete() throws ExecutionException, InterruptedException {
         SFlow sflow = getClient().getTypedRowWrapper(SFlow.class, null);
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
-        TypedDatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
+        DatabaseSchema dbSchema = getClient().getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
 
         TransactionBuilder transactionBuilder = getClient().transactBuilder(dbSchema)
                 .add(op.delete(sflow.getSchema())

@@ -14,14 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 
 public class TransactionBuilder {
     private final List<Operation> operations = new ArrayList<>();
-    private final @NonNull TypedDatabaseSchema databaseSchema;
+    private final @NonNull DatabaseSchema databaseSchema;
     private final OvsdbClient ovs;
 
-    public TransactionBuilder(final OvsdbClient ovs, final TypedDatabaseSchema schema) {
+    public TransactionBuilder(final OvsdbClient ovs, final DatabaseSchema schema) {
         this.ovs = ovs;
         this.databaseSchema = requireNonNull(schema);
     }
@@ -43,7 +43,7 @@ public class TransactionBuilder {
         return ovs.transact(databaseSchema, operations);
     }
 
-    public @NonNull TypedDatabaseSchema getDatabaseSchema() {
+    public @NonNull DatabaseSchema getDatabaseSchema() {
         return databaseSchema;
     }
 

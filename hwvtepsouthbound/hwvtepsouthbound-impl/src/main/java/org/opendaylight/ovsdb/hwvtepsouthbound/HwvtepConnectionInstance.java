@@ -50,7 +50,6 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
@@ -68,7 +67,7 @@ public class HwvtepConnectionInstance {
     private final HwvtepTableReader hwvtepTableReader;
     private InstanceIdentifier<Node> instanceIdentifier;
     private final TransactionInvoker txInvoker;
-    private Map<TypedDatabaseSchema, TransactInvoker> transactInvokers;
+    private Map<DatabaseSchema, TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
     private volatile boolean hasDeviceOwnership = false;
     private Entity connectedEntity;
@@ -139,7 +138,7 @@ public class HwvtepConnectionInstance {
         }
     }
 
-    public ListenableFuture<List<OperationResult>> transact(final TypedDatabaseSchema dbSchema,
+    public ListenableFuture<List<OperationResult>> transact(final DatabaseSchema dbSchema,
             final List<Operation> operations) {
         return client.transact(dbSchema, operations);
     }
@@ -170,7 +169,7 @@ public class HwvtepConnectionInstance {
         if (transactInvokers == null) {
             try {
                 transactInvokers = new HashMap<>();
-                TypedDatabaseSchema dbSchema = getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
+                DatabaseSchema dbSchema = getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
                 if (dbSchema != null) {
                     transactInvokers.put(dbSchema, new TransactInvokerImpl(this, dbSchema));
                 }
@@ -226,11 +225,11 @@ public class HwvtepConnectionInstance {
         return client.getDatabases();
     }
 
-    public ListenableFuture<TypedDatabaseSchema> getSchema(final String database) {
+    public ListenableFuture<DatabaseSchema> getSchema(final String database) {
         return client.getSchema(database);
     }
 
-    public TransactionBuilder transactBuilder(final TypedDatabaseSchema dbSchema) {
+    public TransactionBuilder transactBuilder(final DatabaseSchema dbSchema) {
         return client.transactBuilder(dbSchema);
     }
 

@@ -7,9 +7,11 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import static java.util.Objects.requireNonNull;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.collect.ImmutableClassToInstanceMap;
+import com.google.common.collect.ImmutableClassToInstanceMap.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -30,11 +32,9 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.Select;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.ACL;
 import org.opendaylight.ovsdb.schema.hardwarevtep.ACLEntry;
 import org.opendaylight.ovsdb.schema.hardwarevtep.ArpSourcesLocal;
@@ -54,8 +54,11 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -91,14 +94,13 @@ public class HwvtepTableReader {
         LogicalSwitches.class, LogicalSwitch.class,
         TerminationPoint.class, PhysicalLocator.class);
 
-    private final Map<Class, Function<InstanceIdentifier, List<Condition>>> whereClauseGetterMap = new HashMap();
+    private final ImmutableMap<Class<? extends Identifiable<?>>, WhereClauseGetter<?>> whereClauseGetters;
     private final ImmutableClassToInstanceMap<TypedBaseTable<?>> tables;
-
     private final HwvtepConnectionInstance connectionInstance;
 
     public HwvtepTableReader(final HwvtepConnectionInstance connectionInstance) {
         this.connectionInstance = connectionInstance;
-        DatabaseSchema dbSchema = null;
+        TypedDatabaseSchema dbSchema = null;
         try {
             dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -106,79 +108,118 @@ public class HwvtepTableReader {
                     HwvtepSchemaConstants.HARDWARE_VTEP, connectionInstance.getConnectionInfo(), e);
         }
 
-        whereClauseGetterMap.put(RemoteMcastMacs.class, new RemoteMcastMacWhereClauseGetter());
-        whereClauseGetterMap.put(RemoteUcastMacs.class, new RemoteUcastMacWhereClauseGetter());
-        whereClauseGetterMap.put(LogicalSwitches.class, new LogicalSwitchWhereClauseGetter());
-        whereClauseGetterMap.put(TerminationPoint.class, new LocatorWhereClauseGetter());
+        final Builder<TypedBaseTable<?>> tableBuilder = ImmutableClassToInstanceMap.<TypedBaseTable<?>>builder();
+        final ImmutableMap.Builder<Class<? extends Identifiable<?>>, WhereClauseGetter<?>> whereBuilder =
+                ImmutableMap.builderWithExpectedSize(4);
 
-        tables = ImmutableClassToInstanceMap.<TypedBaseTable<?>>builder()
-                .put(McastMacsRemote.class, TyperUtils.getTypedRowWrapper(dbSchema, McastMacsRemote.class, null))
-                .put(UcastMacsRemote.class, TyperUtils.getTypedRowWrapper(dbSchema, UcastMacsRemote.class, null))
-                .put(LogicalSwitch.class, TyperUtils.getTypedRowWrapper(dbSchema, LogicalSwitch.class, null))
-                .put(PhysicalLocator.class, TyperUtils.getTypedRowWrapper(dbSchema, PhysicalLocator.class, null))
-                .build();
+        if (dbSchema != null) {
+            final McastMacsRemote mcastMacsTable = dbSchema.getTypedRowWrapper(McastMacsRemote.class, null);
+            if (mcastMacsTable != null) {
+                tableBuilder.put(McastMacsRemote.class, mcastMacsTable);
+                whereBuilder.put(RemoteMcastMacs.class, new RemoteMcastMacWhereClauseGetter(mcastMacsTable));
+            }
+            final UcastMacsRemote ucastMacsTable = dbSchema.getTypedRowWrapper(UcastMacsRemote.class, null);
+            if (ucastMacsTable != null) {
+                tableBuilder.put(UcastMacsRemote.class, ucastMacsTable);
+                whereBuilder.put(RemoteUcastMacs.class, new RemoteUcastMacWhereClauseGetter(ucastMacsTable));
+            }
+            final LogicalSwitch lsTable = dbSchema.getTypedRowWrapper(LogicalSwitch.class, null);
+            if (lsTable != null) {
+                tableBuilder.put(LogicalSwitch.class, lsTable);
+                whereBuilder.put(LogicalSwitches.class, new LogicalSwitchWhereClauseGetter(lsTable));
+            }
+            final PhysicalLocator plTable = dbSchema.getTypedRowWrapper(PhysicalLocator.class, null);
+            if (plTable != null) {
+                tableBuilder.put(PhysicalLocator.class, plTable);
+                whereBuilder.put(TerminationPoint.class, new LocatorWhereClauseGetter(plTable));
+            }
+        }
+
+        tables = tableBuilder.build();
+        whereClauseGetters = whereBuilder.build();
     }
 
-    class RemoteMcastMacWhereClauseGetter implements Function<InstanceIdentifier, List<Condition>> {
+    @FunctionalInterface
+    private interface WhereClauseGetter<T extends DataObject> extends Function<InstanceIdentifier<T>, List<Condition>> {
+
+    }
+
+    class RemoteMcastMacWhereClauseGetter implements WhereClauseGetter<RemoteMcastMacs> {
+        private final McastMacsRemote macTable;
+
+        RemoteMcastMacWhereClauseGetter(final McastMacsRemote macTable) {
+            this.macTable = requireNonNull(macTable);
+        }
+
         @Override
-        public List<Condition> apply(final InstanceIdentifier iid) {
-            InstanceIdentifier<RemoteMcastMacs> macIid = iid;
-            String mac = macIid.firstKeyOf(RemoteMcastMacs.class).getMacEntryKey().getValue();
-            InstanceIdentifier<LogicalSwitches> lsIid = (InstanceIdentifier<LogicalSwitches>) macIid.firstKeyOf(
-                    RemoteMcastMacs.class).getLogicalSwitchRef().getValue();
+        public List<Condition> apply(final InstanceIdentifier<RemoteMcastMacs> iid) {
+            RemoteMcastMacsKey key = iid.firstKeyOf(RemoteMcastMacs.class);
+            InstanceIdentifier<LogicalSwitches> lsIid = (InstanceIdentifier<LogicalSwitches>) key.getLogicalSwitchRef()
+                    .getValue();
             UUID lsUUID = connectionInstance.getDeviceInfo().getUUID(LogicalSwitches.class, lsIid);
             if (lsUUID == null) {
                 LOG.error("Could not find uuid for ls key {}", lsIid);
                 return null;
             }
 
-            McastMacsRemote macTable = tables.getInstance(McastMacsRemote.class);
             ArrayList<Condition> conditions = new ArrayList<>();
             conditions.add(macTable.getLogicalSwitchColumn().getSchema().opEqual(lsUUID));
-            conditions.add(macTable.getMacColumn().getSchema().opEqual(mac));
+            conditions.add(macTable.getMacColumn().getSchema().opEqual(key.getMacEntryKey().getValue()));
             return conditions;
         }
     }
 
-    class RemoteUcastMacWhereClauseGetter implements Function<InstanceIdentifier, List<Condition>> {
+    class RemoteUcastMacWhereClauseGetter implements WhereClauseGetter<RemoteUcastMacs> {
+        private final UcastMacsRemote macTable;
+
+        RemoteUcastMacWhereClauseGetter(final UcastMacsRemote macTable) {
+            this.macTable = requireNonNull(macTable);
+        }
+
         @Override
-        public List<Condition> apply(final InstanceIdentifier iid) {
-            InstanceIdentifier<RemoteUcastMacs> macIid = iid;
-            String mac = macIid.firstKeyOf(RemoteUcastMacs.class).getMacEntryKey().getValue();
-            InstanceIdentifier<LogicalSwitches> lsIid = (InstanceIdentifier<LogicalSwitches>) macIid.firstKeyOf(
-                    RemoteUcastMacs.class).getLogicalSwitchRef().getValue();
+        public List<Condition> apply(final InstanceIdentifier<RemoteUcastMacs> iid) {
+            RemoteUcastMacsKey key = iid.firstKeyOf(RemoteUcastMacs.class);
+            InstanceIdentifier<LogicalSwitches> lsIid = (InstanceIdentifier<LogicalSwitches>) key.getLogicalSwitchRef()
+                    .getValue();
             UUID lsUUID = connectionInstance.getDeviceInfo().getUUID(LogicalSwitches.class, lsIid);
             if (lsUUID == null) {
                 LOG.error("Could not find uuid for ls key {}", lsIid);
                 return null;
             }
 
-            UcastMacsRemote macTable = tables.getInstance(UcastMacsRemote.class);
             ArrayList<Condition> conditions = new ArrayList<>();
             conditions.add(macTable.getLogicalSwitchColumn().getSchema().opEqual(lsUUID));
-            conditions.add(macTable.getMacColumn().getSchema().opEqual(mac));
+            conditions.add(macTable.getMacColumn().getSchema().opEqual(key.getMacEntryKey().getValue()));
             return conditions;
         }
     }
 
-    class LogicalSwitchWhereClauseGetter implements Function<InstanceIdentifier, List<Condition>> {
+    static class LogicalSwitchWhereClauseGetter implements WhereClauseGetter<LogicalSwitches> {
+        private final LogicalSwitch logicalSwitch;
+
+        LogicalSwitchWhereClauseGetter(final LogicalSwitch logicalSwitch) {
+            this.logicalSwitch = requireNonNull(logicalSwitch);
+        }
+
         @Override
-        public List<Condition> apply(final InstanceIdentifier iid) {
-            InstanceIdentifier<LogicalSwitches> lsIid = iid;
-            String lsName = lsIid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
-            LogicalSwitch logicalSwitch = tables.getInstance(LogicalSwitch.class);
+        public List<Condition> apply(final InstanceIdentifier<LogicalSwitches> iid) {
+            String lsName = iid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
             return Lists.newArrayList(logicalSwitch.getNameColumn().getSchema().opEqual(lsName));
         }
     }
 
-    class LocatorWhereClauseGetter implements Function<InstanceIdentifier, List<Condition>> {
+    static class LocatorWhereClauseGetter implements WhereClauseGetter<TerminationPoint> {
+        private final PhysicalLocator locatorTable;
+
+        LocatorWhereClauseGetter(final PhysicalLocator locatorTable) {
+            this.locatorTable = requireNonNull(locatorTable);
+        }
+
         @Override
-        public List<Condition> apply(final InstanceIdentifier iid) {
-            InstanceIdentifier<TerminationPoint> tepIid = iid;
-            String locatorIp = tepIid.firstKeyOf(TerminationPoint.class).getTpId().getValue();
+        public List<Condition> apply(final InstanceIdentifier<TerminationPoint> iid) {
+            String locatorIp = iid.firstKeyOf(TerminationPoint.class).getTpId().getValue();
             locatorIp = locatorIp.substring(locatorIp.indexOf(":") + 1);
             LOG.info("Locator ip to look for {}", locatorIp);
-            PhysicalLocator locatorTable = tables.getInstance(PhysicalLocator.class);
             return Lists.newArrayList(locatorTable.getDstIpColumn().getSchema().opEqual(locatorIp));
         }
     }
@@ -203,7 +244,7 @@ public class HwvtepTableReader {
         selectOperation.setColumns(new ArrayList<>(hwvtepSchema.getColumns()));
 
         if (existingUUID == null) {
-            final Function<InstanceIdentifier, List<Condition>> whereClausule = whereClauseGetterMap.get(cls);
+            final WhereClauseGetter<?> whereClausule = whereClauseGetters.get(cls);
             if (whereClausule == null) {
                 LOG.error("Could not get where class for cls {} ", cls);
                 return Optional.empty();

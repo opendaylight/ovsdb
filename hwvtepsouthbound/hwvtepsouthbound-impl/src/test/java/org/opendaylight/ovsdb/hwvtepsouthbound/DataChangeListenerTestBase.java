@@ -219,7 +219,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
 
         ListenableFuture<List<OperationResult>> ft = mock(ListenableFuture.class);
         transactCaptor = ArgumentCaptor.forClass(List.class);
-        doReturn(ft).when(ovsdbClient).transact(any(DatabaseSchema.class), transactCaptor.capture());
+        doReturn(ft).when(ovsdbClient).transact(any(TypedDatabaseSchema.class), transactCaptor.capture());
     }
 
     void addNode(final LogicalDatastoreType logicalDatastoreType) throws Exception {

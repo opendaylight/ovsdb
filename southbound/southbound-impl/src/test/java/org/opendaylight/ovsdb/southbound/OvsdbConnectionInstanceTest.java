@@ -195,17 +195,17 @@ public class OvsdbConnectionInstanceTest {
 
         // test transactBuilder()
         TransactionBuilder transactionBuilder = mock(TransactionBuilder.class);
-        doReturn(transactionBuilder).when(client).transactBuilder(any(DatabaseSchema.class));
+        doReturn(transactionBuilder).when(client).transactBuilder(any(TypedDatabaseSchema.class));
         assertEquals("Error, did not return correct TransactionBuilder object", transactionBuilder,
-                ovsdbConnectionInstance.transactBuilder(mock(DatabaseSchema.class)));
-        verify(client).transactBuilder(any(DatabaseSchema.class));
+                ovsdbConnectionInstance.transactBuilder(mock(TypedDatabaseSchema.class)));
+        verify(client).transactBuilder(any(TypedDatabaseSchema.class));
 
         // test transact()
         ListenableFuture<List<OperationResult>> futureOperationResult = mock(ListenableFuture.class);
-        doReturn(futureOperationResult).when(client).transact(any(DatabaseSchema.class), any(List.class));
+        doReturn(futureOperationResult).when(client).transact(any(TypedDatabaseSchema.class), any(List.class));
         assertEquals("Error, did not return correct ListenableFuture<List<OperationResult>> object",
-                futureOperationResult, ovsdbConnectionInstance.transact(mock(DatabaseSchema.class), mock(List.class)));
-        verify(client).transact(any(DatabaseSchema.class), any(List.class));
+            futureOperationResult, ovsdbConnectionInstance.transact(mock(TypedDatabaseSchema.class), mock(List.class)));
+        verify(client).transact(any(TypedDatabaseSchema.class), any(List.class));
 
         // test monitor()
         TableUpdates tableUpdates = mock(TableUpdates.class);

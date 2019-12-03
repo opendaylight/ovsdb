@@ -44,7 +44,7 @@ public interface OvsdbClient {
      * Allows for a mini DSL way of collecting the transactions to be executed against the ovsdb instance.
      * @return TransactionBuilder
      */
-    TransactionBuilder transactBuilder(DatabaseSchema dbSchema);
+    TransactionBuilder transactBuilder(TypedDatabaseSchema dbSchema);
 
     /**
      * Execute the list of operations in a single Transactions. Similar to the transactBuilder() method
@@ -53,7 +53,7 @@ public interface OvsdbClient {
      *     cancel on the Future would cause OVSDB cancel operation to be fired against
      *     the device.
      */
-    ListenableFuture<List<OperationResult>> transact(DatabaseSchema dbSchema, List<Operation> operations);
+    ListenableFuture<List<OperationResult>> transact(TypedDatabaseSchema dbSchema, List<Operation> operations);
 
     /**
      * ovsdb <a href="http://tools.ietf.org/html/draft-pfaff-ovsdb-proto-04#section-4.1.5">monitor</a> operation.

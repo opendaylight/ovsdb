@@ -30,8 +30,8 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.util.CharsetUtil;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -91,6 +91,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final String OVSDB_RPC_TASK_TIMEOUT_PARAM = "ovsdb-rpc-task-timeout";
     private static final String USE_SSL = "use-ssl";
     private static final int RETRY_PERIOD = 100; // retry after 100 milliseconds
+
+    private static final StringEncoder UTF8_ENCODER = new StringEncoder(StandardCharsets.UTF_8);
 
     private static final ScheduledExecutorService EXECUTOR_SERVICE = Executors.newScheduledThreadPool(10,
             new ThreadFactoryBuilder().setNameFormat("OVSDBPassiveConnServ-%d").build());
@@ -165,7 +167,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                     channel.pipeline().addLast(
                             //new LoggingHandler(LogLevel.INFO),
                             new JsonRpcDecoder(jsonRpcDecoderMaxFrameLength),
-                            new StringEncoder(CharsetUtil.UTF_8),
+                            UTF8_ENCODER,
                             new IdleStateHandler(IDLE_READER_TIMEOUT, 0, 0),
                             new ReadTimeoutHandler(READ_TIMEOUT),
                             new ExceptionHandler(OvsdbConnectionService.this));
@@ -348,7 +350,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
                             channel.pipeline().addLast(
                                  new JsonRpcDecoder(jsonRpcDecoderMaxFrameLength),
-                                 new StringEncoder(CharsetUtil.UTF_8),
+                                 UTF8_ENCODER,
                                  new IdleStateHandler(IDLE_READER_TIMEOUT, 0, 0),
                                  new ReadTimeoutHandler(READ_TIMEOUT),
                                  new ExceptionHandler(OvsdbConnectionService.this));

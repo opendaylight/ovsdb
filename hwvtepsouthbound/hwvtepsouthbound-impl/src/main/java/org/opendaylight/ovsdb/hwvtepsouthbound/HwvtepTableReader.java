@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -91,7 +92,7 @@ public class HwvtepTableReader {
         TerminationPoint.class, PhysicalLocator.class);
 
     private final Map<Class, Function<InstanceIdentifier, List<Condition>>> whereClauseGetterMap = new HashMap();
-    private final Map<Class<? extends TypedBaseTable<?>>, TypedBaseTable> tables = new HashMap<>();
+    private final ImmutableClassToInstanceMap<TypedBaseTable<?>> tables;
 
     private final HwvtepConnectionInstance connectionInstance;
 
@@ -110,10 +111,12 @@ public class HwvtepTableReader {
         whereClauseGetterMap.put(LogicalSwitches.class, new LogicalSwitchWhereClauseGetter());
         whereClauseGetterMap.put(TerminationPoint.class, new LocatorWhereClauseGetter());
 
-        tables.put(McastMacsRemote.class, TyperUtils.getTypedRowWrapper(dbSchema, McastMacsRemote.class, null));
-        tables.put(UcastMacsRemote.class, TyperUtils.getTypedRowWrapper(dbSchema, UcastMacsRemote.class, null));
-        tables.put(LogicalSwitch.class, TyperUtils.getTypedRowWrapper(dbSchema, LogicalSwitch.class, null));
-        tables.put(PhysicalLocator.class, TyperUtils.getTypedRowWrapper(dbSchema, PhysicalLocator.class, null));
+        tables = ImmutableClassToInstanceMap.<TypedBaseTable<?>>builder()
+                .put(McastMacsRemote.class, TyperUtils.getTypedRowWrapper(dbSchema, McastMacsRemote.class, null))
+                .put(UcastMacsRemote.class, TyperUtils.getTypedRowWrapper(dbSchema, UcastMacsRemote.class, null))
+                .put(LogicalSwitch.class, TyperUtils.getTypedRowWrapper(dbSchema, LogicalSwitch.class, null))
+                .put(PhysicalLocator.class, TyperUtils.getTypedRowWrapper(dbSchema, PhysicalLocator.class, null))
+                .build();
     }
 
     class RemoteMcastMacWhereClauseGetter implements Function<InstanceIdentifier, List<Condition>> {
@@ -129,7 +132,7 @@ public class HwvtepTableReader {
                 return null;
             }
 
-            McastMacsRemote macTable = (McastMacsRemote) tables.get(McastMacsRemote.class);
+            McastMacsRemote macTable = tables.getInstance(McastMacsRemote.class);
             ArrayList<Condition> conditions = new ArrayList<>();
             conditions.add(macTable.getLogicalSwitchColumn().getSchema().opEqual(lsUUID));
             conditions.add(macTable.getMacColumn().getSchema().opEqual(mac));
@@ -150,7 +153,7 @@ public class HwvtepTableReader {
                 return null;
             }
 
-            UcastMacsRemote macTable = (UcastMacsRemote) tables.get(UcastMacsRemote.class);
+            UcastMacsRemote macTable = tables.getInstance(UcastMacsRemote.class);
             ArrayList<Condition> conditions = new ArrayList<>();
             conditions.add(macTable.getLogicalSwitchColumn().getSchema().opEqual(lsUUID));
             conditions.add(macTable.getMacColumn().getSchema().opEqual(mac));
@@ -163,7 +166,7 @@ public class HwvtepTableReader {
         public List<Condition> apply(final InstanceIdentifier iid) {
             InstanceIdentifier<LogicalSwitches> lsIid = iid;
             String lsName = lsIid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
-            LogicalSwitch logicalSwitch = (LogicalSwitch) tables.get(LogicalSwitch.class);
+            LogicalSwitch logicalSwitch = tables.getInstance(LogicalSwitch.class);
             return Lists.newArrayList(logicalSwitch.getNameColumn().getSchema().opEqual(lsName));
         }
     }
@@ -175,7 +178,7 @@ public class HwvtepTableReader {
             String locatorIp = tepIid.firstKeyOf(TerminationPoint.class).getTpId().getValue();
             locatorIp = locatorIp.substring(locatorIp.indexOf(":") + 1);
             LOG.info("Locator ip to look for {}", locatorIp);
-            PhysicalLocator locatorTable = (PhysicalLocator) tables.get(PhysicalLocator.class);
+            PhysicalLocator locatorTable = tables.getInstance(PhysicalLocator.class);
             return Lists.newArrayList(locatorTable.getDstIpColumn().getSchema().opEqual(locatorIp));
         }
     }
@@ -217,7 +220,7 @@ public class HwvtepTableReader {
                 selectOperation.where(conditions.get(0));
             }
         } else {
-            TypedBaseTable table = tables.get(tableClass);
+            TypedBaseTable<?> table = tables.get(tableClass);
             LOG.info("Setting uuid condition {} ", existingUUID);
             selectOperation.where(table.getUuidColumn().getSchema().opEqual(existingUUID));
         }

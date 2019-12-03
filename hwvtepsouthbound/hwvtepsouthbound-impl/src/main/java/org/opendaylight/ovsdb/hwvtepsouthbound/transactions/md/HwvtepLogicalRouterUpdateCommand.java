@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import com.google.common.base.Optional;
@@ -21,7 +20,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.ACL;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalRouter;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
@@ -52,26 +50,26 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepLogicalRouterUpdateCommand.class);
+
     private final Map<UUID, LogicalRouter> updatedLRRows;
 
-    public HwvtepLogicalRouterUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public HwvtepLogicalRouterUpdateCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedLRRows = TyperUtils.extractRowsUpdated(LogicalRouter.class, getUpdates(), getDbSchema());
+        updatedLRRows = extractRowsUpdated(LogicalRouter.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         for (Entry<UUID, LogicalRouter> entry : updatedLRRows.entrySet()) {
             LOG.trace("Updating logical router {} with {}", entry.getKey(), entry.getValue());
             updateLogicalRouter(transaction, entry.getValue());
         }
     }
 
-    private void updateLogicalRouter(ReadWriteTransaction transaction, final LogicalRouter router) {
+    private void updateLogicalRouter(final ReadWriteTransaction transaction, final LogicalRouter router) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {

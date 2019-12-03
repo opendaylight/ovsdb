@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import com.google.common.base.Optional;
@@ -26,7 +25,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Tunnel;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
@@ -60,32 +58,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
-
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepPhysicalSwitchUpdateCommand.class);
-    private final Map<UUID, PhysicalSwitch> updatedPSRows;
-    private Map<UUID, Tunnel> updatedTunnelRows;
-    private final Map<UUID, PhysicalSwitch> oldPSRows;
 
-    public HwvtepPhysicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    private final Map<UUID, PhysicalSwitch> updatedPSRows;
+    private final Map<UUID, PhysicalSwitch> oldPSRows;
+    private Map<UUID, Tunnel> updatedTunnelRows;
+
+    public HwvtepPhysicalSwitchUpdateCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedPSRows = TyperUtils.extractRowsUpdated(PhysicalSwitch.class, getUpdates(), getDbSchema());
-        oldPSRows = TyperUtils.extractRowsOld(PhysicalSwitch.class, getUpdates(), getDbSchema());
+        updatedPSRows = extractRowsUpdated(PhysicalSwitch.class);
+        oldPSRows = extractRowsOld(PhysicalSwitch.class);
+
         try {
-            updatedTunnelRows = TyperUtils.extractRowsUpdated(Tunnel.class, getUpdates(), getDbSchema());
+            updatedTunnelRows = extractRowsUpdated(Tunnel.class);
         } catch (IllegalArgumentException e) {
             LOG.debug("Tunnel Table not supported on this HWVTEP device", e);
         }
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         for (Map.Entry<UUID, PhysicalSwitch> entry : updatedPSRows.entrySet()) {
             updatePhysicalSwitch(transaction, entry.getKey(), entry.getValue());
         }
     }
 
-    private void updatePhysicalSwitch(ReadWriteTransaction transaction, UUID uuid, PhysicalSwitch phySwitch) {
+    private void updatePhysicalSwitch(final ReadWriteTransaction transaction, final UUID uuid,
+            final PhysicalSwitch phySwitch) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         //TODO remove this read
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
@@ -114,7 +114,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         }
     }
 
-    private InstanceIdentifier<TunnelIps> getTunnelIpIid(final String tunnelIp,
+    private static InstanceIdentifier<TunnelIps> getTunnelIpIid(final String tunnelIp,
             final InstanceIdentifier<Node> psIid) {
         IpAddress ip = IpAddressBuilder.getDefaultInstance(tunnelIp);
         TunnelIps tunnelIps = new TunnelIpsBuilder().withKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build();
@@ -144,7 +144,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         }
     }
 
-    private Node buildPhysicalSwitchNode(Node node, PhysicalSwitch phySwitch) {
+    private Node buildPhysicalSwitchNode(final Node node, final PhysicalSwitch phySwitch) {
         NodeBuilder psNodeBuilder = new NodeBuilder();
         NodeId psNodeId = getNodeId(phySwitch);
         psNodeBuilder.setNodeId(psNodeId);
@@ -162,7 +162,8 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         return psNodeBuilder.build();
     }
 
-    private void setTunnels(PhysicalSwitchAugmentationBuilder psAugmentationBuilder, PhysicalSwitch phySwitch) {
+    private void setTunnels(final PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
+            final PhysicalSwitch phySwitch) {
         if (updatedTunnelRows != null && phySwitch.getTunnels() != null && phySwitch.getTunnels().getData() != null
                 && !phySwitch.getTunnels().getData().isEmpty()) {
             // Nothing to do but update deviceInfo cache
@@ -172,13 +173,13 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         }
     }
 
-    private void setManagedBy(PhysicalSwitchAugmentationBuilder psAugmentationBuilder) {
+    private void setManagedBy(final PhysicalSwitchAugmentationBuilder psAugmentationBuilder) {
         InstanceIdentifier<Node> connectionNodePath = getOvsdbConnectionInstance().getInstanceIdentifier();
         psAugmentationBuilder.setManagedBy(new HwvtepGlobalRef(connectionNodePath));
     }
 
-    private void setPhysicalSwitchId(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
-            PhysicalSwitch phySwitch) {
+    private static void setPhysicalSwitchId(final PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
+            final PhysicalSwitch phySwitch) {
         if (phySwitch.getName() != null) {
             psAugmentationBuilder.setHwvtepNodeName(new HwvtepNodeName(phySwitch.getName()));
         }
@@ -187,8 +188,8 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         }
     }
 
-    private void setManagementIps(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
-            PhysicalSwitch phySwitch) {
+    private static void setManagementIps(final PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
+            final PhysicalSwitch phySwitch) {
         if (phySwitch.getManagementIpsColumn() != null && phySwitch.getManagementIpsColumn().getData() != null
                 && !phySwitch.getManagementIpsColumn().getData().isEmpty()) {
             List<ManagementIps> mgmtIps = new ArrayList<>();
@@ -201,7 +202,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         }
     }
 
-    private Node buildConnectionNode(PhysicalSwitch phySwitch) {
+    private Node buildConnectionNode(final PhysicalSwitch phySwitch) {
         // Update node with PhysicalSwitch reference
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
@@ -220,24 +221,24 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         return connectionNode.build();
     }
 
-    private InstanceIdentifier<Node> getInstanceIdentifier(PhysicalSwitch phySwitch) {
+    private InstanceIdentifier<Node> getInstanceIdentifier(final PhysicalSwitch phySwitch) {
         return HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), phySwitch);
     }
 
-    private NodeId getNodeId(PhysicalSwitch phySwitch) {
+    private NodeId getNodeId(final PhysicalSwitch phySwitch) {
         NodeKey nodeKey = getInstanceIdentifier(phySwitch).firstKeyOf(Node.class);
         return nodeKey.getNodeId();
     }
 
-    private <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
-            List<InstanceIdentifier<T>> entryIids) {
+    private static <T extends DataObject> void deleteEntries(final ReadWriteTransaction transaction,
+            final List<InstanceIdentifier<T>> entryIids) {
         for (InstanceIdentifier<T> entryIid : entryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
         }
     }
 
-    private List<InstanceIdentifier<SwitchFaultStatus>> getSwitchFaultStatusToRemove(InstanceIdentifier<Node> psIid,
-            PhysicalSwitch phySwitch) {
+    private List<InstanceIdentifier<SwitchFaultStatus>> getSwitchFaultStatusToRemove(
+            final InstanceIdentifier<Node> psIid, final PhysicalSwitch phySwitch) {
         Preconditions.checkNotNull(psIid);
         Preconditions.checkNotNull(phySwitch);
         List<InstanceIdentifier<SwitchFaultStatus>> result = new ArrayList<>();
@@ -255,8 +256,8 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         return result;
     }
 
-    private void setSwitchFaultStatus(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
-            PhysicalSwitch phySwitch) {
+    private static void setSwitchFaultStatus(final PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
+            final PhysicalSwitch phySwitch) {
         if (phySwitch.getSwitchFaultStatusColumn() != null && phySwitch.getSwitchFaultStatusColumn().getData() != null
                 && !phySwitch.getSwitchFaultStatusColumn().getData().isEmpty()) {
             List<SwitchFaultStatus> switchFaultStatusLst = new ArrayList<>();

@@ -44,7 +44,6 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangeEvent;
@@ -70,7 +69,7 @@ public class OvsdbConnectionInstance {
     private final OvsdbClient client;
     private ConnectionInfo connectionInfo;
     private final TransactionInvoker txInvoker;
-    private Map<TypedDatabaseSchema, TransactInvoker> transactInvokers;
+    private Map<DatabaseSchema, TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
     private InstanceIdentifier<Node> instanceIdentifier;
     private volatile boolean hasDeviceOwnership = false;
@@ -118,8 +117,8 @@ public class OvsdbConnectionInstance {
         }
     }
 
-    public ListenableFuture<List<OperationResult>> transact(
-            final DatabaseSchema dbSchema, final List<Operation> operations) {
+    public ListenableFuture<List<OperationResult>> transact(final DatabaseSchema dbSchema,
+            final List<Operation> operations) {
         return client.transact(dbSchema, operations);
     }
 
@@ -149,9 +148,9 @@ public class OvsdbConnectionInstance {
         if (transactInvokers == null) {
             try {
                 transactInvokers = new HashMap<>();
-                TypedDatabaseSchema dbSchema = getSchema(SouthboundConstants.OPEN_V_SWITCH).get();
+                DatabaseSchema dbSchema = getSchema(SouthboundConstants.OPEN_V_SWITCH).get();
                 if (dbSchema != null) {
-                    transactInvokers.put(dbSchema, new TransactInvokerImpl(this,dbSchema));
+                    transactInvokers.put(dbSchema, new TransactInvokerImpl(this, dbSchema));
                 }
             } catch (InterruptedException | ExecutionException e) {
                 LOG.warn("Exception attempting to createTransactionInvokers {}", connectionInfo, e);
@@ -190,7 +189,7 @@ public class OvsdbConnectionInstance {
         LOG.debug("Update attributes of ovsdb node ip: {} port: {}",
                     this.initialCreateData.getConnectionInfo().getRemoteIp(),
                     this.initialCreateData.getConnectionInfo().getRemotePort());
-        for (Map.Entry<TypedDatabaseSchema, TransactInvoker> entry: transactInvokers.entrySet()) {
+        for (Map.Entry<DatabaseSchema, TransactInvoker> entry: transactInvokers.entrySet()) {
 
             TransactionBuilder transaction = new TransactionBuilder(this.client, entry.getKey());
 
@@ -261,7 +260,7 @@ public class OvsdbConnectionInstance {
         return client.getDatabases();
     }
 
-    public ListenableFuture<TypedDatabaseSchema> getSchema(final String database) {
+    public ListenableFuture<DatabaseSchema> getSchema(final String database) {
         return client.getSchema(database);
     }
 

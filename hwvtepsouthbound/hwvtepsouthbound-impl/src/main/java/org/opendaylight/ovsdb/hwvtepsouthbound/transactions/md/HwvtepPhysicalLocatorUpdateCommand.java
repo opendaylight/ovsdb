@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import com.google.common.base.Optional;
@@ -19,7 +18,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -36,15 +34,15 @@ public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionComma
     private final Map<UUID, PhysicalLocator> updatedPLocRows;
     private final Map<UUID, PhysicalLocator> oldPLocRows;
 
-    public HwvtepPhysicalLocatorUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public HwvtepPhysicalLocatorUpdateCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedPLocRows = TyperUtils.extractRowsUpdated(PhysicalLocator.class, getUpdates(), getDbSchema());
-        oldPLocRows = TyperUtils.extractRowsOld(PhysicalLocator.class, getUpdates(), getDbSchema());
+        updatedPLocRows = extractRowsUpdated(PhysicalLocator.class);
+        oldPLocRows = extractRowsOld(PhysicalLocator.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         if (updatedPLocRows.isEmpty()) {
             return;
@@ -55,7 +53,7 @@ public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionComma
         }
     }
 
-    private void updateTerminationPoints(ReadWriteTransaction transaction, Node node) {
+    private void updateTerminationPoints(final ReadWriteTransaction transaction, final Node node) {
         for (Entry<UUID, PhysicalLocator> locUpdate : updatedPLocRows.entrySet()) {
             PhysicalLocator locator = locUpdate.getValue();
             InstanceIdentifier<Node> nodeIid = HwvtepSouthboundMapper.createInstanceIdentifier(node.getNodeId());
@@ -85,16 +83,16 @@ public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionComma
         }
     }
 
-    private void setEncapsType(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder,
-            PhysicalLocator locator) {
+    private static void setEncapsType(final HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder,
+            final PhysicalLocator locator) {
         String encapsType = locator.getEncapsulationTypeColumn().getData();
         if (HwvtepSouthboundMapper.createEncapsulationType(encapsType) != null) {
             tpAugmentationBuilder.setEncapsulationType(HwvtepSouthboundMapper.createEncapsulationType(encapsType));
         }
     }
 
-    private void setDstIp(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder,
-            PhysicalLocator locator) {
+    private static void setDstIp(final HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder,
+            final PhysicalLocator locator) {
         tpAugmentationBuilder.setDstIp(IpAddressBuilder.getDefaultInstance(locator.getDstIpColumn().getData()));
     }
 

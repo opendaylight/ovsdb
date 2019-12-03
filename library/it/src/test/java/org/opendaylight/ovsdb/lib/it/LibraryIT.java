@@ -51,9 +51,8 @@ public class LibraryIT extends LibraryIntegrationTestBase {
         super.setup();
     }
 
-    private void createTypedBridge(DatabaseSchema dbSchema) throws IOException, InterruptedException,
-            ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException,
-            InvocationTargetException {
+    private static void createTypedBridge(final DatabaseSchema dbSchema) throws IOException, InterruptedException,
+            ExecutionException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         Bridge bridge = ovsdbClient.createTypedRowWrapper(Bridge.class);
         bridge.setName(TEST_BRIDGE_NAME);
         bridge.setStatus(ImmutableMap.of("key", "value"));

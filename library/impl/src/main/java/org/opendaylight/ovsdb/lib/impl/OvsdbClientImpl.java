@@ -54,7 +54,6 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedReflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +63,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbClientImpl.class);
     private ExecutorService executorService;
     private OvsdbRPC rpc;
-    private final Map<String, TypedDatabaseSchema> schemas = new HashMap<>();
+    private final Map<String, DatabaseSchema> schemas = new HashMap<>();
     private final Map<String, CallbackContext> monitorCallbacks = new HashMap<>();
     private OvsdbRPC.Callback rpcCallback;
     private OvsdbConnectionInfo connectionInfo;
@@ -302,7 +301,6 @@ public class OvsdbClientImpl implements OvsdbClient {
         return new TransactionBuilder(this, dbSchema);
     }
 
-
     public boolean isReady(int timeout) throws InterruptedException {
         while (timeout > 0) {
             if (!schemas.isEmpty()) {
@@ -320,21 +318,21 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
-    public ListenableFuture<TypedDatabaseSchema> getSchema(final String database) {
-        final TypedDatabaseSchema existing = schemas.get(database);
+    public ListenableFuture<DatabaseSchema> getSchema(final String database) {
+        final DatabaseSchema existing = schemas.get(database);
         if (existing != null) {
             return Futures.immediateFuture(existing);
         }
 
         return Futures.transform(getSchemaFromDevice(Collections.singletonList(database)), result -> {
-            final DatabaseSchema dbSchema = result.get(database);
+            DatabaseSchema dbSchema = result.get(database);
             if (dbSchema == null) {
                 return null;
             }
 
-            final TypedDatabaseSchema typedSchema = TypedDatabaseSchema.of(dbSchema.withInternallyGeneratedColumns());
-            final TypedDatabaseSchema raced = schemas.putIfAbsent(database, typedSchema);
-            return raced != null ? raced : typedSchema;
+            dbSchema = dbSchema.withInternallyGeneratedColumns();
+            final DatabaseSchema raced = schemas.putIfAbsent(database, dbSchema);
+            return raced != null ? raced : dbSchema;
         }, executorService);
     }
 
@@ -384,7 +382,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
-    public TypedDatabaseSchema getDatabaseSchema(final String dbName) {
+    public DatabaseSchema getDatabaseSchema(final String dbName) {
         return schemas.get(dbName);
     }
 
@@ -396,7 +394,7 @@ public class OvsdbClientImpl implements OvsdbClient {
      * @param klazz Typed Class that represents a Table
      * @return DatabaseSchema that matches a Typed Table Class
      */
-    private <T> TypedDatabaseSchema getDatabaseSchemaForTypedTable(final Class<T> klazz) {
+    private <T> DatabaseSchema getDatabaseSchemaForTypedTable(final Class<T> klazz) {
         final String dbName = TypedReflections.getTableDatabase(klazz);
         return dbName == null ? null : getDatabaseSchema(dbName);
     }
@@ -423,7 +421,7 @@ public class OvsdbClientImpl implements OvsdbClient {
      */
     @Override
     public <T extends TypedBaseTable<?>> T createTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz) {
-        return dbSchema == null ? null : TypedDatabaseSchema.of(dbSchema).getTypedRowWrapper(klazz, new Row<>());
+        return dbSchema == null ? null : dbSchema.getTypedRowWrapper(klazz, new Row<>());
     }
 
     /**
@@ -437,7 +435,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     @Override
 
     public <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row) {
-        final TypedDatabaseSchema dbSchema = getDatabaseSchemaForTypedTable(klazz);
+        final DatabaseSchema dbSchema = getDatabaseSchemaForTypedTable(klazz);
         return dbSchema == null ? null : dbSchema.getTypedRowWrapper(klazz, row);
     }
 

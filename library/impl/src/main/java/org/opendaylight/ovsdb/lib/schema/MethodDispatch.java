@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.ovsdb.lib.schema.typed;
+package org.opendaylight.ovsdb.lib.schema;
 
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
@@ -26,9 +26,9 @@ import org.opendaylight.ovsdb.lib.error.TableSchemaNotFoundException;
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.Version;
-import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.MethodType;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedReflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ final class MethodDispatch {
 
     abstract static class Prototype {
 
-        abstract Invoker bindTo(TypedDatabaseSchema dbSchema);
+        abstract Invoker bindTo(DatabaseSchema dbSchema);
     }
 
     abstract static class FailedInvoker extends Invoker {
@@ -122,7 +122,7 @@ final class MethodDispatch {
         }
 
         @Override
-        final Invoker bindTo(final TypedDatabaseSchema dbSchema) {
+        final Invoker bindTo(final DatabaseSchema dbSchema) {
             final Version version = dbSchema.getVersion();
             if (supportedVersions.contains(version)) {
                 return bindToImpl(dbSchema);
@@ -138,7 +138,7 @@ final class MethodDispatch {
             };
         }
 
-        abstract Invoker bindToImpl(TypedDatabaseSchema dbSchema);
+        abstract Invoker bindToImpl(DatabaseSchema dbSchema);
     }
 
     abstract static class TablePrototype extends VersionedPrototype {
@@ -203,7 +203,7 @@ final class MethodDispatch {
         }
 
         @Override
-        final Invoker bindToImpl(final TypedDatabaseSchema dbSchema) {
+        final Invoker bindToImpl(final DatabaseSchema dbSchema) {
             final GenericTableSchema tableSchema = findTableSchema(dbSchema);
             return tableSchema != null ? bindToImpl(tableSchema) : tableSchemaNotFound(dbSchema);
         }
@@ -248,7 +248,7 @@ final class MethodDispatch {
         return CACHE.getUnchecked(target);
     }
 
-    @NonNull TypedRowInvocationHandler bindToSchema(final TypedDatabaseSchema dbSchema) {
+    @NonNull TypedRowInvocationHandler bindToSchema(final DatabaseSchema dbSchema) {
         return new TypedRowInvocationHandler(tableName,
             ImmutableMap.copyOf(Maps.transformValues(prototypes, prototype -> prototype.bindTo(dbSchema))));
     }

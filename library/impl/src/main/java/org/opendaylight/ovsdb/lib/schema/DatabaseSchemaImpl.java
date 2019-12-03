@@ -11,9 +11,13 @@ import static java.util.Objects.requireNonNull;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.Invokable;
+import com.google.common.reflect.Reflection;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -21,7 +25,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.ovsdb.lib.error.ParsingException;
+import org.opendaylight.ovsdb.lib.message.TableUpdate;
+import org.opendaylight.ovsdb.lib.message.TableUpdate.RowUpdate;
+import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.notation.Version;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedReflections;
+import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +40,13 @@ import org.slf4j.LoggerFactory;
 public class DatabaseSchemaImpl implements DatabaseSchema {
     private static final Logger LOG = LoggerFactory.getLogger(DatabaseSchemaImpl.class);
 
+    private final LoadingCache<Class<?>, TypedRowInvocationHandler> handlers = CacheBuilder.newBuilder()
+            .weakKeys().weakValues().build(new CacheLoader<Class<?>, TypedRowInvocationHandler>() {
+                @Override
+                public TypedRowInvocationHandler load(final Class<?> key) {
+                    return MethodDispatch.forTarget(key).bindToSchema(DatabaseSchemaImpl.this);
+                }
+            });
     private final String name;
     private final Version version;
     private final ImmutableMap<String, TableSchema> tables;
@@ -118,7 +136,96 @@ public class DatabaseSchemaImpl implements DatabaseSchema {
             Maps.transformValues(tables, TableSchema::withInternallyGeneratedColumns));
     }
 
-    protected final boolean haveInternallyGeneratedColumns() {
+    @Override
+    public GenericTableSchema getTableSchema(final Class<?> klazz) {
+        return getTableSchema(TypedReflections.getTableName(klazz));
+    }
+
+    private GenericTableSchema getTableSchema(final String tableName) {
+        return table(tableName, GenericTableSchema.class);
+    }
+
+    @Override
+    public <T> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row) {
+        // Check validity of  of the parameter passed to getTypedRowWrapper:
+        // -  checks for a valid Database Schema matching the expected Database for a given table
+        // - checks for the presence of the Table in Database Schema.
+        final String dbName = TypedReflections.getTableDatabase(klazz);
+        if (dbName != null && !dbName.equalsIgnoreCase(getName())) {
+            return null;
+        }
+        TyperUtils.checkVersion(getVersion(), TypedReflections.getTableVersionRange(klazz));
+
+        TypedRowInvocationHandler handler = handlers.getUnchecked(klazz);
+        if (row != null) {
+            row.setTableSchema(getTableSchema(handler.getTableName()));
+            handler = handler.bindToRow(row);
+        }
+        return Reflection.newProxy(klazz, handler);
+    }
+
+    @Override
+    public <T> Map<UUID, T> extractRowsOld(final Class<T> klazz, final TableUpdates updates) {
+        Map<UUID,T> result = new HashMap<>();
+        for (RowUpdate<GenericTableSchema> rowUpdate : extractRowUpdates(klazz, updates).values()) {
+            if (rowUpdate != null && rowUpdate.getOld() != null) {
+                Row<GenericTableSchema> row = rowUpdate.getOld();
+                result.put(rowUpdate.getUuid(), getTypedRowWrapper(klazz, row));
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public <T> Map<UUID, T> extractRowsUpdated(final Class<T> klazz, final TableUpdates updates) {
+        final Map<UUID, T> result = new HashMap<>();
+        for (RowUpdate<GenericTableSchema> rowUpdate : extractRowUpdates(klazz, updates).values()) {
+            if (rowUpdate != null && rowUpdate.getNew() != null) {
+                result.put(rowUpdate.getUuid(), getTypedRowWrapper(klazz, rowUpdate.getNew()));
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public <T> Map<UUID, T> extractRowsRemoved(final Class<T> klazz, final TableUpdates updates) {
+        final Map<UUID, T> result = new HashMap<>();
+        for (RowUpdate<GenericTableSchema> rowUpdate : extractRowUpdates(klazz, updates).values()) {
+            if (rowUpdate != null && rowUpdate.getNew() == null && rowUpdate.getOld() != null) {
+                result.put(rowUpdate.getUuid(), getTypedRowWrapper(klazz, rowUpdate.getOld()));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * This method extracts all RowUpdates of Class&lt;T&gt; klazz from a TableUpdates that correspond to rows of type
+     * klazz. Example:
+     * <code>
+     * Map&lt;UUID,TableUpdate&lt;GenericTableSchema&gt;.RowUpdate&lt;GenericTableSchema&gt;&gt; updatedBridges =
+     *     extractRowsUpdates(Bridge.class,updates,dbSchema)
+     * </code>
+     *
+     * @param klazz Class for row type to be extracted
+     * @param updates TableUpdates from which to extract rowUpdates
+     * @return Map&lt;UUID,TableUpdate&lt;GenericTableSchema&gt;.RowUpdate&lt;GenericTableSchema&gt;&gt;
+     *     for the type of things being sought
+     */
+    private Map<UUID, RowUpdate<GenericTableSchema>> extractRowUpdates(final Class<?> klazz,
+            final TableUpdates updates) {
+        TableUpdate<GenericTableSchema> update = updates.getUpdate(table(TypedReflections.getTableName(klazz),
+            GenericTableSchema.class));
+        Map<UUID, RowUpdate<GenericTableSchema>> result = new HashMap<>();
+        if (update != null) {
+            Map<UUID, RowUpdate<GenericTableSchema>> rows = update.getRows();
+            if (rows != null) {
+                result = rows;
+            }
+        }
+        return result;
+    }
+
+    private boolean haveInternallyGeneratedColumns() {
         for (TableSchema tableSchema : tables.values()) {
             if (!tableSchema.haveInternallyGeneratedColumns()) {
                 return false;

@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.ovsdb.lib.schema.typed;
+package org.opendaylight.ovsdb.lib.schema;
 
 import static java.util.Objects.requireNonNull;
 
@@ -14,8 +14,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.ovsdb.lib.error.TyperException;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 
 final class SetData<T> extends MethodDispatch.ColumnPrototype<T> {
     private static final class Invoker<T> extends MethodDispatch.ColumnInvoker<T> {

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import com.google.common.base.Optional;
@@ -18,7 +17,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Queue;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -35,16 +33,16 @@ import org.slf4j.LoggerFactory;
 public class OvsdbQueueRemovedCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbQueueRemovedCommand.class);
 
-    private Map<UUID, Queue> removedQueueRows;
+    private final Map<UUID, Queue> removedQueueRows;
 
-    public OvsdbQueueRemovedCommand(OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
+    public OvsdbQueueRemovedCommand(final OvsdbConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        removedQueueRows = TyperUtils.extractRowsRemoved(Queue.class, getUpdates(), getDbSchema());
+        removedQueueRows = extractRowsRemoved(Queue.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         if (removedQueueRows == null || removedQueueRows.isEmpty()) {
             return;
         }
@@ -68,7 +66,7 @@ public class OvsdbQueueRemovedCommand extends AbstractTransactionCommand {
         }
     }
 
-    private QueuesKey getQueueKey(Node node, UUID queueUuid) {
+    private static QueuesKey getQueueKey(final Node node, final UUID queueUuid) {
         List<Queues> queueList = node.augmentation(OvsdbNodeAugmentation.class).getQueues();
         if (queueList == null || queueList.isEmpty()) {
             LOG.debug("Deleting Queue {}, Ovsdb Node {} does not have a Queue list.", queueUuid, node);
@@ -86,8 +84,8 @@ public class OvsdbQueueRemovedCommand extends AbstractTransactionCommand {
         return null;
     }
 
-    private void deleteQueue(ReadWriteTransaction transaction,
-            List<InstanceIdentifier<Queues>> queueIids) {
+    private static void deleteQueue(final ReadWriteTransaction transaction,
+            final List<InstanceIdentifier<Queues>> queueIids) {
         for (InstanceIdentifier<Queues> queueIid: queueIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, queueIid);
         }

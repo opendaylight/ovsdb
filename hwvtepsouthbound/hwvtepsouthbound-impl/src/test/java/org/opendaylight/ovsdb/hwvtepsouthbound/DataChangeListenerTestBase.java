@@ -48,7 +48,6 @@ import org.opendaylight.ovsdb.lib.operations.Update;
 import org.opendaylight.ovsdb.lib.operations.Where;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -80,8 +79,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
 
     EntityOwnershipService entityOwnershipService;
     OvsdbClient ovsdbClient;
-    TypedDatabaseSchema dbSchema;
-    ListenableFuture<TypedDatabaseSchema> listenableDbSchema = mock(ListenableFuture.class);
+    DatabaseSchema dbSchema;
+    ListenableFuture<DatabaseSchema> listenableDbSchema = mock(ListenableFuture.class);
     TransactionInvoker transactionInvoker;
     OvsdbConnectionInfo connectionInfo;
     Operations operations;
@@ -151,8 +150,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
                 "hwvtep_schema.json")) {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(resourceAsStream);
-            dbSchema = TypedDatabaseSchema.of(DatabaseSchema.fromJson(HwvtepSchemaConstants.HARDWARE_VTEP,
-                    jsonNode.get("result")));
+            dbSchema = DatabaseSchema.fromJson(HwvtepSchemaConstants.HARDWARE_VTEP, jsonNode.get("result"));
             listenableDbSchema = mock(ListenableFuture.class);
             doReturn(dbSchema).when(listenableDbSchema).get();
         } catch (IOException | ExecutionException | InterruptedException e) {

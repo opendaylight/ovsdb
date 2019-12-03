@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -36,7 +35,6 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.operations.Where;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
@@ -77,7 +75,6 @@ public class TerminationPointCreateCommandTest {
         when(terminationPoint.getName()).thenReturn(TERMINATION_POINT_NAME);
 
         Interface ovsInterface = mock(Interface.class);
-        PowerMockito.mockStatic(TyperUtils.class);
         TransactionBuilder transaction = mock(TransactionBuilder.class);
         when(transaction.getTypedRowWrapper(eq(Interface.class))).thenReturn(ovsInterface);
         //createInterface()

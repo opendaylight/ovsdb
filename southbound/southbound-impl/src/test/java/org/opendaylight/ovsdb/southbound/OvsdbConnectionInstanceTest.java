@@ -44,7 +44,6 @@ import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangeEvent;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommand;
@@ -134,7 +133,7 @@ public class OvsdbConnectionInstanceTest {
         getField(OvsdbConnectionInstance.class, "transactInvokers").set(ovsdbConnectionInstance , null);
 
         ListenableFuture<DatabaseSchema> listenableDbSchema = mock(ListenableFuture.class);
-        TypedDatabaseSchema dbSchema = mock(TypedDatabaseSchema.class);
+        DatabaseSchema dbSchema = mock(DatabaseSchema.class);
         doReturn(listenableDbSchema).when(ovsdbConnectionInstance).getSchema(anyString());
         when(listenableDbSchema.get()).thenReturn(dbSchema);
 
@@ -187,7 +186,7 @@ public class OvsdbConnectionInstanceTest {
         verify(client).getDatabases();
 
         // test getSchema()
-        ListenableFuture<TypedDatabaseSchema> futureDatabaseSchema = mock(ListenableFuture.class);
+        ListenableFuture<DatabaseSchema> futureDatabaseSchema = mock(ListenableFuture.class);
         when(client.getSchema(anyString())).thenReturn(futureDatabaseSchema);
         assertEquals("Error, did not return correct ListenableFuture<DatabaseSchema> object", futureDatabaseSchema,
                 ovsdbConnectionInstance.getSchema(anyString()));
@@ -204,7 +203,7 @@ public class OvsdbConnectionInstanceTest {
         ListenableFuture<List<OperationResult>> futureOperationResult = mock(ListenableFuture.class);
         doReturn(futureOperationResult).when(client).transact(any(DatabaseSchema.class), any(List.class));
         assertEquals("Error, did not return correct ListenableFuture<List<OperationResult>> object",
-                futureOperationResult, ovsdbConnectionInstance.transact(mock(DatabaseSchema.class), mock(List.class)));
+            futureOperationResult, ovsdbConnectionInstance.transact(mock(DatabaseSchema.class), mock(List.class)));
         verify(client).transact(any(DatabaseSchema.class), any(List.class));
 
         // test monitor()
@@ -252,7 +251,7 @@ public class OvsdbConnectionInstanceTest {
         verify(client).disconnect();
 
         // test getDatabaseSchema()
-        TypedDatabaseSchema databaseSchema = mock(TypedDatabaseSchema.class);
+        DatabaseSchema databaseSchema = mock(DatabaseSchema.class);
         when(client.getDatabaseSchema(anyString())).thenReturn(databaseSchema);
         assertEquals("Error, did not return correct DatabaseSchema object", databaseSchema,
                 ovsdbConnectionInstance.getDatabaseSchema(anyString()));

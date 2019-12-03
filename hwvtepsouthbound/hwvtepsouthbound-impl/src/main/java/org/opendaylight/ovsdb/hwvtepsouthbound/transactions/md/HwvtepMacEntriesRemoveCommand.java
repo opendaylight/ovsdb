@@ -17,7 +17,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsLocal;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
@@ -40,25 +39,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
-
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepMacEntriesRemoveCommand.class);
 
-    public HwvtepMacEntriesRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepMacEntriesRemoveCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 
-
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         removeUcastMacsLocal(transaction);
         removeUcastMacsRemote(transaction);
         removeMcastMacsLocal(transaction);
         removeMcastMacsRemote(transaction);
     }
 
-    private void removeUcastMacsLocal(ReadWriteTransaction transaction) {
-        Collection<UcastMacsLocal> deletedLUMRows =
-                TyperUtils.extractRowsRemoved(UcastMacsLocal.class, getUpdates(), getDbSchema()).values();
+    private void removeUcastMacsLocal(final ReadWriteTransaction transaction) {
+        Collection<UcastMacsLocal> deletedLUMRows = extractRowsRemoved(UcastMacsLocal.class).values();
         for (UcastMacsLocal lum : deletedLUMRows) {
             if (lum.getMac() != null && lum.getLogicalSwitchColumn() != null
                     && lum.getLogicalSwitchColumn().getData() != null) {
@@ -73,9 +70,8 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void removeUcastMacsRemote(ReadWriteTransaction transaction) {
-        Collection<UcastMacsRemote> deletedUMRRows =
-                TyperUtils.extractRowsRemoved(UcastMacsRemote.class, getUpdates(), getDbSchema()).values();
+    private void removeUcastMacsRemote(final ReadWriteTransaction transaction) {
+        Collection<UcastMacsRemote> deletedUMRRows = extractRowsRemoved(UcastMacsRemote.class).values();
         for (UcastMacsRemote rum : deletedUMRRows) {
             if (rum.getMac() != null && rum.getLogicalSwitchColumn() != null
                     && rum.getLogicalSwitchColumn().getData() != null) {
@@ -91,9 +87,8 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void removeMcastMacsLocal(ReadWriteTransaction transaction) {
-        Collection<McastMacsLocal> deletedLMMRows =
-                TyperUtils.extractRowsRemoved(McastMacsLocal.class, getUpdates(), getDbSchema()).values();
+    private void removeMcastMacsLocal(final ReadWriteTransaction transaction) {
+        Collection<McastMacsLocal> deletedLMMRows = extractRowsRemoved(McastMacsLocal.class).values();
         for (McastMacsLocal lmm : deletedLMMRows) {
             if (lmm.getMac() != null && lmm.getLogicalSwitchColumn() != null
                     && lmm.getLogicalSwitchColumn().getData() != null) {
@@ -109,9 +104,8 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void removeMcastMacsRemote(ReadWriteTransaction transaction) {
-        Collection<McastMacsRemote> deletedMMRRows =
-                TyperUtils.extractRowsRemoved(McastMacsRemote.class, getUpdates(), getDbSchema()).values();
+    private void removeMcastMacsRemote(final ReadWriteTransaction transaction) {
+        Collection<McastMacsRemote> deletedMMRRows = extractRowsRemoved(McastMacsRemote.class).values();
         for (McastMacsRemote rmm : deletedMMRRows) {
             if (rmm.getMac() != null && rmm.getLogicalSwitchColumn() != null
                     && rmm.getLogicalSwitchColumn().getData() != null) {
@@ -128,7 +122,7 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         }
     }
 
-    private HwvtepLogicalSwitchRef getLogicalSwitchRef(UUID switchUUID) {
+    private HwvtepLogicalSwitchRef getLogicalSwitchRef(final UUID switchUUID) {
         LogicalSwitch logicalSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(switchUUID);
         if (logicalSwitch != null) {
             InstanceIdentifier<LogicalSwitches> switchIid =
@@ -141,7 +135,7 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         return null;
     }
 
-    private MacAddress getMacAddress(String mac) {
+    private MacAddress getMacAddress(final String mac) {
         if (mac.equals(HwvtepSouthboundConstants.UNKNOWN_DST_STRING)) {
             return HwvtepSouthboundConstants.UNKNOWN_DST_MAC;
         } else {

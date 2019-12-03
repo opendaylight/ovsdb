@@ -32,9 +32,9 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.Select;
+import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.schema.hardwarevtep.ACL;
 import org.opendaylight.ovsdb.schema.hardwarevtep.ACLEntry;
 import org.opendaylight.ovsdb.schema.hardwarevtep.ArpSourcesLocal;
@@ -99,7 +99,7 @@ public class HwvtepTableReader {
 
     public HwvtepTableReader(final HwvtepConnectionInstance connectionInstance) {
         this.connectionInstance = connectionInstance;
-        TypedDatabaseSchema dbSchema = null;
+        DatabaseSchema dbSchema = null;
         try {
             dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -227,7 +227,7 @@ public class HwvtepTableReader {
     public Optional<TypedBaseTable> getHwvtepTableEntryUUID(final Class<? extends Identifiable> cls,
                                                             final InstanceIdentifier iid,
                                                             final UUID existingUUID) {
-        final TypedDatabaseSchema dbSchema;
+        final DatabaseSchema dbSchema;
         try {
             dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -289,7 +289,7 @@ public class HwvtepTableReader {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     public List<TypedBaseTable> getHwvtepTableEntries(final Class<? extends Identifiable> cls) {
-        final TypedDatabaseSchema dbSchema;
+        final DatabaseSchema dbSchema;
         try {
             dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -332,7 +332,7 @@ public class HwvtepTableReader {
     }
 
     public TableUpdates readAllTables() throws ExecutionException, InterruptedException {
-        TypedDatabaseSchema dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
+        DatabaseSchema dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
         List<Operation> operations = Arrays.stream(ALL_TABLES)
                 .map(tableClass -> dbSchema.getTableSchema(tableClass))
                 .map(HwvtepTableReader::buildSelectOperationFor)

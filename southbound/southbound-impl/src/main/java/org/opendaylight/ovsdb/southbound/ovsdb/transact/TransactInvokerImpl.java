@@ -28,28 +28,29 @@ public class TransactInvokerImpl implements TransactInvoker {
     private final OvsdbConnectionInstance connectionInstance;
     private final DatabaseSchema dbSchema;
 
-    public TransactInvokerImpl(OvsdbConnectionInstance connectionInstance, DatabaseSchema dbSchema) {
+    public TransactInvokerImpl(final OvsdbConnectionInstance connectionInstance, final DatabaseSchema dbSchema) {
         this.connectionInstance = connectionInstance;
         this.dbSchema = dbSchema;
     }
 
     @Override
-    public void invoke(TransactCommand command, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void invoke(final TransactCommand command, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         TransactionBuilder tb = new TransactionBuilder(connectionInstance.getOvsdbClient(), dbSchema);
         command.execute(tb, state, events, instanceIdentifierCodec);
         invoke(command, tb);
     }
 
     @Override
-    public void invoke(TransactCommand command, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void invoke(final TransactCommand command, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         TransactionBuilder tb = new TransactionBuilder(connectionInstance.getOvsdbClient(), dbSchema);
         command.execute(tb, state, modifications, instanceIdentifierCodec);
         invoke(command, tb);
     }
 
-    private static void invoke(TransactCommand command, TransactionBuilder tb) {
+    private static void invoke(final TransactCommand command, final TransactionBuilder tb) {
         ListenableFuture<List<OperationResult>> result = tb.execute();
         LOG.debug("invoke: command: {}, tb: {}", command, tb);
         if (tb.getOperations().size() > 0) {

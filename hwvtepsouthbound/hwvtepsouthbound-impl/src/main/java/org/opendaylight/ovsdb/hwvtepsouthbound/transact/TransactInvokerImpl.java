@@ -8,6 +8,8 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
@@ -27,16 +29,17 @@ import org.slf4j.LoggerFactory;
 
 public class TransactInvokerImpl implements TransactInvoker {
     private static final Logger LOG = LoggerFactory.getLogger(TransactInvokerImpl.class);
+
     private final HwvtepConnectionInstance connectionInstance;
     private final DatabaseSchema dbSchema;
 
-    public TransactInvokerImpl(HwvtepConnectionInstance connectionInstance, DatabaseSchema dbSchema) {
+    public TransactInvokerImpl(final HwvtepConnectionInstance connectionInstance, final DatabaseSchema dbSchema) {
         this.connectionInstance = connectionInstance;
-        this.dbSchema = dbSchema;
+        this.dbSchema = requireNonNull(dbSchema);
     }
 
     @Override
-    public void invoke(TransactCommand command) {
+    public void invoke(final TransactCommand command) {
         TransactionBuilder tb = new TransactionBuilder(connectionInstance.getOvsdbClient(), dbSchema);
         command.execute(tb);
         ListenableFuture<List<OperationResult>> result = tb.execute();
@@ -68,7 +71,7 @@ public class TransactInvokerImpl implements TransactInvoker {
         }
     }
 
-    void printError(TransactionBuilder tb) {
+    void printError(final TransactionBuilder tb) {
         StringBuilder sb = new StringBuilder();
         for (Operation op : tb.getOperations()) {
             if (op instanceof Insert) {

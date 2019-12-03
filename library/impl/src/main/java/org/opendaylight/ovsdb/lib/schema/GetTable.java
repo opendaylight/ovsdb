@@ -5,14 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.ovsdb.lib.schema.typed;
+package org.opendaylight.ovsdb.lib.schema;
 
 import com.google.common.collect.Range;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 
-public final class GetTable extends MethodDispatch.TablePrototype {
+final class GetTable extends MethodDispatch.TablePrototype {
     private static final class Invoker extends MethodDispatch.TableInvoker {
         Invoker(final GenericTableSchema tableSchema) {
             super(tableSchema);
@@ -30,7 +29,7 @@ public final class GetTable extends MethodDispatch.TablePrototype {
     }
 
     @Override
-    Invoker bindToImpl(final TypedDatabaseSchema dbSchema) {
+    Invoker bindToImpl(final DatabaseSchema dbSchema) {
         return new Invoker(findTableSchema(dbSchema));
     }
 }

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import com.google.common.base.Optional;
@@ -18,7 +17,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -35,16 +33,16 @@ import org.slf4j.LoggerFactory;
 public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbQosRemovedCommand.class);
 
-    private Map<UUID, Qos> removedQosRows;
+    private final Map<UUID, Qos> removedQosRows;
 
-    public OvsdbQosRemovedCommand(OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
+    public OvsdbQosRemovedCommand(final OvsdbConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        removedQosRows = TyperUtils.extractRowsRemoved(Qos.class, getUpdates(), getDbSchema());
+        removedQosRows = extractRowsRemoved(Qos.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         if (removedQosRows == null || removedQosRows.isEmpty()) {
             return;
         }
@@ -68,7 +66,7 @@ public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
         }
     }
 
-    private QosEntriesKey getQosEntriesKey(Node node, UUID qosUuid) {
+    private static QosEntriesKey getQosEntriesKey(final Node node, final UUID qosUuid) {
         List<QosEntries> qosList = node.augmentation(OvsdbNodeAugmentation.class).getQosEntries();
         if (qosList == null || qosList.isEmpty()) {
             LOG.debug("Deleting Qos {}, Ovsdb Node {} does not have a Qos list.", qosUuid, node);
@@ -86,8 +84,8 @@ public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
         return null;
     }
 
-    private void deleteQos(ReadWriteTransaction transaction,
-            List<InstanceIdentifier<QosEntries>> qosEntryIids) {
+    private static void deleteQos(final ReadWriteTransaction transaction,
+            final List<InstanceIdentifier<QosEntries>> qosEntryIids) {
         for (InstanceIdentifier<QosEntries> qosEntryIid: qosEntryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, qosEntryIid);
         }

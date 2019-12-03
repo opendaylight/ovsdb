@@ -18,7 +18,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.events.PortEvent;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
@@ -31,22 +30,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HwvtepPhysicalPortRemoveCommand extends AbstractTransactionCommand {
-
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepPhysicalPortRemoveCommand.class);
 
-    public HwvtepPhysicalPortRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public HwvtepPhysicalPortRemoveCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
-        Collection<PhysicalPort> deletedPortRows =
-                TyperUtils.extractRowsRemoved(PhysicalPort.class, getUpdates(), getDbSchema()).values();
-        Map<UUID, PhysicalSwitch> updatedPSRows =
-                TyperUtils.extractRowsUpdated(PhysicalSwitch.class, getUpdates(), getDbSchema());
-        Map<UUID, PhysicalSwitch> oldPSRows =
-                TyperUtils.extractRowsOld(PhysicalSwitch.class, getUpdates(), getDbSchema());
+    public void execute(final ReadWriteTransaction transaction) {
+        Collection<PhysicalPort> deletedPortRows = extractRowsRemoved(PhysicalPort.class).values();
+        Map<UUID, PhysicalSwitch> updatedPSRows = extractRowsUpdated(PhysicalSwitch.class);
+        Map<UUID, PhysicalSwitch> oldPSRows = extractRowsOld(PhysicalSwitch.class);
         for (PhysicalPort port : deletedPortRows) {
             PhysicalSwitch updatedPSwitchData = null;
             for (Map.Entry<UUID, PhysicalSwitch> updatedEntry : updatedPSRows.entrySet()) {

@@ -511,7 +511,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
         final GenericTableSchema openVSwitchSchema = dbSchema.getTableSchema(OpenVSwitch.class);
         final Select<GenericTableSchema> selectOperation = op.select(openVSwitchSchema);
-        selectOperation.setColumns(new ArrayList<>(openVSwitchSchema.getColumns()));
+        selectOperation.setColumns(openVSwitchSchema.getColumnList());
 
         List<Operation> operations = new ArrayList<>();
         operations.add(selectOperation);

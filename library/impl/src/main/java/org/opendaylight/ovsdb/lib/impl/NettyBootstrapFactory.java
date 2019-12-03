@@ -13,9 +13,14 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.AdaptiveRecvByteBufAllocator;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
+import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import java.util.concurrent.ThreadFactory;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -27,30 +32,94 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class NettyBootstrapFactory implements AutoCloseable {
+    private abstract static class Provider {
+        /**
+         * Return user friendly name, suitable for system operators.
+         *
+         * @return An admin-friendly name.
+         */
+        abstract String name();
+
+        abstract EventLoopGroup createGroup(ThreadFactory threadFactory);
+
+        abstract Bootstrap createBootstrap();
+
+        abstract ServerBootstrap createServerBootstrap();
+    }
+
+    private static final class EpollProvider extends Provider {
+        @Override
+        String name() {
+            return "epoll(7)";
+        }
+
+        @Override
+        EventLoopGroup createGroup(final ThreadFactory threadFactory) {
+            return new EpollEventLoopGroup(0, threadFactory);
+        }
+
+        @Override
+        Bootstrap createBootstrap() {
+            return new Bootstrap()
+                    .channel(EpollSocketChannel.class);
+        }
+
+        @Override
+        ServerBootstrap createServerBootstrap() {
+            return new ServerBootstrap()
+                    .channel(EpollServerSocketChannel.class);
+        }
+    }
+
+    private static final class NioProvider extends Provider {
+        @Override
+        String name() {
+            return "java.nio";
+        }
+
+        @Override
+        EventLoopGroup createGroup(final ThreadFactory threadFactory) {
+            return new NioEventLoopGroup(0, threadFactory);
+        }
+
+        @Override
+        Bootstrap createBootstrap() {
+            return new Bootstrap()
+                    .channel(NioSocketChannel.class);
+        }
+
+        @Override
+        ServerBootstrap createServerBootstrap() {
+            return new ServerBootstrap()
+                    .channel(NioServerSocketChannel.class);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(NettyBootstrapFactory.class);
 
-    private final EventLoopGroup bossGroup = new NioEventLoopGroup(0,
-        new ThreadFactoryBuilder().setNameFormat("OVSDB listener-%d").build());
-    private final EventLoopGroup workerGroup = new NioEventLoopGroup(0,
-        new ThreadFactoryBuilder().setNameFormat("OVSDB connection-%d").build());
+    // Minimum footprint runtime-constant
+    private static final Provider PROVIDER = Epoll.isAvailable() ? new EpollProvider() : new NioProvider();
+
+    private final EventLoopGroup bossGroup;
+    private final EventLoopGroup workerGroup;
 
     @Inject
     public NettyBootstrapFactory() {
-        LOG.info("OVSDB global Netty context instantiated");
+        bossGroup = PROVIDER.createGroup(new ThreadFactoryBuilder().setNameFormat("OVSDB listener-%d").build());
+        workerGroup = PROVIDER.createGroup(new ThreadFactoryBuilder().setNameFormat("OVSDB connection-%d").build());
+        LOG.info("OVSDB global Netty context started with {}", PROVIDER.name());
     }
 
     Bootstrap newClient() {
-        return new Bootstrap()
+        return PROVIDER.createBootstrap()
                 .group(workerGroup)
-                .channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(65535, 65535, 65535));
     }
 
     ServerBootstrap newServer() {
-        return new ServerBootstrap()
+        return PROVIDER.createServerBootstrap()
                 .group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(65535, 65535, 65535))
                 .option(ChannelOption.SO_BACKLOG, 100);

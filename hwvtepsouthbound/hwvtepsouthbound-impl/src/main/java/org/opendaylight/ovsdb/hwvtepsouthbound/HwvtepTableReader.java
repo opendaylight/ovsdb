@@ -241,7 +241,7 @@ public class HwvtepTableReader {
         final GenericTableSchema hwvtepSchema = dbSchema.getTableSchema(tableClass);
 
         final Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
-        selectOperation.setColumns(new ArrayList<>(hwvtepSchema.getColumns()));
+        selectOperation.setColumns(hwvtepSchema.getColumnList());
 
         if (existingUUID == null) {
             final WhereClauseGetter<?> whereClausule = whereClauseGetters.get(cls);
@@ -305,7 +305,7 @@ public class HwvtepTableReader {
         final Class<? extends TypedBaseTable<?>> tableClass = TABLE_MAP.get(cls);
         final GenericTableSchema hwvtepSchema = dbSchema.getTableSchema(tableClass);
         final Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
-        selectOperation.setColumns(new ArrayList<>(hwvtepSchema.getColumns()));
+        selectOperation.setColumns(hwvtepSchema.getColumnList());
 
         final List<OperationResult> results;
         try {
@@ -360,7 +360,7 @@ public class HwvtepTableReader {
 
     private static Select<GenericTableSchema> buildSelectOperationFor(final GenericTableSchema tableSchema) {
         Select<GenericTableSchema> selectOpearation = op.select(tableSchema);
-        selectOpearation.setColumns(new ArrayList<>(tableSchema.getColumns()));
+        selectOpearation.setColumns(tableSchema.getColumnList());
         return selectOpearation;
     }
 

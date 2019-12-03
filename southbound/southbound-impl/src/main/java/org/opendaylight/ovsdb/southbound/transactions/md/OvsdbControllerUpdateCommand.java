@@ -45,8 +45,8 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
     private final Map<UUID, Controller> updatedControllerRows;
     private final Map<UUID, Bridge> updatedBridgeRows;
 
-    public OvsdbControllerUpdateCommand(OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
+    public OvsdbControllerUpdateCommand(final OvsdbConnectionInstance key,
+            final TableUpdates updates, final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
         updatedControllerRows = TyperUtils.extractRowsUpdated(Controller.class,
@@ -54,7 +54,7 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         if (updatedControllerRows != null && !updatedControllerRows.isEmpty()) {
             if (updatedBridgeRows != null && !updatedBridgeRows.isEmpty()) {
                 updateController(transaction, updatedControllerRows, updatedBridgeRows);
@@ -79,9 +79,9 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
      * @param newUpdatedControllerRows updated {@link Controller} rows
      * @param newUpdatedBridgeRows updated {@link Bridge} rows
      */
-    private void updateController(ReadWriteTransaction transaction,
-                                  Map<UUID, Controller> newUpdatedControllerRows,
-                                  Map<UUID, Bridge> newUpdatedBridgeRows) {
+    private void updateController(final ReadWriteTransaction transaction,
+                                  final Map<UUID, Controller> newUpdatedControllerRows,
+                                  final Map<UUID, Bridge> newUpdatedBridgeRows) {
 
         for (Map.Entry<UUID, Bridge> bridgeEntry : newUpdatedBridgeRows.entrySet()) {
             final List<ControllerEntry> controllerEntries =
@@ -110,8 +110,8 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
      * @param newUpdatedControllerRows updated {@link Controller} rows
      */
     @VisibleForTesting
-    void updateController(ReadWriteTransaction transaction,
-                                  Map<UUID, Controller> newUpdatedControllerRows) {
+    void updateController(final ReadWriteTransaction transaction,
+                                  final Map<UUID, Controller> newUpdatedControllerRows) {
 
         Map<InstanceIdentifier<Node>, Node> bridgeNodes = getBridgeNodes(transaction);
         for (Map.Entry<InstanceIdentifier<Node>, Node> bridgeNodeEntry : bridgeNodes.entrySet()) {
@@ -135,7 +135,7 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
      * @param transaction the {@link ReadWriteTransaction}
      * @return map of nodes
      */
-    private Map<InstanceIdentifier<Node>, Node> getBridgeNodes(ReadWriteTransaction transaction) {
+    private Map<InstanceIdentifier<Node>, Node> getBridgeNodes(final ReadWriteTransaction transaction) {
         Map<InstanceIdentifier<Node>, Node> bridgeNodes = new HashMap<>();
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, connectionIId);
@@ -146,7 +146,6 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
                 for (ManagedNodeEntry managedNodeEntry : managedNodeEntries) {
                     final InstanceIdentifier<Node> bridgeIid =
                             (InstanceIdentifier<Node>) managedNodeEntry.getBridgeRef().getValue();
-                    @SuppressWarnings("unchecked")
                     final Optional<Node> bridgeNode = SouthboundUtil.readNode(transaction, bridgeIid);
                     if (bridgeNode.isPresent()) {
                         bridgeNodes.put(bridgeIid, bridgeNode.get());
@@ -173,7 +172,7 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
      */
     @VisibleForTesting
     InstanceIdentifier<ControllerEntry> getControllerEntryIid(
-            ControllerEntry controllerEntry, String bridgeName) {
+            final ControllerEntry controllerEntry, final String bridgeName) {
 
         OvsdbConnectionInstance client = getOvsdbConnectionInstance();
         String nodeString = client.getNodeKey().getNodeId().getValue()

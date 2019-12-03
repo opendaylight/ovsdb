@@ -307,7 +307,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      */
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void ovsdbManagerWithSsl(final String ip, final int port, final ICertificateManager certificateManagerSrv,
-                                            final String[] protocols, final String[] cipherSuites) {
+            final String[] protocols, final String[] cipherSuites) {
 
         ServerBootstrap serverBootstrap = bootstrapFactory.newServer()
                 .handler(new LoggingHandler(LogLevel.INFO))
@@ -315,27 +315,13 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                     @Override
                     public void initChannel(final SocketChannel channel) throws Exception {
                         LOG.debug("New Passive channel created : {}", channel);
-                        if (certificateManagerSrv != null && certificateManagerSrv.getServerContext() != null) {
+                        if (certificateManagerSrv != null) {
                             /* Add SSL handler first if SSL context is provided */
-                            SSLContext sslContext = certificateManagerSrv.getServerContext();
-                            SSLEngine engine = sslContext.createSSLEngine();
-                            engine.setUseClientMode(false); // work in a server mode
-                            engine.setNeedClientAuth(true); // need client authentication
-                            if (protocols != null && protocols.length > 0) {
-                                //Set supported protocols
-                                engine.setEnabledProtocols(protocols);
-                                LOG.debug("Supported ssl protocols {}",
-                                    Arrays.toString(engine.getSupportedProtocols()));
-                                LOG.debug("Enabled ssl protocols {}",
-                                    Arrays.toString(engine.getEnabledProtocols()));
+                            final SSLContext sslContext = certificateManagerSrv.getServerContext();
+                            if (sslContext != null) {
+                                channel.pipeline().addLast("ssl",
+                                    createSslHandler(sslContext, protocols, cipherSuites));
                             }
-                            if (cipherSuites != null && cipherSuites.length > 0) {
-                                //Set supported cipher suites
-                                engine.setEnabledCipherSuites(cipherSuites);
-                                LOG.debug("Enabled cipher suites {}",
-                                    Arrays.toString(engine.getEnabledCipherSuites()));
-                            }
-                            channel.pipeline().addLast("ssl", new SslHandler(engine));
                         }
 
                         channel.pipeline().addLast(
@@ -363,6 +349,29 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             LOG.error("Error while binding to address {}, port {}", ip, port, throwable);
             throw throwable;
         }
+    }
+
+    private static SslHandler createSslHandler(final SSLContext sslContext, final String[] protocols,
+            final String[] cipherSuites) {
+        /* Add SSL handler first if SSL context is provided */
+        final SSLEngine engine = sslContext.createSSLEngine();
+        engine.setUseClientMode(false); // work in a server mode
+        engine.setNeedClientAuth(true); // need client authentication
+        if (protocols != null && protocols.length > 0) {
+            //Set supported protocols
+            engine.setEnabledProtocols(protocols);
+            LOG.debug("Supported ssl protocols {}",
+                Arrays.toString(engine.getSupportedProtocols()));
+            LOG.debug("Enabled ssl protocols {}",
+                Arrays.toString(engine.getEnabledProtocols()));
+        }
+        if (cipherSuites != null && cipherSuites.length > 0) {
+            //Set supported cipher suites
+            engine.setEnabledCipherSuites(cipherSuites);
+            LOG.debug("Enabled cipher suites {}",
+                Arrays.toString(engine.getEnabledCipherSuites()));
+        }
+        return new SslHandler(engine);
     }
 
     private static void handleNewPassiveConnection(final OvsdbClient client) {

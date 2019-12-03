@@ -291,39 +291,35 @@ public class HwvtepTableReader {
     }
 
     public TableUpdates readAllTables() throws ExecutionException, InterruptedException {
-        Map<String, TableUpdate> tableUpdates =  new HashMap<>();
         TypedDatabaseSchema dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
-
         List<Operation> operations = Arrays.asList(alltables).stream()
                 .map(tableClass -> dbSchema.getTableSchema(tableClass))
                 .map(tableSchema -> buildSelectOperationFor(tableSchema))
                 .collect(Collectors.toList());
-
         List<OperationResult> results = connectionInstance.transact(dbSchema, operations).get();
-        if (results != null && !results.isEmpty()) {
-            results.stream()
-                    .filter(result -> result.getRows() != null)
-                    .flatMap(result -> result.getRows().stream())
-                    .forEach(row -> {
-                        tableUpdates.compute(row.getTableSchema().getName(), (tableName, tableUpdate) -> {
-                            if (tableUpdate == null) {
-                                tableUpdate = new TableUpdate();
-                            }
-                            tableUpdate.addRow(getRowUuid(row), null, row);
-                            return tableUpdate;
-                        });
-                    });
+
+        Map<String, TableUpdate> tableUpdates = new HashMap<>();
+        if (results != null) {
+            for (OperationResult result : results) {
+                final List<Row<GenericTableSchema>> rows = result.getRows();
+                if (rows != null) {
+                    for (Row<GenericTableSchema> row : rows) {
+                        tableUpdates.computeIfAbsent(row.getTableSchema().getName(), key -> new TableUpdate<>())
+                            .addRow(getRowUuid(row), null, row);
+                    }
+                }
+            }
         }
         return new TableUpdates(tableUpdates);
     }
 
-    private Select<GenericTableSchema> buildSelectOperationFor(final GenericTableSchema tableSchema) {
+    private static Select<GenericTableSchema> buildSelectOperationFor(final GenericTableSchema tableSchema) {
         Select<GenericTableSchema> selectOpearation = op.select(tableSchema);
         selectOpearation.setColumns(new ArrayList<>(tableSchema.getColumns()));
         return selectOpearation;
     }
 
-    private UUID getRowUuid(final Row<GenericTableSchema> row) {
+    private static UUID getRowUuid(final Row<GenericTableSchema> row) {
         return row.getColumns().stream()
                 .filter(column -> column.getSchema().getName().equals("_uuid"))
                 .map(column -> (UUID) column.getData())

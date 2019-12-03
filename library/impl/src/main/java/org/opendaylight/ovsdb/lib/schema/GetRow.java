@@ -5,11 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.ovsdb.lib.schema.typed;
+package org.opendaylight.ovsdb.lib.schema;
 
 import org.opendaylight.ovsdb.lib.notation.Row;
-import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.MethodDispatch.Prototype;
+import org.opendaylight.ovsdb.lib.schema.MethodDispatch.Prototype;
 
 final class GetRow extends Prototype {
     private static final MethodDispatch.Invoker INVOKER = new MethodDispatch.Invoker() {
@@ -26,7 +25,7 @@ final class GetRow extends Prototype {
     }
 
     @Override
-    MethodDispatch.Invoker bindTo(final TypedDatabaseSchema dbSchema) {
+    MethodDispatch.Invoker bindTo(final DatabaseSchema dbSchema) {
         return INVOKER;
     }
 }

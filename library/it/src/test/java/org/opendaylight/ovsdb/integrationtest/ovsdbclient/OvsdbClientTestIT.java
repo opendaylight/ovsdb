@@ -93,7 +93,8 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
         sendBridgeMonitorRequest(false); // Test monitor request without filters
     }
 
-    public void sendBridgeMonitorRequest(boolean filter) throws ExecutionException, InterruptedException, IOException {
+    public void sendBridgeMonitorRequest(final boolean filter) throws ExecutionException, InterruptedException,
+            IOException {
         assertNotNull(dbSchema);
         GenericTableSchema bridge = dbSchema.table("Bridge", GenericTableSchema.class);
 
@@ -117,13 +118,13 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
 
         TableUpdates updates = ovs.monitor(dbSchema, monitorRequests, new MonitorCallBack() {
             @Override
-            public void update(TableUpdates result, DatabaseSchema unused) {
+            public void update(final TableUpdates result, final DatabaseSchema unused) {
                 results.add(result);
                 LOG.info("result = {}", result);
             }
 
             @Override
-            public void exception(Throwable ex) {
+            public void exception(final Throwable ex) {
                 results.add(ex);
                 LOG.warn("t = ", ex);
             }

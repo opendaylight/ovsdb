@@ -15,7 +15,6 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 
 public class TransactionBuilder {
     private final List<Operation> operations = new ArrayList<>();
@@ -49,10 +48,10 @@ public class TransactionBuilder {
     }
 
     public <T> T getTypedRowWrapper(final Class<T> klazz) {
-        return TyperUtils.getTypedRowWrapper(databaseSchema, klazz);
+        return databaseSchema.getTypedRowWrapper(klazz);
     }
 
     public <T> T getTypedRowSchema(final Class<T> klazz) {
-        return TyperUtils.getTypedRowWrapper(databaseSchema, klazz, null);
+        return databaseSchema.getTypedRowWrapper(klazz, null);
     }
 }

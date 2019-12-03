@@ -19,7 +19,6 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
-import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 
 /**
  * The main interface to interact with a device speaking ovsdb protocol in an asynchronous fashion and hence most
@@ -38,7 +37,7 @@ public interface OvsdbClient {
      * @param database name of the database schema
      * @return DatabaseSchema future
      */
-    ListenableFuture<TypedDatabaseSchema> getSchema(String database);
+    ListenableFuture<DatabaseSchema> getSchema(String database);
 
     /**
      * Allows for a mini DSL way of collecting the transactions to be executed against the ovsdb instance.
@@ -161,7 +160,7 @@ public interface OvsdbClient {
 
     void disconnect();
 
-    TypedDatabaseSchema getDatabaseSchema(String dbName);
+    DatabaseSchema getDatabaseSchema(String dbName);
 
     /**
      * User friendly convenient methods that make use of TyperUtils.getTypedRowWrapper to create a Typed Row Proxy

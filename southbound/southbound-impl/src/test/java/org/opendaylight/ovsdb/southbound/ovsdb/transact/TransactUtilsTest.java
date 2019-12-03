@@ -146,7 +146,6 @@ public class TransactUtilsTest {
         assertEquals(map, TransactUtils.extractCreated(changes, klazz));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testExtractRemoved() {
         DataChangeEvent changes = mock(DataChangeEvent.class);
@@ -255,7 +254,7 @@ public class TransactUtilsTest {
                 instanceIdentifierCodec));
     }
 
-    private Object setField(String fieldName) throws Exception {
+    private Object setField(final String fieldName) throws Exception {
         Field field = Operations.class.getDeclaredField(fieldName);
         field.setAccessible(true);
         field.set(field.get(Operations.class), mock(Operations.class));

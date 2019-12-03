@@ -48,6 +48,7 @@ import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -59,7 +60,7 @@ import org.slf4j.LoggerFactory;
 public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbClientTestIT.class);
     OvsdbClient ovs;
-    DatabaseSchema dbSchema = null;
+    TypedDatabaseSchema dbSchema = null;
     private static final String TEST_BRIDGE_NAME = "br-test";
     private static UUID testBridgeUuid = null;
 
@@ -93,7 +94,8 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
         sendBridgeMonitorRequest(false); // Test monitor request without filters
     }
 
-    public void sendBridgeMonitorRequest(boolean filter) throws ExecutionException, InterruptedException, IOException {
+    public void sendBridgeMonitorRequest(final boolean filter) throws ExecutionException, InterruptedException,
+            IOException {
         assertNotNull(dbSchema);
         GenericTableSchema bridge = dbSchema.table("Bridge", GenericTableSchema.class);
 
@@ -117,13 +119,13 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
 
         TableUpdates updates = ovs.monitor(dbSchema, monitorRequests, new MonitorCallBack() {
             @Override
-            public void update(TableUpdates result, DatabaseSchema unused) {
+            public void update(final TableUpdates result, final DatabaseSchema unused) {
                 results.add(result);
                 LOG.info("result = {}", result);
             }
 
             @Override
-            public void exception(Throwable ex) {
+            public void exception(final Throwable ex) {
                 results.add(ex);
                 LOG.warn("t = ", ex);
             }

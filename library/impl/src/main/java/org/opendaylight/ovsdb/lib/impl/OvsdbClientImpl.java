@@ -171,7 +171,7 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
-    public ListenableFuture<List<OperationResult>> transact(final DatabaseSchema dbSchema,
+    public ListenableFuture<List<OperationResult>> transact(final TypedDatabaseSchema dbSchema,
             final List<Operation> operations) {
 
         //todo, we may not need transactionbuilder if we can have JSON objects
@@ -298,10 +298,9 @@ public class OvsdbClientImpl implements OvsdbClient {
     }
 
     @Override
-    public TransactionBuilder transactBuilder(final DatabaseSchema dbSchema) {
+    public TransactionBuilder transactBuilder(final TypedDatabaseSchema dbSchema) {
         return new TransactionBuilder(this, dbSchema);
     }
-
 
     public boolean isReady(int timeout) throws InterruptedException {
         while (timeout > 0) {

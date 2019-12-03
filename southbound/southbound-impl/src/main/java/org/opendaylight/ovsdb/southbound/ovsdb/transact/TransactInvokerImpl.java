@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -26,30 +26,31 @@ import org.slf4j.LoggerFactory;
 public class TransactInvokerImpl implements TransactInvoker {
     private static final Logger LOG = LoggerFactory.getLogger(TransactInvokerImpl.class);
     private final OvsdbConnectionInstance connectionInstance;
-    private final DatabaseSchema dbSchema;
+    private final TypedDatabaseSchema dbSchema;
 
-    public TransactInvokerImpl(OvsdbConnectionInstance connectionInstance, DatabaseSchema dbSchema) {
+    public TransactInvokerImpl(final OvsdbConnectionInstance connectionInstance, final TypedDatabaseSchema dbSchema) {
         this.connectionInstance = connectionInstance;
         this.dbSchema = dbSchema;
     }
 
     @Override
-    public void invoke(TransactCommand command, BridgeOperationalState state,
-            DataChangeEvent events, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void invoke(final TransactCommand command, final BridgeOperationalState state,
+            final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         TransactionBuilder tb = new TransactionBuilder(connectionInstance.getOvsdbClient(), dbSchema);
         command.execute(tb, state, events, instanceIdentifierCodec);
         invoke(command, tb);
     }
 
     @Override
-    public void invoke(TransactCommand command, BridgeOperationalState state,
-            Collection<DataTreeModification<Node>> modifications, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public void invoke(final TransactCommand command, final BridgeOperationalState state,
+            final Collection<DataTreeModification<Node>> modifications,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         TransactionBuilder tb = new TransactionBuilder(connectionInstance.getOvsdbClient(), dbSchema);
         command.execute(tb, state, modifications, instanceIdentifierCodec);
         invoke(command, tb);
     }
 
-    private static void invoke(TransactCommand command, TransactionBuilder tb) {
+    private static void invoke(final TransactCommand command, final TransactionBuilder tb) {
         ListenableFuture<List<OperationResult>> result = tb.execute();
         LOG.debug("invoke: command: {}, tb: {}", command, tb);
         if (tb.getOperations().size() > 0) {

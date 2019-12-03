@@ -9,7 +9,7 @@
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -25,7 +25,7 @@ import org.mockito.Mock;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.powermock.api.mockito.PowerMockito;
@@ -39,7 +39,7 @@ import org.powermock.reflect.Whitebox;
 public class TransactInvokerImplTest {
 
     @Mock private OvsdbConnectionInstance connectionInstance;
-    @Mock private DatabaseSchema dbSchema;
+    @Mock private TypedDatabaseSchema dbSchema;
     private TransactInvokerImpl transactInvokerImpl;
 
     @Before

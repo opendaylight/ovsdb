@@ -118,8 +118,8 @@ public class OvsdbConnectionInstance {
         }
     }
 
-    public ListenableFuture<List<OperationResult>> transact(
-            final DatabaseSchema dbSchema, final List<Operation> operations) {
+    public ListenableFuture<List<OperationResult>> transact(final TypedDatabaseSchema dbSchema,
+            final List<Operation> operations) {
         return client.transact(dbSchema, operations);
     }
 
@@ -265,7 +265,7 @@ public class OvsdbConnectionInstance {
         return client.getSchema(database);
     }
 
-    public TransactionBuilder transactBuilder(final DatabaseSchema dbSchema) {
+    public TransactionBuilder transactBuilder(final TypedDatabaseSchema dbSchema) {
         return client.transactBuilder(dbSchema);
     }
 

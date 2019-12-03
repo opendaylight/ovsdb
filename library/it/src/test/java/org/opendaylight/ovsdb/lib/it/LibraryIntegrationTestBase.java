@@ -47,6 +47,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
@@ -64,7 +65,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
     protected static final String ASSERT_TRANS_OPERATION_COUNT = "Transaction should match number of operations";
     protected static final String ASSERT_TRANS_UUID = "Transaction UUID should not be null";
     protected static Version schemaVersion;
-    protected static DatabaseSchema dbSchema;
+    protected static TypedDatabaseSchema dbSchema;
     private static boolean schemaSupported = false;
     private static AtomicBoolean setup = new AtomicBoolean(false);
     protected static OvsdbClient ovsdbClient;
@@ -80,7 +81,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         return ovsdbClient;
     }
 
-    protected DatabaseSchema getDbSchema() {
+    protected TypedDatabaseSchema getDbSchema() {
         return dbSchema;
     }
 
@@ -88,7 +89,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         return setup.get();
     }
 
-    protected static void setSetup(boolean setup) {
+    protected static void setSetup(final boolean setup) {
         LibraryIntegrationTestBase.setup.set(setup);
     }
 
@@ -149,7 +150,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         return option;
     }
 
-    public boolean checkSchema(String schemaStr)
+    public boolean checkSchema(final String schemaStr)
             throws IOException, InterruptedException, ExecutionException, TimeoutException {
         if (schemaSupported) {
             LOG.info("Schema ({}) is supported", schemaStr);
@@ -171,12 +172,12 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         return false;
     }
 
-    public boolean isSchemaSupported(String schemaStr) throws ExecutionException,
+    public boolean isSchemaSupported(final String schemaStr) throws ExecutionException,
             InterruptedException {
         return isSchemaSupported(ovsdbClient, schemaStr);
     }
 
-    public boolean isSchemaSupported(OvsdbClient client, String schemaStr)
+    public boolean isSchemaSupported(final OvsdbClient client, final String schemaStr)
             throws ExecutionException, InterruptedException {
         ListenableFuture<List<String>> databases = client.getDatabases();
         List<String> dbNames = databases.get();
@@ -196,7 +197,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
      *
      * @return MonitorRequest that includes all the Bridge Columns including _uuid
      */
-    public <T extends TypedBaseTable<GenericTableSchema>> MonitorRequest getAllColumnsMonitorRequest(Class<T> klazz) {
+    public <T extends TypedBaseTable<GenericTableSchema>> MonitorRequest getAllColumnsMonitorRequest(final Class<T> klazz) {
         TypedBaseTable<GenericTableSchema> table = getClient().createTypedRowWrapper(klazz);
         GenericTableSchema tableSchema = table.getSchema();
         Set<String> columns = tableSchema.getColumns();
@@ -207,7 +208,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         return bridgeBuilder.with(new MonitorSelect(true, true, true, true)).build();
     }
 
-    public <T extends TableSchema<T>> MonitorRequest getAllColumnsMonitorRequest(T tableSchema) {
+    public <T extends TableSchema<T>> MonitorRequest getAllColumnsMonitorRequest(final T tableSchema) {
         Set<String> columns = tableSchema.getColumns();
         MonitorRequestBuilder<T> monitorBuilder = new MonitorRequestBuilder<>(tableSchema);
         for (String column : columns) {
@@ -242,7 +243,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
     }
 
     @SuppressWarnings("unchecked")
-    protected void updateTableCache(TableUpdates updates) {
+    protected void updateTableCache(final TableUpdates updates) {
         for (String tableName : updates.getUpdates().keySet()) {
             Map<UUID, Row> rowUpdates = getTableCache().get(tableName);
             TableUpdate update = updates.getUpdates().get(tableName);
@@ -260,7 +261,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         }
     }
 
-    public List<OperationResult> executeTransaction(TransactionBuilder transactionBuilder, String text)
+    public List<OperationResult> executeTransaction(final TransactionBuilder transactionBuilder, final String text)
             throws ExecutionException, InterruptedException {
         ListenableFuture<List<OperationResult>> results = transactionBuilder.execute();
         List<OperationResult> operationResults = results.get();
@@ -307,12 +308,12 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
 
     private class UpdateMonitor implements MonitorCallBack {
         @Override
-        public void update(TableUpdates result, DatabaseSchema unused) {
+        public void update(final TableUpdates result, final DatabaseSchema unused) {
             updateTableCache(result);
         }
 
         @Override
-        public void exception(Throwable ex) {
+        public void exception(final Throwable ex) {
             LOG.error("Exception t = " + ex);
         }
     }

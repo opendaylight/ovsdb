@@ -14,7 +14,6 @@ import com.google.common.collect.Range;
 import java.util.Map;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
-import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -53,53 +52,6 @@ public final class TyperUtils {
         if (!range.contains(schemaVersion)) {
             throw new SchemaVersionMismatchException(schemaVersion, range);
         }
-    }
-
-    /**
-     * Returns a Typed Proxy implementation for the klazz passed as a parameter.
-     * Per design choice, the Typed Proxy implementation is just a Wrapper on top of the actual
-     * Row which is untyped.
-     *
-     * <p>Being just a wrapper, it is state-less and more of a convenience functionality to
-     * provide a type-safe infrastructure for the applications to built on top of.
-     * And this Typed infra is completely optional.
-     *
-     * <p>It is the applications responsibility to pass on the raw Row parameter and this method will
-     * return the appropriate Proxy wrapper for the passed klazz Type.
-     * The raw Row parameter may be null if the caller is interested in just the ColumnSchema.
-     * But that is not a very common use-case.
-     *
-     * @param dbSchema DatabaseSchema as learnt from a OVSDB connection
-     * @param klazz Typed Class that represents a Table
-     */
-    @Deprecated
-    public static <T> T getTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz) {
-        return getTypedRowWrapper(dbSchema, klazz, new Row<>());
-    }
-
-    /**
-     * Returns a Typed Proxy implementation for the klazz passed as a parameter.
-     * Per design choice, the Typed Proxy implementation is just a Wrapper on top of the actual
-     * Row which is untyped.
-     *
-     * <p>Being just a wrapper, it is state-less and more of a convenience functionality
-     * to provide a type-safe infrastructure for the applications to built on top of.
-     * And this Typed infra is completely optional.
-     *
-     * <p>It is the applications responsibility to pass on the raw Row parameter and this method
-     * will return the appropriate Proxy wrapper for the passed klazz Type.
-     * The raw Row parameter may be null if the caller is interested in just the
-     * ColumnSchema. But that is not a very common use-case.
-     *
-     * @param dbSchema DatabaseSchema as learnt from a OVSDB connection
-     * @param klazz Typed Class that represents a Table
-     * @param row The actual Row that the wrapper is operating on. It can be null if the caller
-     *            is just interested in getting ColumnSchema.
-     */
-    @Deprecated
-    public static <T> T getTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz,
-                                           final Row<GenericTableSchema> row) {
-        return dbSchema == null ? null : getTyped(dbSchema).getTypedRowWrapper(klazz, row);
     }
 
     /**

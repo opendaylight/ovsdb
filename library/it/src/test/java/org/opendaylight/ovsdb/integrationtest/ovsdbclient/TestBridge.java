@@ -26,7 +26,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
  * functionality of TyperHelper.java
  */
 @TypedTable(name = "Bridge", database = "Open_vSwitch")
-public interface TestBridge extends TypedBaseTable {
+public interface TestBridge extends TypedBaseTable<GenericTableSchema> {
     /*
      * Its a good practice to set the @TypedColumn to these Statically typed Tables & Columns.
      * Implementations can choose to use GETDATA or GETCOLUMN or both to get the data.

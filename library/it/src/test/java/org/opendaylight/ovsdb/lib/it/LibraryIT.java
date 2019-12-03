@@ -28,7 +28,7 @@ import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -51,9 +51,8 @@ public class LibraryIT extends LibraryIntegrationTestBase {
         super.setup();
     }
 
-    private void createTypedBridge(DatabaseSchema dbSchema) throws IOException, InterruptedException,
-            ExecutionException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException,
-            InvocationTargetException {
+    private static void createTypedBridge(final TypedDatabaseSchema dbSchema) throws IOException, InterruptedException,
+            ExecutionException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         Bridge bridge = ovsdbClient.createTypedRowWrapper(Bridge.class);
         bridge.setName(TEST_BRIDGE_NAME);
         bridge.setStatus(ImmutableMap.of("key", "value"));
@@ -95,7 +94,7 @@ public class LibraryIT extends LibraryIntegrationTestBase {
         assertNotNull("Invalid Client. Check connection params", ovsdbClient);
         Thread.sleep(3000); // Wait for a few seconds to get the Schema exchange done
         if (isSchemaSupported(LibraryIntegrationTestUtils.OPEN_VSWITCH)) {
-            DatabaseSchema dbSchema = ovsdbClient.getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
+            TypedDatabaseSchema dbSchema = ovsdbClient.getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
             assertNotNull(dbSchema);
             LOG.info("{} schema in {} with Tables: {}", LibraryIntegrationTestUtils.OPEN_VSWITCH,
                     ovsdbClient.getConnectionInfo(), dbSchema.getTables());
@@ -105,7 +104,7 @@ public class LibraryIT extends LibraryIntegrationTestBase {
         }
 
         if (isSchemaSupported(LibraryIntegrationTestUtils.HARDWARE_VTEP)) {
-            DatabaseSchema dbSchema = ovsdbClient.getSchema(LibraryIntegrationTestUtils.HARDWARE_VTEP).get();
+            TypedDatabaseSchema dbSchema = ovsdbClient.getSchema(LibraryIntegrationTestUtils.HARDWARE_VTEP).get();
             assertNotNull(dbSchema);
             LOG.info("{} schema in {} with Tables: {}", LibraryIntegrationTestUtils.HARDWARE_VTEP,
                     ovsdbClient.getConnectionInfo(), dbSchema.getTables());
@@ -116,7 +115,7 @@ public class LibraryIT extends LibraryIntegrationTestBase {
     public void tearDown() throws InterruptedException, ExecutionException {
         Bridge bridge = ovsdbClient.getTypedRowWrapper(Bridge.class, null);
         OpenVSwitch openVSwitch = ovsdbClient.getTypedRowWrapper(OpenVSwitch.class, null);
-        DatabaseSchema dbSchema = ovsdbClient.getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
+        TypedDatabaseSchema dbSchema = ovsdbClient.getSchema(LibraryIntegrationTestUtils.OPEN_VSWITCH).get();
         ListenableFuture<List<OperationResult>> results = ovsdbClient.transactBuilder(dbSchema)
                 .add(op.delete(bridge.getSchema())
                         .where(bridge.getNameColumn().getSchema().opEqual(TEST_BRIDGE_NAME))

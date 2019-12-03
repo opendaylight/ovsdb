@@ -33,9 +33,9 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 public class OvsdbClientTestTypedIT extends LibraryIntegrationTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbClientTestTypedIT.class);
     OvsdbClient ovs;
-    DatabaseSchema dbSchema = null;
+    TypedDatabaseSchema dbSchema = null;
     private static final String TEST_BRIDGE_NAME = "br_test";
     private static UUID testBridgeUuid = null;
 

@@ -61,9 +61,9 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
     private final OvsdbConnectionInstance connectionInstance;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
-    public BridgeConfigReconciliationTask(ReconciliationManager reconciliationManager,
-            OvsdbConnectionManager connectionManager, InstanceIdentifier<?> nodeIid,
-            OvsdbConnectionInstance connectionInstance, InstanceIdentifierCodec instanceIdentifierCodec) {
+    public BridgeConfigReconciliationTask(final ReconciliationManager reconciliationManager,
+            final OvsdbConnectionManager connectionManager, final InstanceIdentifier<?> nodeIid,
+            final OvsdbConnectionInstance connectionInstance, final InstanceIdentifierCodec instanceIdentifierCodec) {
         super(reconciliationManager, connectionManager, nodeIid, null);
         this.connectionInstance = connectionInstance;
         this.instanceIdentifierCodec = instanceIdentifierCodec;
@@ -93,8 +93,8 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
         // except the one specified in the exclusion-list.
 
         Boolean reconcileAllBridges = Boolean.FALSE;
-        if ((bridgeReconcileIncludeList.isEmpty() && bridgeReconcileExcludeList.isEmpty())
-            || (bridgeReconcileIncludeList.isEmpty() && !bridgeReconcileExcludeList.isEmpty())) {
+        if (bridgeReconcileIncludeList.isEmpty() && bridgeReconcileExcludeList.isEmpty()
+            || bridgeReconcileIncludeList.isEmpty() && !bridgeReconcileExcludeList.isEmpty()) {
             // Case 1 & 3
             reconcileAllBridges = Boolean.TRUE;
         } else if (!bridgeReconcileIncludeList.isEmpty() && !bridgeReconcileExcludeList.isEmpty()) {
@@ -123,9 +123,8 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
             }
             Futures.addCallback(readTopologyFuture, new FutureCallback<Optional<Topology>>() {
                 @Override
-                public void onSuccess(@Nullable Optional<Topology> optionalTopology) {
+                public void onSuccess(@Nullable final Optional<Topology> optionalTopology) {
                     if (optionalTopology != null && optionalTopology.isPresent()) {
-                        @SuppressWarnings("unchecked")
                         Topology topology = optionalTopology.get();
                         if (topology.getNode() != null) {
                             for (Node node : topology.getNode()) {
@@ -144,7 +143,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                 }
 
                 @Override
-                public void onFailure(Throwable throwable) {
+                public void onFailure(final Throwable throwable) {
                     LOG.warn("Read Config/DS for Topology failed! {}", nodeIid, throwable);
                 }
 
@@ -162,10 +161,8 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                 }
                 Futures.addCallback(readNodeFuture, new FutureCallback<Optional<Node>>() {
                     @Override
-                    public void onSuccess(@Nullable Optional<Node> optionalTopology) {
+                    public void onSuccess(@Nullable final Optional<Node> optionalTopology) {
                         if (optionalTopology != null && optionalTopology.isPresent()) {
-                            @SuppressWarnings("unchecked")
-
                             Node node = optionalTopology.get();
                             if (node != null) {
                                 bridgeNodeList.add(node);
@@ -177,7 +174,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                     }
 
                     @Override
-                    public void onFailure(Throwable throwable) {
+                    public void onFailure(final Throwable throwable) {
                         LOG.warn("Read Config/DS for Topology failed! {}", bridgeNodeIid, throwable);
                     }
                 }, MoreExecutors.directExecutor());
@@ -281,7 +278,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
     }
 
     @Override
-    public void doRetry(boolean wasPreviousAttemptSuccessful) {
+    public void doRetry(final boolean wasPreviousAttemptSuccessful) {
     }
 
     @Override
@@ -293,7 +290,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
         return 0;
     }
 
-    private List<String> getNodeIdForBridges(String nodeIdVal, List<String> bridgeList) {
+    private List<String> getNodeIdForBridges(final String nodeIdVal, final List<String> bridgeList) {
         List<String> nodeIdBridgeList = new ArrayList<>();
         for (String bridge : bridgeList) {
             String bridgeNodeIid = new StringBuilder().append(nodeIdVal)

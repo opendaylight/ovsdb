@@ -8,8 +8,8 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -53,7 +53,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 public class OvsdbAutoAttachRemovedCommandTest {
 
-    private Map<UUID, AutoAttach> removedAutoAttachRows = new HashMap<>();
+    private final Map<UUID, AutoAttach> removedAutoAttachRows = new HashMap<>();
     private OvsdbAutoAttachRemovedCommand ovsdbAutoAttachRemovedCommand;
     private ReadWriteTransaction transaction;
     private InstanceIdentifier<Autoattach> aaIid;
@@ -61,7 +61,6 @@ public class OvsdbAutoAttachRemovedCommandTest {
     private static final UUID AUTOATTACH_UUID = new UUID("798f35d8-f40a-449a-94d3-c860f5547f9a");
     private static final String CONNECTED_NODE_ID = "10.0.0.1";
 
-    @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws Exception {
         ovsdbAutoAttachRemovedCommand = mock(OvsdbAutoAttachRemovedCommand.class, Mockito.CALLS_REAL_METHODS);

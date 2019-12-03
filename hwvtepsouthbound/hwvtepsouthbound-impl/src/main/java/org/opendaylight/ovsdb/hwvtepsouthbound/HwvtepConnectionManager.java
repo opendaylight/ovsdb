@@ -412,7 +412,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
         GenericTableSchema hwvtepSchema = dbSchema.getTableSchema(Global.class);
         Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
-        selectOperation.setColumns(new ArrayList<>(hwvtepSchema.getColumns()));
+        selectOperation.setColumns(hwvtepSchema.getColumnList());
 
         ArrayList<Operation> operations = new ArrayList<>(2);
         operations.add(selectOperation);

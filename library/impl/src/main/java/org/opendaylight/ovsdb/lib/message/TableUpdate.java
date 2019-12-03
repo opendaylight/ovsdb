@@ -20,10 +20,10 @@ public class TableUpdate<E extends TableSchema<E>> {
         return rows;
     }
 
-    public static class RowUpdate<E extends TableSchema<E>> {
+    public static final class RowUpdate<E extends TableSchema<E>> {
         private final UUID uuid;
-        private Row<E> oldRow;
-        private Row<E> newRow;
+        private final Row<E> oldRow;
+        private final Row<E> newRow;
 
         public RowUpdate(final UUID uuid, final Row<E> oldRow, final Row<E> newRow) {
             this.uuid = uuid;
@@ -39,23 +39,13 @@ public class TableUpdate<E extends TableSchema<E>> {
             return oldRow;
         }
 
-        public void setOld(final Row<E> old) {
-            this.oldRow = old;
-        }
-
         public Row<E> getNew() {
             return newRow;
         }
 
-        @SuppressWarnings("checkstyle:HiddenField")
-        public void setNew(final Row<E> newRow) {
-            this.newRow = newRow;
-        }
-
         @Override
         public String toString() {
-            return "RowUpdate [uuid=" + uuid + ", oldRow=" + oldRow + ", newRow=" + newRow
-                    + "]";
+            return "RowUpdate [uuid=" + uuid + ", oldRow=" + oldRow + ", newRow=" + newRow + "]";
         }
     }
 

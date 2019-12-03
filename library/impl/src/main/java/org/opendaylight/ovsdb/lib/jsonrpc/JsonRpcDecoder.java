@@ -38,12 +38,12 @@ import org.slf4j.LoggerFactory;
  * in the stream.
  */
 public class JsonRpcDecoder extends ByteToMessageDecoder {
-
     private static final Logger LOG = LoggerFactory.getLogger(JsonRpcDecoder.class);
+    private static final JsonFactory JSON_FACTORY = new MappingJsonFactory();
+
     private final int maxFrameLength;
     //Indicates if the frame limit warning was issued
     private boolean maxFrameLimitWasReached = false;
-    private final JsonFactory jacksonJsonFactory = new MappingJsonFactory();
 
     private final IOContext jacksonIOContext = new IOContext(new BufferRecycler(), null, false);
 
@@ -55,15 +55,15 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
 
     private int recordsRead;
 
-    public JsonRpcDecoder(int maxFrameLength) {
+    public JsonRpcDecoder(final int maxFrameLength) {
         this.maxFrameLength = maxFrameLength;
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) throws Exception {
-
-        LOG.trace("readable bytes {}, records read {}, incomplete record bytes {}",
-                buf.readableBytes(), recordsRead, lastRecordBytes);
+    protected void decode(final ChannelHandlerContext ctx, final ByteBuf buf, final List<Object> out)
+            throws IOException {
+        LOG.trace("readable bytes {}, records read {}, incomplete record bytes {}", buf.readableBytes(),
+            recordsRead, lastRecordBytes);
 
         if (lastRecordBytes == 0) {
             if (buf.readableBytes() < 4) {
@@ -106,7 +106,7 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
 
             if (leftCurlies != 0 && leftCurlies == rightCurlies && !inS) {
                 ByteBuf slice = buf.readSlice(1 + index - buf.readerIndex());
-                JsonParser jp = jacksonJsonFactory.createParser((InputStream) new ByteBufInputStream(slice));
+                JsonParser jp = JSON_FACTORY.createParser((InputStream) new ByteBufInputStream(slice));
                 JsonNode root = jp.readValueAsTree();
                 out.add(root);
                 leftCurlies = 0;
@@ -142,7 +142,7 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
         return recordsRead;
     }
 
-    private static void skipSpaces(ByteBuf byteBuf) throws IOException {
+    private static void skipSpaces(final ByteBuf byteBuf) throws IOException {
         while (byteBuf.isReadable()) {
             int ch = byteBuf.getByte(byteBuf.readerIndex()) & 0xFF;
             if (!(ch == ' ' || ch == '\r' || ch == '\n' || ch == '\t')) {

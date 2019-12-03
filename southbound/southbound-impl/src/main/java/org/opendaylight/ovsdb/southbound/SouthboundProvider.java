@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -85,7 +86,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
                               @Reference final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
                               @Reference final SystemReadyMonitor systemReadyMonitor,
                               @Reference final DiagStatusService diagStatusService) {
-        this.db = dataBroker;
+        SouthboundProvider.db = dataBroker;
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
@@ -151,7 +152,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         ovsdbStatusProvider.reportStatus(ServiceState.UNREGISTERED, "OVSDB Service stopped");
     }
 
-    private void initializeOvsdbTopology(LogicalDatastoreType type) {
+    private void initializeOvsdbTopology(final LogicalDatastoreType type) {
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
@@ -171,7 +172,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         }
     }
 
-    public void handleOwnershipChange(EntityOwnershipChange ownershipChange) {
+    public void handleOwnershipChange(final EntityOwnershipChange ownershipChange) {
         if (ownershipChange.getState().isOwner()) {
             LOG.info("*This* instance of OVSDB southbound provider is set as a MASTER instance");
             LOG.info("Initialize OVSDB topology {} in operational and config data store if not already present",
@@ -184,7 +185,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     }
 
     @Override
-    public void onDataTreeChanged(Collection<DataTreeModification<Topology>> collection) {
+    public void onDataTreeChanged(final Collection<DataTreeModification<Topology>> collection) {
         if (!registered.getAndSet(true)) {
             LOG.info("Starting the ovsdb port");
             ovsdbConnection.registerConnectionListener(cm);
@@ -193,13 +194,11 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
                 ovsdbConnection.startOvsdbManager();
                 LOG.info("Started OVSDB Manager (in system ready listener)");
             });
-            //mdsal registration/deregistration in mdsal update callback should be avoided
-            new Thread(() -> {
-                if (operTopologyRegistration != null) {
-                    operTopologyRegistration.close();
-                    operTopologyRegistration = null;
-                }
-            }).start();
+
+            if (operTopologyRegistration != null) {
+                operTopologyRegistration.close();
+                operTopologyRegistration = null;
+            }
             ovsdbStatusProvider.reportStatus(ServiceState.OPERATIONAL, "OVSDB initialization complete");
         }
     }
@@ -208,8 +207,8 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         private final SouthboundProvider sp;
         private final EntityOwnershipListenerRegistration listenerRegistration;
 
-        SouthboundPluginInstanceEntityOwnershipListener(SouthboundProvider sp,
-                EntityOwnershipService entityOwnershipService) {
+        SouthboundPluginInstanceEntityOwnershipListener(final SouthboundProvider sp,
+                final EntityOwnershipService entityOwnershipService) {
             this.sp = sp;
             listenerRegistration = entityOwnershipService.registerListener(ENTITY_TYPE, this);
         }
@@ -219,17 +218,22 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         }
 
         @Override
-        public void ownershipChanged(EntityOwnershipChange ownershipChange) {
+        public void ownershipChanged(final EntityOwnershipChange ownershipChange) {
             sp.handleOwnershipChange(ownershipChange);
         }
     }
 
-    public void setSkipMonitoringManagerStatus(boolean flag) {
+    public void setSkipMonitoringManagerStatus(final boolean flag) {
         LOG.debug("skipManagerStatus set to {}", flag);
         if (flag) {
             SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get("Manager").add("status");
         } else {
             SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get("Manager").remove("status");
         }
+    }
+
+    @VisibleForTesting
+    boolean isRegistered() {
+        return registered.get();
     }
 }

@@ -5,24 +5,25 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.infrautils.ready.testutils.TestSystemReadyMonitor.Behaviour.IMMEDIATE;
 
+import com.google.common.base.Stopwatch;
+import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.infrautils.diagstatus.DiagStatusService;
@@ -45,7 +46,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 
-public class SouthboundProviderTest extends AbstractDataBrokerTest {
+public class SouthboundProviderTest extends OvsdbDataTreeChangeListenerTest {
 
     private EntityOwnershipService entityOwnershipService;
 
@@ -164,6 +165,13 @@ public class SouthboundProviderTest extends AbstractDataBrokerTest {
             // Become owner
             southboundProvider.handleOwnershipChange(new EntityOwnershipChange(entity,
                     EntityOwnershipChangeState.from(false, true, true)));
+
+            // Up to 3 seconds for DTCL to settle
+            final Stopwatch sw = Stopwatch.createStarted();
+            while (!southboundProvider.isRegistered() && sw.elapsed(TimeUnit.SECONDS) < 3) {
+                Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+            }
+            assertTrue(southboundProvider.isRegistered());
 
             // Now the OVSDB topology must be present in both trees
             assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION,

@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,9 +84,14 @@ public class HwvtepTableReader {
         UcastMacsRemote.class
     };
 
+    private static final ImmutableMap<Class<?>, Class<? extends TypedBaseTable<?>>> TABLE_MAP = ImmutableMap.of(
+        RemoteMcastMacs.class, McastMacsRemote.class,
+        RemoteUcastMacs.class, UcastMacsRemote.class,
+        LogicalSwitches.class, LogicalSwitch.class,
+        TerminationPoint.class, PhysicalLocator.class);
+
     private final Map<Class, Function<InstanceIdentifier, List<Condition>>> whereClauseGetterMap = new HashMap();
-    private final Map<Class, Class> tableMap = new HashMap();
-    private final Map<Class, TypedBaseTable> tables = new HashMap<>();
+    private final Map<Class<? extends TypedBaseTable<?>>, TypedBaseTable> tables = new HashMap<>();
 
     private final HwvtepConnectionInstance connectionInstance;
 
@@ -98,11 +104,6 @@ public class HwvtepTableReader {
             LOG.warn("Not able to fetch schema for database {} from device {}",
                     HwvtepSchemaConstants.HARDWARE_VTEP, connectionInstance.getConnectionInfo(), e);
         }
-
-        tableMap.put(RemoteMcastMacs.class, McastMacsRemote.class);
-        tableMap.put(RemoteUcastMacs.class, UcastMacsRemote.class);
-        tableMap.put(LogicalSwitches.class, LogicalSwitch.class);
-        tableMap.put(TerminationPoint.class, PhysicalLocator.class);
 
         whereClauseGetterMap.put(RemoteMcastMacs.class, new RemoteMcastMacWhereClauseGetter());
         whereClauseGetterMap.put(RemoteUcastMacs.class, new RemoteUcastMacWhereClauseGetter());
@@ -192,7 +193,7 @@ public class HwvtepTableReader {
             return Optional.empty();
         }
 
-        final Class<TypedBaseTable> tableClass = tableMap.get(cls);
+        final Class<? extends TypedBaseTable<?>> tableClass = TABLE_MAP.get(cls);
         final GenericTableSchema hwvtepSchema = dbSchema.getTableSchema(tableClass);
 
         final Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
@@ -257,7 +258,7 @@ public class HwvtepTableReader {
             return null;
         }
 
-        final Class<TypedBaseTable> tableClass = tableMap.get(cls);
+        final Class<? extends TypedBaseTable<?>> tableClass = TABLE_MAP.get(cls);
         final GenericTableSchema hwvtepSchema = dbSchema.getTableSchema(tableClass);
         final Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
         selectOperation.setColumns(new ArrayList<>(hwvtepSchema.getColumns()));

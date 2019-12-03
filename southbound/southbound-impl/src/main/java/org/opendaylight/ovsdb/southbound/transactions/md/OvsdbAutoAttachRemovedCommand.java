@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import com.google.common.base.Optional;
@@ -16,7 +15,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.AutoAttach;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
@@ -33,16 +31,16 @@ import org.slf4j.LoggerFactory;
 public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbAutoAttachRemovedCommand.class);
 
-    private Map<UUID, AutoAttach> removedAutoAttachRows;
+    private final Map<UUID, AutoAttach> removedAutoAttachRows;
 
-    public OvsdbAutoAttachRemovedCommand(OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
+    public OvsdbAutoAttachRemovedCommand(final OvsdbConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        removedAutoAttachRows = TyperUtils.extractRowsRemoved(AutoAttach.class, getUpdates(), getDbSchema());
+        removedAutoAttachRows = extractRowsRemoved(AutoAttach.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         if (removedAutoAttachRows == null || removedAutoAttachRows.isEmpty()) {
             return;
         }
@@ -70,7 +68,7 @@ public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
         }
     }
 
-    private AutoattachKey getAutoAttachKeyToRemove(Node node, UUID autoAttachUuid) {
+    private static AutoattachKey getAutoAttachKeyToRemove(final Node node, final UUID autoAttachUuid) {
         final List<Autoattach> autoAttachList = node.augmentation(OvsdbNodeAugmentation.class).getAutoattach();
         if (autoAttachList == null || autoAttachList.isEmpty()) {
             return null;

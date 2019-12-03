@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
@@ -16,7 +15,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Tunnel;
@@ -32,10 +30,11 @@ public class HwvtepTunnelRemoveCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepTunnelRemoveCommand.class);
     Collection<Tunnel> deletedTunnelRows = null;
 
-    public HwvtepTunnelRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepTunnelRemoveCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         try {
-            deletedTunnelRows = TyperUtils.extractRowsRemoved(Tunnel.class, getUpdates(), getDbSchema()).values();
+            deletedTunnelRows = extractRowsRemoved(Tunnel.class).values();
         } catch (IllegalArgumentException e) {
             LOG.debug("Tunnel Table not supported on this HWVTEP device", e);
         }
@@ -43,7 +42,7 @@ public class HwvtepTunnelRemoveCommand extends AbstractTransactionCommand {
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         for (Tunnel tunnel : deletedTunnelRows) {
             try {
                 InstanceIdentifier<Tunnels> tunnelIid = getInstanceIdentifier(getOvsdbConnectionInstance(), tunnel);
@@ -58,7 +57,8 @@ public class HwvtepTunnelRemoveCommand extends AbstractTransactionCommand {
         }
     }
 
-    private InstanceIdentifier<Tunnels> getInstanceIdentifier(HwvtepConnectionInstance client, Tunnel tunnel) {
+    private InstanceIdentifier<Tunnels> getInstanceIdentifier(final HwvtepConnectionInstance client,
+            final Tunnel tunnel) {
         InstanceIdentifier<Tunnels> result = null;
 
         PhysicalSwitch phySwitch = client.getDeviceInfo().getPhysicalSwitchForTunnel(tunnel.getUuid());
@@ -79,7 +79,7 @@ public class HwvtepTunnelRemoveCommand extends AbstractTransactionCommand {
         return result;
     }
 
-    private PhysicalLocator getPhysicalLocatorFromUUID(UUID uuid) {
+    private PhysicalLocator getPhysicalLocatorFromUUID(final UUID uuid) {
         PhysicalLocator locator = getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocator(uuid);
         if (locator == null) {
             LOG.trace("Available PhysicalLocators: {}",

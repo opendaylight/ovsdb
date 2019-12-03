@@ -17,7 +17,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
@@ -45,12 +44,11 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
     private final Map<UUID, Controller> updatedControllerRows;
     private final Map<UUID, Bridge> updatedBridgeRows;
 
-    public OvsdbControllerUpdateCommand(final OvsdbConnectionInstance key,
-            final TableUpdates updates, final DatabaseSchema dbSchema) {
+    public OvsdbControllerUpdateCommand(final OvsdbConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
-        updatedControllerRows = TyperUtils.extractRowsUpdated(Controller.class,
-                getUpdates(), getDbSchema());
+        updatedBridgeRows = extractRowsUpdated(Bridge.class);
+        updatedControllerRows = extractRowsUpdated(Controller.class);
     }
 
     @Override
@@ -111,7 +109,7 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
      */
     @VisibleForTesting
     void updateController(final ReadWriteTransaction transaction,
-                                  final Map<UUID, Controller> newUpdatedControllerRows) {
+            final Map<UUID, Controller> newUpdatedControllerRows) {
 
         Map<InstanceIdentifier<Node>, Node> bridgeNodes = getBridgeNodes(transaction);
         for (Map.Entry<InstanceIdentifier<Node>, Node> bridgeNodeEntry : bridgeNodes.entrySet()) {

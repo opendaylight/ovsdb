@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import com.google.common.base.Optional;
@@ -21,7 +20,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Tunnel;
@@ -44,14 +42,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
-
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepTunnelUpdateCommand.class);
+
     private Map<UUID, Tunnel> updatedTunnelRows;
 
-    public HwvtepTunnelUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepTunnelUpdateCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         try {
-            updatedTunnelRows = TyperUtils.extractRowsUpdated(Tunnel.class, getUpdates(), getDbSchema());
+            updatedTunnelRows = extractRowsUpdated(Tunnel.class);
         } catch (IllegalArgumentException e) {
             LOG.debug("Tunnel Table not supported on this HWVTEP device", e);
         }
@@ -59,7 +58,7 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         if (updatedTunnelRows != null && !updatedTunnelRows.isEmpty()) {
             for (Tunnel tunnel : updatedTunnelRows.values()) {
                 try {
@@ -71,7 +70,7 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateTunnel(ReadWriteTransaction transaction, Tunnel tunnel) {
+    private void updateTunnel(final ReadWriteTransaction transaction, final Tunnel tunnel) {
         Preconditions.checkNotNull(tunnel.getLocalColumn().getData());
         Preconditions.checkNotNull(tunnel.getRemoteColumn().getData());
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
@@ -107,7 +106,7 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setBfdLocalConfigs(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
+    private static void setBfdLocalConfigs(final TunnelsBuilder tunnelsBuilder, final Tunnel tunnel) {
         Map<String, String> localConfigs = tunnel.getBfdConfigLocalColumn().getData();
         if (localConfigs != null && !localConfigs.isEmpty()) {
             List<BfdLocalConfigs> localConfigsList = localConfigs.entrySet().stream().map(
@@ -118,7 +117,7 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setBfdRemoteConfigs(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
+    private static void setBfdRemoteConfigs(final TunnelsBuilder tunnelsBuilder, final Tunnel tunnel) {
         Map<String, String> remoteConfigs = tunnel.getBfdConfigRemoteColumn().getData();
         if (remoteConfigs != null && !remoteConfigs.isEmpty()) {
             List<BfdRemoteConfigs> remoteConfigsList = remoteConfigs.entrySet().stream().map(
@@ -129,8 +128,7 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-
-    private void setBfdParams(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
+    private static void setBfdParams(final TunnelsBuilder tunnelsBuilder, final Tunnel tunnel) {
         Map<String, String> params = tunnel.getBfdParamsColumn().getData();
         if (params != null && !params.isEmpty()) {
             List<BfdParams> paramsList = params.entrySet().stream().map(
@@ -141,7 +139,7 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setBfdStatus(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
+    private static void setBfdStatus(final TunnelsBuilder tunnelsBuilder, final Tunnel tunnel) {
         Map<String, String> status = tunnel.getBfdStatusColumn().getData();
         if (status != null && !status.isEmpty()) {
             List<BfdStatus> statusList = status.entrySet().stream().map(
@@ -152,7 +150,8 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private InstanceIdentifier<Tunnels> getInstanceIdentifier(InstanceIdentifier<Node> psIid, Tunnel tunnel) {
+    private InstanceIdentifier<Tunnels> getInstanceIdentifier(final InstanceIdentifier<Node> psIid,
+            final Tunnel tunnel) {
         InstanceIdentifier<Tunnels> result = null;
         InstanceIdentifier<TerminationPoint> localTpPath =
                         getPhysicalLocatorRefFromUUID(getOvsdbConnectionInstance().getInstanceIdentifier(),
@@ -166,8 +165,8 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
         return result;
     }
 
-    private InstanceIdentifier<TerminationPoint> getPhysicalLocatorRefFromUUID(InstanceIdentifier<Node> nodeIid,
-                                                                               UUID uuid) {
+    private InstanceIdentifier<TerminationPoint> getPhysicalLocatorRefFromUUID(final InstanceIdentifier<Node> nodeIid,
+                                                                               final UUID uuid) {
         PhysicalLocator locator = getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocator(uuid);
         if (locator == null) {
             LOG.trace("Available PhysicalLocators: {}",

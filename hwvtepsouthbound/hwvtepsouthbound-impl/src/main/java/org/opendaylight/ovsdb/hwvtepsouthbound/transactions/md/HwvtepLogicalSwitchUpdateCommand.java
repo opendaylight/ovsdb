@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import com.google.common.base.Optional;
@@ -21,7 +20,6 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -38,24 +36,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand {
-
-    private final Map<UUID, LogicalSwitch> updatedLSRows;
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepLogicalSwitchUpdateCommand.class);
 
-    public HwvtepLogicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    private final Map<UUID, LogicalSwitch> updatedLSRows;
+
+    public HwvtepLogicalSwitchUpdateCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedLSRows = TyperUtils.extractRowsUpdated(LogicalSwitch.class, getUpdates(), getDbSchema());
+        updatedLSRows = extractRowsUpdated(LogicalSwitch.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         for (Entry<UUID, LogicalSwitch> entry : updatedLSRows.entrySet()) {
             updateLogicalSwitch(transaction, entry.getValue());
         }
     }
 
-    private void updateLogicalSwitch(ReadWriteTransaction transaction, LogicalSwitch logicalSwitch) {
+    private void updateLogicalSwitch(final ReadWriteTransaction transaction, final LogicalSwitch logicalSwitch) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
@@ -71,7 +69,7 @@ public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand
         }
     }
 
-    private Node buildConnectionNode(LogicalSwitch logicalSwitch) {
+    private Node buildConnectionNode(final LogicalSwitch logicalSwitch) {
         //Update node with LogicalSwitch reference
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());

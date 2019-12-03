@@ -97,7 +97,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         super.setup();
     }
 
-    public UUID getOpenVSwitchTableUuid(OvsdbClient ovs, Map<String, Map<UUID, Row>> tableCache) {
+    public UUID getOpenVSwitchTableUuid(final OvsdbClient ovs, final Map<String, Map<UUID, Row>> tableCache) {
         OpenVSwitch openVSwitch = getClient().getTypedRowWrapper(OpenVSwitch.class, null);
         Map<UUID, Row> ovsTable = tableCache.get(openVSwitch.getSchema().getName());
         if (ovsTable != null) {
@@ -141,7 +141,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         return bridgeUuid;
     }
 
-    public void bridgeDelete(UUID bridgeUuid) throws ExecutionException, InterruptedException {
+    public void bridgeDelete(final UUID bridgeUuid) throws ExecutionException, InterruptedException {
         Bridge bridge = getClient().getTypedRowWrapper(Bridge.class, null);
         OpenVSwitch openVSwitch = getClient().getTypedRowWrapper(OpenVSwitch.class, null);
 

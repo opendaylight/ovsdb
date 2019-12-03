@@ -16,7 +16,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -30,24 +29,22 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
-
     private final InstanceIdentifierCodec instanceIdentifierCodec;
-    private Map<UUID, Bridge> oldBridgeRows;
-    private Map<UUID, Controller> removedControllerRows;
-    private Map<UUID, Bridge> updatedBridgeRows;
+    private final Map<UUID, Bridge> oldBridgeRows;
+    private final Map<UUID, Controller> removedControllerRows;
+    private final Map<UUID, Bridge> updatedBridgeRows;
 
-    public OvsdbControllerRemovedCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
+    public OvsdbControllerRemovedCommand(final InstanceIdentifierCodec instanceIdentifierCodec,
+            final OvsdbConnectionInstance key, final TableUpdates updates, final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         this.instanceIdentifierCodec = instanceIdentifierCodec;
-        updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
-        oldBridgeRows = TyperUtils.extractRowsOld(Bridge.class, getUpdates(), getDbSchema());
-        removedControllerRows = TyperUtils.extractRowsRemoved(Controller.class,
-                getUpdates(), getDbSchema());
+        updatedBridgeRows = extractRowsUpdated(Bridge.class);
+        oldBridgeRows = extractRowsOld(Bridge.class);
+        removedControllerRows = extractRowsRemoved(Controller.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         for (Bridge bridge : updatedBridgeRows.values()) {
             InstanceIdentifier<Node> bridgeIid =
                     SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
@@ -56,15 +53,15 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void deleteControllers(ReadWriteTransaction transaction,
-            List<InstanceIdentifier<ControllerEntry>> controllerEntryIids) {
+    private static void deleteControllers(final ReadWriteTransaction transaction,
+            final List<InstanceIdentifier<ControllerEntry>> controllerEntryIids) {
         for (InstanceIdentifier<ControllerEntry> controllerEntryIid: controllerEntryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, controllerEntryIid);
         }
     }
 
     private List<InstanceIdentifier<ControllerEntry>> controllerEntriesToRemove(
-            InstanceIdentifier<Node> bridgeIid, Bridge bridge) {
+            final InstanceIdentifier<Node> bridgeIid, final Bridge bridge) {
         Preconditions.checkNotNull(bridgeIid);
         Preconditions.checkNotNull(bridge);
         List<InstanceIdentifier<ControllerEntry>> result =

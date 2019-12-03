@@ -32,7 +32,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.transact.PhysicalPortUpdateComman
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
@@ -74,9 +73,9 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
     public HwvtepPhysicalPortUpdateCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
             final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
-        updatedPPRows = TyperUtils.extractRowsUpdated(PhysicalPort.class, getUpdates(), getDbSchema());
-        oldPPRows = TyperUtils.extractRowsOld(PhysicalPort.class, getUpdates(), getDbSchema());
-        switchUpdatedRows = TyperUtils.extractRowsUpdated(PhysicalSwitch.class, getUpdates(), getDbSchema());
+        updatedPPRows = extractRowsUpdated(PhysicalPort.class);
+        oldPPRows = extractRowsOld(PhysicalPort.class);
+        switchUpdatedRows = extractRowsUpdated(PhysicalSwitch.class);
         skipReconciliationPorts = new HashSet<>();
         for (Entry<UUID, PhysicalPort> portUpdateEntry : updatedPPRows.entrySet()) {
             Optional<InstanceIdentifier<Node>> switchIid = getTerminationPointSwitch(portUpdateEntry.getKey());

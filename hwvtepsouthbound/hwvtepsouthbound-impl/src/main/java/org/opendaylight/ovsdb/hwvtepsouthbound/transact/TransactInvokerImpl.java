@@ -21,22 +21,22 @@ import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.operations.Update;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TransactInvokerImpl implements TransactInvoker {
     private static final Logger LOG = LoggerFactory.getLogger(TransactInvokerImpl.class);
     private final HwvtepConnectionInstance connectionInstance;
-    private final DatabaseSchema dbSchema;
+    private final TypedDatabaseSchema dbSchema;
 
-    public TransactInvokerImpl(HwvtepConnectionInstance connectionInstance, DatabaseSchema dbSchema) {
+    public TransactInvokerImpl(final HwvtepConnectionInstance connectionInstance, final TypedDatabaseSchema dbSchema) {
         this.connectionInstance = connectionInstance;
         this.dbSchema = dbSchema;
     }
 
     @Override
-    public void invoke(TransactCommand command) {
+    public void invoke(final TransactCommand command) {
         TransactionBuilder tb = new TransactionBuilder(connectionInstance.getOvsdbClient(), dbSchema);
         command.execute(tb);
         ListenableFuture<List<OperationResult>> result = tb.execute();
@@ -68,7 +68,7 @@ public class TransactInvokerImpl implements TransactInvoker {
         }
     }
 
-    void printError(TransactionBuilder tb) {
+    void printError(final TransactionBuilder tb) {
         StringBuilder sb = new StringBuilder();
         for (Operation op : tb.getOperations()) {
             if (op instanceof Insert) {

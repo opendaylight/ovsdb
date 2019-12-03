@@ -139,7 +139,7 @@ public class HwvtepConnectionInstance {
         }
     }
 
-    public ListenableFuture<List<OperationResult>> transact(final DatabaseSchema dbSchema,
+    public ListenableFuture<List<OperationResult>> transact(final TypedDatabaseSchema dbSchema,
             final List<Operation> operations) {
         return client.transact(dbSchema, operations);
     }
@@ -230,7 +230,7 @@ public class HwvtepConnectionInstance {
         return client.getSchema(database);
     }
 
-    public TransactionBuilder transactBuilder(final DatabaseSchema dbSchema) {
+    public TransactionBuilder transactBuilder(final TypedDatabaseSchema dbSchema) {
         return client.transactBuilder(dbSchema);
     }
 

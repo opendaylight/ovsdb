@@ -25,6 +25,7 @@ import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
+import org.opendaylight.yangtools.util.CollectionWrappers;
 
 public abstract class TableSchema<E extends TableSchema<E>> {
     private static final AtomicColumnType UUID_COLUMN_TYPE = new AtomicColumnType(UuidBaseType.SINGLETON);
@@ -33,6 +34,8 @@ public abstract class TableSchema<E extends TableSchema<E>> {
 
     private final String name;
     private final ImmutableMap<String, ColumnSchema> columns;
+
+    private volatile List<String> columnList;
 
     protected TableSchema(final String name) {
         this(name, ImmutableMap.of());
@@ -45,6 +48,19 @@ public abstract class TableSchema<E extends TableSchema<E>> {
 
     public Set<String> getColumns() {
         return columns.keySet();
+    }
+
+    public List<String> getColumnList() {
+        final List<String> local = columnList;
+        return local != null ? local : populateColumnList();
+    }
+
+    private synchronized List<String> populateColumnList() {
+        List<String> local = columnList;
+        if (local == null) {
+            columnList = local = CollectionWrappers.wrapAsList(columns.keySet());
+        }
+        return local;
     }
 
     public Map<String, ColumnSchema> getColumnSchemas() {

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import java.util.Collection;
@@ -34,14 +33,14 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
 
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
-    public OvsdbPortRemoveCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
+    public OvsdbPortRemoveCommand(final InstanceIdentifierCodec instanceIdentifierCodec,
+            final OvsdbConnectionInstance key, final TableUpdates updates, final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         this.instanceIdentifierCodec = instanceIdentifierCodec;
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         Collection<Port> portRemovedRows = TyperUtils.extractRowsRemoved(
                 Port.class, getUpdates(), getDbSchema()).values();
         Map<UUID, Port> portUpdatedRows = TyperUtils.extractRowsUpdated(
@@ -70,7 +69,10 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
                 }
             }
             if (updatedBridgeData == null) {
-                LOG.warn("Bridge not found for port {}",port);
+                LOG.warn("Bridge not found for port {}", port);
+
+                LOG.info("Old bridge rows: {}", bridgeUpdatedOldRows);
+                LOG.info("Update bridge rows: {}", bridgeUpdatedRows);
                 continue;
             }
             final InstanceIdentifier<TerminationPoint> nodePath = SouthboundMapper
@@ -81,5 +83,4 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
         }
     }
-
 }

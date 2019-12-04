@@ -73,7 +73,8 @@ public final class TyperUtils {
      * @param klazz Typed Class that represents a Table
      */
     @Deprecated
-    public static <T> T getTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz) {
+    public static <T extends TypedBaseTable<?>> T getTypedRowWrapper(final DatabaseSchema dbSchema,
+            final Class<T> klazz) {
         return getTypedRowWrapper(dbSchema, klazz, new Row<>());
     }
 
@@ -97,8 +98,8 @@ public final class TyperUtils {
      *            is just interested in getting ColumnSchema.
      */
     @Deprecated
-    public static <T> T getTypedRowWrapper(final DatabaseSchema dbSchema, final Class<T> klazz,
-                                           final Row<GenericTableSchema> row) {
+    public static <T extends TypedBaseTable<?>> T getTypedRowWrapper(final DatabaseSchema dbSchema,
+            final Class<T> klazz, final Row<GenericTableSchema> row) {
         return dbSchema == null ? null : getTyped(dbSchema).getTypedRowWrapper(klazz, row);
     }
 
@@ -115,8 +116,8 @@ public final class TyperUtils {
      * @param dbSchema Dbschema for the TableUpdates
      * @return Map&lt;UUID,T&gt; for the type of things being sought
      */
-    public static <T> Map<UUID,T> extractRowsUpdated(final Class<T> klazz, final TableUpdates updates,
-            final DatabaseSchema dbSchema) {
+    public static <T extends TypedBaseTable<?>> Map<UUID,T> extractRowsUpdated(final Class<T> klazz,
+            final TableUpdates updates, final DatabaseSchema dbSchema) {
         return getTyped(dbSchema).extractRowsUpdated(klazz, updates);
     }
 
@@ -133,8 +134,8 @@ public final class TyperUtils {
      * @param dbSchema Dbschema for the TableUpdates
      * @return Map&lt;UUID,T&gt; for the type of things being sought
      */
-    public static <T> Map<UUID, T> extractRowsOld(final Class<T> klazz, final TableUpdates updates,
-            final DatabaseSchema dbSchema) {
+    public static <T extends TypedBaseTable<?>> Map<UUID, T> extractRowsOld(final Class<T> klazz,
+            final TableUpdates updates, final DatabaseSchema dbSchema) {
         return getTyped(dbSchema).extractRowsOld(klazz, updates);
     }
 
@@ -151,8 +152,8 @@ public final class TyperUtils {
      * @param dbSchema Dbschema for the TableUpdates
      * @return Map&lt;UUID,T&gt; for the type of things being sought
      */
-    public static <T> Map<UUID,T> extractRowsRemoved(final Class<T> klazz, final TableUpdates updates,
-            final DatabaseSchema dbSchema) {
+    public static <T extends TypedBaseTable<?>> Map<UUID,T> extractRowsRemoved(final Class<T> klazz,
+            final TableUpdates updates, final DatabaseSchema dbSchema) {
         return getTyped(dbSchema).extractRowsRemoved(klazz, updates);
     }
 

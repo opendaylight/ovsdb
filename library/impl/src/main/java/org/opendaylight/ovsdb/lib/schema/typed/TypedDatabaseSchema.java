@@ -49,7 +49,7 @@ public interface TypedDatabaseSchema extends DatabaseSchema {
      *
      * @param klazz Typed Class that represents a Table
      */
-    default <T> T getTypedRowWrapper(final Class<T> klazz) {
+    default <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz) {
         return getTypedRowWrapper(klazz, new Row<>());
     }
 
@@ -71,7 +71,7 @@ public interface TypedDatabaseSchema extends DatabaseSchema {
      * @param row The actual Row that the wrapper is operating on. It can be null if the caller
      *            is just interested in getting ColumnSchema.
      */
-    <T> T getTypedRowWrapper(Class<T> klazz, Row<GenericTableSchema> row);
+    <T extends TypedBaseTable<?>> T getTypedRowWrapper(Class<T> klazz, Row<GenericTableSchema> row);
 
     /**
      * This method extracts all row updates of Class&lt;T&gt; klazz from a TableUpdates
@@ -85,7 +85,7 @@ public interface TypedDatabaseSchema extends DatabaseSchema {
      * @param updates TableUpdates from which to extract rowUpdates
      * @return Map&lt;UUID,T&gt; for the type of things being sought
      */
-    <T> Map<UUID, T> extractRowsOld(Class<T> klazz, TableUpdates updates);
+    <T extends TypedBaseTable<?>> Map<UUID, T> extractRowsOld(Class<T> klazz, TableUpdates updates);
 
     /**
      * This method extracts all row updates of Class&lt;T&gt; klazz from a TableUpdates
@@ -99,7 +99,7 @@ public interface TypedDatabaseSchema extends DatabaseSchema {
      * @param updates TableUpdates from which to extract rowUpdates
      * @return Map&lt;UUID,T&gt; for the type of things being sought
      */
-    <T> Map<UUID,T> extractRowsRemoved(Class<T> klazz, TableUpdates updates);
+    <T extends TypedBaseTable<?>> Map<UUID,T> extractRowsRemoved(Class<T> klazz, TableUpdates updates);
 
     /**
      * This method extracts all row updates of Class&lt;T&gt; klazz from a TableUpdates
@@ -113,5 +113,5 @@ public interface TypedDatabaseSchema extends DatabaseSchema {
      * @param updates TableUpdates from which to extract rowUpdates
      * @return Map&lt;UUID,T&gt; for the type of things being sought
      */
-    <T> Map<UUID, T> extractRowsUpdated(Class<T> klazz, TableUpdates updates);
+    <T extends TypedBaseTable<?>> Map<UUID, T> extractRowsUpdated(Class<T> klazz, TableUpdates updates);
 }

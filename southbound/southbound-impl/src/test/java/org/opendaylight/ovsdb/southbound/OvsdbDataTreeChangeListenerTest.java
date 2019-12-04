@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
+import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
@@ -33,11 +33,15 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 /**
  * Unit tests for the data-tree change listener.
  */
-public class OvsdbDataTreeChangeListenerTest extends AbstractDataBrokerTest {
+public class OvsdbDataTreeChangeListenerTest extends AbstractConcurrentDataBrokerTest {
 
     private final OvsdbConnection ovsdbConnection = mock(OvsdbConnection.class);
     private DataBroker dataBroker;
     private OvsdbDataTreeChangeListener listener;
+
+    public OvsdbDataTreeChangeListenerTest() {
+        super(true);
+    }
 
     @Before
     public void setupListener() {
@@ -70,6 +74,6 @@ public class OvsdbDataTreeChangeListenerTest extends AbstractDataBrokerTest {
         transaction.submit().get();
 
         // Then the listener tries to open a connection
-        Mockito.verify(ovsdbConnection).connect(inetAddress, port);
+        Mockito.verify(ovsdbConnection, Mockito.timeout(5000)).connect(inetAddress, port);
     }
 }

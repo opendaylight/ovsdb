@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6036fca9_72f3d0d2",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionInstance.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2019-12-04T09:49:53Z",
+      "side": 1,
+      "message": "This shouldn’t be static, it’s still scoped at the instance level (even if there’s only supposed to be one).",
+      "revId": "d06e0ab5e70aaf0bf53cbba44795a6499737c09e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}

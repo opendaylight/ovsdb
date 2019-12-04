@@ -16,6 +16,24 @@
       "revId": "d06e0ab5e70aaf0bf53cbba44795a6499737c09e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "abe014d3_93bfe796",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionInstance.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2019-12-04T11:04:15Z",
+      "side": 1,
+      "message": "The role of this ExceutorService is to set the reconcilationFt after specified interval only(which is an minor task). \n\nCreating this executorService per instance level is not required and can be handled by single executorService.",
+      "parentUuid": "6036fca9_72f3d0d2",
+      "revId": "d06e0ab5e70aaf0bf53cbba44795a6499737c09e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }

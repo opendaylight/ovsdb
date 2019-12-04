@@ -60,7 +60,7 @@ final class TypedDatabaseSchemaImpl extends ForwardingDatabaseSchema implements 
     }
 
     @Override
-    public <T> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row) {
+    public <T extends TypedBaseTable<?>> T getTypedRowWrapper(final Class<T> klazz, final Row<GenericTableSchema> row) {
         // Check validity of  of the parameter passed to getTypedRowWrapper:
         // -  checks for a valid Database Schema matching the expected Database for a given table
         // - checks for the presence of the Table in Database Schema.
@@ -79,7 +79,7 @@ final class TypedDatabaseSchemaImpl extends ForwardingDatabaseSchema implements 
     }
 
     @Override
-    public <T> Map<UUID, T> extractRowsOld(final Class<T> klazz, final TableUpdates updates) {
+    public <T extends TypedBaseTable<?>> Map<UUID, T> extractRowsOld(final Class<T> klazz, final TableUpdates updates) {
         Map<UUID,T> result = new HashMap<>();
         for (RowUpdate<GenericTableSchema> rowUpdate : extractRowUpdates(klazz, updates).values()) {
             if (rowUpdate != null && rowUpdate.getOld() != null) {
@@ -91,7 +91,8 @@ final class TypedDatabaseSchemaImpl extends ForwardingDatabaseSchema implements 
     }
 
     @Override
-    public <T> Map<UUID, T> extractRowsUpdated(final Class<T> klazz, final TableUpdates updates) {
+    public <T extends TypedBaseTable<?>> Map<UUID, T> extractRowsUpdated(final Class<T> klazz,
+            final TableUpdates updates) {
         final Map<UUID, T> result = new HashMap<>();
         for (RowUpdate<GenericTableSchema> rowUpdate : extractRowUpdates(klazz, updates).values()) {
             if (rowUpdate != null && rowUpdate.getNew() != null) {
@@ -102,7 +103,8 @@ final class TypedDatabaseSchemaImpl extends ForwardingDatabaseSchema implements 
     }
 
     @Override
-    public <T> Map<UUID, T> extractRowsRemoved(final Class<T> klazz, final TableUpdates updates) {
+    public <T extends TypedBaseTable<?>> Map<UUID, T> extractRowsRemoved(final Class<T> klazz,
+            final TableUpdates updates) {
         final Map<UUID, T> result = new HashMap<>();
         for (RowUpdate<GenericTableSchema> rowUpdate : extractRowUpdates(klazz, updates).values()) {
             if (rowUpdate != null && rowUpdate.getNew() == null && rowUpdate.getOld() != null) {

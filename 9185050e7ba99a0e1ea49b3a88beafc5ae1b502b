@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "8cdebddc_3ba16808",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2019-12-04T11:04:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "db6b261c_bef52243",
+      "revId": "9185050e7ba99a0e1ea49b3a88beafc5ae1b502b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "fd309814_4d7abced",
         "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2019-11-13T14:11:14Z",
       "side": 1,
       "message": "i think \"thread\" is redundant here.",
+      "revId": "9185050e7ba99a0e1ea49b3a88beafc5ae1b502b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "90b9dc9a_567953bc",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2019-12-04T11:04:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fd309814_4d7abced",
       "revId": "9185050e7ba99a0e1ea49b3a88beafc5ae1b502b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true

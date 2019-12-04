@@ -69,8 +69,8 @@ public class BridgeRemovedCommand implements TransactCommand {
             } else {
                 LOG.warn("Unable to delete bridge {} because it was not found in the operational store, "
                         + "and thus we cannot retrieve its UUID", ovsdbManagedNodeIid);
+                LOG.info("Original points to {}", original, new Throwable());
             }
-
         }
     }
 }

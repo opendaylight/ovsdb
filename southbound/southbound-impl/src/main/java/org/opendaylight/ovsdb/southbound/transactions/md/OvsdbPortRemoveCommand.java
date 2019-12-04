@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import java.util.Collection;
@@ -34,14 +33,14 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
 
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
-    public OvsdbPortRemoveCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
+    public OvsdbPortRemoveCommand(final InstanceIdentifierCodec instanceIdentifierCodec,
+            final OvsdbConnectionInstance key, final TableUpdates updates, final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         this.instanceIdentifierCodec = instanceIdentifierCodec;
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
         Collection<Port> portRemovedRows = TyperUtils.extractRowsRemoved(
                 Port.class, getUpdates(), getDbSchema()).values();
         Map<UUID, Port> portUpdatedRows = TyperUtils.extractRowsUpdated(
@@ -58,28 +57,29 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
                 LOG.debug("port {} present in updated rows, skipping delete", portName);
                 continue;
             }
-            Bridge updatedBridgeData = null;
+            Bridge bridgeData = null;
             for (Entry<UUID, Bridge> entry : bridgeUpdatedOldRows.entrySet()) {
                 UUID bridgeUuid = entry.getKey();
                 Bridge oldBridgeData = entry.getValue();
                 if (oldBridgeData.getPortsColumn() != null
-                        && oldBridgeData.getPortsColumn().getData().contains(port.getUuidColumn().getData())
-                        && ! bridgeUpdatedRows.isEmpty()) {
-                    updatedBridgeData = bridgeUpdatedRows.get(bridgeUuid);
+                        && oldBridgeData.getPortsColumn().getData().contains(port.getUuidColumn().getData())) {
+                    // We have a match, try updated bridge rows first...
+                    bridgeData = bridgeUpdatedRows.get(bridgeUuid);
+                    if (bridgeData == null) {
+                        // ... and fall back to old data
+                        bridgeData = oldBridgeData;
+                    }
                     break;
                 }
             }
-            if (updatedBridgeData == null) {
-                LOG.warn("Bridge not found for port {}",port);
+            if (bridgeData == null) {
+                LOG.warn("Bridge not found for port {}", port);
                 continue;
             }
-            final InstanceIdentifier<TerminationPoint> nodePath = SouthboundMapper
-                    .createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
-                            updatedBridgeData).child(
-                            TerminationPoint.class,
-                            new TerminationPointKey(new TpId(portName)));
+            final InstanceIdentifier<TerminationPoint> nodePath = SouthboundMapper.createInstanceIdentifier(
+                instanceIdentifierCodec, getOvsdbConnectionInstance(), bridgeData)
+                    .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
             transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
         }
     }
-
 }

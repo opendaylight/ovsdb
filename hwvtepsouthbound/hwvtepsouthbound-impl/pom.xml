@@ -152,13 +152,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <build>
     <plugins>
-      <plugin>
+      <!--plugin>
         <groupId>org.apache.aries.blueprint</groupId>
         <artifactId>blueprint-maven-plugin</artifactId>
         <configuration>
           <scanPaths>org.opendaylight.ovsdb.hwvtepsouthbound</scanPaths>
         </configuration>
-      </plugin>
+      </plugin-->
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>

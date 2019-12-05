@@ -125,6 +125,12 @@ public interface Port extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name = "statistics", method = MethodType.SETDATA)
     void setStatistics(Map<String, Long> statistics);
 
+    @TypedColumn(name = "protected", method = MethodType.GETCOLUMN, fromVersion = "7.14.0")
+    Column<GenericTableSchema, Set<Boolean>> getProtectedColumn();
+
+    @TypedColumn(name = "protected", method = MethodType.SETDATA, fromVersion = "7.14.0")
+    void setProtected(Set<Boolean> fakeBridge);
+
     @TypedColumn(name = "other_config", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();
 

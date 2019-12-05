@@ -125,7 +125,7 @@ public class TransactionInvokerImplTest {
         final ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         invoker.recordPendingTransaction(command, transaction);
 
-        List<ReadWriteTransaction> testPendingTransactions = getInternalState(invoker, "pendingTransactions");
+        Queue<ReadWriteTransaction> testPendingTransactions = getInternalState(invoker, "pendingTransactions");
         assertEquals(1, testPendingTransactions.size());
         assertTrue(testPendingTransactions.contains(transaction));
 

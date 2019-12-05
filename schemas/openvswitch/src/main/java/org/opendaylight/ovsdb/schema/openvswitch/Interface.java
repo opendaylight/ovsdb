@@ -218,6 +218,12 @@ public interface Interface extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name = "mtu", method = MethodType.SETDATA, fromVersion = "1.0.6")
     void setMtu(Set<Long> mtu);
 
+    @TypedColumn(name = "mtu_request", method = MethodType.GETCOLUMN, fromVersion = "7.14.0")
+    Column<GenericTableSchema, Set<Long>> getMtuRequestColumn();
+
+    @TypedColumn(name = "mtu_request", method = MethodType.SETDATA, fromVersion = "7.14.0")
+    void setMtuReuqest(Set<Long> mtuRequest);
+
     @TypedColumn(name = "error", method = MethodType.GETCOLUMN, fromVersion = "7.7.0")
     Column<GenericTableSchema, Set<String>> getErrorColumn();
 

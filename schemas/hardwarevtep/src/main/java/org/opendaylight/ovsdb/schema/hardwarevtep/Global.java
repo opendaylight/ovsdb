@@ -18,6 +18,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 @TypedTable(name = "Global", database = "hardware_vtep", fromVersion = "1.0.0")
+// FIXME: rename this to HardwareVtep for consistency
 public interface Global extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name = "managers", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
@@ -31,7 +32,6 @@ public interface Global extends TypedBaseTable<GenericTableSchema> {
 
     @TypedColumn(name = "switches", method = MethodType.SETDATA, fromVersion = "1.0.0")
     void setSwitches(Set<UUID> switches);
-
 
     @TypedColumn(name = "other_config", method = MethodType.GETCOLUMN, fromVersion = "1.7.0")
     Column<GenericTableSchema, Map<String, String>> getOtherConfigColumn();

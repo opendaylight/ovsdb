@@ -24,7 +24,8 @@ import org.opendaylight.ovsdb.lib.schema.typed.MethodDispatch.Invoker;
  * Theory of operation: we have a set of Invoker, which are indexed by method and point to implementations we should
  * be invoking. This mapping is data-invariant, end hence we allow rebiding to a different row (which may not be null).
  */
-final class TypedRowInvocationHandler implements InvocationHandler {
+// FIXME: okay, 'public' and 'InvocationHandler' do not mix well
+public final class TypedRowInvocationHandler implements InvocationHandler {
 
     private final @NonNull ImmutableMap<Method, Invoker> invokers;
     private final @NonNull String tableName;

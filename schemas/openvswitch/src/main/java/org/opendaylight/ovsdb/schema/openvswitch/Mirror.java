@@ -63,6 +63,12 @@ public interface Mirror extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name = "output_vlan", method = MethodType.SETDATA, fromVersion = "1.0.0")
     void setOutputVlan(Set<Long> outputVlan);
 
+    @TypedColumn(name = "snaplen", method = MethodType.GETCOLUMN, fromVersion = "7.13.0")
+    Column<GenericTableSchema, Set<Long>> getSnaplenColumn();
+
+    @TypedColumn(name = "snaplen", method = MethodType.SETDATA, fromVersion = "7.13.0")
+    void setSnaplen(Set<Long> snaplen);
+
     @TypedColumn(name = "statistics", method = MethodType.GETCOLUMN, fromVersion = "6.4.0")
     Column<GenericTableSchema, Map<String, Long>> getStatisticsColumn();
 

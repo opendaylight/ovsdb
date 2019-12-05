@@ -45,6 +45,12 @@ public interface Port extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name = "trunks", method = MethodType.SETDATA, fromVersion = "1.0.0")
     void setTrunks(Set<Long> trunks);
 
+    @TypedColumn(name = "cvlans", method = MethodType.GETCOLUMN, fromVersion = "7.15.0")
+    Column<GenericTableSchema, Set<Long>> getCustomerVlansColumn();
+
+    @TypedColumn(name = "cvlans", method = MethodType.SETDATA, fromVersion = "7.15.0")
+    void setCustomerVlans(Set<Long> cvlans);
+
     @TypedColumn(name = "tag", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     Column<GenericTableSchema, Set<Long>> getTagColumn();
 

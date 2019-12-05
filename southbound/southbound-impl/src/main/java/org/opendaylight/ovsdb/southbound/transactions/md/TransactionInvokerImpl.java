@@ -13,10 +13,13 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -47,7 +50,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     @GuardedBy("this")
     private final Map<ReadWriteTransaction, TransactionCommand> transactionToCommand = new HashMap<>();
     @GuardedBy("this")
-    private final List<ReadWriteTransaction> pendingTransactions = new ArrayList<>();
+    private final Queue<ReadWriteTransaction> pendingTransactions = new ArrayDeque<>();
 
     private BindingTransactionChain chain;
 
@@ -135,10 +138,18 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         AsyncTransaction<?, ?> transaction = failedTransactionQueue.poll();
         List<TransactionCommand> commands = new ArrayList<>();
         if (transaction != null) {
-            int index = pendingTransactions.lastIndexOf(transaction);
-            for (ReadWriteTransaction tx: pendingTransactions.subList(index, pendingTransactions.size() - 1)) {
-                commands.add(transactionToCommand.get(tx));
+            // Process all pending transactions, looking for the failed one...
+            final Iterator<ReadWriteTransaction> it = pendingTransactions.iterator();
+            while (it.hasNext()) {
+                final ReadWriteTransaction current = it.next();
+                if (transaction.equals(current)) {
+                    // .. collect the failed transaction and all remaining pending transactions
+                    commands.add(transactionToCommand.get(current));
+                    it.forEachRemaining(tx -> commands.add(transactionToCommand.get(tx)));
+                    break;
+                }
             }
+
             resetTransactionQueue();
         }
         return commands;

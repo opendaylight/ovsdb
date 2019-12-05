@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * or a device function. This class exposes {@link #bindToSchema(TypedDatabaseSchema)}, which will construct an
  * immutable mapping between a Method and its invocation handler.
  */
-final class MethodDispatch {
+public final class MethodDispatch {
     abstract static class Invoker {
 
         abstract Object invokeMethod(Row<GenericTableSchema> row, Object proxy, Object[] args);
@@ -244,7 +244,7 @@ final class MethodDispatch {
         this.prototypes = builder.build();
     }
 
-    static MethodDispatch forTarget(final Class<?> target) {
+    public static MethodDispatch forTarget(final Class<? extends TypedBaseTable<?>> target) {
         return CACHE.getUnchecked(target);
     }
 

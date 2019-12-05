@@ -400,7 +400,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         reconciliationManager.dequeue(task);
     }
 
-    public void stopBridgeConfigReconciliationIfActive(final InstanceIdentifier<?> iid) {
+    public void stopBridgeConfigReconciliationIfActive(final InstanceIdentifier<Node> iid) {
         final ReconciliationTask task =
                 new BridgeConfigReconciliationTask(reconciliationManager, this, iid, null, instanceIdentifierCodec);
         reconciliationManager.dequeue(task);

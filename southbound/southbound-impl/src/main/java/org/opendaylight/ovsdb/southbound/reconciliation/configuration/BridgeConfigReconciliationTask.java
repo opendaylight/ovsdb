@@ -56,19 +56,18 @@ import org.slf4j.LoggerFactory;
  * Created by Vinh Nguyen (vinh.nguyen@hcl.com) on 3/21/16.
  */
 public class BridgeConfigReconciliationTask extends ReconciliationTask {
-
     private static final Logger LOG = LoggerFactory.getLogger(BridgeConfigReconciliationTask.class);
+
     private final OvsdbConnectionInstance connectionInstance;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
     public BridgeConfigReconciliationTask(final ReconciliationManager reconciliationManager,
-            final OvsdbConnectionManager connectionManager, final InstanceIdentifier<?> nodeIid,
+            final OvsdbConnectionManager connectionManager, final InstanceIdentifier<Node> nodeIid,
             final OvsdbConnectionInstance connectionInstance, final InstanceIdentifierCodec instanceIdentifierCodec) {
         super(reconciliationManager, connectionManager, nodeIid, null);
         this.connectionInstance = connectionInstance;
         this.instanceIdentifierCodec = instanceIdentifierCodec;
     }
-
 
     @Override
     public boolean reconcileConfiguration(final OvsdbConnectionManager connectionManagerOfDevice) {
@@ -212,7 +211,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
         return true;
     }
 
-    private Map<InstanceIdentifier<?>, DataObject> extractBridgeConfigurationChanges(
+    private static Map<InstanceIdentifier<?>, DataObject> extractBridgeConfigurationChanges(
             final Node bridgeNode, final OvsdbBridgeAugmentation ovsdbBridge) {
         Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
         final InstanceIdentifier<Node> bridgeNodeIid =
@@ -290,7 +289,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
         return 0;
     }
 
-    private List<String> getNodeIdForBridges(final String nodeIdVal, final List<String> bridgeList) {
+    private static List<String> getNodeIdForBridges(final String nodeIdVal, final List<String> bridgeList) {
         List<String> nodeIdBridgeList = new ArrayList<>();
         for (String bridge : bridgeList) {
             String bridgeNodeIid = new StringBuilder().append(nodeIdVal)

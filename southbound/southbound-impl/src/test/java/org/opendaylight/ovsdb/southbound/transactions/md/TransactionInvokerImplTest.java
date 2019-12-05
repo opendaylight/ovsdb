@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
@@ -125,7 +124,7 @@ public class TransactionInvokerImplTest {
         final ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         invoker.recordPendingTransaction(command, transaction);
 
-        List<ReadWriteTransaction> testPendingTransactions = getInternalState(invoker, "pendingTransactions");
+        Queue<ReadWriteTransaction> testPendingTransactions = getInternalState(invoker, "pendingTransactions");
         assertEquals(1, testPendingTransactions.size());
         assertTrue(testPendingTransactions.contains(transaction));
 

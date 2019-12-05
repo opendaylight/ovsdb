@@ -122,4 +122,18 @@ public interface OpenVSwitch extends TypedBaseTable<GenericTableSchema> {
     @TypedColumn(name = "iface_types", method = MethodType.SETDATA, fromVersion = "7.12.1")
     @SuppressWarnings("checkstyle:ParameterName")
     void setIfaceTypes(Set<String> iface_types);
+
+    @TypedColumn(name = "dpdk_initialized", method = MethodType.GETCOLUMN, fromVersion = "7.16.0")
+    Column<GenericTableSchema, Set<Boolean>> getDpdkInitializedColumn();
+
+    @TypedColumn(name = "dpdk_initialized", method = MethodType.SETDATA, fromVersion = "7.16.0")
+    @SuppressWarnings("checkstyle:ParameterName")
+    void setDpdkInitialized(Set<Boolean> dpdk_initialized);
+
+    @TypedColumn(name = "dpdk_version", method = MethodType.GETCOLUMN, fromVersion = "7.16.0")
+    Column<GenericTableSchema, Set<String>> getDpdkVersionColumn();
+
+    @TypedColumn(name = "dpdk_version", method = MethodType.SETDATA, fromVersion = "7.16.0")
+    @SuppressWarnings("checkstyle:ParameterName")
+    void setDpdkVersion(Set<String> dpdk_version);
 }

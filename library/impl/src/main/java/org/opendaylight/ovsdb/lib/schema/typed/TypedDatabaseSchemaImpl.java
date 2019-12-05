@@ -25,13 +25,14 @@ import org.opendaylight.ovsdb.lib.schema.ForwardingDatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 
 final class TypedDatabaseSchemaImpl extends ForwardingDatabaseSchema implements TypedDatabaseSchema {
-    private final LoadingCache<Class<?>, TypedRowInvocationHandler> handlers = CacheBuilder.newBuilder()
-            .weakKeys().weakValues().build(new CacheLoader<Class<?>, TypedRowInvocationHandler>() {
-                @Override
-                public TypedRowInvocationHandler load(final Class<?> key) {
-                    return MethodDispatch.forTarget(key).bindToSchema(TypedDatabaseSchemaImpl.this);
-                }
-            });
+    private final LoadingCache<Class<? extends TypedBaseTable<?>>, TypedRowInvocationHandler> handlers =
+            CacheBuilder.newBuilder().weakKeys().weakValues()
+                .build(new CacheLoader<Class<? extends TypedBaseTable<?>>, TypedRowInvocationHandler>() {
+                    @Override
+                    public TypedRowInvocationHandler load(final Class<? extends TypedBaseTable<?>> key) {
+                        return MethodDispatch.forTarget(key).bindToSchema(TypedDatabaseSchemaImpl.this);
+                    }
+                });
 
     private final DatabaseSchema delegate;
 

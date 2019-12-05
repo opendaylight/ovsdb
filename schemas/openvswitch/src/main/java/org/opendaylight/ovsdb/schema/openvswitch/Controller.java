@@ -24,6 +24,12 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 @TypedTable(name = "Controller", database = "Open_vSwitch", fromVersion = "1.0.0")
 public interface Controller extends TypedBaseTable<GenericTableSchema> {
 
+    @TypedColumn(name = "type", method = MethodType.GETCOLUMN, fromVersion = "8.0.0")
+    Column<GenericTableSchema, Set<String>> getTypeColumn();
+
+    @TypedColumn(name = "type", method = MethodType.SETDATA, fromVersion = "8.0.0")
+    void setType(Set<String> type);
+
     @TypedColumn(name = "target", method = MethodType.GETCOLUMN, fromVersion = "1.0.0")
     Column<GenericTableSchema, String> getTargetColumn();
 

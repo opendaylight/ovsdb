@@ -390,7 +390,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     }
 
-    public void stopConnectionReconciliationIfActive(final InstanceIdentifier<?> iid,
+    public void stopConnectionReconciliationIfActive(final InstanceIdentifier<Node> iid,
             final OvsdbNodeAugmentation ovsdbNode) {
         final ReconciliationTask task = new ConnectionReconciliationTask(
                 reconciliationManager,

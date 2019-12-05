@@ -16,7 +16,6 @@ import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,14 +29,14 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
 
     private final AtomicInteger connectionAttempt = new AtomicInteger(0);
 
-    public ConnectionReconciliationTask(ReconciliationManager reconciliationManager, OvsdbConnectionManager
-            connectionManager, InstanceIdentifier<?> nodeIid, DataObject configData) {
+    public ConnectionReconciliationTask(final ReconciliationManager reconciliationManager,
+            final OvsdbConnectionManager connectionManager, final InstanceIdentifier<Node> nodeIid,
+            final OvsdbNodeAugmentation configData) {
         super(reconciliationManager, connectionManager, nodeIid, configData);
-
     }
 
     @Override
-    public boolean reconcileConfiguration(OvsdbConnectionManager connectionManagerOfDevice) {
+    public boolean reconcileConfiguration(final OvsdbConnectionManager connectionManagerOfDevice) {
         boolean result = false;
         connectionAttempt.incrementAndGet();
         InstanceIdentifier<Node> ndIid = (InstanceIdentifier<Node>) nodeIid;
@@ -61,7 +60,7 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
     }
 
     @Override
-    public void doRetry(boolean wasLastAttemptSuccessful) {
+    public void doRetry(final boolean wasLastAttemptSuccessful) {
 
         if (!wasLastAttemptSuccessful && connectionAttempt.get() <= MAX_ATTEMPT) {
             reconciliationManager.enqueueForRetry(ConnectionReconciliationTask.this);

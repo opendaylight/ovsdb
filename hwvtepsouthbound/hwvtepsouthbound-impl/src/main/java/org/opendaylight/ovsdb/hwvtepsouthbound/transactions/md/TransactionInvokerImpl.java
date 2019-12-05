@@ -43,8 +43,6 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private final DataBroker db;
     private final BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
     private final BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
-    private final BlockingQueue<ReadWriteTransaction> successfulTransactionQueue =
-            new LinkedBlockingQueue<>(QUEUE_SIZE);
     private final ExecutorService executor;
 
     private Map<ReadWriteTransaction,TransactionCommand> transactionToCommand = new HashMap<>();
@@ -87,9 +85,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     @Override
     public void run() {
         while (true) {
-            forgetSuccessfulTransactions();
-
-            List<TransactionCommand> commands = null;
+            final List<TransactionCommand> commands;
             try {
                 commands = extractCommands();
             } catch (InterruptedException e) {
@@ -100,26 +96,25 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
             try {
                 while (commandIterator.hasNext()) {
                     TransactionCommand command = commandIterator.next();
-                    final ReadWriteTransaction transaction = chain.newReadWriteTransaction();
-                    transactionInFlight = transaction;
-                    recordPendingTransaction(command, transaction);
-                    command.execute(transaction);
-                    ListenableFuture<Void> ft = transaction.submit();
-                    command.setTransactionResultFuture(ft);
-                    Futures.addCallback(ft, new FutureCallback<Void>() {
-                        @Override
-                        public void onSuccess(final Void result) {
-                            if (!successfulTransactionQueue.offer(transaction)) {
-                                LOG.error("successfulTransactionQueue is full (size: {}) - could not offer {}",
-                                        successfulTransactionQueue.size(), transaction);
+                    synchronized (this) {
+                        final ReadWriteTransaction transaction = chain.newReadWriteTransaction();
+                        transactionInFlight = transaction;
+                        recordPendingTransaction(command, transaction);
+                        command.execute(transaction);
+                        ListenableFuture<Void> ft = transaction.submit();
+                        command.setTransactionResultFuture(ft);
+                        Futures.addCallback(ft, new FutureCallback<Void>() {
+                            @Override
+                            public void onSuccess(final Void result) {
+                                forgetSuccessfulTransaction(transaction);
                             }
-                        }
 
-                        @Override
-                        public void onFailure(final Throwable throwable) {
-                            // NOOP - handled by failure of transaction chain
-                        }
-                    }, MoreExecutors.directExecutor());
+                            @Override
+                            public void onFailure(final Throwable throwable) {
+                                // NOOP - handled by failure of transaction chain
+                            }
+                        }, MoreExecutors.directExecutor());
+                    }
                 }
                 transactionInFlight = null;
             } catch (IllegalStateException e) {
@@ -142,7 +137,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         }
     }
 
-    private List<TransactionCommand> extractResubmitCommands() {
+    private synchronized List<TransactionCommand> extractResubmitCommands() {
         AsyncTransaction<?, ?> transaction = failedTransactionQueue.poll();
         List<TransactionCommand> commands = new ArrayList<>();
         if (transaction != null) {
@@ -171,10 +166,14 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         pendingTransactions = new ArrayList<>();
         transactionToCommand = new HashMap<>();
         failedTransactionQueue.clear();
-        successfulTransactionQueue.clear();
     }
 
-    private void recordPendingTransaction(final TransactionCommand command,
+    synchronized void forgetSuccessfulTransaction(final ReadWriteTransaction transaction) {
+        pendingTransactions.remove(transaction);
+        transactionToCommand.remove(transaction);
+    }
+
+    private synchronized void recordPendingTransaction(final TransactionCommand command,
             final ReadWriteTransaction transaction) {
         transactionToCommand.put(transaction, command);
         pendingTransactions.add(transaction);
@@ -197,15 +196,6 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         result.add(command);
         inputQueue.drainTo(result);
         return result;
-    }
-
-    private void forgetSuccessfulTransactions() {
-        ReadWriteTransaction transaction = successfulTransactionQueue.poll();
-        while (transaction != null) {
-            pendingTransactions.remove(transaction);
-            transactionToCommand.remove(transaction);
-            transaction = successfulTransactionQueue.poll();
-        }
     }
 
     @Override

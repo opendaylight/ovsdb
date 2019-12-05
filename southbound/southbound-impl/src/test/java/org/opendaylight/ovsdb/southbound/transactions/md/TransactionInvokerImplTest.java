@@ -5,13 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -142,7 +141,6 @@ public class TransactionInvokerImplTest {
             transactionToCommand);
         getField(TransactionInvokerImpl.class, "failedTransactionQueue").set(transactionInvokerImpl,
             failedTransactionQ);
-        getField(TransactionInvokerImpl.class, "successfulTransactionQueue").set(transactionInvokerImpl, successfulTxQ);
 
         Whitebox.invokeMethod(transactionInvokerImpl, "resetTransactionQueue");
         assertNotNull(Whitebox.getInternalState(transactionInvokerImpl, "pendingTransactions"));
@@ -193,27 +191,6 @@ public class TransactionInvokerImplTest {
         List<TransactionCommand> testResult = new ArrayList<>();
         testResult.add(command);
         assertEquals(testResult, Whitebox.invokeMethod(transactionInvokerImpl, "extractCommandsFromQueue"));
-    }
-
-    @Test
-    public void testForgetSuccessfulTransactions() throws Exception {
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        successfulTxQ.add(transaction);
-        pendingTransactions.add(transaction);
-        transactionToCommand.put(transaction, mock(TransactionCommand.class));
-        getField(TransactionInvokerImpl.class, "successfulTransactionQueue").set(transactionInvokerImpl, successfulTxQ);
-        getField(TransactionInvokerImpl.class, "pendingTransactions").set(transactionInvokerImpl, pendingTransactions);
-        getField(TransactionInvokerImpl.class, "transactionToCommand").set(transactionInvokerImpl,
-            transactionToCommand);
-
-        Whitebox.invokeMethod(transactionInvokerImpl, "forgetSuccessfulTransactions");
-
-        List<ReadWriteTransaction> testPendingTransactions = Whitebox.getInternalState(transactionInvokerImpl,
-                "pendingTransactions");
-        Map<ReadWriteTransaction, TransactionCommand> testTransactionToCommand = Whitebox
-                .getInternalState(transactionInvokerImpl, "transactionToCommand");
-        assertTrue(testPendingTransactions.isEmpty());
-        assertTrue(testTransactionToCommand.isEmpty());
     }
 
     @Test

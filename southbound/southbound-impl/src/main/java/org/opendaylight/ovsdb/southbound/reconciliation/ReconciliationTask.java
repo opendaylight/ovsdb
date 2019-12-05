@@ -7,13 +7,12 @@
  */
 package org.opendaylight.ovsdb.southbound.reconciliation;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
 import org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Abstract implementation of a reconciliation task. Each new type of
@@ -21,23 +20,17 @@ import org.slf4j.LoggerFactory;
  * and implement the abstract methods.
  */
 public abstract class ReconciliationTask implements Runnable {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ReconciliationTask.class);
-
     protected final ReconciliationManager reconciliationManager;
     protected final OvsdbConnectionManager connectionManager;
     protected final InstanceIdentifier<?> nodeIid;
     protected final DataObject configData;
 
-    protected ReconciliationTask(ReconciliationManager reconciliationManager, OvsdbConnectionManager connectionManager,
-                                 InstanceIdentifier<?> nodeIid,
-                                 DataObject configData) {
-        Preconditions.checkNotNull(reconciliationManager, "Reconciliation manager must not be null");
-        Preconditions.checkNotNull(connectionManager, "Connection manager must not be null");
-        Preconditions.checkNotNull(nodeIid, "Node Iid must not be null");
-        this.reconciliationManager = reconciliationManager;
-        this.connectionManager = connectionManager;
-        this.nodeIid = nodeIid;
+    protected ReconciliationTask(final ReconciliationManager reconciliationManager,
+                                 final OvsdbConnectionManager connectionManager,
+                                 final InstanceIdentifier<?> nodeIid, final DataObject configData) {
+        this.reconciliationManager = requireNonNull(reconciliationManager, "Reconciliation manager must not be null");
+        this.connectionManager = requireNonNull(connectionManager, "Connection manager must not be null");
+        this.nodeIid = requireNonNull(nodeIid, "Node Iid must not be null");
         this.configData = configData;
     }
 
@@ -95,7 +88,7 @@ public abstract class ReconciliationTask implements Runnable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -103,16 +96,14 @@ public abstract class ReconciliationTask implements Runnable {
             return false;
         }
 
-        ReconciliationTask that = (ReconciliationTask) obj;
-
-        return nodeIid.equals(that.nodeIid);
+        final ReconciliationTask other = (ReconciliationTask) obj;
+        return nodeIid.equals(other.nodeIid);
     }
 
     @Override
     public int hashCode() {
         return getClass().hashCode() + nodeIid.hashCode();
     }
-
 
     @Override
     public String toString() {

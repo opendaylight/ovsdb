@@ -15,190 +15,154 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.powermock.reflect.Whitebox.getField;
+import static org.powermock.reflect.Whitebox.getInternalState;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.powermock.reflect.Whitebox;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionInvokerImplTest {
+    @Mock
+    private BindingTransactionChain chain;
+    @Mock
+    private DataBroker db;
 
-    private static final int QUEUE_SIZE = 10000;
-    @Mock private BindingTransactionChain chain;
-    @Mock private DataBroker db;
-    private final BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
-    private final BlockingQueue<ReadWriteTransaction> successfulTxQ
-        = new LinkedBlockingQueue<>(QUEUE_SIZE);
-    private final BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQ
-        = new LinkedBlockingQueue<>(QUEUE_SIZE);
-    @Mock private ExecutorService executor;
-    @Mock private AtomicBoolean runTask;
-    private final Map<ReadWriteTransaction,TransactionCommand> transactionToCommand
-        = new HashMap<>();
-    private final List<ReadWriteTransaction> pendingTransactions = new ArrayList<>();
-    private TransactionInvokerImpl transactionInvokerImpl;
+    private final BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<>(10000);
 
     @Before
-    public void setUp() throws Exception {
-        transactionInvokerImpl = mock(TransactionInvokerImpl.class, Mockito.CALLS_REAL_METHODS);
-        getField(TransactionInvokerImpl.class, "chain").set(transactionInvokerImpl, chain);
-        getField(TransactionInvokerImpl.class, "db").set(transactionInvokerImpl, db);
-    }
-
-    @Test
-    public void testTransactionInvokerImpl() throws Exception {
-        getField(TransactionInvokerImpl.class, "inputQueue").set(transactionInvokerImpl, inputQueue);
-        when(db.createTransactionChain(any(TransactionChainListener.class)))
-                .thenReturn(mock(BindingTransactionChain.class));
-        TransactionInvokerImpl transactionInvokerImpl1 = new TransactionInvokerImpl(db);
-        verify(db).createTransactionChain(any(TransactionChainListener.class));
-        assertNotNull(Whitebox.getInternalState(transactionInvokerImpl1, "executor"));
-    }
-
-    @Test
-    public void testInvoke() throws Exception {
-        getField(TransactionInvokerImpl.class, "inputQueue").set(transactionInvokerImpl, inputQueue);
-        TransactionCommand command = mock(TransactionCommand.class);
-        transactionInvokerImpl.invoke(command);
-        BlockingQueue<TransactionCommand> testInputQueue = Whitebox.getInternalState(transactionInvokerImpl,
-                "inputQueue");
-        assertTrue(testInputQueue.contains(command));
-    }
-
-    @Test
-    public void testOnTransactionChainFailed() throws Exception {
-        getField(TransactionInvokerImpl.class, "failedTransactionQueue").set(transactionInvokerImpl,
-                failedTransactionQ);
-        AsyncTransaction<?, ?> transaction = mock(AsyncTransaction.class);
-        Throwable cause = mock(Throwable.class);
-        transactionInvokerImpl.onTransactionChainFailed(mock(TransactionChain.class), transaction, cause);
-        BlockingQueue<AsyncTransaction<?, ?>> testFailedTransactionQueue = Whitebox
-                .getInternalState(transactionInvokerImpl, "failedTransactionQueue");
-        assertTrue(testFailedTransactionQueue.contains(transaction));
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Test
-    public void testExtractResubmitCommands() throws Exception {
-        AsyncTransaction<?, ?> transaction = mock(ReadWriteTransaction.class);
-        failedTransactionQ.put(transaction);
-        getField(TransactionInvokerImpl.class, "failedTransactionQueue").set(transactionInvokerImpl,
-                failedTransactionQ);
-
-        AsyncTransaction tx1 = mock(ReadWriteTransaction.class);
-        AsyncTransaction tx2 = mock(ReadWriteTransaction.class);
-        pendingTransactions.add((ReadWriteTransaction) tx1);
-        pendingTransactions.add((ReadWriteTransaction) transaction);
-        pendingTransactions.add((ReadWriteTransaction) tx2);
-        getField(TransactionInvokerImpl.class, "pendingTransactions").set(transactionInvokerImpl,
-                pendingTransactions);
-
-        List<ReadWriteTransaction> transactions = new ArrayList<>();
-        transactions.add((ReadWriteTransaction) tx1);
-
-        TransactionCommand txCommand = mock(TransactionCommand.class);
-        transactionToCommand.put((ReadWriteTransaction) tx1, txCommand);
-        transactionToCommand.put((ReadWriteTransaction) tx2, txCommand);
-        transactionToCommand.put((ReadWriteTransaction) transaction, txCommand);
-        getField(TransactionInvokerImpl.class, "transactionToCommand").set(transactionInvokerImpl,
-                transactionToCommand);
-        doNothing().when(transactionInvokerImpl).resetTransactionQueue();
-
-        List<TransactionCommand> testCommands = new ArrayList<>();
-        testCommands.add(txCommand);
-
-        assertEquals(testCommands, Whitebox.invokeMethod(transactionInvokerImpl, "extractResubmitCommands"));
-    }
-
-    @Test
-    public void testResetTransactionQueue() throws Exception {
+    public void setUp() {
+        doReturn(chain).when(db).createTransactionChain(any(TransactionChainListener.class));
         doNothing().when(chain).close();
-        when(db.createTransactionChain(any(TransactionInvokerImpl.class))).thenReturn(chain);
-
-        failedTransactionQ.add(mock(AsyncTransaction.class));
-        getField(TransactionInvokerImpl.class, "pendingTransactions").set(transactionInvokerImpl, pendingTransactions);
-        getField(TransactionInvokerImpl.class, "transactionToCommand").set(transactionInvokerImpl,
-            transactionToCommand);
-        getField(TransactionInvokerImpl.class, "failedTransactionQueue").set(transactionInvokerImpl,
-            failedTransactionQ);
-
-        Whitebox.invokeMethod(transactionInvokerImpl, "resetTransactionQueue");
-        assertNotNull(Whitebox.getInternalState(transactionInvokerImpl, "pendingTransactions"));
-        assertNotNull(Whitebox.getInternalState(transactionInvokerImpl, "transactionToCommand"));
-        BlockingQueue<AsyncTransaction<?, ?>> testFailedTransactionQueue = Whitebox
-                .getInternalState(transactionInvokerImpl, "failedTransactionQueue");
-        assertEquals(0, testFailedTransactionQueue.size());
     }
 
     @Test
-    public void testRecordPendingTransaction() throws Exception {
-        TransactionCommand command = mock(TransactionCommand.class);
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        getField(TransactionInvokerImpl.class, "pendingTransactions").set(transactionInvokerImpl, pendingTransactions);
-        getField(TransactionInvokerImpl.class, "transactionToCommand").set(transactionInvokerImpl,
-            transactionToCommand);
-        Whitebox.invokeMethod(transactionInvokerImpl, "recordPendingTransaction", command, transaction);
+    public void testConstructor() throws InterruptedException {
+        try (TransactionInvokerImpl invoker = new TransactionInvokerImpl(db)) {
+            verify(db).createTransactionChain(any(TransactionChainListener.class));
+            assertNotNull(getInternalState(invoker, "executor"));
+        }
+    }
 
-        List<ReadWriteTransaction> testPendingTransactions = Whitebox.getInternalState(transactionInvokerImpl,
-                "pendingTransactions");
+    @Test
+    public void testInvoke() {
+        final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, new ArrayList<>());
+        final TransactionCommand command = mock(TransactionCommand.class);
+        invoker.invoke(command);
+
+        BlockingQueue<TransactionCommand> inputQueue = getInternalState(invoker, "inputQueue");
+        assertEquals(1, inputQueue.size());
+        assertTrue(inputQueue.contains(command));
+    }
+
+    @Test
+    public void testOnTransactionChainFailed() {
+        final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, new ArrayList<>());
+
+        final AsyncTransaction<?, ?> transaction = mock(AsyncTransaction.class);
+        invoker.onTransactionChainFailed(chain, transaction, new Throwable());
+
+        final Queue<?> failedQueue = getInternalState(invoker, "failedTransactionQueue");
+        assertEquals(1, failedQueue.size());
+        assertTrue(failedQueue.contains(transaction));
+    }
+
+    @Test
+    public void testExtractResubmitCommands() {
+        final ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        final ReadWriteTransaction tx1 = mock(ReadWriteTransaction.class);
+        final ReadWriteTransaction tx2 = mock(ReadWriteTransaction.class);
+
+        final List<ReadWriteTransaction> pendingTransactions = new ArrayList<>();
+        pendingTransactions.add(tx1);
+        pendingTransactions.add(transaction);
+        pendingTransactions.add(tx2);
+
+        final Map<ReadWriteTransaction,TransactionCommand> transactionToCommand = new HashMap<>();
+        final TransactionCommand txCommand = mock(TransactionCommand.class);
+        transactionToCommand.put(tx1, txCommand);
+        transactionToCommand.put(tx2, txCommand);
+        transactionToCommand.put(transaction, txCommand);
+
+        final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, pendingTransactions,
+            Collections.singletonList(transaction), transactionToCommand);
+
+        assertEquals(Collections.singletonList(txCommand), invoker.extractResubmitCommands());
+    }
+
+    @Test
+    public void testResetTransactionQueue() {
+        final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, Collections.emptyList(),
+            Collections.singletonList(mock(ReadWriteTransaction.class)), Collections.emptyMap());
+
+        invoker.resetTransactionQueue();
+
+        assertNotNull(getInternalState(invoker, "pendingTransactions"));
+        assertNotNull(getInternalState(invoker, "transactionToCommand"));
+        final Queue<?> failedTransactionQueue = getInternalState(invoker, "failedTransactionQueue");
+        assertEquals(0, failedTransactionQueue.size());
+    }
+
+    @Test
+    public void testRecordPendingTransaction() {
+        final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, Collections.emptyList());
+
+        final TransactionCommand command = mock(TransactionCommand.class);
+        final ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        invoker.recordPendingTransaction(command, transaction);
+
+        List<ReadWriteTransaction> testPendingTransactions = getInternalState(invoker, "pendingTransactions");
         assertEquals(1, testPendingTransactions.size());
+        assertTrue(testPendingTransactions.contains(transaction));
 
-        Map<ReadWriteTransaction, TransactionCommand> testTransactionToCommand = Whitebox
-                .getInternalState(transactionInvokerImpl, "transactionToCommand");
-        assertEquals(1, testTransactionToCommand.size());
+        assertEquals(Collections.singletonMap(transaction, command), getInternalState(invoker, "transactionToCommand"));
     }
 
     @Test
-    public void testExtractCommands() throws Exception {
-        List<TransactionCommand> commands = new ArrayList<>();
-        doReturn(commands).when(transactionInvokerImpl).extractResubmitCommands();
+    public void testExtractCommands() throws InterruptedException {
+        final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, Collections.emptyList());
 
-        List<TransactionCommand> resubmitCommands = new ArrayList<>();
-        resubmitCommands.add(mock(TransactionCommand.class));
-        doReturn(resubmitCommands).when(transactionInvokerImpl).extractCommandsFromQueue();
+        final TransactionCommand command = mock(TransactionCommand.class);
+        invoker.invoke(command);
 
-        List<TransactionCommand> testCommands = new ArrayList<>();
-        testCommands.addAll(resubmitCommands);
-
-        assertEquals(testCommands, Whitebox.invokeMethod(transactionInvokerImpl, "extractCommands"));
+        assertEquals(Collections.singletonList(command), invoker.extractCommands());
     }
 
     @Test
-    public void testExtractCommandsFromQueue() throws Exception {
-        TransactionCommand command = mock(TransactionCommand.class);
-        inputQueue.add(command);
-        getField(TransactionInvokerImpl.class, "inputQueue").set(transactionInvokerImpl, inputQueue);
-        List<TransactionCommand> testResult = new ArrayList<>();
-        testResult.add(command);
-        assertEquals(testResult, Whitebox.invokeMethod(transactionInvokerImpl, "extractCommandsFromQueue"));
+    public void testExtractCommandsFromQueue() throws InterruptedException {
+        final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, Collections.emptyList());
+
+        final TransactionCommand command = mock(TransactionCommand.class);
+        invoker.invoke(command);
+
+        assertEquals(Collections.singletonList(command), invoker.extractCommandsFromQueue());
     }
 
     @Test
-    public void testClose() throws Exception {
-        getField(TransactionInvokerImpl.class, "executor").set(transactionInvokerImpl, executor);
-        getField(TransactionInvokerImpl.class, "runTask").set(transactionInvokerImpl, runTask);
+    public void testClose() throws InterruptedException {
+        final ExecutorService executor = mock(ExecutorService.class);
         doNothing().when(executor).shutdown();
-        transactionInvokerImpl.close();
+
+        try (TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, executor)) {
+            // No-op, but invokes close
+        }
+
         verify(executor).shutdown();
     }
 }

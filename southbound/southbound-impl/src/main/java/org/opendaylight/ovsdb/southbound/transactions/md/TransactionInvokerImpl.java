@@ -13,6 +13,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,30 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("transaction-invoker-impl-%d").build();
         executor = Executors.newSingleThreadExecutor(threadFact);
         executor.execute(this);
+    }
+
+    @VisibleForTesting
+    TransactionInvokerImpl(final DataBroker db, final ExecutorService executor) {
+        this.db = db;
+        this.chain = db.createTransactionChain(this);
+        this.executor = executor;
+    }
+
+    @VisibleForTesting
+    TransactionInvokerImpl(final DataBroker db, final List<ReadWriteTransaction> pendingTransactions,
+            final List<ReadWriteTransaction> failedTransactions,
+            final Map<ReadWriteTransaction, TransactionCommand> transactionToCommand) {
+        this(db, (ExecutorService) null);
+
+        // Initialize state
+        this.pendingTransactions.addAll(pendingTransactions);
+        this.failedTransactionQueue.addAll(failedTransactions);
+        this.transactionToCommand.putAll(transactionToCommand);
+    }
+
+    @VisibleForTesting
+    TransactionInvokerImpl(final DataBroker db, final List<ReadWriteTransaction> pendingTransactions) {
+        this(db, pendingTransactions, Collections.emptyList(), Collections.emptyMap());
     }
 
     @Override
@@ -162,13 +187,15 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         transactionToCommand.remove(transaction);
     }
 
-    private synchronized void recordPendingTransaction(final TransactionCommand command,
+    @VisibleForTesting
+    synchronized void recordPendingTransaction(final TransactionCommand command,
             final ReadWriteTransaction transaction) {
         transactionToCommand.put(transaction, command);
         pendingTransactions.add(transaction);
     }
 
-    private List<TransactionCommand> extractCommands() throws InterruptedException {
+    @VisibleForTesting
+    List<TransactionCommand> extractCommands() throws InterruptedException {
         List<TransactionCommand> commands = extractResubmitCommands();
         commands.addAll(extractCommandsFromQueue());
         return commands;

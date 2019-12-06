@@ -17,6 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.powermock.reflect.Whitebox.getInternalState;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -81,25 +82,26 @@ public class TransactionInvokerImplTest {
 
     @Test
     public void testExtractResubmitCommands() {
-        final ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         final ReadWriteTransaction tx1 = mock(ReadWriteTransaction.class);
         final ReadWriteTransaction tx2 = mock(ReadWriteTransaction.class);
-
-        final List<ReadWriteTransaction> pendingTransactions = new ArrayList<>();
-        pendingTransactions.add(tx1);
-        pendingTransactions.add(transaction);
-        pendingTransactions.add(tx2);
+        final ReadWriteTransaction tx3 = mock(ReadWriteTransaction.class);
 
         final Map<ReadWriteTransaction,TransactionCommand> transactionToCommand = new HashMap<>();
-        final TransactionCommand txCommand = mock(TransactionCommand.class);
         transactionToCommand.put(tx1, mock(TransactionCommand.class));
-        transactionToCommand.put(tx2, mock(TransactionCommand.class));
-        transactionToCommand.put(transaction, txCommand);
+        final TransactionCommand cmd2 = mock(TransactionCommand.class);
+        transactionToCommand.put(tx2, cmd2);
+        final TransactionCommand cmd3 = mock(TransactionCommand.class);
+        transactionToCommand.put(tx3, cmd3);
 
-        final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, pendingTransactions,
-            Collections.singletonList(transaction), transactionToCommand);
+        final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db,
+            // Given pending transaction order ...
+            ImmutableList.of(tx1, tx2, tx3),
+            // .. if tx2 fails ...
+            Collections.singletonList(tx2),
+            transactionToCommand);
 
-        assertEquals(Collections.singletonList(txCommand), invoker.extractResubmitCommands());
+        // .. we want to replay tx2 and tx3
+        assertEquals(ImmutableList.of(cmd2, cmd3), invoker.extractResubmitCommands());
     }
 
     @Test

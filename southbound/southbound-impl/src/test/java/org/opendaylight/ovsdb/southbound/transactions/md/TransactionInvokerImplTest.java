@@ -17,6 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.powermock.reflect.Whitebox.getInternalState;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -91,15 +92,18 @@ public class TransactionInvokerImplTest {
         pendingTransactions.add(tx2);
 
         final Map<ReadWriteTransaction,TransactionCommand> transactionToCommand = new HashMap<>();
-        final TransactionCommand txCommand = mock(TransactionCommand.class);
         transactionToCommand.put(tx1, mock(TransactionCommand.class));
-        transactionToCommand.put(tx2, mock(TransactionCommand.class));
+
+        final TransactionCommand cmd2 = mock(TransactionCommand.class);
+        transactionToCommand.put(tx2, cmd2);
+
+        final TransactionCommand txCommand = mock(TransactionCommand.class);
         transactionToCommand.put(transaction, txCommand);
 
         final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, pendingTransactions,
             Collections.singletonList(transaction), transactionToCommand);
 
-        assertEquals(Collections.singletonList(txCommand), invoker.extractResubmitCommands());
+        assertEquals(ImmutableList.of(txCommand, cmd2), invoker.extractResubmitCommands());
     }
 
     @Test

@@ -50,8 +50,9 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     @GuardedBy("this")
     private final Queue<Entry<ReadWriteTransaction, TransactionCommand>> pendingTransactions = new ArrayDeque<>();
-
+    @GuardedBy("this")
     private BindingTransactionChain chain;
+
     //This is made volatile as it is accessed from uncaught exception handler thread also
     private volatile ReadWriteTransaction transactionInFlight = null;
     private Iterator<TransactionCommand> commandIterator = null;
@@ -213,9 +214,12 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     }
 
     @Override
-    public void close() throws Exception {
-        this.chain.close();
+    public void close() {
         this.executor.shutdown();
+
+        synchronized (this) {
+            this.chain.close();
+        }
     }
 
     @Override

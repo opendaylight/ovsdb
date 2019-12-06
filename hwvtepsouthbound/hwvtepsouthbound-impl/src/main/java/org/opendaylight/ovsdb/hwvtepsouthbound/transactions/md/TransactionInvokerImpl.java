@@ -12,12 +12,12 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -49,9 +49,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private final ExecutorService executor;
 
     @GuardedBy("this")
-    private final Map<ReadWriteTransaction,TransactionCommand> transactionToCommand = new HashMap<>();
-    @GuardedBy("this")
-    private final Queue<ReadWriteTransaction> pendingTransactions = new ArrayDeque<>();
+    private final Queue<Entry<ReadWriteTransaction, TransactionCommand>> pendingTransactions = new ArrayDeque<>();
 
     private BindingTransactionChain chain;
     //This is made volatile as it is accessed from uncaught exception handler thread also
@@ -149,13 +147,13 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
             AsyncTransaction<?, ?> transaction = failedTransactionQueue.poll();
             if (transaction != null) {
                 // Process all pending transactions, looking for the failed one...
-                final Iterator<ReadWriteTransaction> it = pendingTransactions.iterator();
+                final Iterator<Entry<ReadWriteTransaction, TransactionCommand>> it = pendingTransactions.iterator();
                 while (it.hasNext()) {
-                    final ReadWriteTransaction current = it.next();
-                    if (transaction.equals(current)) {
+                    final Entry<ReadWriteTransaction, TransactionCommand> current = it.next();
+                    if (transaction.equals(current.getKey())) {
                         // .. collect current and all remaining pending transactions
-                        commands.add(transactionToCommand.get(current));
-                        it.forEachRemaining(tx -> commands.add(transactionToCommand.get(tx)));
+                        commands.add(current.getValue());
+                        it.forEachRemaining(entry -> commands.add(entry.getValue()));
                         break;
                     }
                 }
@@ -175,19 +173,23 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         chain.close();
         chain = db.createTransactionChain(this);
         pendingTransactions.clear();
-        transactionToCommand.clear();
         failedTransactionQueue.clear();
     }
 
     synchronized void forgetSuccessfulTransaction(final ReadWriteTransaction transaction) {
-        pendingTransactions.remove(transaction);
-        transactionToCommand.remove(transaction);
+        Iterator<Entry<ReadWriteTransaction, TransactionCommand>> it = pendingTransactions.iterator();
+        while (it.hasNext()) {
+            final Entry<ReadWriteTransaction, TransactionCommand> entry = it.next();
+            if (transaction.equals(entry.getKey())) {
+                it.remove();
+                break;
+            }
+        }
     }
 
     private synchronized void recordPendingTransaction(final TransactionCommand command,
             final ReadWriteTransaction transaction) {
-        transactionToCommand.put(transaction, command);
-        pendingTransactions.add(transaction);
+        pendingTransactions.add(new SimpleImmutableEntry<>(transaction, command));
     }
 
     private List<TransactionCommand> extractCommands() throws InterruptedException {

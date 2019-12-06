@@ -17,6 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.powermock.reflect.Whitebox.getInternalState;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -99,7 +100,7 @@ public class TransactionInvokerImplTest {
         final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, pendingTransactions,
             Collections.singletonList(transaction), transactionToCommand);
 
-        assertEquals(Collections.singletonList(txCommand), invoker.extractResubmitCommands());
+        assertEquals(ImmutableList.of(txCommand, txCommand), invoker.extractResubmitCommands());
     }
 
     @Test

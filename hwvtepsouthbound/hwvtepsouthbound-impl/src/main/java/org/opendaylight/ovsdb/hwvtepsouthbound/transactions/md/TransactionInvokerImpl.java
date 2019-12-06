@@ -145,9 +145,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
             //This logic needs to be revisited. Is it ok to resubmit these things again ?
             //are these operations idempotent ?
             //Does the transaction chain execute n+1th if nth one threw error ?
-            List<ReadWriteTransaction> transactions =
-                    pendingTransactions.subList(index, pendingTransactions.size() - 1);
-            for (ReadWriteTransaction tx: transactions) {
+            for (ReadWriteTransaction tx : pendingTransactions.subList(index, pendingTransactions.size())) {
                 commands.add(transactionToCommand.get(tx));
             }
             resetTransactionQueue();

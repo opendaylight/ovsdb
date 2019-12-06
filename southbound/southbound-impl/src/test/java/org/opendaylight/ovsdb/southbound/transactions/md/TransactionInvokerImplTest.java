@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -18,11 +19,11 @@ import static org.mockito.Mockito.verify;
 import static org.powermock.reflect.Whitebox.getInternalState;
 
 import com.google.common.collect.ImmutableList;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import org.junit.Before;
@@ -85,36 +86,38 @@ public class TransactionInvokerImplTest {
         final ReadWriteTransaction tx1 = mock(ReadWriteTransaction.class);
         final ReadWriteTransaction tx2 = mock(ReadWriteTransaction.class);
         final ReadWriteTransaction tx3 = mock(ReadWriteTransaction.class);
-
-        final Map<ReadWriteTransaction,TransactionCommand> transactionToCommand = new HashMap<>();
-        transactionToCommand.put(tx1, mock(TransactionCommand.class));
+        final TransactionCommand cmd1 = mock(TransactionCommand.class);
         final TransactionCommand cmd2 = mock(TransactionCommand.class);
-        transactionToCommand.put(tx2, cmd2);
         final TransactionCommand cmd3 = mock(TransactionCommand.class);
-        transactionToCommand.put(tx3, cmd3);
 
         final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db,
             // Given pending transaction order ...
-            ImmutableList.of(tx1, tx2, tx3),
+            ImmutableList.of(entry(tx1, cmd1), entry(tx2, cmd2), entry(tx3, cmd3)),
             // .. if tx2 fails ...
-            Collections.singletonList(tx2),
-            transactionToCommand);
+            Collections.singletonList(tx2));
 
         // .. we want to replay tx2 and tx3
         assertEquals(ImmutableList.of(cmd2, cmd3), invoker.extractResubmitCommands());
     }
 
+    private static <K, V> Entry<K, V> entry(final K key, final V value) {
+        return new SimpleImmutableEntry<>(key, value);
+    }
+
     @Test
     public void testResetTransactionQueue() {
         final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, Collections.emptyList(),
-            Collections.singletonList(mock(ReadWriteTransaction.class)), Collections.emptyMap());
+            Collections.singletonList(mock(ReadWriteTransaction.class)));
 
         invoker.resetTransactionQueue();
 
-        assertNotNull(getInternalState(invoker, "pendingTransactions"));
-        assertNotNull(getInternalState(invoker, "transactionToCommand"));
-        final Queue<?> failedTransactionQueue = getInternalState(invoker, "failedTransactionQueue");
-        assertEquals(0, failedTransactionQueue.size());
+        assertEmpty(getInternalState(invoker, "pendingTransactions"));
+        assertEmpty(getInternalState(invoker, "failedTransactionQueue"));
+    }
+
+    private static void assertEmpty(final Collection<?> collection) {
+        assertNotNull(collection);
+        assertEquals(0, collection.size());
     }
 
     @Test
@@ -125,11 +128,10 @@ public class TransactionInvokerImplTest {
         final ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         invoker.recordPendingTransaction(command, transaction);
 
-        Queue<ReadWriteTransaction> testPendingTransactions = getInternalState(invoker, "pendingTransactions");
-        assertEquals(1, testPendingTransactions.size());
-        assertTrue(testPendingTransactions.contains(transaction));
-
-        assertEquals(Collections.singletonMap(transaction, command), getInternalState(invoker, "transactionToCommand"));
+        Queue<Entry<?, ?>> endingTransactions = getInternalState(invoker, "pendingTransactions");
+        assertEquals(1, endingTransactions.size());
+        assertSame(transaction, endingTransactions.element().getKey());
+        assertSame(command, endingTransactions.element().getValue());
     }
 
     @Test

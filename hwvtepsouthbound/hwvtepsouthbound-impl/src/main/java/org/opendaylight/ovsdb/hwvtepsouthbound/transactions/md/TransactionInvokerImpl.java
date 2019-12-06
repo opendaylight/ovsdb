@@ -99,26 +99,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
             commandIterator = commands.iterator();
             try {
                 while (commandIterator.hasNext()) {
-                    TransactionCommand command = commandIterator.next();
-                    synchronized (this) {
-                        final ReadWriteTransaction transaction = chain.newReadWriteTransaction();
-                        transactionInFlight = transaction;
-                        recordPendingTransaction(command, transaction);
-                        command.execute(transaction);
-                        ListenableFuture<Void> ft = transaction.submit();
-                        command.setTransactionResultFuture(ft);
-                        Futures.addCallback(ft, new FutureCallback<Void>() {
-                            @Override
-                            public void onSuccess(final Void result) {
-                                forgetSuccessfulTransaction(transaction);
-                            }
-
-                            @Override
-                            public void onFailure(final Throwable throwable) {
-                                // NOOP - handled by failure of transaction chain
-                            }
-                        }, MoreExecutors.directExecutor());
-                    }
+                    executeCommand(commandIterator.next());
                 }
                 transactionInFlight = null;
             } catch (IllegalStateException e) {
@@ -133,6 +114,26 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                 LOG.warn("Failed to process an update notification from OVS.", e);
             }
         }
+    }
+
+    private synchronized void executeCommand(final TransactionCommand command) {
+        final ReadWriteTransaction transaction = chain.newReadWriteTransaction();
+        transactionInFlight = transaction;
+        recordPendingTransaction(command, transaction);
+        command.execute(transaction);
+        ListenableFuture<Void> ft = transaction.submit();
+        command.setTransactionResultFuture(ft);
+        Futures.addCallback(ft, new FutureCallback<Void>() {
+            @Override
+            public void onSuccess(final Void result) {
+                forgetSuccessfulTransaction(transaction);
+            }
+
+            @Override
+            public void onFailure(final Throwable throwable) {
+                // NOOP - handled by failure of transaction chain
+            }
+        }, MoreExecutors.directExecutor());
     }
 
     private void offerFailedTransaction(final AsyncTransaction<?, ?> transaction) {

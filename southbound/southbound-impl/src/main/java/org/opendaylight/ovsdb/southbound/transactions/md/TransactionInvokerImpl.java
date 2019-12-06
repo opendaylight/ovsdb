@@ -51,7 +51,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     @GuardedBy("this")
     private final Queue<Entry<ReadWriteTransaction, TransactionCommand>> pendingTransactions = new ArrayDeque<>();
-
+    @GuardedBy("this")
     private BindingTransactionChain chain;
 
     public TransactionInvokerImpl(final DataBroker db) {
@@ -227,8 +227,12 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     @Override
     public void close() throws InterruptedException {
-        this.chain.close();
         this.executor.shutdown();
+
+        synchronized (this) {
+            this.chain.close();
+        }
+
         if (!this.executor.awaitTermination(1, TimeUnit.SECONDS)) {
             runTask.set(false);
             this.executor.shutdownNow();

@@ -92,8 +92,8 @@ public class TransactionInvokerImplTest {
 
         final Map<ReadWriteTransaction,TransactionCommand> transactionToCommand = new HashMap<>();
         final TransactionCommand txCommand = mock(TransactionCommand.class);
-        transactionToCommand.put(tx1, txCommand);
-        transactionToCommand.put(tx2, txCommand);
+        transactionToCommand.put(tx1, mock(TransactionCommand.class));
+        transactionToCommand.put(tx2, mock(TransactionCommand.class));
         transactionToCommand.put(transaction, txCommand);
 
         final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, pendingTransactions,

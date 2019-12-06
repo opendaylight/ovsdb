@@ -12,13 +12,13 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -49,9 +49,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private final AtomicBoolean runTask = new AtomicBoolean(true);
 
     @GuardedBy("this")
-    private final Map<ReadWriteTransaction, TransactionCommand> transactionToCommand = new HashMap<>();
-    @GuardedBy("this")
-    private final Queue<ReadWriteTransaction> pendingTransactions = new ArrayDeque<>();
+    private final Queue<Entry<ReadWriteTransaction, TransactionCommand>> pendingTransactions = new ArrayDeque<>();
 
     private BindingTransactionChain chain;
 
@@ -71,20 +69,20 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     }
 
     @VisibleForTesting
-    TransactionInvokerImpl(final DataBroker db, final List<ReadWriteTransaction> pendingTransactions,
-            final List<ReadWriteTransaction> failedTransactions,
-            final Map<ReadWriteTransaction, TransactionCommand> transactionToCommand) {
+    TransactionInvokerImpl(final DataBroker db,
+            final List<Entry<ReadWriteTransaction, TransactionCommand>> pendingTransactions,
+            final List<ReadWriteTransaction> failedTransactions) {
         this(db, (ExecutorService) null);
 
         // Initialize state
         this.pendingTransactions.addAll(pendingTransactions);
         this.failedTransactionQueue.addAll(failedTransactions);
-        this.transactionToCommand.putAll(transactionToCommand);
     }
 
     @VisibleForTesting
-    TransactionInvokerImpl(final DataBroker db, final List<ReadWriteTransaction> pendingTransactions) {
-        this(db, pendingTransactions, Collections.emptyList(), Collections.emptyMap());
+    TransactionInvokerImpl(final DataBroker db,
+            final List<Entry<ReadWriteTransaction, TransactionCommand>> pendingTransactions) {
+        this(db, pendingTransactions, Collections.emptyList());
     }
 
     @Override
@@ -166,13 +164,13 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         List<TransactionCommand> commands = new ArrayList<>();
         if (transaction != null) {
             // Process all pending transactions, looking for the failed one...
-            final Iterator<ReadWriteTransaction> it = pendingTransactions.iterator();
+            final Iterator<Entry<ReadWriteTransaction, TransactionCommand>> it = pendingTransactions.iterator();
             while (it.hasNext()) {
-                final ReadWriteTransaction current = it.next();
-                if (transaction.equals(current)) {
-                    // .. collect current and all remaining pending transactions
-                    commands.add(transactionToCommand.get(current));
-                    it.forEachRemaining(tx -> commands.add(transactionToCommand.get(tx)));
+                final Entry<ReadWriteTransaction, TransactionCommand> current = it.next();
+                if (transaction.equals(current.getKey())) {
+                    // .. collect current and all remaining pending transactions' values
+                    commands.add(current.getValue());
+                    it.forEachRemaining(entry -> commands.add(entry.getValue()));
                     break;
                 }
             }
@@ -187,20 +185,24 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         chain.close();
         chain = db.createTransactionChain(this);
         pendingTransactions.clear();
-        transactionToCommand.clear();
         failedTransactionQueue.clear();
     }
 
     synchronized void forgetSuccessfulTransaction(final ReadWriteTransaction transaction) {
-        pendingTransactions.remove(transaction);
-        transactionToCommand.remove(transaction);
+        Iterator<Entry<ReadWriteTransaction, TransactionCommand>> it = pendingTransactions.iterator();
+        while (it.hasNext()) {
+            final Entry<ReadWriteTransaction, TransactionCommand> entry = it.next();
+            if (transaction.equals(entry.getKey())) {
+                it.remove();
+                break;
+            }
+        }
     }
 
     @VisibleForTesting
     synchronized void recordPendingTransaction(final TransactionCommand command,
             final ReadWriteTransaction transaction) {
-        transactionToCommand.put(transaction, command);
-        pendingTransactions.add(transaction);
+        pendingTransactions.add(new SimpleImmutableEntry<>(transaction, command));
     }
 
     @VisibleForTesting

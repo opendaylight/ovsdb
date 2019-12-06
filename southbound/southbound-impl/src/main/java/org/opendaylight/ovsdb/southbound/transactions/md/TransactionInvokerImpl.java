@@ -116,39 +116,39 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
                 continue;
             }
 
-            ReadWriteTransaction transactionInFlight = null;
-            try {
-                for (TransactionCommand command: commands) {
-                    synchronized (this) {
-                        final ReadWriteTransaction transaction = chain.newReadWriteTransaction();
-                        transactionInFlight = transaction;
-                        recordPendingTransaction(command, transaction);
-                        command.execute(transaction);
-                        Futures.addCallback(transaction.submit(), new FutureCallback<Void>() {
-                            @Override
-                            public void onSuccess(final Void result) {
-                                forgetSuccessfulTransaction(transaction);
-                                command.onSuccess();
-                            }
+            commands.forEach(this::executeCommand);
+        }
+    }
 
-                            @Override
-                            public void onFailure(final Throwable throwable) {
-                                command.onFailure(throwable);
-                                // NOOP - handled by failure of transaction chain
-                            }
-                        }, MoreExecutors.directExecutor());
-                    }
+    private synchronized void executeCommand(final TransactionCommand command) {
+        ReadWriteTransaction transactionInFlight = null;
+        try {
+            final ReadWriteTransaction transaction = chain.newReadWriteTransaction();
+            transactionInFlight = transaction;
+            recordPendingTransaction(command, transaction);
+            command.execute(transaction);
+            Futures.addCallback(transaction.submit(), new FutureCallback<Void>() {
+                @Override
+                public void onSuccess(final Void result) {
+                    forgetSuccessfulTransaction(transaction);
+                    command.onSuccess();
                 }
-            } catch (IllegalStateException e) {
-                if (transactionInFlight != null) {
-                    // TODO: This method should distinguish exceptions on which the command should be
-                    // retried from exceptions on which the command should NOT be retried.
-                    // Then it should retry only the commands which should be retried, otherwise
-                    // this method will retry commands which will never be successful forever.
-                    offerFailedTransaction(transactionInFlight);
+
+                @Override
+                public void onFailure(final Throwable throwable) {
+                    command.onFailure(throwable);
+                    // NOOP - handled by failure of transaction chain
                 }
-                LOG.warn("Failed to process an update notification from OVS.", e);
+            }, MoreExecutors.directExecutor());
+        } catch (IllegalStateException e) {
+            if (transactionInFlight != null) {
+                // TODO: This method should distinguish exceptions on which the command should be
+                // retried from exceptions on which the command should NOT be retried.
+                // Then it should retry only the commands which should be retried, otherwise
+                // this method will retry commands which will never be successful forever.
+                offerFailedTransaction(transactionInFlight);
             }
+            LOG.warn("Failed to process an update notification from OVS.", e);
         }
     }
 

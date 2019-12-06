@@ -163,9 +163,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         List<TransactionCommand> commands = new ArrayList<>();
         if (transaction != null) {
             int index = pendingTransactions.lastIndexOf(transaction);
-            List<ReadWriteTransaction> transactions =
-                    pendingTransactions.subList(index, pendingTransactions.size() - 1);
-            for (ReadWriteTransaction tx: transactions) {
+            for (ReadWriteTransaction tx : pendingTransactions.subList(index, pendingTransactions.size())) {
                 commands.add(transactionToCommand.get(tx));
             }
             resetTransactionQueue();

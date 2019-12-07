@@ -26,14 +26,11 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.lib.storage.mdsal.TransactionComponent;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
-import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
-import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
@@ -69,26 +66,21 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
+public class OvsdbBridgeUpdateCommand extends TransactionComponent {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbBridgeUpdateCommand.class);
-    private final InstanceIdentifierCodec instanceIdentifierCodec;
-    private final Map<UUID,Bridge> updatedBridgeRows;
-    private final Map<UUID, Bridge> oldBridgeRows;
-    private final List<InstanceIdentifier<Node>> updatedBridges = new ArrayList<>();
 
-    public OvsdbBridgeUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
-        super(key,updates,dbSchema);
-        this.instanceIdentifierCodec = instanceIdentifierCodec;
-        updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
-        oldBridgeRows = TyperUtils.extractRowsOld(Bridge.class, getUpdates(), getDbSchema());
+    public OvsdbBridgeUpdateCommand() {
+        super(Bridge.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
+        Map<UUID, Bridge> updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
         if (updatedBridgeRows == null || updatedBridgeRows.isEmpty()) {
             return;
         }
+
+        Map<UUID, Bridge> oldBridgeRows = TyperUtils.extractRowsOld(Bridge.class, getUpdates(), getDbSchema());
 
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = SouthboundUtil.readNode(transaction, connectionIId);
@@ -96,14 +88,16 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             return;
         }
 
+        final List<InstanceIdentifier<Node>> updatedBridges = new ArrayList<>();
+
         for (Entry<UUID, Bridge> entry : updatedBridgeRows.entrySet()) {
             updateBridge(transaction, entry.getValue(), connectionIId);
         }
     }
 
     @VisibleForTesting
-    void updateBridge(ReadWriteTransaction transaction,
-            Bridge bridge, InstanceIdentifier<Node> connectionIId) {
+    void updateBridge(final ReadWriteTransaction transaction,
+            final Bridge bridge, final InstanceIdentifier<Node> connectionIId) {
         // Update the connection node to let it know it manages this bridge
         Node connectionNode = buildConnectionNode(bridge);
         transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
@@ -119,15 +113,15 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     }
 
     @VisibleForTesting
-    <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
-            List<InstanceIdentifier<T>> entryIids) {
+    <T extends DataObject> void deleteEntries(final ReadWriteTransaction transaction,
+            final List<InstanceIdentifier<T>> entryIids) {
         for (InstanceIdentifier<T> entryIid : entryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
         }
     }
 
     private List<InstanceIdentifier<BridgeOtherConfigs>> bridgeOtherConfigsToRemove(
-            InstanceIdentifier<Node> bridgeIid, Bridge bridge) {
+            final InstanceIdentifier<Node> bridgeIid, final Bridge bridge) {
         Preconditions.checkNotNull(bridgeIid);
         Preconditions.checkNotNull(bridge);
         List<InstanceIdentifier<BridgeOtherConfigs>> result = new ArrayList<>();
@@ -151,7 +145,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     }
 
     private List<InstanceIdentifier<BridgeExternalIds>> externalIdsToRemove(
-            InstanceIdentifier<Node> bridgeIid, Bridge bridge) {
+            final InstanceIdentifier<Node> bridgeIid, final Bridge bridge) {
         Preconditions.checkNotNull(bridgeIid);
         Preconditions.checkNotNull(bridge);
         List<InstanceIdentifier<BridgeExternalIds>> result = new ArrayList<>();
@@ -175,7 +169,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     }
 
     private List<InstanceIdentifier<ProtocolEntry>> protocolEntriesToRemove(
-            InstanceIdentifier<Node> bridgeIid, Bridge bridge) {
+            final InstanceIdentifier<Node> bridgeIid, final Bridge bridge) {
         Preconditions.checkNotNull(bridgeIid);
         Preconditions.checkNotNull(bridge);
         List<InstanceIdentifier<ProtocolEntry>> result = new ArrayList<>();
@@ -203,7 +197,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     }
 
     private Node buildConnectionNode(
-            Bridge bridge) {
+            final Bridge bridge) {
         //Update node with managed node reference
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
@@ -225,7 +219,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         return connectionNode.build();
     }
 
-    private Node buildBridgeNode(Bridge bridge) {
+    private Node buildBridgeNode(final Bridge bridge) {
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
         NodeId bridgeNodeId = getNodeId(bridge);
         bridgeNodeBuilder.setNodeId(bridgeNodeId);
@@ -249,7 +243,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         return bridgeNodeBuilder.build();
     }
 
-    private static void setAutoAttach(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
+    private static void setAutoAttach(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, final Bridge bridge) {
         try {
             if (bridge.getAutoAttachColumn() != null
                     && bridge.getAutoAttachColumn().getData() != null
@@ -264,17 +258,17 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setManagedBy(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder) {
+    private void setManagedBy(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder) {
         InstanceIdentifier<Node> connectionNodePath = getOvsdbConnectionInstance().getInstanceIdentifier();
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }
 
-    private static void setDataPathType(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
+    private static void setDataPathType(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, final Bridge bridge) {
         ovsdbBridgeAugmentationBuilder.setDatapathType(
                 SouthboundMapper.createDatapathType(bridge.getDatapathTypeColumn().getData()));
     }
 
-    private static void setFailMode(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
+    private static void setFailMode(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, final Bridge bridge) {
         if (bridge.getFailModeColumn() != null
                 && bridge.getFailModeColumn().getData() != null
                 && !bridge.getFailModeColumn().getData().isEmpty()) {
@@ -285,7 +279,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private static void setOtherConfig(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
+    private static void setOtherConfig(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, final Bridge bridge) {
         Map<String, String> otherConfigs = bridge
                 .getOtherConfigColumn().getData();
         if (otherConfigs != null && !otherConfigs.isEmpty()) {
@@ -304,7 +298,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private static void setExternalIds(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
+    private static void setExternalIds(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, final Bridge bridge) {
         Map<String, String> externalIds = bridge.getExternalIdsColumn()
                 .getData();
         if (externalIds != null && !externalIds.isEmpty()) {
@@ -323,22 +317,22 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private static void setProtocol(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
+    private static void setProtocol(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, final Bridge bridge) {
         final List<ProtocolEntry> protocols = SouthboundMapper.createMdsalProtocols(bridge);
         if (!protocols.isEmpty()) {
             ovsdbBridgeAugmentationBuilder.setProtocolEntry(protocols);
         }
     }
 
-    private static void setDataPath(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
+    private static void setDataPath(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, final Bridge bridge) {
         DatapathId dpid = SouthboundMapper.createDatapathId(bridge);
         if (dpid != null) {
             ovsdbBridgeAugmentationBuilder.setDatapathId(dpid);
         }
     }
 
-    private static void setStpEnalbe(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
-                              Bridge bridge) {
+    private static void setStpEnalbe(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
+                              final Bridge bridge) {
         if (bridge.getStpEnableColumn() != null) {
             Boolean stpEnable = bridge.getStpEnableColumn().getData();
             if (stpEnable != null) {
@@ -347,7 +341,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setOpenFlowNodeRef(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
+    private void setOpenFlowNodeRef(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, final Bridge bridge) {
         Map<UUID, Controller> updatedControllerRows =
                 TyperUtils.extractRowsUpdated(Controller.class, getUpdates(), getDbSchema());
         LOG.debug("setOpenFlowNodeRef: updatedControllerRows: {}", updatedControllerRows);
@@ -388,12 +382,12 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private InstanceIdentifier<Node> getInstanceIdentifier(Bridge bridge) {
+    private InstanceIdentifier<Node> getInstanceIdentifier(final Bridge bridge) {
         return SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
                 bridge);
     }
 
-    private NodeId getNodeId(Bridge bridge) {
+    private NodeId getNodeId(final Bridge bridge) {
         NodeKey nodeKey = getInstanceIdentifier(bridge).firstKeyOf(Node.class);
         return nodeKey.getNodeId();
     }
@@ -406,7 +400,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     }
 
     @Override
-    public void onFailure(Throwable throwable) {
+    public void onFailure(final Throwable throwable) {
         for (InstanceIdentifier<Node> updatedBridge : updatedBridges) {
             LOG.error("Failed to update bridge {} in operational datastore", updatedBridge);
         }

@@ -14,13 +14,11 @@ import java.util.List;
 import java.util.Map;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.lib.storage.mdsal.TransactionComponent;
 import org.opendaylight.ovsdb.schema.openvswitch.Manager;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
-import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
@@ -29,25 +27,21 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
-
-    private Map<UUID, OpenVSwitch> oldOpenVSwitchRows;
-    private Map<UUID, Manager> removedManagerRows;
-    private Map<UUID, OpenVSwitch> updatedOpenVSwitchRows;
-    private Map<UUID, Manager> updatedManagerRows;
-
-    public OvsdbManagersRemovedCommand(OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
-        super(key, updates, dbSchema);
-        updatedOpenVSwitchRows = TyperUtils.extractRowsUpdated(OpenVSwitch.class, getUpdates(), getDbSchema());
-        oldOpenVSwitchRows = TyperUtils.extractRowsOld(OpenVSwitch.class, getUpdates(), getDbSchema());
-        updatedManagerRows = TyperUtils.extractRowsUpdated(Manager.class, getUpdates(), getDbSchema());
-        removedManagerRows = TyperUtils.extractRowsRemoved(Manager.class,
-                getUpdates(), getDbSchema());
+public class OvsdbManagersRemovedCommand extends TransactionComponent {
+    public OvsdbManagersRemovedCommand() {
+        super(OpenVSwitch.class, Manager.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final ReadWriteTransaction transaction) {
+        Map<UUID, OpenVSwitch> updatedOpenVSwitchRows = TyperUtils.extractRowsUpdated(OpenVSwitch.class, getUpdates(),
+            getDbSchema());
+        Map<UUID, OpenVSwitch> oldOpenVSwitchRows = TyperUtils.extractRowsOld(OpenVSwitch.class, getUpdates(),
+            getDbSchema());
+        Map<UUID, Manager> updatedManagerRows = TyperUtils.extractRowsUpdated(Manager.class, getUpdates(),
+            getDbSchema());
+        Map<UUID, Manager> removedManagerRows = TyperUtils.extractRowsRemoved(Manager.class,
+                getUpdates(), getDbSchema());
         for (OpenVSwitch openVSwitch : updatedOpenVSwitchRows.values()) {
             InstanceIdentifier<Node> ovsdbNodeIid =
                     SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
@@ -56,8 +50,8 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
     }
 
     @VisibleForTesting
-    void deleteManagers(ReadWriteTransaction transaction,
-            List<InstanceIdentifier<ManagerEntry>> managerEntryIids) {
+    void deleteManagers(final ReadWriteTransaction transaction,
+            final List<InstanceIdentifier<ManagerEntry>> managerEntryIids) {
         for (InstanceIdentifier<ManagerEntry> managerEntryIid: managerEntryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, managerEntryIid);
         }
@@ -65,7 +59,7 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
 
     @VisibleForTesting
     List<InstanceIdentifier<ManagerEntry>> managerEntriesToRemove(
-            InstanceIdentifier<Node> ovsdbNodeIid, OpenVSwitch openVSwitch) {
+            final InstanceIdentifier<Node> ovsdbNodeIid, final OpenVSwitch openVSwitch) {
         Preconditions.checkNotNull(ovsdbNodeIid);
         Preconditions.checkNotNull(openVSwitch);
 
@@ -95,7 +89,7 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
         return result;
     }
 
-    private boolean checkIfManagerPresentInUpdatedManagersList(Manager removedManager) {
+    private boolean checkIfManagerPresentInUpdatedManagersList(final Manager removedManager) {
         for (Map.Entry<UUID, Manager> updatedManager : updatedManagerRows.entrySet()) {
             if (updatedManager.getValue().getTargetColumn().getData()
                     .equals(removedManager.getTargetColumn().getData())) {

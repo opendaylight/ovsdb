@@ -5,22 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
-import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
-import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -29,28 +21,26 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
+public class OvsdbPortRemoveCommand extends AbstractTransactionComponent {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbPortRemoveCommand.class);
 
-    private final InstanceIdentifierCodec instanceIdentifierCodec;
-
-    public OvsdbPortRemoveCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
-        super(key, updates, dbSchema);
-        this.instanceIdentifierCodec = instanceIdentifierCodec;
+    public OvsdbPortRemoveCommand() {
+        super(Port.class, Bridge.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
-        Collection<Port> portRemovedRows = TyperUtils.extractRowsRemoved(
-                Port.class, getUpdates(), getDbSchema()).values();
-        Map<UUID, Port> portUpdatedRows = TyperUtils.extractRowsUpdated(
-                Port.class, getUpdates(), getDbSchema());
-        Map<UUID,Bridge> bridgeUpdatedRows = TyperUtils.extractRowsUpdated(
-                Bridge.class, getUpdates(), getDbSchema());
-        Map<UUID,Bridge> bridgeUpdatedOldRows = TyperUtils.extractRowsOld(
-                Bridge.class, getUpdates(), getDbSchema());
-        for (Port port : portRemovedRows) {
+    public void execute(final OvsdbTransactionContext context) {
+        final Map<UUID, Port> portRemovedRows = context.getRemovedRows(Port.class);
+        if (portRemovedRows.isEmpty()) {
+            LOG.debug("No ports have been updated");
+            return;
+        }
+
+
+        Map<UUID, Port> portUpdatedRows = context.getUpdatedRows(Port.class);
+        Map<UUID,Bridge> bridgeUpdatedRows = context.getUpdatedRows(Bridge.class);
+        Map<UUID,Bridge> bridgeUpdatedOldRows = context.getOldRows(Bridge.class);
+        for (Port port : portRemovedRows.values()) {
             final String portName = port.getName();
             boolean isPortInUpdatedRows = portUpdatedRows.values()
                 .stream().anyMatch(updatedPort -> portName.equals(updatedPort.getName()));

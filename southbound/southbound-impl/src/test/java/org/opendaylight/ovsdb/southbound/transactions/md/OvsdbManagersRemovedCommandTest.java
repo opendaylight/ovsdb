@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.assertEquals;
@@ -29,10 +28,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.Manager;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
@@ -49,7 +46,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-
 @PrepareForTest({SouthboundMapper.class, OvsdbManagersRemovedCommand.class})
 @RunWith(PowerMockRunner.class)
 public class OvsdbManagersRemovedCommandTest {
@@ -63,18 +59,6 @@ public class OvsdbManagersRemovedCommandTest {
     @Before
     public void setUp() {
         ovsdbManagersRemovedCommand = PowerMockito.mock(OvsdbManagersRemovedCommand.class, Mockito.CALLS_REAL_METHODS);
-    }
-
-    @Test
-    public void testOvsdbManagersRemovedCommand() {
-        OvsdbConnectionInstance key = mock(OvsdbConnectionInstance.class);
-        TableUpdates updates = mock(TableUpdates.class);
-        DatabaseSchema dbSchema = mock(DatabaseSchema.class);
-        OvsdbManagersRemovedCommand ovsdbManagersRemovedCommand1 = new OvsdbManagersRemovedCommand(key, updates,
-                dbSchema);
-        assertEquals(key, Whitebox.getInternalState(ovsdbManagersRemovedCommand1, "key"));
-        assertEquals(updates, Whitebox.getInternalState(ovsdbManagersRemovedCommand1, "updates"));
-        assertEquals(dbSchema, Whitebox.getInternalState(ovsdbManagersRemovedCommand1, "dbSchema"));
     }
 
     @SuppressWarnings("unchecked")

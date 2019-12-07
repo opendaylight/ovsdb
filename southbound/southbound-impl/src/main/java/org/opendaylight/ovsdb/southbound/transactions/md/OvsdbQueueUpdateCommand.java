@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import com.google.common.base.Optional;
@@ -17,13 +16,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Queue;
-import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
-import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
@@ -44,27 +38,11 @@ import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
+public class OvsdbQueueUpdateCommand extends AbstractTransactionComponent {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbQueueUpdateCommand.class);
 
-    private final InstanceIdentifierCodec instanceIdentifierCodec;
-
-    private final Map<UUID, Queue> updatedQueueRows;
-    private final Map<UUID, Queue> oldQueueRows;
-
-    public OvsdbQueueUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
-        super(key, updates, dbSchema);
-        this.instanceIdentifierCodec = instanceIdentifierCodec;
-        updatedQueueRows = TyperUtils.extractRowsUpdated(Queue.class,getUpdates(), getDbSchema());
-        oldQueueRows = TyperUtils.extractRowsOld(Queue.class, getUpdates(), getDbSchema());
-    }
-
-    @Override
-    public void execute(ReadWriteTransaction transaction) {
-        if (updatedQueueRows != null && !updatedQueueRows.isEmpty()) {
-            updateQueue(transaction);
-        }
+    public OvsdbQueueUpdateCommand() {
+        super(Queue.class);
     }
 
     /**
@@ -76,12 +54,17 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
      * updates together and in other cases independently. This method here
      * assumes the latter.
      * </p>
-     *
-     * @param transaction the {@link ReadWriteTransaction}
      */
-    private void updateQueue(ReadWriteTransaction transaction) {
+    @Override
+    public void execute(final OvsdbTransactionContext context) {
+        final Map<UUID, Queue> updatedQueueRows= context.getUpdatedRows(Queue.class);
+        if (updatedQueueRows == null || updatedQueueRows.isEmpty()) {
+            LOG.debug("No updated rows, continuing");
+            return;
+        }
 
-        final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final Map<UUID, Queue> oldQueueRows = context.getOldRows(Queue.class);
+        final InstanceIdentifier<Node> nodeIId = context.getNode();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
         if (ovsdbNode.isPresent()) {
             for (Entry<UUID, Queue> entry : updatedQueueRows.entrySet()) {
@@ -102,14 +85,13 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
                 InstanceIdentifier<Queues> iid = nodeIId
                         .augmentation(OvsdbNodeAugmentation.class)
                         .child(Queues.class, queues.key());
-                transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                        iid, queues);
+                transaction.merge(LogicalDatastoreType.OPERATIONAL, iid, queues);
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    private String getQueueId(Queue queue) {
+    private String getQueueId(final Queue queue) {
         if (queue.getExternalIdsColumn() != null
                 && queue.getExternalIdsColumn().getData() != null) {
             if (queue.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
@@ -130,9 +112,9 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         return SouthboundConstants.QUEUE_URI_PREFIX + "://" + queue.getUuid().toString();
     }
 
-    private void setOtherConfig(ReadWriteTransaction transaction,
-            QueuesBuilder queuesBuilder, Queue oldQueue, Queue queue,
-            InstanceIdentifier<Node> nodeIId) {
+    private void setOtherConfig(final ReadWriteTransaction transaction,
+            final QueuesBuilder queuesBuilder, final Queue oldQueue, final Queue queue,
+            final InstanceIdentifier<Node> nodeIId) {
         Map<String, String> oldOtherConfigs = null;
         Map<String, String> otherConfigs = null;
 
@@ -150,9 +132,9 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void removeOldConfigs(ReadWriteTransaction transaction,
-            QueuesBuilder queuesBuilder, Map<String, String> oldOtherConfigs,
-            Queue queue, InstanceIdentifier<Node> nodeIId) {
+    private void removeOldConfigs(final ReadWriteTransaction transaction,
+            final QueuesBuilder queuesBuilder, final Map<String, String> oldOtherConfigs,
+            final Queue queue, final InstanceIdentifier<Node> nodeIId) {
         InstanceIdentifier<Queues> queueIId = nodeIId
                 .augmentation(OvsdbNodeAugmentation.class)
                 .child(Queues.class, queuesBuilder.build().key());
@@ -165,8 +147,8 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setNewOtherConfigs(QueuesBuilder queuesBuilder,
-            Map<String, String> otherConfig) {
+    private void setNewOtherConfigs(final QueuesBuilder queuesBuilder,
+            final Map<String, String> otherConfig) {
         List<QueuesOtherConfig> otherConfigList = new ArrayList<>();
         for (Entry<String, String> entry : otherConfig.entrySet()) {
             String otherConfigKey = entry.getKey();
@@ -179,9 +161,8 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         queuesBuilder.setQueuesOtherConfig(otherConfigList);
     }
 
-    private void setExternalIds(ReadWriteTransaction transaction,
-            QueuesBuilder queuesBuilder, Queue oldQueue, Queue queue,
-            InstanceIdentifier<Node> nodeIId) {
+    private static void setExternalIds(final ReadWriteTransaction transaction, final QueuesBuilder queuesBuilder,
+            final Queue oldQueue, final Queue queue, final InstanceIdentifier<Node> nodeIId) {
         Map<String, String> oldExternalIds = null;
         Map<String, String> externalIds = null;
 
@@ -199,9 +180,8 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void removeOldExternalIds(ReadWriteTransaction transaction,
-            QueuesBuilder queuesBuilder, Map<String, String> oldExternalIds,
-            Queue queue, InstanceIdentifier<Node> nodeIId) {
+    private static void removeOldExternalIds(final ReadWriteTransaction transaction, final QueuesBuilder queuesBuilder,
+            final Map<String, String> oldExternalIds, final Queue queue, final InstanceIdentifier<Node> nodeIId) {
         InstanceIdentifier<Queues> queueIId = nodeIId
                 .augmentation(OvsdbNodeAugmentation.class)
                 .child(Queues.class, queuesBuilder.build().key());
@@ -214,8 +194,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setNewExternalIds(QueuesBuilder queuesBuilder,
-            Map<String, String> externalIds) {
+    private static void setNewExternalIds(final QueuesBuilder queuesBuilder, final Map<String, String> externalIds) {
         List<QueuesExternalIds> externalIdsList = new ArrayList<>();
         for (Entry<String, String> entry : externalIds.entrySet()) {
             String extIdKey = entry.getKey();
@@ -227,5 +206,4 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         }
         queuesBuilder.setQueuesExternalIds(externalIdsList);
     }
-
 }

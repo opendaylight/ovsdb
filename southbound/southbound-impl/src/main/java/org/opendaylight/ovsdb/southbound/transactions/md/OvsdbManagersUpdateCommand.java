@@ -13,10 +13,7 @@ import java.util.List;
 import java.util.Map;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Manager;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
@@ -36,26 +33,22 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
+public class OvsdbManagersUpdateCommand extends AbstractTransactionComponent {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbManagersUpdateCommand.class);
 
-    private Map<UUID, Manager> updatedManagerRows;
-    private Map<UUID, OpenVSwitch> updatedOpenVSwitchRows;
-
-    public OvsdbManagersUpdateCommand(OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
-        super(key, updates, dbSchema);
-        updatedOpenVSwitchRows = TyperUtils.extractRowsUpdated(OpenVSwitch.class, getUpdates(), getDbSchema());
-        updatedManagerRows = TyperUtils.extractRowsUpdated(Manager.class,getUpdates(), getDbSchema());
+    public OvsdbManagersUpdateCommand() {
+        super(OpenVSwitch.class, Manager.class);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
+    public void execute(final OvsdbTransactionContext context) {
+        Map<UUID, Manager> updatedManagerRows = context.getUpdatedRows(Manager.class);
         if (updatedManagerRows != null && !updatedManagerRows.isEmpty()) {
-            Map<Uri, Manager> updatedManagerRowsWithUri = getUriManagerMap(updatedManagerRows);
+            Map<UUID, OpenVSwitch> updatedOpenVSwitchRows = context.getUpdatedRows(OpenVSwitch.class);
             if (updatedOpenVSwitchRows != null && !updatedOpenVSwitchRows.isEmpty()) {
                 updateManagers(transaction, updatedManagerRows, updatedOpenVSwitchRows);
             } else {
+                Map<Uri, Manager> updatedManagerRowsWithUri = getUriManagerMap(updatedManagerRows);
                 updateManagers(transaction, updatedManagerRowsWithUri);
             }
         }
@@ -76,9 +69,9 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
      * @param newUpdatedManagerRows updated {@link Manager} rows
      * @param newUpdatedOpenVSwitchRows updated {@link OpenVSwitch} rows
      */
-    private void updateManagers(ReadWriteTransaction transaction,
-                                  Map<UUID, Manager> newUpdatedManagerRows,
-                                  Map<UUID, OpenVSwitch> newUpdatedOpenVSwitchRows) {
+    private void updateManagers(final ReadWriteTransaction transaction,
+                                  final Map<UUID, Manager> newUpdatedManagerRows,
+                                  final Map<UUID, OpenVSwitch> newUpdatedOpenVSwitchRows) {
 
         for (Map.Entry<UUID, OpenVSwitch> ovsdbNodeEntry : newUpdatedOpenVSwitchRows.entrySet()) {
             final List<ManagerEntry> managerEntries =
@@ -108,8 +101,8 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
      * @param newUpdatedManagerRows updated {@link Manager} rows
 
      */
-    private void updateManagers(ReadWriteTransaction transaction,
-                                  Map<Uri, Manager> newUpdatedManagerRows) {
+    private void updateManagers(final ReadWriteTransaction transaction,
+                                  final Map<Uri, Manager> newUpdatedManagerRows) {
 
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, connectionIId);
@@ -135,7 +128,7 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
      * @param managerEntry the {@link ManagerEntry}
      * @return the {@link InstanceIdentifier}
      */
-    private InstanceIdentifier<ManagerEntry> getManagerEntryIid(ManagerEntry managerEntry) {
+    private InstanceIdentifier<ManagerEntry> getManagerEntryIid(final ManagerEntry managerEntry) {
 
         OvsdbConnectionInstance client = getOvsdbConnectionInstance();
         String nodeString = client.getNodeKey().getNodeId().getValue();
@@ -151,7 +144,7 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
                 .child(ManagerEntry.class, managerEntry.key());
     }
 
-    private Map<Uri, Manager> getUriManagerMap(Map<UUID,Manager> uuidManagerMap) {
+    private Map<Uri, Manager> getUriManagerMap(final Map<UUID,Manager> uuidManagerMap) {
         Map<Uri, Manager> uriManagerMap = new HashMap<>();
         for (Map.Entry<UUID, Manager> uuidManagerMapEntry : uuidManagerMap.entrySet()) {
             uriManagerMap.put(

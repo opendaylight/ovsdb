@@ -200,13 +200,11 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     private void deleteOperNodeAndReleaseOwnership(final OvsdbConnectionInstance ovsdbConnectionInstance) {
         ovsdbConnectionInstance.setHasDeviceOwnership(false);
-        final InstanceIdentifier nodeIid = ovsdbConnectionInstance.getInstanceIdentifier();
+        final InstanceIdentifier<Node> nodeIid = ovsdbConnectionInstance.getInstanceIdentifier();
         //remove the node from oper only if it has ownership
-        txInvoker.invoke(new OvsdbNodeRemoveCommand(ovsdbConnectionInstance, null, null) {
-
+        txInvoker.invoke(new OvsdbNodeRemoveCommand(nodeIid) {
             @Override
             public void onSuccess() {
-                super.onSuccess();
                 LOG.debug("Successfully removed node {} from oper", nodeIid);
                 //Giveup the ownership only after cleanup is done
                 unregisterEntityForOwnership(ovsdbConnectionInstance);
@@ -215,7 +213,6 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             @Override
             public void onFailure(final Throwable throwable) {
                 LOG.debug("Failed to remove node {} from oper", nodeIid);
-                super.onFailure(throwable);
                 unregisterEntityForOwnership(ovsdbConnectionInstance);
             }
         });
@@ -234,6 +231,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         // For connections from the controller to the ovs instance, the library doesn't call
         // this method for us
         if (client != null) {
+            // FIXME: 'firstIdentifierOf' here seems to be superfluous
             putInstanceIdentifier(ovsdbNode.getConnectionInfo(), iid.firstIdentifierOf(Node.class));
             OvsdbConnectionInstance ovsdbConnectionInstance = connectedButCallBacksNotRegistered(client);
             ovsdbConnectionInstance.setOvsdbNodeAugmentation(ovsdbNode);

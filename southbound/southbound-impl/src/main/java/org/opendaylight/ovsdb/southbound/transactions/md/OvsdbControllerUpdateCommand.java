@@ -14,10 +14,7 @@ import java.util.List;
 import java.util.Map;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
-import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
-import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
@@ -39,22 +36,17 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
+public class OvsdbControllerUpdateCommand extends AbstractTransactionComponent {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbControllerUpdateCommand.class);
 
-    private final Map<UUID, Controller> updatedControllerRows;
-    private final Map<UUID, Bridge> updatedBridgeRows;
-
-    public OvsdbControllerUpdateCommand(final OvsdbConnectionInstance key,
-            final TableUpdates updates, final DatabaseSchema dbSchema) {
-        super(key, updates, dbSchema);
-        updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
-        updatedControllerRows = TyperUtils.extractRowsUpdated(Controller.class,
-                getUpdates(), getDbSchema());
+    public OvsdbControllerUpdateCommand() {
+        super(Controller.class, Bridge.class);
     }
 
     @Override
-    public void execute(final ReadWriteTransaction transaction) {
+    public void execute(final OvsdbTransactionContext context) {
+        final Map<UUID, Bridge> updatedBridgeRows = context.getUpdatedRows(Bridge.class);
+        final Map<UUID, Controller> updatedControllerRows = context.getUpdatedRows(Controller.class);
         if (updatedControllerRows != null && !updatedControllerRows.isEmpty()) {
             if (updatedBridgeRows != null && !updatedBridgeRows.isEmpty()) {
                 updateController(transaction, updatedControllerRows, updatedBridgeRows);

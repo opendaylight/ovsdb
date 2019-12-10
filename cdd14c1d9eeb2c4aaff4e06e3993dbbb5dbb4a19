@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8e64b9b_f2f1a225",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/TransactionInvokerImpl.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2019-12-10T08:01:41Z",
+      "side": 1,
+      "message": "Will using Iterator(.hasNext() till we find failed one) over getting subList(using lastIndexOf to find the failed one) is better under case where pendingList size is huge and one of the last transactions in the pendingList has failed ??",
+      "range": {
+        "startLine": 169,
+        "startChar": 11,
+        "endLine": 170,
+        "endChar": 34
+      },
+      "revId": "cdd14c1d9eeb2c4aaff4e06e3993dbbb5dbb4a19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

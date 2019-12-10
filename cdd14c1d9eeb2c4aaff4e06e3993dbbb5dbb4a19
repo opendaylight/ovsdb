@@ -22,6 +22,30 @@
       "revId": "cdd14c1d9eeb2c4aaff4e06e3993dbbb5dbb4a19",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d29a53b4_47dda3d7",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/TransactionInvokerImpl.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2019-12-10T11:14:38Z",
+      "side": 1,
+      "message": "Well, transactions in a transaction chain complete in the order in which they are submitted. This is a critical insight.\n\nAs we are actively removing successful transactions outside of this thread, by the time this method is called all successful transactions will have been removed, hence the first failing transaction is really expected to be at the head of pendingTransactions -- making this certainly faster than the lastIndexOf/subList solution.\n\nFurthermore forgetSuccessfulTransaction() will end up always removing the head of the queue -- and if you compare the implementation of Collection.remove() in ArrayList and ArrayDeque, you will find this is a clear win.",
+      "parentUuid": "a8e64b9b_f2f1a225",
+      "range": {
+        "startLine": 169,
+        "startChar": 11,
+        "endLine": 170,
+        "endChar": 34
+      },
+      "revId": "cdd14c1d9eeb2c4aaff4e06e3993dbbb5dbb4a19",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

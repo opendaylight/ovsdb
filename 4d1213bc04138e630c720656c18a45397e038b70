@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8b87994_5684ab2f",
+        "filename": "library/impl/src/main/java/org/opendaylight/ovsdb/lib/impl/OvsdbConnectionService.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2019-12-11T11:55:14Z",
+      "side": 0,
+      "message": "the bossGroup and workerGroup are shutdown gracefully once we obtain serverChannel(or if there any Exception). But with these changes, there were not closed immediately and we are holding on them will karaf shutdown(close() Predestroy). I hope this need to be shutdown immediately after serverChannel is obtained.",
+      "range": {
+        "startLine": 376,
+        "startChar": 0,
+        "endLine": 379,
+        "endChar": 45
+      },
+      "revId": "4d1213bc04138e630c720656c18a45397e038b70",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

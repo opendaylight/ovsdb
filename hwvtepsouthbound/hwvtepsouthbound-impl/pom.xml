@@ -25,11 +25,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
        build failure. Please do not modify this unless you have a good reason. -->
   <name>ODL :: ovsdb :: ${project.artifactId}</name>
 
-  <properties>
-    <!-- FIXME: Workaround for https://issues.apache.org/jira/browse/ARIES-1923 -->
-    <maven.compiler.release>10</maven.compiler.release>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.osgi</groupId>

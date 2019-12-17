@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,6 +29,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.infrautils.diagstatus.DiagStatusService;
 import org.opendaylight.infrautils.diagstatus.ServiceState;
+import org.opendaylight.infrautils.ready.SystemReadyListener;
 import org.opendaylight.infrautils.ready.SystemReadyMonitor;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
@@ -53,7 +53,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
+public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topology>,
+        SystemReadyListener, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundProvider.class);
 
@@ -99,15 +100,11 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
                 bindingNormalizedNodeSerializer);
         this.systemReadyMonitor = systemReadyMonitor;
         LOG.info("SouthboundProvider ovsdbConnectionService Initialized");
+        ovsdbStatusProvider.reportStatus(ServiceState.STARTING, "OVSDB initialization in progress");
     }
 
-    /**
-     * Used by blueprint when starting the container.
-     */
-    @PostConstruct
     public void init() {
         LOG.info("SouthboundProvider Session Initiated");
-        ovsdbStatusProvider.reportStatus(ServiceState.STARTING, "OVSDB initialization in progress");
         this.txInvoker = new TransactionInvokerImpl(db);
         cm = new OvsdbConnectionManager(db, txInvoker, entityOwnershipService, ovsdbConnection,
                 instanceIdentifierCodec);
@@ -205,6 +202,12 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
             }
             ovsdbStatusProvider.reportStatus(ServiceState.OPERATIONAL, "OVSDB initialization complete");
         }
+    }
+
+    @Override
+    public void onSystemBootReady() throws Exception {
+        LOG.info("System is Ready. Open OVSDB port 6640 to accept Connections");
+        init();
     }
 
     private static class SouthboundPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {

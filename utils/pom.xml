@@ -24,6 +24,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
        build failure. Please do not modify this unless you have a good reason. -->
   <name>ODL :: ovsdb :: ${project.artifactId}</name>
 
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+    <maven.install.skip>true</maven.install.skip>
+  </properties>
+
   <modules>
     <module>config</module>
     <module>hwvtepsouthbound-utils</module>
@@ -34,26 +39,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>yang-utils</module>
     <module>odl-ovsdb-utils</module>
   </modules>
-
-<!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 
   <!--
       Maven Site Configuration

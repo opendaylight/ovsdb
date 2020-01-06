@@ -22,6 +22,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <name>${project.artifactId}</name> <!-- Used by Sonar to set project name -->
   <packaging>pom</packaging>
 
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+    <maven.install.skip>true</maven.install.skip>
+  </properties>
+
   <modules>
     <module>commons</module>
     <module>hwvtepsouthbound</module>
@@ -30,24 +35,4 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <module>southbound</module>
     <module>utils</module>
   </modules>
-
-  <!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>

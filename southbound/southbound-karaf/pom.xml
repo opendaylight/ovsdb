@@ -21,6 +21,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <name>ODL :: ovsdb :: ${project.artifactId}</name>
   <properties>
     <karaf.localFeature>odl-ovsdb-southbound-impl-ui</karaf.localFeature>
+    <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -50,19 +51,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <scope>runtime</scope>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <!-- DO NOT deploy the karaf artifact -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 
   <!--
       Maven Site Configuration

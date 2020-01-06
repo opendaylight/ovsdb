@@ -6,6 +6,7 @@ terms of the Eclipse Public License v1.0 which accompanies this distribution,
 and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
@@ -21,7 +22,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
        build failure. Please do not modify this unless you have a good reason. -->
   <name>ODL :: ovsdb :: ${project.artifactId}</name>
   <packaging>pom</packaging>
-  <modelVersion>4.0.0</modelVersion>
+
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+    <maven.install.skip>true</maven.install.skip>
+  </properties>
+
   <modules>
     <module>hwvtepsouthbound-api</module>
     <module>hwvtepsouthbound-impl</module>
@@ -30,24 +36,4 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <module>hwvtepsouthbound-artifacts</module>
     <module>hwvtepsouthbound-it</module>
   </modules>
-
-  <!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>

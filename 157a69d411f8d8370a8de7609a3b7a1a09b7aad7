@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "880603c4_ace286a4",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalState.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2020-01-07T11:40:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ed7a3470_2ade2893",
+      "range": {
+        "startLine": 48,
+        "startChar": 12,
+        "endLine": 48,
+        "endChar": 32
+      },
+      "revId": "157a69d411f8d8370a8de7609a3b7a1a09b7aad7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7885f8ae_3d9188c9",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2020-01-07T11:33:32Z",
       "side": 1,
       "message": "Explict closing not required",
+      "range": {
+        "startLine": 192,
+        "startChar": 12,
+        "endLine": 192,
+        "endChar": 32
+      },
+      "revId": "157a69d411f8d8370a8de7609a3b7a1a09b7aad7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9f0cfcd_24d12cc3",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2020-01-07T11:40:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7885f8ae_3d9188c9",
       "range": {
         "startLine": 192,
         "startChar": 12,

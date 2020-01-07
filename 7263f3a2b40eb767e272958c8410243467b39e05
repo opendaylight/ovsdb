@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9d8ab71d_2da410d6",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbOperGlobalListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2020-01-07T09:27:43Z",
+      "side": 1,
+      "message": "OK, will check on this how it can be shared. That will be in different patch",
+      "parentUuid": "11d2a202_a5339f38",
+      "revId": "7263f3a2b40eb767e272958c8410243467b39e05",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "67b42469_8a01fab9",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbOperGlobalListener.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2019-10-17T12:24:00Z",
       "side": 1,
       "message": "This is weird in a cache ;-).",
+      "revId": "7263f3a2b40eb767e272958c8410243467b39e05",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3c901aac_dc684b5c",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbOperGlobalListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2020-01-07T09:27:43Z",
+      "side": 1,
+      "message": "This is to handle one of the scenario that may happen in the 3 Node ODL clustered environment.\nSuppose the ODL is running in 3 Node Clustered, ie, ODL1, ODL2 \u0026 ODL3.\nCompute1 is connected to ODL3, and everthing is working fine at this point of time.\nIf the Compute1\u0027s ovsdb connection gets flapped, there are possiblity of Compute1 connecting\nto other ODL ex: ODL2.\nIn this case ODL3 will handle the disconnect event and deletes the Ovsdb node of this Compute1.\nAs it is connected to ODL2 , it will handle the connect event and adds Ovsdb node.\nIn ideal case the sequence of events processing is as :\n\t1. ODL3 handles the disconnects event and deletes the Ovsdb node from datastore\n\t2. ODL2 handles the connect event and adds the Ovsdb node to datastore.\nSuppose if there is a delay in the ODL3 for the processing of the Ovsdb node delete,\n\tThe ODL2 handles the connect event and adds the Ovsdb node to datastore first and \n\tthen the delete of Ovsdb node triggered from ODL3 would get processed later,\n\tas a result of it the Ovsdb node will not be present in Datastore.\nThis is to handle this situation.",
+      "parentUuid": "67b42469_8a01fab9",
       "revId": "7263f3a2b40eb767e272958c8410243467b39e05",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "42d0e16d_b71f1bb3",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalState.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2020-01-07T09:27:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca27ec62_07fac202",
+      "revId": "7263f3a2b40eb767e272958c8410243467b39e05",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "89dc2f3e_b46b13ac",
         "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2019-10-17T12:24:00Z",
       "side": 1,
       "message": "Please use a try with resource block instead.",
+      "revId": "7263f3a2b40eb767e272958c8410243467b39e05",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "849472dd_03a6c377",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/TerminationPointUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2020-01-07T09:27:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "89dc2f3e_b46b13ac",
       "revId": "7263f3a2b40eb767e272958c8410243467b39e05",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "f448ddef_28bbf301",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommand.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2020-01-07T09:27:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f952305d_7fe6d68f",
+      "revId": "7263f3a2b40eb767e272958c8410243467b39e05",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f59fdc31_349998fe",
         "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalStateTest.java",
         "patchSetId": 1
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "6152372b_83264ac1",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/ovsdb/transact/BridgeOperationalStateTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2020-01-07T09:27:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f59fdc31_349998fe",
+      "revId": "7263f3a2b40eb767e272958c8410243467b39e05",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6bf3ce9b_16b97054",
         "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommandTest.java",
         "patchSetId": 1
@@ -115,6 +223,24 @@
       "writtenOn": "2019-10-17T12:24:00Z",
       "side": 1,
       "message": "Never mock Optional.",
+      "revId": "7263f3a2b40eb767e272958c8410243467b39e05",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ceb2350f_92fa014c",
+        "filename": "southbound/southbound-impl/src/test/java/org/opendaylight/ovsdb/southbound/transactions/md/OvsdbPortUpdateCommandTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2020-01-07T09:27:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6bf3ce9b_16b97054",
       "revId": "7263f3a2b40eb767e272958c8410243467b39e05",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true

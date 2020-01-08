@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0e4ac174_aa726a36",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2020-01-08T11:27:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bcad5171_eb93bca4",
+      "range": {
+        "startLine": 94,
+        "startChar": 32,
+        "endLine": 94,
+        "endChar": 36
+      },
+      "revId": "29d1a83de20c3414cea2cb3a10571152d3a68644",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9c023b52_5b1ad3ab",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundProvider.java",
         "patchSetId": 3
@@ -36,6 +60,24 @@
       "writtenOn": "2019-07-31T07:24:41Z",
       "side": 1,
       "message": "this log message should be warning.",
+      "revId": "29d1a83de20c3414cea2cb3a10571152d3a68644",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "de85667c_fa078b18",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2020-01-08T11:27:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9c023b52_5b1ad3ab",
       "revId": "29d1a83de20c3414cea2cb3a10571152d3a68644",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "dea25ddf_2e6b1d3f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2020-01-08T11:27:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "86533c2c_1c44d834",
+      "revId": "29d1a83de20c3414cea2cb3a10571152d3a68644",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3e9913be_def3a52d",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundProvider.java",
         "patchSetId": 3
@@ -76,6 +136,24 @@
     },
     {
       "key": {
+        "uuid": "38bfbc1e_a9a5cf3f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2020-01-08T11:27:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3e9913be_def3a52d",
+      "revId": "29d1a83de20c3414cea2cb3a10571152d3a68644",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "923b1419_69c3ec55",
         "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/ShardStatusMonitor.java",
         "patchSetId": 3
@@ -87,6 +165,30 @@
       "writtenOn": "2019-07-31T07:24:41Z",
       "side": 1,
       "message": "please change this to 2019",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "29d1a83de20c3414cea2cb3a10571152d3a68644",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37f1c3c5_ec8fcde7",
+        "filename": "utils/mdsal-utils/src/main/java/org/opendaylight/ovsdb/utils/mdsal/utils/ShardStatusMonitor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 8447
+      },
+      "writtenOn": "2020-01-08T11:27:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "923b1419_69c3ec55",
       "range": {
         "startLine": 2,
         "startChar": 17,

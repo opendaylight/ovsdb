@@ -108,8 +108,11 @@ public class TerminationPointCreateCommand implements TransactCommand {
                         terminationPoint.getName(),portUuid);
                 //Configure bridge with the above port details
                 Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
-                if (getBridge(entry.getKey(), nodes) != null) {
-                    bridge.setName(getBridge(entry.getKey(), nodes).getBridgeName().getValue());
+                String bridgeName = SouthboundUtil
+                    .getBridgeNameFromOvsdbNodeId(entry.getKey().firstIdentifierOf(Node.class));
+                if (bridgeName != null) {
+                    LOG.trace("Updating bridge {} for newly added port {}", bridgeName, terminationPoint.getName());
+                    bridge.setName(bridgeName);
                     bridge.setPorts(Collections.singleton(new UUID(portUuid)));
 
                     transaction.add(op.mutate(bridge)
@@ -352,25 +355,6 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 LOG.warn("Incomplete OVSDB port other_config", e);
             }
         }
-    }
-
-    private OvsdbBridgeAugmentation getBridge(final InstanceIdentifier<?> key,
-            final Map<InstanceIdentifier<Node>, Node> nodes) {
-        OvsdbBridgeAugmentation bridge = null;
-        InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
-        if (nodes != null && nodes.get(nodeIid) != null) {
-            Node node = nodes.get(nodeIid);
-            bridge = node.augmentation(OvsdbBridgeAugmentation.class);
-            if (bridge == null) {
-                ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction();
-                Optional<Node> nodeOptional = SouthboundUtil.readNode(transaction, nodeIid);
-                if (nodeOptional.isPresent()) {
-                    bridge = nodeOptional.get().augmentation(OvsdbBridgeAugmentation.class);
-                }
-                transaction.close();
-            }
-        }
-        return bridge;
     }
 
     public static void stampInstanceIdentifier(final TransactionBuilder transaction,

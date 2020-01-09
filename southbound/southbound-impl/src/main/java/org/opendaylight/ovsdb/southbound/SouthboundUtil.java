@@ -187,4 +187,14 @@ public final class SouthboundUtil {
         }
         return nodeId;
     }
+
+    public static String getBridgeNameFromOvsdbNodeId(InstanceIdentifier<Node> nodeIid) {
+        String nodeId = getOvsdbNodeId(nodeIid);
+        if (nodeId != null && !nodeId.isEmpty() && nodeId.contains("bridge")
+                && nodeId.lastIndexOf("bridge") + 7 < nodeId.length()) {
+            return nodeId.substring(nodeId.indexOf("bridge") + 7);// to fetch bridge name ex: "/bridge/br-int"
+        } else {
+            return null;
+        }
+    }
 }

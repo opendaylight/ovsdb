@@ -21,7 +21,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -62,21 +62,13 @@ public class TerminationPointDeleteCommand implements TransactCommand {
         for (InstanceIdentifier<OvsdbTerminationPointAugmentation> removedTpIid: removedTps) {
             LOG.debug("Received request to delete termination point {}", removedTpIid);
             OvsdbTerminationPointAugmentation original = originals.get(removedTpIid);
-            Node originalNode = originalNodes.get(removedTpIid.firstIdentifierOf(Node.class));
-            LOG.trace("Termination point's associated original node {}", originalNode);
-            OvsdbBridgeAugmentation originalOvsdbBridgeAugmentation =
-                    originalNode.augmentation(OvsdbBridgeAugmentation.class);
-            String bridgeName = null;
-            if (originalOvsdbBridgeAugmentation != null) {
-                bridgeName = originalOvsdbBridgeAugmentation.getBridgeName().getValue();
-            } else {
-                Optional<OvsdbBridgeAugmentation> bridgeAug = state.getOvsdbBridgeAugmentation(removedTpIid);
-                if (bridgeAug.isPresent()) {
-                    bridgeName = bridgeAug.get().getBridgeName().getValue();
-                } else {
-                    LOG.error("Bridge does not exist for termination point {}", removedTpIid);
-                }
+            String bridgeName = SouthboundUtil.getBridgeNameFromOvsdbNodeId(removedTpIid.firstIdentifierOf(Node.class));
+            if (bridgeName == null) {
+                LOG.error("Missing Bridge Name for Node {} during deletion of Port {}",
+                        removedTpIid.firstIdentifierOf(Node.class), original.getName());
+                continue;
             }
+            LOG.trace("Deleting port {} from bridge {}", original.getName(), bridgeName);
             Port port = transaction.getTypedRowSchema(Port.class);
             Optional<OvsdbTerminationPointAugmentation> tpAugmentation =
                     state.getOvsdbTerminationPointAugmentation(removedTpIid);

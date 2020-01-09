@@ -7,6 +7,8 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -21,6 +23,7 @@ public class OvsdbMonitorCallback implements MonitorCallBack {
     private final InstanceIdentifierCodec instanceIdentifierCodec;
     private TransactionInvoker txInvoker;
     private OvsdbConnectionInstance key;
+    private AtomicBoolean intialUpdate = new AtomicBoolean(false);
 
     OvsdbMonitorCallback(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
             TransactionInvoker txInvoker) {
@@ -31,7 +34,9 @@ public class OvsdbMonitorCallback implements MonitorCallBack {
 
     @Override
     public void update(TableUpdates result, DatabaseSchema dbSchema) {
-        txInvoker.invoke(new OvsdbOperationalCommandAggregator(instanceIdentifierCodec, key, result, dbSchema));
+        boolean isFirstUpdate = intialUpdate.compareAndSet(false, true);
+        txInvoker.invoke(new OvsdbOperationalCommandAggregator(instanceIdentifierCodec, key, result,
+                dbSchema, isFirstUpdate));
         LOG.trace("Updated dbSchema: {} and result: {}", dbSchema, result);
     }
 

@@ -71,7 +71,7 @@ public class OvsdbOperationalCommandAggregatorTest {
         when(dbSchema.getVersion())
                 .thenReturn(Version.fromString(SouthboundConstants.AUTOATTACH_SUPPORTED_OVS_SCHEMA_VERSION));
         OvsdbOperationalCommandAggregator ovsdbOperationalCommandAggregator1 = new OvsdbOperationalCommandAggregator(
-                mock(InstanceIdentifierCodec.class), key, updates, dbSchema);
+                mock(InstanceIdentifierCodec.class), key, updates, dbSchema, false);
         List<TransactionCommand> testCommands = Whitebox.getInternalState(ovsdbOperationalCommandAggregator1,
                 "commands");
         assertEquals(NUMBER_OF_COMMANDS, testCommands.size());

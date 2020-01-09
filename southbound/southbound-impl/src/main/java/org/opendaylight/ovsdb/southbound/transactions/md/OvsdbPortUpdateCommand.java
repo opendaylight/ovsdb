@@ -153,11 +153,9 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 }
                 tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
                 if (portOldRows.containsKey(portUpdate.getKey()) && !portQosCleared(portUpdate)) {
-                    transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                            tpPath, tpBuilder.build());
+                    updateToDataStore(transaction, tpBuilder, tpPath, true);
                 } else {
-                    transaction.put(LogicalDatastoreType.OPERATIONAL,
-                            tpPath, tpBuilder.build());
+                    updateToDataStore(transaction, tpBuilder, tpPath, false);
                 }
             }
         }
@@ -180,11 +178,21 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                         .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                         .child(Node.class,new NodeKey(bridgeId))
                         .child(TerminationPoint.class,tpKey);
-                transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                        tpPath, tpBuilder.build());
+                updateToDataStore(transaction, tpBuilder, tpPath, true);
             }
         }
 
+    }
+
+    protected void updateToDataStore(ReadWriteTransaction transaction, TerminationPointBuilder tpBuilder,
+                                     InstanceIdentifier<TerminationPoint> tpPath, boolean merge) {
+        if (merge) {
+            transaction.merge(LogicalDatastoreType.OPERATIONAL,
+                    tpPath, tpBuilder.build());
+        } else {
+            transaction.put(LogicalDatastoreType.OPERATIONAL,
+                    tpPath, tpBuilder.build());
+        }
     }
 
     @VisibleForTesting

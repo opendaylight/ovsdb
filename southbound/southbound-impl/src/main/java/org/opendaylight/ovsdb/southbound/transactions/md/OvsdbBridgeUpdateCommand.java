@@ -75,13 +75,16 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     private final Map<UUID,Bridge> updatedBridgeRows;
     private final Map<UUID, Bridge> oldBridgeRows;
     private final List<InstanceIdentifier<Node>> updatedBridges = new ArrayList<>();
+    private final Map<NodeId, Node> updatedBridgeNodes;
 
     public OvsdbBridgeUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
+            TableUpdates updates, DatabaseSchema dbSchema,
+                                    Map<NodeId, Node> updatedBridgeNodes) {
         super(key,updates,dbSchema);
         this.instanceIdentifierCodec = instanceIdentifierCodec;
         updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
         oldBridgeRows = TyperUtils.extractRowsOld(Bridge.class, getUpdates(), getDbSchema());
+        this.updatedBridgeNodes = updatedBridgeNodes;
     }
 
     @Override
@@ -113,6 +116,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         Node bridgeNode = buildBridgeNode(bridge);
         transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNode);
         updatedBridges.add(bridgeIid);
+        updatedBridgeNodes.put(getNodeId(bridge), bridgeNode);
         deleteEntries(transaction, protocolEntriesToRemove(bridgeIid, bridge));
         deleteEntries(transaction, externalIdsToRemove(bridgeIid,bridge));
         deleteEntries(transaction, bridgeOtherConfigsToRemove(bridgeIid,bridge));

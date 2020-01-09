@@ -9,7 +9,9 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -18,6 +20,8 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +29,12 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbOperationalCommandAggregator.class);
     private final List<TransactionCommand> commands = new ArrayList<>();
+    private final Map<NodeId, Node> updatedBridgeNodes = new HashMap<>();
+    private boolean initialUpdate;
 
     public OvsdbOperationalCommandAggregator(InstanceIdentifierCodec instanceIdentifierCodec,
-            OvsdbConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+            OvsdbConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema, boolean initialUpdate) {
+        this.initialUpdate = initialUpdate;
         commands.add(new OpenVSwitchUpdateCommand(instanceIdentifierCodec, key, updates, dbSchema));
         commands.add(new OvsdbManagersUpdateCommand(key, updates,  dbSchema));
         commands.add(new OvsdbManagersRemovedCommand(key, updates,  dbSchema));
@@ -35,11 +42,17 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
         commands.add(new OvsdbQosRemovedCommand(key, updates,  dbSchema));
         commands.add(new OvsdbQueueUpdateCommand(instanceIdentifierCodec, key, updates,  dbSchema));
         commands.add(new OvsdbQueueRemovedCommand(key, updates,  dbSchema));
-        commands.add(new OvsdbBridgeUpdateCommand(instanceIdentifierCodec, key, updates,  dbSchema));
+        commands.add(new OvsdbBridgeUpdateCommand(instanceIdentifierCodec, key, updates,  dbSchema,
+                updatedBridgeNodes));
         commands.add(new OvsdbBridgeRemovedCommand(instanceIdentifierCodec, key, updates,  dbSchema));
         commands.add(new OvsdbControllerUpdateCommand(key, updates,  dbSchema));
         commands.add(new OvsdbControllerRemovedCommand(instanceIdentifierCodec, key, updates,  dbSchema));
-        commands.add(new OvsdbPortUpdateCommand(instanceIdentifierCodec, key, updates, dbSchema));
+        if (initialUpdate) {
+            commands.add(new OvsdbInitialPortUpdateCommand(instanceIdentifierCodec, key, updates, dbSchema,
+                    updatedBridgeNodes));
+        } else {
+            commands.add(new OvsdbPortUpdateCommand(instanceIdentifierCodec, key, updates, dbSchema));
+        }
         commands.add(new OvsdbPortRemoveCommand(instanceIdentifierCodec, key, updates, dbSchema));
 
         if (dbSchema.getVersion().compareTo(

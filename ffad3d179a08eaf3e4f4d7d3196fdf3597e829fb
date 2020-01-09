@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3e23c0a_004a3b9f",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transactions/md/HwvtepPhysicalPortUpdateCommand.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2020-01-09T10:06:07Z",
+      "side": 1,
+      "message": "You could retrieve this on object construction and store it in an instance variable...",
+      "revId": "ffad3d179a08eaf3e4f4d7d3196fdf3597e829fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}

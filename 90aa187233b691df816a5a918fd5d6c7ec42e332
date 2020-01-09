@@ -16,6 +16,24 @@
       "revId": "90aa187233b691df816a5a918fd5d6c7ec42e332",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d1e8d922_d5753ebc",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundUtil.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2020-01-09T13:01:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "58965042_4df46935",
+      "revId": "90aa187233b691df816a5a918fd5d6c7ec42e332",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }

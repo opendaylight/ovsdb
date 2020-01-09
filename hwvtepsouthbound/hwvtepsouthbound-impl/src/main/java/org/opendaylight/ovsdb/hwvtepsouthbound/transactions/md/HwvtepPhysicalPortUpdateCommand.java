@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
@@ -140,7 +141,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                 } else {
                     addToDeviceUpdate(TransactionType.UPDATE, new PortEvent(portUpdate, psNodeId));
                 }
-                reconcileToPort(transaction, portUpdate, tpPath);
+                reconcileToPort(portUpdate, tpPath);
                 getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath,
                         portUpdate.getUuid(), portUpdate);
                 // Update with Deleted VlanBindings
@@ -167,8 +168,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
         }
     }
 
-    private void reconcileToPort(final ReadWriteTransaction transaction,
-                                 final PhysicalPort portUpdate,
+    private void reconcileToPort(final PhysicalPort portUpdate,
                                  final InstanceIdentifier<TerminationPoint> tpPath) {
         if (skipReconciliationPorts.contains(portUpdate.getUuid())) {
             //case of port added along with switch add
@@ -181,7 +181,8 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
         }
         //case of individual port add , reconcile to this port
         getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath, portUpdate.getUuid(), portUpdate);
-        Futures.addCallback(transaction.read(LogicalDatastoreType.CONFIGURATION, tpPath),
+        Futures.addCallback(new MdsalUtils(getOvsdbConnectionInstance().getDataBroker())
+                .read(LogicalDatastoreType.CONFIGURATION, tpPath),
                 new FutureCallback<Optional<TerminationPoint>>() {
                     @Override
                     public void onSuccess(final Optional<TerminationPoint> optionalConfigTp) {

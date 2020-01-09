@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "58965042_4df46935",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/SouthboundUtil.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2020-01-09T09:34:28Z",
+      "side": 1,
+      "message": "This should check that the string is long enough (i.e. that nodeId.indexOf(\"bridge\") + 7 is within the string bounds).",
+      "revId": "90aa187233b691df816a5a918fd5d6c7ec42e332",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}

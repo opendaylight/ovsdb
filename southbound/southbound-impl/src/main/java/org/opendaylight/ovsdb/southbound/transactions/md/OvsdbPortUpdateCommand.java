@@ -39,6 +39,7 @@ import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -136,6 +137,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 bridgeIid = getTerminationPointBridge(transaction, node, portName);
             }
             if (bridgeIid.isPresent()) {
+                NodeId bridgeId = SouthboundMapper.createManagedNodeId(bridgeIid.get());
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(portName));
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
                 tpBuilder.withKey(tpKey);
@@ -153,11 +155,13 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 }
                 tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
                 if (portOldRows.containsKey(portUpdate.getKey()) && !portQosCleared(portUpdate)) {
-                    transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                            tpPath, tpBuilder.build());
+                    updateToDataStore(transaction, tpBuilder, tpPath, true);
+                    LOG.info("DEVICE - {} TerminationPoint : {} to Bridge : {}", TransactionType.ADD,
+                            tpKey.getTpId().getValue(), bridgeId.getValue());
                 } else {
-                    transaction.put(LogicalDatastoreType.OPERATIONAL,
-                            tpPath, tpBuilder.build());
+                    updateToDataStore(transaction, tpBuilder, tpPath, false);
+                    LOG.debug("DEVICE - {} TerminationPoint : {} to Bridge : {}", TransactionType.UPDATE,
+                            tpKey.getTpId().getValue(), bridgeId.getValue());
                 }
             }
         }
@@ -180,11 +184,21 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                         .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                         .child(Node.class,new NodeKey(bridgeId))
                         .child(TerminationPoint.class,tpKey);
-                transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                        tpPath, tpBuilder.build());
+                updateToDataStore(transaction, tpBuilder, tpPath, true);
             }
         }
 
+    }
+
+    protected void updateToDataStore(ReadWriteTransaction transaction, TerminationPointBuilder tpBuilder,
+                                     InstanceIdentifier<TerminationPoint> tpPath, boolean merge) {
+        if (merge) {
+            transaction.merge(LogicalDatastoreType.OPERATIONAL,
+                    tpPath, tpBuilder.build());
+        } else {
+            transaction.put(LogicalDatastoreType.OPERATIONAL,
+                    tpPath, tpBuilder.build());
+        }
     }
 
     @VisibleForTesting

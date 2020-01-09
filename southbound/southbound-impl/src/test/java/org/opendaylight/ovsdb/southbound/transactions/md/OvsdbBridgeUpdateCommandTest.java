@@ -87,6 +87,7 @@ public class OvsdbBridgeUpdateCommandTest {
     private final Map<UUID,Bridge> updatedBridgeRows = new HashMap<>();
     private final Map<UUID, Bridge> oldBridgeRows = new HashMap<>();
     private OvsdbBridgeUpdateCommand ovsdbBridgeUpdateCommand;
+    private Map<NodeId, Node> updatedBridgeNodes = new HashMap<>();
 
     @Before
     public void setUp() throws Exception {
@@ -95,6 +96,8 @@ public class OvsdbBridgeUpdateCommandTest {
                 .set(ovsdbBridgeUpdateCommand, new ArrayList<>());
         MemberModifier.field(OvsdbBridgeUpdateCommand.class, "updatedBridgeRows").set(ovsdbBridgeUpdateCommand,
                 updatedBridgeRows);
+        MemberModifier.field(OvsdbBridgeUpdateCommand.class, "updatedBridgeNodes").set(
+                ovsdbBridgeUpdateCommand,updatedBridgeNodes);
     }
 
     @Test
@@ -103,7 +106,8 @@ public class OvsdbBridgeUpdateCommandTest {
         TableUpdates updates = mock(TableUpdates.class);
         DatabaseSchema dbSchema = mock(DatabaseSchema.class);
         OvsdbBridgeUpdateCommand ovsdbBridgeUpdateCommand1 =
-                new OvsdbBridgeUpdateCommand(mock(InstanceIdentifierCodec.class), key, updates, dbSchema);
+                new OvsdbBridgeUpdateCommand(mock(InstanceIdentifierCodec.class), key, updates, dbSchema,
+                        updatedBridgeNodes);
         assertEquals(key, Whitebox.getInternalState(ovsdbBridgeUpdateCommand1, "key"));
         assertEquals(updates, Whitebox.getInternalState(ovsdbBridgeUpdateCommand1, "updates"));
         assertEquals(dbSchema, Whitebox.getInternalState(ovsdbBridgeUpdateCommand1, "dbSchema"));
@@ -150,6 +154,8 @@ public class OvsdbBridgeUpdateCommandTest {
                 InstanceIdentifier.class, Bridge.class));
         MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "bridgeOtherConfigsToRemove",
                 InstanceIdentifier.class, Bridge.class));
+        MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "getNodeId",
+                Bridge.class));
 
         Bridge bridge = mock(Bridge.class);
         InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);

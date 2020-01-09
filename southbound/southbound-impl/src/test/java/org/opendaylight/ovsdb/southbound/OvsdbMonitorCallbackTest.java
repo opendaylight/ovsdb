@@ -13,6 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -25,6 +26,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbOperationalCommandAggregator;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 
+
 @RunWith(MockitoJUnitRunner.class)
 
 public class OvsdbMonitorCallbackTest {
@@ -36,6 +38,8 @@ public class OvsdbMonitorCallbackTest {
     private TransactionInvoker txInvoker;
     @Mock
     private OvsdbConnectionInstance key;
+    @Mock
+    private AtomicBoolean intialUpdate;
 
     @Test
     public void testUpdate() {

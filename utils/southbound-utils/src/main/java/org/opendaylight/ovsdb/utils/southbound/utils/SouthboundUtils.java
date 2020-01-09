@@ -1345,6 +1345,10 @@ public class SouthboundUtils {
     }
 
     public static boolean compareDbVersionToMinVersion(final String dbVersion, final String minVersion) {
+        if (dbVersion == null || minVersion == null) {
+            LOG.error("Invalid DB version {} or minVersion {}", dbVersion, minVersion);
+            return false;
+        }
         final Matcher dbVersionMatcher = PATTERN.matcher(dbVersion);
         final Matcher minVersionMatcher = PATTERN.matcher(minVersion);
         LOG.debug("dbVersion {}, minVersion {}", dbVersion, minVersion);

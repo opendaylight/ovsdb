@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -34,11 +33,9 @@ import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfd;
@@ -108,8 +105,11 @@ public class TerminationPointCreateCommand implements TransactCommand {
                         terminationPoint.getName(),portUuid);
                 //Configure bridge with the above port details
                 Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
-                if (getBridge(entry.getKey(), nodes) != null) {
-                    bridge.setName(getBridge(entry.getKey(), nodes).getBridgeName().getValue());
+                String bridgeName = SouthboundUtil
+                    .getBridgeNameFromOvsdbNodeId(entry.getKey().firstIdentifierOf(Node.class));
+                if (bridgeName != null) {
+                    LOG.trace("Updating bridge {} for newly added port {}", bridgeName, terminationPoint.getName());
+                    bridge.setName(bridgeName);
                     bridge.setPorts(Collections.singleton(new UUID(portUuid)));
 
                     transaction.add(op.mutate(bridge)
@@ -352,25 +352,6 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 LOG.warn("Incomplete OVSDB port other_config", e);
             }
         }
-    }
-
-    private OvsdbBridgeAugmentation getBridge(final InstanceIdentifier<?> key,
-            final Map<InstanceIdentifier<Node>, Node> nodes) {
-        OvsdbBridgeAugmentation bridge = null;
-        InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
-        if (nodes != null && nodes.get(nodeIid) != null) {
-            Node node = nodes.get(nodeIid);
-            bridge = node.augmentation(OvsdbBridgeAugmentation.class);
-            if (bridge == null) {
-                ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction();
-                Optional<Node> nodeOptional = SouthboundUtil.readNode(transaction, nodeIid);
-                if (nodeOptional.isPresent()) {
-                    bridge = nodeOptional.get().augmentation(OvsdbBridgeAugmentation.class);
-                }
-                transaction.close();
-            }
-        }
-        return bridge;
     }
 
     public static void stampInstanceIdentifier(final TransactionBuilder transaction,

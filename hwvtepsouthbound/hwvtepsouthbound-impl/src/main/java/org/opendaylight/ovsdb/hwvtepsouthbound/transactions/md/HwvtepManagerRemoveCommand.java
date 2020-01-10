@@ -16,6 +16,7 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Manager;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Managers;
@@ -43,6 +44,8 @@ public class HwvtepManagerRemoveCommand extends AbstractTransactionCommand {
                             .child(Managers.class, new ManagersKey(new Uri(manager.getTargetColumn().getData())));
             // TODO Delete any references
             transaction.delete(LogicalDatastoreType.OPERATIONAL, managerIid);
+            addToDeviceUpdate(TransactionType.DELETE, manager);
+            LOG.info("DEVICE - {} {}", TransactionType.DELETE, manager);
         }
     }
 }

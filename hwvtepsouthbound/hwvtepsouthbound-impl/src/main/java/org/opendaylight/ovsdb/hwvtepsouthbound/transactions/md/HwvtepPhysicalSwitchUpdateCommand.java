@@ -29,6 +29,7 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Tunnel;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -100,6 +101,8 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
             InstanceIdentifier<Node> psIid = getInstanceIdentifier(phySwitch);
             Node psNode = buildPhysicalSwitchNode(connection.get(), phySwitch);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, psIid, psNode);
+            addToDeviceUpdate(TransactionType.ADD, phySwitch);
+            LOG.info("DEVICE - {} {}", TransactionType.ADD, phySwitch);
 
             PhysicalSwitch oldPSwitch = oldPSRows.get(uuid);
             updateTunnelIps(phySwitch, oldPSwitch, transaction);

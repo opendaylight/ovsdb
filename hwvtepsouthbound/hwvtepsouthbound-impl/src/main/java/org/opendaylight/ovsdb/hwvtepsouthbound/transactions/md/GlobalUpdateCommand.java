@@ -21,6 +21,7 @@ import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -63,6 +64,8 @@ public class GlobalUpdateCommand extends AbstractTransactionCommand {
             nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, hwvtepGlobalAugmentation);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath, nodeBuilder.build());
             getOvsdbConnectionInstance().setHwvtepGlobalAugmentation(hwvtepGlobalAugmentation);
+            addToDeviceUpdate(TransactionType.ADD, hwvtepGlobal);
+            LOG.info("DEVICE - {} {}", TransactionType.ADD, hwvtepGlobal);
         }
     }
 

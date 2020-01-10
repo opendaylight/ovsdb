@@ -22,6 +22,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Manager;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -62,6 +63,8 @@ public class HwvtepManagerUpdateCommand extends AbstractTransactionCommand {
             LOG.debug("Connection {} is present", connection.get());
             Node connectionNode = buildConnectionNode(manager);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+            addToDeviceUpdate(TransactionType.ADD, manager);
+            LOG.info("DEVICE - {} {}", TransactionType.ADD, manager);
             // TODO: Delete entries that are no longer needed
         }
     }

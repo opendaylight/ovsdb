@@ -207,12 +207,8 @@ public class HwvtepDeviceInfo {
                 new DeviceData(key, null, data, DeviceDataStatus.AVAILABLE));
     }
 
-    public Object getConfigData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
-        DeviceData deviceData = HwvtepSouthboundUtil.getData(configKeyVsData, cls, key);
-        if (deviceData != null) {
-            return deviceData.getData();
-        }
-        return null;
+    public DeviceData getConfigData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+        return HwvtepSouthboundUtil.getData(configKeyVsData, cls, key);
     }
 
     public Map<Class<? extends Identifiable>, Map<InstanceIdentifier, DeviceData>> getConfigData() {

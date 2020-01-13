@@ -27,8 +27,10 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepTableReader;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
@@ -87,8 +89,9 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         T oldData = null;
         Type type = getClass().getGenericSuperclass();
         Type classType = ((ParameterizedType) type).getActualTypeArguments()[0];
-        if (getDeviceInfo().getConfigData((Class<? extends Identifiable>) classType, key) != null) {
-            oldData = (T) getDeviceInfo().getConfigData((Class<? extends Identifiable>) classType, key);
+        if (getDeviceInfo().getConfigData((Class<? extends Identifiable>) classType, key) != null
+                && getDeviceInfo().getConfigData((Class<? extends Identifiable>) classType, key).getData() != null) {
+            oldData = (T) getDeviceInfo().getConfigData((Class<? extends Identifiable>) classType, key).getData();
         }
         updates.putIfAbsent(getDeviceTransaction(), new ArrayList<MdsalUpdate<T>>());
         updates.get(getDeviceTransaction()).add(new MdsalUpdate<>(key, data, oldData));
@@ -395,5 +398,43 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
 
     void updateControllerTxHistory(TransactionType transactionType, Object element) {
         getOperationalState().getDeviceInfo().addToControllerTx(transactionType, element);
+    }
+
+    public <T> HwvtepDeviceInfo.DeviceData fetchDeviceData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+        HwvtepDeviceInfo.DeviceData deviceData  = getDeviceOpData(cls, key);
+        if (deviceData == null) {
+            LOG.debug("Could not find data for key {}", getNodeKeyStr(key));
+            java.util.Optional<TypedBaseTable> optional = getTableReader().getHwvtepTableEntryUUID(cls, key, null);
+            if (optional.isPresent()) {
+                LOG.debug("Found the data for key from device {} ", getNodeKeyStr(key));
+                getDeviceInfo().updateDeviceOperData(cls, key, optional.get().getUuid(), (T)optional.get());
+                return getDeviceOpData(cls, key);
+            } else {
+                LOG.info("Could not Find the data for key from device {} ", getNodeKeyStr(key));
+            }
+        }
+        return deviceData;
+    }
+
+    protected String getNodeKeyStr(InstanceIdentifier iid) {
+        try {
+            return getClassType().getTypeName() + "." + ((Node) iid.firstKeyOf(Node.class)).getNodeId().getValue() + "."
+                    + getKeyStr(iid);
+        } catch (ClassCastException  exp) {
+            LOG.error("Error in getting the Node id ", exp);
+        }
+        return iid.toString();
+    }
+
+    protected String getKeyStr(InstanceIdentifier iid) {
+        return iid.toString();
+    }
+
+    public HwvtepDeviceInfo.DeviceData getDeviceOpData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+        return getOperationalState().getDeviceInfo().getDeviceOperData(cls, key);
+    }
+
+    public HwvtepTableReader getTableReader() {
+        return getOperationalState().getConnectionInstance().getHwvtepTableReader();
     }
 }

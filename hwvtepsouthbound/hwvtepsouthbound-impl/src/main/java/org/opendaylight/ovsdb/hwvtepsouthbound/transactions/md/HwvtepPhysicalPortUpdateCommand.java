@@ -10,9 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.MoreExecutors;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,6 +20,7 @@ import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.hwvtepsouthbound.events.PortEvent;
@@ -180,37 +178,30 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
         if (getDeviceInfo().getDeviceOperData(TerminationPoint.class, tpPath) != null) {
             //case of port update not new port add
             return;
+
         }
         //case of individual port add , reconcile to this port
         getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath, portUpdate.getUuid(), portUpdate);
-        Futures.addCallback(mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, tpPath),
-                new FutureCallback<Optional<TerminationPoint>>() {
-                    @Override
-                    public void onSuccess(final Optional<TerminationPoint> optionalConfigTp) {
-                        if (!optionalConfigTp.isPresent() || optionalConfigTp.get().augmentation(
-                                HwvtepPhysicalPortAugmentation.class) == null) {
-                            //TODO port came with some vlan bindings clean them up use PortRemovedCommand
-                            return;
-                        }
-                        addToDeviceUpdate(TransactionType.ADD,
-                                new ReconcilePortEvent(portUpdate, tpPath.firstKeyOf(Node.class).getNodeId()));
-                        getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath,
-                                portUpdate.getUuid(), portUpdate);
-                        TerminationPoint configTp = optionalConfigTp.get();
-                        getDeviceInfo().scheduleTransaction((transactionBuilder) -> {
-                            InstanceIdentifier psIid = tpPath.firstIdentifierOf(Node.class);
-                            HwvtepOperationalState operState = new HwvtepOperationalState(getOvsdbConnectionInstance());
-                            PhysicalPortUpdateCommand portUpdateCommand = new PhysicalPortUpdateCommand(
-                                    operState, Collections.EMPTY_LIST);
-                            portUpdateCommand.updatePhysicalPort(transactionBuilder, psIid,
-                                    Lists.newArrayList(configTp.augmentation(HwvtepPhysicalPortAugmentation.class)));
-                        });
-                    }
+        HwvtepDeviceInfo.DeviceData data = getDeviceInfo().getConfigData(TerminationPoint.class, tpPath);
+        if (data == null || data.getData() == null) {
+            LOG.error("No config data present ");
+        } else {
+            addToDeviceUpdate(TransactionType.ADD,
+                    new ReconcilePortEvent(portUpdate, tpPath.firstKeyOf(Node.class).getNodeId()));
+            LOG.info("addToDeviceUpdate {}", portUpdate);
+            getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath,
+                    portUpdate.getUuid(), portUpdate);
+            getDeviceInfo().scheduleTransaction((transactionBuilder) -> {
+                InstanceIdentifier psIid = tpPath.firstIdentifierOf(Node.class);
+                HwvtepOperationalState operState = new HwvtepOperationalState(getOvsdbConnectionInstance());
+                PhysicalPortUpdateCommand portUpdateCommand = new PhysicalPortUpdateCommand(
+                        operState, Collections.EMPTY_LIST);
+                TerminationPoint cfgPoint = (TerminationPoint) data.getData();
+                portUpdateCommand.updatePhysicalPort(transactionBuilder, psIid,
+                            Lists.newArrayList(cfgPoint));
 
-                    @Override
-                    public void onFailure(final Throwable throwable) {
-                    }
-                }, MoreExecutors.directExecutor());
+            });
+        }
     }
 
     private static <T extends DataObject> void deleteEntries(final ReadWriteTransaction transaction,

@@ -19,6 +19,7 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundProvider;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
@@ -180,6 +181,12 @@ public class HwvtepCacheDisplayCmd implements Action {
     private void printTerminationPoint(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
         InstanceIdentifier<TerminationPoint> terminationPointIid = deviceData.getKey();
         console.print(terminationPointIid.firstKeyOf(TerminationPoint.class).getTpId().getValue());
+        try {
+            PhysicalPort physicalPort = (PhysicalPort) deviceData.getData();
+            console.print("    " + physicalPort.getVlanBindingsColumn().getData().keySet());
+        } catch (ClassCastException exp) {
+            //This is the Karaf cli display command , ignore the exception.
+        }
     }
 
     private void printNode(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {

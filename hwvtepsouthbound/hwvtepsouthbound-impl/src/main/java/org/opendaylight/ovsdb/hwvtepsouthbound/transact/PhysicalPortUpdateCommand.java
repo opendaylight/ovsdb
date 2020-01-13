@@ -49,18 +49,18 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> createds =
-                extractCreated(getChanges(),HwvtepPhysicalPortAugmentation.class);
+        Map<InstanceIdentifier<Node>, List<TerminationPoint>> createds =
+                extractCreated(getChanges(),TerminationPoint.class);
         if (!createds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> created:
+            for (Entry<InstanceIdentifier<Node>, List<TerminationPoint>> created:
                 createds.entrySet()) {
                 updatePhysicalPort(transaction,  created.getKey(), created.getValue());
             }
         }
-        Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> updateds =
-                extractUpdatedPorts(getChanges(), HwvtepPhysicalPortAugmentation.class);
+        Map<InstanceIdentifier<Node>, List<TerminationPoint>> updateds =
+                extractUpdatedPorts(getChanges(), TerminationPoint.class);
         if (!updateds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> updated:
+            for (Entry<InstanceIdentifier<Node>, List<TerminationPoint>> updated:
                 updateds.entrySet()) {
                 updatePhysicalPort(transaction,  updated.getKey(), updated.getValue());
             }
@@ -69,19 +69,26 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
 
     public void updatePhysicalPort(final TransactionBuilder transaction,
                                    final InstanceIdentifier<Node> psNodeiid,
-                                   final List<HwvtepPhysicalPortAugmentation> listPort) {
+                                   final List<TerminationPoint> listPort) {
         //Get physical switch which the port belong to: in operation DS or new created
-        for (HwvtepPhysicalPortAugmentation port : listPort) {
+        for (TerminationPoint tp : listPort) {
+            HwvtepPhysicalPortAugmentation port = tp.augmentation(HwvtepPhysicalPortAugmentation.class);
             LOG.debug("Creating a physical port named: {}", port.getHwvtepNodeName().getValue());
-            HwvtepDeviceInfo.DeviceData deviceOperdata = getDeviceInfo().getDeviceOperData(TerminationPoint.class,
-                    getTpIid(psNodeiid, port.getHwvtepNodeName().getValue()));
-            if (deviceOperdata == null) {
+            InstanceIdentifier<TerminationPoint> key = getTpIid(psNodeiid, port.getHwvtepNodeName().getValue());
+
+            getOperationalState().getDeviceInfo().updateConfigData(TerminationPoint.class, key, tp);
+            HwvtepDeviceInfo.DeviceData deviceOperdata = getDeviceInfo().getDeviceOperData(TerminationPoint.class, key);
+            if (deviceOperdata == null || deviceOperdata.getData() == null) {
+                LOG.error("Updated the device oper cache for port from actual device {}", key);
+                deviceOperdata = super.fetchDeviceData(TerminationPoint.class, key);
+            }
+            if (deviceOperdata == null || deviceOperdata.getData() == null) {
                 //create a physical port always happens from device
                 LOG.error("Physical port {} not present in oper datastore", port.getHwvtepNodeName().getValue());
             } else {
                 PhysicalPort physicalPort = transaction.getTypedRowWrapper(PhysicalPort.class);
                 physicalPort.setName(port.getHwvtepNodeName().getValue());
-                setVlanBindings(psNodeiid, physicalPort, port, transaction);
+                setVlanBindings(psNodeiid, physicalPort, tp, transaction);
                 setDescription(physicalPort, port);
                 String existingPhysicalPortName = port.getHwvtepNodeName().getValue();
                 PhysicalPort extraPhyscialPort = transaction.getTypedRowWrapper(PhysicalPort.class);
@@ -105,8 +112,9 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
 
     private void setVlanBindings(final InstanceIdentifier<Node> psNodeiid,
                                  final PhysicalPort physicalPort,
-                                 final HwvtepPhysicalPortAugmentation inputPhysicalPort,
+                                 final TerminationPoint tp,
                                  final TransactionBuilder transaction) {
+        HwvtepPhysicalPortAugmentation inputPhysicalPort = tp.augmentation(HwvtepPhysicalPortAugmentation.class);
         if (inputPhysicalPort.getVlanBindings() != null) {
             //get UUID by LogicalSwitchRef
             Map<Long, UUID> bindingMap = new HashMap<>();
@@ -122,12 +130,12 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                         getOperationalState(), vlanBinding);
 
                 if (!HwvtepSouthboundUtil.isEmptyMap(configDependencies)) {
-                    createConfigWaitJob(psNodeiid, inputPhysicalPort,
+                    createConfigWaitJob(psNodeiid, tp,
                             vlanBinding, configDependencies, vlanIid);
                     continue;
                 }
                 if (!HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies)) {
-                    createOperWaitingJob(psNodeiid, inputPhysicalPort,
+                    createOperWaitingJob(psNodeiid, tp,
                             vlanBinding, inTransitDependencies, vlanIid);
                     continue;
                 }
@@ -140,7 +148,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
     }
 
     private void createOperWaitingJob(final InstanceIdentifier<Node> psNodeiid,
-                                      final HwvtepPhysicalPortAugmentation inputPhysicalPort,
+                                      final TerminationPoint inputPhysicalPort,
                                       final VlanBindings vlanBinding,
                                       final Map inTransitDependencies,
                                       final InstanceIdentifier<VlanBindings> vlanIid) {
@@ -159,7 +167,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
     }
 
     private void createConfigWaitJob(final InstanceIdentifier<Node> psNodeiid,
-                                     final HwvtepPhysicalPortAugmentation inputPhysicalPort,
+                                     final TerminationPoint inputPhysicalPort,
                                      final VlanBindings vlanBinding,
                                      final Map configDependencies,
                                      final InstanceIdentifier<VlanBindings> vlanIid) {
@@ -206,22 +214,22 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private static Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> extractCreated(
-            final Collection<DataTreeModification<Node>> changes, final Class<HwvtepPhysicalPortAugmentation> class1) {
-        Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> result = new HashMap<>();
+    private static Map<InstanceIdentifier<Node>, List<TerminationPoint>> extractCreated(
+            final Collection<DataTreeModification<Node>> changes, final Class<TerminationPoint> class1) {
+        Map<InstanceIdentifier<Node>, List<TerminationPoint>> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
                 final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
                 final DataObjectModification<Node> mod = change.getRootNode();
                 Node created = TransactUtils.getCreated(mod);
                 if (created != null) {
-                    List<HwvtepPhysicalPortAugmentation> portListUpdated = new ArrayList<>();
+                    List<TerminationPoint> portListUpdated = new ArrayList<>();
                     if (created.getTerminationPoint() != null) {
                         for (TerminationPoint tp : created.getTerminationPoint()) {
                             HwvtepPhysicalPortAugmentation hppAugmentation =
                                     tp.augmentation(HwvtepPhysicalPortAugmentation.class);
                             if (hppAugmentation != null) {
-                                portListUpdated.add(hppAugmentation);
+                                portListUpdated.add(tp);
                             }
                         }
                     }
@@ -232,9 +240,9 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
         return result;
     }
 
-    private static Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> extractUpdatedPorts(
-            final Collection<DataTreeModification<Node>> changes, final Class<HwvtepPhysicalPortAugmentation> class1) {
-        Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> result = new HashMap<>();
+    private static Map<InstanceIdentifier<Node>, List<TerminationPoint>> extractUpdatedPorts(
+            final Collection<DataTreeModification<Node>> changes, final Class<TerminationPoint> class1) {
+        Map<InstanceIdentifier<Node>, List<TerminationPoint>> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
                 final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
@@ -242,14 +250,14 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                 Node updated = TransactUtils.getUpdated(mod);
                 Node before = mod.getDataBefore();
                 if (updated != null && before != null) {
-                    List<HwvtepPhysicalPortAugmentation> portListUpdated = new ArrayList<>();
-                    List<HwvtepPhysicalPortAugmentation> portListBefore = new ArrayList<>();
+                    List<TerminationPoint> portListUpdated = new ArrayList<>();
+                    List<TerminationPoint> portListBefore = new ArrayList<>();
                     if (updated.getTerminationPoint() != null) {
                         for (TerminationPoint tp : updated.getTerminationPoint()) {
                             HwvtepPhysicalPortAugmentation hppAugmentation =
                                     tp.augmentation(HwvtepPhysicalPortAugmentation.class);
                             if (hppAugmentation != null) {
-                                portListUpdated.add(hppAugmentation);
+                                portListUpdated.add(tp);
                             }
                         }
                     }
@@ -258,7 +266,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                             HwvtepPhysicalPortAugmentation hppAugmentation =
                                     tp.augmentation(HwvtepPhysicalPortAugmentation.class);
                             if (hppAugmentation != null) {
-                                portListBefore.add(hppAugmentation);
+                                portListBefore.add(tp);
                             }
                         }
                     }
@@ -269,4 +277,14 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
         }
         return result;
     }
+
+    protected String getKeyStr(InstanceIdentifier iid) {
+        try {
+            return ((TerminationPoint)iid.firstKeyOf(TerminationPoint.class)).getTpId().getValue();
+        } catch (ClassCastException exp) {
+            LOG.error("Error in getting the TerminationPoint id ", exp);
+        }
+        return super.getKeyStr(iid);
+    }
+
 }

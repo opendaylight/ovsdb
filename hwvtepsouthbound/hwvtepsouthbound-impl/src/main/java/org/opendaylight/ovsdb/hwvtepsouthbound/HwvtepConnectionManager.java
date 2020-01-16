@@ -116,16 +116,17 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
     @Override
     public void connected(final OvsdbClient externalClient) {
-        LOG.info("Library connected {} from {}:{} to {}:{}",
-                externalClient.getConnectionInfo().getType(),
-                externalClient.getConnectionInfo().getRemoteAddress(),
-                externalClient.getConnectionInfo().getRemotePort(),
-                externalClient.getConnectionInfo().getLocalAddress(),
-                externalClient.getConnectionInfo().getLocalPort());
+        HwvtepConnectionInstance hwClient = null;
         try {
             List<String> databases = externalClient.getDatabases().get(DB_FETCH_TIMEOUT, TimeUnit.MILLISECONDS);
-            if (databases.contains(HwvtepSchemaConstants.HARDWARE_VTEP)) {
-                HwvtepConnectionInstance hwClient = connectedButCallBacksNotRegistered(externalClient);
+            if (databases != null && !databases.isEmpty() && databases.contains(HwvtepSchemaConstants.HARDWARE_VTEP)) {
+                LOG.info("Hwvtep Library connected {} from {}:{} to {}:{}",
+                        externalClient.getConnectionInfo().getType(),
+                        externalClient.getConnectionInfo().getRemoteAddress(),
+                        externalClient.getConnectionInfo().getRemotePort(),
+                        externalClient.getConnectionInfo().getLocalAddress(),
+                        externalClient.getConnectionInfo().getLocalPort());
+                hwClient = connectedButCallBacksNotRegistered(externalClient);
                 registerEntityForOwnership(hwClient);
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -136,47 +137,53 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void disconnected(final OvsdbClient client) {
-        LOG.info("Library disconnected {} from {}:{} to {}:{}. Cleaning up the operational data store",
-                client.getConnectionInfo().getType(),
-                client.getConnectionInfo().getRemoteAddress(),
-                client.getConnectionInfo().getRemotePort(),
-                client.getConnectionInfo().getLocalAddress(),
-                client.getConnectionInfo().getLocalPort());
-        ConnectionInfo key = HwvtepSouthboundMapper.createConnectionInfo(client);
-        HwvtepConnectionInstance hwvtepConnectionInstance = getConnectionInstance(key);
-        if (hwvtepConnectionInstance != null) {
-            if (hwvtepConnectionInstance.getInstanceIdentifier() != null) {
-                deviceUpdateHistory.get(hwvtepConnectionInstance.getInstanceIdentifier()).addToHistory(
-                        TransactionType.DELETE, new ClientConnected(client.getConnectionInfo().getRemotePort()));
-            }
+        HwvtepConnectionInstance hwvtepConnectionInstance = null;
+        try {
+            LOG.info("Library disconnected {} from {}:{} to {}:{}. Cleaning up the operational data store",
+                    client.getConnectionInfo().getType(),
+                    client.getConnectionInfo().getRemoteAddress(),
+                    client.getConnectionInfo().getRemotePort(),
+                    client.getConnectionInfo().getLocalAddress(),
+                    client.getConnectionInfo().getLocalPort());
+            ConnectionInfo key = HwvtepSouthboundMapper.createConnectionInfo(client);
+            hwvtepConnectionInstance = getConnectionInstance(key);
+            if (hwvtepConnectionInstance != null) {
+                if (hwvtepConnectionInstance.getInstanceIdentifier() != null) {
+                    deviceUpdateHistory.get(hwvtepConnectionInstance.getInstanceIdentifier()).addToHistory(
+                            TransactionType.DELETE, new ClientConnected(client.getConnectionInfo().getRemotePort()));
+                }
 
 
-            // Unregister Entity ownership as soon as possible ,so this instance should
-            // not be used as a candidate in Entity election (given that this instance is
-            // about to disconnect as well), if current owner get disconnected from
-            // HWVTEP device.
-            if (hwvtepConnectionInstance.getHasDeviceOwnership()) {
-                unregisterEntityForOwnership(hwvtepConnectionInstance);
-                txInvoker.invoke(new HwvtepGlobalRemoveCommand(hwvtepConnectionInstance, null, null));
+                // Unregister Entity ownership as soon as possible ,so this instance should
+                // not be used as a candidate in Entity election (given that this instance is
+                // about to disconnect as well), if current owner get disconnected from
+                // HWVTEP device.
+                if (hwvtepConnectionInstance.getHasDeviceOwnership()) {
+                    unregisterEntityForOwnership(hwvtepConnectionInstance);
+                    txInvoker.invoke(new HwvtepGlobalRemoveCommand(hwvtepConnectionInstance, null, null));
+                } else {
+                    unregisterEntityForOwnership(hwvtepConnectionInstance);
+                    //Do not delete if client disconnected from follower HwvtepGlobalRemoveCommand
+                }
+
+                removeConnectionInstance(key);
+
+                //Controller initiated connection can be terminated from switch side.
+                //So cleanup the instance identifier cache.
+                removeInstanceIdentifier(key);
+                removeConnectionInstance(hwvtepConnectionInstance.getInstanceIdentifier());
+                retryConnection(hwvtepConnectionInstance.getInstanceIdentifier(),
+                        hwvtepConnectionInstance.getHwvtepGlobalAugmentation(),
+                        ConnectionReconciliationTriggers.ON_DISCONNECT);
             } else {
-                unregisterEntityForOwnership(hwvtepConnectionInstance);
-                //Do not delete if client disconnected from follower HwvtepGlobalRemoveCommand
+                LOG.warn("HWVTEP disconnected event did not find connection instance for {}", key);
             }
-
-            removeConnectionInstance(key);
-
-            //Controller initiated connection can be terminated from switch side.
-            //So cleanup the instance identifier cache.
-            removeInstanceIdentifier(key);
-            removeConnectionInstance(hwvtepConnectionInstance.getInstanceIdentifier());
-            retryConnection(hwvtepConnectionInstance.getInstanceIdentifier(),
-                    hwvtepConnectionInstance.getHwvtepGlobalAugmentation(),
-                    ConnectionReconciliationTriggers.ON_DISCONNECT);
-        } else {
-            LOG.warn("HWVTEP disconnected event did not find connection instance for {}", key);
+            LOG.trace("HwvtepConnectionManager exit disconnected client: {}", client);
+        } catch (Exception e) {
+            LOG.error("Failed to execute disconnected ",e);
         }
-        LOG.trace("HwvtepConnectionManager exit disconnected client: {}", client);
     }
 
     public OvsdbClient connect(final InstanceIdentifier<Node> iid, final HwvtepGlobalAugmentation hwvtepGlobal)
@@ -233,8 +240,8 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             removeConnectionInstance(key);
         }
 
-        hwvtepConnectionInstance = new HwvtepConnectionInstance(this, key, externalClient, getInstanceIdentifier(key),
-                txInvoker, db);
+        hwvtepConnectionInstance = new HwvtepConnectionInstance(this, key,
+                externalClient, getInstanceIdentifier(key), txInvoker, db);
         hwvtepConnectionInstance.createTransactInvokers();
         return hwvtepConnectionInstance;
     }
@@ -245,21 +252,9 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         LOG.info("Clients after put: {}", clients);
     }
 
-    void putConnectionInstance(final InstanceIdentifier<Node> nodeIid,
-            final HwvtepConnectionInstance connectionInstance) {
+    public void putConnectionInstance(final InstanceIdentifier<Node> nodeIid,
+                                       final HwvtepConnectionInstance connectionInstance) {
         nodeIidVsConnectionInstance.put(nodeIid, connectionInstance);
-    }
-
-    public HwvtepConnectionInstance getConnectionInstanceFromNodeIid(final InstanceIdentifier<Node> nodeIid) {
-        HwvtepConnectionInstance hwvtepConnectionInstance = nodeIidVsConnectionInstance.get(nodeIid);
-        if (hwvtepConnectionInstance != null) {
-            return hwvtepConnectionInstance;
-        }
-        InstanceIdentifier<Node> globalNodeIid = HwvtepSouthboundUtil.getGlobalNodeIid(nodeIid);
-        if (globalNodeIid != null) {
-            return nodeIidVsConnectionInstance.get(globalNodeIid);
-        }
-        return null;
     }
 
     public HwvtepConnectionInstance getConnectionInstance(final ConnectionInfo key) {
@@ -298,6 +293,18 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         } else {
             return null;
         }
+    }
+
+    public HwvtepConnectionInstance getConnectionInstanceFromNodeIid(final InstanceIdentifier<Node> nodeIid) {
+        HwvtepConnectionInstance hwvtepConnectionInstance = nodeIidVsConnectionInstance.get(nodeIid);
+        if (hwvtepConnectionInstance != null) {
+            return hwvtepConnectionInstance;
+        }
+        InstanceIdentifier<Node> globalNodeIid = HwvtepSouthboundUtil.getGlobalNodeIid(nodeIid);
+        if (globalNodeIid != null) {
+            return nodeIidVsConnectionInstance.get(globalNodeIid);
+        }
+        return null;
     }
 
     public void stopConfigurationReconciliation(final InstanceIdentifier<Node> nodeIid) {
@@ -346,11 +353,31 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         return getConnectionInstance(connectionInfo).getOvsdbClient();
     }
 
-    private void registerEntityForOwnership(final HwvtepConnectionInstance hwvtepConnectionInstance) {
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private void registerCallbacks(HwvtepConnectionInstance hwvtepConnectionInstance) {
+        LOG.info("HWVTEP entity {} is owned by this controller registering callbacks",
+                hwvtepConnectionInstance.getConnectionInfo());
+        try {
+            hwvtepOperGlobalListener.runAfterNodeDeleted(
+                hwvtepConnectionInstance.getInstanceIdentifier(), () -> {
+                    cleanupOperationalNode(hwvtepConnectionInstance.getInstanceIdentifier());
+                    hwvtepConnectionInstance.registerCallbacks();
+                    return null;
+                });
+        } catch (Exception e) {
+            LOG.error("Failed to register callbacks for HWVTEP entity {} ",
+                    hwvtepConnectionInstance.getConnectionInfo(), e);
+        }
+    }
+
+
+    private void registerEntityForOwnership(HwvtepConnectionInstance hwvtepConnectionInstance) {
 
         Entity candidateEntity = getEntityFromConnectionInstance(hwvtepConnectionInstance);
         if (entityConnectionMap.get(candidateEntity) != null) {
+            InstanceIdentifier<Node> iid = hwvtepConnectionInstance.getInstanceIdentifier();
             disconnected(entityConnectionMap.get(candidateEntity).getOvsdbClient());
+            hwvtepConnectionInstance.setInstanceIdentifier(iid);
             putConnectionInstance(hwvtepConnectionInstance.getInstanceIdentifier(), hwvtepConnectionInstance);
         }
         entityConnectionMap.put(candidateEntity, hwvtepConnectionInstance);
@@ -361,14 +388,10 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                     entityOwnershipService.registerCandidate(candidateEntity);
             hwvtepConnectionInstance.setDeviceOwnershipCandidateRegistration(registration);
             LOG.info("HWVTEP entity {} is registered for ownership.", candidateEntity);
-
-            //If entity already has owner, it won't get notification from EntityOwnershipService
-            //so cache the connection instances.
-            handleOwnershipState(candidateEntity, hwvtepConnectionInstance);
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("OVSDB entity {} was already registered for ownership", candidateEntity, e);
         }
-
+        handleOwnershipState(candidateEntity, hwvtepConnectionInstance);
     }
 
     private void handleOwnershipState(final Entity candidateEntity,
@@ -387,17 +410,10 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                                     + "instance, so *this* instance is NOT an OWNER of the device",
                             hwvtepConnectionInstance.getConnectionInfo());
                 } else {
-                    afterTakingOwnership(hwvtepConnectionInstance);
+                    registerCallbacks(hwvtepConnectionInstance);
                 }
             }
         }
-    }
-
-    private void afterTakingOwnership(final HwvtepConnectionInstance hwvtepConnectionInstance) {
-        txInvoker.invoke(new HwvtepGlobalRemoveCommand(hwvtepConnectionInstance, null, null));
-        putConnectionInstance(hwvtepConnectionInstance.getMDConnectionInfo(), hwvtepConnectionInstance);
-        hwvtepConnectionInstance.setHasDeviceOwnership(true);
-        hwvtepConnectionInstance.registerCallbacks();
     }
 
     private static Global getHwvtepGlobalTableEntry(final HwvtepConnectionInstance connectionInstance) {
@@ -486,7 +502,11 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     private void retryConnection(final InstanceIdentifier<Node> iid, final HwvtepGlobalAugmentation hwvtepNode,
-                                 final ConnectionReconciliationTriggers trigger) {
+                                 ConnectionReconciliationTriggers trigger) {
+        if (hwvtepNode == null) {
+            //switch initiated connection
+            return;
+        }
         final ReconciliationTask task = new ConnectionReconciliationTask(
                 reconciliationManager,
                 this,
@@ -561,8 +581,28 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             // might went down abruptly and didn't get a chance to clean up the operational data store.
             if (!ownershipChange.getState().hasOwner()) {
                 LOG.debug("{} has no owner, cleaning up the operational data store", ownershipChange.getEntity());
-                // If first cleanEntityOperationalData() was called, this call will be no-op.
-                cleanEntityOperationalData(ownershipChange.getEntity());
+                // Below code might look weird but it's required. We want to give first opportunity to the
+                // previous owner of the device to clean up the operational data store if there is no owner now.
+                // That way we will avoid lot of nasty md-sal exceptions because of concurrent delete.
+                InstanceIdentifier<Node> nodeIid =
+                        (InstanceIdentifier<Node>) ownershipChange.getEntity().getIdentifier();
+                hwvtepOperGlobalListener.scheduleOldConnectionNodeDelete(nodeIid);
+                /*
+                Assuming node1 was the owner earlier.
+                If the owner relinquished he would have cleaned it already in which case the above would be a no op
+                If the owner crashed then the above would clean the node after the scheduled delay
+                The live nodes (two and three) will try to cleanup but that is ok one of them ends up cleaning.
+                But if the southbound connects again that connection can itself trigger the pending cleanup and
+                the above op would become noop again.
+
+                In summary
+                In The following cases it would be a noop
+                1) The southbound connects again within the scheduled cleanup delay.
+                2) The owner node1 which is not crashed cleaned the node properly.
+
+                In the following case both node2 and node3 will try to clean it (one of them will succeed ).
+                 1) node1 which was the owner crashed
+                 */
             }
             return;
         }
@@ -583,7 +623,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
             //*this* instance of southbound plugin is owner of the device,
             //so register for monitor callbacks
-            afterTakingOwnership(hwvtepConnectionInstance);
+            registerCallbacks(hwvtepConnectionInstance);
 
         } else {
             //You were owner of the device, but now you are not. With the current ownership
@@ -596,12 +636,6 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             LOG.error("handleOwnershipChanged: *this* southbound plugin instance is no longer the owner of device {}",
                     hwvtepConnectionInstance.getNodeId().getValue());
         }
-    }
-
-    private void cleanEntityOperationalData(final Entity entity) {
-        @SuppressWarnings("unchecked")
-        final InstanceIdentifier<Node> nodeIid = (InstanceIdentifier<Node>) entity.getIdentifier();
-        txInvoker.invoke(new HwvtepGlobalRemoveCommand(nodeIid));
     }
 
     private HwvtepConnectionInstance getConnectionInstanceFromEntity(final Entity entity) {
@@ -652,5 +686,9 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
     public Map<InstanceIdentifier<Node>, HwvtepConnectionInstance> getAllConnectedInstances() {
         return Collections.unmodifiableMap(nodeIidVsConnectionInstance);
+    }
+
+    public void cleanupOperationalNode(InstanceIdentifier<Node> nodeIid) {
+        txInvoker.invoke(new HwvtepGlobalRemoveCommand(nodeIid));
     }
 }

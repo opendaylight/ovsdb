@@ -10,9 +10,14 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -42,6 +47,10 @@ public final class HwvtepSouthboundUtil {
             "{} column for {} table is not supported by this version of the {} schema: {}";
 
     private static InstanceIdentifierCodec instanceIdentifierCodec;
+
+    private static ScheduledExecutorService scheduledExecutorService = Executors
+            .newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
+                    .setNameFormat("hwvteputil-executor-service-%d").build());
 
     private HwvtepSouthboundUtil() {
         // Prevent instantiating a utility class
@@ -220,5 +229,9 @@ public final class HwvtepSouthboundUtil {
             return augmentation.getConnectionInfo().getRemotePort().getValue().toJava();
         }
         return 0;
+    }
+
+    public static ScheduledExecutorService getScheduledExecutorService() {
+        return scheduledExecutorService;
     }
 }

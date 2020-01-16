@@ -42,10 +42,15 @@ public interface HwvtepSouthboundConstants {
     int WAITING_QUEUE_CAPACITY = Integer.getInteger("hwvtep.wait.queue.capacity", 1000);
     long WAITING_JOB_EXPIRY_TIME_MILLIS = Integer.getInteger(
             "hwvtep.wait.job.expiry.time.millis", 90000);
+    Integer STALE_HWVTEP_CLEANUP_DELAY_SECS
+            = Integer.getInteger("stale.hwvtep.node.cleanup.delay.secs", 240);
+    Integer HWVTEP_REGISTER_CALLBACKS_WAIT_TIMEOUT
+            = Integer.getInteger("hwvtep.max.oper.wait.time.secs", 10);
     long IN_TRANSIT_STATE_EXPIRY_TIME_MILLIS = Integer.getInteger(
             "hwvtep.intransit.job.expiry.time.millis", 10000);
     long IN_TRANSIT_STATE_CHECK_PERIOD_MILLIS = Integer.getInteger(
             "hwvtep.intransit.job.check.period.millis", 30000);
     long CONFIG_NODE_UPDATE_MAX_DELAY_MS = Integer.getInteger(
             "config.node.update.max.delay.ms", 10000);
+
 }

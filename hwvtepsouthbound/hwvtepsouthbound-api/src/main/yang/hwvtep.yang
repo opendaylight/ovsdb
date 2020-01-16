@@ -353,6 +353,7 @@ module hwvtep {
 
     grouping hwvtep-physical-locator-set-attributes {
         list locator-set {
+            key "locator-ref";
             leaf locator-ref {
                 type hwvtep-physical-locator-ref;
             }
@@ -436,6 +437,7 @@ module hwvtep {
             type yang:uuid;
         }
         list switch-bindings {
+            key "logical-switch-ref";
             description "A map of IPv4 or IPv6 address prefix in CIDR
                          notation to logical switch. Multiple prefixes
                          may map to the same switch. By writing a 32-bit
@@ -455,6 +457,7 @@ module hwvtep {
             }
         }
         list static-routes {
+            key "destination-address";
             description "map of string-string pairs. One or more static routes,
                          mapping IP prefixes to next hop IP addresses.";
             leaf destination-address {
@@ -539,6 +542,7 @@ module hwvtep {
             type yang:uuid;
         }
         list acl-entries {
+            key "acl-entry-uuid";
             uses hwvtep-acl-entry-attributes;
         }
         list acl-fault-status {

@@ -26,6 +26,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommandAggregator;
+import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerProxy;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
@@ -56,6 +57,8 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
     /** The instance identifier codec. */
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
+    private TransactionInvokerProxy txInvokerProxy;
+
     /** Logger. */
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbDataTreeChangeListener.class);
 
@@ -66,9 +69,10 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
      * @param cm The connection manager.
      */
     OvsdbDataTreeChangeListener(DataBroker db, OvsdbConnectionManager cm,
-            InstanceIdentifierCodec instanceIdentifierCodec) {
+            InstanceIdentifierCodec instanceIdentifierCodec, TransactionInvokerProxy txInvokerProxy) {
         this.cm = cm;
         this.db = db;
+        this.txInvokerProxy = txInvokerProxy;
         this.instanceIdentifierCodec = instanceIdentifierCodec;
         InstanceIdentifier<Node> path = InstanceIdentifier
                 .create(NetworkTopology.class)
@@ -222,14 +226,29 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
         }
     }
 
-    private void updateData(@NonNull Collection<DataTreeModification<Node>> changes) {
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private void updateData(@Nonnull Collection<DataTreeModification<Node>> changes) {
+
         for (Entry<OvsdbConnectionInstance, Collection<DataTreeModification<Node>>> connectionInstanceEntry :
-                changesPerConnectionInstance(changes).entrySet()) {
-            OvsdbConnectionInstance connectionInstance = connectionInstanceEntry.getKey();
-            Collection<DataTreeModification<Node>> clientChanges = connectionInstanceEntry.getValue();
-            connectionInstance.transact(new TransactCommandAggregator(),
-                    new BridgeOperationalState(db, clientChanges), clientChanges, instanceIdentifierCodec);
+            changesPerConnectionInstance(changes).entrySet()) {
+            txInvokerProxy.getTransactionInvokerForNode(connectionInstanceEntry.getKey().getInstanceIdentifier())
+                .invoke((transaction) -> {
+                    try {
+                        updateDataPerNode(connectionInstanceEntry);
+                    } catch (Exception e) {
+                        LOG.error("Failed to handle ovsdb config topo event", e);
+                        throw e;
+                    }
+                });
         }
+    }
+
+    private void updateDataPerNode(Entry<OvsdbConnectionInstance,
+        Collection<DataTreeModification<Node>>> connectionInstanceEntry) {
+        OvsdbConnectionInstance connectionInstance = connectionInstanceEntry.getKey();
+        Collection<DataTreeModification<Node>> clientChanges = connectionInstanceEntry.getValue();
+        connectionInstance.transact(new TransactCommandAggregator(),
+            new BridgeOperationalState(db, clientChanges),clientChanges, instanceIdentifierCodec);
     }
 
     private Map<OvsdbConnectionInstance, Collection<DataTreeModification<Node>>> changesPerConnectionInstance(

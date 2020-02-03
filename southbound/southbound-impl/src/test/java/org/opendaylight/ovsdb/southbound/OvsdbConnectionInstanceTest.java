@@ -49,7 +49,7 @@ import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangeEvent;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommand;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvoker;
-import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
+import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerProxy;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -63,7 +63,7 @@ public class OvsdbConnectionInstanceTest {
     @Mock private OvsdbConnectionInstance ovsdbConnectionInstance;
     @Mock private OvsdbClient client;
     @Mock private ConnectionInfo connectionInfo;
-    @Mock private TransactionInvoker txInvoker;
+    @Mock private TransactionInvokerProxy txInvokerProxy;
     @Mock private MonitorCallBack callback;
     @Mock private ConnectionInfo key;
     @Mock private InstanceIdentifier<Node> instanceIdentifier;
@@ -71,7 +71,7 @@ public class OvsdbConnectionInstanceTest {
 
     @Before
     public void setUp() throws Exception {
-        ovsdbConnectionInstance = spy(new OvsdbConnectionInstance(key, client, txInvoker, instanceIdentifier));
+        ovsdbConnectionInstance = spy(new OvsdbConnectionInstance(key, client, txInvokerProxy, instanceIdentifier));
     }
 
     @Test

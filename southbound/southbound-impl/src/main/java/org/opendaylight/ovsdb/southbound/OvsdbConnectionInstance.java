@@ -52,7 +52,7 @@ import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommand;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvoker;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvokerImpl;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactUtils;
-import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
+import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerProxy;
 import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
@@ -69,7 +69,7 @@ public class OvsdbConnectionInstance {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionInstance.class);
     private final OvsdbClient client;
     private ConnectionInfo connectionInfo;
-    private final TransactionInvoker txInvoker;
+    private TransactionInvokerProxy txInvokerProxy;
     private Map<TypedDatabaseSchema, TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
     private InstanceIdentifier<Node> instanceIdentifier;
@@ -78,11 +78,11 @@ public class OvsdbConnectionInstance {
     private EntityOwnershipCandidateRegistration deviceOwnershipCandidateRegistration;
     private OvsdbNodeAugmentation initialCreateData = null;
 
-    OvsdbConnectionInstance(final ConnectionInfo key, final OvsdbClient client, final TransactionInvoker txInvoker,
+    OvsdbConnectionInstance(final ConnectionInfo key, final OvsdbClient client, final TransactionInvokerProxy txInvokerProxy,
                             final InstanceIdentifier<Node> iid) {
         this.connectionInfo = key;
         this.client = client;
-        this.txInvoker = txInvoker;
+        this.txInvokerProxy = txInvokerProxy;
         // this.key = key;
         this.instanceIdentifier = iid;
     }
@@ -134,7 +134,7 @@ public class OvsdbConnectionInstance {
                 DatabaseSchema dbSchema = getSchema(database).get();
                 if (dbSchema != null) {
                     LOG.info("Monitoring database: {}", database);
-                    callback = new OvsdbMonitorCallback(instanceIdentifierCodec, this, txInvoker);
+                    callback = new OvsdbMonitorCallback(instanceIdentifierCodec, this, txInvokerProxy);
                     monitorTables(database, dbSchema);
                 } else {
                     LOG.info("No database {} found on {}", database, connectionInfo);

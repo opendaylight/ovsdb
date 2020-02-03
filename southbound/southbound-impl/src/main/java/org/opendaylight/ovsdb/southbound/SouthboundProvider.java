@@ -42,8 +42,8 @@ import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.southbound.reconciliation.OvsdbUpgradeStateListener;
-import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
+import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerProxy;
 import org.opendaylight.serviceutils.upgrade.UpgradeState;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -69,7 +69,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
     private static DataBroker db;
     private OvsdbConnectionManager cm;
-    private TransactionInvoker txInvoker;
+    private TransactionInvokerProxy txInvokerProxy;
     private OvsdbDataTreeChangeListener ovsdbDataTreeChangeListener;
     private OvsdbOperGlobalListener ovsdbOperGlobalListener;
     private final EntityOwnershipService entityOwnershipService;
@@ -114,11 +114,11 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     public void init() {
         LOG.info("SouthboundProvider Session Initiated");
         ovsdbStatusProvider.reportStatus(ServiceState.STARTING, "OVSDB initialization in progress");
-        this.txInvoker = new TransactionInvokerImpl(db);
-        cm = new OvsdbConnectionManager(db, txInvoker, entityOwnershipService, ovsdbConnection,
+        this.txInvokerProxy = new TransactionInvokerProxy();
+        cm = new OvsdbConnectionManager(db, txInvokerProxy, entityOwnershipService, ovsdbConnection,
                 instanceIdentifierCodec, upgradeState);
-        ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(db, cm, instanceIdentifierCodec);
-        ovsdbOperGlobalListener = new OvsdbOperGlobalListener(db, cm, txInvoker);
+        ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(db, cm, instanceIdentifierCodec, txInvokerProxy);
+        ovsdbOperGlobalListener = new OvsdbOperGlobalListener(db, cm, txInvokerProxy);
 
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
@@ -148,11 +148,14 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     public void close() {
         LOG.info("SouthboundProvider Closed");
         try {
-            txInvoker.close();
+            if (txInvokerProxy != null) {
+                txInvokerProxy.close();
+            }
         } catch (InterruptedException e) {
             ovsdbStatusProvider.reportStatus(ServiceState.ERROR, "OVSDB service shutdown error");
             LOG.debug("SouthboundProvider failed to close TransactionInvoker.");
         }
+
         cm.close();
         ovsdbDataTreeChangeListener.close();
         ovsdbOperGlobalListener.close();

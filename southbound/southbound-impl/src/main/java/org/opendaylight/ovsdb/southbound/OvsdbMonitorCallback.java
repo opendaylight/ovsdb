@@ -13,7 +13,7 @@ import org.opendaylight.ovsdb.lib.MonitorCallBack;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbOperationalCommandAggregator;
-import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
+import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,21 +21,22 @@ public class OvsdbMonitorCallback implements MonitorCallBack {
 
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbMonitorCallback.class);
     private final InstanceIdentifierCodec instanceIdentifierCodec;
-    private TransactionInvoker txInvoker;
+    private TransactionInvokerProxy txInvokerProxy;
     private OvsdbConnectionInstance key;
     private AtomicBoolean intialUpdate = new AtomicBoolean(false);
 
     OvsdbMonitorCallback(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
-            TransactionInvoker txInvoker) {
+        TransactionInvokerProxy txInvokerProxy) {
         this.instanceIdentifierCodec = instanceIdentifierCodec;
-        this.txInvoker = txInvoker;
+        this.txInvokerProxy = txInvokerProxy;
         this.key = key;
     }
 
     @Override
     public void update(TableUpdates result, DatabaseSchema dbSchema) {
         boolean isFirstUpdate = intialUpdate.compareAndSet(false, true);
-        txInvoker.invoke(new OvsdbOperationalCommandAggregator(instanceIdentifierCodec, key, result,
+        txInvokerProxy.getTransactionInvokerForNode(key.getInstanceIdentifier())
+            .invoke(new OvsdbOperationalCommandAggregator(instanceIdentifierCodec, key, result,
                 dbSchema, isFirstUpdate));
         LOG.trace("Updated dbSchema: {} and result: {}", dbSchema, result);
     }

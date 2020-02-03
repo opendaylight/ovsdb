@@ -54,7 +54,7 @@ import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask;
 import org.opendaylight.ovsdb.southbound.reconciliation.configuration.BridgeConfigReconciliationTask;
 import org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeRemoveCommand;
-import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
+import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerProxy;
 import org.opendaylight.serviceutils.upgrade.UpgradeState;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -75,7 +75,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private static final int DB_FETCH_TIMEOUT = 1000;
 
     private final DataBroker db;
-    private final TransactionInvoker txInvoker;
+    private TransactionInvokerProxy txInvokerProxy;
     private final Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers =
             new ConcurrentHashMap<>();
     private final Map<InstanceIdentifier<Node>, OvsdbConnectionInstance> nodeIdVsConnectionInstance =
@@ -89,13 +89,13 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private final InstanceIdentifierCodec instanceIdentifierCodec;
     private final UpgradeState upgradeState;
 
-    public OvsdbConnectionManager(final DataBroker db,final TransactionInvoker txInvoker,
+    public OvsdbConnectionManager(final DataBroker db,final TransactionInvokerProxy txInvokerProxy,
                                   final EntityOwnershipService entityOwnershipService,
                                   final OvsdbConnection ovsdbConnection,
                                   final InstanceIdentifierCodec instanceIdentifierCodec,
                                   final UpgradeState upgradeState) {
         this.db = db;
-        this.txInvoker = txInvoker;
+        this.txInvokerProxy = txInvokerProxy;
         this.entityOwnershipService = entityOwnershipService;
         this.ovsdbDeviceEntityOwnershipListener = new OvsdbDeviceEntityOwnershipListener(this, entityOwnershipService);
         this.ovsdbConnection = ovsdbConnection;
@@ -153,7 +153,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             stopBridgeConfigReconciliationIfActive(ovsdbConnectionInstance.getInstanceIdentifier());
         }
 
-        ovsdbConnectionInstance = new OvsdbConnectionInstance(key, externalClient, txInvoker,
+        ovsdbConnectionInstance = new OvsdbConnectionInstance(key, externalClient, txInvokerProxy,
                 getInstanceIdentifier(key));
         ovsdbConnectionInstance.createTransactInvokers();
         return ovsdbConnectionInstance;
@@ -202,23 +202,24 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         ovsdbConnectionInstance.setHasDeviceOwnership(false);
         final InstanceIdentifier nodeIid = ovsdbConnectionInstance.getInstanceIdentifier();
         //remove the node from oper only if it has ownership
-        txInvoker.invoke(new OvsdbNodeRemoveCommand(ovsdbConnectionInstance, null, null) {
+        txInvokerProxy.getTransactionInvokerForNode(nodeIid)
+            .invoke(new OvsdbNodeRemoveCommand(ovsdbConnectionInstance, null, null) {
 
-            @Override
-            public void onSuccess() {
-                super.onSuccess();
-                LOG.debug("Successfully removed node {} from oper", nodeIid);
-                //Giveup the ownership only after cleanup is done
-                unregisterEntityForOwnership(ovsdbConnectionInstance);
-            }
+                @Override
+                public void onSuccess() {
+                    super.onSuccess();
+                    LOG.debug("Successfully removed node {} from oper", nodeIid);
+                    //Giveup the ownership only after cleanup is done
+                    unregisterEntityForOwnership(ovsdbConnectionInstance);
+                }
 
-            @Override
-            public void onFailure(final Throwable throwable) {
-                LOG.debug("Failed to remove node {} from oper", nodeIid);
-                super.onFailure(throwable);
-                unregisterEntityForOwnership(ovsdbConnectionInstance);
-            }
-        });
+                @Override
+                public void onFailure(final Throwable throwable) {
+                    LOG.debug("Failed to remove node {} from oper", nodeIid);
+                    super.onFailure(throwable);
+                    unregisterEntityForOwnership(ovsdbConnectionInstance);
+                }
+            });
     }
 
     public OvsdbClient connect(final InstanceIdentifier<Node> iid,
@@ -488,7 +489,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         @SuppressWarnings("unchecked")
         final InstanceIdentifier<Node> nodeIid = (InstanceIdentifier<Node>) entity.getIdentifier();
 
-        txInvoker.invoke(transaction -> {
+        txInvokerProxy.getTransactionInvokerForNode(nodeIid).invoke(transaction -> {
             Optional<Node> ovsdbNodeOpt = SouthboundUtil.readNode(transaction, nodeIid);
             if (ovsdbNodeOpt.isPresent()) {
                 Node ovsdbNode = ovsdbNodeOpt.get();

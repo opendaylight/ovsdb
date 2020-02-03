@@ -27,6 +27,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -52,9 +54,14 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private final Queue<Entry<ReadWriteTransaction, TransactionCommand>> pendingTransactions = new ArrayDeque<>();
     @GuardedBy("this")
     private BindingTransactionChain chain;
+    private final int id;
+    private TransactionInvokerProxy invokerProxy;
+    private static final AtomicInteger THRAED_ID_COUNTER = new AtomicInteger(0);
 
-    public TransactionInvokerImpl(final DataBroker db) {
+    public TransactionInvokerImpl(final DataBroker db, TransactionInvokerProxy transactionInvokerProxy, int queueSize) {
         this.db = db;
+        this.id = THRAED_ID_COUNTER.incrementAndGet();
+        this.invokerProxy = transactionInvokerProxy;
         this.chain = db.createTransactionChain(this);
         ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("transaction-invoker-impl-%d").build();
         executor = Executors.newSingleThreadExecutor(threadFact);
@@ -63,6 +70,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     @VisibleForTesting
     TransactionInvokerImpl(final DataBroker db, final ExecutorService executor) {
+        this.id = 1;
         this.db = db;
         this.chain = db.createTransactionChain(this);
         this.executor = executor;

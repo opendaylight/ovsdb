@@ -166,13 +166,13 @@ public class OvsdbConnectionInstance {
             List<MonitorRequest> monitorRequests = new ArrayList<>();
             for (String tableName : tables) {
                 if (!SouthboundConstants.SKIP_OVSDB_TABLE.contains(tableName)) {
-                    LOG.info("Southbound monitoring OVSDB schema table {}", tableName);
+                    LOG.trace("Southbound monitoring OVSDB schema table {}", tableName);
                     GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
                     // We copy the columns so we can clean the set up later
                     Set<String> columns = new HashSet<>(tableSchema.getColumns());
                     List<String> skipColumns = SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get(tableName);
                     if (skipColumns != null) {
-                        LOG.info("Southbound NOT monitoring columns {} in table {}", skipColumns, tableName);
+                        LOG.trace("Southbound NOT monitoring columns {} in table {}", skipColumns, tableName);
                         columns.removeAll(skipColumns);
                     }
                     monitorRequests.add(new MonitorRequestBuilder<>(tableSchema)

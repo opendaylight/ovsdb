@@ -122,7 +122,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
                     transaction.add(op.update(port)
                         .where(extraPort.getNameColumn().getSchema().opEqual(terminationPoint.getName()))
                         .build());
-                    LOG.info("Updated Termination Point : {}  with Uuid : {}",
+                    LOG.debug("Updated Termination Point : {}  with Uuid : {}",
                         terminationPoint.getName(), terminationPoint.getPortUuid());
                 }
             } else {

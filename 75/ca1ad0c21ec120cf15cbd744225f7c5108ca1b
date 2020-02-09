@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Chetan Arakere Gowdru <chetan.arakere@altencalsoftlabs.com>
+Code-Review+1: Anil Belur <abelur@linuxfoundation.org>
+Submitted-by: Anil Belur <abelur@linuxfoundation.org>
+Submitted-at: Sun, 09 Feb 2020 12:19:02 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/ovsdb/+/86256
+Project: ovsdb
+Branch: refs/heads/stable/sodium

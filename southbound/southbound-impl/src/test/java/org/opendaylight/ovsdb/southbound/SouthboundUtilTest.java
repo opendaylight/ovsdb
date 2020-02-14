@@ -16,7 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.collect.Iterators;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.net.InetAddress;
@@ -26,10 +26,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
@@ -59,7 +59,7 @@ public class SouthboundUtilTest {
         OvsdbBridgeAttributes mn = mock(OvsdbBridgeAttributes.class);
         DataBroker db = mock(DataBroker.class);
         OvsdbNodeRef ref = mock(OvsdbNodeRef.class);
-        ReadOnlyTransaction transaction = mock(ReadOnlyTransaction.class);
+        ReadTransaction transaction = mock(ReadOnlyTransaction.class);
         when(db.newReadOnlyTransaction()).thenReturn(transaction);
         when(mn.getManagedBy()).thenReturn(ref);
         when(ref.getValue()).thenAnswer(
@@ -78,18 +78,18 @@ public class SouthboundUtilTest {
                 SouthboundUtil.getManagingNode(db, mn));
 
         //node not null, ovsdbNode null
-        when(nf.get()).thenReturn(Optional.absent());
-        assertEquals("Failed to return correct Optional object", Optional.absent(),
+        when(nf.get()).thenReturn(Optional.empty());
+        assertEquals("Failed to return correct Optional object", Optional.empty(),
                 SouthboundUtil.getManagingNode(db, mn));
 
         //optional null
         when(nf.get()).thenReturn(null);
-        assertEquals("Failed to return correct Optional object", Optional.absent(),
+        assertEquals("Failed to return correct Optional object", Optional.empty(),
                 SouthboundUtil.getManagingNode(db, mn));
 
         //ref null
         when(mn.getManagedBy()).thenReturn(null);
-        assertEquals("Failed to return correct Optional object", Optional.absent(),
+        assertEquals("Failed to return correct Optional object", Optional.empty(),
                 SouthboundUtil.getManagingNode(db, mn));
     }
 

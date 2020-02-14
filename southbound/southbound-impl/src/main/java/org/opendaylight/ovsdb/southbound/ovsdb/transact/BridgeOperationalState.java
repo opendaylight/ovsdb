@@ -8,11 +8,11 @@
 
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import java.util.Collection;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
@@ -42,8 +42,8 @@ public class BridgeOperationalState {
     @SuppressWarnings("IllegalCatch")
     public Optional<Node> getBridgeNode(InstanceIdentifier<?> iid) {
         InstanceIdentifier<Node> nodeIid = iid.firstIdentifierOf(Node.class);
-        Optional<Node> bridgeNode = Optional.absent();
-        try (ReadOnlyTransaction transaction = db.newReadOnlyTransaction()) {
+        Optional<Node> bridgeNode = Optional.empty();
+        try (ReadTransaction transaction = db.newReadOnlyTransaction()) {
             bridgeNode = SouthboundUtil.readNode(transaction, nodeIid);
         } catch (Exception exp) {
             LOG.error("Error in getting the brideNode for {}", iid, exp);
@@ -54,9 +54,9 @@ public class BridgeOperationalState {
     public Optional<OvsdbBridgeAugmentation> getOvsdbBridgeAugmentation(InstanceIdentifier<?> iid) {
         Optional<Node> nodeOptional = getBridgeNode(iid);
         if (nodeOptional.isPresent()) {
-            return Optional.fromNullable(nodeOptional.get().augmentation(OvsdbBridgeAugmentation.class));
+            return Optional.ofNullable(nodeOptional.get().augmentation(OvsdbBridgeAugmentation.class));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<TerminationPoint> getBridgeTerminationPoint(InstanceIdentifier<?> iid) {
@@ -75,15 +75,15 @@ public class BridgeOperationalState {
                 LOG.debug("TerminationPoints or Operational BridgeNode missing for {}", iid);
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<OvsdbTerminationPointAugmentation> getOvsdbTerminationPointAugmentation(InstanceIdentifier<?> iid) {
         Optional<TerminationPoint> tpOptional = getBridgeTerminationPoint(iid);
         if (tpOptional.isPresent()) {
-            return Optional.fromNullable(tpOptional.get().augmentation(OvsdbTerminationPointAugmentation.class));
+            return Optional.ofNullable(tpOptional.get().augmentation(OvsdbTerminationPointAugmentation.class));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<ControllerEntry> getControllerEntry(InstanceIdentifier<?> iid) {
@@ -100,7 +100,7 @@ public class BridgeOperationalState {
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<ProtocolEntry> getProtocolEntry(InstanceIdentifier<ProtocolEntry> iid) {
@@ -117,7 +117,7 @@ public class BridgeOperationalState {
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
 }

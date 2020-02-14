@@ -16,13 +16,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommandAggregator;
@@ -75,7 +75,7 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class);
         DataTreeIdentifier<Node> dataTreeIdentifier =
-                new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION, path);
+                DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION, path);
         registration = db.registerDataTreeChangeListener(dataTreeIdentifier, this);
         LOG.info("OVSDB topology listener has been registered.");
     }

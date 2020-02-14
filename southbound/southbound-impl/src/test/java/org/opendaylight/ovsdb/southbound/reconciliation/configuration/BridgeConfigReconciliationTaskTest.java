@@ -15,7 +15,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import java.util.ArrayList;
@@ -31,9 +31,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
@@ -85,7 +85,7 @@ public class BridgeConfigReconciliationTaskTest {
         CheckedFuture<Optional<Node>, ReadFailedException> readNodeFuture =
                 Futures.immediateCheckedFuture(nodeOptional);
         when(reconciliationManager.getDb()).thenReturn(db);
-        ReadOnlyTransaction tx = mock(ReadOnlyTransaction.class);
+        ReadTransaction tx = mock(ReadOnlyTransaction.class);
         Mockito.when(db.newReadOnlyTransaction()).thenReturn(tx);
         Mockito.when(tx.read(any(LogicalDatastoreType.class),any(InstanceIdentifier.class)))
                 .thenReturn(readNodeFuture);

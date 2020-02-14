@@ -12,12 +12,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -41,18 +41,19 @@ public class ControllerNotifyingDataChangeListener implements AutoCloseable, Dat
     public static final int BIT_DELETE = 4;
     public static final int BIT_ALL = 7;
 
-    private final Set<InstanceIdentifier<?>> createdIids = ConcurrentHashMap.newKeySet();
-    private final Set<InstanceIdentifier<?>> removedIids = ConcurrentHashMap.newKeySet();
-    private final Set<InstanceIdentifier<?>> updatedIids = ConcurrentHashMap.newKeySet();
+    private final Set<InstanceIdentifier<DataObject>> createdIids = ConcurrentHashMap.newKeySet();
+    private final Set<InstanceIdentifier<DataObject>> removedIids = ConcurrentHashMap.newKeySet();
+    private final Set<InstanceIdentifier<DataObject>> updatedIids = ConcurrentHashMap.newKeySet();
     private final List<ControllerNotifyingDataChangeListener> waitList;
     private ListenerRegistration<?> listenerRegistration;
     private int mdsalTimeout = MDSAL_TIMEOUT_OPERATIONAL;
-    private volatile InstanceIdentifier<?> iid;
+    private volatile InstanceIdentifier<DataObject> iid;
     private volatile  LogicalDatastoreType type;
     private volatile boolean listen;
     private volatile int mask;
 
-    public ControllerNotifyingDataChangeListener(LogicalDatastoreType type, int mask, InstanceIdentifier<?> iid,
+    public ControllerNotifyingDataChangeListener(LogicalDatastoreType type, int mask,
+                                                 InstanceIdentifier<DataObject> iid,
                                                  List<ControllerNotifyingDataChangeListener> waitList) {
         this(type, iid, waitList);
         this.mask = mask;
@@ -65,7 +66,7 @@ public class ControllerNotifyingDataChangeListener implements AutoCloseable, Dat
      * @param iid of the md-sal object we're waiting for
      * @param waitList for tracking outstanding changes
      */
-    public ControllerNotifyingDataChangeListener(LogicalDatastoreType type, InstanceIdentifier<?> iid,
+    public ControllerNotifyingDataChangeListener(LogicalDatastoreType type, InstanceIdentifier<DataObject> iid,
                                                  List<ControllerNotifyingDataChangeListener> waitList) {
         this.type = type;
         this.iid = iid;
@@ -88,7 +89,7 @@ public class ControllerNotifyingDataChangeListener implements AutoCloseable, Dat
      * @param newType DataStore type
      * @param newIid of the md-sal object we're waiting for
      */
-    public void modify(LogicalDatastoreType newType, InstanceIdentifier<?> newIid) {
+    public void modify(LogicalDatastoreType newType, InstanceIdentifier<DataObject> newIid) {
         this.close();
         this.clear();
         this.type = newType;
@@ -142,15 +143,15 @@ public class ControllerNotifyingDataChangeListener implements AutoCloseable, Dat
         }
     }
 
-    public boolean isCreated(InstanceIdentifier<?> path) {
+    public boolean isCreated(InstanceIdentifier<DataObject> path) {
         return createdIids.remove(path);
     }
 
-    public boolean isUpdated(InstanceIdentifier<?> path) {
+    public boolean isUpdated(InstanceIdentifier<DataObject> path) {
         return updatedIids.remove(path);
     }
 
-    public boolean isRemoved(InstanceIdentifier<?> path) {
+    public boolean isRemoved(InstanceIdentifier<DataObject> path) {
         return removedIids.remove(path);
     }
 
@@ -162,8 +163,10 @@ public class ControllerNotifyingDataChangeListener implements AutoCloseable, Dat
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void registerDataChangeListener(DataBroker dataBroker) {
-        listenerRegistration = dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(type,
-                (InstanceIdentifier)iid), this);
+
+        final DataTreeIdentifier<DataObject> identifier = DataTreeIdentifier.create(type, iid);
+        listenerRegistration = dataBroker.registerDataTreeChangeListener(identifier,
+            ControllerNotifyingDataChangeListener.this);
     }
 
     public void waitForCreation() throws InterruptedException {

@@ -10,7 +10,7 @@ package org.opendaylight.ovsdb.southbound.reconciliation.configuration;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
@@ -113,7 +113,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
             CheckedFuture<Optional<Topology>, ReadFailedException> readTopologyFuture;
             InstanceIdentifier<Topology> topologyInstanceIdentifier = SouthboundMapper
                 .createTopologyInstanceIdentifier();
-            try (ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
+            try (ReadTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
                 // find all bridges of the specific device in the config data store
                 // TODO: this query is not efficient. It retrieves all the Nodes in the datastore, loop over them and
                 // look for the bridges of specific device. It is mre efficient if MDSAL allows query nodes using
@@ -153,7 +153,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
             CheckedFuture<Optional<Node>, ReadFailedException> readNodeFuture;
             LOG.trace("Reconcile Bridge from InclusionList {} only", bridgeReconcileIncludeList);
             for (String bridgeNodeIid : bridgeReconcileIncludeList) {
-                try (ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
+                try (ReadTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
                     InstanceIdentifier<Node> nodeInstanceIdentifier =
                         SouthboundMapper.createInstanceIdentifier(new NodeId(bridgeNodeIid));
                     readNodeFuture = tx.read(CONFIGURATION, nodeInstanceIdentifier);

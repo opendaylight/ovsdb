@@ -21,8 +21,7 @@ import static org.powermock.api.support.membermodification.MemberMatcher.field;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.suppress;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -39,10 +39,8 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -166,7 +164,7 @@ public class OvsdbPortUpdateCommandTest {
             any(Node.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         PowerMockito.mockStatic(SouthboundUtil.class);
-        PowerMockito.when(SouthboundUtil.readNode(any(ReadTransaction.class), any(InstanceIdentifier.class)))
+        PowerMockito.when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(InstanceIdentifier.class)))
             .thenReturn(node);
         ovsdbPortUpdateCommand.execute(transaction);
         verify(ovsdbConnectionInstance).getInstanceIdentifier();
@@ -328,10 +326,10 @@ public class OvsdbPortUpdateCommandTest {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         InstanceIdentifier<Node> nodePath = mock(InstanceIdentifier.class);
         Optional<Node> node = Optional.of(mock(Node.class));
-        CheckedFuture<Optional<Node>, ReadFailedException> checkedFuture = mock(CheckedFuture.class);
+        FluentFuture<Optional<Node>> fluentFuture = mock(FluentFuture.class);
         when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
-                .thenReturn(checkedFuture);
-        when(checkedFuture.checkedGet()).thenReturn(node);
+                .thenReturn(fluentFuture);
+        when(fluentFuture.get()).thenReturn(node);
         assertEquals(node, Whitebox.invokeMethod(ovsdbPortUpdateCommand, "readNode", transaction, nodePath));
     }
 

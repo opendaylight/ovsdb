@@ -138,27 +138,23 @@ public class SouthboundUtils {
 
         @Override
         <T extends DataObject> T read(LogicalDatastoreType store, InstanceIdentifier<T> path) {
-            return mdsalUtils.read(
-                org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.fromMdsal(store), path);
+            return mdsalUtils.read(store, path);
         }
 
         @Override
         <T extends DataObject> boolean put(LogicalDatastoreType store,
                 InstanceIdentifier<T> path, T data) {
-            return mdsalUtils.put(
-                org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.fromMdsal(store), path, data);
+            return mdsalUtils.put(store, path, data);
         }
 
         @Override
         boolean delete(LogicalDatastoreType store, InstanceIdentifier<?> path) {
-            return mdsalUtils.delete(
-                org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.fromMdsal(store), path);
+            return mdsalUtils.delete(store, path);
         }
 
         @Override
         <T extends DataObject> boolean merge(LogicalDatastoreType store, InstanceIdentifier<T> path, T data) {
-            return mdsalUtils.merge(
-                org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.fromMdsal(store), path, data);
+            return mdsalUtils.merge(store, path, data);
         }
     }
 
@@ -478,21 +474,6 @@ public class SouthboundUtils {
      * @param store defined by the <code>LogicalDatastoreType</code> enumeration
      * @return <code>store</code> type data store contents
      */
-    @Deprecated
-    public OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo, String bridgeName,
-            org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType store) {
-        return getBridge(connectionInfo, bridgeName, store.toMdsal());
-    }
-
-    /**
-     * Extract the <code>store</code> type data store contents for the particular bridge identified by
-     * <code>bridgeName</code>.
-     *
-     * @param connectionInfo address for the node
-     * @param bridgeName name of the bridge
-     * @param store defined by the <code>LogicalDatastoreType</code> enumeration
-     * @return <code>store</code> type data store contents
-     */
     public OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo, String bridgeName,
                                               LogicalDatastoreType store) {
         OvsdbBridgeAugmentation ovsdbBridgeAugmentation = null;
@@ -514,21 +495,6 @@ public class SouthboundUtils {
      */
     public OvsdbBridgeAugmentation getBridge(ConnectionInfo connectionInfo, String bridgeName) {
         return getBridge(connectionInfo, bridgeName, LogicalDatastoreType.OPERATIONAL);
-    }
-
-    /**
-     * Extract the node contents from <code>store</code> type data store for the
-     * bridge identified by <code>bridgeName</code>.
-     *
-     * @param connectionInfo address for the node
-     * @param bridgeName name of the bridge
-     * @param store defined by the <code>LogicalDatastoreType</code> enumeration
-     * @return <code>store</code> type data store contents
-     */
-    @Deprecated
-    public Node getBridgeNode(ConnectionInfo connectionInfo, String bridgeName,
-            org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType store) {
-        return getBridgeNode(connectionInfo, bridgeName, store.toMdsal());
     }
 
     /**

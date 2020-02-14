@@ -9,12 +9,12 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;

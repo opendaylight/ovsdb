@@ -14,7 +14,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerNotifyingDataChangeListener;
 import org.opendaylight.ovsdb.utils.mdsal.utils.NotifyingDataChangeListener;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;

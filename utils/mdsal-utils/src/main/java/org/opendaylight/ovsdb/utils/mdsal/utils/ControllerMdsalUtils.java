@@ -7,14 +7,15 @@
  */
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import com.google.common.util.concurrent.FluentFuture;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -50,11 +51,11 @@ public class ControllerMdsalUtils {
         boolean result = false;
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
         transaction.delete(store, path);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        FluentFuture<? extends @NonNull CommitInfo> future = transaction.commit();
         try {
-            future.checkedGet();
+            future.get();
             result = true;
-        } catch (TransactionCommitFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Failed to delete {} ", path, e);
         }
         return result;
@@ -73,11 +74,11 @@ public class ControllerMdsalUtils {
         boolean result = false;
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
         transaction.merge(logicalDatastoreType, path, data, true);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        FluentFuture<? extends @NonNull CommitInfo> future = transaction.commit();
         try {
-            future.checkedGet();
+            future.get();
             result = true;
-        } catch (TransactionCommitFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Failed to merge {} ", path, e);
         }
         return result;
@@ -96,11 +97,11 @@ public class ControllerMdsalUtils {
         boolean result = false;
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
         transaction.put(logicalDatastoreType, path, data, true);
-        CheckedFuture<Void, TransactionCommitFailedException> future = transaction.submit();
+        FluentFuture<? extends @NonNull CommitInfo> future = transaction.commit();
         try {
-            future.checkedGet();
+            future.get();
             result = true;
-        } catch (TransactionCommitFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Failed to put {} ", path, e);
         }
         return result;
@@ -128,13 +129,13 @@ public class ControllerMdsalUtils {
     public <D extends DataObject> Optional<D> readOptional(
             final LogicalDatastoreType store, final InstanceIdentifier<? extends DataObject> path)  {
         int trialNo = 0;
-        ReadOnlyTransaction transaction = databroker.newReadOnlyTransaction();
+        ReadTransaction transaction = databroker.newReadOnlyTransaction();
         do {
             try {
-                Optional<D> result = transaction.read(store, (InstanceIdentifier<D>)path).checkedGet();
+                Optional<D> result = transaction.read(store, (InstanceIdentifier<D>)path).get();
                 transaction.close();
                 return result;
-            } catch (ReadFailedException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 if (trialNo == 0) {
                     logReadFailureError(path, " mdsal Read failed exception retrying the read after sleep");
                 }
@@ -148,7 +149,7 @@ public class ControllerMdsalUtils {
             }
         } while (trialNo++ < MDSAL_MAX_READ_TRIALS);
         logReadFailureError(path, " All read trials exceeded");
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private <D extends org.opendaylight.yangtools.yang.binding.DataObject> void logReadFailureError(

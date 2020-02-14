@@ -10,8 +10,8 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSchemaConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;

@@ -10,13 +10,13 @@ package org.opendaylight.ovsdb.southbound.reconciliation;
 import java.util.Collection;
 import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
@@ -41,7 +41,7 @@ public class OvsdbUpgradeStateListener implements ClusteredDataTreeChangeListene
     public OvsdbUpgradeStateListener(final DataBroker db, OvsdbConnectionManager cm) {
 
         DataTreeIdentifier<UpgradeConfig> dataTreeIdentifier =
-            new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION,
+            DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION,
                         InstanceIdentifier.create(UpgradeConfig.class));
         registration = db.registerDataTreeChangeListener(dataTreeIdentifier, this);
 

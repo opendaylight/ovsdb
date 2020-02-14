@@ -11,7 +11,6 @@ package org.opendaylight.ovsdb.utils.mdsal.utils;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.DataBroker;
@@ -190,7 +189,7 @@ public class MdsalUtilsAsync {
                 transaction.close();
             }
         };
-        Futures.addCallback(future, closeTransactionCallback, MoreExecutors.directExecutor());
+        future.addCallback(closeTransactionCallback, MoreExecutors.directExecutor());
         return future;
     }
 
@@ -207,7 +206,7 @@ public class MdsalUtilsAsync {
      */
     void assignDefaultCallback(final FluentFuture<? extends CommitInfo> transactionFuture,
             final String operationDesc) {
-        Futures.addCallback(transactionFuture, new FutureCallback<CommitInfo>() {
+        transactionFuture.addCallback(new FutureCallback<CommitInfo>() {
             @Override
             public void onSuccess(final CommitInfo result) {
                 LOG.debug("Transaction({}) SUCCESSFUL", operationDesc);

@@ -190,7 +190,7 @@ public class MdsalUtilsAsync {
                 transaction.close();
             }
         };
-        Futures.addCallback(future, closeTransactionCallback, MoreExecutors.directExecutor());
+        future.addCallback(closeTransactionCallback, MoreExecutors.directExecutor());
         return future;
     }
 
@@ -207,7 +207,7 @@ public class MdsalUtilsAsync {
      */
     void assignDefaultCallback(final FluentFuture<? extends CommitInfo> transactionFuture,
             final String operationDesc) {
-        Futures.addCallback(transactionFuture, new FutureCallback<CommitInfo>() {
+        transactionFuture.addCallback(new FutureCallback<CommitInfo>() {
             @Override
             public void onSuccess(final CommitInfo result) {
                 LOG.debug("Transaction({}) SUCCESSFUL", operationDesc);

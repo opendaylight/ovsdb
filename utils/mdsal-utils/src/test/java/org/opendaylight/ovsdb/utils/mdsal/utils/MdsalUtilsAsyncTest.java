@@ -67,13 +67,13 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
     public void testDelete() {
         final FluentFuture<? extends CommitInfo> fut = mdsalUtilsAsync.put(
                 LogicalDatastoreType.CONFIGURATION, TEST_IID, DATA);
-        Futures.addCallback(fut, new FutureCallback<CommitInfo>() {
+        fut.addCallback(new FutureCallback<CommitInfo>() {
 
             @Override
             public void onSuccess(final CommitInfo result) {
                 final FluentFuture<? extends CommitInfo> future =
                         mdsalUtilsAsync.delete(LogicalDatastoreType.CONFIGURATION, TEST_IID);
-                Futures.addCallback(future, new FutureCallback<CommitInfo>() {
+                future.addCallback(new FutureCallback<CommitInfo>() {
 
                     @Override
                     public void onSuccess(final CommitInfo result) {
@@ -112,7 +112,7 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
 
         final FluentFuture<? extends CommitInfo> future = mdsalUtilsAsync.put(
                 LogicalDatastoreType.CONFIGURATION, TEST_IID, data2);
-        Futures.addCallback(future, new FutureCallback<CommitInfo>() {
+        future.addCallback(new FutureCallback<CommitInfo>() {
 
             @Override
             public void onSuccess(final CommitInfo result) {
@@ -144,7 +144,7 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
 
         final FluentFuture<? extends CommitInfo> future =
                 mdsalUtilsAsync.merge(LogicalDatastoreType.CONFIGURATION, TEST_IID, data2, true);
-        Futures.addCallback(future, new FutureCallback<CommitInfo>() {
+        future.addCallback(new FutureCallback<CommitInfo>() {
 
             @Override
             public void onSuccess(final CommitInfo result) {
@@ -163,7 +163,7 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
         final FluentFuture<? extends CommitInfo> fut =
                 mdsalUtilsAsync.put(LogicalDatastoreType.CONFIGURATION, TEST_IID, DATA);
 
-        Futures.addCallback(fut, new FutureCallback<CommitInfo>() {
+        fut.addCallback(new FutureCallback<CommitInfo>() {
             @Override
             public void onSuccess(final CommitInfo result) {
                 final FluentFuture<Optional<Node>> future =

@@ -7,12 +7,12 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
-import com.google.common.base.Optional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import java.util.Optional;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;

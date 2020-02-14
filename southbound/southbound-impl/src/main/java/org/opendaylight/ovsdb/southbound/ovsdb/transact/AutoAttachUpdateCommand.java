@@ -9,7 +9,6 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import com.google.common.base.Optional;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,10 +16,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -171,7 +171,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
                 .augmentation(OvsdbBridgeAugmentation.class);
 
         OvsdbBridgeAugmentation bridge = null;
-        try (ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
+        try (ReadTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
             final Optional<OvsdbBridgeAugmentation> bridgeOptional =
                     transaction.read(LogicalDatastoreType.OPERATIONAL, bridgeIid).get();
             if (bridgeOptional.isPresent()) {

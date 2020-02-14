@@ -8,9 +8,9 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -20,11 +20,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
@@ -92,7 +92,7 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
     private void deleteNode(InstanceIdentifier<Node> iid) {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         tx.delete(LogicalDatastoreType.CONFIGURATION, iid);
-        tx.submit();
+        tx.commit();
     }
 
     @Test
@@ -184,10 +184,10 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
         }
 
         @Override
-        public void setTransactionResultFuture(ListenableFuture future) {
-            Futures.addCallback(future, new FutureCallback<Void>() {
+        public void setTransactionResultFuture(FluentFuture future) {
+            future.addCallback(new FutureCallback<Object>() {
                 @Override
-                public void onSuccess(Void notUsed) {
+                public void onSuccess(Object notUsed) {
                     ft.set(null);
                 }
 

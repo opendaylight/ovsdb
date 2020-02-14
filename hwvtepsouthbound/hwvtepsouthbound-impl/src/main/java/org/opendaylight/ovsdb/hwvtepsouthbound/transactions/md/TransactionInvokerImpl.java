@@ -7,9 +7,9 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.ArrayList;
@@ -23,12 +23,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import org.checkerframework.checker.lock.qual.GuardedBy;
-import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.binding.api.Transaction;
+import org.opendaylight.mdsal.binding.api.TransactionChain;
+import org.opendaylight.mdsal.binding.api.TransactionChainListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +42,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
 
     private final DataBroker db;
     private final BlockingQueue<TransactionCommand> inputQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
-    private final BlockingQueue<AsyncTransaction<?, ?>> failedTransactionQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
+    private final BlockingQueue<Transaction> failedTransactionQueue = new LinkedBlockingQueue<>(QUEUE_SIZE);
     private final ExecutorService executor;
 
     @GuardedBy("this")
@@ -51,7 +50,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     @GuardedBy("this")
     private final List<ReadWriteTransaction> pendingTransactions = new ArrayList<>();
 
-    private BindingTransactionChain chain;
+    private TransactionChain chain;
     //This is made volatile as it is accessed from uncaught exception handler thread also
     private volatile ReadWriteTransaction transactionInFlight = null;
     private Iterator<TransactionCommand> commandIterator = null;
@@ -76,13 +75,13 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     }
 
     @Override
-    public void onTransactionChainFailed(final TransactionChain<?, ?> txChain,
-            final AsyncTransaction<?, ?> transaction, final Throwable cause) {
+    public void onTransactionChainFailed(final TransactionChain txChain,
+            final Transaction transaction, final Throwable cause) {
         offerFailedTransaction(transaction);
     }
 
     @Override
-    public void onTransactionChainSuccessful(final TransactionChain<?, ?> txChain) {
+    public void onTransactionChainSuccessful(final TransactionChain txChain) {
         // NO OP
     }
 
@@ -121,11 +120,11 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         transactionInFlight = transaction;
         recordPendingTransaction(command, transaction);
         command.execute(transaction);
-        ListenableFuture<Void> ft = transaction.submit();
+        FluentFuture<?> ft = transaction.commit();
         command.setTransactionResultFuture(ft);
-        Futures.addCallback(ft, new FutureCallback<Void>() {
+        ft.addCallback(new FutureCallback<Object>() {
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final Object result) {
                 forgetSuccessfulTransaction(transaction);
             }
 
@@ -136,7 +135,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
         }, MoreExecutors.directExecutor());
     }
 
-    private void offerFailedTransaction(final AsyncTransaction<?, ?> transaction) {
+    private void offerFailedTransaction(final Transaction transaction) {
         if (!failedTransactionQueue.offer(transaction)) {
             LOG.warn("failedTransactionQueue is full (size: {})", failedTransactionQueue.size());
         }
@@ -145,7 +144,7 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
     private List<TransactionCommand> extractResubmitCommands() {
         List<TransactionCommand> commands = new ArrayList<>();
         synchronized (this) {
-            AsyncTransaction<?, ?> transaction = failedTransactionQueue.poll();
+            Transaction transaction = failedTransactionQueue.poll();
             if (transaction != null) {
                 int index = pendingTransactions.lastIndexOf(transaction);
                 //This logic needs to be revisited. Is it ok to resubmit these things again ?

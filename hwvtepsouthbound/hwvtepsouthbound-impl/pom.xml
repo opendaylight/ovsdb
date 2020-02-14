@@ -87,6 +87,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.opendaylight.serviceutils</groupId>
       <artifactId>upgrade</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-binding-spi</artifactId>
+    </dependency>
     <!-- Testing Dependencies -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -104,7 +108,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-binding-dom-adapter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-binding-dom-adapter</artifactId>
+      <scope>test</scope>
+      <type>test-jar</type>
+    </dependency>
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-reflect</artifactId>

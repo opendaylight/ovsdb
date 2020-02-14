@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,13 +15,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.tuple.Pair;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
@@ -178,34 +178,34 @@ public class HwvtepOperationalState {
 
     public Optional<Node> getGlobalNode(InstanceIdentifier<?> iid) {
         InstanceIdentifier<Node> nodeIid = iid.firstIdentifierOf(Node.class);
-        return Optional.fromNullable(operationalNodes.get(nodeIid));
+        return Optional.ofNullable(operationalNodes.get(nodeIid));
     }
 
     public Optional<HwvtepGlobalAugmentation> getHwvtepGlobalAugmentation(InstanceIdentifier<?> iid) {
         Preconditions.checkNotNull(iid);
         Optional<Node> nodeOptional = getGlobalNode(iid);
         if (nodeOptional.isPresent()) {
-            return Optional.fromNullable(nodeOptional.get().augmentation(HwvtepGlobalAugmentation.class));
+            return Optional.ofNullable(nodeOptional.get().augmentation(HwvtepGlobalAugmentation.class));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<PhysicalSwitchAugmentation> getPhysicalSwitchAugmentation(InstanceIdentifier<?> iid) {
         Preconditions.checkNotNull(iid);
         Optional<Node> nodeOptional = getGlobalNode(iid);
         if (nodeOptional.isPresent()) {
-            return Optional.fromNullable(nodeOptional.get().augmentation(PhysicalSwitchAugmentation.class));
+            return Optional.ofNullable(nodeOptional.get().augmentation(PhysicalSwitchAugmentation.class));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<List<TerminationPoint>> getTerminationPointList(InstanceIdentifier<?> iid) {
         Preconditions.checkNotNull(iid);
         Optional<Node> nodeOptional = getGlobalNode(iid);
         if (nodeOptional.isPresent() && nodeOptional.get().getTerminationPoint() != null) {
-            return Optional.fromNullable(nodeOptional.get().getTerminationPoint());
+            return Optional.ofNullable(nodeOptional.get().getTerminationPoint());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<LogicalSwitches> getLogicalSwitches(InstanceIdentifier<?> iid,
@@ -221,12 +221,12 @@ public class HwvtepOperationalState {
             if (lswitchList != null) {
                 for (LogicalSwitches lswitch: lswitchList) {
                     if (lswitch.key().equals(logicalSwitchesKey)) {
-                        return Optional.fromNullable(lswitch);
+                        return Optional.ofNullable(lswitch);
                     }
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<LogicalSwitches> getLogicalSwitches(InstanceIdentifier<LogicalSwitches> iid) {
@@ -245,12 +245,12 @@ public class HwvtepOperationalState {
             if (tunnelList != null) {
                 for (Tunnels tunnel: tunnelList) {
                     if (tunnel.key().equals(tunnelsKey)) {
-                        return Optional.fromNullable(tunnel);
+                        return Optional.ofNullable(tunnel);
                     }
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<Tunnels> getTunnels(InstanceIdentifier<Tunnels> iid) {
@@ -268,11 +268,11 @@ public class HwvtepOperationalState {
                 HwvtepPhysicalPortAugmentation hppAugmentation =
                         tp.augmentation(HwvtepPhysicalPortAugmentation.class);
                 if (hppAugmentation != null && hppAugmentation.getHwvtepNodeName().equals(hwvtepNodeName)) {
-                    return Optional.fromNullable(hppAugmentation);
+                    return Optional.ofNullable(hppAugmentation);
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<HwvtepPhysicalLocatorAugmentation> getPhysicalLocatorAugmentation(InstanceIdentifier<?> iid,
@@ -286,11 +286,11 @@ public class HwvtepOperationalState {
                         tp.augmentation(HwvtepPhysicalLocatorAugmentation.class);
                 if (hppAugmentation != null && hppAugmentation.getDstIp().equals(dstIp)
                         && hppAugmentation.getEncapsulationType().equals(encapType)) {
-                    return Optional.fromNullable(hppAugmentation);
+                    return Optional.ofNullable(hppAugmentation);
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<HwvtepPhysicalLocatorAugmentation>
@@ -298,9 +298,9 @@ public class HwvtepOperationalState {
         Optional<TerminationPoint> tp =
             new ControllerMdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
         if (tp.isPresent()) {
-            return Optional.fromNullable(tp.get().augmentation(HwvtepPhysicalLocatorAugmentation.class));
+            return Optional.ofNullable(tp.get().augmentation(HwvtepPhysicalLocatorAugmentation.class));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<LocalMcastMacs> getLocalMcastMacs(InstanceIdentifier<?> iid, LocalMcastMacsKey key) {
@@ -315,12 +315,12 @@ public class HwvtepOperationalState {
             if (macList != null) {
                 for (LocalMcastMacs mac: macList) {
                     if (mac.key().equals(key)) {
-                        return Optional.fromNullable(mac);
+                        return Optional.ofNullable(mac);
                     }
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<RemoteMcastMacs> getRemoteMcastMacs(InstanceIdentifier<?> iid, RemoteMcastMacsKey key) {
@@ -335,12 +335,12 @@ public class HwvtepOperationalState {
             if (macList != null) {
                 for (RemoteMcastMacs mac: macList) {
                     if (mac.key().equals(key)) {
-                        return Optional.fromNullable(mac);
+                        return Optional.ofNullable(mac);
                     }
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<LocalUcastMacs> getLocalUcastMacs(InstanceIdentifier<?> iid, LocalUcastMacsKey key) {
@@ -355,12 +355,12 @@ public class HwvtepOperationalState {
             if (macList != null) {
                 for (LocalUcastMacs mac: macList) {
                     if (mac.key().equals(key)) {
-                        return Optional.fromNullable(mac);
+                        return Optional.ofNullable(mac);
                     }
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<RemoteUcastMacs> getRemoteUcastMacs(InstanceIdentifier<?> iid, RemoteUcastMacsKey key) {
@@ -375,12 +375,12 @@ public class HwvtepOperationalState {
             if (macList != null) {
                 for (RemoteUcastMacs mac: macList) {
                     if (mac.key().equals(key)) {
-                        return Optional.fromNullable(mac);
+                        return Optional.ofNullable(mac);
                     }
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<LogicalRouters> getLogicalRouters(final InstanceIdentifier<?> iid,
@@ -392,12 +392,12 @@ public class HwvtepOperationalState {
             if (hgAugmentation != null && hgAugmentation.getLogicalRouters() != null) {
                 for (LogicalRouters lrouter: hgAugmentation.getLogicalRouters()) {
                     if (lrouter.key().equals(logicalRoutersKey)) {
-                        return Optional.fromNullable(lrouter);
+                        return Optional.ofNullable(lrouter);
                     }
                 }
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     public Optional<Acls> getAcls(InstanceIdentifier<Acls> iid) {

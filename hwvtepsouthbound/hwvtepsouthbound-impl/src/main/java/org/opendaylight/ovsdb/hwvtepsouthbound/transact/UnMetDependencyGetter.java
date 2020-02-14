@@ -8,17 +8,15 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import com.google.common.base.Optional;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
@@ -111,9 +109,7 @@ public abstract class UnMetDependencyGetter<T extends Identifiable> {
                                       Class<? extends Identifiable> cls,
                                       InstanceIdentifier<? extends DataObject> key) {
             DataBroker db = opState.getConnectionInstance().getDataBroker();
-            ReadOnlyTransaction tx = db.newReadOnlyTransaction();
-            Optional data = HwvtepSouthboundUtil.readNode(tx, LogicalDatastoreType.CONFIGURATION, key);
-            tx.close();
+            Optional data = HwvtepSouthboundUtil.readNode(db, LogicalDatastoreType.CONFIGURATION, key);
             if (data.isPresent()) {
                 opState.getDeviceInfo().updateConfigData(cls, key, data.get());
                 return true;

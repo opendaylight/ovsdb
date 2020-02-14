@@ -9,9 +9,10 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.ChildOf;
+import org.opendaylight.yangtools.yang.binding.ChoiceIn;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
@@ -63,6 +64,18 @@ public class DataObjectModificationImpl<T extends DataObject> implements DataObj
     }
 
     @Override
+    public <H extends ChoiceIn<? super T> & DataObject, C extends ChildOf<? super H>>
+            Collection<DataObjectModification<C>> getModifiedChildren(Class<H> caseType, Class<C> childType) {
+        return null;
+    }
+
+    @Override
+    public <C extends ChildOf<? super T>> Collection<DataObjectModification<C>> getModifiedChildren(
+            Class<C> childType) {
+        return null;
+    }
+
+    @Override
     public DataObjectModification<? extends DataObject> getModifiedChild(final InstanceIdentifier.PathArgument arg) {
         return null;
     }
@@ -75,9 +88,22 @@ public class DataObjectModificationImpl<T extends DataObject> implements DataObj
     }
 
     @Override
+    public <H extends ChoiceIn<? super T> & DataObject, C extends Identifiable<K> & ChildOf<? super H>,
+            K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(Class<H> caseType,
+                    Class<C> listItem, K listKey) {
+        return null;
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <C extends ChildOf<? super T>> DataObjectModification<C> getModifiedChildContainer(final Class<C> arg) {
         return (DataObjectModification<C>) getModifiedChild(InstanceIdentifier.Item.of(arg));
+    }
+
+    @Override
+    public <H extends ChoiceIn<? super T> & DataObject, C extends ChildOf<? super H>> DataObjectModification<C>
+            getModifiedChildContainer(Class<H> caseType, Class<C> child) {
+        return null;
     }
 
     @Override

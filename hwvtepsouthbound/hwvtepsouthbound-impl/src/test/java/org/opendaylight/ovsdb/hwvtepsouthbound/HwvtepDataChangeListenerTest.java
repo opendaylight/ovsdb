@@ -14,8 +14,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
 
 import com.google.common.collect.Lists;
 import java.util.Iterator;
@@ -27,6 +25,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
@@ -100,26 +99,26 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     @Test
     public <T extends DataObject> void testLogicalSwitchAdd() throws Exception {
-        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         verifyThatLogicalSwitchCreated();
     }
 
     @Test
     public <T extends DataObject> void testLogicalSwitchDelete() throws Exception {
-        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
-        addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
-        deleteData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        deleteData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, logicalSwitches);
         verify(Operations.op,  times(10)).delete(any());
     }
 
     @Test
     public <T extends DataObject> void testUcastMacAdd() throws Exception {
-        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
-        addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
-        addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
-        addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
+        addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
         //4 ucast macs + 2 termination points
         verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
         //TODO add finer grained validation
@@ -127,10 +126,10 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     @Test
     public <T extends DataObject> void testUcastMacAddWithoutConfigTep() throws Exception {
-        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
-        addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
-        addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
         //4 ucast macs + 2 termination points
         verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
         //TODO add finer grained validation
@@ -138,89 +137,89 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     @Test
     public <T extends DataObject> void testUcastMacDelete() throws Exception {
-        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
-        addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
-        addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
-        addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
-        addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
-        addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
+        addData(LogicalDatastoreType.OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
+        addData(LogicalDatastoreType.OPERATIONAL, TerminationPoint.class, terminationPoints);
 
         resetOperations();
-        deleteData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
+        deleteData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
         verify(Operations.op,  times(4)).delete(any());
         //TODO add finer grained validation
     }
 
     @Test
     public <T extends DataObject> void testMcastMacAdd() throws Exception {
-        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
-        addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
-        addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
-        addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
+        addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast macs + 2 locator sets + 3 termination points
         verify(Operations.op,  times(7)).insert(ArgumentMatchers.<McastMacsRemote>any());
     }
 
     @Test
     public <T extends DataObject> void testMcastMacAddWithoutConfigTep() throws Exception {
-        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
-        addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
-        addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast macs + 2 locator sets + 3 termination points
         verify(Operations.op,  times(7)).insert(ArgumentMatchers.<McastMacsRemote>any());
     }
 
     @Test
     public <T extends DataObject> void testMcastMacDelete() throws Exception {
-        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
-        addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
-        addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
-        addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
-        addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
-        addData(OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
+        addData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
+        addData(LogicalDatastoreType.OPERATIONAL, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
 
         resetOperations();
-        deleteData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
+        deleteData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         verify(Operations.op,  times(2)).delete(ArgumentMatchers.any());
     }
 
     @Test
     public <T extends DataObject> void testAddMacs() throws Exception {
-        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
-        addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
-        addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
-        addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
+        addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
         verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
 
-        addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
-        addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
+        addData(LogicalDatastoreType.OPERATIONAL, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         resetOperations();
-        addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast mac + 2 locator sets ( termination point already added )
         verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
     }
 
     @Test
     public <T extends DataObject> void testUpdateMacs() throws Exception {
-        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
-        addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
-        addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
-        addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
+        addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
         verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
 
-        addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
-        addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
+        addData(LogicalDatastoreType.OPERATIONAL, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         resetOperations();
-        addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
-        addData(OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
+        addData(LogicalDatastoreType.OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
 
         resetOperations();
-        addData(CONFIGURATION, RemoteMcastMacs.class, mcastMac2);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMac2);
         verify(Operations.op,  times(2)).insert(ArgumentMatchers.<McastMacsRemote>any());
         verify(Operations.op,  times(2)).update(ArgumentMatchers.<McastMacsRemote>any());
         verify(Operations.op,  times(0)).delete(ArgumentMatchers.any());
@@ -228,49 +227,49 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
     @Test
     public <T extends DataObject> void testUpdateMacsWithZeroLocators() throws Exception {
-        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
-        addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
-        addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
-        addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
+        addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
         verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
 
-        addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
-        addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
+        addData(LogicalDatastoreType.OPERATIONAL, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         resetOperations();
-        addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
-        addData(OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
+        addData(LogicalDatastoreType.OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
 
         resetOperations();
-        addData(CONFIGURATION, RemoteMcastMacs.class, mcastMac3WithZeroLocators);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMac3WithZeroLocators);
         verify(Operations.op,  times(2)).delete(ArgumentMatchers.any());
     }
 
     @Test
     public <T extends DataObject> void testBackToBackMacsUpdate() throws Exception {
-        addData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
-        addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        addData(LogicalDatastoreType.OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
-        addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
-        addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
+        addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
         verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
 
         resetOperations();
-        addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast mac + 2 locator sets ( termination point already added )
         verify(Operations.op,  times(0)).insert(ArgumentMatchers.<McastMacsRemote>any());
         resetOperations();
-        addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
-        addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
+        addData(LogicalDatastoreType.OPERATIONAL, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         connectionInstance.getDeviceInfo().onOperDataAvailable();
         //2 mcast mac + 2 locator sets ( termination point already added )
         verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
 
         resetOperations();
-        addData(CONFIGURATION, RemoteMcastMacs.class, mcastMac2);
+        addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMac2);
         verify(Operations.op,  times(0)).insert(ArgumentMatchers.<McastMacsRemote>any());
-        addData(OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
+        addData(LogicalDatastoreType.OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
         connectionInstance.getDeviceInfo().onOperDataAvailable();
         verify(Operations.op,  times(2)).insert(ArgumentMatchers.<McastMacsRemote>any());
         verify(Operations.op,  times(2)).update(ArgumentMatchers.<McastMacsRemote>any());

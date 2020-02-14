@@ -9,7 +9,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;

@@ -12,8 +12,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,11 +27,11 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractDataBrokerTest;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
@@ -119,16 +117,16 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         mockConnectionManager();
         mockOperations();
 
-        addNode(OPERATIONAL);
-        addNode(CONFIGURATION);
+        addNode(LogicalDatastoreType.OPERATIONAL);
+        addNode(LogicalDatastoreType.CONFIGURATION);
         hwvtepDataChangeListener = new HwvtepDataChangeListener(dataBroker, hwvtepConnectionManager);
     }
 
     @After
     public void tearDown() throws Exception {
         hwvtepDataChangeListener.close();
-        deleteNode(OPERATIONAL);
-        deleteNode(CONFIGURATION);
+        deleteNode(LogicalDatastoreType.OPERATIONAL);
+        deleteNode(LogicalDatastoreType.CONFIGURATION);
     }
 
     static final void setFinalStatic(final Class<?> cls, final String fieldName, final Object newValue)
@@ -228,13 +226,13 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, builder.build());
         WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         transaction.put(logicalDatastoreType, nodeIid, nodeBuilder.build(), WriteTransaction.CREATE_MISSING_PARENTS);
-        transaction.submit();
+        transaction.commit();
     }
 
     void deleteNode(final LogicalDatastoreType logicalDatastoreType) {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         tx.delete(logicalDatastoreType, nodeIid);
-        tx.submit();
+        tx.commit();
     }
 
     Node addData(final LogicalDatastoreType logicalDatastoreType, final Class<? extends DataObject> dataObject,
@@ -290,7 +288,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
                 tx.delete(logicalDatastoreType, key);
             }
         }
-        tx.submit();
+        tx.commit();
     }
 
     NodeBuilder prepareNode(final InstanceIdentifier<Node> iid) {
@@ -304,7 +302,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         Node node = nodeBuilder.build();
         WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         transaction.merge(datastoreType, id, node, WriteTransaction.CREATE_MISSING_PARENTS);
-        transaction.submit();
+        transaction.commit();
         return node;
     }
 

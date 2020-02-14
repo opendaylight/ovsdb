@@ -11,7 +11,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
-import com.google.common.base.Optional;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,9 +19,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -184,7 +184,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         @SuppressWarnings("unchecked")
         InstanceIdentifier<Node> iidNode = (InstanceIdentifier<Node>)operBridge.getManagedBy().getValue();
         OvsdbNodeAugmentation operNode = null;
-        try (ReadOnlyTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
+        try (ReadTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
             Optional<Node> nodeOptional = SouthboundUtil.readNode(transaction, iidNode);
             if (nodeOptional.isPresent()) {
                 operNode = nodeOptional.get().augmentation(OvsdbNodeAugmentation.class);

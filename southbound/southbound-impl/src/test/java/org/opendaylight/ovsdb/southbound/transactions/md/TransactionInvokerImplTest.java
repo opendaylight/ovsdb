@@ -31,16 +31,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.binding.api.Transaction;
+import org.opendaylight.mdsal.binding.api.TransactionChain;
+import org.opendaylight.mdsal.binding.api.TransactionChainListener;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionInvokerImplTest {
     @Mock
-    private BindingTransactionChain chain;
+    private TransactionChain chain;
     @Mock
     private DataBroker db;
 
@@ -73,7 +73,7 @@ public class TransactionInvokerImplTest {
     public void testOnTransactionChainFailed() {
         final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, new ArrayList<>());
 
-        final AsyncTransaction<?, ?> transaction = mock(AsyncTransaction.class);
+        final Transaction transaction = mock(Transaction.class);
         invoker.onTransactionChainFailed(chain, transaction, new Throwable());
 
         final Queue<?> failedQueue = getInternalState(invoker, "failedTransactionQueue");

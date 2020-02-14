@@ -12,7 +12,7 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;

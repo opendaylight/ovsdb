@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.support.membermodification.MemberMatcher.field;
 import static org.powermock.api.support.membermodification.MemberModifier.suppress;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import java.net.InetAddress;
@@ -33,9 +33,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
@@ -123,7 +123,7 @@ public class OvsdbConnectionManagerTest {
         suppress(MemberMatcher.method(OvsdbConnectionManager.class, "registerEntityForOwnership",
                 OvsdbConnectionInstance.class));
 
-        ReadOnlyTransaction tx = mock(ReadOnlyTransaction.class);
+        ReadTransaction tx = mock(ReadOnlyTransaction.class);
         when(db.newReadOnlyTransaction()).thenReturn(tx);
         when(tx.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
                 .thenReturn(mock(CheckedFuture.class));
@@ -184,7 +184,7 @@ public class OvsdbConnectionManagerTest {
 
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "reconcileConnection",
                 InstanceIdentifier.class, OvsdbNodeAugmentation.class));
-        ReadOnlyTransaction tx = mock(ReadOnlyTransaction.class);
+        ReadTransaction tx = mock(ReadOnlyTransaction.class);
         when(db.newReadOnlyTransaction()).thenReturn(tx);
         when(tx.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
                 .thenReturn(mock(CheckedFuture.class));

@@ -7,19 +7,14 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
-
-import com.google.common.base.Optional;
-
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
@@ -65,10 +60,10 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
         InstanceIdentifier<Node> psNodeIid = HwvtepSouthboundMapper.createInstanceIdentifier(psNode.getNodeId());
         InstanceIdentifier<Node> nodeId = (InstanceIdentifier<Node>)nodeIid;
 
-        ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction();
-        Node globalConfigNode = readNode(tx, CONFIGURATION, nodeId);
-        Node globalOpNode = readNode(tx, OPERATIONAL, nodeId);
-        Node psConfigNode = readNode(tx, CONFIGURATION, psNodeIid);
+        ReadTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction();
+        Node globalConfigNode = readNode(tx, LogicalDatastoreType.CONFIGURATION, nodeId);
+        Node globalOpNode = readNode(tx, LogicalDatastoreType.OPERATIONAL, nodeId);
+        Node psConfigNode = readNode(tx, LogicalDatastoreType.CONFIGURATION, psNodeIid);
 
         DataTreeModification<Node> change = null;
         Collection<DataTreeModification<Node>> changes = new ArrayList<>();

@@ -138,27 +138,23 @@ public class SouthboundUtils {
 
         @Override
         <T extends DataObject> T read(LogicalDatastoreType store, InstanceIdentifier<T> path) {
-            return mdsalUtils.read(
-                org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.fromMdsal(store), path);
+            return mdsalUtils.read(store, path);
         }
 
         @Override
         <T extends DataObject> boolean put(LogicalDatastoreType store,
                 InstanceIdentifier<T> path, T data) {
-            return mdsalUtils.put(
-                org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.fromMdsal(store), path, data);
+            return mdsalUtils.put(store, path, data);
         }
 
         @Override
         boolean delete(LogicalDatastoreType store, InstanceIdentifier<?> path) {
-            return mdsalUtils.delete(
-                org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.fromMdsal(store), path);
+            return mdsalUtils.delete(store, path);
         }
 
         @Override
         <T extends DataObject> boolean merge(LogicalDatastoreType store, InstanceIdentifier<T> path, T data) {
-            return mdsalUtils.merge(
-                org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.fromMdsal(store), path, data);
+            return mdsalUtils.merge(store, path, data);
         }
     }
 

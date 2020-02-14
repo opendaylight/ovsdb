@@ -8,12 +8,13 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.concurrent.ExecutionException;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -36,7 +37,7 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        CheckedFuture<Optional<Node>, ReadFailedException> ovsdbNodeFuture = transaction.read(
+        FluentFuture<Optional<Node>> ovsdbNodeFuture = transaction.read(
                 LogicalDatastoreType.OPERATIONAL, getOvsdbConnectionInstance().getInstanceIdentifier());
         Optional<Node> ovsdbNodeOptional;
         try {

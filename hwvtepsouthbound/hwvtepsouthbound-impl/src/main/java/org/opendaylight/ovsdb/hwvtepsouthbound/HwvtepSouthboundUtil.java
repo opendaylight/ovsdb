@@ -8,21 +8,21 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -79,11 +79,47 @@ public final class HwvtepSouthboundUtil {
     }
 
     public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNode(
-                    ReadWriteTransaction transaction, final InstanceIdentifier<D> connectionIid) {
+            DataBroker db,
+            LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> connectionIid) {
+        if (logicalDatastoreType == LogicalDatastoreType.OPERATIONAL) {
+            if (HwvtepOperGlobalListener.getNode((InstanceIdentifier<Node>) connectionIid) != null) {
+                return Optional.of((D)HwvtepOperGlobalListener.getNode((InstanceIdentifier<Node>)connectionIid));
+            } else {
+                LOG.debug("Node not available in cache. Read from datastore - {}", connectionIid);
+            }
+        }
+        try (ReadTransaction transaction = db.newReadOnlyTransaction()) {
+            return transaction.read(logicalDatastoreType, connectionIid).get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.error("Read failed from datastore for Node : {}",connectionIid,e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNode(
+            ReadTransaction transaction,
+            LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> connectionIid) {
+        if (logicalDatastoreType == LogicalDatastoreType.OPERATIONAL) {
+            if (HwvtepOperGlobalListener.getNode((InstanceIdentifier<Node>) connectionIid) != null) {
+                return Optional.of((D)HwvtepOperGlobalListener.getNode((InstanceIdentifier<Node>)connectionIid));
+            } else {
+                LOG.debug("Node not available in cache. Read from datastore - {}", connectionIid);
+            }
+        }
+        try {
+            return transaction.read(logicalDatastoreType, connectionIid).get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.error("Read failed from datastore for Node : {}",connectionIid,e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNode(
+            ReadWriteTransaction transaction, final InstanceIdentifier<D> connectionIid) {
         return readNode(transaction, LogicalDatastoreType.OPERATIONAL, connectionIid);
     }
 
-    public static <D extends DataObject> Optional<D> readNode(ReadTransaction transaction,
+    public static <D extends DataObject> Optional<D> readNode(ReadWriteTransaction transaction,
                                                               LogicalDatastoreType logicalDatastoreType,
                                                               InstanceIdentifier<D> connectionIid) {
         if (logicalDatastoreType == LogicalDatastoreType.OPERATIONAL) {
@@ -94,8 +130,8 @@ public final class HwvtepSouthboundUtil {
             }
         }
         try {
-            return transaction.read(logicalDatastoreType, connectionIid).checkedGet();
-        } catch (ReadFailedException e) {
+            return transaction.read(logicalDatastoreType, connectionIid).get();
+        } catch (InterruptedException | ExecutionException e) {
             LOG.error("Read failed from datastore for Node : {}",connectionIid,e);
             throw new RuntimeException(e);
         }
@@ -110,7 +146,7 @@ public final class HwvtepSouthboundUtil {
             result = getManagingNode(db, ref);
         } else {
             LOG.warn("Cannot find client for PhysicalSwitch without a specified ManagedBy {}", node);
-            return Optional.absent();
+            return Optional.empty();
         }
         if (!result.isPresent()) {
             LOG.warn("Failed to find managing node for PhysicalSwitch {}", node);
@@ -140,15 +176,15 @@ public final class HwvtepSouthboundUtil {
                 } else {
                     LOG.warn("Hwvtep switch claims to be managed by {} but " + "that HwvtepNode does not exist",
                                     ref.getValue());
-                    return Optional.absent();
+                    return Optional.empty();
                 }
             } else {
                 LOG.warn("Mysteriously got back a thing which is *not* a topology Node: {}", optional);
-                return Optional.absent();
+                return Optional.empty();
             }
         } catch (RuntimeException e) {
             LOG.warn("Failed to get HwvtepNode {}", ref, e);
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 

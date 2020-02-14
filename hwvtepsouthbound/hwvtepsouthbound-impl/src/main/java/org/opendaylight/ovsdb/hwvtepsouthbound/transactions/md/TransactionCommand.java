@@ -8,8 +8,8 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import com.google.common.util.concurrent.FluentFuture;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 
 public interface TransactionCommand {
 
@@ -18,10 +18,10 @@ public interface TransactionCommand {
     /**
      * Sets the result future of the executed/submitted transaction.
      */
-    default void setTransactionResultFuture(ListenableFuture future) {
+    default void setTransactionResultFuture(FluentFuture future) {
     }
 
-    default ListenableFuture getTransactionResultFuture() {
+    default FluentFuture getTransactionResultFuture() {
         return null;
     }
 }

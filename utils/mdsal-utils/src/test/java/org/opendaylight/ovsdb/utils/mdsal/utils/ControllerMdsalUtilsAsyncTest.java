@@ -11,23 +11,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractDataBrokerTest;
+import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
@@ -66,18 +66,18 @@ public class ControllerMdsalUtilsAsyncTest extends AbstractDataBrokerTest {
 
     @Test
     public void testDelete() {
-        final CheckedFuture<Void, TransactionCommitFailedException> fut = mdsalUtilsAsync.put(
+        final FluentFuture<? extends @NonNull CommitInfo> fut = mdsalUtilsAsync.put(
                 LogicalDatastoreType.CONFIGURATION, TEST_IID, DATA);
-        Futures.addCallback(fut, new FutureCallback<Void>() {
+        Futures.addCallback(fut, new FutureCallback<CommitInfo>() {
 
             @Override
-            public void onSuccess(final Void result) {
-                final CheckedFuture<Void, TransactionCommitFailedException> future =
+            public void onSuccess(final CommitInfo result) {
+                final FluentFuture<? extends @NonNull CommitInfo> future =
                         mdsalUtilsAsync.delete(LogicalDatastoreType.CONFIGURATION, TEST_IID);
-                Futures.addCallback(future, new FutureCallback<Void>() {
+                Futures.addCallback(future, new FutureCallback<CommitInfo>() {
 
                     @Override
-                    public void onSuccess(final Void result) {
+                    public void onSuccess(final CommitInfo result) {
                         assertNull(readDS());
                     }
 
@@ -111,12 +111,12 @@ public class ControllerMdsalUtilsAsyncTest extends AbstractDataBrokerTest {
         mdsalUtilsAsync.put(LogicalDatastoreType.CONFIGURATION, TEST_IID, data1, operationDesc);
         assertEquals(data1, readDS());
 
-        final CheckedFuture<Void, TransactionCommitFailedException> future = mdsalUtilsAsync.put(
+        final FluentFuture<? extends @NonNull CommitInfo> future = mdsalUtilsAsync.put(
                 LogicalDatastoreType.CONFIGURATION, TEST_IID, data2);
-        Futures.addCallback(future, new FutureCallback<Void>() {
+        Futures.addCallback(future, new FutureCallback<CommitInfo>() {
 
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final CommitInfo result) {
                 assertEquals(1, readDS().getSupportingNode().size());
             }
 
@@ -143,12 +143,12 @@ public class ControllerMdsalUtilsAsyncTest extends AbstractDataBrokerTest {
         mdsalUtilsAsync.merge(LogicalDatastoreType.CONFIGURATION, TEST_IID, data1, operationDesc, true);
         assertEquals(data1, readDS());
 
-        final CheckedFuture<Void, TransactionCommitFailedException> future =
+        final FluentFuture<? extends @NonNull CommitInfo> future =
                 mdsalUtilsAsync.merge(LogicalDatastoreType.CONFIGURATION, TEST_IID, data2, true);
-        Futures.addCallback(future, new FutureCallback<Void>() {
+        Futures.addCallback(future, new FutureCallback<CommitInfo>() {
 
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final CommitInfo result) {
                 assertEquals(2, readDS().getSupportingNode().size());
             }
 
@@ -161,13 +161,13 @@ public class ControllerMdsalUtilsAsyncTest extends AbstractDataBrokerTest {
 
     @Test
     public void testRead() {
-        final CheckedFuture<Void, TransactionCommitFailedException> fut =
+        final FluentFuture<? extends @NonNull CommitInfo> fut =
                 mdsalUtilsAsync.put(LogicalDatastoreType.CONFIGURATION, TEST_IID, DATA);
 
-        Futures.addCallback(fut, new FutureCallback<Void>() {
+        Futures.addCallback(fut, new FutureCallback<CommitInfo>() {
             @Override
-            public void onSuccess(final Void result) {
-                final CheckedFuture<Optional<Node>, ReadFailedException> future =
+            public void onSuccess(final CommitInfo result) {
+                final FluentFuture<Optional<Node>> future =
                         mdsalUtilsAsync.read(LogicalDatastoreType.CONFIGURATION, TEST_IID);
                 Optional<Node> optNode;
                 try {

@@ -20,16 +20,16 @@ import static org.opendaylight.infrautils.ready.testutils.TestSystemReadyMonitor
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.infrautils.diagstatus.DiagStatusService;
 import org.opendaylight.infrautils.ready.testutils.TestSystemReadyMonitor;
+import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipCandidateRegistration;
@@ -146,7 +146,7 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
     }
 
     @Test
-    public void testHandleOwnershipChange() throws ReadFailedException {
+    public void testHandleOwnershipChange() throws ExecutionException, InterruptedException {
         when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
             java.util.Optional.of(EntityOwnershipState.from(false, true)));
         Entity entity = new Entity("ovsdb-southbound-provider", "ovsdb-southbound-provider");
@@ -168,9 +168,9 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
 
             // At this point the OVSDB topology must not be present in either tree
             assertFalse(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION,
-                    topologyIid).checkedGet().isPresent());
+                    topologyIid).get().isPresent());
             assertFalse(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
-                    topologyIid).checkedGet().isPresent());
+                    topologyIid).get().isPresent());
 
             // Become owner
             southboundProvider.handleOwnershipChange(new EntityOwnershipChange(entity,
@@ -185,9 +185,9 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
 
             // Now the OVSDB topology must be present in both trees
             assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION,
-                    topologyIid).checkedGet().isPresent());
+                    topologyIid).get().isPresent());
             assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
-                    topologyIid).checkedGet().isPresent());
+                    topologyIid).get().isPresent());
 
             // Verify idempotency
             southboundProvider.handleOwnershipChange(new EntityOwnershipChange(entity,
@@ -195,9 +195,9 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
 
             // The OVSDB topology must be present in both trees
             assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION,
-                    topologyIid).checkedGet().isPresent());
+                    topologyIid).get().isPresent());
             assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
-                    topologyIid).checkedGet().isPresent());
+                    topologyIid).get().isPresent());
         }
     }
 }

@@ -7,11 +7,8 @@
  */
 package org.opendaylight.ovsdb.southbound.reconciliation.configuration;
 
-import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
-
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -20,10 +17,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
@@ -110,15 +108,15 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
         if (reconcileAllBridges) {
             // case 1, 3 & 4
             LOG.trace("Reconciling all bridges with exclusion list {}", bridgeReconcileExcludeList);
-            CheckedFuture<Optional<Topology>, ReadFailedException> readTopologyFuture;
+            FluentFuture<Optional<Topology>> readTopologyFuture;
             InstanceIdentifier<Topology> topologyInstanceIdentifier = SouthboundMapper
                 .createTopologyInstanceIdentifier();
-            try (ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
+            try (ReadTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
                 // find all bridges of the specific device in the config data store
                 // TODO: this query is not efficient. It retrieves all the Nodes in the datastore, loop over them and
                 // look for the bridges of specific device. It is mre efficient if MDSAL allows query nodes using
                 // wildcard on node id (ie: ovsdb://uuid/<device uuid>/bridge/*) r attributes
-                readTopologyFuture = tx.read(CONFIGURATION, topologyInstanceIdentifier);
+                readTopologyFuture = tx.read(LogicalDatastoreType.CONFIGURATION, topologyInstanceIdentifier);
             }
             Futures.addCallback(readTopologyFuture, new FutureCallback<Optional<Topology>>() {
                 @Override
@@ -150,13 +148,13 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
         } else {
             // Case 3
             // Reconciling Specific set of bridges in order to avoid full Topology Read.
-            CheckedFuture<Optional<Node>, ReadFailedException> readNodeFuture;
+            FluentFuture<Optional<Node>> readNodeFuture;
             LOG.trace("Reconcile Bridge from InclusionList {} only", bridgeReconcileIncludeList);
             for (String bridgeNodeIid : bridgeReconcileIncludeList) {
-                try (ReadOnlyTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
+                try (ReadTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
                     InstanceIdentifier<Node> nodeInstanceIdentifier =
                         SouthboundMapper.createInstanceIdentifier(new NodeId(bridgeNodeIid));
-                    readNodeFuture = tx.read(CONFIGURATION, nodeInstanceIdentifier);
+                    readNodeFuture = tx.read(LogicalDatastoreType.CONFIGURATION, nodeInstanceIdentifier);
                 }
                 Futures.addCallback(readNodeFuture, new FutureCallback<Optional<Node>>() {
                     @Override

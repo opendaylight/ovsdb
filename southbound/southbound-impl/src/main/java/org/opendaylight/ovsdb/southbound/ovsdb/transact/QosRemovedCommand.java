@@ -12,7 +12,7 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Qos;

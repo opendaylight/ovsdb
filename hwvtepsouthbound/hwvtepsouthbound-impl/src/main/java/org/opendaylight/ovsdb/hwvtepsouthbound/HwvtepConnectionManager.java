@@ -10,9 +10,8 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -23,15 +22,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipCandidateRegistration;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
@@ -526,8 +525,8 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                 reconciliationManager.enqueueForRetry(task);
                 break;
             case ON_DISCONNECT: {
-                ReadOnlyTransaction tx = db.newReadOnlyTransaction();
-                CheckedFuture<Optional<Node>, ReadFailedException> readNodeFuture =
+                ReadTransaction tx = db.newReadOnlyTransaction();
+                FluentFuture<Optional<Node>> readNodeFuture =
                         tx.read(LogicalDatastoreType.CONFIGURATION, iid);
 
                 Futures.addCallback(readNodeFuture, new FutureCallback<Optional<Node>>() {

@@ -7,9 +7,9 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.PostConstruct;
@@ -18,14 +18,13 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.aries.blueprint.annotation.service.Reference;
 import org.apache.aries.blueprint.annotation.service.Service;
-import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipCandidateRegistration;
@@ -131,7 +130,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID));
         DataTreeIdentifier<Topology> treeId =
-                new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, path);
+                DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, path);
 
         LOG.trace("Registering listener for path {}", treeId);
         operTopologyRegistration = dataBroker.registerDataTreeChangeListener(treeId, this);
@@ -177,13 +176,13 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID));
         ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
-        CheckedFuture<Optional<Topology>, ReadFailedException> hwvtepTp = transaction.read(type, path);
+        FluentFuture<Optional<Topology>> hwvtepTp = transaction.read(type, path);
         try {
             if (!hwvtepTp.get().isPresent()) {
                 TopologyBuilder tpb = new TopologyBuilder();
                 tpb.setTopologyId(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID);
                 transaction.put(type, path, tpb.build(), true);
-                transaction.submit();
+                transaction.commit();
             } else {
                 transaction.cancel();
             }

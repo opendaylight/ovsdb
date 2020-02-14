@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependentJob;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
@@ -80,8 +81,8 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
             }
         });
         assertEquals(1, latch.getCount());
-        addData(CONFIGURATION, LogicalSwitches.class, new String[]{"ls0", "100"});
-        addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
+        addData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, new String[]{"ls0", "100"});
+        addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
         assertEquals(0, latch.getCount());
     }
 

@@ -11,7 +11,7 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
+import java.util.Optional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -226,7 +226,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
 
     @SuppressWarnings("IllegalCatch")
     private Optional<Node> readNode(final ReadWriteTransaction transaction, final InstanceIdentifier<Node> nodePath) {
-        Optional<Node> node = Optional.absent();
+        Optional<Node> node = Optional.empty();
         try {
             node = SouthboundUtil.readNode(transaction, nodePath);
         } catch (Exception exp) {
@@ -244,7 +244,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                 this.bridgeUpdatedRows.get(bridgeUuid)));
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
@@ -270,7 +270,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             }
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @VisibleForTesting

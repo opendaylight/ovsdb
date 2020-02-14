@@ -10,8 +10,8 @@ package org.opendaylight.ovsdb.southbound;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -23,14 +23,15 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipCandidateRegistration;
@@ -348,8 +349,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             return nodeIdVsConnectionInstance.get(nodePath);
         }
         try {
-            ReadOnlyTransaction transaction = db.newReadOnlyTransaction();
-            CheckedFuture<Optional<Node>, ReadFailedException> nodeFuture = transaction.read(
+            ReadTransaction transaction = db.newReadOnlyTransaction();
+            FluentFuture<Optional<Node>> nodeFuture = transaction.read(
                     LogicalDatastoreType.OPERATIONAL, nodePath);
             transaction.close();
             Optional<Node> optional = nodeFuture.get();
@@ -619,8 +620,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 reconciliationManager.enqueueForRetry(task);
                 break;
             case ON_DISCONNECT: {
-                CheckedFuture<Optional<Node>, ReadFailedException> readNodeFuture;
-                try (ReadOnlyTransaction tx = db.newReadOnlyTransaction()) {
+                FluentFuture<Optional<Node>> readNodeFuture;
+                try (ReadTransaction tx = db.newReadOnlyTransaction()) {
                     readNodeFuture = tx.read(LogicalDatastoreType.CONFIGURATION, iid);
                 }
                 Futures.addCallback(readNodeFuture, new FutureCallback<Optional<Node>>() {

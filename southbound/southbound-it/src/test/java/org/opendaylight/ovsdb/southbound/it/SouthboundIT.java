@@ -42,12 +42,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.runner.RunWith;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
@@ -266,7 +266,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
 
         public void registerDataChangeListener() {
-            dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(type,
+            dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.create(type,
                     (InstanceIdentifier)iid), this);
         }
 
@@ -426,9 +426,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         assertTrue("Did not find " + SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue(), getOvsdbTopology());
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         final InstanceIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
-        dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(LogicalDatastoreType.CONFIGURATION,
+        dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION,
                 (InstanceIdentifier)iid), CONFIGURATION_LISTENER);
-        dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL,
+        dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL,
                 (InstanceIdentifier)iid), OPERATIONAL_LISTENER);
 
         ovsdbNode = connectOvsdbNode(connectionInfo);

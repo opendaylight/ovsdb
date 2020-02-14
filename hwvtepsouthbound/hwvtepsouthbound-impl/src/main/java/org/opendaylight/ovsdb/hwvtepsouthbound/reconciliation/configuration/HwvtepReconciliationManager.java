@@ -8,13 +8,13 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
 import java.util.Collection;
-import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
@@ -35,8 +35,8 @@ public class HwvtepReconciliationManager implements ClusteredDataTreeChangeListe
     public HwvtepReconciliationManager(DataBroker db, HwvtepConnectionManager hcm) {
         this.hcm = hcm;
 
-        InstanceIdentifier<Node> iid = HwvtepSouthboundMapper.createInstanceIdentifier();
-        DataTreeIdentifier<Node> treeId = new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, iid);
+        final InstanceIdentifier<Node> iid = HwvtepSouthboundMapper.createInstanceIdentifier();
+        final DataTreeIdentifier<Node> treeId = DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, iid);
         LOG.trace("Registering listener for path {}", treeId);
         registration = db.registerDataTreeChangeListener(treeId, HwvtepReconciliationManager.this);
     }

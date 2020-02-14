@@ -12,12 +12,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -52,7 +52,8 @@ public class ControllerNotifyingDataChangeListener implements AutoCloseable, Dat
     private volatile boolean listen;
     private volatile int mask;
 
-    public ControllerNotifyingDataChangeListener(LogicalDatastoreType type, int mask, InstanceIdentifier<?> iid,
+    public ControllerNotifyingDataChangeListener(LogicalDatastoreType type, int mask,
+                                                 InstanceIdentifier<?> iid,
                                                  List<ControllerNotifyingDataChangeListener> waitList) {
         this(type, iid, waitList);
         this.mask = mask;
@@ -162,8 +163,9 @@ public class ControllerNotifyingDataChangeListener implements AutoCloseable, Dat
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void registerDataChangeListener(DataBroker dataBroker) {
-        listenerRegistration = dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(type,
-                (InstanceIdentifier)iid), this);
+
+        listenerRegistration = dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.create(type,
+            (InstanceIdentifier)iid), this);
     }
 
     public void waitForCreation() throws InterruptedException {

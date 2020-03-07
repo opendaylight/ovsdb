@@ -5,11 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import java.util.Collection;
-
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -27,7 +25,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
-
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
     public OvsdbBridgeRemovedCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
@@ -52,5 +49,4 @@ public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, mnIid);
         }
     }
-
 }

@@ -16,7 +16,6 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -33,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class SouthboundUtil {
-
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundUtil.class);
     private static final String SCHEMA_VERSION_MISMATCH =
             "{} column for {} table is not supported by this version of the {} schema: {}";

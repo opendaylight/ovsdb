@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.lib.impl;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +18,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

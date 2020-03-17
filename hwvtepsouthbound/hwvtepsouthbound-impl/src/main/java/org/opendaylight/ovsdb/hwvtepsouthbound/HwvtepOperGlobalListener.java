@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
@@ -23,6 +24,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.Mod
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.utils.mdsal.utils.Scheduler;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -38,6 +40,7 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperGlobalListener.class);
     private static final Map<InstanceIdentifier<Node>, ConnectionInfo> NODE_CONNECTION_INFO = new ConcurrentHashMap<>();
+    private static final Map<InstanceIdentifier<Node>, ScheduledFuture> TIMEOUT_FTS = new ConcurrentHashMap<>();
 
     private ListenerRegistration<HwvtepOperGlobalListener> registration;
     private final HwvtepConnectionManager hcm;
@@ -79,6 +82,20 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
         } catch (Exception e) {
             LOG.error("Failed to handle dcn event ", e);
         }
+    }
+
+    public static void runAfterTimeoutIfNodeNotCreated(InstanceIdentifier<Node> iid, Runnable job) {
+        ScheduledFuture<?> ft = TIMEOUT_FTS.get(iid);
+        if (ft != null) {
+            ft.cancel(false);
+        }
+        ft = Scheduler.getScheduledExecutorService().schedule(() -> {
+            TIMEOUT_FTS.remove(iid);
+            if (!NODE_CONNECTION_INFO.containsKey(iid)) {
+                job.run();
+            }
+        }, HwvtepSouthboundConstants.EOS_TIMEOUT, TimeUnit.SECONDS);
+        TIMEOUT_FTS.put(iid, ft);
     }
 
     public void runAfterNodeDeleted(InstanceIdentifier<Node> iid, Callable<Void> job) throws Exception {
@@ -123,6 +140,10 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
                 return;
             }
             CONNECTED_NODES.put(key, node);
+            ScheduledFuture ft = TIMEOUT_FTS.remove(key);
+            if (ft != null) {
+                ft.cancel(false);
+            }
             HwvtepGlobalAugmentation globalAugmentation = node.augmentation(HwvtepGlobalAugmentation.class);
             if (globalAugmentation != null) {
                 ConnectionInfo connectionInfo = globalAugmentation.getConnectionInfo();

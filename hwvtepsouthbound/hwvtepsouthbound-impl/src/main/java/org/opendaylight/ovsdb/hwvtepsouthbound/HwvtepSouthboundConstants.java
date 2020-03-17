@@ -52,5 +52,6 @@ public interface HwvtepSouthboundConstants {
             "hwvtep.intransit.job.check.period.millis", 30000);
     long CONFIG_NODE_UPDATE_MAX_DELAY_MS = Integer.getInteger(
             "config.node.update.max.delay.ms", 10000);
+    int EOS_TIMEOUT = Integer.getInteger("hwvtep.eos.timeout.delay.secs", 240);
 
 }

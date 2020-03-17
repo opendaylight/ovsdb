@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
@@ -36,6 +37,7 @@ import org.opendaylight.ovsdb.lib.message.MonitorSelect;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.Row;
+import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
@@ -77,6 +79,8 @@ public class OvsdbConnectionInstance {
     private Entity connectedEntity;
     private EntityOwnershipCandidateRegistration deviceOwnershipCandidateRegistration;
     private OvsdbNodeAugmentation initialCreateData = null;
+    private Map<UUID, InstanceIdentifier<Node>> ports = new ConcurrentHashMap<>();
+    private Map<String, InstanceIdentifier<Node>> portInterfaces = new ConcurrentHashMap<>();
 
     OvsdbConnectionInstance(final ConnectionInfo key, final OvsdbClient client, final TransactionInvoker txInvoker,
                             final InstanceIdentifier<Node> iid) {
@@ -85,6 +89,30 @@ public class OvsdbConnectionInstance {
         this.txInvoker = txInvoker;
         // this.key = key;
         this.instanceIdentifier = iid;
+    }
+
+    public void updatePort(UUID uuid, InstanceIdentifier<Node> iid) {
+        ports.put(uuid, iid);
+    }
+
+    public void remotePort(UUID uuid) {
+        ports.remove(uuid);
+    }
+
+    public InstanceIdentifier<Node> getPort(UUID uuid) {
+        return ports.get(uuid);
+    }
+
+    public void updatePortInterface(String name, InstanceIdentifier<Node> iid) {
+        portInterfaces.put(name, iid);
+    }
+
+    public void removePortInterface(String name) {
+        portInterfaces.remove(name);
+    }
+
+    public InstanceIdentifier<Node> getPortInterface(String name) {
+        return portInterfaces.get(name);
     }
 
     /**

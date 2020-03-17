@@ -7,7 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -41,15 +40,17 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(final ReadWriteTransaction transaction) {
-        Collection<Port> portRemovedRows = TyperUtils.extractRowsRemoved(
-                Port.class, getUpdates(), getDbSchema()).values();
+        Map<UUID, Port> portRemovedRows = TyperUtils.extractRowsRemoved(
+            Port.class, getUpdates(), getDbSchema());
         Map<UUID, Port> portUpdatedRows = TyperUtils.extractRowsUpdated(
                 Port.class, getUpdates(), getDbSchema());
         Map<UUID,Bridge> bridgeUpdatedRows = TyperUtils.extractRowsUpdated(
                 Bridge.class, getUpdates(), getDbSchema());
         Map<UUID,Bridge> bridgeUpdatedOldRows = TyperUtils.extractRowsOld(
                 Bridge.class, getUpdates(), getDbSchema());
-        for (Port port : portRemovedRows) {
+        for (Entry<UUID, Port> portRemoved: portRemovedRows.entrySet()) {
+            final UUID portUuid = portRemoved.getKey();
+            final Port port = portRemoved.getValue();
             final String portName = port.getName();
             boolean isPortInUpdatedRows = portUpdatedRows.values()
                 .stream().anyMatch(updatedPort -> portName.equals(updatedPort.getName()));
@@ -80,6 +81,9 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
                 instanceIdentifierCodec, getOvsdbConnectionInstance(), bridgeData)
                     .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
             transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
+            // Remove from OvsdbConnection Instance cache
+            getOvsdbConnectionInstance().remotePort(portUuid);
+            getOvsdbConnectionInstance().removePortInterface(portName);
         }
     }
 }

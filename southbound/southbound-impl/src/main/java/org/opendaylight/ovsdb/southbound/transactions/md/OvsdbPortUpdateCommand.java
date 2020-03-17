@@ -139,6 +139,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             if (bridgeIid.isPresent()) {
                 NodeId bridgeId = SouthboundMapper.createManagedNodeId(bridgeIid.get());
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(portName));
+                getOvsdbConnectionInstance().updatePortInterface(portName, bridgeIid.get());
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
                 tpBuilder.withKey(tpKey);
                 tpBuilder.setTpId(tpKey.getTpId());
@@ -167,8 +168,14 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
         for (Entry<UUID, Interface> interfaceUpdate : interfaceUpdatedRows.entrySet()) {
             String interfaceName = null;
+            Optional<InstanceIdentifier<Node>> bridgeIid = Optional.absent();
             interfaceName = interfaceUpdatedRows.get(interfaceUpdate.getKey()).getNameColumn().getData();
-            Optional<InstanceIdentifier<Node>> bridgeIid = getTerminationPointBridge(transaction, node, interfaceName);
+            if (getOvsdbConnectionInstance().getPortInterface(interfaceName) != null) {
+                bridgeIid = Optional.of(getOvsdbConnectionInstance().getPortInterface(interfaceName));
+            }
+            if (!bridgeIid.isPresent()) {
+                bridgeIid = getTerminationPointBridge(transaction, node, interfaceName);
+            }
             if (bridgeIid.isPresent()) {
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(interfaceName));
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
@@ -236,13 +243,16 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     }
 
     private Optional<InstanceIdentifier<Node>> getTerminationPointBridge(UUID portUuid) {
-        for (Entry<UUID, Bridge> entry : this.bridgeUpdatedRows.entrySet()) {
-            UUID bridgeUuid = entry.getKey();
-            if (entry.getValue().getPortsColumn().getData().contains(portUuid)) {
-                return Optional.of(
-                        SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
-                                this.bridgeUpdatedRows.get(bridgeUuid)));
+        for (UUID bridgeUuid : this.bridgeUpdatedRows.keySet()) {
+            if (this.bridgeUpdatedRows.get(bridgeUuid).getPortsColumn().getData().contains(portUuid)) {
+                InstanceIdentifier<Node> iid = SouthboundMapper.createInstanceIdentifier(
+                    instanceIdentifierCodec, getOvsdbConnectionInstance(), this.bridgeUpdatedRows.get(bridgeUuid));
+                getOvsdbConnectionInstance().updatePort(portUuid, iid);
+                return Optional.of(iid);
             }
+        }
+        if (getOvsdbConnectionInstance().getPort(portUuid) != null) {
+            return Optional.of(getOvsdbConnectionInstance().getPort(portUuid));
         }
         return Optional.absent();
     }

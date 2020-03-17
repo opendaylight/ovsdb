@@ -39,6 +39,7 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -164,6 +165,9 @@ public class OvsdbPortUpdateCommandTest {
         doNothing().when(ovsdbPortUpdateCommand).updateTerminationPoints(any(ReadWriteTransaction.class),
             any(Node.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+        PowerMockito.mockStatic(SouthboundUtil.class);
+        PowerMockito.when(SouthboundUtil.readNode(any(ReadTransaction.class), any(InstanceIdentifier.class)))
+            .thenReturn(node);
         ovsdbPortUpdateCommand.execute(transaction);
         verify(ovsdbConnectionInstance).getInstanceIdentifier();
         verify(ovsdbPortUpdateCommand).updateTerminationPoints(any(ReadWriteTransaction.class), any(Node.class));

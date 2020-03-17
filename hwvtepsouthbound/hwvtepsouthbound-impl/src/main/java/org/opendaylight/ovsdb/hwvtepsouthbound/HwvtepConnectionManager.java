@@ -128,6 +128,10 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                         externalClient.getConnectionInfo().getLocalPort());
                 hwClient = connectedButCallBacksNotRegistered(externalClient);
                 registerEntityForOwnership(hwClient);
+                HwvtepOperGlobalListener.runAfterTimeoutIfNodeNotCreated(hwClient.getInstanceIdentifier(), () -> {
+                    externalClient.disconnect();
+                    disconnected(externalClient);
+                });
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.warn("Unable to fetch Database list from device {}. Disconnecting from the device.",

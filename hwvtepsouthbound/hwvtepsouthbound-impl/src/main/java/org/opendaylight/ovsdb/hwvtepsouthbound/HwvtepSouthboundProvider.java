@@ -11,6 +11,7 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -38,7 +39,9 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration.Hwvt
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.utils.mdsal.utils.Scheduler;
 import org.opendaylight.ovsdb.utils.mdsal.utils.ShardStatusMonitor;
+import org.opendaylight.serviceutils.upgrade.UpgradeState;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
@@ -68,17 +71,20 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
     private final AtomicBoolean registered = new AtomicBoolean(false);
     private ListenerRegistration<HwvtepSouthboundProvider> operTopologyRegistration;
     private int shardStatusCheckRetryCount = 1000;
+    private UpgradeState upgradeState;
 
     @Inject
     public HwvtepSouthboundProvider(@Reference final DataBroker dataBroker,
             @Reference final EntityOwnershipService entityOwnershipServiceDependency,
             @Reference final OvsdbConnection ovsdbConnection,
             @Reference final DOMSchemaService schemaService,
-            @Reference final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
+            @Reference final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
+            @Reference final UpgradeState upgradeState) {
         this.dataBroker = dataBroker;
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
+        this.upgradeState = upgradeState;
         HwvtepSouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(schemaService,
                 bindingNormalizedNodeSerializer));
         LOG.info("HwvtepSouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
@@ -113,8 +119,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
         LOG.info("HwvtepSouthboundProvider Session Initiated");
         txInvoker = new TransactionInvokerImpl(dataBroker);
         cm = new HwvtepConnectionManager(dataBroker, txInvoker, entityOwnershipService, ovsdbConnection);
-        hwvtepDTListener = new HwvtepDataChangeListener(dataBroker, cm);
-        hwvtepReconciliationManager = new HwvtepReconciliationManager(dataBroker, cm);
+        registerConfigListenerPostUpgrade();
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
                 new HwvtepsbPluginInstanceEntityOwnershipListener(this,this.entityOwnershipService);
@@ -135,6 +140,17 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
 
         LOG.trace("Registering listener for path {}", treeId);
         operTopologyRegistration = dataBroker.registerDataTreeChangeListener(treeId, this);
+    }
+
+    private void registerConfigListenerPostUpgrade() {
+        if (upgradeState.isUpgradeInProgress()) {
+            LOG.error("Upgrade is in progress delay config data change listener registration");
+            Scheduler.getScheduledExecutorService().schedule(() -> registerConfigListenerPostUpgrade(),
+                    60, TimeUnit.SECONDS);
+            return;
+        }
+        hwvtepDTListener = new HwvtepDataChangeListener(dataBroker, cm);
+        hwvtepReconciliationManager = new HwvtepReconciliationManager(dataBroker, cm);
     }
 
     @Override

@@ -78,7 +78,7 @@ public class HwvtepReconciliationManager implements ClusteredDataTreeChangeListe
                     HwvtepConnectionInstance connection =
                             hcm.getConnectionInstance(physicalSwitch);
                     if (connection != null) {
-                        LOG.trace("Reconcile config for node {}, IP : {}", node.key(),
+                        LOG.info("HwvtepReconciliationManager Reconcile config for node {}, IP : {}", node.key(),
                                 connection.getConnectionInfo().getRemoteAddress());
                         hcm.reconcileConfigurations(connection, node);
                     }

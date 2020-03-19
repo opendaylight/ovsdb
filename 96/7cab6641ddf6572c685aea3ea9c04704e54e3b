@@ -1,0 +1,7 @@
+Verified+1: Robert Varga <nite@hq.sk>
+Code-Review+2: Robert Varga <nite@hq.sk>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Thu, 19 Mar 2020 09:56:38 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/ovsdb/+/88357
+Project: ovsdb
+Branch: refs/heads/stable/sodium

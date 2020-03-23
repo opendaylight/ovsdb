@@ -21,6 +21,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 public interface HwvtepSouthboundConstants {
     TopologyId HWVTEP_TOPOLOGY_ID = new TopologyId(new Uri("hwvtep:1"));
     Integer DEFAULT_OVSDB_PORT = 6640;
+    long PORT_OPEN_MAX_DELAY_IN_MINS = 5;
     String IID_OTHER_CONFIG_KEY = "opendaylight-iid";
     String UUID = "uuid";
     ImmutableBiMap<Class<? extends EncapsulationTypeBase>,String> ENCAPS_TYPE_MAP

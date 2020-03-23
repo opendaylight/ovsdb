@@ -140,6 +140,12 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
 
         LOG.trace("Registering listener for path {}", treeId);
         operTopologyRegistration = dataBroker.registerDataTreeChangeListener(treeId, this);
+        Scheduler.getScheduledExecutorService().schedule(() -> {
+            if (!registered.get()) {
+                openOvsdbPort();
+                LOG.error("Timed out to get eos notification opening the port now");
+            }
+        }, HwvtepSouthboundConstants.PORT_OPEN_MAX_DELAY_IN_MINS, TimeUnit.MINUTES);
     }
 
     private void registerConfigListenerPostUpgrade() {
@@ -223,15 +229,19 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
 
     @Override
     public void onDataTreeChanged(final Collection<DataTreeModification<Topology>> collection) {
-        if (!registered.getAndSet(true)) {
-            LOG.info("Starting the ovsdb port");
-            ovsdbConnection.registerConnectionListener(cm);
-            ovsdbConnection.startOvsdbManager();
-        }
+        openOvsdbPort();
 
         if (operTopologyRegistration != null) {
             operTopologyRegistration.close();
             operTopologyRegistration = null;
+        }
+    }
+
+    private void openOvsdbPort() {
+        if (!registered.getAndSet(true)) {
+            LOG.info("Starting the ovsdb port");
+            ovsdbConnection.registerConnectionListener(cm);
+            ovsdbConnection.startOvsdbManager();
         }
     }
 

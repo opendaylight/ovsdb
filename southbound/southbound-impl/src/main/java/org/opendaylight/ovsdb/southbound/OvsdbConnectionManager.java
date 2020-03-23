@@ -76,6 +76,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     private final DataBroker db;
     private final TransactionInvoker txInvoker;
+    private final Map<OvsdbClient, OvsdbClient> alreadyProcessedClients = new ConcurrentHashMap<>();
     private final Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers =
             new ConcurrentHashMap<>();
     private final Map<InstanceIdentifier<Node>, OvsdbConnectionInstance> nodeIdVsConnectionInstance =
@@ -106,6 +107,18 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     @Override
     public void connected(final OvsdbClient externalClient) {
+        if (alreadyProcessedClients.containsKey(externalClient)) {
+            LOG.info("OvsdbConnectionManager Library already connected {} from {}:{} to {}:{} "
+                            + "to this, hence skipping the processing",
+                    externalClient.getConnectionInfo().getType(),
+                    externalClient.getConnectionInfo().getRemoteAddress(),
+                    externalClient.getConnectionInfo().getRemotePort(),
+                    externalClient.getConnectionInfo().getLocalAddress(),
+                    externalClient.getConnectionInfo().getLocalPort());
+            return;
+        }
+        alreadyProcessedClients.put(externalClient, externalClient);
+
         LOG.info("Library connected {} from {}:{} to {}:{}",
                 externalClient.getConnectionInfo().getType(),
                 externalClient.getConnectionInfo().getRemoteAddress(),
@@ -161,6 +174,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     @Override
     public void disconnected(final OvsdbClient client) {
+        alreadyProcessedClients.remove(client);
         LOG.info("Library disconnected {} from {}:{} to {}:{}. Cleaning up the operational data store",
                 client.getConnectionInfo().getType(),
                 client.getConnectionInfo().getRemoteAddress(),

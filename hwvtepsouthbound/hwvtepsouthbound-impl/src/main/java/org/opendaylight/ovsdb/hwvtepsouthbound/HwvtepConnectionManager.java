@@ -90,6 +90,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private final Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxHistory = new ConcurrentHashMap<>();
     private final Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateHistory = new ConcurrentHashMap<>();
     private final OvsdbConnection ovsdbConnectionService;
+    private final Map<OvsdbClient, OvsdbClient> alreadyProcessedClients = new ConcurrentHashMap<>();
 
     public HwvtepConnectionManager(final DataBroker db, final TransactionInvoker txInvoker,
                     final EntityOwnershipService entityOwnershipService, final OvsdbConnection ovsdbConnectionService) {
@@ -116,6 +117,16 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
     @Override
     public void connected(final OvsdbClient externalClient) {
+        if (alreadyProcessedClients.containsKey(externalClient)) {
+            LOG.info("Hwvtep Library already connected {} from {}:{} to {}:{} to this, hence skipping the processing",
+                    externalClient.getConnectionInfo().getType(),
+                    externalClient.getConnectionInfo().getRemoteAddress(),
+                    externalClient.getConnectionInfo().getRemotePort(),
+                    externalClient.getConnectionInfo().getLocalAddress(),
+                    externalClient.getConnectionInfo().getLocalPort());
+            return;
+        }
+        alreadyProcessedClients.put(externalClient, externalClient);
         HwvtepConnectionInstance hwClient = null;
         try {
             List<String> databases = externalClient.getDatabases().get(DB_FETCH_TIMEOUT, TimeUnit.MILLISECONDS);

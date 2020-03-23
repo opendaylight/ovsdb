@@ -284,8 +284,12 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     @Override
     public void registerConnectionListener(final OvsdbConnectionListener listener) {
         LOG.info("registerConnectionListener: registering {}", listener.getClass().getSimpleName());
-        CONNECTION_LISTENERS.add(listener);
-        notifyAlreadyExistingConnectionsToListener(listener);
+        if (CONNECTION_LISTENERS.add(listener)) {
+            LOG.info("registerConnectionListener: registered {} notifying exisitng connections",
+                    listener.getClass().getSimpleName());
+            //notify only the first time if called multiple times
+            notifyAlreadyExistingConnectionsToListener(listener);
+        }
     }
 
     private void notifyAlreadyExistingConnectionsToListener(final OvsdbConnectionListener listener) {

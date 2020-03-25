@@ -24,10 +24,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
        build failure. Please do not modify this unless you have a good reason. -->
   <name>ODL :: ovsdb :: ${project.artifactId}</name>
 
-  <properties>
-    <controller.mdsal.version>1.12.0-SNAPSHOT</controller.mdsal.version>
-  </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -40,7 +36,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>${controller.mdsal.version}</version>
+        <version>1.11.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

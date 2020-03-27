@@ -13,7 +13,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.lib.operations.Delete;
 import org.opendaylight.ovsdb.lib.operations.Insert;
@@ -22,6 +21,8 @@ import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.operations.Update;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,7 @@ public class TransactInvokerImpl implements TransactInvoker {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void invoke(TransactCommand command) {
         TransactionBuilder tb = new TransactionBuilder(connectionInstance.getOvsdbClient(), dbSchema);
         command.execute(tb);
@@ -61,9 +63,28 @@ public class TransactInvokerImpl implements TransactInvoker {
                 } else {
                     command.onSuccess(tb);
                 }
-            } catch (InterruptedException | ExecutionException e) {
-                LOG.warn("Transact execution exception: ", e);
+                if (errorOccured) {
+                    if (!command.retry()) {
+                        LOG.error("Failed on second attempt too aborting the transaction {}", command);
+                        return;
+                    }
+                    LOG.error("Retrying the failed command {}", command);
+                    //Oper data is going to be filled with latest data after monitor callback update comes and is
+                    // processed but do not wait till then , pull the latest data and retry the failing command
+                    //The command could be failing due to reference to stale physical locator/logical switch.
+                    //pull the latest locators and put them in device oper data and retry the command.
+                    connectionInstance.getDeviceInfo().clearDeviceOperData(LogicalSwitches.class);
+                    connectionInstance.getDeviceInfo().clearDeviceOperData(TerminationPoint.class);
+
+                    connectionInstance.getHwvtepTableReader().refreshLogicalSwitches();
+                    connectionInstance.getHwvtepTableReader().refreshLocators();
+                    connectionInstance.transact(command);
+                }
+            } catch (Exception e) {
+                LOG.error("Transact execution exception: {} {}",
+                        tb, connectionInstance.getInstanceIdentifier(), e);
             }
+
             LOG.trace("invoke exit command: {}, tb: {}", command, tb);
         }
     }

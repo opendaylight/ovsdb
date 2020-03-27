@@ -30,4 +30,8 @@ public interface TransactCommand<T extends Identifiable> {
 
     default void onFailure(TransactionBuilder deviceTransaction) {
     }
+
+    default boolean retry() {
+        return false;
+    }
 }

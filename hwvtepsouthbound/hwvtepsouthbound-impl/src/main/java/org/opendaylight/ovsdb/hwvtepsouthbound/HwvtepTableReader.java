@@ -52,7 +52,10 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Tunnel;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
@@ -352,6 +355,32 @@ public class HwvtepTableReader {
             }
         }
         return new TableUpdates(tableUpdates);
+    }
+
+    public void refreshLocators() {
+        List<TypedBaseTable> physicalLocators = connectionInstance.getHwvtepTableReader()
+                .getHwvtepTableEntries(TerminationPoint.class);
+        for (TypedBaseTable row : physicalLocators) {
+            PhysicalLocator physicalLocator = (PhysicalLocator)row;
+            InstanceIdentifier<TerminationPoint> tpPath =
+                    HwvtepSouthboundMapper.createInstanceIdentifier(connectionInstance.getInstanceIdentifier(),
+                            physicalLocator);
+            connectionInstance.getDeviceInfo().updateDeviceOperData(
+                    TerminationPoint.class, tpPath, physicalLocator.getUuid(), physicalLocator);
+        }
+    }
+
+    public void refreshLogicalSwitches() {
+        List<TypedBaseTable> logicalSwitches = connectionInstance.getHwvtepTableReader()
+                .getHwvtepTableEntries(LogicalSwitches.class);
+        for (TypedBaseTable row : logicalSwitches) {
+            LogicalSwitch logicalSwitch = (LogicalSwitch)row;
+            InstanceIdentifier<LogicalSwitches> switchIid = connectionInstance.getInstanceIdentifier()
+                    .augmentation(HwvtepGlobalAugmentation.class)
+                    .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch.getName())));
+            connectionInstance.getDeviceInfo().updateDeviceOperData(LogicalSwitches.class, switchIid,
+                    logicalSwitch.getUuid(), logicalSwitch);
+        }
     }
 
     private static Select<GenericTableSchema> buildSelectOperationFor(final GenericTableSchema tableSchema) {

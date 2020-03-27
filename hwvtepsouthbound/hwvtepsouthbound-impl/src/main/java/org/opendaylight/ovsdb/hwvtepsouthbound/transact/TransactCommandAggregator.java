@@ -14,9 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
@@ -32,6 +35,7 @@ public class TransactCommandAggregator implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(TransactCommandAggregator.class);
 
     private final List<TransactCommand> commands = new ArrayList<>();
+    private AtomicInteger retryCount = new AtomicInteger(HwvtepSouthboundConstants.CHAIN_RETRY_COUNT);
     private final HwvtepOperationalState operationalState;
     /* stores the modified and deleted data for each child type of each node id
        Map<nodeid , Pair < updated, deleted >
@@ -189,4 +193,11 @@ public class TransactCommandAggregator implements TransactCommand {
     public void onSuccess(TransactionBuilder deviceTransaction) {
         commands.forEach(cmd -> cmd.onSuccess(deviceTransaction));
     }
+
+    @Override
+    public boolean retry() {
+        return retryCount.decrementAndGet() > 0;
+    }
+
+
 }

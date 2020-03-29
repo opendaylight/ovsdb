@@ -91,7 +91,7 @@ public class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransactionComman
             PhysicalLocator physicalLocator = updatedPLocRows.get(plocUUID);
             if (physicalLocator == null) {
                 physicalLocator = (PhysicalLocator) getOvsdbConnectionInstance()
-                        .getDeviceInfo().getDeviceOperData(TerminationPoint.class, plocUUID);
+                        .getDeviceInfo().getPhysicalLocator(plocUUID);
             }
             if (physicalLocator != null) {
                 InstanceIdentifier<TerminationPoint> plIid =

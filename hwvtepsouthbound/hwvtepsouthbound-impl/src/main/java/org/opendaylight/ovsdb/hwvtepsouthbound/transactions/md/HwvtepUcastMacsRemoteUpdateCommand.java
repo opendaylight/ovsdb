@@ -88,7 +88,7 @@ public class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactionComma
             PhysicalLocator physicalLocator = updatedPLocRows.get(locUUID);
             if (physicalLocator == null) {
                 physicalLocator = (PhysicalLocator) getOvsdbConnectionInstance()
-                        .getDeviceInfo().getDeviceOperData(TerminationPoint.class, locUUID);
+                        .getDeviceInfo().getPhysicalLocator(locUUID);
             }
             if (physicalLocator != null) {
                 InstanceIdentifier<TerminationPoint> plIid = HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid,

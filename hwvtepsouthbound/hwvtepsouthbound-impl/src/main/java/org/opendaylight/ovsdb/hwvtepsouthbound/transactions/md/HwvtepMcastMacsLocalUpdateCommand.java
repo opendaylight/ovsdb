@@ -121,7 +121,7 @@ public class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransactionComman
                         PhysicalLocator locator = updatedPLocRows.get(locUUID);
                         if (locator == null) {
                             locator = (PhysicalLocator) getOvsdbConnectionInstance()
-                                    .getDeviceInfo().getDeviceOperData(TerminationPoint.class, locUUID);
+                                    .getDeviceInfo().getPhysicalLocator(locUUID);
                         }
                         InstanceIdentifier<TerminationPoint> tpIid = HwvtepSouthboundMapper.createInstanceIdentifier(
                                 getOvsdbConnectionInstance().getInstanceIdentifier(), locator);

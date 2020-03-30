@@ -146,7 +146,7 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
     }
 
     @Override
-    protected boolean isRemoveCommand() {
+    protected boolean isDeleteCmd() {
         return true;
     }
 

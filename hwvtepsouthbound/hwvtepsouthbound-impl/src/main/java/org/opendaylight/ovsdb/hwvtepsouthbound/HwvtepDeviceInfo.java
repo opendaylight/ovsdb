@@ -132,7 +132,11 @@ public class HwvtepDeviceInfo {
     }
 
     public LogicalSwitch getLogicalSwitch(UUID uuid) {
-        return (LogicalSwitch) getDeviceOperData(LogicalSwitches.class, uuid);
+        DeviceData deviceData = getDeviceOperData(LogicalSwitches.class, uuid);
+        if (deviceData != null && deviceData.getData() != null) {
+            return (LogicalSwitch) deviceData.getData();
+        }
+        return null;
     }
 
     public Map<UUID, LogicalSwitch> getLogicalSwitches() {
@@ -163,7 +167,11 @@ public class HwvtepDeviceInfo {
     }
 
     public PhysicalLocator getPhysicalLocator(UUID uuid) {
-        return (PhysicalLocator) getDeviceOperData(TerminationPoint.class, uuid);
+        DeviceData deviceData = getDeviceOperData(TerminationPoint.class, uuid);
+        if (deviceData != null && deviceData.getData() != null) {
+            return (PhysicalLocator) deviceData.getData();
+        }
+        return null;
     }
 
     public Map<UUID, PhysicalLocator> getPhysicalLocators() {
@@ -262,8 +270,8 @@ public class HwvtepDeviceInfo {
         }
     }
 
-    public Object getDeviceOperData(Class<? extends Identifiable> cls, UUID uuid) {
-        return HwvtepSouthboundUtil.getData(uuidVsData, cls, uuid).getData();
+    public DeviceData getDeviceOperData(Class<? extends Identifiable> cls, UUID uuid) {
+        return HwvtepSouthboundUtil.getData(uuidVsData, cls, uuid);
     }
 
     public DeviceData getDeviceOperData(Class<? extends Identifiable> cls, InstanceIdentifier key) {

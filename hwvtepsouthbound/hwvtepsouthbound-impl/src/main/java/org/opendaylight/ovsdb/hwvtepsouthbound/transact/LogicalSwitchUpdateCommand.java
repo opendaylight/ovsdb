@@ -66,7 +66,7 @@ public class LogicalSwitchUpdateCommand extends AbstractTransactCommand<LogicalS
                                final LogicalSwitches lswitch,
                                final InstanceIdentifier lsKey,
                                final Object... extraData) {
-        processDependencies(null, transaction, nodeIid, lsKey, lswitch);
+        processDependencies(EmptyDependencyGetter.INSTANCE, transaction, nodeIid, lsKey, lswitch);
     }
 
     @Override

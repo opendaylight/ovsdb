@@ -83,7 +83,7 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                                final RemoteMcastMacs remoteMcastMac,
                                final InstanceIdentifier macKey,
                                final Object... extraData) {
-        processDependencies(null, transaction, nodeIid, macKey, remoteMcastMac);
+        processDependencies(EmptyDependencyGetter.INSTANCE, transaction, nodeIid, macKey, remoteMcastMac);
     }
 
     @Override
@@ -123,7 +123,7 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    protected boolean isRemoveCommand() {
+    protected boolean isDeleteCmd() {
         return true;
     }
 

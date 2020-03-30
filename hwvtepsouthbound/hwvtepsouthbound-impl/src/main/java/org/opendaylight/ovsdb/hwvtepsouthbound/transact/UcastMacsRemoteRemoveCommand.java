@@ -99,7 +99,7 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    protected boolean isRemoveCommand() {
+    protected boolean isDeleteCmd() {
         return true;
     }
 

@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e71548b0_3cdd2498",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepConnectionManager.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 532,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-03-30T20:43:51Z",
+      "side": 1,
+      "message": "minor nit: FluentFuture can be used without Futures.addCallback(), i.e.:\n\nreadNodeFuture.addCallback(",
+      "range": {
+        "startLine": 532,
+        "startChar": 16,
+        "endLine": 532,
+        "endChar": 52
+      },
+      "revId": "4ddb2382393d94b005c79e3953439c7d95f9af85",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "54fc7b3d_ffa1f3ec",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepSouthboundUtil.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-03-30T20:43:51Z",
+      "side": 1,
+      "message": "hmm, you probably want to access the cache only once",
+      "range": {
+        "startLine": 103,
+        "startChar": 16,
+        "endLine": 103,
+        "endChar": 90
+      },
+      "revId": "4ddb2382393d94b005c79e3953439c7d95f9af85",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}

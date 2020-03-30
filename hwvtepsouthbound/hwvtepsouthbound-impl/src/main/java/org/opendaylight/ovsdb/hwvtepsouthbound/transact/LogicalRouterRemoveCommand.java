@@ -105,4 +105,9 @@ public class LogicalRouterRemoveCommand extends AbstractTransactCommand<LogicalR
     protected boolean areEqual(final LogicalRouters routers1, final LogicalRouters routers2) {
         return routers1.key().equals(routers2.key());
     }
+
+    @Override
+    public boolean isDeleteCmd() {
+        return true;
+    }
 }

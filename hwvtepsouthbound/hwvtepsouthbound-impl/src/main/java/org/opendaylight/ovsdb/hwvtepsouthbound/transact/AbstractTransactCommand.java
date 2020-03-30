@@ -108,7 +108,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         Map inTransitDependencies = new HashMap<>();
         Map configDependencies = new HashMap<>();
 
-        if (!isRemoveCommand() && unMetDependencyGetter != null) {
+        if (!isDeleteCmd() && unMetDependencyGetter != null) {
             inTransitDependencies = unMetDependencyGetter.getInTransitDependencies(getOperationalState(), data);
             configDependencies = unMetDependencyGetter.getUnMetConfigDependencies(getOperationalState(), data);
             //we can skip the config termination point dependency as we can create them in device as part of this tx
@@ -126,7 +126,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         if (HwvtepSouthboundUtil.isEmptyMap(configDependencies) && HwvtepSouthboundUtil.isEmptyMap(
                 inTransitDependencies)) {
             doDeviceTransaction(transaction, nodeIid, data, key, extraData);
-            if (isRemoveCommand()) {
+            if (isDeleteCmd()) {
                 getDeviceInfo().clearConfigData((Class<? extends Identifiable>) classType, key);
             } else {
                 getDeviceInfo().updateConfigData((Class<? extends Identifiable>) classType, key, data);
@@ -358,7 +358,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return false;
     }
 
-    protected boolean isRemoveCommand() {
+    protected boolean isDeleteCmd() {
         return false;
     }
 

@@ -99,7 +99,7 @@ public class UcastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalUc
     }
 
     @Override
-    protected boolean isRemoveCommand() {
+    protected boolean isDeleteCmd() {
         return true;
     }
 }

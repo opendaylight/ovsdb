@@ -68,9 +68,6 @@ public class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionComma
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Node connectionNode = buildConnectionNode(macRemote);
         transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
-        InstanceIdentifier<RemoteMcastMacs> macIid = getMacIid(connectionIId, connectionNode);
-        getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(RemoteMcastMacs.class,
-                macIid, macRemote.getUuid(), macRemote);
     }
 
     InstanceIdentifier<RemoteMcastMacs> getMacIid(InstanceIdentifier<Node> connectionIId, Node connectionNode) {
@@ -96,11 +93,16 @@ public class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionComma
         setLogicalSwitch(macRemoteBuilder, macRemote);
 
         List<RemoteMcastMacs> macRemoteList = new ArrayList<>();
-        macRemoteList.add(macRemoteBuilder.build());
+        RemoteMcastMacs mac = macRemoteBuilder.build();
+        macRemoteList.add(mac);
 
         HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
         hgAugmentationBuilder.setRemoteMcastMacs(macRemoteList);
         connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
+        InstanceIdentifier<RemoteMcastMacs> macIid = getOvsdbConnectionInstance().getInstanceIdentifier()
+                .augmentation(HwvtepGlobalAugmentation.class).child(RemoteMcastMacs.class, mac.key());
+        getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(RemoteMcastMacs.class,
+                macIid, macRemote.getUuid(), macRemote);
         return connectionNode.build();
     }
 
@@ -134,7 +136,7 @@ public class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionComma
                         PhysicalLocator locator = updatedPLocRows.get(locUUID);
                         if (locator == null) {
                             locator = (PhysicalLocator) getOvsdbConnectionInstance()
-                                    .getDeviceInfo().getDeviceOperData(TerminationPoint.class, locUUID);
+                                    .getDeviceInfo().getPhysicalLocator(locUUID);
                         }
                         InstanceIdentifier<TerminationPoint> tpIid = HwvtepSouthboundMapper.createInstanceIdentifier(
                                 getOvsdbConnectionInstance().getInstanceIdentifier(), locator);

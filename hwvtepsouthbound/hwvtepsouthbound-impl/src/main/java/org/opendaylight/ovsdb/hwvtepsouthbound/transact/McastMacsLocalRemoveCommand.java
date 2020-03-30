@@ -99,7 +99,7 @@ public class McastMacsLocalRemoveCommand extends AbstractTransactCommand<LocalMc
     }
 
     @Override
-    protected boolean isRemoveCommand() {
+    protected boolean isDeleteCmd() {
         return true;
     }
 }

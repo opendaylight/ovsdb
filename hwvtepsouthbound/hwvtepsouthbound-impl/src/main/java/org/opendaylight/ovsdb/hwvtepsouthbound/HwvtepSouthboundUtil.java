@@ -163,6 +163,7 @@ public final class HwvtepSouthboundUtil {
 
     public static <K, D> void updateData(Map<Class<? extends Identifiable>, Map<K, D>> map,
             Class<? extends Identifiable> cls, K key, D data) {
+        LOG.debug("Updating data {} {} {}", cls, key, data);
         if (key == null) {
             return;
         }
@@ -196,6 +197,7 @@ public final class HwvtepSouthboundUtil {
 
     public static <K, D> void clearData(Map<Class<? extends Identifiable>, Map<K, D>> map,
             Class<? extends Identifiable> cls, K key) {
+        LOG.debug("Clearing data {} {}", cls, key);
         if (key == null) {
             return;
         }

@@ -16,15 +16,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactCommandAggregator;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionCommand;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerProxy;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
@@ -39,15 +44,19 @@ import org.slf4j.LoggerFactory;
 
 public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
 
+    private static final Logger LOG = LoggerFactory.getLogger(HwvtepDataChangeListener.class);
+
     private ListenerRegistration<HwvtepDataChangeListener> registration;
     private final HwvtepConnectionManager hcm;
     private final DataBroker db;
-    private static final Logger LOG = LoggerFactory.getLogger(HwvtepDataChangeListener.class);
+    private TransactionInvokerProxy txInvokerProxy;
 
-    HwvtepDataChangeListener(DataBroker db, HwvtepConnectionManager hcm) {
+    HwvtepDataChangeListener(DataBroker db, HwvtepConnectionManager hcm,
+                             TransactionInvokerProxy txInvokerProxy) {
         LOG.info("Registering HwvtepDataChangeListener");
         this.db = db;
         this.hcm = hcm;
+        this.txInvokerProxy = txInvokerProxy;
         registerListener();
     }
 
@@ -166,6 +175,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
         }
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void updateData(Collection<DataTreeModification<Node>> changes) {
         /* TODO:
          * Get connection instances for each change
@@ -175,9 +185,32 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
         for (Entry<HwvtepConnectionInstance, Collection<DataTreeModification<Node>>> changesEntry :
                 changesByConnectionInstance(changes).entrySet()) {
             HwvtepConnectionInstance connectionInstance = changesEntry.getKey();
-            connectionInstance.transact(new TransactCommandAggregator(
-                new HwvtepOperationalState(db, connectionInstance, changesEntry.getValue()),changesEntry.getValue()));
-            connectionInstance.getDeviceInfo().onConfigDataAvailable();
+            txInvokerProxy.getTransactionInvokerForNode(changesEntry.getKey().getInstanceIdentifier()).invoke(
+                    new TransactionCommand() {
+                        AtomicInteger chainRetryCount = new AtomicInteger(HwvtepSouthboundConstants.CHAIN_RETRY_COUNT);
+                        @Override
+                        public void execute(ReadWriteTransaction transaction) {
+                            try {
+                                //skip the disconnected node event proessing
+                                if (!changesEntry.getKey().isActive()) {
+                                    return;
+                                }
+                                connectionInstance.transact(new TransactCommandAggregator(
+                                        new HwvtepOperationalState(db, connectionInstance, changesEntry.getValue()),
+                                        changesEntry.getValue()));
+                                connectionInstance.getDeviceInfo().onConfigDataAvailable();
+                            } catch (Exception e) {
+                                LOG.error("Failed to handle hwvtep config topo event {} ",
+                                          changesEntry.getKey().getNodeId(), e);
+                                throw e;
+                            }
+                        }
+
+                        @Override
+                        public int getTransactionChainRetryCount() {
+                            return chainRetryCount.decrementAndGet();
+                        }
+                    });
         }
     }
 

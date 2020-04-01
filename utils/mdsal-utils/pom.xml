@@ -64,6 +64,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <version>1</version>
           <scope>compile</scope>
       </dependency>
+      <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-lang3</artifactId>
+      </dependency>
   </dependencies>
 
   <build>

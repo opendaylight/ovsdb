@@ -35,8 +35,8 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
-import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerProxy;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
@@ -82,7 +82,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     OvsdbClient ovsdbClient;
     TypedDatabaseSchema dbSchema;
     ListenableFuture<TypedDatabaseSchema> listenableDbSchema = mock(ListenableFuture.class);
-    TransactionInvoker transactionInvoker;
+    TransactionInvokerProxy transactionInvoker;
     OvsdbConnectionInfo connectionInfo;
     Operations operations;
     HwvtepDataChangeListener hwvtepDataChangeListener;
@@ -121,7 +121,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
 
         addNode(OPERATIONAL);
         addNode(CONFIGURATION);
-        hwvtepDataChangeListener = new HwvtepDataChangeListener(dataBroker, hwvtepConnectionManager);
+        hwvtepDataChangeListener = new HwvtepDataChangeListener(dataBroker, hwvtepConnectionManager, null);
     }
 
     @After

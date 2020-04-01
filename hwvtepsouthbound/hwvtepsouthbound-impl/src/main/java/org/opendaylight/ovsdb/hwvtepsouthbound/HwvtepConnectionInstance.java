@@ -32,7 +32,7 @@ import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipCandidateRegistrati
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactInvoker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactInvokerImpl;
-import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerProxy;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
 import org.opendaylight.ovsdb.lib.LockStolenCallback;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
@@ -68,7 +68,7 @@ public class HwvtepConnectionInstance {
     private final OvsdbClient client;
     private final HwvtepTableReader hwvtepTableReader;
     private InstanceIdentifier<Node> instanceIdentifier;
-    private final TransactionInvoker txInvoker;
+    private TransactionInvokerProxy txInvokerProxy;
     private Map<TypedDatabaseSchema, TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
     private volatile boolean hasDeviceOwnership = false;
@@ -89,13 +89,13 @@ public class HwvtepConnectionInstance {
     private TransactionHistory deviceUpdateHistory;
 
     HwvtepConnectionInstance(final HwvtepConnectionManager hwvtepConnectionManager, final ConnectionInfo key,
-            final OvsdbClient client, final InstanceIdentifier<Node> iid, final TransactionInvoker txInvoker,
+            final OvsdbClient client, final InstanceIdentifier<Node> iid, final TransactionInvokerProxy txInvokerProxy,
             final DataBroker dataBroker) {
         this.hwvtepConnectionManager = hwvtepConnectionManager;
         this.connectionInfo = key;
         this.client = client;
         this.instanceIdentifier = iid;
-        this.txInvoker = txInvoker;
+        this.txInvokerProxy = txInvokerProxy;
         this.deviceInfo = new HwvtepDeviceInfo(this);
         this.dataBroker = dataBroker;
         this.hwvtepTableReader = new HwvtepTableReader(this);
@@ -158,7 +158,7 @@ public class HwvtepConnectionInstance {
                 DatabaseSchema dbSchema = getSchema(database).get();
                 if (dbSchema != null) {
                     LOG.info("Monitoring database: {}", database);
-                    callback = new HwvtepMonitorCallback(this, txInvoker);
+                    callback = new HwvtepMonitorCallback(this, txInvokerProxy);
                     monitorAllTables(database, dbSchema);
                 } else {
                     LOG.info("No database {} found on {}", database, connectionInfo);

@@ -37,6 +37,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerProxy;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
@@ -96,6 +97,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     InstanceIdentifier<Node> nodeIid;
     InstanceIdentifier<LogicalSwitches> ls0Iid;
     InstanceIdentifier<LogicalSwitches> ls1Iid;
+    TransactionInvokerProxy transactionInvokerProxy;
 
     @Before
     public void setupTest() throws Exception {
@@ -121,7 +123,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
 
         addNode(OPERATIONAL);
         addNode(CONFIGURATION);
-        hwvtepDataChangeListener = new HwvtepDataChangeListener(dataBroker, hwvtepConnectionManager);
+        hwvtepDataChangeListener = new HwvtepDataChangeListener(dataBroker, hwvtepConnectionManager,
+                transactionInvokerProxy);
     }
 
     @After
@@ -161,13 +164,19 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     }
 
     private void mockConnectionManager() throws IllegalAccessException {
-        hwvtepConnectionManager = spy(new HwvtepConnectionManager(dataBroker, transactionInvoker,
+        transactionInvokerProxy = spy(new TransactionInvokerProxy());
+        doReturn(transactionInvoker).when(transactionInvokerProxy)
+                .getTransactionInvokerForNode(any(InstanceIdentifier.class));
+
+        hwvtepConnectionManager = spy(new HwvtepConnectionManager(dataBroker, transactionInvokerProxy,
             entityOwnershipService, mock(OvsdbConnection.class)));
         doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstance(
             any(HwvtepPhysicalSwitchAttributes.class));
         doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstance(any(Node.class));
         doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstanceFromNodeIid(
             any(InstanceIdentifier.class));
+
+
     }
 
     void mockConnectionInstance() throws IllegalAccessException {
@@ -179,10 +188,10 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(connectionInfo).when(ovsdbClient).getConnectionInfo();
         doReturn(listenableDbSchema).when(ovsdbClient).getSchema(anyString());
 
-        transactionInvoker = new TransactionInvokerImpl(dataBroker);
+        transactionInvoker = new TransactionInvokerImpl(dataBroker, transactionInvokerProxy, 10);
 
-        connectionInstance = new HwvtepConnectionInstance(null, null, ovsdbClient, nodeIid, transactionInvoker,
-            dataBroker);
+        connectionInstance = new HwvtepConnectionInstance(null, null, ovsdbClient,
+                nodeIid, transactionInvokerProxy, dataBroker);
         connectionInstance.reconciliationFt.set(Boolean.TRUE);
         connectionInstance.firstUpdateTriggered.set(true);
         connectionInstance.setControllerTxHistory(new TransactionHistory(10000, 7500));

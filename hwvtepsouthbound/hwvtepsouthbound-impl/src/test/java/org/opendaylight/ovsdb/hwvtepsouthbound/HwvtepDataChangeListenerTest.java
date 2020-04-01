@@ -110,6 +110,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         addData(OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
         deleteData(CONFIGURATION, LogicalSwitches.class, logicalSwitches);
+        Thread.sleep(1000);
         verify(Operations.op,  times(10)).delete(any());
     }
 
@@ -121,6 +122,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
         //4 ucast macs + 2 termination points
+        Thread.sleep(1000);
         verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
         //TODO add finer grained validation
     }
@@ -132,6 +134,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
         //4 ucast macs + 2 termination points
+        Thread.sleep(1000);
         verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
         //TODO add finer grained validation
     }
@@ -147,6 +150,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
         resetOperations();
         deleteData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
+        Thread.sleep(1000);
         verify(Operations.op,  times(4)).delete(any());
         //TODO add finer grained validation
     }
@@ -159,6 +163,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast macs + 2 locator sets + 3 termination points
+        Thread.sleep(1000);
         verify(Operations.op,  times(7)).insert(ArgumentMatchers.<McastMacsRemote>any());
     }
 
@@ -169,6 +174,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast macs + 2 locator sets + 3 termination points
+        Thread.sleep(1000);
         verify(Operations.op,  times(7)).insert(ArgumentMatchers.<McastMacsRemote>any());
     }
 
@@ -183,6 +189,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
         resetOperations();
         deleteData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
+        Thread.sleep(1000);
         verify(Operations.op,  times(2)).delete(ArgumentMatchers.any());
     }
 
@@ -193,6 +200,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
+        Thread.sleep(1000);
         verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
 
         addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
@@ -200,6 +208,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast mac + 2 locator sets ( termination point already added )
+        Thread.sleep(1000);
         verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
     }
 
@@ -210,17 +219,20 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
+        Thread.sleep(1000);
         verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
 
         addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
         addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
+        Thread.sleep(1000);
         verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
         addData(OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
 
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMac2);
+        Thread.sleep(1000);
         verify(Operations.op,  times(2)).insert(ArgumentMatchers.<McastMacsRemote>any());
         verify(Operations.op,  times(2)).update(ArgumentMatchers.<McastMacsRemote>any());
         verify(Operations.op,  times(0)).delete(ArgumentMatchers.any());
@@ -233,17 +245,20 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
+        Thread.sleep(1000);
         verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
 
         addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
         addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
+        Thread.sleep(1000);
         verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
         addData(OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
 
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMac3WithZeroLocators);
+        Thread.sleep(1000);
         verify(Operations.op,  times(2)).delete(ArgumentMatchers.any());
     }
 
@@ -254,24 +269,29 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
+        Thread.sleep(1000);
         verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
 
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast mac + 2 locator sets ( termination point already added )
+        Thread.sleep(1000);
         verify(Operations.op,  times(0)).insert(ArgumentMatchers.<McastMacsRemote>any());
         resetOperations();
         addData(OPERATIONAL, TerminationPoint.class, terminationPoints);
         addData(OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         connectionInstance.getDeviceInfo().onOperDataAvailable();
         //2 mcast mac + 2 locator sets ( termination point already added )
+        Thread.sleep(1000);
         verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
 
         resetOperations();
         addData(CONFIGURATION, RemoteMcastMacs.class, mcastMac2);
+        Thread.sleep(1000);
         verify(Operations.op,  times(0)).insert(ArgumentMatchers.<McastMacsRemote>any());
         addData(OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
         connectionInstance.getDeviceInfo().onOperDataAvailable();
+        Thread.sleep(1000);
         verify(Operations.op,  times(2)).insert(ArgumentMatchers.<McastMacsRemote>any());
         verify(Operations.op,  times(2)).update(ArgumentMatchers.<McastMacsRemote>any());
     }

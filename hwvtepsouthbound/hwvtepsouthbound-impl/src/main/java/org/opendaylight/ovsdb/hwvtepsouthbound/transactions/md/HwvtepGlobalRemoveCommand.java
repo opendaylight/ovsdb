@@ -31,9 +31,10 @@ public class HwvtepGlobalRemoveCommand extends AbstractTransactionCommand {
     private static final long ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE = 1;
     private final InstanceIdentifier<Node> nodeInstanceIdentifier;
 
-    public HwvtepGlobalRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
+    public HwvtepGlobalRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema,
+                                     InstanceIdentifier<Node> nodeIid) {
         super(key, updates, dbSchema);
-        this.nodeInstanceIdentifier = key.getInstanceIdentifier();
+        this.nodeInstanceIdentifier = nodeIid;
     }
 
     public HwvtepGlobalRemoveCommand(InstanceIdentifier<Node> nodeInstanceIdentifier) {

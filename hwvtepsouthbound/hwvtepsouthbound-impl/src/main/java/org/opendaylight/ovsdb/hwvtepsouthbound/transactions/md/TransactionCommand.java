@@ -15,6 +15,14 @@ public interface TransactionCommand {
 
     void execute(ReadWriteTransaction transaction);
 
+    default void onSuccess() {
+    }
+
+    default void onFailure() {
+    }
+
+    int getTransactionChainRetryCount();
+
     /**
      * Sets the result future of the executed/submitted transaction.
      */

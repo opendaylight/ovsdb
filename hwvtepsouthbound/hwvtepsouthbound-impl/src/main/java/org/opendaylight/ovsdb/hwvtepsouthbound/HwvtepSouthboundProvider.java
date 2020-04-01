@@ -36,8 +36,8 @@ import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListenerRegistratio
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration.HwvtepReconciliationManager;
-import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerProxy;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.utils.mdsal.utils.Scheduler;
 import org.opendaylight.ovsdb.utils.mdsal.utils.ShardStatusMonitor;
@@ -63,7 +63,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
     private final OvsdbConnection ovsdbConnection;
 
     private HwvtepConnectionManager cm;
-    private TransactionInvoker txInvoker;
+    private TransactionInvokerProxy txInvokerProxy;
     private EntityOwnershipCandidateRegistration registration;
     private HwvtepsbPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private HwvtepDataChangeListener hwvtepDTListener;
@@ -117,8 +117,11 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
 
     private void init2() {
         LOG.info("HwvtepSouthboundProvider Session Initiated");
-        txInvoker = new TransactionInvokerImpl(dataBroker);
-        cm = new HwvtepConnectionManager(dataBroker, txInvoker, entityOwnershipService, ovsdbConnection);
+        txInvokerProxy = new TransactionInvokerProxy();
+        txInvokerProxy.init(() -> new TransactionInvokerImpl(dataBroker, txInvokerProxy,
+                TransactionInvokerProxy.PER_THREAD_QUEUE_SIZE));
+
+        cm = new HwvtepConnectionManager(dataBroker, txInvokerProxy, entityOwnershipService, ovsdbConnection);
         registerConfigListenerPostUpgrade();
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
@@ -155,7 +158,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
                     60, TimeUnit.SECONDS);
             return;
         }
-        hwvtepDTListener = new HwvtepDataChangeListener(dataBroker, cm);
+        hwvtepDTListener = new HwvtepDataChangeListener(dataBroker, cm, txInvokerProxy);
         hwvtepReconciliationManager = new HwvtepReconciliationManager(dataBroker, cm);
     }
 
@@ -164,18 +167,16 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void close() throws Exception {
         LOG.info("HwvtepSouthboundProvider Closed");
-        if (txInvoker != null) {
-            try {
-                txInvoker.close();
-                txInvoker = null;
-            } catch (Exception e) {
-                LOG.error("HWVTEP Southbound Provider failed to close TransactionInvoker", e);
-            }
-        }
+
         if (cm != null) {
             cm.close();
             cm = null;
         }
+
+        if (txInvokerProxy != null) {
+            txInvokerProxy.close();
+        }
+
         if (registration != null) {
             registration.close();
             registration = null;

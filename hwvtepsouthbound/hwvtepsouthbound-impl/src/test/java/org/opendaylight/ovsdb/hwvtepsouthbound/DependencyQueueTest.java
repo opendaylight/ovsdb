@@ -82,6 +82,8 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
         assertEquals(1, latch.getCount());
         addData(CONFIGURATION, LogicalSwitches.class, new String[]{"ls0", "100"});
         addData(CONFIGURATION, TerminationPoint.class, terminationPoints);
+        //Need some time to execute onDependencyResolved.
+        Thread.sleep(1000);
         assertEquals(0, latch.getCount());
     }
 

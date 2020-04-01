@@ -7,9 +7,9 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.cli;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.PrintStream;
 import java.util.Map;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -54,6 +54,8 @@ public class HwvtepCacheDisplayCmd implements Action {
 
     @Override
     @SuppressWarnings("checkstyle:RegexpSinglelineJava")
+    @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT",
+            justification = "This is display command")
     public Object execute() throws Exception {
         Map<InstanceIdentifier<Node>, HwvtepConnectionInstance> allConnectedInstances =
                 hwvtepSouthboundProvider.getHwvtepConnectionManager().getAllConnectedInstances();

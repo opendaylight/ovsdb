@@ -8,7 +8,7 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.HwvtepOperationalCommandAggregator;
-import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerProxy;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -19,17 +19,18 @@ public class HwvtepMonitorCallback implements MonitorCallBack {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepMonitorCallback.class);
     private HwvtepConnectionInstance key;
-    private TransactionInvoker txInvoker;
+    private TransactionInvokerProxy txInvokerProxy;
 
-    HwvtepMonitorCallback(HwvtepConnectionInstance key,TransactionInvoker txInvoker) {
-        this.txInvoker = txInvoker;
+    HwvtepMonitorCallback(HwvtepConnectionInstance key,TransactionInvokerProxy txInvokerProxy) {
+        this.txInvokerProxy = txInvokerProxy;
         this.key = key;
     }
 
     @Override
     public void update(TableUpdates result, DatabaseSchema dbSchema) {
         LOG.trace("result: {} dbSchema: {}", result, dbSchema.getName());
-        txInvoker.invoke(new HwvtepOperationalCommandAggregator(key, result, dbSchema));
+        txInvokerProxy.getTransactionInvokerForNode(key.getInstanceIdentifier()).invoke(
+                new HwvtepOperationalCommandAggregator(key, result, dbSchema));
         LOG.trace("update exit");
     }
 

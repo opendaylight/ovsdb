@@ -50,20 +50,36 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
     private final CountDownLatch sleepingPillEndLatch = new CountDownLatch(1);
     private CountDownLatch nullPointerPillStart = new CountDownLatch(1);
 
-    private final TransactionCommand sleepingPill = transaction -> {
-        try {
-            LOG.debug("Running sleeping pill");
-            sleepingPillStartedLatch.countDown();
-            sleepingPillEndLatch.await(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            //ignore the error
+    private TransactionCommand sleepingPill = new TransactionCommand() {
+        @Override
+        public void execute(ReadWriteTransaction transaction) {
+            try {
+                LOG.debug("Running sleeping pill");
+                sleepingPillStartedLatch.countDown();
+                sleepingPillEndLatch.await(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                //ignore the error
+            }
+        }
+
+        @Override
+        public int getTransactionChainRetryCount() {
+            return 0;
         }
     };
 
-    private final TransactionCommand nullPointerPill = transaction -> {
-        LOG.debug("Running npe TransactionCommand");
-        nullPointerPillStart.countDown();
-        throw new NullPointerException("Failed to execute command");
+    private TransactionCommand nullPointerPill = new TransactionCommand() {
+        @Override
+        public void execute(ReadWriteTransaction transaction) {
+            LOG.debug("Running npe TransactionCommand");
+            nullPointerPillStart.countDown();
+            throw new NullPointerException("Failed to execute command");
+        }
+
+        @Override
+        public int getTransactionChainRetryCount() {
+            return 0;
+        }
     };
 
     private InstanceIdentifier<Node> nodeIid1;
@@ -76,7 +92,7 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
     @Before
     public void setupTest() throws Exception {
         dataBroker = getDataBroker();
-        invoker = new TransactionInvokerImpl(dataBroker);
+        invoker = new TransactionInvokerImpl(dataBroker, null, 10);
         nodeIid1 = createInstanceIdentifier(java.util.UUID.randomUUID().toString());
         nodeIid2 = createInstanceIdentifier(java.util.UUID.randomUUID().toString());
         nodeIid3 = createInstanceIdentifier(java.util.UUID.randomUUID().toString());
@@ -181,6 +197,11 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
         @Override
         public void execute(ReadWriteTransaction transaction) {
 
+        }
+
+        @Override
+        public int getTransactionChainRetryCount() {
+            return 0;
         }
 
         @Override

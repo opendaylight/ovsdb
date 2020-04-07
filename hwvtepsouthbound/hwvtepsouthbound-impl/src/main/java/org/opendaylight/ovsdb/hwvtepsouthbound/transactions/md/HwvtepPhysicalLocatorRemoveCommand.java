@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -36,9 +35,7 @@ public class HwvtepPhysicalLocatorRemoveCommand extends AbstractTransactionComma
             final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
             final InstanceIdentifier<TerminationPoint> nodePath = HwvtepSouthboundMapper
                     .createInstanceIdentifier(connectionIId, locator);
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
-            getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOperData(TerminationPoint.class, nodePath);
-
+            addToDeleteTx(transaction, TerminationPoint.class, nodePath, locator.getUuid());
             //TODO: Check if any cleanup is required
         }
     }

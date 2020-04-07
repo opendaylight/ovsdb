@@ -22,6 +22,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -68,6 +69,7 @@ public class HwvtepPhysicalPortRemoveCommand extends AbstractTransactionCommand 
                                 updatedPSwitchData).child(TerminationPoint.class,
                                 new TerminationPointKey(new TpId(portName)));
                 transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
+                addToDeleteTx(transaction, VlanBindings.class, nodePath, port.getUuid());
                 addToDeviceUpdate(TransactionType.DELETE,
                         new PortEvent(port, nodePath.firstKeyOf(Node.class).getNodeId()));
                 getDeviceInfo().clearDeviceOperData(TerminationPoint.class, nodePath);

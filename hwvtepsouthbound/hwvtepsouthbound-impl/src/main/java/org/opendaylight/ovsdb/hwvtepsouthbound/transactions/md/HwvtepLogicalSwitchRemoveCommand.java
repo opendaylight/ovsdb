@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -39,8 +38,7 @@ public class HwvtepLogicalSwitchRemoveCommand extends AbstractTransactionCommand
                     .augmentation(HwvtepGlobalAugmentation.class)
                     .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch.getName())));
             // TODO Delete any references
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, switchIid);
-            getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOperData(LogicalSwitches.class, switchIid);
+            addToDeleteTx(transaction, LogicalSwitches.class, switchIid, logicalSwitch.getUuid());
             addToDeviceUpdate(TransactionType.DELETE, logicalSwitch);
         }
     }

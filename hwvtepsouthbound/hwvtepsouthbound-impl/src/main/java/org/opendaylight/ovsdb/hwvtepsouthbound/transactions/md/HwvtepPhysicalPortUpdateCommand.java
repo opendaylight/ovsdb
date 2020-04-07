@@ -142,8 +142,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                     addToDeviceUpdate(TransactionType.UPDATE, new PortEvent(portUpdate, psNodeId));
                 }
                 reconcileToPort(portUpdate, tpPath);
-                getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath,
-                        portUpdate.getUuid(), portUpdate);
+                addToUpdateTx(VlanBindings.class, tpPath, portUpdate.getUuid(), portUpdate);
                 // Update with Deleted VlanBindings
                 if (oldPPRows.get(portUpdateEntry.getKey()) != null
                         && oldPPRows.get(portUpdateEntry.getKey()).getVlanBindingsColumn() != null) {
@@ -175,21 +174,21 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
             //switch reconciliation will take care of this port along with other ports
             return;
         }
-        if (getDeviceInfo().getDeviceOperData(TerminationPoint.class, tpPath) != null) {
+        if (getDeviceInfo().getDeviceOperData(VlanBindings.class, tpPath) != null) {
             //case of port update not new port add
             return;
 
         }
         //case of individual port add , reconcile to this port
-        getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath, portUpdate.getUuid(), portUpdate);
-        HwvtepDeviceInfo.DeviceData data = getDeviceInfo().getConfigData(TerminationPoint.class, tpPath);
+        addToUpdateTx(VlanBindings.class, tpPath, portUpdate.getUuid(), portUpdate);
+        HwvtepDeviceInfo.DeviceData data = getDeviceInfo().getConfigData(VlanBindings.class, tpPath);
         if (data == null || data.getData() == null) {
             LOG.error("No config data present ");
         } else {
             addToDeviceUpdate(TransactionType.ADD,
                     new ReconcilePortEvent(portUpdate, tpPath.firstKeyOf(Node.class).getNodeId()));
             LOG.info("addToDeviceUpdate {}", portUpdate);
-            getDeviceInfo().updateDeviceOperData(TerminationPoint.class, tpPath,
+            getDeviceInfo().updateDeviceOperData(VlanBindings.class, tpPath,
                     portUpdate.getUuid(), portUpdate);
             getDeviceInfo().scheduleTransaction((transactionBuilder) -> {
                 InstanceIdentifier psIid = tpPath.firstIdentifierOf(Node.class);

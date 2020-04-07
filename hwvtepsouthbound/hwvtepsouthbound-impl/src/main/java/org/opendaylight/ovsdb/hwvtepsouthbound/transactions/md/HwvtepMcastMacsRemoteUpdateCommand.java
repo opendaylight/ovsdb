@@ -101,8 +101,7 @@ public class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionComma
         connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
         InstanceIdentifier<RemoteMcastMacs> macIid = getOvsdbConnectionInstance().getInstanceIdentifier()
                 .augmentation(HwvtepGlobalAugmentation.class).child(RemoteMcastMacs.class, mac.key());
-        getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(RemoteMcastMacs.class,
-                macIid, macRemote.getUuid(), macRemote);
+        addToUpdateTx(RemoteMcastMacs.class, macIid, macRemote.getUuid(), macRemote);
         return connectionNode.build();
     }
 

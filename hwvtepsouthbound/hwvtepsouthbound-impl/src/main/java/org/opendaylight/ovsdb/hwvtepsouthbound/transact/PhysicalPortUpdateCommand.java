@@ -76,11 +76,11 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
             LOG.debug("Creating a physical port named: {}", port.getHwvtepNodeName().getValue());
             InstanceIdentifier<TerminationPoint> key = getTpIid(psNodeiid, port.getHwvtepNodeName().getValue());
 
-            getOperationalState().getDeviceInfo().updateConfigData(TerminationPoint.class, key, tp);
-            HwvtepDeviceInfo.DeviceData deviceOperdata = getDeviceInfo().getDeviceOperData(TerminationPoint.class, key);
+            getOperationalState().getDeviceInfo().updateConfigData(VlanBindings.class, key, tp);
+            HwvtepDeviceInfo.DeviceData deviceOperdata = getDeviceInfo().getDeviceOperData(VlanBindings.class, key);
             if (deviceOperdata == null || deviceOperdata.getData() == null) {
                 LOG.error("Updated the device oper cache for port from actual device {}", key);
-                deviceOperdata = super.fetchDeviceData(TerminationPoint.class, key);
+                deviceOperdata = super.fetchDeviceData(VlanBindings.class, key);
             }
             if (deviceOperdata == null || deviceOperdata.getData() == null) {
                 //create a physical port always happens from device

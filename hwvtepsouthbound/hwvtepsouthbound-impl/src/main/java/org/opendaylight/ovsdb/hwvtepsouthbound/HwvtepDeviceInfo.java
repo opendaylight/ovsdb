@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Set;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependentJob;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactCommand;
@@ -56,6 +58,24 @@ import org.slf4j.LoggerFactory;
 public class HwvtepDeviceInfo {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepDeviceInfo.class);
+
+    private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, Boolean>> availableInOperDs =
+            new ConcurrentHashMap<>();
+
+    public void markAvailableInOperDs(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+        availableInOperDs.putIfAbsent(cls, new ConcurrentHashMap<>());
+        availableInOperDs.get(cls).put(key, Boolean.TRUE);
+    }
+
+    public Boolean isAvailableInOperDs(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+        availableInOperDs.putIfAbsent(cls, new ConcurrentHashMap<>());
+        return availableInOperDs.get(cls).getOrDefault(key, Boolean.FALSE);
+    }
+
+    public Boolean clearOperDsAvailability(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+        availableInOperDs.putIfAbsent(cls, new ConcurrentHashMap<>());
+        return availableInOperDs.get(cls).remove(key);
+    }
 
     public enum DeviceDataStatus {
         IN_TRANSIT,
@@ -104,8 +124,18 @@ public class HwvtepDeviceInfo {
         public boolean isInTransitState() {
             return status == DeviceDataStatus.IN_TRANSIT;
         }
+
+        public boolean isAvailableInOperDs() {
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return key + " uuid:" + uuid + " data:" + data + " status:" + status;
+        }
     }
 
+    private static AtomicInteger ZERO = new AtomicInteger(0);
     private final Map<InstanceIdentifier<?>, Set<InstanceIdentifier>> tepIdReferences = new ConcurrentHashMap<>();
     private final Map<InstanceIdentifier<LogicalSwitches>, Map<InstanceIdentifier<RemoteUcastMacs>, RemoteUcastMacs>>
             logicalSwitchVsUcasts = new ConcurrentHashMap<>();
@@ -268,6 +298,15 @@ public class HwvtepDeviceInfo {
                 }
             }
         }
+    }
+
+    public void clearDeviceOperUUID(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid) {
+        LOG.debug("Clearing device data {}", key);
+        if (uuidVsData.containsKey(cls) && uuidVsData.get(cls).containsKey(uuid)) {
+            LOG.debug("Remove {} {} from device data.", connectionInstance.getNodeId().getValue(), cls.getSimpleName());
+        }
+        HwvtepSouthboundUtil.clearData(uuidVsData, cls, uuid);
+        HwvtepSouthboundUtil.clearData(opKeyVsData, cls, key);
     }
 
     public DeviceData getDeviceOperData(Class<? extends Identifiable> cls, UUID uuid) {
@@ -442,4 +481,5 @@ public class HwvtepDeviceInfo {
     public Map<Class<? extends Identifiable>, Map<UUID, DeviceData>> getUuidData() {
         return Collections.unmodifiableMap(uuidVsData);
     }
+
 }

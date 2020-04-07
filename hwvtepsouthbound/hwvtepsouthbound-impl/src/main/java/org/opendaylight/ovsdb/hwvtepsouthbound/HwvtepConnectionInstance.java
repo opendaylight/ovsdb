@@ -337,6 +337,10 @@ public class HwvtepConnectionInstance {
 
     public void setHasDeviceOwnership(final Boolean hasDeviceOwnership) {
         if (hasDeviceOwnership != null) {
+            if (hasDeviceOwnership != this.hasDeviceOwnership) {
+                LOG.info("Ownership status changed for {} old {} new {}", instanceIdentifier,
+                        this.hasDeviceOwnership, hasDeviceOwnership);
+            }
             this.hasDeviceOwnership = hasDeviceOwnership;
         }
     }

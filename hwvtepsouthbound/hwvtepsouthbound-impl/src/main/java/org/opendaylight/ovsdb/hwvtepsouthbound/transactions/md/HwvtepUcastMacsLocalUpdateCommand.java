@@ -108,6 +108,10 @@ public class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransactionComman
                 ucmlBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid));
             }
         }
-        return ucmlBuilder.build();
+        LocalUcastMacs ucastMacsLocal = ucmlBuilder.build();
+        InstanceIdentifier iid = key.getInstanceIdentifier().augmentation(HwvtepGlobalAugmentation.class)
+                .child(LocalUcastMacs.class, ucastMacsLocal.key());
+        addToUpdateTx(LocalUcastMacs.class, iid, ucml.getUuid(), ucastMacsLocal);
+        return ucastMacsLocal;
     }
 }

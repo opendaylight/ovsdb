@@ -15,6 +15,12 @@ public interface TransactionCommand {
 
     void execute(ReadWriteTransaction transaction);
 
+    default void onSuccess() {
+    }
+
+    default void onFailure() {
+    }
+
     /**
      * Sets the result future of the executed/submitted transaction.
      */

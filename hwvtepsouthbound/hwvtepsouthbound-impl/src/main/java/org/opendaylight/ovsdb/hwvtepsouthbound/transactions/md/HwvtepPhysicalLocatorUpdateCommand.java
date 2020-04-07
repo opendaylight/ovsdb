@@ -79,8 +79,7 @@ public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionComma
                     transaction.put(LogicalDatastoreType.OPERATIONAL,
                             tpPath, tpBuilder.build());
                 }
-                getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(
-                        TerminationPoint.class, tpPath, locator.getUuid(), locator);
+                addToUpdateTx(TerminationPoint.class, tpPath, locator.getUuid(), locator);
             }
         }
     }

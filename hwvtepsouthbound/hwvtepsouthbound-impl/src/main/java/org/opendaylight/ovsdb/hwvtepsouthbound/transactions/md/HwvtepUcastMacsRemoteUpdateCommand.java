@@ -108,8 +108,7 @@ public class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactionComma
         }
         RemoteUcastMacs remoteUcastMacs = rumBuilder.build();
         InstanceIdentifier<RemoteUcastMacs> macIid = getMacIid(remoteUcastMacs);
-        getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(RemoteUcastMacs.class, macIid,
-                macRemote.getUuid(), macRemote);
+        addToUpdateTx(RemoteUcastMacs.class, macIid, macRemote.getUuid(), macRemote);
         return remoteUcastMacs;
     }
 

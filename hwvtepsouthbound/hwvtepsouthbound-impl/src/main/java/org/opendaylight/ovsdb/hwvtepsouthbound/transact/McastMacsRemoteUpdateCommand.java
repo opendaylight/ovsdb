@@ -59,6 +59,10 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             final InstanceIdentifier<Node> instanceIdentifier, final List<RemoteMcastMacs> macList) {
         for (RemoteMcastMacs mac: macList) {
             //add / update only if locator set got changed
+            InstanceIdentifier<RemoteMcastMacs> macIid = instanceIdentifier
+                    .augmentation(HwvtepGlobalAugmentation.class)
+                    .child(RemoteMcastMacs.class, mac.key());
+            updateConfigData(RemoteMcastMacs.class, macIid, mac);
             if (!HwvtepSouthboundUtil.isEmpty(mac.getLocatorSet())) {
                 onConfigUpdate(transaction, instanceIdentifier, mac, null);
             }
@@ -112,6 +116,9 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             LOG.warn("Unable to update remoteMcastMacs {} because uuid not found in the operational store",
                     mac.getMacEntryKey().getValue());
         }
+        InstanceIdentifier<RemoteMcastMacs> macIid = instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class)
+                .child(RemoteMcastMacs.class, mac.key());
+        updateConfigData(RemoteMcastMacs.class, macIid, mac);
     }
 
     private void setLogicalSwitch(final TransactionBuilder transaction, final McastMacsRemote mcastMacsRemote,
@@ -203,8 +210,8 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    protected void onCommandSucceeded() {
-        for (MdsalUpdate mdsalUpdate : updates.get(getDeviceTransaction())) {
+    public void onSuccess(TransactionBuilder tx) {
+        for (MdsalUpdate mdsalUpdate : updates) {
             updateLocatorRefCounts(mdsalUpdate);
             RemoteMcastMacs mac = (RemoteMcastMacs) mdsalUpdate.getNewData();
             InstanceIdentifier<RemoteMcastMacs> macIid = mdsalUpdate.getKey();
@@ -212,4 +219,5 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
                     (InstanceIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue(), macIid, mac);
         }
     }
+
 }

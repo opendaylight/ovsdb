@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -17,7 +18,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
@@ -97,38 +100,45 @@ public class DependencyQueue {
         processReadyJobs(connectionInstance, opWaitQueue);
     }
 
+    @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
     private void processReadyJobs(final HwvtepConnectionInstance hwvtepConnectionInstance,
                                   LinkedBlockingQueue<DependentJob> queue) {
-        final List<DependentJob> readyJobs =  getReadyJobs(queue);
-        if (readyJobs.size() > 0) {
-            EXECUTOR_SERVICE.execute(() -> hwvtepConnectionInstance.transact(new TransactCommand() {
-                private HwvtepOperationalState operationalState;
+        final List<DependentJob> readyJobs = getReadyJobs(queue);
+        readyJobs.forEach((job) -> {
+            EXECUTOR_SERVICE.execute(() ->
+                hwvtepConnectionInstance.transact(new TransactCommand() {
+                    HwvtepOperationalState operationalState = new HwvtepOperationalState(hwvtepConnectionInstance);
+                    AtomicInteger retryCount = new AtomicInteger(5);
 
-                @Override
-                public void execute(TransactionBuilder transactionBuilder) {
-                    this.operationalState = new HwvtepOperationalState(hwvtepConnectionInstance);
-                    for (DependentJob job : readyJobs) {
-                        job.onDependencyResolved(operationalState, transactionBuilder);
+                    @Override
+                    public boolean retry() {
+                        return retryCount.decrementAndGet() > 0;
                     }
-                }
 
-                @Override
-                public void onFailure(TransactionBuilder deviceTransaction) {
-                    readyJobs.forEach((job) -> job.onFailure(deviceTransaction));
-                    if (operationalState != null) {
+                    @Override
+                    public void execute(TransactionBuilder transactionBuilder) {
+                        deviceInfo.clearKeyFromDependencyQueue(job.getKey());
+                        if (operationalState.getConnectionInstance() != null
+                                && operationalState.getConnectionInstance().isActive()) {
+                            job.onDependencyResolved(operationalState, transactionBuilder);
+                        }
+                    }
+
+                    @Override
+                    @SuppressFBWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
+                    public void onFailure(TransactionBuilder tx) {
+                        job.onFailure();
                         operationalState.clearIntransitKeys();
-                    }
-                }
 
-                @Override
-                public void onSuccess(TransactionBuilder deviceTransaction) {
-                    readyJobs.forEach((job) -> job.onSuccess(deviceTransaction));
-                    if (operationalState != null) {
+                    }
+
+                    @Override
+                    public void onSuccess(TransactionBuilder tx) {
+                        job.onSuccess();
                         operationalState.getDeviceInfo().onOperDataAvailable();
                     }
-                }
-            }));
-        }
+                }));
+        });
     }
 
     private List<DependentJob> getReadyJobs(LinkedBlockingQueue<DependentJob> queue) {
@@ -137,14 +147,13 @@ public class DependencyQueue {
         while (jobIterator.hasNext()) {
             DependentJob job = jobIterator.next();
             long currentTime = System.currentTimeMillis();
-
-            //first check if its dependencies are met later check for expired status
             if (job.areDependenciesMet(deviceInfo)) {
                 jobIterator.remove();
                 readyJobs.add(job);
                 continue;
             }
             if (job.isExpired(currentTime)) {
+                deviceInfo.clearKeyFromDependencyQueue(job.getKey());
                 jobIterator.remove();
                 continue;
             }

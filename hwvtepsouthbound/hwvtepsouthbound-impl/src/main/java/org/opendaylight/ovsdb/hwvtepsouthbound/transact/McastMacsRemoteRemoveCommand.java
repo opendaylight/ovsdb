@@ -23,7 +23,6 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -93,6 +92,7 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                                     final InstanceIdentifier macIid,
                                     final Object... extraData) {
         LOG.debug("Removing remoteMcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
+        clearConfigData(RemoteMcastMacs.class, macIid);
         HwvtepDeviceInfo.DeviceData operationalMacOptional =
                 getDeviceInfo().getDeviceOperData(RemoteMcastMacs.class, macIid);
         McastMacsRemote mcastMacsRemote = transaction.getTypedRowSchema(McastMacsRemote.class);
@@ -127,15 +127,4 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
         return true;
     }
 
-
-    @Override
-    public void onCommandSucceeded() {
-        //remove the refcounts of the deleted macs
-        for (MdsalUpdate mdsalUpdate : updates.get(getDeviceTransaction())) {
-            RemoteMcastMacs deletedMac = (RemoteMcastMacs) mdsalUpdate.getNewData();
-            InstanceIdentifier<RemoteMcastMacs> macIid = mdsalUpdate.getKey();
-            getDeviceInfo().removeRemoteMcast(
-                    (InstanceIdentifier<LogicalSwitches>) deletedMac.getLogicalSwitchRef().getValue(), macIid);
-        }
-    }
 }

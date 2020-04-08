@@ -55,5 +55,7 @@ public interface HwvtepSouthboundConstants {
             "config.node.update.max.delay.ms", 10000);
     int EOS_TIMEOUT = Integer.getInteger("hwvtep.eos.timeout.delay.secs", 240);
     int CHAIN_RETRY_COUNT = 10;
+    long LS_REMOVE_DELAY_SECS = 5;
+    int LS_REMOVE_RETRIES = 10;
 
 }

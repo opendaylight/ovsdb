@@ -167,16 +167,12 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    public void onCommandSucceeded() {
-        for (MdsalUpdate mdsalUpdate : updates.get(getDeviceTransaction())) {
-            RemoteUcastMacs newMac = (RemoteUcastMacs) mdsalUpdate.getNewData();
+    public void onSuccess(TransactionBuilder tx) {
+        for (MdsalUpdate mdsalUpdate : updates) {
+            RemoteUcastMacs mac = (RemoteUcastMacs) mdsalUpdate.getNewData();
             InstanceIdentifier<RemoteUcastMacs> macIid = mdsalUpdate.getKey();
-            RemoteUcastMacs oldMac = (RemoteUcastMacs) mdsalUpdate.getOldData();
-            if (oldMac != null && !oldMac.equals(newMac)) {
-                getDeviceInfo().decRefCount(macIid, oldMac.getLocatorRef().getValue());
-            }
             getDeviceInfo().updateRemoteUcast(
-                    (InstanceIdentifier<LogicalSwitches>) newMac.getLogicalSwitchRef().getValue(), macIid, newMac);
+                    (InstanceIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue(), macIid, mac);
         }
     }
 }

@@ -53,13 +53,16 @@ public abstract class DependentJob<T extends Identifiable> {
     private final InstanceIdentifier key;
     private final T data;
     private final Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies;
+    private final long transactionId;
 
     DependentJob(InstanceIdentifier key,
-                           T data, Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies) {
+                           T data, Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies,
+                 long transactionId) {
         this.expiryTime = System.currentTimeMillis() + HwvtepSouthboundConstants.WAITING_JOB_EXPIRY_TIME_MILLIS;
         this.key = key;
         this.data = data;
         this.dependencies = dependencies;
+        this.transactionId = transactionId;
     }
 
     /**
@@ -108,6 +111,14 @@ public abstract class DependentJob<T extends Identifiable> {
         return key;
     }
 
+    public long getTransactionId() {
+        return transactionId;
+    }
+
+    public Map<Class<? extends DataObject>, List<InstanceIdentifier>> getDependencies() {
+        return dependencies;
+    }
+
     public T getData() {
         return data;
     }
@@ -116,30 +127,35 @@ public abstract class DependentJob<T extends Identifiable> {
         return true;
     }
 
-    public void onFailure(TransactionBuilder deviceTransaction) {
+    public void onFailure() {
     }
 
-    public void onSuccess(TransactionBuilder deviceTransaction) {
+    public void onSuccess() {
     }
 
     public abstract static class ConfigWaitingJob<T extends Identifiable> extends DependentJob<T> {
 
         public ConfigWaitingJob(InstanceIdentifier key, T data,
                 Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies) {
-            super(key, data, dependencies);
+            super(key, data, dependencies, 0);
         }
 
         @Override
         protected boolean isDependencyMet(HwvtepDeviceInfo deviceInfo, Class cls, InstanceIdentifier iid) {
             return deviceInfo.isConfigDataAvailable(cls, iid);
         }
+
+        public boolean isConfigWaitingJob() {
+            return true;
+        }
     }
 
     public abstract static class OpWaitingJob<T extends Identifiable> extends DependentJob<T> {
 
         public OpWaitingJob(InstanceIdentifier key, T data,
-                Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies) {
-            super(key, data, dependencies);
+                Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies,
+                            long transactionId) {
+            super(key, data, dependencies, transactionId);
         }
 
         @Override

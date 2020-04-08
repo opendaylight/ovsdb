@@ -146,6 +146,7 @@ public class HwvtepDeviceInfo {
 
     private final HwvtepConnectionInstance connectionInstance;
 
+    private Map<InstanceIdentifier, AtomicInteger> iidInQueueCount = new ConcurrentHashMap<>();
     private Map<Class<? extends Identifiable>, Map<InstanceIdentifier, DeviceData>> configKeyVsData =
             new ConcurrentHashMap<>();
     private final Map<Class<? extends Identifiable>, Map<InstanceIdentifier, DeviceData>> opKeyVsData =
@@ -480,6 +481,19 @@ public class HwvtepDeviceInfo {
 
     public Map<Class<? extends Identifiable>, Map<UUID, DeviceData>> getUuidData() {
         return Collections.unmodifiableMap(uuidVsData);
+    }
+
+    public void putKeyInDependencyQueue(InstanceIdentifier iid) {
+        iidInQueueCount.putIfAbsent(iid, new AtomicInteger(0));
+        iidInQueueCount.get(iid).incrementAndGet();
+    }
+
+    public void clearKeyFromDependencyQueue(InstanceIdentifier iid) {
+        iidInQueueCount.remove(iid);
+    }
+
+    public boolean isKeyInDependencyQueue(InstanceIdentifier iid) {
+        return iidInQueueCount.containsKey(iid);
     }
 
 }

@@ -84,6 +84,7 @@ public class HwvtepOperationalState {
     private boolean inReconciliation = false;
     private final DataBroker db;
     private final Collection<DataTreeModification<Node>> changes;
+    long transactionId = 0;
 
     public HwvtepOperationalState(DataBroker db, HwvtepConnectionInstance connectionInstance,
                                   Collection<DataTreeModification<Node>> changes) {
@@ -501,5 +502,9 @@ public class HwvtepOperationalState {
         currentTxUUIDs.clear();
         currentTxDeletedKeys.clear();
         deviceInfo.onOperDataAvailable();
+    }
+
+    public long getTransactionId() {
+        return transactionId;
     }
 }

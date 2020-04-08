@@ -8,30 +8,32 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
+import com.google.common.collect.Lists;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepTableReader;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -50,7 +52,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
     protected volatile HwvtepOperationalState hwvtepOperationalState = null;
     protected volatile TransactionBuilder deviceTransaction = null;
     private Collection<DataTreeModification<Node>> changes;
-    protected Map<TransactionBuilder, List<MdsalUpdate<T>>> updates = new ConcurrentHashMap<>();
+    Set<MdsalUpdate<T>> updates = new HashSet<>();
 
     protected AbstractTransactCommand() {
         // NO OP
@@ -74,27 +76,25 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
     }
 
     void updateCurrentTxDeleteData(Class<? extends Identifiable> cls, InstanceIdentifier key, T data) {
-        getOperationalState().getDeviceInfo().markKeyAsInTransit(cls, key);
+        hwvtepOperationalState.updateCurrentTxDeleteData(cls, key);
+        markKeyAsInTransit(cls, key);
         addToUpdates(key, data);
-        getOperationalState().getDeviceInfo().clearConfigData(cls, key);
     }
 
     void updateCurrentTxData(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid, T data) {
-        getOperationalState().getDeviceInfo().markKeyAsInTransit(cls, key);
+        hwvtepOperationalState.updateCurrentTxData(cls, key, uuid);
+        markKeyAsInTransit(cls, key);
         addToUpdates(key, data);
-        getOperationalState().getDeviceInfo().updateConfigData(cls, key, data);
     }
 
     void addToUpdates(InstanceIdentifier key, T data) {
         T oldData = null;
         Type type = getClass().getGenericSuperclass();
         Type classType = ((ParameterizedType) type).getActualTypeArguments()[0];
-        if (getDeviceInfo().getConfigData((Class<? extends Identifiable>) classType, key) != null
-                && getDeviceInfo().getConfigData((Class<? extends Identifiable>) classType, key).getData() != null) {
-            oldData = (T) getDeviceInfo().getConfigData((Class<? extends Identifiable>) classType, key).getData();
+        if (getConfigData((Class<? extends Identifiable>) classType, key) != null) {
+            oldData = (T) getConfigData((Class<? extends Identifiable>) classType, key).getData();
         }
-        updates.putIfAbsent(getDeviceTransaction(), new ArrayList<MdsalUpdate<T>>());
-        updates.get(getDeviceTransaction()).add(new MdsalUpdate<>(key, data, oldData));
+        updates.add(new MdsalUpdate<T>(key, data, oldData));
     }
 
     void processDependencies(final UnMetDependencyGetter<T> unMetDependencyGetter,
@@ -103,28 +103,32 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
             final InstanceIdentifier key,
             final T data, final Object... extraData) {
 
-        this.deviceTransaction = transaction;
-        HwvtepDeviceInfo deviceInfo = getOperationalState().getDeviceInfo();
-        Map inTransitDependencies = new HashMap<>();
-        Map configDependencies = new HashMap<>();
-
-        if (!isDeleteCmd() && unMetDependencyGetter != null) {
-            inTransitDependencies = unMetDependencyGetter.getInTransitDependencies(getOperationalState(), data);
-            configDependencies = unMetDependencyGetter.getUnMetConfigDependencies(getOperationalState(), data);
-            //we can skip the config termination point dependency as we can create them in device as part of this tx
-            configDependencies.remove(TerminationPoint.class);
-        }
-
+        HwvtepDeviceInfo deviceInfo = hwvtepOperationalState.getDeviceInfo();
         Type type = getClass().getGenericSuperclass();
         Type classType = ((ParameterizedType) type).getActualTypeArguments()[0];
+        Map inTransitDependencies = Collections.emptyMap();
+        Map confingDependencies = Collections.emptyMap();
 
-        //If this key itself is in transit wait for the response of this key itself
-        if (deviceInfo.isKeyInTransit((Class<? extends Identifiable>) classType, key)) {
-            inTransitDependencies.put(classType, Collections.singletonList(key));
+        if (isDeleteCmd()) {
+            if (deviceInfo.isKeyInTransit((Class<? extends Identifiable>) classType, key)) {
+                inTransitDependencies = new HashMap<>();
+                inTransitDependencies.put((Class<? extends Identifiable>) classType, Lists.newArrayList(key));
+            }
+        } else {
+            inTransitDependencies = unMetDependencyGetter.getInTransitDependencies(hwvtepOperationalState, data);
+            confingDependencies = unMetDependencyGetter.getUnMetConfigDependencies(hwvtepOperationalState, data);
+            //we can skip the config termination point dependency as we can create them in device as part of this tx
+            confingDependencies.remove(TerminationPoint.class);
+
+            //If this key itself is in transit wait for the response of this key itself
+            if (deviceInfo.isKeyInTransit((Class<? extends Identifiable>) classType, key)
+                    || deviceInfo.isKeyInDependencyQueue(key)) {
+                inTransitDependencies.put((Class<? extends Identifiable>) classType, Lists.newArrayList(key));
+            }
         }
-
-        if (HwvtepSouthboundUtil.isEmptyMap(configDependencies) && HwvtepSouthboundUtil.isEmptyMap(
-                inTransitDependencies)) {
+        LOG.info("Update received for key: {} txId: {}", key, getOperationalState().getTransactionId());
+        if (HwvtepSouthboundUtil.isEmptyMap(confingDependencies)
+                && HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies)) {
             doDeviceTransaction(transaction, nodeIid, data, key, extraData);
             if (isDeleteCmd()) {
                 getDeviceInfo().clearConfigData((Class<? extends Identifiable>) classType, key);
@@ -132,42 +136,77 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
                 getDeviceInfo().updateConfigData((Class<? extends Identifiable>) classType, key, data);
             }
         }
-        if (!HwvtepSouthboundUtil.isEmptyMap(configDependencies)) {
-            DependentJob<T> configWaitingJob = new DependentJob.ConfigWaitingJob<T>(
-                    key, data, configDependencies) {
+
+        if (!HwvtepSouthboundUtil.isEmptyMap(confingDependencies)) {
+            DependentJob<T> configWaitingJob = new DependentJob.ConfigWaitingJob(
+                    key, data, confingDependencies) {
+                AbstractTransactCommand clone = getClone();
 
                 @Override
                 public void onDependencyResolved(HwvtepOperationalState operationalState,
-                        TransactionBuilder transactionBuilder) {
-                    hwvtepOperationalState = operationalState;
-                    deviceTransaction = transactionBuilder;
-                    onConfigUpdate(transactionBuilder, nodeIid, data, key, extraData);
-                }
-            };
-            deviceInfo.addJobToQueue(configWaitingJob);
-        }
-
-        if (!HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies)) {
-
-            DependentJob<T> opWaitingJob = new DependentJob.OpWaitingJob<T>(
-                    key, data, inTransitDependencies) {
-
-                @Override
-                public void onDependencyResolved(HwvtepOperationalState operationalState,
-                        TransactionBuilder transactionBuilder) {
-                    //data would have got deleted by , push the data only if it is still in configds
-                    hwvtepOperationalState = operationalState;
-                    deviceTransaction = transactionBuilder;
-                    T data = (T) new ControllerMdsalUtils(operationalState.getDataBroker()).read(
-                            LogicalDatastoreType.CONFIGURATION, key);
-                    if (data != null) {
-                        onConfigUpdate(transactionBuilder, nodeIid, data, key, extraData);
-                    } else {
-                        LOG.warn("Skipping add of key: {} as it is not present", key);
+                                                 TransactionBuilder transactionBuilder) {
+                    clone.hwvtepOperationalState = operationalState;
+                    HwvtepDeviceInfo.DeviceData deviceData =
+                            getDeviceInfo().getConfigData((Class<? extends Identifiable>)getClassType(), key);
+                    T latest = data;
+                    if (deviceData != null && deviceData.getData() != null) {
+                        latest = (T) deviceData.getData();
+                        clone.onConfigUpdate(transactionBuilder, nodeIid, latest, key, extraData);
+                    } else if (isDeleteCmd()) {
+                        clone.onConfigUpdate(transactionBuilder, nodeIid, latest, key, extraData);
                     }
                 }
+
+                @Override
+                public void onFailure() {
+                    clone.onFailure(transaction);
+                }
+
+                @Override
+                public void onSuccess() {
+                    clone.onSuccess(transaction);
+                }
             };
-            deviceInfo.addJobToQueue(opWaitingJob);
+            LOG.info("Update Adding to config wait queue for key: {} txId: {}",
+                    key, getOperationalState().getTransactionId());
+            addJobToQueue(configWaitingJob);
+            return;
+        }
+        final long transactionId = hwvtepOperationalState.getTransactionId();
+        if (!HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies)) {
+
+            DependentJob<T> opWaitingJob = new DependentJob.OpWaitingJob(
+                    key, data, inTransitDependencies, transactionId) {
+                AbstractTransactCommand clone = getClone();
+
+                @Override
+                public void onDependencyResolved(HwvtepOperationalState operationalState,
+                                                 TransactionBuilder transactionBuilder) {
+                    clone.hwvtepOperationalState = operationalState;
+                    HwvtepDeviceInfo.DeviceData deviceData = getDeviceInfo()
+                            .getConfigData((Class<? extends Identifiable>)getClassType(), key);
+                    T latest = data;
+                    if (deviceData != null && deviceData.getData() != null) {
+                        latest = (T) deviceData.getData();
+                        clone.onConfigUpdate(transactionBuilder, nodeIid, latest, key, extraData);
+                    } else if (isDeleteCmd()) {
+                        clone.onConfigUpdate(transactionBuilder, nodeIid, latest, key, extraData);
+                    }
+                }
+
+                @Override
+                public void onFailure() {
+                    clone.onFailure(transaction);
+                }
+
+                @Override
+                public void onSuccess() {
+                    clone.onSuccess(transaction);
+                }
+            };
+            LOG.info("Update Adding to op wait queue for key: {} txId: {}", key, transactionId);
+            addJobToQueue(opWaitingJob);
+            return;
         }
     }
 
@@ -216,6 +255,9 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         if (modification != null && !modification.isEmpty()) {
             for (DataTreeModification<Node> change : modification) {
                 final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+                if (!Objects.equals(hwvtepOperationalState.getConnectionInstance().getInstanceIdentifier(), key)) {
+                    continue;
+                }
                 Class<? extends Identifiable> classType = (Class<? extends Identifiable>) getClassType();
                 List<T> removed;
                 if (getOperationalState().isInReconciliation()) {
@@ -237,6 +279,9 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         if (modification != null && !modification.isEmpty()) {
             for (DataTreeModification<Node> change : modification) {
                 InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+                if (!Objects.equals(hwvtepOperationalState.getConnectionInstance().getInstanceIdentifier(), key)) {
+                    continue;
+                }
                 Class<? extends Identifiable> classType = (Class<? extends Identifiable>) getClassType();
                 List<T> updated = null;
                 if (getOperationalState().isInReconciliation()) {
@@ -292,7 +337,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         List<T> data1 = getData(include);
         List<T> data2 = diffOf(node1, node2, compareKeyOnly);
         if (HwvtepSouthboundUtil.isEmpty(data1) && HwvtepSouthboundUtil.isEmpty(data2)) {
-            return Collections.emptyList();
+            return Collections.EMPTY_LIST;
         }
         List<T> result = new ArrayList<>(data1);
         result.addAll(data2);
@@ -306,30 +351,30 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         List<T> list2 = getData(node2);
 
         if (HwvtepSouthboundUtil.isEmpty(list1)) {
-            return Collections.emptyList();
+            return Collections.EMPTY_LIST;
         }
         if (HwvtepSouthboundUtil.isEmpty(list2)) {
-            return HwvtepSouthboundUtil.isEmpty(list1) ? Collections.emptyList() : list1;
+            return HwvtepSouthboundUtil.isEmpty(list1) ? Collections.EMPTY_LIST : list1;
         }
 
-        Iterator<T> it1 = list1.iterator();
-
-        while (it1.hasNext()) {
-            T ele = it1.next();
-            Iterator<T> it2 = list2.iterator();
-            boolean found = false;
-            while (it2.hasNext()) {
-                T other = it2.next();
-                found = compareKeyOnly ? Objects.equals(ele.key(), other.key()) : areEqual(ele, other);
-                if (found) {
-                    it2.remove();
-                    break;
+        Map<Object, T> map1 = list1.stream().collect(Collectors.toMap(ele -> ele.key(), ele -> ele));
+        Map<Object, T> map2 = list2.stream().collect(Collectors.toMap(ele -> ele.key(), ele -> ele));
+        map1.entrySet().forEach(entry1 -> {
+            T val2 = map2.remove(entry1.getKey());
+            if (compareKeyOnly) {
+                if (val2 == null) {
+                    result.add(entry1.getValue());
+                }
+            } else {
+                if (val2 == null) {
+                    result.add(entry1.getValue());
+                    return;
+                }
+                if (!areEqual(entry1.getValue(), val2)) {
+                    result.add(entry1.getValue());
                 }
             }
-            if (!found) {
-                result.add(ele);
-            }
-        }
+        });
         return result;
     }
 
@@ -372,21 +417,11 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
 
     @Override
     public void onSuccess(TransactionBuilder deviceTx) {
-        if (deviceTx == null || !updates.containsKey(deviceTx)) {
-            return;
-        }
         onCommandSucceeded();
     }
 
     @Override
     public void onFailure(TransactionBuilder deviceTx) {
-        if (deviceTx == null || !updates.containsKey(deviceTx)) {
-            return;
-        }
-        for (MdsalUpdate mdsalUpdate : updates.get(deviceTx)) {
-            getDeviceInfo().clearInTransit((Class<? extends Identifiable>) mdsalUpdate.getClass(),
-                    mdsalUpdate.getKey());
-        }
         onCommandFailed();
     }
 
@@ -403,38 +438,69 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
     public <T> HwvtepDeviceInfo.DeviceData fetchDeviceData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
         HwvtepDeviceInfo.DeviceData deviceData  = getDeviceOpData(cls, key);
         if (deviceData == null) {
-            LOG.debug("Could not find data for key {}", getNodeKeyStr(key));
-            java.util.Optional<TypedBaseTable> optional = getTableReader().getHwvtepTableEntryUUID(cls, key, null);
+            LOG.debug("Could not find data for key {}", key);
+            java.util.Optional<TypedBaseTable> optional =
+                    getTableReader().getHwvtepTableEntryUUID(cls, key, null);
             if (optional.isPresent()) {
-                LOG.debug("Found the data for key from device {} ", getNodeKeyStr(key));
+                LOG.debug("Found the data for key from device {} ", key);
                 getDeviceInfo().updateDeviceOperData(cls, key, optional.get().getUuid(), (T)optional.get());
                 return getDeviceOpData(cls, key);
             } else {
-                LOG.info("Could not Find the data for key from device {} ", getNodeKeyStr(key));
+                LOG.info("Could not Find the data for key from device {} ", key);
             }
         }
         return deviceData;
-    }
-
-    protected String getNodeKeyStr(InstanceIdentifier iid) {
-        try {
-            return getClassType().getTypeName() + "." + ((Node) iid.firstKeyOf(Node.class)).getNodeId().getValue() + "."
-                    + getKeyStr(iid);
-        } catch (ClassCastException  exp) {
-            LOG.error("Error in getting the Node id ", exp);
-        }
-        return iid.toString();
     }
 
     protected String getKeyStr(InstanceIdentifier iid) {
         return iid.toString();
     }
 
+    public <K extends Identifiable> void addJobToQueue(DependentJob<K> job) {
+        hwvtepOperationalState.getDeviceInfo().putKeyInDependencyQueue(job.getKey());
+        hwvtepOperationalState.getDeviceInfo().addJobToQueue(job);
+    }
+
+    public void markKeyAsInTransit(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+        hwvtepOperationalState.getDeviceInfo().markKeyAsInTransit(cls, key);
+    }
+
     public HwvtepDeviceInfo.DeviceData getDeviceOpData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
         return getOperationalState().getDeviceInfo().getDeviceOperData(cls, key);
     }
 
+    public void clearConfigData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+        hwvtepOperationalState.getDeviceInfo().clearConfigData(cls, key);
+    }
+
+    public HwvtepDeviceInfo.DeviceData getConfigData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+        return hwvtepOperationalState.getDeviceInfo().getConfigData(cls, key);
+    }
+
+    public void updateConfigData(Class<? extends Identifiable> cls, InstanceIdentifier key, Object data) {
+        hwvtepOperationalState.getDeviceInfo().updateConfigData(cls, key, data);
+    }
+
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    public AbstractTransactCommand getClone() {
+        try {
+            return (AbstractTransactCommand) getClass().getConstructor(HwvtepOperationalState.class, Collection.class)
+                    .newInstance(hwvtepOperationalState, changes);
+        } catch (Throwable e) {
+            LOG.error("Failed to clone the cmd ", e);
+        }
+        return this;
+    }
+
     public HwvtepTableReader getTableReader() {
         return getOperationalState().getConnectionInstance().getHwvtepTableReader();
+    }
+
+    public HwvtepConnectionInstance getConnectionInstance() {
+        return hwvtepOperationalState.getConnectionInstance();
+    }
+
+    public HwvtepOperationalState newOperState() {
+        return new HwvtepOperationalState(getConnectionInstance());
     }
 }

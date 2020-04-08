@@ -407,19 +407,28 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             });
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private static void handleNewPassiveConnection(final OvsdbClient client) {
         ListenableFuture<List<String>> echoFuture = client.echo();
         LOG.debug("Send echo message to probe the OVSDB switch {}",client.getConnectionInfo());
         Futures.addCallback(echoFuture, new FutureCallback<List<String>>() {
             @Override
-            public void onSuccess(@Nullable final List<String> result) {
-                LOG.debug("Probe was successful to OVSDB switch {}",client.getConnectionInfo());
-                List<OvsdbClient> clientsFromSameNode = getPassiveClientsFromSameNode(client);
+            public void onSuccess(@Nullable List<String> result) {
+                LOG.info("Probe was successful to OVSDB switch {}",client.getConnectionInfo());
+                //List<OvsdbClient> clientsFromSameNode = getPassiveClientsFromSameNode(client);
+                try {
+                    getPassiveClientsFromSameNode(client);
+                } catch (Throwable throwable) {
+                    LOG.error("Failed to get passive clients from same node", throwable);
+                }
+                notifyListenerForPassiveConnection(client);
+                /*
                 if (clientsFromSameNode.size() == 0) {
                     notifyListenerForPassiveConnection(client);
                 } else {
                     STALE_PASSIVE_CONNECTION_SERVICE.handleNewPassiveConnection(client, clientsFromSameNode);
                 }
+                */
             }
 
             @Override

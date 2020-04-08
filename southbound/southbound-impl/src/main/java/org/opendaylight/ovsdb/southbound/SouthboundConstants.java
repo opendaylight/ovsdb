@@ -213,4 +213,6 @@ public interface SouthboundConstants {
             return this.state;
         }
     }
+
+    int EOS_TIMEOUT = Integer.getInteger("southbound.eos.timeout.delay.secs", 240);
 }

@@ -168,7 +168,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
 
     @Override
     public void onCommandSucceeded() {
-        for (MdsalUpdate mdsalUpdate : updates.get(getDeviceTransaction())) {
+        for (MdsalUpdate mdsalUpdate : updates) {
             RemoteUcastMacs newMac = (RemoteUcastMacs) mdsalUpdate.getNewData();
             InstanceIdentifier<RemoteUcastMacs> macIid = mdsalUpdate.getKey();
             RemoteUcastMacs oldMac = (RemoteUcastMacs) mdsalUpdate.getOldData();

@@ -407,4 +407,8 @@ public class HwvtepConnectionInstance {
         deviceInfo.setDeviceUpdateHistory(deviceUpdateLog);
         this.deviceUpdateHistory = deviceUpdateLog;
     }
+
+    public TransactionInvoker getTxInvoker() {
+        return txInvoker;
+    }
 }

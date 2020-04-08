@@ -131,7 +131,7 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
     @Override
     public void onCommandSucceeded() {
         //remove the refcounts of the deleted macs
-        for (MdsalUpdate mdsalUpdate : updates.get(getDeviceTransaction())) {
+        for (MdsalUpdate mdsalUpdate : updates) {
             RemoteMcastMacs deletedMac = (RemoteMcastMacs) mdsalUpdate.getNewData();
             InstanceIdentifier<RemoteMcastMacs> macIid = mdsalUpdate.getKey();
             getDeviceInfo().removeRemoteMcast(

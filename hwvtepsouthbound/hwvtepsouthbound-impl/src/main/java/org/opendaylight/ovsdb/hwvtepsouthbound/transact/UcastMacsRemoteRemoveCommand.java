@@ -105,7 +105,7 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
 
     @Override
     public void onCommandSucceeded() {
-        for (MdsalUpdate mdsalUpdate : updates.get(getDeviceTransaction())) {
+        for (MdsalUpdate mdsalUpdate : updates) {
             RemoteUcastMacs deletedMac = (RemoteUcastMacs) mdsalUpdate.getNewData();
             InstanceIdentifier<RemoteUcastMacs> macIid = mdsalUpdate.getKey();
             getDeviceInfo().removeRemoteUcast(

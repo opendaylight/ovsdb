@@ -204,7 +204,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
 
     @Override
     protected void onCommandSucceeded() {
-        for (MdsalUpdate mdsalUpdate : updates.get(getDeviceTransaction())) {
+        for (MdsalUpdate mdsalUpdate : updates) {
             updateLocatorRefCounts(mdsalUpdate);
             RemoteMcastMacs mac = (RemoteMcastMacs) mdsalUpdate.getNewData();
             InstanceIdentifier<RemoteMcastMacs> macIid = mdsalUpdate.getKey();

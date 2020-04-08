@@ -152,10 +152,7 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
 
     @Override
     public void onCommandSucceeded() {
-        if (getDeviceTransaction() == null || !updates.containsKey(getDeviceTransaction())) {
-            return;
-        }
-        for (MdsalUpdate mdsalUpdate : updates.get(getDeviceTransaction())) {
+        for (MdsalUpdate mdsalUpdate : updates) {
             getDeviceInfo().clearLogicalSwitchRefs(mdsalUpdate.getKey());
         }
     }

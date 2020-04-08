@@ -93,7 +93,7 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
 
         final CountDownLatch latch = new CountDownLatch(1);
         opState.getDeviceInfo().addJobToQueue(new DependentJob.OpWaitingJob<RemoteMcastMacs>(
-                macIid, mac, (Map)unMetDependencies) {
+                macIid, mac, (Map)unMetDependencies, 0) {
             @Override
             protected void onDependencyResolved(HwvtepOperationalState operationalState,
                     TransactionBuilder transactionBuilder) {
@@ -105,6 +105,8 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
 
         opState.getDeviceInfo().updateDeviceOperData(LogicalSwitches.class, lsIid, new UUID("ls0"), "ls0");
         opState.getDeviceInfo().onOperDataAvailable();
+        //wait for sometime so that the onDependencyResolved is triggered
+        Thread.sleep(500);
         assertEquals(0, latch.getCount());
 
     }

@@ -9,19 +9,28 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionCommand;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,54 +106,91 @@ public class DependencyQueue {
         processReadyJobs(connectionInstance, opWaitQueue);
     }
 
+    @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
     private void processReadyJobs(final HwvtepConnectionInstance hwvtepConnectionInstance,
                                   LinkedBlockingQueue<DependentJob> queue) {
-        final List<DependentJob> readyJobs =  getReadyJobs(queue);
-        if (readyJobs.size() > 0) {
-            EXECUTOR_SERVICE.execute(() -> hwvtepConnectionInstance.transact(new TransactCommand() {
-                private HwvtepOperationalState operationalState;
+        final List<DependentJob> readyJobs = getReadyJobs(queue);
+        readyJobs.forEach((job) -> {
+            InstanceIdentifier<Node> nodeIid = job.getKey().firstIdentifierOf(Node.class);
+            hwvtepConnectionInstance.getTxInvoker().invoke(
+                    new TransactionCommand() {
+                        @Override
+                        public void execute(ReadWriteTransaction transaction) {
+                            hwvtepConnectionInstance.transact(new TransactCommand() {
+                                HwvtepOperationalState operationalState;
+                                AtomicInteger retryCount = new AtomicInteger(5);
 
-                @Override
-                public void execute(TransactionBuilder transactionBuilder) {
-                    this.operationalState = new HwvtepOperationalState(hwvtepConnectionInstance);
-                    for (DependentJob job : readyJobs) {
-                        job.onDependencyResolved(operationalState, transactionBuilder);
-                    }
-                }
+                                @Override
+                                public boolean retry() {
+                                    return retryCount.decrementAndGet() > 0;
+                                }
 
-                @Override
-                public void onFailure(TransactionBuilder deviceTransaction) {
-                    readyJobs.forEach((job) -> job.onFailure(deviceTransaction));
-                    if (operationalState != null) {
-                        operationalState.clearIntransitKeys();
-                    }
-                }
+                                @Override
+                                public void execute(TransactionBuilder transactionBuilder) {
+                                    deviceInfo.clearKeyFromDependencyQueue(job.getKey());
+                                    operationalState = new HwvtepOperationalState(hwvtepConnectionInstance);
+                                    if (operationalState.getConnectionInstance() != null
+                                            && operationalState.getConnectionInstance().isActive()) {
+                                        job.onDependencyResolved(operationalState, transactionBuilder);
+                                    }
+                                }
 
-                @Override
-                public void onSuccess(TransactionBuilder deviceTransaction) {
-                    readyJobs.forEach((job) -> job.onSuccess(deviceTransaction));
-                    if (operationalState != null) {
-                        operationalState.getDeviceInfo().onOperDataAvailable();
-                    }
-                }
-            }));
-        }
+                                @Override
+                                @SuppressFBWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
+                                public void onFailure(TransactionBuilder tx) {
+                                    job.onFailure();
+                                    operationalState.clearIntransitKeys();
+                                    operationalState.getDeviceInfo().onOperDataAvailable();
+                                }
+
+                                @Override
+                                public void onSuccess(TransactionBuilder tx) {
+                                    job.onSuccess();
+                                }
+                            });
+                        }
+
+                    });
+        });
     }
 
     private List<DependentJob> getReadyJobs(LinkedBlockingQueue<DependentJob> queue) {
         List<DependentJob> readyJobs = new ArrayList<>();
         Iterator<DependentJob> jobIterator = queue.iterator();
-        while (jobIterator.hasNext()) {
+        while(jobIterator.hasNext()) {
             DependentJob job = jobIterator.next();
             long currentTime = System.currentTimeMillis();
-
-            //first check if its dependencies are met later check for expired status
             if (job.areDependenciesMet(deviceInfo)) {
+                Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies = job.getDependencies();
+                InstanceIdentifier unmetIid = null;
+                String queueType = job.isConfigWaitingJob() ? "config" : "operational";
+                StringBuilder reasons = new StringBuilder("Dependency met for " + queueType + " dependency of " + job.getKey()
+                        + ":depends.on #####################################:");
+                for (Class<? extends DataObject> cls : dependencies.keySet()) {
+                    for (InstanceIdentifier iid : dependencies.get(cls)) {
+                        //TODOreasons.append(HwvtepSouthboundUtil.getKey(iid) + ":" + deviceInfo.getLastStatusAndReason(iid) + ":");
+                    }
+                }
+                //TODO deviceInfo.addToDependencyTxLog(TransactionLog.ADD, reasons.toString());
                 jobIterator.remove();
+                InstanceIdentifier<? extends DataObject> iid = job.getKey();
+                String nodeId = iid.firstKeyOf(Node.class).getNodeId().getValue();
+                if (job.getData() != null && job.getData().key() != null) {
+                    String jobType = job.getData().key().getClass().getSimpleName();
+                }
                 readyJobs.add(job);
                 continue;
             }
             if (job.isExpired(currentTime)) {
+                Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies = job.getDependencies();
+                InstanceIdentifier unmetIid = null;
+                //TODO deviceInfo.addToDependencyTxLog(TransactionLog.ADD, reasons.toString());
+                InstanceIdentifier<? extends DataObject> iid = job.getKey();
+                String nodeId = iid.firstKeyOf(Node.class).getNodeId().getValue();
+                if (job.getData() != null && job.getData().key() != null) {
+                    String jobType = job.getData().key().getClass().getSimpleName();
+                }
+                deviceInfo.clearKeyFromDependencyQueue(job.getKey());
                 jobIterator.remove();
                 continue;
             }

@@ -158,7 +158,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand {
                                       final InstanceIdentifier<VlanBindings> vlanIid) {
 
         DependentJob<VlanBindings> opWaitingJob = new DependentJob.OpWaitingJob<VlanBindings>(
-                vlanIid, vlanBinding, inTransitDependencies) {
+                vlanIid, vlanBinding, inTransitDependencies, getOperationalState().getTransactionId()) {
             @Override
             public void onDependencyResolved(final HwvtepOperationalState operationalState,
                                              final TransactionBuilder transactionBuilder) {

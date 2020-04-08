@@ -9,9 +9,12 @@
 package org.opendaylight.ovsdb.southbound;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
@@ -19,6 +22,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
+import org.opendaylight.ovsdb.utils.mdsal.utils.Scheduler;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
@@ -101,7 +105,21 @@ public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<
         });
     }
 
+    private static final Map<InstanceIdentifier<Node>, ScheduledFuture> TIMEOUT_FTS = new ConcurrentHashMap<>();
 
+    public static void runAfterTimeoutIfNodeNotCreated(InstanceIdentifier<Node> iid, Runnable job) {
+        ScheduledFuture<?> ft = TIMEOUT_FTS.get(iid);
+        if (ft != null) {
+            ft.cancel(false);
+        }
+        ft = Scheduler.getScheduledExecutorService().schedule(() -> {
+            TIMEOUT_FTS.remove(iid);
+            if (!OPER_NODE_CACHE.containsKey(iid)) {
+                job.run();
+            }
+        }, SouthboundConstants.EOS_TIMEOUT, TimeUnit.SECONDS);
+        TIMEOUT_FTS.put(iid, ft);
+    }
 
     private Node getCreated(DataObjectModification<Node> mod) {
         if ((mod.getModificationType() == DataObjectModification.ModificationType.WRITE)

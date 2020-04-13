@@ -60,6 +60,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
@@ -94,7 +95,8 @@ public class HwvtepTableReader {
         RemoteMcastMacs.class, McastMacsRemote.class,
         RemoteUcastMacs.class, UcastMacsRemote.class,
         LogicalSwitches.class, LogicalSwitch.class,
-        TerminationPoint.class, PhysicalLocator.class);
+        TerminationPoint.class, PhysicalLocator.class,
+        VlanBindings.class, PhysicalPort.class);
 
     private final ImmutableMap<Class<? extends Identifiable<?>>, WhereClauseGetter<?>> whereClauseGetters;
     private final ImmutableClassToInstanceMap<TypedBaseTable<?>> tables;
@@ -135,6 +137,10 @@ public class HwvtepTableReader {
                 tableBuilder.put(PhysicalLocator.class, plTable);
                 whereBuilder.put(TerminationPoint.class, new LocatorWhereClauseGetter(plTable));
             }
+            final PhysicalPort physicalPort = dbSchema.getTypedRowWrapper(PhysicalPort.class, null);
+            if (physicalPort != null) {
+                tableBuilder.put(PhysicalPort.class, physicalPort);
+            }
         }
 
         tables = tableBuilder.build();
@@ -158,17 +164,28 @@ public class HwvtepTableReader {
             RemoteMcastMacsKey key = iid.firstKeyOf(RemoteMcastMacs.class);
             InstanceIdentifier<LogicalSwitches> lsIid = (InstanceIdentifier<LogicalSwitches>) key.getLogicalSwitchRef()
                     .getValue();
-            UUID lsUUID = connectionInstance.getDeviceInfo().getUUID(LogicalSwitches.class, lsIid);
+            UUID lsUUID = getLsUuid(lsIid);
             if (lsUUID == null) {
-                LOG.error("Could not find uuid for ls key {}", lsIid);
+                LOG.warn("Could not find uuid for ls key {}", lsIid);
                 return null;
             }
 
             ArrayList<Condition> conditions = new ArrayList<>();
             conditions.add(macTable.getLogicalSwitchColumn().getSchema().opEqual(lsUUID));
-            conditions.add(macTable.getMacColumn().getSchema().opEqual(key.getMacEntryKey().getValue()));
             return conditions;
         }
+    }
+
+    public UUID getLsUuid(InstanceIdentifier lsIid) {
+        UUID lsUUID = connectionInstance.getDeviceInfo().getUUID(LogicalSwitches.class, lsIid);
+        if (lsUUID == null) {
+            Optional<TypedBaseTable> optional =
+                    getHwvtepTableEntryUUID(LogicalSwitches.class, lsIid, null);
+            if (optional.isPresent()) {
+                lsUUID = optional.get().getUuid();
+            }
+        }
+        return lsUUID;
     }
 
     class RemoteUcastMacWhereClauseGetter implements WhereClauseGetter<RemoteUcastMacs> {

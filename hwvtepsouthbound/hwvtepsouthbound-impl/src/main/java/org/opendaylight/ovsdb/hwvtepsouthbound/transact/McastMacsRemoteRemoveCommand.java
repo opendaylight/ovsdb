@@ -91,24 +91,40 @@ public class McastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                                     final RemoteMcastMacs mac,
                                     final InstanceIdentifier macIid,
                                     final Object... extraData) {
-        LOG.debug("Removing remoteMcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
         clearConfigData(RemoteMcastMacs.class, macIid);
-        HwvtepDeviceInfo.DeviceData operationalMacOptional =
-                getDeviceInfo().getDeviceOperData(RemoteMcastMacs.class, macIid);
+        long transactionId = getOperationalState().getTransactionId();
+        LOG.debug("Remove received for RemoteMcastMacs key: {} txId: {}", macIid, transactionId);
+        HwvtepDeviceInfo.DeviceData deviceData = getDeviceOpData(RemoteMcastMacs.class, macIid);
         McastMacsRemote mcastMacsRemote = transaction.getTypedRowSchema(McastMacsRemote.class);
-        if (operationalMacOptional != null && operationalMacOptional.getUuid() != null) {
-            //when mac entry is deleted, its referenced locator set and locators are deleted automatically.
-            //TODO: locator in config DS is not deleted
-            UUID macEntryUUID = operationalMacOptional.getUuid();
-            mcastMacsRemote.getUuidColumn().setData(macEntryUUID);
-            transaction.add(op.delete(mcastMacsRemote.getSchema())
-                    .where(mcastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
-            transaction.add(op.comment("McastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));
-            updateCurrentTxDeleteData(RemoteMcastMacs.class, macIid, mac);
-            updateControllerTxHistory(TransactionType.DELETE, mcastMacsRemote);
-        } else {
-            LOG.warn("Unable to delete remoteMcastMacs {} because it was not found in the operational store",
-                    mac.getMacEntryKey().getValue());
+        boolean deleted = false;
+        if (deviceData != null && deviceData.getData() != null && deviceData.getData() instanceof McastMacsRemote
+                && ((McastMacsRemote)deviceData.getData()).getLogicalSwitchColumn() != null) {
+            UUID logicalSwitchUid = ((McastMacsRemote)deviceData.getData()).getLogicalSwitchColumn().getData();
+            if (logicalSwitchUid != null) {
+                transaction.add(op.delete(mcastMacsRemote.getSchema())
+                        .where(mcastMacsRemote.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUid)).build());
+                deleted = true;
+                updateCurrentTxDeleteData(RemoteMcastMacs.class, macIid, mac);
+                updateControllerTxHistory(TransactionType.DELETE, new StringBuilder(mcastMacsRemote.toString())
+                        .append(":  LS: ").append(logicalSwitchUid));
+                LOG.info("CONTROLLER - {} {} LS:{}", TransactionType.DELETE, mcastMacsRemote, logicalSwitchUid);
+            }
+        }
+        if (!deleted && deviceData != null) {
+            UUID macEntryUUID = deviceData.getUuid();
+            if (macEntryUUID != null) {
+                mcastMacsRemote.getUuidColumn().setData(macEntryUUID);
+                updateCurrentTxDeleteData(RemoteMcastMacs.class, macIid, mac);
+                transaction.add(op.delete(mcastMacsRemote.getSchema())
+                        .where(mcastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
+                updateControllerTxHistory(TransactionType.DELETE, new StringBuilder(mcastMacsRemote.toString())
+                        .append(":  Mac : ").append(macEntryUUID));
+                LOG.info("CONTROLLER - {} {} Mac :{}", TransactionType.DELETE, mcastMacsRemote, macEntryUUID);
+            } else {
+                LOG.error("Failed to delete remote mcast entry as it is not found in device {}", macIid);
+                getDeviceInfo().clearConfigData(RemoteMcastMacs.class, macIid);
+                return;
+            }
         }
     }
 

@@ -44,9 +44,11 @@ import org.opendaylight.ovsdb.lib.operations.Delete;
 import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.Operations;
+import org.opendaylight.ovsdb.lib.operations.Select;
 import org.opendaylight.ovsdb.lib.operations.Update;
 import org.opendaylight.ovsdb.lib.operations.Where;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
@@ -208,8 +210,12 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(insert).when(mockOp).insert(insertOpCapture.capture());
         Update update = mock(Update.class);
         doReturn(update).when(mockOp).update(insertOpCapture.capture());
+        Select select = mock(Select.class);
+        doReturn(select).when(mockOp).select(any(GenericTableSchema.class));
         doReturn(where).when(update).where(any());
         doReturn(delete).when(mockOp).delete(any());
+
+
 
         try {
             setFinalStatic(Operations.class, "op", mockOp);

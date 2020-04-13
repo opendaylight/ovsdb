@@ -9,16 +9,22 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -39,62 +45,103 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
                 extractRemoved(getChanges(),RemoteUcastMacs.class);
         if (!removeds.isEmpty()) {
             for (Entry<InstanceIdentifier<Node>, List<RemoteUcastMacs>> removed:
-                removeds.entrySet()) {
-                removeUcastMacRemote(transaction,  removed.getKey(), removed.getValue());
+                    removeds.entrySet()) {
+                onConfigUpdate(transaction, removed.getKey(), removed.getValue());
             }
         }
     }
 
-
-    private void removeUcastMacRemote(final TransactionBuilder transaction,
-                                      final InstanceIdentifier<Node> instanceIdentifier,
-                                      final List<RemoteUcastMacs> macList) {
-        for (RemoteUcastMacs mac: macList) {
-            onConfigUpdate(transaction, instanceIdentifier, mac, null);
+    public void onConfigUpdate(TransactionBuilder transaction,
+                               InstanceIdentifier<Node> nodeIid,
+                               List<RemoteUcastMacs> macs) {
+        for (RemoteUcastMacs mac : macs) {
+            InstanceIdentifier<RemoteUcastMacs> macKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
+                    .child(RemoteUcastMacs.class, mac.key());
+            getDeviceInfo().clearConfigData(RemoteUcastMacs.class, macKey);
+            onConfigUpdate(transaction, nodeIid, mac, macKey);
         }
     }
 
     @Override
-    public void onConfigUpdate(final TransactionBuilder transaction,
-                               final InstanceIdentifier<Node> nodeIid,
-                               final RemoteUcastMacs remoteUcastMacs,
-                               final InstanceIdentifier macKey,
-                               final Object... extraData) {
-        InstanceIdentifier<RemoteUcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                .child(RemoteUcastMacs.class, remoteUcastMacs.key());
-        processDependencies(null, transaction, nodeIid, macIid, remoteUcastMacs);
+    public void onConfigUpdate(TransactionBuilder transaction,
+                               InstanceIdentifier<Node> nodeIid,
+                               RemoteUcastMacs remoteMcastMac,
+                               InstanceIdentifier macKey,
+                               Object... extraData) {
+        processDependencies(EmptyDependencyGetter.INSTANCE, transaction, nodeIid, macKey, remoteMcastMac);
     }
 
     @Override
-    public void doDeviceTransaction(final TransactionBuilder transaction,
-                                    final InstanceIdentifier<Node> instanceIdentifier,
-                                    final RemoteUcastMacs mac,
-                                    final InstanceIdentifier macKey,
-                                    final Object... extraData) {
-        LOG.debug("Removing remoteUcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
-        InstanceIdentifier<RemoteUcastMacs> macIid = instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class)
-                .child(RemoteUcastMacs.class, mac.key());
-        HwvtepDeviceInfo.DeviceData deviceData =
-                getOperationalState().getDeviceInfo().getDeviceOperData(RemoteUcastMacs.class, macIid);
-        UcastMacsRemote ucastMacsRemote = transaction.getTypedRowSchema(UcastMacsRemote.class);
-        if (deviceData != null && deviceData.getUuid() != null) {
-            //when mac entry is deleted, its referenced locators are deleted automatically.
-            //locators in config DS is not deleted and need to be removed explicitly by user.
-            UUID macEntryUUID = deviceData.getUuid();
-            ucastMacsRemote.getUuidColumn().setData(macEntryUUID);
-            transaction.add(op.delete(ucastMacsRemote.getSchema())
-                    .where(ucastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
-            transaction.add(op.comment("UcastMacRemote: Deleting " + mac.getMacEntryKey().getValue()));
-            updateCurrentTxDeleteData(RemoteUcastMacs.class, macKey, mac);
-        } else {
-            LOG.warn("Unable to delete remoteUcastMacs {} because it was not found in the operational store",
-                    mac.getMacEntryKey().getValue());
+    public void doDeviceTransaction(TransactionBuilder transaction,
+                                    InstanceIdentifier<Node> instanceIdentifier,
+                                    RemoteUcastMacs mac,
+                                    InstanceIdentifier macKey,
+                                    Object... extraData) {
+        removeUcastMacRemote(transaction, instanceIdentifier, Lists.newArrayList(mac));
+    }
+
+    private void removeUcastMacRemote(TransactionBuilder transaction,
+                                      InstanceIdentifier<Node> instanceIdentifier, List<RemoteUcastMacs> macList) {
+        for (RemoteUcastMacs mac: macList) {
+            final InstanceIdentifier<RemoteUcastMacs> macIid =
+                    instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class)
+                            .child(RemoteUcastMacs.class, mac.key());
+            HwvtepDeviceInfo.DeviceData deviceData = getDeviceOpData(RemoteUcastMacs.class, macIid);
+            UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                    UcastMacsRemote.class, null);
+            LOG.debug("Remove received for remoteUcastMacs, key: {} txId: {}", macIid,
+                    getOperationalState().getTransactionId());
+            boolean deleted = false;
+            if (deviceData != null && deviceData.getUuid() != null) {
+                if (deviceData.getData() != null && deviceData.getData() instanceof UcastMacsRemote
+                        && ((UcastMacsRemote)deviceData.getData()).getLogicalSwitchColumn() != null) {
+                    UUID logicalSwitchUid = ((UcastMacsRemote) deviceData.getData()).getLogicalSwitchColumn().getData();
+                    if (logicalSwitchUid != null) {
+                        deleted = true;
+                        updateCurrentTxDeleteData(RemoteUcastMacs.class, macIid, mac);
+                        transaction.add(op.delete(ucastMacsRemote.getSchema())
+                                .where(ucastMacsRemote.getLogicalSwitchColumn().getSchema()
+                                        .opEqual(logicalSwitchUid))
+                                .and(ucastMacsRemote.getMacColumn().getSchema().opEqual(mac.getMacEntryKey()
+                                        .getValue())).build());
+                        LOG.info("CONTROLLER - {} {}", TransactionType.DELETE, ucastMacsRemote);
+                    }
+                }
+            }
+            if (!deleted && deviceData != null && deviceData.getUuid() != null) {
+                updateCurrentTxDeleteData(RemoteUcastMacs.class, macIid, mac);
+                UUID macEntryUUID = deviceData.getUuid();
+                ucastMacsRemote.getUuidColumn().setData(macEntryUUID);
+                transaction.add(op.delete(ucastMacsRemote.getSchema())
+                        .where(ucastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
+                LOG.info("CONTROLLER - {} {}", TransactionType.DELETE, ucastMacsRemote);
+            } else {
+                LOG.trace("Remove failed to find in op datastore key:{} txId:{}", macIid, getOperationalState()
+                        .getTransactionId());
+            }
+            getDeviceInfo().clearConfigData(RemoteUcastMacs.class, macIid);
         }
     }
 
     @Override
     protected List<RemoteUcastMacs> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getRemoteUcastMacs();
+    }
+
+    @Override
+    protected boolean areEqual(RemoteUcastMacs remoteUcastMacs1, RemoteUcastMacs remoteUcastMacs2) {
+        return Objects.equals(remoteUcastMacs1.key(), remoteUcastMacs2.key());
+    }
+
+    @Override
+    public void onSuccess(TransactionBuilder tx) {
+        for (MdsalUpdate mdsalUpdate : updates) {
+            RemoteUcastMacs mac = (RemoteUcastMacs) mdsalUpdate.getNewData();
+            InstanceIdentifier<RemoteUcastMacs> macIid = mdsalUpdate.getKey();
+            getDeviceInfo().removeRemoteUcast(
+                    (InstanceIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue(), macIid);
+        }
+        getDeviceInfo().onOperDataAvailable();
     }
 
     @Override

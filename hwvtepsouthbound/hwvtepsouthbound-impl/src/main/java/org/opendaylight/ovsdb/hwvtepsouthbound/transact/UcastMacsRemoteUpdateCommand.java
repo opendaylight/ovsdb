@@ -9,16 +9,21 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
+import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
@@ -56,6 +61,10 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             return;
         }
         for (RemoteUcastMacs remoteUcastMac : remoteUcastMacs) {
+            InstanceIdentifier<RemoteUcastMacs> macIid =
+                    instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class)
+                            .child(RemoteUcastMacs.class, remoteUcastMac.key());
+            getDeviceInfo().updateConfigData(RemoteUcastMacs.class, macIid, remoteUcastMac);
             onConfigUpdate(transaction, instanceIdentifier, remoteUcastMac, null);
         }
     }
@@ -77,33 +86,50 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
                                     final RemoteUcastMacs remoteUcastMac,
                                     final InstanceIdentifier macKey,
                                     final Object... extraData) {
-        LOG.debug("Creating remoteUcastMacs, mac address: {}", remoteUcastMac.getMacEntryKey().getValue());
+        LOG.debug("DoDeviceTransaction remoteUcastMacs, mac address: {}", remoteUcastMac.getMacEntryKey().getValue());
         updateConfigData(RemoteUcastMacs.class, macKey, remoteUcastMac);
-        final HwvtepDeviceInfo.DeviceData deviceData =
-                getOperationalState().getDeviceInfo().getDeviceOperData(RemoteUcastMacs.class, macKey);
-
+        HwvtepDeviceInfo.DeviceData deviceData = getDeviceOpData(RemoteUcastMacs.class, macKey);
         UcastMacsRemote ucastMacsRemote = transaction.getTypedRowWrapper(UcastMacsRemote.class);
         setIpAddress(ucastMacsRemote, remoteUcastMac);
-        setLocator(transaction, ucastMacsRemote, remoteUcastMac);
         setLogicalSwitch(transaction, ucastMacsRemote, remoteUcastMac);
-        if (deviceData == null) {
+        //TODO handle multiple inserts
+        if (deviceData  == null) {
+            setLocator(transaction, ucastMacsRemote, remoteUcastMac);
             setMac(ucastMacsRemote, remoteUcastMac);
-            LOG.trace("doDeviceTransaction: creating RemotUcastMac entry: {}", ucastMacsRemote);
+            LOG.trace("DoDeviceTransaction: creating RemotUcastMac entry: {} txId: {}", macKey,
+                    getOperationalState().getTransactionId());
             transaction.add(op.insert(ucastMacsRemote));
-            getOperationalState().getDeviceInfo().markKeyAsInTransit(RemoteUcastMacs.class, macKey);
             updateCurrentTxData(RemoteUcastMacs.class, macKey, new UUID("uuid"), remoteUcastMac);
+            LOG.info("CONTROLLER - {} {}", TransactionType.ADD, ucastMacsRemote);
+            return;
         } else if (deviceData.getUuid() != null) {
+            UUID newLocator = setLocator(transaction, ucastMacsRemote, remoteUcastMac);
+            if (deviceData.getData() != null) {
+                UcastMacsRemote existing = (UcastMacsRemote) deviceData.getData();
+                if (existing.getLocatorColumn() != null) {
+                    UUID oldLocatorUuid = existing.getLocatorColumn().getData();
+                    if (Objects.equals(newLocator, oldLocatorUuid)) {
+                        return;
+                    }
+                }
+            }
+            setMac(ucastMacsRemote, remoteUcastMac);
             UUID macEntryUUID = deviceData.getUuid();
-            UcastMacsRemote extraMac = transaction.getTypedRowSchema(UcastMacsRemote.class);
+            UcastMacsRemote extraMac = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
+                    UcastMacsRemote.class, null);
             extraMac.getUuidColumn().setData(macEntryUUID);
-            LOG.trace("doDeviceTransaction: updating RemotUcastMac entry: {}", ucastMacsRemote);
+            LOG.trace("doDeviceTransaction: updating RemotUcastMac entry: {} txId: {}", macKey,
+                    getOperationalState().getTransactionId());
             transaction.add(op.update(ucastMacsRemote)
                     .where(extraMac.getUuidColumn().getSchema().opEqual(macEntryUUID))
                     .build());
+            LOG.info("CONTROLLER - {} {}", TransactionType.UPDATE, ucastMacsRemote);
+            addToUpdates(macKey, remoteUcastMac);
         } else {
-            LOG.warn("Unable to update remoteMcastMacs {} because uuid not found in the operational store",
-                    remoteUcastMac.getMacEntryKey().getValue());
+            LOG.warn("Unable to update remoteUcastMacs {} because uuid not found in the operational store txId: {}",
+                    macKey, getOperationalState().getTransactionId());
         }
+        return;
     }
 
     private void setLogicalSwitch(final TransactionBuilder transaction, final UcastMacsRemote ucastMacsRemote,
@@ -112,23 +138,25 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
             @SuppressWarnings("unchecked")
             InstanceIdentifier<LogicalSwitches> lswitchIid =
                     (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
-            ucastMacsRemote.setLogicalSwitch(TransactUtils.getLogicalSwitchUUID(
-                    transaction, getOperationalState(), lswitchIid));
+            UUID logicalSwitchUUID = TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(), lswitchIid);
+            if (logicalSwitchUUID != null) {
+                ucastMacsRemote.setLogicalSwitch(TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(),
+                        lswitchIid));
+            }
         }
     }
 
-    private void setLocator(final TransactionBuilder transaction, final UcastMacsRemote ucastMacsRemote,
-            final RemoteUcastMacs inputMac) {
+    private UUID setLocator(TransactionBuilder transaction, UcastMacsRemote ucastMacsRemote, RemoteUcastMacs inputMac) {
         //get UUID by locatorRef
         if (inputMac.getLocatorRef() != null) {
             @SuppressWarnings("unchecked")
-            InstanceIdentifier<TerminationPoint> iid = (InstanceIdentifier<TerminationPoint>)
-                    inputMac.getLocatorRef().getValue();
+            InstanceIdentifier<TerminationPoint> iid =
+                    (InstanceIdentifier<TerminationPoint>) inputMac.getLocatorRef().getValue();
             UUID locatorUuid = TransactUtils.createPhysicalLocator(transaction, getOperationalState(), iid);
-            if (locatorUuid != null) {
-                ucastMacsRemote.setLocator(locatorUuid);
-            }
+            ucastMacsRemote.setLocator(locatorUuid);
+            return locatorUuid;
         }
+        return null;
     }
 
     private static void setIpAddress(final UcastMacsRemote ucastMacsRemote, final RemoteUcastMacs inputMac) {
@@ -153,18 +181,24 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
         @Override
         public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final RemoteUcastMacs data) {
             if (data == null) {
-                return Collections.emptyList();
+                return Collections.EMPTY_LIST;
             }
-            return Collections.singletonList(data.getLogicalSwitchRef().getValue());
+            return Lists.newArrayList(data.getLogicalSwitchRef().getValue());
         }
 
         @Override
         public List<InstanceIdentifier<?>> getTerminationPointDependencies(final RemoteUcastMacs data) {
             if (data == null) {
-                return Collections.emptyList();
+                return Collections.EMPTY_LIST;
             }
-            return Collections.singletonList(data.getLocatorRef().getValue());
+            return Lists.newArrayList(data.getLocatorRef().getValue());
         }
+    }
+
+    @Override
+    protected boolean areEqual(RemoteUcastMacs remoteUcastMacs1, RemoteUcastMacs remoteUcastMacs2) {
+        return Objects.equals(remoteUcastMacs1.key(), remoteUcastMacs2.key())
+                && Objects.equals(remoteUcastMacs1.getLocatorRef(), remoteUcastMacs2.getLocatorRef());
     }
 
     @Override

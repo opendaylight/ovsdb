@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2aac8d0e_d1e0b930",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/transact/UcastMacsRemoteRemoveCommand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2020-04-16T10:18:18Z",
+      "side": 0,
+      "message": "Can we mark these params to final(as these changes done earlier in one the Robert patch)",
+      "range": {
+        "startLine": 49,
+        "startChar": 38,
+        "endLine": 51,
+        "endChar": 43
+      },
+      "revId": "7b105803ed5a0482e11c8f6eb6344b9a1a8f79a0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}

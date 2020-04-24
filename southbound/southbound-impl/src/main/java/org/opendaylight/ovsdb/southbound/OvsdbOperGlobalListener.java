@@ -5,13 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
@@ -29,14 +27,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
-
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbOperGlobalListener.class);
-    private ListenerRegistration<OvsdbOperGlobalListener> registration;
-    private DataBroker db;
+
     public static final ConcurrentMap<InstanceIdentifier<Node>, Node> OPER_NODE_CACHE = new ConcurrentHashMap<>();
+
     private final OvsdbConnectionManager ovsdbConnectionManager;
     private final TransactionInvoker txInvoker;
-
+    private ListenerRegistration<OvsdbOperGlobalListener> registration;
+    private DataBroker db;
 
     OvsdbOperGlobalListener(DataBroker db, OvsdbConnectionManager ovsdbConnectionManager,
                             TransactionInvoker txInvoker) {

@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.southbound;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -44,5 +43,4 @@ public class OvsdbMonitorCallback implements MonitorCallBack {
     public void exception(Throwable exception) {
         LOG.warn("exception", exception);
     }
-
 }

@@ -5,17 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import com.google.common.collect.Sets;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
 import java.util.concurrent.ConcurrentHashMap;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependentJob;
@@ -51,10 +48,8 @@ import org.slf4j.LoggerFactory;
  * keys. Mac-entry updates from switch rarely contain Logical_Switch
  * table entries. To add mac-entries we need table entries from
  * Logical_Switch table which were created in an earlier update.
- *
  */
 public class HwvtepDeviceInfo {
-
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepDeviceInfo.class);
 
     public enum DeviceDataStatus {

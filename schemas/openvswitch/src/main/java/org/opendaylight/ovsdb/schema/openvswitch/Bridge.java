@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.schema.openvswitch;
 
 import java.util.Map;
 import java.util.Set;
-
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;

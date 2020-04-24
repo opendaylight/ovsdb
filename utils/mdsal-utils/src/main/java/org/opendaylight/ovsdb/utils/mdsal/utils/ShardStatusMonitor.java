@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
 import java.lang.management.ManagementFactory;
@@ -13,19 +12,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class ShardStatusMonitor {
-
     private static final Logger LOG = LoggerFactory.getLogger(ShardStatusMonitor.class);
     private static final String TOPOLOGY_CONFIG_SHARD = "topology:config";
     private static final String TOPOLOGY_OPER_SHARD = "topology:oper";

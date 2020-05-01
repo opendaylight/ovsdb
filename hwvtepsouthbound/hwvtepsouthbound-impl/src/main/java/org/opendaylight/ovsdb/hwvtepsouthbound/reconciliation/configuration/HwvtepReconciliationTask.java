@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;

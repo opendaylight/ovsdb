@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.utils.mdsal.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -66,8 +65,8 @@ public class MdsalUtilsTest {
         boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
                 mock(InstanceIdentifier.class), mock(DataObject.class));
 
-        verify(writeTransaction, times(1)).merge(any(LogicalDatastoreType.class),
-                any(InstanceIdentifier.class), any(DataObject.class), anyBoolean());
+        verify(writeTransaction, times(1)).mergeParentStructureMerge(any(LogicalDatastoreType.class),
+                any(InstanceIdentifier.class), any(DataObject.class));
         verify(writeTransaction, times(1)).commit();
 
         assertTrue("Error, the merge transaction failed", result);
@@ -82,8 +81,8 @@ public class MdsalUtilsTest {
         boolean result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION,
                 mock(InstanceIdentifier.class), mock(DataObject.class));
 
-        verify(writeTransaction, times(1)).put(any(LogicalDatastoreType.class),
-                any(InstanceIdentifier.class), any(DataObject.class), anyBoolean());
+        verify(writeTransaction, times(1)).mergeParentStructurePut(any(LogicalDatastoreType.class),
+                any(InstanceIdentifier.class), any(DataObject.class));
         verify(writeTransaction, times(1)).commit();
 
         assertTrue("Error, the put transaction failed", result);

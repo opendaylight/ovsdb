@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;

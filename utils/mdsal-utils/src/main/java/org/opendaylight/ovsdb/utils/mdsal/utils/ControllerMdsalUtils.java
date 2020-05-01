@@ -73,7 +73,7 @@ public class ControllerMdsalUtils {
             final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
         boolean result = false;
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.merge(logicalDatastoreType, path, data, true);
+        transaction.mergeParentStructureMerge(logicalDatastoreType, path, data);
         FluentFuture<? extends @NonNull CommitInfo> future = transaction.commit();
         try {
             future.get();
@@ -96,7 +96,7 @@ public class ControllerMdsalUtils {
             final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
         boolean result = false;
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.put(logicalDatastoreType, path, data, true);
+        transaction.mergeParentStructurePut(logicalDatastoreType, path, data);
         FluentFuture<? extends @NonNull CommitInfo> future = transaction.commit();
         try {
             future.get();

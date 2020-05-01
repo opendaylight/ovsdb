@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import java.net.URI;
@@ -17,19 +16,19 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.data.util.AbstractModuleStringInstanceIdentifierCodec;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContextListener;
 import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 
 public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentifierCodec
-    implements SchemaContextListener {
+    implements EffectiveModelContextListener {
 
     private DataSchemaContextTree dataSchemaContextTree;
-    private SchemaContext context;
+    private EffectiveModelContext context;
     private final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
 
-    public InstanceIdentifierCodec(DOMSchemaService schemaService,
-            BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
+    public InstanceIdentifierCodec(final DOMSchemaService schemaService,
+            final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
         schemaService.registerSchemaContextListener(this);
         this.bindingNormalizedNodeSerializer = bindingNormalizedNodeSerializer;
     }
@@ -51,26 +50,26 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
     }
 
     @Override
-    public void onGlobalContextUpdated(SchemaContext schemaContext) {
+    public void onModelContextUpdated(final EffectiveModelContext schemaContext) {
         this.context = schemaContext;
         this.dataSchemaContextTree = DataSchemaContextTree.from(schemaContext);
     }
 
-    public String serialize(InstanceIdentifier<?> iid) {
+    public String serialize(final InstanceIdentifier<?> iid) {
         YangInstanceIdentifier normalizedIid = bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid);
         return serialize(normalizedIid);
     }
 
-    public YangInstanceIdentifier getYangInstanceIdentifier(InstanceIdentifier<?> iid) {
+    public YangInstanceIdentifier getYangInstanceIdentifier(final InstanceIdentifier<?> iid) {
         return bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid);
     }
 
-    public  InstanceIdentifier<?> bindingDeserializer(String iidString) throws DeserializationException {
+    public  InstanceIdentifier<?> bindingDeserializer(final String iidString) throws DeserializationException {
         YangInstanceIdentifier normalizedYangIid = deserialize(iidString);
         return bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(normalizedYangIid);
     }
 
-    public InstanceIdentifier<?> bindingDeserializer(YangInstanceIdentifier yangIID) {
+    public InstanceIdentifier<?> bindingDeserializer(final YangInstanceIdentifier yangIID) {
         return bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(yangIID);
     }
 }

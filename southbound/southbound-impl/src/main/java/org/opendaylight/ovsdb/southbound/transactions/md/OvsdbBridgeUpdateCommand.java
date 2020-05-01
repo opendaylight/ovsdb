@@ -225,7 +225,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         connectionNode.addAugmentation(OvsdbNodeAugmentation.class, ovsdbConnectionAugmentationBuilder.build());
 
         LOG.debug("Update node with bridge node ref {}",
-                ovsdbConnectionAugmentationBuilder.getManagedNodeEntry().iterator().next());
+                ovsdbConnectionAugmentationBuilder.getManagedNodeEntry().values().iterator().next());
         return connectionNode.build();
     }
 

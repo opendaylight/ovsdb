@@ -12,7 +12,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>6.0.4</version>
+        <version>7.0.1</version>
         <relativePath/>
     </parent>
 
@@ -24,19 +24,26 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
          build failure. Please do not modify this unless you have a good reason. -->
     <name>ODL :: ovsdb :: ${project.artifactId}</name>
 
-    <!--<dependencyManagement>
+    <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
-                <artifactId>mdsal-artifacts</artifactId>
-                <version>1.11.0</version>
+                <artifactId>controller-artifacts</artifactId>
+                <version>2.0.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
-    </dependencyManagement>-->
+    </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-mdsal-broker</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+
         <dependency>
             <groupId>org.opendaylight.ovsdb</groupId>
             <artifactId>odl-ovsdb-southbound-api</artifactId>
@@ -60,12 +67,5 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <artifactId>utils.southbound-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-	<!--<dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-mdsal-broker</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-	</dependency>-->
     </dependencies>
 </project>

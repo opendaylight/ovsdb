@@ -9,7 +9,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.cli;
 
 import java.io.PrintStream;
 import java.util.Map;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;

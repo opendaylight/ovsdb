@@ -5,13 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import com.google.common.annotations.VisibleForTesting;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -20,7 +18,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
@@ -51,6 +48,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfd;
@@ -265,23 +263,23 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     }
 
     @SuppressWarnings("unchecked")
+    // FIXME: non-static for implementation internals mocking
     private Optional<InstanceIdentifier<Node>> getTerminationPointBridge(
             final ReadWriteTransaction transaction, Node node, String tpName) {
         OvsdbNodeAugmentation ovsdbNode = node.augmentation(OvsdbNodeAugmentation.class);
-        List<ManagedNodeEntry> managedNodes = ovsdbNode.getManagedNodeEntry();
+        Map<ManagedNodeEntryKey, ManagedNodeEntry> managedNodes = ovsdbNode.nonnullManagedNodeEntry();
         TpId tpId = new TpId(tpName);
 
-        for (ManagedNodeEntry managedNodeEntry : managedNodes) {
+        for (ManagedNodeEntry managedNodeEntry : managedNodes.values()) {
             Optional<Node> optManagedNode = SouthboundUtil.readNode(transaction,
                     (InstanceIdentifier<Node>)managedNodeEntry.getBridgeRef().getValue());
             if (optManagedNode.isPresent()) {
                 Node managedNode = optManagedNode.get();
-                List<TerminationPoint> tpEntrys = managedNode.getTerminationPoint();
+                Map<TerminationPointKey, TerminationPoint> tpEntrys = managedNode.getTerminationPoint();
                 if (tpEntrys != null) {
-                    for (TerminationPoint tpEntry : tpEntrys) {
-                        if (tpId.equals(tpEntry.getTpId())) {
-                            return Optional.of((InstanceIdentifier<Node>) managedNodeEntry.getBridgeRef().getValue());
-                        }
+                    TerminationPoint tpEntry = tpEntrys.get(new TerminationPointKey(tpId));
+                    if (tpEntry != null) {
+                        return Optional.of((InstanceIdentifier<Node>) managedNodeEntry.getBridgeRef().getValue());
                     }
                 }
             }
@@ -437,11 +435,12 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     @SuppressWarnings("unchecked")
     private InstanceIdentifier<QosEntries> getQosIid(NodeId nodeId, OvsdbNodeAugmentation ovsdbNode, UUID qosUuid) {
         // Search for the QoS entry first in the operational datastore
-        for (QosEntries qosEntry : ovsdbNode.getQosEntries()) {
-            if (qosEntry.getQosUuid().equals(new Uuid(qosUuid.toString()))) {
+        final Uuid uuid = new Uuid(qosUuid.toString());
+        for (QosEntries qosEntry : ovsdbNode.nonnullQosEntries().values()) {
+            if (uuid.equals(qosEntry.getQosUuid())) {
                 return SouthboundMapper.createInstanceIdentifier(nodeId)
                         .augmentation(OvsdbNodeAugmentation.class)
-                        .child(QosEntries.class, new QosEntriesKey(qosEntry.getQosId()));
+                        .child(QosEntries.class, qosEntry.key());
             }
         }
 

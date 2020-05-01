@@ -5,12 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
@@ -30,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public class BridgeOperationalState {
     private static final Logger LOG = LoggerFactory.getLogger(BridgeOperationalState.class);
-    private DataBroker db;
+    private final DataBroker db;
 
     public BridgeOperationalState(DataBroker db, DataChangeEvent changes) {
         this.db = db;
@@ -66,10 +65,9 @@ public class BridgeOperationalState {
             if (nodeOptional.isPresent() && nodeOptional.get().getTerminationPoint() != null) {
                 TerminationPointKey key = iid.firstKeyOf(TerminationPoint.class);
                 if (key != null) {
-                    for (TerminationPoint tp:nodeOptional.get().getTerminationPoint()) {
-                        if (tp.key().equals(key)) {
-                            return Optional.of(tp);
-                        }
+                    final TerminationPoint tp = nodeOptional.get().nonnullTerminationPoint().get(key);
+                    if (tp != null) {
+                        return Optional.of(tp);
                     }
                 }
             } else {
@@ -90,11 +88,13 @@ public class BridgeOperationalState {
     public Optional<ControllerEntry> getControllerEntry(InstanceIdentifier<?> iid) {
         if (iid != null) {
             Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
-            if (ovsdbBridgeOptional.isPresent() && ovsdbBridgeOptional.get().getControllerEntry() != null) {
-                ControllerEntryKey key = iid.firstKeyOf(ControllerEntry.class);
-                if (key != null) {
-                    for (ControllerEntry entry: ovsdbBridgeOptional.get().getControllerEntry()) {
-                        if (entry.key().equals(key)) {
+            if (ovsdbBridgeOptional.isPresent()) {
+                Map<ControllerEntryKey, ControllerEntry> entries = ovsdbBridgeOptional.get().getControllerEntry();
+                if (entries != null) {
+                    ControllerEntryKey key = iid.firstKeyOf(ControllerEntry.class);
+                    if (key != null) {
+                        ControllerEntry entry = entries.get(key);
+                        if (entry != null) {
                             return Optional.of(entry);
                         }
                     }
@@ -107,11 +107,13 @@ public class BridgeOperationalState {
     public Optional<ProtocolEntry> getProtocolEntry(InstanceIdentifier<ProtocolEntry> iid) {
         if (iid != null) {
             Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
-            if (ovsdbBridgeOptional.isPresent() && ovsdbBridgeOptional.get().getProtocolEntry() != null) {
-                ProtocolEntryKey key = iid.firstKeyOf(ProtocolEntry.class);
-                if (key != null) {
-                    for (ProtocolEntry entry: ovsdbBridgeOptional.get().getProtocolEntry()) {
-                        if (entry.key().equals(key)) {
+            if (ovsdbBridgeOptional.isPresent()) {
+                Map<ProtocolEntryKey, ProtocolEntry> entries = ovsdbBridgeOptional.get().getProtocolEntry();
+                if (entries != null) {
+                    ProtocolEntryKey key = iid.firstKeyOf(ProtocolEntry.class);
+                    if (key != null) {
+                        ProtocolEntry entry = entries.get(key);
+                        if (entry != null) {
                             return Optional.of(entry);
                         }
                     }
@@ -120,5 +122,4 @@ public class BridgeOperationalState {
         }
         return Optional.empty();
     }
-
 }

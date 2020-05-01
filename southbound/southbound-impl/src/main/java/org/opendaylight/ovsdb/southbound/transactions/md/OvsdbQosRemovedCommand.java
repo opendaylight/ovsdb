@@ -9,7 +9,6 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbQosRemovedCommand.class);
 
-    private Map<UUID, Qos> removedQosRows;
+    private final Map<UUID, Qos> removedQosRows;
 
     public OvsdbQosRemovedCommand(OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
@@ -68,16 +67,14 @@ public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
         }
     }
 
-    private QosEntriesKey getQosEntriesKey(Node node, UUID qosUuid) {
-        List<QosEntries> qosList = node.augmentation(OvsdbNodeAugmentation.class).getQosEntries();
+    private static QosEntriesKey getQosEntriesKey(Node node, UUID qosUuid) {
+        Map<QosEntriesKey, QosEntries> qosList = node.augmentation(OvsdbNodeAugmentation.class).getQosEntries();
         if (qosList == null || qosList.isEmpty()) {
             LOG.debug("Deleting Qos {}, Ovsdb Node {} does not have a Qos list.", qosUuid, node);
             return null;
         }
-        Iterator<QosEntries> itr = qosList.iterator();
         Uuid quUuid = new Uuid(qosUuid.toString());
-        while (itr.hasNext()) {
-            QosEntries qos = itr.next();
+        for (QosEntries qos : qosList.values()) {
             if (qos.getQosUuid().equals(quUuid)) {
                 return qos.key();
             }
@@ -86,7 +83,7 @@ public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
         return null;
     }
 
-    private void deleteQos(ReadWriteTransaction transaction,
+    private static void deleteQos(ReadWriteTransaction transaction,
             List<InstanceIdentifier<QosEntries>> qosEntryIids) {
         for (InstanceIdentifier<QosEntries> qosEntryIid: qosEntryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, qosEntryIid);

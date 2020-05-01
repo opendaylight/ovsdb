@@ -28,7 +28,6 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacs;
@@ -64,13 +63,25 @@ public class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransactionComman
 
     private void updateData(ReadWriteTransaction transaction, McastMacsLocal macLocal) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
-        Node connectionNode = buildConnectionNode(macLocal);
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+
+        // Ensure the node exists
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId,
+            new NodeBuilder().setNodeId(getOvsdbConnectionInstance().getNodeId()).build());
+
+        final LocalMcastMacs mac = buildLocalMcastMacs(macLocal);
+        final InstanceIdentifier<LocalMcastMacs> macIid = connectionIId.augmentation(HwvtepGlobalAugmentation.class)
+                .child(LocalMcastMacs.class, mac.key());
+
+        // Merge update, relying on automatic lifecycle...
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, macIid, mac);
+        if (mac.getLocatorSet() == null) {
+            // ... but delete locator set if it is empty
+            // FIXME: can we use .put() of instead of merge/delete?
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, macIid.child(LocatorSet.class));
+        }
     }
 
-    private Node buildConnectionNode(McastMacsLocal macLocal) {
-        NodeBuilder connectionNode = new NodeBuilder();
-        connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
+    private LocalMcastMacs buildLocalMcastMacs(McastMacsLocal macLocal) {
         LocalMcastMacsBuilder macLocalBuilder = new LocalMcastMacsBuilder();
         if (macLocal.getMac().equals(HwvtepSouthboundConstants.UNKNOWN_DST_STRING)) {
             macLocalBuilder.setMacEntryKey(HwvtepSouthboundConstants.UNKNOWN_DST_MAC);
@@ -82,13 +93,7 @@ public class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransactionComman
         setLocatorSet(macLocalBuilder, macLocal);
         setLogicalSwitch(macLocalBuilder, macLocal);
 
-        List<LocalMcastMacs> macLocalList = new ArrayList<>();
-        macLocalList.add(macLocalBuilder.build());
-
-        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
-        hgAugmentationBuilder.setLocalMcastMacs(macLocalList);
-        connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
-        return connectionNode.build();
+        return macLocalBuilder.build();
     }
 
     private void setLogicalSwitch(LocalMcastMacsBuilder macLocalBuilder, McastMacsLocal macLocal) {
@@ -103,7 +108,7 @@ public class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransactionComman
         }
     }
 
-    private void setIpAddress(LocalMcastMacsBuilder macLocalBuilder, McastMacsLocal macLocal) {
+    private static void setIpAddress(LocalMcastMacsBuilder macLocalBuilder, McastMacsLocal macLocal) {
         if (macLocal.getIpAddr() != null && !macLocal.getIpAddr().isEmpty()) {
             macLocalBuilder.setIpaddr(IpAddressBuilder.getDefaultInstance(macLocal.getIpAddr()));
         }
@@ -120,8 +125,7 @@ public class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransactionComman
                     for (UUID locUUID : plSet.getLocatorsColumn().getData()) {
                         PhysicalLocator locator = updatedPLocRows.get(locUUID);
                         if (locator == null) {
-                            locator = (PhysicalLocator) getOvsdbConnectionInstance()
-                                    .getDeviceInfo().getPhysicalLocator(locUUID);
+                            locator = getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocator(locUUID);
                         }
                         InstanceIdentifier<TerminationPoint> tpIid = HwvtepSouthboundMapper.createInstanceIdentifier(
                                 getOvsdbConnectionInstance().getInstanceIdentifier(), locator);

@@ -32,11 +32,16 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -242,7 +247,16 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         addData(LogicalDatastoreType.OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
 
         resetOperations();
-        addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMac3WithZeroLocators);
+        final MacAddress macAddr = new MacAddress("FF:FF:FF:FF:FF:FF");
+        final InstanceIdentifier<HwvtepGlobalAugmentation> augIid =
+                nodeIid.augmentation(HwvtepGlobalAugmentation.class);
+        deleteData(LogicalDatastoreType.CONFIGURATION,
+            augIid.child(RemoteMcastMacs.class,
+                new RemoteMcastMacsKey(TestBuilders.buildLogicalSwitchesRef(nodeIid, "ls0"), macAddr))
+            .child(LocatorSet.class),
+            augIid.child(RemoteMcastMacs.class,
+                new RemoteMcastMacsKey(TestBuilders.buildLogicalSwitchesRef(nodeIid, "ls1"), macAddr))
+            .child(LocatorSet.class));
         verify(Operations.op,  times(2)).delete(ArgumentMatchers.any());
     }
 

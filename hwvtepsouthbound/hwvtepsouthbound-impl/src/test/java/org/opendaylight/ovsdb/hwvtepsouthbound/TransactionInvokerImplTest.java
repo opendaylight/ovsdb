@@ -21,7 +21,6 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
-import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionCommand;
@@ -88,7 +87,7 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
         deleteNode(nodeIid3);
     }
 
-    private void deleteNode(InstanceIdentifier<Node> iid) {
+    private void deleteNode(final InstanceIdentifier<Node> iid) {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         tx.delete(LogicalDatastoreType.CONFIGURATION, iid);
         tx.commit();
@@ -126,7 +125,7 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
     }
 
 
-    private InstanceIdentifier<Node> createInstanceIdentifier(String nodeIdString) {
+    private InstanceIdentifier<Node> createInstanceIdentifier(final String nodeIdString) {
         NodeId nodeId = new NodeId(new Uri(nodeIdString));
         NodeKey nodeKey = new NodeKey(nodeId);
         TopologyKey topoKey = new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID);
@@ -139,19 +138,18 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
     private static class AddNodeCmd extends DefaultTransactionComamndImpl {
         InstanceIdentifier<Node> iid;
 
-        AddNodeCmd(InstanceIdentifier<Node> iid, SettableFuture ft) {
+        AddNodeCmd(final InstanceIdentifier<Node> iid, final SettableFuture ft) {
             super(ft);
             this.iid = iid;
         }
 
         @Override
-        public void execute(ReadWriteTransaction transaction) {
+        public void execute(final ReadWriteTransaction transaction) {
             NodeBuilder nodeBuilder = new NodeBuilder();
             nodeBuilder.setNodeId(iid.firstKeyOf(Node.class).getNodeId());
             HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
             nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, builder.build());
-            transaction.put(LogicalDatastoreType.CONFIGURATION, iid, nodeBuilder.build(),
-                    WriteTransaction.CREATE_MISSING_PARENTS);
+            transaction.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, iid, nodeBuilder.build());
 
         }
     }
@@ -159,13 +157,13 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
     private static class DeleteNodeCmd extends DefaultTransactionComamndImpl {
         InstanceIdentifier<Node> iid;
 
-        DeleteNodeCmd(InstanceIdentifier<Node> iid, SettableFuture ft) {
+        DeleteNodeCmd(final InstanceIdentifier<Node> iid, final SettableFuture ft) {
             super(ft);
             this.iid = iid;
         }
 
         @Override
-        public void execute(ReadWriteTransaction transaction) {
+        public void execute(final ReadWriteTransaction transaction) {
             transaction.delete(LogicalDatastoreType.CONFIGURATION, iid);
         }
     }
@@ -173,25 +171,25 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
     private static class DefaultTransactionComamndImpl implements TransactionCommand {
         SettableFuture ft;
 
-        DefaultTransactionComamndImpl(SettableFuture ft) {
+        DefaultTransactionComamndImpl(final SettableFuture ft) {
             this.ft = ft;
         }
 
         @Override
-        public void execute(ReadWriteTransaction transaction) {
+        public void execute(final ReadWriteTransaction transaction) {
 
         }
 
         @Override
-        public void setTransactionResultFuture(FluentFuture future) {
-            future.addCallback(new FutureCallback<Object>() {
+        public void setTransactionResultFuture(final FluentFuture future) {
+            future.addCallback(new FutureCallback<>() {
                 @Override
-                public void onSuccess(Object notUsed) {
+                public void onSuccess(final Object notUsed) {
                     ft.set(null);
                 }
 
                 @Override
-                public void onFailure(Throwable throwable) {
+                public void onFailure(final Throwable throwable) {
                     ft.setException(throwable);
                 }
             }, MoreExecutors.directExecutor());

@@ -18,9 +18,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +39,9 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigsBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
@@ -86,12 +86,12 @@ public class OvsdbNodeUpdateCommandTest {
         TransactionBuilder transaction = mock(TransactionBuilder.class);
         when(transaction.getTypedRowWrapper(eq(OpenVSwitch.class))).thenReturn(ovs);
 
-        List<OpenvswitchExternalIds> externalIds = new ArrayList<>();
-        OpenvswitchExternalIds externalId = mock(OpenvswitchExternalIds.class);
-        externalIds.add(externalId);
-        when(externalId.getExternalIdKey()).thenReturn(EXTERNAL_ID_KEY);
-        when(externalId.getExternalIdValue()).thenReturn(EXTERNAL_ID_VALUE);
-        when(ovsdbNode.getOpenvswitchExternalIds()).thenReturn(externalIds);
+
+        OpenvswitchExternalIds externalId = new OpenvswitchExternalIdsBuilder()
+                .setExternalIdKey(EXTERNAL_ID_KEY)
+                .setExternalIdValue(EXTERNAL_ID_VALUE)
+                .build();
+        when(ovsdbNode.getOpenvswitchExternalIds()).thenReturn(Map.of(externalId.key(), externalId));
         PowerMockito.suppress(MemberMatcher.method(OvsdbNodeUpdateCommand.class, "stampInstanceIdentifier",
                 TransactionBuilder.class, InstanceIdentifier.class, InstanceIdentifierCodec.class));
         PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
@@ -106,19 +106,17 @@ public class OvsdbNodeUpdateCommandTest {
         when(op.mutate(any(OpenVSwitch.class))).thenReturn(mutate);
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
 
-        List<OpenvswitchOtherConfigs> otherConfigs = new ArrayList<>();
-        OpenvswitchOtherConfigs otherConfig = mock(OpenvswitchOtherConfigs.class);
-        otherConfigs.add(otherConfig);
-        when(ovsdbNode.getOpenvswitchOtherConfigs()).thenReturn(otherConfigs);
-        when(otherConfig.getOtherConfigKey()).thenReturn(OTHER_CONFIG_KEY);
-        when(otherConfig.getOtherConfigValue()).thenReturn(OTHER_CONFIG_VALUE);
+        OpenvswitchOtherConfigs otherConfig = new OpenvswitchOtherConfigsBuilder()
+                .setOtherConfigKey(OTHER_CONFIG_KEY)
+                .setOtherConfigValue(OTHER_CONFIG_VALUE)
+                .build();
+
+        when(ovsdbNode.getOpenvswitchOtherConfigs()).thenReturn(Map.of(otherConfig.key(), otherConfig));
         doNothing().when(ovs).setOtherConfig(any(ImmutableMap.class));
         when(ovs.getOtherConfigColumn()).thenReturn(column);
 
         ovsdbNodeUpdateCommand.execute(transaction, mock(BridgeOperationalState.class), changes,
                 mock(InstanceIdentifierCodec.class));
-        verify(externalId).getExternalIdKey();
-        verify(otherConfig).getOtherConfigKey();
         verify(ovs, times(2)).getExternalIdsColumn();
         verify(transaction, times(2)).add(eq(null));
     }

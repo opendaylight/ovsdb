@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.southbound;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -18,8 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OvsdbMonitorCallback implements MonitorCallBack {
-
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbMonitorCallback.class);
+
     private final InstanceIdentifierCodec instanceIdentifierCodec;
     private TransactionInvoker txInvoker;
     private OvsdbConnectionInstance key;

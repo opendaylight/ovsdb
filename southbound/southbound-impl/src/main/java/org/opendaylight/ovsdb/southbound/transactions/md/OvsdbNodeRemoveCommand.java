@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.FluentFuture;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
@@ -19,7 +20,9 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +48,10 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
                 OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
                 if (checkIfOnlyConnectedManager(ovsdbNodeAugmentation)) {
                     if (ovsdbNodeAugmentation != null) {
-                        if (ovsdbNodeAugmentation.getManagedNodeEntry() != null) {
-                            for (ManagedNodeEntry managedNode : ovsdbNodeAugmentation.getManagedNodeEntry()) {
+                        Map<ManagedNodeEntryKey, ManagedNodeEntry> entries =
+                                ovsdbNodeAugmentation.getManagedNodeEntry();
+                        if (entries != null) {
+                            for (ManagedNodeEntry managedNode : entries.values()) {
                                 transaction.delete(
                                         LogicalDatastoreType.OPERATIONAL, managedNode.getBridgeRef().getValue());
                             }
@@ -74,8 +79,9 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
         ManagerEntry onlyConnectedManager = null;
         if (ovsdbNodeAugmentation != null) {
             int connectedManager = 0;
-            if (ovsdbNodeAugmentation.getManagerEntry() != null) {
-                for (ManagerEntry manager : ovsdbNodeAugmentation.getManagerEntry()) {
+            final Map<ManagerEntryKey, ManagerEntry> entries = ovsdbNodeAugmentation.getManagerEntry();
+            if (entries != null) {
+                for (ManagerEntry manager : entries.values()) {
                     if (manager.isConnected()) {
                         connectedManager++;
                         if (connectedManager > ONE_CONNECTED_MANAGER) {

@@ -10,10 +10,8 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -28,13 +26,14 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Autoattach;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.AutoattachKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -70,8 +69,9 @@ public class AutoAttachRemovedCommand implements TransactCommand {
             final OvsdbNodeAugmentation deletedOvsdbNodeAugmentation = updated.get(ovsdbNodeIid);
 
             if (ovsdbNodeAugmentation != null && deletedOvsdbNodeAugmentation != null) {
-                final List<Autoattach> origAutoattachList = ovsdbNodeAugmentation.getAutoattach();
-                final List<Autoattach> deletedAutoattachList = deletedOvsdbNodeAugmentation.getAutoattach();
+                final Map<AutoattachKey, Autoattach> origAutoattachList = ovsdbNodeAugmentation.getAutoattach();
+                final Map<AutoattachKey, Autoattach> deletedAutoattachList =
+                        deletedOvsdbNodeAugmentation.getAutoattach();
                 if (origAutoattachList != null && !origAutoattachList.isEmpty()
                         && (deletedAutoattachList == null || deletedAutoattachList.isEmpty())) {
 
@@ -83,10 +83,10 @@ public class AutoAttachRemovedCommand implements TransactCommand {
                     }
                     final OvsdbNodeAugmentation currentOvsdbNode =
                             state.getBridgeNode(ovsdbNodeIid).get().augmentation(OvsdbNodeAugmentation.class);
-                    final List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
-                    for (final Autoattach origAutoattach : origAutoattachList) {
-                        final Uri autoAttachId = origAutoattach.getAutoattachId();
-                        deleteAutoAttach(transaction, ovsdbNodeIid, getAutoAttachUuid(currentAutoAttach, autoAttachId));
+                    final Map<AutoattachKey, Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
+                    for (final Autoattach origAutoattach : origAutoattachList.values()) {
+                        deleteAutoAttach(transaction, ovsdbNodeIid, getAutoAttachUuid(currentAutoAttach,
+                            origAutoattach.key()));
                     }
                 }
             }
@@ -123,18 +123,19 @@ public class AutoAttachRemovedCommand implements TransactCommand {
         }
     }
 
-    private Uuid getAutoAttachUuid(final List<Autoattach> currentAutoAttach, final Uri autoAttachId) {
-        if (currentAutoAttach != null && !currentAutoAttach.isEmpty()) {
-            for (final Autoattach autoAttach : currentAutoAttach) {
-                if (autoAttach.getAutoattachId().equals(autoAttachId)) {
-                    return autoAttach.getAutoattachUuid();
-                }
+    private static Uuid getAutoAttachUuid(final Map<AutoattachKey, Autoattach> currentAutoAttach,
+            final AutoattachKey autoAttachId) {
+        if (currentAutoAttach != null) {
+            final Autoattach autoAttach = currentAutoAttach.get(autoAttachId);
+            if (autoAttach != null) {
+                return autoAttach.getAutoattachUuid();
             }
         }
         return null;
     }
 
-    private OvsdbBridgeAugmentation getBridge(final InstanceIdentifier<OvsdbNodeAugmentation> key, final Uuid aaUuid) {
+    private static OvsdbBridgeAugmentation getBridge(final InstanceIdentifier<OvsdbNodeAugmentation> key,
+            final Uuid aaUuid) {
         if (aaUuid == null) {
             return null;
         }
@@ -143,9 +144,9 @@ public class AutoAttachRemovedCommand implements TransactCommand {
         try (ReadTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
             final Optional<Node> nodeOptional = SouthboundUtil.readNode(transaction, nodeIid);
             if (nodeOptional.isPresent()) {
-                final List<ManagedNodeEntry> managedNodes =
+                final Map<ManagedNodeEntryKey, ManagedNodeEntry> managedNodes =
                         nodeOptional.get().augmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
-                for (final ManagedNodeEntry managedNode : managedNodes) {
+                for (final ManagedNodeEntry managedNode : managedNodes.values()) {
                     final OvsdbBridgeRef ovsdbBridgeRef = managedNode.getBridgeRef();
                     final InstanceIdentifier<OvsdbBridgeAugmentation> brIid = ovsdbBridgeRef.getValue()
                             .firstIdentifierOf(Node.class).augmentation(OvsdbBridgeAugmentation.class);

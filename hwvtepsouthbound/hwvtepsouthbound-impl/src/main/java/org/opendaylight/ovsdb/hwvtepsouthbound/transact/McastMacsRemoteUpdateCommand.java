@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
@@ -32,13 +31,15 @@ import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<RemoteMcastMacs, HwvtepGlobalAugmentation> {
+public class McastMacsRemoteUpdateCommand
+        extends AbstractTransactCommand<RemoteMcastMacs, RemoteMcastMacsKey, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsRemoteUpdateCommand.class);
     private static final McastMacUnMetDependencyGetter MCAST_MAC_DATA_VALIDATOR = new McastMacUnMetDependencyGetter();
 
@@ -164,7 +165,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    protected List<RemoteMcastMacs> getData(final HwvtepGlobalAugmentation augmentation) {
+    protected Map<RemoteMcastMacsKey, RemoteMcastMacs> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getRemoteMcastMacs();
     }
 
@@ -236,7 +237,7 @@ public class McastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    public void onSuccess(TransactionBuilder tx) {
+    public void onSuccess(final TransactionBuilder tx) {
         for (MdsalUpdate mdsalUpdate : updates) {
             updateLocatorRefCounts(mdsalUpdate);
             RemoteMcastMacs mac = (RemoteMcastMacs) mdsalUpdate.getNewData();

@@ -18,8 +18,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.util.concurrent.FluentFuture;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,10 +31,14 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -82,35 +86,39 @@ public class OvsdbNodeRemoveCommandTest {
 
         doReturn(true).when(ovsdbNodeRemoveCommand).checkIfOnlyConnectedManager(any(OvsdbNodeAugmentation.class));
 
-        List<ManagedNodeEntry> listManagedNodeEntry = new ArrayList<>();
-        ManagedNodeEntry managedNode = mock(ManagedNodeEntry.class);
-        listManagedNodeEntry.add(managedNode);
-        when(ovsdbNodeAugmentation.getManagedNodeEntry()).thenReturn(listManagedNodeEntry);
-        OvsdbBridgeRef ovsdbBridgeRef = mock(OvsdbBridgeRef.class);
-        when(managedNode.getBridgeRef()).thenReturn(ovsdbBridgeRef);
-        when(ovsdbBridgeRef.getValue()).thenReturn(mock(InstanceIdentifier.class));
+        ManagedNodeEntry managedNode = new ManagedNodeEntryBuilder()
+                .setBridgeRef(new OvsdbBridgeRef(mock(InstanceIdentifier.class)))
+                .build();
+
+        when(ovsdbNodeAugmentation.getManagedNodeEntry()).thenReturn(Map.of(managedNode.key(), managedNode));
 
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
 
         ovsdbNodeRemoveCommand.execute(transaction);
-        verify(ovsdbNodeAugmentation, times(2)).getManagedNodeEntry();
+        verify(ovsdbNodeAugmentation).getManagedNodeEntry();
         verify(transaction, times(2)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
     }
 
     @Test
     public void testCheckIfOnlyConnectedManager() throws Exception {
-        OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
         ManagerEntry manager = mock(ManagerEntry.class);
-        List<ManagerEntry> listManagerEntry = new ArrayList<>();
-        listManagerEntry.add(manager);
-
-        //case 1: connectedManager > ONE_CONNECTED_MANAGER
         ManagerEntry manager1 = mock(ManagerEntry.class);
-        listManagerEntry.add(manager1);
-        when(ovsdbNodeAugmentation.getManagerEntry()).thenReturn(listManagerEntry);
+        doReturn(new ManagerEntryKey(new Uri("manager"))).when(manager).key();
+        doReturn(new ManagerEntryKey(new Uri("manager1"))).when(manager1).key();
+
         when(manager.isConnected()).thenReturn(true, false, true);
         when(manager1.isConnected()).thenReturn(true, false, true);
-        when(manager.getNumberOfConnections()).thenReturn(Uint32.valueOf(0));
+        when(manager.getNumberOfConnections()).thenReturn(Uint32.ZERO);
+
+        Map<ManagerEntryKey, ManagerEntry> listManagerEntry = new HashMap<>();
+        listManagerEntry.put(manager.key(), manager);
+        listManagerEntry.put(manager1.key(), manager1);
+
+        OvsdbNodeAugmentation ovsdbNodeAugmentation = new OvsdbNodeAugmentationBuilder()
+                .setManagerEntry(listManagerEntry)
+                .build();
+
+        //case 1: connectedManager > ONE_CONNECTED_MANAGER
         assertEquals(false,
                 Whitebox.invokeMethod(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", ovsdbNodeAugmentation));
 
@@ -124,7 +132,7 @@ public class OvsdbNodeRemoveCommandTest {
                 Whitebox.invokeMethod(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", ovsdbNodeAugmentation));
 
         // case 4: when all the above don't apply
-        listManagerEntry.remove(manager1);
+        listManagerEntry.remove(manager1.key());
         assertEquals(true,
                 Whitebox.invokeMethod(ovsdbNodeRemoveCommand, "checkIfOnlyConnectedManager", ovsdbNodeAugmentation));
     }

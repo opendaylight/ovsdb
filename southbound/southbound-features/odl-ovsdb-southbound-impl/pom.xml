@@ -12,7 +12,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>6.0.4</version>
+        <version>7.0.1</version>
         <relativePath/>
     </parent>
 
@@ -33,17 +33,24 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
-	<!--<dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-mdsal-broker</artifactId>
-            <version>1.11.0</version>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>-->
         <dependency>
             <groupId>org.opendaylight.infrautils</groupId>
             <artifactId>odl-infrautils-diagstatus</artifactId>
             <version>1.8.0-SNAPSHOT</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.serviceutils</groupId>
+            <artifactId>odl-serviceutils-tools</artifactId>
+            <version>0.6.0-SNAPSHOT</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.ovsdb</groupId>
+            <artifactId>odl-ovsdb-utils</artifactId>
+            <version>${project.version}</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
@@ -74,30 +81,5 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <type>cfg</type>
             <classifier>config</classifier>
         </dependency>
-
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-        </dependency>
     </dependencies>
-
-    <!--
-  <feature name='odl-ovsdb-southbound-impl' version='${project.version}' description=' '>
-    <bundle>mvn:org.opendaylight.ovsdb/southbound-impl/{{VERSION}}</bundle>
-    <bundle>mvn:org.opendaylight.ovsdb/library/{{VERSION}}</bundle>
-    <bundle>mvn:org.opendaylight.ovsdb/utils.yang-utils/{{VERSION}}</bundle>
-    <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/{{VERSION}}</bundle>
-    <bundle>mvn:com.fasterxml.jackson.core/jackson-core/{{VERSION}}</bundle>
-    <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/{{VERSION}}</bundle>
-    <bundle>mvn:com.google.code.gson/gson/{{VERSION}}</bundle>
-    <bundle>mvn:io.netty/netty-buffer/{{VERSION}}</bundle>
-    <bundle>mvn:io.netty/netty-codec/{{VERSION}}</bundle>
-    <bundle>mvn:io.netty/netty-codec-http/{{VERSION}}</bundle>
-    <bundle>mvn:io.netty/netty-common/{{VERSION}}</bundle>
-    <bundle>mvn:io.netty/netty-handler/{{VERSION}}</bundle>
-    <bundle>mvn:io.netty/netty-transport/{{VERSION}}</bundle>
-    <feature version="${project.version}">odl-ovsdb-library</feature>
-  </feature>
-    -->
-
 </project>

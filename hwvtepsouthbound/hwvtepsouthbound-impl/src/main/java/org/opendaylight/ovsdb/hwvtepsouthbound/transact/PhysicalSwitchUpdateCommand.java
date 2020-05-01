@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -36,11 +35,16 @@ import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIps;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIpsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelIps;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelIpsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.Tunnels;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdLocalConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdLocalConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdParams;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdParamsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdRemoteConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdRemoteConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -150,9 +154,10 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
 
     private static void setManagementIps(final PhysicalSwitch physicalSwitch,
             final PhysicalSwitchAugmentation physicalSwitchAugmentation) {
-        Set<String> ipSet = new HashSet<>();
-        if (physicalSwitchAugmentation.getManagementIps() != null) {
-            for (ManagementIps ip: physicalSwitchAugmentation.getManagementIps()) {
+        Map<ManagementIpsKey, ManagementIps> managementIps = physicalSwitchAugmentation.getManagementIps();
+        if (managementIps != null) {
+            Set<String> ipSet = new HashSet<>();
+            for (ManagementIps ip: managementIps.values()) {
                 ipSet.add(ip.getManagementIpsKey().getIpv4Address().getValue());
             }
             physicalSwitch.setManagementIps(ipSet);
@@ -161,9 +166,10 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
 
     private static void setTunnuleIps(final PhysicalSwitch physicalSwitch,
             final PhysicalSwitchAugmentation physicalSwitchAugmentation) {
-        Set<String> ipSet = new HashSet<>();
-        if (physicalSwitchAugmentation.getTunnelIps() != null) {
-            for (TunnelIps ip: physicalSwitchAugmentation.getTunnelIps()) {
+        final Map<TunnelIpsKey, TunnelIps> tunnelIps = physicalSwitchAugmentation.getTunnelIps();
+        if (tunnelIps != null) {
+            Set<String> ipSet = new HashSet<>();
+            for (TunnelIps ip: tunnelIps.values()) {
                 ipSet.add(ip.getTunnelIpsKey().getIpv4Address().getValue());
             }
             physicalSwitch.setTunnelIps(ipSet);
@@ -176,61 +182,59 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
             final boolean switchExists) {
         //TODO: revisit this code for optimizations
         //TODO: needs more testing
-        if (physicalSwitchAugmentation.getTunnels() != null) {
-            for (Tunnels tunnel : physicalSwitchAugmentation.getTunnels()) {
-                Optional<Tunnels> opTunnelOpt = getOperationalState().getTunnels(iid, tunnel.key());
-                Tunnel newTunnel = transaction.getTypedRowWrapper(Tunnel.class);
+        for (Tunnels tunnel : physicalSwitchAugmentation.nonnullTunnels().values()) {
+            Optional<Tunnels> opTunnelOpt = getOperationalState().getTunnels(iid, tunnel.key());
+            Tunnel newTunnel = transaction.getTypedRowWrapper(Tunnel.class);
 
-                UUID localUUID = getLocatorUUID(transaction,
-                                (InstanceIdentifier<TerminationPoint>) tunnel.getLocalLocatorRef().getValue());
-                UUID remoteUUID = getLocatorUUID(transaction,
-                                (InstanceIdentifier<TerminationPoint>) tunnel.getRemoteLocatorRef().getValue());
-                if (localUUID != null && remoteUUID != null) {
-                    // local and remote must exist
-                    newTunnel.setLocal(localUUID);
-                    newTunnel.setRemote(remoteUUID);
-                    setBfdParams(newTunnel, tunnel);
-                    setBfdLocalConfigs(newTunnel, tunnel);
-                    setBfdRemoteConfigs(newTunnel, tunnel);
-                    if (!opTunnelOpt.isPresent()) {
-                        String tunnelUuid = "Tunnel_" + HwvtepSouthboundMapper.getRandomUUID();
-                        transaction.add(op.insert(newTunnel).withId(tunnelUuid));
-                        transaction.add(op.comment("Tunnel: Creating " + tunnelUuid));
-                        if (!switchExists) {
-                            //TODO: Figure out a way to handle this
-                            LOG.warn("Tunnel configuration requires pre-existing physicalSwitch");
-                        } else {
-                            // TODO: Can we reuse physicalSwitch instead?
-                            PhysicalSwitch phySwitch = transaction.getTypedRowWrapper(PhysicalSwitch.class);
-                            phySwitch.setTunnels(Collections.singleton(new UUID(tunnelUuid)));
-                            phySwitch.setName(physicalSwitchAugmentation.getHwvtepNodeName().getValue());
-                            transaction.add(op.mutate(phySwitch)
-                                            .addMutation(phySwitch.getTunnels().getSchema(), Mutator.INSERT,
-                                                    phySwitch.getTunnels().getData())
-                                            .where(phySwitch.getNameColumn().getSchema()
-                                                            .opEqual(phySwitch.getNameColumn().getData()))
-                                            .build());
-                            transaction.add(op.comment("PhysicalSwitch: Mutating " + tunnelUuid));
-                        }
+            UUID localUUID = getLocatorUUID(transaction,
+                (InstanceIdentifier<TerminationPoint>) tunnel.getLocalLocatorRef().getValue());
+            UUID remoteUUID = getLocatorUUID(transaction,
+                (InstanceIdentifier<TerminationPoint>) tunnel.getRemoteLocatorRef().getValue());
+            if (localUUID != null && remoteUUID != null) {
+                // local and remote must exist
+                newTunnel.setLocal(localUUID);
+                newTunnel.setRemote(remoteUUID);
+                setBfdParams(newTunnel, tunnel);
+                setBfdLocalConfigs(newTunnel, tunnel);
+                setBfdRemoteConfigs(newTunnel, tunnel);
+                if (!opTunnelOpt.isPresent()) {
+                    String tunnelUuid = "Tunnel_" + HwvtepSouthboundMapper.getRandomUUID();
+                    transaction.add(op.insert(newTunnel).withId(tunnelUuid));
+                    transaction.add(op.comment("Tunnel: Creating " + tunnelUuid));
+                    if (!switchExists) {
+                        //TODO: Figure out a way to handle this
+                        LOG.warn("Tunnel configuration requires pre-existing physicalSwitch");
                     } else {
-                        UUID uuid = new UUID(opTunnelOpt.get().getTunnelUuid().getValue());
-                        Tunnel extraTunnel = transaction.getTypedRowSchema(Tunnel.class);
-                        extraTunnel.getUuidColumn().setData(uuid);
-                        transaction.add(op.update(newTunnel)
-                                        .where(extraTunnel.getUuidColumn().getSchema().opEqual(uuid))
-                                        .build());
-                        transaction.add(op.comment("Tunnel: Updating " + uuid));
+                        // TODO: Can we reuse physicalSwitch instead?
+                        PhysicalSwitch phySwitch = transaction.getTypedRowWrapper(PhysicalSwitch.class);
+                        phySwitch.setTunnels(Collections.singleton(new UUID(tunnelUuid)));
+                        phySwitch.setName(physicalSwitchAugmentation.getHwvtepNodeName().getValue());
+                        transaction.add(op.mutate(phySwitch)
+                            .addMutation(phySwitch.getTunnels().getSchema(), Mutator.INSERT,
+                                phySwitch.getTunnels().getData())
+                            .where(phySwitch.getNameColumn().getSchema()
+                                .opEqual(phySwitch.getNameColumn().getData()))
+                            .build());
+                        transaction.add(op.comment("PhysicalSwitch: Mutating " + tunnelUuid));
                     }
+                } else {
+                    UUID uuid = new UUID(opTunnelOpt.get().getTunnelUuid().getValue());
+                    Tunnel extraTunnel = transaction.getTypedRowSchema(Tunnel.class);
+                    extraTunnel.getUuidColumn().setData(uuid);
+                    transaction.add(op.update(newTunnel)
+                        .where(extraTunnel.getUuidColumn().getSchema().opEqual(uuid))
+                        .build());
+                    transaction.add(op.comment("Tunnel: Updating " + uuid));
                 }
             }
         }
     }
 
     private static void setBfdParams(final Tunnel tunnel, final Tunnels psAugTunnel) {
-        List<BfdParams> bfdParams = psAugTunnel.getBfdParams();
+        Map<BfdParamsKey, BfdParams> bfdParams = psAugTunnel.getBfdParams();
         if (bfdParams != null) {
             Map<String, String> bfdParamMap = new HashMap<>();
-            for (BfdParams bfdParam : bfdParams) {
+            for (BfdParams bfdParam : bfdParams.values()) {
                 bfdParamMap.put(bfdParam.getBfdParamKey(), bfdParam.getBfdParamValue());
             }
             try {
@@ -242,10 +246,10 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
     }
 
     private static void setBfdLocalConfigs(final Tunnel tunnel, final Tunnels psAugTunnel) {
-        List<BfdLocalConfigs> bfdLocalConfigs = psAugTunnel.getBfdLocalConfigs();
+        Map<BfdLocalConfigsKey, BfdLocalConfigs> bfdLocalConfigs = psAugTunnel.getBfdLocalConfigs();
         if (bfdLocalConfigs != null) {
             Map<String, String> configLocalMap = new HashMap<>();
-            for (BfdLocalConfigs localConfig : bfdLocalConfigs) {
+            for (BfdLocalConfigs localConfig : bfdLocalConfigs.values()) {
                 configLocalMap.put(localConfig.getBfdLocalConfigKey(), localConfig.getBfdLocalConfigValue());
             }
             try {
@@ -257,10 +261,10 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
     }
 
     private static void setBfdRemoteConfigs(final Tunnel tunnel, final Tunnels psAugTunnel) {
-        List<BfdRemoteConfigs> bfdRemoteConfigs = psAugTunnel.getBfdRemoteConfigs();
+        Map<BfdRemoteConfigsKey, BfdRemoteConfigs> bfdRemoteConfigs = psAugTunnel.getBfdRemoteConfigs();
         if (bfdRemoteConfigs != null) {
             Map<String, String> configRemoteMap = new HashMap<>();
-            for (BfdRemoteConfigs remoteConfig : bfdRemoteConfigs) {
+            for (BfdRemoteConfigs remoteConfig : bfdRemoteConfigs.values()) {
                 configRemoteMap.put(remoteConfig.getBfdRemoteConfigKey(), remoteConfig.getBfdRemoteConfigValue());
             }
             try {

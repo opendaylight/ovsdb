@@ -21,7 +21,6 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.aries.blueprint.annotation.service.Reference;
-
 import org.opendaylight.infrautils.diagstatus.DiagStatusService;
 import org.opendaylight.infrautils.diagstatus.ServiceState;
 import org.opendaylight.infrautils.ready.SystemReadyMonitor;
@@ -56,18 +55,17 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
-
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundProvider.class);
-
     private static final String ENTITY_TYPE = "ovsdb-southbound-provider";
+
+    // FIXME: get rid of this static
+    @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
+    private static DataBroker db;
 
     public static DataBroker getDb() {
         return db;
     }
 
-    // FIXME: get rid of this static
-    @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
-    private static DataBroker db;
     private OvsdbConnectionManager cm;
     private TransactionInvoker txInvoker;
     private OvsdbDataTreeChangeListener ovsdbDataTreeChangeListener;
@@ -178,7 +176,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
             if (!ovsdbTp.get().isPresent()) {
                 TopologyBuilder tpb = new TopologyBuilder();
                 tpb.setTopologyId(SouthboundConstants.OVSDB_TOPOLOGY_ID);
-                transaction.put(type, path, tpb.build(), true);
+                transaction.mergeParentStructurePut(type, path, tpb.build());
                 transaction.commit();
             } else {
                 transaction.cancel();

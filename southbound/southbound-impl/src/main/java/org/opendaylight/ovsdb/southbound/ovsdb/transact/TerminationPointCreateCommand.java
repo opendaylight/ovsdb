@@ -10,8 +10,6 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,12 +37,18 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfd;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfdKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldpKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -201,14 +205,14 @@ public class TerminationPointCreateCommand implements TransactCommand {
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
-        List<InterfaceExternalIds> interfaceExternalIds =
+        Map<InterfaceExternalIdsKey, InterfaceExternalIds> interfaceExternalIds =
                 terminationPoint.getInterfaceExternalIds();
+        final InterfaceExternalIds odl = SouthboundUtil.interfaceCreatedByOpenDaylight();
+
         if (interfaceExternalIds != null && !interfaceExternalIds.isEmpty()) {
-            interfaceExternalIds.add(SouthboundUtil.createExternalIdsForInterface(
-                SouthboundConstants.CREATED_BY, SouthboundConstants.ODL));
+            interfaceExternalIds.put(odl.key(), odl);
         } else {
-            interfaceExternalIds = Arrays.asList(SouthboundUtil.createExternalIdsForInterface(
-                SouthboundConstants.CREATED_BY, SouthboundConstants.ODL));
+            interfaceExternalIds = Map.of(odl.key(), odl);
         }
         try {
             ovsInterface.setExternalIds(YangUtils.convertYangKeyValueListToMap(interfaceExternalIds,
@@ -222,11 +226,11 @@ public class TerminationPointCreateCommand implements TransactCommand {
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
-        List<InterfaceOtherConfigs> interfaceOtherConfigs =
+        Map<InterfaceOtherConfigsKey, InterfaceOtherConfigs> interfaceOtherConfigs =
                 terminationPoint.getInterfaceOtherConfigs();
         if (interfaceOtherConfigs != null && !interfaceOtherConfigs.isEmpty()) {
             Map<String, String> otherConfigsMap = new HashMap<>();
-            for (InterfaceOtherConfigs interfaceOtherConfig : interfaceOtherConfigs) {
+            for (InterfaceOtherConfigs interfaceOtherConfig : interfaceOtherConfigs.values()) {
                 otherConfigsMap.put(interfaceOtherConfig.getOtherConfigKey(),
                         interfaceOtherConfig.getOtherConfigValue());
             }
@@ -243,7 +247,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
             final Interface ovsInterface) {
 
         try {
-            List<InterfaceLldp> interfaceLldpList =
+            Map<InterfaceLldpKey, InterfaceLldp> interfaceLldpList =
                     terminationPoint.getInterfaceLldp();
             if (interfaceLldpList != null && !interfaceLldpList.isEmpty()) {
                 try {
@@ -262,7 +266,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
                     final Interface ovsInterface) {
 
         try {
-            List<InterfaceBfd> interfaceBfdList = terminationPoint.getInterfaceBfd();
+            Map<InterfaceBfdKey, InterfaceBfd> interfaceBfdList = terminationPoint.getInterfaceBfd();
             if (interfaceBfdList != null && !interfaceBfdList.isEmpty()) {
                 try {
                     ovsInterface.setBfd(YangUtils.convertYangKeyValueListToMap(interfaceBfdList,
@@ -281,18 +285,16 @@ public class TerminationPointCreateCommand implements TransactCommand {
             final Port port, final String opendaylightIid) {
 
         // Set the iid external_id
-        List<PortExternalIds> portExternalIds = terminationPoint.getPortExternalIds();
+        Map<PortExternalIdsKey, PortExternalIds> portExternalIds = terminationPoint.getPortExternalIds();
+        PortExternalIds odl = SouthboundUtil.portCreatedByOpenDaylight();
+        PortExternalIds iid = SouthboundUtil.createExternalIdsForPort(
+            SouthboundConstants.IID_EXTERNAL_ID_KEY, opendaylightIid);
+
         if (portExternalIds != null && !portExternalIds.isEmpty()) {
-            portExternalIds.add(SouthboundUtil.createExternalIdsForPort(
-                SouthboundConstants.CREATED_BY, SouthboundConstants.ODL));
-            portExternalIds.add(SouthboundUtil.createExternalIdsForPort(
-                SouthboundConstants.IID_EXTERNAL_ID_KEY, opendaylightIid));
+            portExternalIds.put(odl.key(), odl);
+            portExternalIds.put(iid.key(), iid);
         } else {
-            portExternalIds = new ArrayList<>();
-            portExternalIds.add(SouthboundUtil.createExternalIdsForPort(
-                SouthboundConstants.CREATED_BY, SouthboundConstants.ODL));
-            portExternalIds.add(SouthboundUtil.createExternalIdsForPort(
-                SouthboundConstants.IID_EXTERNAL_ID_KEY, opendaylightIid));
+            portExternalIds = Map.of(odl.key(), odl, iid.key(), iid);
         }
         try {
             port.setExternalIds(YangUtils.convertYangKeyValueListToMap(portExternalIds,
@@ -345,7 +347,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
     private void createPortOtherConfig(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port ovsPort) {
-        List<PortOtherConfigs> portOtherConfigs =
+        Map<PortOtherConfigsKey, PortOtherConfigs> portOtherConfigs =
                 terminationPoint.getPortOtherConfigs();
         if (portOtherConfigs != null && !portOtherConfigs.isEmpty()) {
             try {

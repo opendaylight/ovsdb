@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
@@ -20,7 +19,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
@@ -37,6 +35,7 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -44,21 +43,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LogicalSwitchUcastsRemoveCommand
-        extends AbstractTransactCommand<LogicalSwitches, HwvtepGlobalAugmentation> {
+        extends AbstractTransactCommand<LogicalSwitches, LogicalSwitchesKey, HwvtepGlobalAugmentation> {
 
     private static final Logger LOG = LoggerFactory.getLogger(LogicalSwitchUcastsRemoveCommand.class);
 
+    private final AtomicInteger retryCount = new AtomicInteger(5);
+    private final LogicalSwitches logicalSwitches;
+    private final InstanceIdentifier<Node> nodeIid;
+    private final List<LogicalSwitches> deletedLs;
+
     volatile Map<String, Map<Long, UUID>> updatedPortBindings = new HashMap<>();
-    private AtomicInteger retryCount = new AtomicInteger(5);
-    private LogicalSwitches logicalSwitches;
-    private InstanceIdentifier<Node> nodeIid;
-    private List<LogicalSwitches> deletedLs;
     private boolean firstAttempt = true;
 
-    public LogicalSwitchUcastsRemoveCommand(HwvtepOperationalState state,
-                                            Collection<DataTreeModification<Node>> changes,
-                                            List<LogicalSwitches> deletedLs,
-                                            LogicalSwitches logicalSwitches) {
+    public LogicalSwitchUcastsRemoveCommand(final HwvtepOperationalState state,
+                                            final Collection<DataTreeModification<Node>> changes,
+                                            final List<LogicalSwitches> deletedLs,
+                                            final LogicalSwitches logicalSwitches) {
         super(state, changes);
         this.deletedLs = deletedLs;
         this.logicalSwitches = logicalSwitches;
@@ -66,7 +66,7 @@ public class LogicalSwitchUcastsRemoveCommand
     }
 
     @Override
-    public void execute(TransactionBuilder transaction) {
+    public void execute(final TransactionBuilder transaction) {
         InstanceIdentifier<LogicalSwitches> lsKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
                 .child(LogicalSwitches.class, logicalSwitches.key());
         HwvtepDeviceInfo.DeviceData deviceData  = super.<LogicalSwitch>fetchDeviceData(LogicalSwitches.class, lsKey);
@@ -125,18 +125,18 @@ public class LogicalSwitchUcastsRemoveCommand
     }
 
     @Override
-    protected List<LogicalSwitches> getData(HwvtepGlobalAugmentation augmentation) {
+    protected Map<LogicalSwitchesKey, LogicalSwitches> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getLogicalSwitches();
     }
 
     @Override
-    protected boolean areEqual(LogicalSwitches logicalSwitches1 , LogicalSwitches logicalSwitches2) {
+    protected boolean areEqual(final LogicalSwitches logicalSwitches1 , final LogicalSwitches logicalSwitches2) {
         return logicalSwitches1.key().equals(logicalSwitches2.key())
                 && Objects.equals(logicalSwitches1.getTunnelKey(), logicalSwitches2.getTunnelKey());
     }
 
     @Override
-    public void onSuccess(TransactionBuilder tx) {
+    public void onSuccess(final TransactionBuilder tx) {
         if (firstAttempt) {
             //LOG.error("check succeeded in deletion of logical swtich at first attempt ");
             //succeed in removing the logical switch upon first attempt
@@ -149,7 +149,7 @@ public class LogicalSwitchUcastsRemoveCommand
     }
 
     @Override
-    public void onFailure(TransactionBuilder tx) {
+    public void onFailure(final TransactionBuilder tx) {
         //Failed to remove logical swith upon first attempt,
         //will attempt to remove the local ucasts and vlan bindings alone in the next attemtps
         firstAttempt = false;
@@ -188,7 +188,7 @@ public class LogicalSwitchUcastsRemoveCommand
                 });
     }
 
-    private Map<Long, UUID> excludeVlanBindings(Set<UUID> deletedLsUuids, PhysicalPort port) {
+    private Map<Long, UUID> excludeVlanBindings(final Set<UUID> deletedLsUuids, final PhysicalPort port) {
         return port.getVlanBindingsColumn().getData()
                 .entrySet().stream()
                 .peek(entry -> {
@@ -200,11 +200,13 @@ public class LogicalSwitchUcastsRemoveCommand
                 .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
     }
 
+    @Override
     public boolean retry() {
         boolean ret = retryCount.decrementAndGet() > 0;
         return ret;
     }
 
+    @Override
     protected boolean isDeleteCmd() {
         return true;
     }

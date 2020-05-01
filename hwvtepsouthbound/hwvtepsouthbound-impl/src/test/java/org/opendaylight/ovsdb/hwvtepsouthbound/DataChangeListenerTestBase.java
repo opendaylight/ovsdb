@@ -231,7 +231,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
         nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, builder.build());
         WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-        transaction.put(logicalDatastoreType, nodeIid, nodeBuilder.build(), WriteTransaction.CREATE_MISSING_PARENTS);
+        transaction.mergeParentStructurePut(logicalDatastoreType, nodeIid, nodeBuilder.build());
         transaction.commit();
     }
 
@@ -259,6 +259,14 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         }
         nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, builder.build());
         return mergeNode(logicalDatastoreType, nodeIid, nodeBuilder);
+    }
+
+    void deleteData(final LogicalDatastoreType datastoreType, InstanceIdentifier<?>... iids) {
+        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        for (InstanceIdentifier<?> id : iids) {
+            transaction.delete(datastoreType, id);
+        }
+        transaction.commit();
     }
 
     void deleteData(final LogicalDatastoreType logicalDatastoreType, final Class<? extends DataObject> dataObject,
@@ -307,7 +315,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
             final NodeBuilder nodeBuilder) {
         Node node = nodeBuilder.build();
         WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
-        transaction.merge(datastoreType, id, node, WriteTransaction.CREATE_MISSING_PARENTS);
+        transaction.mergeParentStructureMerge(datastoreType, id, node);
         transaction.commit();
         return node;
     }

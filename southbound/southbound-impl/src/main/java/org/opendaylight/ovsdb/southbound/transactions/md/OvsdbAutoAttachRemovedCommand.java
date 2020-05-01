@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
@@ -33,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbAutoAttachRemovedCommand.class);
 
-    private Map<UUID, AutoAttach> removedAutoAttachRows;
+    private final Map<UUID, AutoAttach> removedAutoAttachRows;
 
     public OvsdbAutoAttachRemovedCommand(OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
@@ -71,13 +70,13 @@ public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
     }
 
     private AutoattachKey getAutoAttachKeyToRemove(Node node, UUID autoAttachUuid) {
-        final List<Autoattach> autoAttachList = node.augmentation(OvsdbNodeAugmentation.class).getAutoattach();
+        final Map<AutoattachKey, Autoattach> autoAttachList =
+                node.augmentation(OvsdbNodeAugmentation.class).getAutoattach();
         if (autoAttachList == null || autoAttachList.isEmpty()) {
             return null;
         }
-        for (final Autoattach autoAttach : autoAttachList) {
-            if (autoAttach.getAutoattachUuid()
-                    .equals(new Uuid(autoAttachUuid.toString()))) {
+        for (final Autoattach autoAttach : autoAttachList.values()) {
+            if (autoAttach.getAutoattachUuid().equals(new Uuid(autoAttachUuid.toString()))) {
                 return autoAttach.key();
             }
         }

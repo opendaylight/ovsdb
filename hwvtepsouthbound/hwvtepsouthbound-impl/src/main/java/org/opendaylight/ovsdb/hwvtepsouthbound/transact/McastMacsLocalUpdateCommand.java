@@ -23,13 +23,15 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsLocal;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMcastMacs, HwvtepGlobalAugmentation> {
+public class McastMacsLocalUpdateCommand
+        extends AbstractTransactCommand<LocalMcastMacs, LocalMcastMacsKey, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsLocalUpdateCommand.class);
 
     public McastMacsLocalUpdateCommand(final HwvtepOperationalState state,
@@ -128,7 +130,7 @@ public class McastMacsLocalUpdateCommand extends AbstractTransactCommand<LocalMc
     }
 
     @Override
-    protected List<LocalMcastMacs> getData(final HwvtepGlobalAugmentation augmentation) {
+    protected Map<LocalMcastMacsKey, LocalMcastMacs> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getLocalMcastMacs();
     }
 }

@@ -50,12 +50,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeVxlan;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow10;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntryBuilder;
@@ -192,11 +192,11 @@ public class SouthboundMapperTest {
     public void testCreateOvsdbBridgeProtocols() {
         OvsdbBridgeAugmentation ovsdbBridgeNode = mock(OvsdbBridgeAugmentation.class);
         List<ProtocolEntry> protocolList = new ArrayList<>();
-        ProtocolEntry protocolEntry = mock(ProtocolEntry.class);
-        protocolList.add(protocolEntry);
-        when(ovsdbBridgeNode.getProtocolEntry()).thenReturn(protocolList);
-        when(protocolEntry.getProtocol()).thenAnswer(
-                (Answer<Class<? extends OvsdbBridgeProtocolBase>>) invocation -> OvsdbBridgeProtocolOpenflow10.class);
+        ProtocolEntry protocolEntry = new ProtocolEntryBuilder()
+                .setProtocol(OvsdbBridgeProtocolOpenflow10.class)
+                .build();
+
+        when(ovsdbBridgeNode.getProtocolEntry()).thenReturn(Map.of(protocolEntry.key(), protocolEntry));
         Set<String> protocols = new HashSet<>();
         protocols.add("OpenFlow10");
         assertEquals(protocols, SouthboundMapper.createOvsdbBridgeProtocols(ovsdbBridgeNode));
@@ -389,11 +389,8 @@ public class SouthboundMapperTest {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
         when(ovsdbNode.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
 
-        List<ManagerEntry> managerEntries = new ArrayList<>();
-        ManagerEntry managerEntry = mock(ManagerEntry.class);
-        managerEntries.add(managerEntry);
-        when(ovsdbNodeAugmentation.getManagerEntry()).thenReturn(managerEntries);
-        when(managerEntry.getTarget()).thenReturn(uri);
+        ManagerEntry managerEntry = new ManagerEntryBuilder().setTarget(uri).build();
+        when(ovsdbNodeAugmentation.getManagerEntry()).thenReturn(Map.of(managerEntry.key(), managerEntry));
 
         //Test addManagerEntries(managerEntriesCreated, manager)
         Column<GenericTableSchema, String> value = mock(Column.class);

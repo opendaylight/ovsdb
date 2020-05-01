@@ -16,11 +16,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.util.concurrent.FluentFuture;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
@@ -29,7 +27,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -41,24 +38,24 @@ import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow10;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
-
-
 
 @RunWith(MockitoJUnitRunner.class)
 public class BridgeConfigReconciliationTaskTest {
@@ -76,10 +73,8 @@ public class BridgeConfigReconciliationTaskTest {
     @Before
     public void setUp() throws Exception {
         NodeKey nodeKey = new NodeKey(new NodeId(new Uri(NODE_ID)));
-        List<Node> bridgeNodes = new ArrayList<>();
 
         iid = SouthboundMapper.createInstanceIdentifier(nodeKey.getNodeId());
-        when(topology.getNode()).thenReturn(bridgeNodes);
         SouthboundProvider.setBridgesReconciliationInclusionList(Arrays.asList(BR_INT));
         Node brIntNode = createBridgeNode(NODE_ID + "/bridge/" + BR_INT);
         Optional<Node> nodeOptional = Optional.of(brIntNode);
@@ -90,7 +85,8 @@ public class BridgeConfigReconciliationTaskTest {
         Mockito.when(db.newReadOnlyTransaction()).thenReturn(tx);
         Mockito.when(tx.read(any(LogicalDatastoreType.class),any(InstanceIdentifier.class)))
                 .thenReturn(readNodeFuture);
-        bridgeNodes.add(brIntNode);
+
+        when(topology.getNode()).thenReturn(Map.of(brIntNode.key(), brIntNode));
 
         configurationReconciliationTask =
                 new BridgeConfigReconciliationTask(reconciliationManager, ovsdbConnectionManager, iid,
@@ -103,37 +99,26 @@ public class BridgeConfigReconciliationTaskTest {
         doNothing().when(underTest).reconcileBridgeConfigurations(any(Map.class));
         assertTrue(underTest.reconcileConfiguration(ovsdbConnectionManager));
         Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
-        for (Node bridgeNode : topology.getNode()) {
+        for (Node bridgeNode : topology.getNode().values()) {
             changes.putAll(createExpectedConfigurationChanges(bridgeNode));
         }
         verify(underTest).reconcileBridgeConfigurations(changes);
     }
 
     private Node createBridgeNode(final String bridgeName) {
-        Node bridgeNode = mock(Node.class);
-        String nodeString = bridgeName;
-        when(bridgeNode.getNodeId()).thenReturn(new NodeId(new Uri(nodeString)));
-        OvsdbBridgeAugmentation ovsdbBridgeAugmentation = mock(OvsdbBridgeAugmentation.class);
-        OvsdbNodeRef ovsdbNodeRef = mock(OvsdbNodeRef.class);
+        ProtocolEntry protocolEntry = new ProtocolEntryBuilder()
+                .setProtocol(OvsdbBridgeProtocolOpenflow10.class)
+                .build();
+        ControllerEntry controllerEntry = new ControllerEntryBuilder().setTarget(new Uri("mock")).build();
 
-        when((InstanceIdentifier<Node>)ovsdbNodeRef.getValue()).thenReturn(iid);
-        OvsdbBridgeName ovsdbBridgeName = new OvsdbBridgeName(bridgeName);
-        when(bridgeNode.augmentation(OvsdbBridgeAugmentation.class)).thenReturn(ovsdbBridgeAugmentation);
-        ProtocolEntry protocolEntry = mock(ProtocolEntry.class);
-        ProtocolEntryKey protocolEntryKey = mock(ProtocolEntryKey.class);
-        Mockito.when(protocolEntry.getProtocol()).thenAnswer(
-                (Answer<Class<? extends OvsdbBridgeProtocolBase>>) invocation -> OvsdbBridgeProtocolOpenflow10.class);
-        when(protocolEntry.key()).thenReturn(protocolEntryKey);
-        when(ovsdbBridgeAugmentation.getProtocolEntry()).thenReturn(Collections.singletonList(protocolEntry));
-
-        ControllerEntry controllerEntry = mock(ControllerEntry.class);
-        ControllerEntryKey controllerEntryKey = mock(ControllerEntryKey.class);
-        when(controllerEntry.key()).thenReturn(controllerEntryKey);
-        when(ovsdbBridgeAugmentation.getControllerEntry()).thenReturn(Collections.singletonList(controllerEntry));
-
-        when(ovsdbBridgeAugmentation.getManagedBy()).thenReturn(ovsdbNodeRef);
-
-        return bridgeNode;
+        return new NodeBuilder()
+                .setNodeId(new NodeId(new Uri(bridgeName)))
+                .addAugmentation(new OvsdbBridgeAugmentationBuilder()
+                    .setManagedBy(new OvsdbNodeRef(iid))
+                    .setProtocolEntry(Collections.singletonMap(protocolEntry.key(), protocolEntry))
+                    .setControllerEntry(Collections.singletonMap(controllerEntry.key(), controllerEntry))
+                    .build())
+                .build();
     }
 
     private Map<InstanceIdentifier<?>, DataObject> createExpectedConfigurationChanges(final Node bridgeNode) {
@@ -146,12 +131,12 @@ public class BridgeConfigReconciliationTaskTest {
                 bridgeNodeIid.builder().augmentation(OvsdbBridgeAugmentation.class).build();
         changes.put(bridgeNodeIid, bridgeNode);
         changes.put(ovsdbBridgeIid, ovsdbBridge);
-        for (ProtocolEntry protocolEntry : ovsdbBridge.getProtocolEntry()) {
+        for (ProtocolEntry protocolEntry : ovsdbBridge.getProtocolEntry().values()) {
             KeyedInstanceIdentifier<ProtocolEntry, ProtocolEntryKey> protocolIid =
                     ovsdbBridgeIid.child(ProtocolEntry.class, protocolEntry.key());
             changes.put(protocolIid, protocolEntry);
         }
-        for (ControllerEntry controller : ovsdbBridge.getControllerEntry()) {
+        for (ControllerEntry controller : ovsdbBridge.getControllerEntry().values()) {
             KeyedInstanceIdentifier<ControllerEntry, ControllerEntryKey> controllerIid =
                     ovsdbBridgeIid.child(ControllerEntry.class, controller.key());
             changes.put(controllerIid, controller);

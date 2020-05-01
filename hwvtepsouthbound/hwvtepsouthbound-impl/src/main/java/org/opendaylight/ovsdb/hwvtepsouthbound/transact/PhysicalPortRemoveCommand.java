@@ -87,13 +87,11 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                 Node removed = TransactUtils.getRemoved(mod);
                 if (removed != null) {
                     List<HwvtepPhysicalPortAugmentation> lswitchListRemoved = new ArrayList<>();
-                    if (removed.getTerminationPoint() != null) {
-                        for (TerminationPoint tp : removed.getTerminationPoint()) {
-                            HwvtepPhysicalPortAugmentation hppAugmentation =
-                                    tp.augmentation(HwvtepPhysicalPortAugmentation.class);
-                            if (hppAugmentation != null) {
-                                lswitchListRemoved.add(hppAugmentation);
-                            }
+                    for (TerminationPoint tp : removed.nonnullTerminationPoint().values()) {
+                        HwvtepPhysicalPortAugmentation hppAugmentation =
+                                tp.augmentation(HwvtepPhysicalPortAugmentation.class);
+                        if (hppAugmentation != null) {
+                            lswitchListRemoved.add(hppAugmentation);
                         }
                     }
                     if (!lswitchListRemoved.isEmpty()) {
@@ -108,22 +106,18 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                     List<HwvtepPhysicalPortAugmentation> portListUpdated = new ArrayList<>();
                     List<HwvtepPhysicalPortAugmentation> portListBefore = new ArrayList<>();
                     List<HwvtepPhysicalPortAugmentation> portListRemoved = new ArrayList<>();
-                    if (updated.getTerminationPoint() != null) {
-                        for (TerminationPoint tp : updated.getTerminationPoint()) {
-                            HwvtepPhysicalPortAugmentation hppAugmentation =
-                                    tp.augmentation(HwvtepPhysicalPortAugmentation.class);
-                            if (hppAugmentation != null) {
-                                portListUpdated.add(hppAugmentation);
-                            }
+                    for (TerminationPoint tp : updated.nonnullTerminationPoint().values()) {
+                        HwvtepPhysicalPortAugmentation hppAugmentation =
+                                tp.augmentation(HwvtepPhysicalPortAugmentation.class);
+                        if (hppAugmentation != null) {
+                            portListUpdated.add(hppAugmentation);
                         }
                     }
-                    if (before.getTerminationPoint() != null) {
-                        for (TerminationPoint tp : before.getTerminationPoint()) {
-                            HwvtepPhysicalPortAugmentation hppAugmentation =
-                                    tp.augmentation(HwvtepPhysicalPortAugmentation.class);
-                            if (hppAugmentation != null) {
-                                portListBefore.add(hppAugmentation);
-                            }
+                    for (TerminationPoint tp : before.nonnullTerminationPoint().values()) {
+                        HwvtepPhysicalPortAugmentation hppAugmentation =
+                                tp.augmentation(HwvtepPhysicalPortAugmentation.class);
+                        if (hppAugmentation != null) {
+                            portListBefore.add(hppAugmentation);
                         }
                     }
                     portListBefore.removeAll(portListUpdated);

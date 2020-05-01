@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -26,12 +25,14 @@ import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<RemoteUcastMacs, HwvtepGlobalAugmentation> {
+public class UcastMacsRemoteRemoveCommand
+        extends AbstractTransactCommand<RemoteUcastMacs, RemoteUcastMacsKey, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(UcastMacsRemoteRemoveCommand.class);
 
     public UcastMacsRemoteRemoveCommand(final HwvtepOperationalState state,
@@ -51,9 +52,9 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
         }
     }
 
-    public void onConfigUpdate(TransactionBuilder transaction,
-                               InstanceIdentifier<Node> nodeIid,
-                               List<RemoteUcastMacs> macs) {
+    public void onConfigUpdate(final TransactionBuilder transaction,
+                               final InstanceIdentifier<Node> nodeIid,
+                               final List<RemoteUcastMacs> macs) {
         for (RemoteUcastMacs mac : macs) {
             InstanceIdentifier<RemoteUcastMacs> macKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
                     .child(RemoteUcastMacs.class, mac.key());
@@ -63,20 +64,20 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    public void onConfigUpdate(TransactionBuilder transaction,
-                               InstanceIdentifier<Node> nodeIid,
-                               RemoteUcastMacs remoteMcastMac,
-                               InstanceIdentifier macKey,
-                               Object... extraData) {
+    public void onConfigUpdate(final TransactionBuilder transaction,
+                               final InstanceIdentifier<Node> nodeIid,
+                               final RemoteUcastMacs remoteMcastMac,
+                               final InstanceIdentifier macKey,
+                               final Object... extraData) {
         processDependencies(EmptyDependencyGetter.INSTANCE, transaction, nodeIid, macKey, remoteMcastMac);
     }
 
     @Override
-    public void doDeviceTransaction(TransactionBuilder transaction,
-                                    InstanceIdentifier<Node> instanceIdentifier,
-                                    RemoteUcastMacs mac,
-                                    InstanceIdentifier macKey,
-                                    Object... extraData) {
+    public void doDeviceTransaction(final TransactionBuilder transaction,
+                                    final InstanceIdentifier<Node> instanceIdentifier,
+                                    final RemoteUcastMacs mac,
+                                    final InstanceIdentifier macKey,
+                                    final Object... extraData) {
         removeUcastMacRemote(transaction, instanceIdentifier, Lists.newArrayList(mac));
     }
 
@@ -125,17 +126,17 @@ public class UcastMacsRemoteRemoveCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    protected List<RemoteUcastMacs> getData(final HwvtepGlobalAugmentation augmentation) {
+    protected Map<RemoteUcastMacsKey, RemoteUcastMacs> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getRemoteUcastMacs();
     }
 
     @Override
-    protected boolean areEqual(RemoteUcastMacs remoteUcastMacs1, RemoteUcastMacs remoteUcastMacs2) {
+    protected boolean areEqual(final RemoteUcastMacs remoteUcastMacs1, final RemoteUcastMacs remoteUcastMacs2) {
         return Objects.equals(remoteUcastMacs1.key(), remoteUcastMacs2.key());
     }
 
     @Override
-    public void onSuccess(TransactionBuilder tx) {
+    public void onSuccess(final TransactionBuilder tx) {
         for (MdsalUpdate mdsalUpdate : updates) {
             RemoteUcastMacs mac = (RemoteUcastMacs) mdsalUpdate.getNewData();
             InstanceIdentifier<RemoteUcastMacs> macIid = mdsalUpdate.getKey();

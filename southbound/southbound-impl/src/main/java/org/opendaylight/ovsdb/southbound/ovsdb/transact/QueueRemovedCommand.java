@@ -10,17 +10,16 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Queue;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QueuesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -44,9 +43,9 @@ public class QueueRemovedCommand implements TransactCommand {
                 TransactUtils.extractUpdated(modifications, OvsdbNodeAugmentation.class));
     }
 
-    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-                         final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originals,
-                         final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
+    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+                                final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originals,
+                                final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
         for (Map.Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originalEntry : originals
                 .entrySet()) {
             InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = originalEntry.getKey();
@@ -54,27 +53,16 @@ public class QueueRemovedCommand implements TransactCommand {
             OvsdbNodeAugmentation update = updated.get(ovsdbNodeIid);
 
             if (original != null && update != null) {
-                List<Queues> origQueues = original.getQueues();
-                List<Queues> updatedQueues = update.getQueues();
+                Map<QueuesKey, Queues> origQueues = original.getQueues();
+                Map<QueuesKey, Queues> updatedQueues = update.getQueues();
                 if (origQueues != null && !origQueues.isEmpty()) {
-                    for (Queues origQueue : origQueues) {
+                    for (Queues origQueue : origQueues.values()) {
                         OvsdbNodeAugmentation operNode =
                                 state.getBridgeNode(ovsdbNodeIid).get().augmentation(
                                         OvsdbNodeAugmentation.class);
-                        List<Queues> operQueues = operNode.getQueues();
-
-                        boolean found = false;
-                        if (updatedQueues != null && !updatedQueues.isEmpty()) {
-                            for (Queues updatedQueue : updatedQueues) {
-                                if (origQueue.getQueueId().equals(updatedQueue.getQueueId())) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (!found) {
+                        if (updatedQueues == null || !updatedQueues.containsKey(origQueue.key())) {
                             LOG.debug("Received request to delete Queue entry {}", origQueue.getQueueId());
-                            Uuid queueUuid = getQueueUuid(operQueues, origQueue.getQueueId());
+                            Uuid queueUuid = getQueueUuid(operNode.getQueues(), origQueue.key());
                             if (queueUuid != null) {
                                 Queue queue = transaction.getTypedRowSchema(Queue.class);
                                 transaction.add(op.delete(queue.getSchema())
@@ -94,15 +82,13 @@ public class QueueRemovedCommand implements TransactCommand {
         }
     }
 
-    private Uuid getQueueUuid(final List<Queues> operQueues, final Uri queueId) {
-        if (operQueues != null && !operQueues.isEmpty()) {
-            for (Queues queueEntry : operQueues) {
-                if (queueEntry.getQueueId().equals(queueId)) {
-                    return queueEntry.getQueueUuid();
-                }
+    private static Uuid getQueueUuid(final Map<QueuesKey, Queues> operQueues, final QueuesKey queueId) {
+        if (operQueues != null) {
+            Queues queueEntry = operQueues.get(queueId);
+            if (queueEntry != null) {
+                return queueEntry.getQueueUuid();
             }
         }
         return null;
     }
-
 }

@@ -29,6 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -142,8 +143,9 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
         if (ovsdbNode.isPresent()) {
             OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.get().augmentation(OvsdbNodeAugmentation.class);
             if (ovsdbNodeAugmentation != null) {
-                final List<ManagedNodeEntry> managedNodeEntries = ovsdbNodeAugmentation.getManagedNodeEntry();
-                for (ManagedNodeEntry managedNodeEntry : managedNodeEntries) {
+                final Map<ManagedNodeEntryKey, ManagedNodeEntry> managedNodeEntries
+                    = ovsdbNodeAugmentation.getManagedNodeEntry();
+                for (ManagedNodeEntry managedNodeEntry : managedNodeEntries.values()) {
                     final InstanceIdentifier<Node> bridgeIid =
                             (InstanceIdentifier<Node>) managedNodeEntry.getBridgeRef().getValue();
                     final Optional<Node> bridgeNode = SouthboundUtil.readNode(transaction, bridgeIid);

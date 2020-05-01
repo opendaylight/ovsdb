@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
@@ -28,6 +27,7 @@ import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -43,8 +43,9 @@ import org.slf4j.LoggerFactory;
  * termination point reconciliation is triggered for that bridge.
  */
 public class TerminationPointConfigReconciliationTask extends ReconciliationTask {
-
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointConfigReconciliationTask.class);
+    private static final PortExternalIdsKey CREATED_BY_KEY = new PortExternalIdsKey(SouthboundConstants.CREATED_BY);
+
     private final OvsdbConnectionInstance connectionInstance;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
     private final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
@@ -65,7 +66,7 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
     @Override
     public boolean reconcileConfiguration(final OvsdbConnectionManager connectionManager) {
         final Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
-        final Node configNodeData = ((Node) configData);
+        final Node configNodeData = (Node) configData;
         LOG.debug("Reconcile Termination Point Configuration for node {}", configNodeData.getNodeId());
         changes.putAll(SouthboundMapper.extractTerminationPointConfigurationChanges(configNodeData));
         DataChangeEvent changeEvents = new DataChangeEvent() {
@@ -96,7 +97,7 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
 
         List<String> configTerminationPoints = new ArrayList<>();
         if (configNodeData.getTerminationPoint() != null) {
-            configNodeData.getTerminationPoint().forEach(entry -> {
+            configNodeData.getTerminationPoint().values().forEach(entry -> {
                 configTerminationPoints.add(entry.getTpId().getValue());
             });
         }
@@ -120,17 +121,16 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
                 LOG.trace("Termination Point {} from Oper Topology NOT present in config topology During Reconcile,"
                         + "checking if this created by ODL and perform delete reconciliation",
                     terminationPoint.getName());
-                List<PortExternalIds> externalIds = terminationPoint.getPortExternalIds();
+                Map<PortExternalIdsKey, PortExternalIds> externalIds = terminationPoint.getPortExternalIds();
                 if (externalIds != null) {
-                    for (PortExternalIds portExternalIds : externalIds) {
-                        if (portExternalIds.getExternalIdKey().equals(SouthboundConstants.CREATED_BY)
-                            && portExternalIds.getExternalIdValue().equals(SouthboundConstants.ODL)) {
-                            LOG.trace("Termination Point {} created by ODL. Marking for deletion during reconcile",
-                                entry.getKey());
-                            removeTerminationPoints.add(entry.getKey());
-                            original.put(entry.getKey(), entry.getValue());
-                            break;
-                        }
+                    final PortExternalIds portExternalIds = externalIds.get(CREATED_BY_KEY);
+                    if (portExternalIds != null
+                            && SouthboundConstants.ODL.equals(portExternalIds.getExternalIdValue())) {
+                        LOG.trace("Termination Point {} created by ODL. Marking for deletion during reconcile",
+                            entry.getKey());
+                        removeTerminationPoints.add(entry.getKey());
+                        original.put(entry.getKey(), entry.getValue());
+                        break;
                     }
                 }
             }

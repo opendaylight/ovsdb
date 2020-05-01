@@ -29,13 +29,11 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSetBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -66,21 +64,27 @@ public class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionComma
 
     private void updateData(ReadWriteTransaction transaction, McastMacsRemote macRemote) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
-        Node connectionNode = buildConnectionNode(macRemote);
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+
+        // Ensure the node exists
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId,
+            new NodeBuilder().setNodeId(getOvsdbConnectionInstance().getNodeId()).build());
+
+        // Prepare the update in internal structures
+        final RemoteMcastMacs mac = buildRemoteMcastMacs(macRemote);
+        final InstanceIdentifier<RemoteMcastMacs> macIid = connectionIId.augmentation(HwvtepGlobalAugmentation.class)
+                .child(RemoteMcastMacs.class, mac.key());
+        addToUpdateTx(RemoteMcastMacs.class, macIid, macRemote.getUuid(), macRemote);
+
+        // Merge update, relying on automatic lifecycle...
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, macIid, mac);
+        if (mac.getLocatorSet() == null) {
+            // ... but delete locator set if it is empty
+            // FIXME: can we use .put() of instead of merge/delete?
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, macIid.child(LocatorSet.class));
+        }
     }
 
-    InstanceIdentifier<RemoteMcastMacs> getMacIid(InstanceIdentifier<Node> connectionIId, Node connectionNode) {
-        RemoteMcastMacsKey macsKey =
-                connectionNode.augmentation(HwvtepGlobalAugmentation.class).getRemoteMcastMacs().get(0).key();
-        InstanceIdentifier<RemoteMcastMacs> key = connectionIId.augmentation(HwvtepGlobalAugmentation.class)
-                .child(RemoteMcastMacs.class, macsKey);
-        return key;
-    }
-
-    private Node buildConnectionNode(McastMacsRemote macRemote) {
-        NodeBuilder connectionNode = new NodeBuilder();
-        connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
+    private RemoteMcastMacs buildRemoteMcastMacs(McastMacsRemote macRemote) {
         RemoteMcastMacsBuilder macRemoteBuilder = new RemoteMcastMacsBuilder();
         if (macRemote.getMac().equals(HwvtepSouthboundConstants.UNKNOWN_DST_STRING)) {
             macRemoteBuilder.setMacEntryKey(HwvtepSouthboundConstants.UNKNOWN_DST_MAC);
@@ -92,17 +96,7 @@ public class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionComma
         setLocatorSet(macRemoteBuilder, macRemote);
         setLogicalSwitch(macRemoteBuilder, macRemote);
 
-        List<RemoteMcastMacs> macRemoteList = new ArrayList<>();
-        RemoteMcastMacs mac = macRemoteBuilder.build();
-        macRemoteList.add(mac);
-
-        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
-        hgAugmentationBuilder.setRemoteMcastMacs(macRemoteList);
-        connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
-        InstanceIdentifier<RemoteMcastMacs> macIid = getOvsdbConnectionInstance().getInstanceIdentifier()
-                .augmentation(HwvtepGlobalAugmentation.class).child(RemoteMcastMacs.class, mac.key());
-        addToUpdateTx(RemoteMcastMacs.class, macIid, macRemote.getUuid(), macRemote);
-        return connectionNode.build();
+        return macRemoteBuilder.build();
     }
 
     private void setLogicalSwitch(RemoteMcastMacsBuilder macRemoteBuilder, McastMacsRemote macRemote) {
@@ -117,7 +111,7 @@ public class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionComma
         }
     }
 
-    private void setIpAddress(RemoteMcastMacsBuilder macRemoteBuilder, McastMacsRemote macRemote) {
+    private static void setIpAddress(RemoteMcastMacsBuilder macRemoteBuilder, McastMacsRemote macRemote) {
         if (macRemote.getIpAddr() != null && !macRemote.getIpAddr().isEmpty()) {
             macRemoteBuilder.setIpaddr(IpAddressBuilder.getDefaultInstance(macRemote.getIpAddr()));
         }
@@ -134,8 +128,7 @@ public class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionComma
                     for (UUID locUUID : plSet.getLocatorsColumn().getData()) {
                         PhysicalLocator locator = updatedPLocRows.get(locUUID);
                         if (locator == null) {
-                            locator = (PhysicalLocator) getOvsdbConnectionInstance()
-                                    .getDeviceInfo().getPhysicalLocator(locUUID);
+                            locator = getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocator(locUUID);
                         }
                         InstanceIdentifier<TerminationPoint> tpIid = HwvtepSouthboundMapper.createInstanceIdentifier(
                                 getOvsdbConnectionInstance().getInstanceIdentifier(), locator);
@@ -147,5 +140,4 @@ public class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionComma
             }
         }
     }
-
 }

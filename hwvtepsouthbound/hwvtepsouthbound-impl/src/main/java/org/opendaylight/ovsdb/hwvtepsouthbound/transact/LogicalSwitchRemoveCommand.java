@@ -16,12 +16,14 @@ import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalSwitches, HwvtepGlobalAugmentation> {
+public class LogicalSwitchRemoveCommand
+        extends AbstractTransactCommand<LogicalSwitches, LogicalSwitchesKey, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(LogicalSwitchRemoveCommand.class);
     List<LogicalSwitches> deletedLs;
 
@@ -49,8 +51,9 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
     }
 
     @Override
-    public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid,
-                               LogicalSwitches logicalSwitches, InstanceIdentifier lsKey, Object... extraData) {
+    public void onConfigUpdate(final TransactionBuilder transaction, final InstanceIdentifier<Node> nodeIid,
+                               final LogicalSwitches logicalSwitches, final InstanceIdentifier lsKey,
+                               final Object... extraData) {
         processDependencies(EmptyDependencyGetter.INSTANCE, transaction, nodeIid, lsKey, logicalSwitches);
     }
 
@@ -68,7 +71,7 @@ public class LogicalSwitchRemoveCommand extends AbstractTransactCommand<LogicalS
     }
 
     @Override
-    protected List<LogicalSwitches> getData(final HwvtepGlobalAugmentation augmentation) {
+    protected Map<LogicalSwitchesKey, LogicalSwitches> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getLogicalSwitches();
     }
 

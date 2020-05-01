@@ -45,6 +45,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Switches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.SwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.PortFaultStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.PortFaultStatusBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.PortFaultStatusKey;
@@ -292,20 +293,16 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
     private static Optional<InstanceIdentifier<Node>> getTerminationPointSwitch(final ReadWriteTransaction transaction,
             final Node node, final String tpName) {
         HwvtepGlobalAugmentation hwvtepNode = node.augmentation(HwvtepGlobalAugmentation.class);
-        List<Switches> switchNodes = hwvtepNode.getSwitches();
+        Map<SwitchesKey, Switches> switchNodes = hwvtepNode.getSwitches();
         if (switchNodes != null && !switchNodes.isEmpty()) {
-            for (Switches managedNodeEntry : switchNodes) {
+            for (Switches managedNodeEntry : switchNodes.values()) {
                 @SuppressWarnings("unchecked")
-                Node switchNode = HwvtepSouthboundUtil
-                        .readNode(transaction,
+                Node switchNode = HwvtepSouthboundUtil.readNode(transaction,
                                 (InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue()).get();
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(tpName));
-                if (switchNode.getTerminationPoint() != null) {
-                    for (TerminationPoint terminationPoint : switchNode.getTerminationPoint()) {
-                        if (terminationPoint.key().equals(tpKey)) {
-                            return Optional.of((InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue());
-                        }
-                    }
+                TerminationPoint terminationPoint = switchNode.nonnullTerminationPoint().get(tpKey);
+                if (terminationPoint != null) {
+                    return Optional.of((InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue());
                 }
             }
         } else {

@@ -74,7 +74,7 @@ public class OvsdbItUtils {
             OvsdbBridgeAugmentation bridge =
                     southboundUtils.getBridge(connectionInfo, "br-int");
             if (bridge != null && bridge.getControllerEntry() != null) {
-                controllerEntry = bridge.getControllerEntry().iterator().next();
+                controllerEntry = bridge.getControllerEntry().values().iterator().next();
                 assertEquals(controllerTarget, controllerEntry.getTarget().getValue());
                 if (controllerEntry.isIsConnected()) {
                     LOG.info("isControllerConnected exit: true {}", controllerTarget);

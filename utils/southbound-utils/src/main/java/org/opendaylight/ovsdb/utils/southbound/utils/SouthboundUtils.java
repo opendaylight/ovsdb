@@ -80,14 +80,19 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsKey;
@@ -197,11 +202,13 @@ public class SouthboundUtils {
     private static final String DISABLE_IN_BAND = "disable-in-band";
     private static final String PATCH_PORT_TYPE = "patch";
     // External ID key used for mapping between an OVSDB port and an interface name
-    private static final String EXTERNAL_INTERFACE_ID_KEY = "iface-id";
+    private static final InterfaceExternalIdsKey EXTERNAL_INTERFACE_ID_KEY = new InterfaceExternalIdsKey("iface-id");
     private static final String CREATED_BY = "created_by";
     private static final String ODL = "odl";
     private static final String FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)";
     private static final Pattern PATTERN = Pattern.compile(FORMAT);
+    // DPDK interface type
+    private static final InterfaceTypeEntryKey DPDK_IFACE_KEY = new InterfaceTypeEntryKey(InterfaceTypeDpdk.class);
 
     private final UtilsProvider provider;
 
@@ -763,12 +770,12 @@ public class SouthboundUtils {
         OvsdbBridgeAugmentation bridgeAug = extractBridgeAugmentation(bridgeNode);
 
         //Only add controller entries that do not already exist on this bridge
-        List<ControllerEntry> existingControllerEntries = bridgeAug.getControllerEntry();
+        Map<ControllerEntryKey, ControllerEntry> existingControllerEntries = bridgeAug.getControllerEntry();
         List<ControllerEntry> newControllerEntries = new ArrayList<>();
         if (existingControllerEntries != null) {
             NEW_ENTRY_LOOP:
             for (ControllerEntry newEntry : createControllerEntries(controllers, maxBackoff, inactivityProbe)) {
-                for (ControllerEntry existingEntry : existingControllerEntries) {
+                for (ControllerEntry existingEntry : existingControllerEntries.values()) {
                     if (newEntry.getTarget().equals(existingEntry.getTarget())) {
                         continue NEW_ENTRY_LOOP;
                     }
@@ -950,9 +957,9 @@ public class SouthboundUtils {
             // Check if ovsdb node has manager entries
             OvsdbNodeAugmentation ovsdbNodeAugmentation = extractOvsdbNode(node);
             if (ovsdbNodeAugmentation != null) {
-                List<ManagerEntry> managerEntries = ovsdbNodeAugmentation.getManagerEntry();
+                Map<ManagerEntryKey, ManagerEntry> managerEntries = ovsdbNodeAugmentation.getManagerEntry();
                 if (managerEntries != null && !managerEntries.isEmpty()) {
-                    for (ManagerEntry managerEntry : managerEntries) {
+                    for (ManagerEntry managerEntry : managerEntries.values()) {
                         if (managerEntry == null || managerEntry.getTarget() == null) {
                             continue;
                         }
@@ -1060,9 +1067,9 @@ public class SouthboundUtils {
     public boolean isBridgeOnOvsdbNode(Node ovsdbNode, String bridgeName) {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = extractNodeAugmentation(ovsdbNode);
         if (ovsdbNodeAugmentation != null) {
-            List<ManagedNodeEntry> managedNodes = ovsdbNodeAugmentation.getManagedNodeEntry();
+            Map<ManagedNodeEntryKey, ManagedNodeEntry> managedNodes = ovsdbNodeAugmentation.getManagedNodeEntry();
             if (managedNodes != null) {
-                for (ManagedNodeEntry managedNode : managedNodes) {
+                for (ManagedNodeEntry managedNode : managedNodes.values()) {
                     if (matchesBridgeName(managedNode, bridgeName)) {
                         return true;
                     }
@@ -1118,20 +1125,16 @@ public class SouthboundUtils {
     }
 
     public boolean isOvsdbNodeDpdk(Node ovsdbNode) {
-        boolean found = false;
         OvsdbNodeAugmentation ovsdbNodeAugmentation = extractNodeAugmentation(ovsdbNode);
         if (ovsdbNodeAugmentation != null) {
-            List<InterfaceTypeEntry> ifTypes = ovsdbNodeAugmentation.getInterfaceTypeEntry();
+            Map<InterfaceTypeEntryKey, InterfaceTypeEntry> ifTypes = ovsdbNodeAugmentation.getInterfaceTypeEntry();
             if (ifTypes != null) {
-                for (InterfaceTypeEntry ifType : ifTypes) {
-                    if (ifType.getInterfaceType().equals(InterfaceTypeDpdk.class)) {
-                        found = true;
-                        break;
-                    }
+                if (ifTypes.containsKey(DPDK_IFACE_KEY)) {
+                    return true;
                 }
             }
         }
-        return found;
+        return false;
     }
 
     private static List<ControllerEntry> createControllerEntries(List<String> controllersStr,
@@ -1171,9 +1174,9 @@ public class SouthboundUtils {
             LOG.error("extractTerminationPointAugmentations: Node value is null");
             return Collections.emptyList();
         }
-        List<TerminationPoint> terminationPoints = node.getTerminationPoint();
+        Map<TerminationPointKey, TerminationPoint> terminationPoints = node.getTerminationPoint();
         if (terminationPoints != null && !terminationPoints.isEmpty()) {
-            for (TerminationPoint tp : terminationPoints) {
+            for (TerminationPoint tp : terminationPoints.values()) {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
                         tp.augmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation != null) {
@@ -1225,7 +1228,7 @@ public class SouthboundUtils {
      * Get all OVSDB nodes from topology.
      * @return a list of nodes or null if the topology could not found
      */
-    public List<Node> getOvsdbNodes() {
+    public Map<NodeKey, Node> getOvsdbNodes() {
         InstanceIdentifier<Topology> inst = InstanceIdentifier.create(NetworkTopology.class).child(Topology.class,
                 new TopologyKey(OVSDB_TOPOLOGY_ID));
         Topology topology = provider.read(LogicalDatastoreType.OPERATIONAL, inst);
@@ -1247,11 +1250,11 @@ public class SouthboundUtils {
             }
         }
 
-        if (ovsdbNode != null && ovsdbNode.getOpenvswitchOtherConfigs() != null) {
-            for (OpenvswitchOtherConfigs openvswitchOtherConfigs : ovsdbNode.getOpenvswitchOtherConfigs()) {
-                if (openvswitchOtherConfigs.getOtherConfigKey().equals(key)) {
-                    return openvswitchOtherConfigs.getOtherConfigValue();
-                }
+        if (ovsdbNode != null) {
+            final OpenvswitchOtherConfigs found = ovsdbNode.nonnullOpenvswitchOtherConfigs()
+                    .get(new OpenvswitchOtherConfigsKey(key));
+            if (found != null) {
+                return found.getOtherConfigValue();
             }
         }
 
@@ -1259,8 +1262,9 @@ public class SouthboundUtils {
     }
 
     public static TerminationPoint getTerminationPointByExternalId(final Node bridgeNode, final String interfaceName) {
-        if (bridgeNode.getTerminationPoint() != null) {
-            for (TerminationPoint tp : bridgeNode.getTerminationPoint()) {
+        final Map<TerminationPointKey, TerminationPoint> tps = bridgeNode.getTerminationPoint();
+        if (tps != null) {
+            for (TerminationPoint tp : tps.values()) {
                 OvsdbTerminationPointAugmentation ovsdbTp = tp.augmentation(OvsdbTerminationPointAugmentation.class);
                 String externalIdValue = getExternalInterfaceIdValue(ovsdbTp);
                 if (externalIdValue != null && externalIdValue.equals(interfaceName)) {
@@ -1275,9 +1279,9 @@ public class SouthboundUtils {
 
     // This utility shouldn't be called often, as it reads all OVSDB nodes each time - not good for scale
     public Node getNodeByTerminationPointExternalId(final String interfaceName) {
-        List<Node> nodes = getOvsdbNodes();
+        Map<NodeKey, Node> nodes = getOvsdbNodes();
         if (nodes != null) {
-            for (Node node : nodes) {
+            for (Node node : nodes.values()) {
                 TerminationPoint tp = getTerminationPointByExternalId(node, interfaceName);
                 if (tp != null) {
                     return node;
@@ -1289,12 +1293,11 @@ public class SouthboundUtils {
 
     public static String getExternalInterfaceIdValue(final OvsdbTerminationPointAugmentation ovsdbTp) {
         if (ovsdbTp != null) {
-            List<InterfaceExternalIds> ifaceExtIds = ovsdbTp.getInterfaceExternalIds();
+            Map<InterfaceExternalIdsKey, InterfaceExternalIds> ifaceExtIds = ovsdbTp.getInterfaceExternalIds();
             if (ifaceExtIds != null) {
-                for (InterfaceExternalIds entry : ifaceExtIds) {
-                    if (entry.getExternalIdKey().equals(EXTERNAL_INTERFACE_ID_KEY)) {
-                        return entry.getExternalIdValue();
-                    }
+                final InterfaceExternalIds entry = ifaceExtIds.get(EXTERNAL_INTERFACE_ID_KEY);
+                if (entry != null) {
+                    return entry.getExternalIdValue();
                 }
             }
         }

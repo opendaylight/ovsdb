@@ -11,7 +11,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -19,8 +19,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.getField;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
@@ -39,13 +37,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -109,19 +108,16 @@ public class BridgeOperationalStateTest {
         assertNotNull(optTerm);
         assertTrue(optTerm.equals(Optional.empty()));
 
-        TerminationPoint termPnt = mock(TerminationPoint.class);
-        List<TerminationPoint> termPntList = new ArrayList<>();
-        termPntList.add(termPnt);
+        TerminationPoint termPnt = new TerminationPointBuilder().setTpId(new TpId("mockTp")).build();
 
         Node node = mock(Node.class);
         Optional<Node> optNode = Optional.of(node);
         doReturn(optNode).when(briOperationState).getBridgeNode(any(InstanceIdentifier.class));
-        when(node.getTerminationPoint()).thenReturn(termPntList);
-        TerminationPointKey termPntKey = mock(TerminationPointKey.class);
-        when(termPnt.key()).thenReturn(termPntKey);
+        when(node.nonnullTerminationPoint()).thenCallRealMethod();
+        when(node.getTerminationPoint()).thenReturn(Map.of(termPnt.key(), termPnt));
 
         Optional<TerminationPoint> optTermPnt = briOperationState.getBridgeTerminationPoint(
-            iidNode.child(TerminationPoint.class, termPntKey));
+            iidNode.child(TerminationPoint.class, termPnt.key()));
         assertTrue(optTermPnt.isPresent());
     }
 

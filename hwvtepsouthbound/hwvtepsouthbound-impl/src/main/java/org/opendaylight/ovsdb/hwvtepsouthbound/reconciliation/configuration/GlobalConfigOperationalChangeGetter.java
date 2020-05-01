@@ -11,14 +11,18 @@ import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -28,8 +32,8 @@ public final class GlobalConfigOperationalChangeGetter {
     private GlobalConfigOperationalChangeGetter() {
     }
 
-    public static DataTreeModification<Node> getModification(InstanceIdentifier<Node> nodeId, Node configNode,
-                                                             Node opNode) {
+    public static DataTreeModification<Node> getModification(final InstanceIdentifier<Node> nodeId,
+                                                             final Node configNode, final Node opNode) {
 
         NodeBuilder newNodeBuilder = getNodeBuilderFromNode(configNode);
         NodeBuilder oldNodeBuilder = getNodeBuilderFromNode(opNode);
@@ -46,8 +50,8 @@ public final class GlobalConfigOperationalChangeGetter {
         return new DataTreeModificationImpl<>(nodeId, newNodeBuilder.build(), oldNodeBuilder.build());
     }
 
-    static void fillLocalMacsToBeRemoved(HwvtepGlobalAugmentationBuilder oldAugmentation, Node configNode,
-            Node opNode) {
+    static void fillLocalMacsToBeRemoved(final HwvtepGlobalAugmentationBuilder oldAugmentation, final Node configNode,
+            final Node opNode) {
         Set<String> logicalSwitchNamesToBeRemoved = getLogicalSwitchesToBeRemoved(configNode, opNode);
         List<LocalUcastMacs> localUcastMacsToBeRemoved = getLocalUcastMacsToBeRemoved(opNode,
                 logicalSwitchNamesToBeRemoved);
@@ -58,43 +62,43 @@ public final class GlobalConfigOperationalChangeGetter {
         oldAugmentation.setLocalMcastMacs(localMcastMacsToBeRemoved);
     }
 
-    static List<LocalUcastMacs> getLocalUcastMacsToBeRemoved(Node opNode, final Set<String> removedSwitchNames) {
+    static List<LocalUcastMacs> getLocalUcastMacsToBeRemoved(final Node opNode, final Set<String> removedSwitchNames) {
         if (opNode == null || opNode.augmentation(HwvtepGlobalAugmentation.class) == null) {
             return null;
         }
-        List<LocalUcastMacs> localUcastMacs = opNode.augmentation(HwvtepGlobalAugmentation.class)
+        Map<LocalUcastMacsKey, LocalUcastMacs> localUcastMacs = opNode.augmentation(HwvtepGlobalAugmentation.class)
                 .getLocalUcastMacs();
         if (localUcastMacs == null) {
             return null;
         }
-        return localUcastMacs.stream()
+        return localUcastMacs.values().stream()
                 .filter(mac -> removedSwitchNames.contains(
                         mac.getLogicalSwitchRef().getValue().firstKeyOf(
                                 LogicalSwitches.class).getHwvtepNodeName().getValue()))
                 .collect(Collectors.toList());
     }
 
-    static List<LocalMcastMacs> getLocalMcastMacsToBeRemoved(Node opNode, final Set<String> removedSwitchNames) {
+    static List<LocalMcastMacs> getLocalMcastMacsToBeRemoved(final Node opNode, final Set<String> removedSwitchNames) {
         if (opNode == null || opNode.augmentation(HwvtepGlobalAugmentation.class) == null) {
             return null;
         }
-        List<LocalMcastMacs> localMcastMacs = opNode.augmentation(HwvtepGlobalAugmentation.class)
+        Map<LocalMcastMacsKey, LocalMcastMacs> localMcastMacs = opNode.augmentation(HwvtepGlobalAugmentation.class)
                 .getLocalMcastMacs();
         if (localMcastMacs == null) {
             return null;
         }
-        return localMcastMacs.stream()
+        return localMcastMacs.values().stream()
                 .filter(mac -> removedSwitchNames.contains(
                         mac.getLogicalSwitchRef().getValue().firstKeyOf(
                                 LogicalSwitches.class).getHwvtepNodeName().getValue()))
                 .collect(Collectors.toList());
     }
 
-    static  Set<String> getLogicalSwitchesToBeRemoved(Node configNode, Node opNode) {
+    static  Set<String> getLogicalSwitchesToBeRemoved(final Node configNode, final Node opNode) {
         Set<String> opSwitchNames = new HashSet<>();
         Set<String> cfgSwitchNames = new HashSet<>();
-        List<LogicalSwitches> cfgLogicalSwitches = new ArrayList<>();
-        List<LogicalSwitches> opLogicalSwitches = new ArrayList<>();
+        Map<LogicalSwitchesKey, LogicalSwitches> cfgLogicalSwitches = null;
+        Map<LogicalSwitchesKey, LogicalSwitches> opLogicalSwitches = null;
 
         if (opNode != null && opNode.augmentation(HwvtepGlobalAugmentation.class) != null) {
             opLogicalSwitches = opNode.augmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
@@ -103,12 +107,12 @@ public final class GlobalConfigOperationalChangeGetter {
             cfgLogicalSwitches = configNode.augmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
         }
         if (opLogicalSwitches != null) {
-            for (LogicalSwitches ls : opLogicalSwitches) {
+            for (LogicalSwitches ls : opLogicalSwitches.values()) {
                 opSwitchNames.add(ls.getHwvtepNodeName().getValue());
             }
         }
         if (cfgLogicalSwitches != null) {
-            for (LogicalSwitches ls : cfgLogicalSwitches) {
+            for (LogicalSwitches ls : cfgLogicalSwitches.values()) {
                 cfgSwitchNames.add(ls.getHwvtepNodeName().getValue());
             }
         }
@@ -116,7 +120,7 @@ public final class GlobalConfigOperationalChangeGetter {
         return removedSwitchNames;
     }
 
-    static HwvtepGlobalAugmentationBuilder augmentationFromNode(Node node) {
+    static HwvtepGlobalAugmentationBuilder augmentationFromNode(final Node node) {
         if (node == null) {
             return new HwvtepGlobalAugmentationBuilder();
         }
@@ -130,7 +134,7 @@ public final class GlobalConfigOperationalChangeGetter {
         return builder;
     }
 
-    static NodeBuilder getNodeBuilderFromNode(Node node) {
+    static NodeBuilder getNodeBuilderFromNode(final Node node) {
         NodeBuilder newNodeBuilder;
         if (node != null) {
             newNodeBuilder = new NodeBuilder(node);

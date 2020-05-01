@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -27,13 +26,15 @@ import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<RemoteUcastMacs, HwvtepGlobalAugmentation> {
+public class UcastMacsRemoteUpdateCommand
+        extends AbstractTransactCommand<RemoteUcastMacs, RemoteUcastMacsKey, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(UcastMacsRemoteUpdateCommand.class);
     private static final UcastMacUnMetDependencyGetter UCAST_MAC_DATA_VALIDATOR = new UcastMacUnMetDependencyGetter();
 
@@ -146,7 +147,8 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
         }
     }
 
-    private UUID setLocator(TransactionBuilder transaction, UcastMacsRemote ucastMacsRemote, RemoteUcastMacs inputMac) {
+    private UUID setLocator(final TransactionBuilder transaction, final UcastMacsRemote ucastMacsRemote,
+            final RemoteUcastMacs inputMac) {
         //get UUID by locatorRef
         if (inputMac.getLocatorRef() != null) {
             @SuppressWarnings("unchecked")
@@ -172,7 +174,7 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    protected List<RemoteUcastMacs> getData(final HwvtepGlobalAugmentation augmentation) {
+    protected Map<RemoteUcastMacsKey, RemoteUcastMacs> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getRemoteUcastMacs();
     }
 
@@ -196,13 +198,13 @@ public class UcastMacsRemoteUpdateCommand extends AbstractTransactCommand<Remote
     }
 
     @Override
-    protected boolean areEqual(RemoteUcastMacs remoteUcastMacs1, RemoteUcastMacs remoteUcastMacs2) {
+    protected boolean areEqual(final RemoteUcastMacs remoteUcastMacs1, final RemoteUcastMacs remoteUcastMacs2) {
         return Objects.equals(remoteUcastMacs1.key(), remoteUcastMacs2.key())
                 && Objects.equals(remoteUcastMacs1.getLocatorRef(), remoteUcastMacs2.getLocatorRef());
     }
 
     @Override
-    public void onSuccess(TransactionBuilder tx) {
+    public void onSuccess(final TransactionBuilder tx) {
         for (MdsalUpdate mdsalUpdate : updates) {
             RemoteUcastMacs mac = (RemoteUcastMacs) mdsalUpdate.getNewData();
             InstanceIdentifier<RemoteUcastMacs> macIid = mdsalUpdate.getKey();

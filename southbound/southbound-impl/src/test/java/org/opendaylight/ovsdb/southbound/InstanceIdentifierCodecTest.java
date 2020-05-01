@@ -5,11 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,10 +73,9 @@ public class InstanceIdentifierCodecTest {
     @Test
     public void testModuleForPrefix() {
         Module module = mock(Module.class);
-        when(context.findModules("")).thenReturn(ImmutableSet.of(module));
+        doReturn(ImmutableSet.of(module)).when(context).findModules("");
         assertEquals("Found Module", module, instanceIdCodec.moduleForPrefix(""));
-
-        when(context.findModules("foo")).thenReturn(ImmutableSet.of(module, mock(Module.class)));
+        doReturn(ImmutableSet.of(module, mock(Module.class))).when(context).findModules("foo");
         assertEquals("Found Module", module, instanceIdCodec.moduleForPrefix("foo"));
 
         when(context.findModules("bar")).thenReturn(Collections.emptySet());
@@ -93,10 +92,9 @@ public class InstanceIdentifierCodecTest {
         when(context.findModules(namespace)).thenReturn(Collections.emptySet());
         assertNull(instanceIdCodec.prefixForNamespace(namespace));
 
-        when(context.findModules(namespace)).thenReturn(ImmutableSet.of(module));
+        doReturn(ImmutableSet.of(module)).when(context).findModules(namespace);
         assertEquals("Found prefix", prefix, instanceIdCodec.prefixForNamespace(namespace));
-
-        when(context.findModules(namespace)).thenReturn(ImmutableSet.of(module, mock(Module.class)));
+        doReturn(ImmutableSet.of(module, mock(Module.class))).when(context).findModules(namespace);
         assertEquals("Found prefix", prefix, instanceIdCodec.prefixForNamespace(namespace));
     }
 

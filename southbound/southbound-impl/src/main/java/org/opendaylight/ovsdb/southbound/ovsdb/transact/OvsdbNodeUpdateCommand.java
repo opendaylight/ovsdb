@@ -11,7 +11,6 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
@@ -25,6 +24,7 @@ import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -82,7 +82,8 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
 
 
 
-            List<OpenvswitchOtherConfigs> otherConfigs = ovsdbNode.getOpenvswitchOtherConfigs();
+            Map<OpenvswitchOtherConfigsKey, OpenvswitchOtherConfigs> otherConfigs =
+                    ovsdbNode.getOpenvswitchOtherConfigs();
             if (otherConfigs != null) {
                 try {
                     ovs.setOtherConfig(YangUtils.convertYangKeyValueListToMap(otherConfigs,

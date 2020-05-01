@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
@@ -25,8 +24,10 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Acls;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRouters;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRoutersKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.AclBindings;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.AclBindingsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.StaticRoutes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.SwitchBindings;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -34,8 +35,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalRouters, HwvtepGlobalAugmentation> {
+public class LogicalRouterUpdateCommand
+        extends AbstractTransactCommand<LogicalRouters, LogicalRoutersKey, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(LogicalRouterUpdateCommand.class);
 
     public LogicalRouterUpdateCommand(final HwvtepOperationalState state,
@@ -134,10 +135,10 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
         }
     }
 
-    private void setAclBindings(final LogicalRouter logicalRouter, final List<AclBindings> aclBindings) {
+    private void setAclBindings(final LogicalRouter logicalRouter, final Map<AclBindingsKey, AclBindings> aclBindings) {
         if (aclBindings != null) {
             Map<String, UUID> bindingMap = new HashMap<>();
-            for (AclBindings aclBinding : aclBindings) {
+            for (AclBindings aclBinding : aclBindings.values()) {
                 @SuppressWarnings("unchecked")
                 InstanceIdentifier<Acls> aclIid =
                         (InstanceIdentifier<Acls>)aclBinding.getAclRef().getValue();
@@ -157,7 +158,7 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
 
     }
 
-    private void setStaticRoutes(final LogicalRouter logicalRouter, final List<StaticRoutes> staticRoutes) {
+    private static void setStaticRoutes(final LogicalRouter logicalRouter, final List<StaticRoutes> staticRoutes) {
         if (staticRoutes != null) {
             Map<String, String> staticRoutesMap = new HashMap<>();
             for (StaticRoutes staticRoute : staticRoutes) {
@@ -169,7 +170,7 @@ public class LogicalRouterUpdateCommand extends AbstractTransactCommand<LogicalR
     }
 
     @Override
-    protected List<LogicalRouters> getData(final HwvtepGlobalAugmentation augmentation) {
+    protected Map<LogicalRoutersKey, LogicalRouters> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getLogicalRouters();
     }
 }

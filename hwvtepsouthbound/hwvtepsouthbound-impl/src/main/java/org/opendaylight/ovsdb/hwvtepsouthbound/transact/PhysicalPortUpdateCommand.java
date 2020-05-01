@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
@@ -18,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
@@ -34,11 +32,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PhysicalPortUpdateCommand extends AbstractTransactCommand<TerminationPoint, PhysicalSwitchAugmentation> {
+public class PhysicalPortUpdateCommand
+        extends AbstractTransactCommand<TerminationPoint, TerminationPointKey, PhysicalSwitchAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalPortUpdateCommand.class);
     private static final VlanBindingsUnMetDependencyGetter DEPENDENCY_GETTER = new VlanBindingsUnMetDependencyGetter();
 
@@ -84,17 +84,18 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand<Terminati
     }
 
     @Override
-    public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier psNodeiid,
-                               TerminationPoint port, InstanceIdentifier tpIId, Object... extraData) {
+    public void onConfigUpdate(final TransactionBuilder transaction, final InstanceIdentifier psNodeiid,
+                               final TerminationPoint port, final InstanceIdentifier tpIId, final Object... extraData) {
         doDeviceTransaction(transaction, psNodeiid, port, tpIId);
     }
 
     @Override
-    public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier nodeIid,
-                                    TerminationPoint data, InstanceIdentifier key, Object... extraData) {
+    public void doDeviceTransaction(final TransactionBuilder transaction, final InstanceIdentifier nodeIid,
+                                    final TerminationPoint data, final InstanceIdentifier key,
+                                    final Object... extraData) {
         LOG.debug("Processing port doDeviceTransaction {}", data);
         InstanceIdentifier<Node> psNodeiid = nodeIid;
-        HwvtepPhysicalPortAugmentation port = ((TerminationPoint)data).augmentation(
+        HwvtepPhysicalPortAugmentation port = data.augmentation(
                 HwvtepPhysicalPortAugmentation.class);
         if (port == null) {
             LOG.info("No port augmentation found for port {}", data);
@@ -159,7 +160,7 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand<Terminati
         return;
     }
 
-    private void setName(PhysicalPort physicalPort, HwvtepPhysicalPortAugmentation inputPhysicalPort) {
+    private void setName(final PhysicalPort physicalPort, final HwvtepPhysicalPortAugmentation inputPhysicalPort) {
         if (inputPhysicalPort.getHwvtepNodeName() != null) {
             physicalPort.setName(inputPhysicalPort.getHwvtepNodeName().getValue());
         }
@@ -180,34 +181,32 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand<Terminati
         HwvtepPhysicalPortAugmentation portAugmentation = inputPhysicalPort.augmentation(
                 HwvtepPhysicalPortAugmentation.class);
         Map<Long, UUID> bindingMap = new HashMap<>();
-        if (portAugmentation.getVlanBindings() != null) {
-            //get UUID by LogicalSwitchRef
-            for (VlanBindings vlanBinding : portAugmentation.getVlanBindings()) {
-                @SuppressWarnings("unchecked")
-                InstanceIdentifier<LogicalSwitches> lswitchIid =
-                        (InstanceIdentifier<LogicalSwitches>) vlanBinding.getLogicalSwitchRef().getValue();
+        //get UUID by LogicalSwitchRef
+        for (VlanBindings vlanBinding : portAugmentation.nonnullVlanBindings().values()) {
+            @SuppressWarnings("unchecked")
+            InstanceIdentifier<LogicalSwitches> lswitchIid =
+                (InstanceIdentifier<LogicalSwitches>) vlanBinding.getLogicalSwitchRef().getValue();
 
-                Map inTransitDependencies = DEPENDENCY_GETTER.getInTransitDependencies(
-                        getOperationalState(), vlanBinding);
-                Map configDependencies = DEPENDENCY_GETTER.getUnMetConfigDependencies(
-                        getOperationalState(), vlanBinding);
+            Map inTransitDependencies = DEPENDENCY_GETTER.getInTransitDependencies(
+                getOperationalState(), vlanBinding);
+            Map configDependencies = DEPENDENCY_GETTER.getUnMetConfigDependencies(
+                getOperationalState(), vlanBinding);
 
-                if (!HwvtepSouthboundUtil.isEmptyMap(configDependencies)) {
-                    createConfigWaitJob(psNodeiid, inputPhysicalPort, key, configDependencies);
-                    continue;
-                }
-                if (!HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies)) {
-                    createOperWaitingJob(psNodeiid, inputPhysicalPort, key, inTransitDependencies);
-                    continue;
-                }
-
-                UUID lsUUid = TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(), lswitchIid);
-                if (lsUUid == null) {
-                    LOG.error("Could not get the logical switch uuid for {}", vlanBinding);
-                    continue;
-                }
-                bindingMap.put(vlanBinding.getVlanIdKey().getValue().longValue(), lsUUid);
+            if (!HwvtepSouthboundUtil.isEmptyMap(configDependencies)) {
+                createConfigWaitJob(psNodeiid, inputPhysicalPort, key, configDependencies);
+                continue;
             }
+            if (!HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies)) {
+                createOperWaitingJob(psNodeiid, inputPhysicalPort, key, inTransitDependencies);
+                continue;
+            }
+
+            UUID lsUUid = TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(), lswitchIid);
+            if (lsUUid == null) {
+                LOG.error("Could not get the logical switch uuid for {}", vlanBinding);
+                continue;
+            }
+            bindingMap.put(vlanBinding.getVlanIdKey().getValue().longValue(), lsUUid);
         }
         physicalPort.setVlanBindings(bindingMap);
         return bindingMap;
@@ -293,13 +292,11 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand<Terminati
                 Node created = TransactUtils.getCreated(mod);
                 if (created != null) {
                     List<TerminationPoint> portListUpdated = new ArrayList<>();
-                    if (created.getTerminationPoint() != null) {
-                        for (TerminationPoint tp : created.getTerminationPoint()) {
-                            HwvtepPhysicalPortAugmentation hppAugmentation =
-                                    tp.augmentation(HwvtepPhysicalPortAugmentation.class);
-                            if (hppAugmentation != null) {
-                                portListUpdated.add(tp);
-                            }
+                    for (TerminationPoint tp : created.nonnullTerminationPoint().values()) {
+                        HwvtepPhysicalPortAugmentation hppAugmentation =
+                                tp.augmentation(HwvtepPhysicalPortAugmentation.class);
+                        if (hppAugmentation != null) {
+                            portListUpdated.add(tp);
                         }
                     }
                     result.put(key, portListUpdated);
@@ -321,22 +318,18 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand<Terminati
                 if (updated != null && before != null) {
                     List<TerminationPoint> portListUpdated = new ArrayList<>();
                     List<TerminationPoint> portListBefore = new ArrayList<>();
-                    if (updated.getTerminationPoint() != null) {
-                        for (TerminationPoint tp : updated.getTerminationPoint()) {
-                            HwvtepPhysicalPortAugmentation hppAugmentation =
-                                    tp.augmentation(HwvtepPhysicalPortAugmentation.class);
-                            if (hppAugmentation != null) {
-                                portListUpdated.add(tp);
-                            }
+                    for (TerminationPoint tp : updated.nonnullTerminationPoint().values()) {
+                        HwvtepPhysicalPortAugmentation hppAugmentation =
+                                tp.augmentation(HwvtepPhysicalPortAugmentation.class);
+                        if (hppAugmentation != null) {
+                            portListUpdated.add(tp);
                         }
                     }
-                    if (before.getTerminationPoint() != null) {
-                        for (TerminationPoint tp : before.getTerminationPoint()) {
-                            HwvtepPhysicalPortAugmentation hppAugmentation =
-                                    tp.augmentation(HwvtepPhysicalPortAugmentation.class);
-                            if (hppAugmentation != null) {
-                                portListBefore.add(tp);
-                            }
+                    for (TerminationPoint tp : before.nonnullTerminationPoint().values()) {
+                        HwvtepPhysicalPortAugmentation hppAugmentation =
+                                tp.augmentation(HwvtepPhysicalPortAugmentation.class);
+                        if (hppAugmentation != null) {
+                            portListBefore.add(tp);
                         }
                     }
                     portListUpdated.removeAll(portListBefore);
@@ -347,7 +340,8 @@ public class PhysicalPortUpdateCommand extends AbstractTransactCommand<Terminati
         return result;
     }
 
-    protected String getKeyStr(InstanceIdentifier iid) {
+    @Override
+    protected String getKeyStr(final InstanceIdentifier iid) {
         try {
             return ((TerminationPoint)iid.firstKeyOf(TerminationPoint.class)).getTpId().getValue();
         } catch (ClassCastException exp) {

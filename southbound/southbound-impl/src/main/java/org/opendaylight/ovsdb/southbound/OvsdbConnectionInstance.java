@@ -59,7 +59,9 @@ import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
@@ -79,8 +81,8 @@ public class OvsdbConnectionInstance {
     private Entity connectedEntity;
     private EntityOwnershipCandidateRegistration deviceOwnershipCandidateRegistration;
     private OvsdbNodeAugmentation initialCreateData = null;
-    private Map<UUID, InstanceIdentifier<Node>> ports = new ConcurrentHashMap<>();
-    private Map<String, InstanceIdentifier<Node>> portInterfaces = new ConcurrentHashMap<>();
+    private final Map<UUID, InstanceIdentifier<Node>> ports = new ConcurrentHashMap<>();
+    private final Map<String, InstanceIdentifier<Node>> portInterfaces = new ConcurrentHashMap<>();
 
     OvsdbConnectionInstance(final ConnectionInfo key, final OvsdbClient client, final TransactionInvoker txInvoker,
                             final InstanceIdentifier<Node> iid) {
@@ -225,7 +227,8 @@ public class OvsdbConnectionInstance {
             // OpenVSwitchPart
             OpenVSwitch ovs = transaction.getTypedRowWrapper(OpenVSwitch.class);
 
-            List<OpenvswitchExternalIds> externalIds = this.initialCreateData.getOpenvswitchExternalIds();
+            Map<OpenvswitchExternalIdsKey, OpenvswitchExternalIds> externalIds =
+                    this.initialCreateData.getOpenvswitchExternalIds();
 
             stampInstanceIdentifier(transaction, this.instanceIdentifier.firstIdentifierOf(Node.class),
                     instanceIdentifierCodec);
@@ -245,7 +248,8 @@ public class OvsdbConnectionInstance {
 
 
 
-            List<OpenvswitchOtherConfigs> otherConfigs = this.initialCreateData.getOpenvswitchOtherConfigs();
+            Map<OpenvswitchOtherConfigsKey, OpenvswitchOtherConfigs> otherConfigs =
+                    this.initialCreateData.getOpenvswitchOtherConfigs();
             if (otherConfigs != null) {
                 try {
                     ovs.setOtherConfig(YangUtils.convertYangKeyValueListToMap(otherConfigs,

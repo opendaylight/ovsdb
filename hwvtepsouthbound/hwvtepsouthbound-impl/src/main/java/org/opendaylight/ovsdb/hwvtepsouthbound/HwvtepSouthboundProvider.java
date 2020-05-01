@@ -203,7 +203,7 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
             if (!hwvtepTp.get().isPresent()) {
                 TopologyBuilder tpb = new TopologyBuilder();
                 tpb.setTopologyId(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID);
-                transaction.put(type, path, tpb.build(), true);
+                transaction.mergeParentStructurePut(type, path, tpb.build());
                 transaction.commit();
             } else {
                 transaction.cancel();

@@ -28,6 +28,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>mdsal-binding-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
 
     <!-- testing dependencies -->
     <dependency>
@@ -38,7 +44,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
-      <artifactId>mdsal-binding-dom-adapter</artifactId>
+      <artifactId>mdsal-binding-test-utils</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -47,12 +53,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
-      <dependency>
-        <groupId>javax.inject</groupId>
-        <artifactId>javax.inject</artifactId>
-        <version>1</version>
-        <scope>compile</scope>
-      </dependency>
   </dependencies>
 
   <build>

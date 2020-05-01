@@ -41,6 +41,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
@@ -121,9 +122,9 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                 @Override
                 public void onSuccess(@Nullable final Optional<Topology> optionalTopology) {
                     if (optionalTopology != null && optionalTopology.isPresent()) {
-                        Topology topology = optionalTopology.get();
-                        if (topology.getNode() != null) {
-                            for (Node node : topology.getNode()) {
+                        Map<NodeKey, Node> nodes = optionalTopology.get().getNode();
+                        if (nodes != null) {
+                            for (Node node : nodes.values()) {
                                 String bridgeNodeIid = node.getNodeId().getValue();
                                 LOG.trace("bridgeNodeIid : {}", bridgeNodeIid);
                                 if (bridgeReconcileExcludeList.contains(bridgeNodeIid)) {
@@ -218,8 +219,9 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
         changes.put(bridgeNodeIid, bridgeNode);
         changes.put(ovsdbBridgeIid, ovsdbBridge);
 
-        if (ovsdbBridge.getProtocolEntry() != null) {
-            for (ProtocolEntry protocol : ovsdbBridge.getProtocolEntry()) {
+        final Map<ProtocolEntryKey, ProtocolEntry> protocols = ovsdbBridge.getProtocolEntry();
+        if (protocols != null) {
+            for (ProtocolEntry protocol : protocols.values()) {
                 if (SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) != null) {
                     KeyedInstanceIdentifier<ProtocolEntry, ProtocolEntryKey> protocolIid =
                             ovsdbBridgeIid.child(ProtocolEntry.class, protocol.key());
@@ -230,8 +232,9 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
             }
         }
 
-        if (ovsdbBridge.getControllerEntry() != null) {
-            for (ControllerEntry controller : ovsdbBridge.getControllerEntry()) {
+        final Map<ControllerEntryKey, ControllerEntry> controllers = ovsdbBridge.getControllerEntry();
+        if (controllers != null) {
+            for (ControllerEntry controller : controllers.values()) {
                 KeyedInstanceIdentifier<ControllerEntry, ControllerEntryKey> controllerIid =
                         ovsdbBridgeIid.child(ControllerEntry.class, controller.key());
                 changes.put(controllerIid, controller);

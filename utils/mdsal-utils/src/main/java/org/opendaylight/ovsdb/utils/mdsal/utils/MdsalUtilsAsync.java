@@ -8,7 +8,6 @@
 
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -89,7 +88,7 @@ public class MdsalUtilsAsync {
                                         final InstanceIdentifier<D> path,
                                         final D data)  {
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.put(logicalDatastoreType, path, data, true);
+        transaction.mergeParentStructurePut(logicalDatastoreType, path, data);
         return transaction.commit();
     }
 
@@ -127,13 +126,18 @@ public class MdsalUtilsAsync {
      * @return The {@link FluentFuture} object to which you can assign a
      *         callback
      */
+    // FIXME: eliminate the boolean flag here to separate out the distinct code paths
     public <D extends DataObject> FluentFuture<? extends CommitInfo> merge(
                                         final LogicalDatastoreType logicalDatastoreType,
                                         final InstanceIdentifier<D> path,
                                         final D data,
                                         final boolean withParent)  {
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.merge(logicalDatastoreType, path, data, withParent);
+        if (withParent) {
+            transaction.mergeParentStructureMerge(logicalDatastoreType, path, data);
+        } else {
+            transaction.merge(logicalDatastoreType, path, data);
+        }
         return transaction.commit();
     }
 
@@ -151,6 +155,7 @@ public class MdsalUtilsAsync {
      * @param withParent
      *            Whether or not to create missing parent.
      */
+    // FIXME: eliminate the boolean flag here to separate out the distinct code paths
     public <D extends DataObject> void merge(
                                         final LogicalDatastoreType logicalDatastoreType,
                                         final InstanceIdentifier<D> path,
@@ -194,7 +199,7 @@ public class MdsalUtilsAsync {
     }
 
     /**
-     * Assign a default callback to a {@link CheckedFuture}. It will either log
+     * Assign a default callback to a {@link FluentFuture}. It will either log
      * a message at DEBUG level if the transaction succeed, or will log at ERROR
      * level and throw an {@link IllegalStateException} if the transaction
      * failed.

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.assertEquals;
@@ -23,7 +22,6 @@ import static org.powermock.api.support.membermodification.MemberModifier.suppre
 
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,10 +33,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -57,7 +52,6 @@ import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeRef;
@@ -67,6 +61,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
@@ -339,40 +334,38 @@ public class OvsdbPortUpdateCommandTest {
         Node node = mock(Node.class);
         OvsdbNodeAugmentation ovsdbNode = mock(OvsdbNodeAugmentation.class);
         when(node.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNode);
-        List<ManagedNodeEntry> managedNodes = new ArrayList<>();
-        ManagedNodeEntry managedNodeEntry = mock(ManagedNodeEntry.class);
-        managedNodes.add(managedNodeEntry);
-        when(ovsdbNode.getManagedNodeEntry()).thenReturn(managedNodes);
+
+        InstanceIdentifier<Node> iidNode = mock(InstanceIdentifier.class);
+
+        ManagedNodeEntry managedNodeEntry = new ManagedNodeEntryBuilder()
+                .setBridgeRef(new OvsdbBridgeRef(iidNode))
+                .build();
+        when(ovsdbNode.nonnullManagedNodeEntry()).thenCallRealMethod();
+        when(ovsdbNode.getManagedNodeEntry()).thenReturn(Map.of(managedNodeEntry.key(), managedNodeEntry));
 
         Node managedNode = mock(Node.class);
-        OvsdbBridgeRef ovsdbBridgeRef = mock(OvsdbBridgeRef.class);
-        when(managedNodeEntry.getBridgeRef()).thenReturn(ovsdbBridgeRef);
-        InstanceIdentifier<Node> iidNode = mock(InstanceIdentifier.class);
-        when((InstanceIdentifier<Node>) ovsdbBridgeRef.getValue()).thenReturn(iidNode);
         Optional<Node> optionalNode = Optional.of(managedNode);
         PowerMockito.doReturn(optionalNode).when(ovsdbPortUpdateCommand, "readNode", any(ReadWriteTransaction.class),
                 any(InstanceIdentifier.class));
 
         PowerMockito.mockStatic(SouthboundUtil.class);
-        PowerMockito.when(SouthboundUtil.readNode(Matchers.any(ReadWriteTransaction.class),
-                Matchers.any(InstanceIdentifier.class)))
+        PowerMockito.when(SouthboundUtil.readNode(any(ReadWriteTransaction.class),
+                any(InstanceIdentifier.class)))
                 .thenReturn(optionalNode);
-        TerminationPointBuilder tpBuilder = mock(TerminationPointBuilder.class);
-        PowerMockito.whenNew(TerminationPointBuilder.class).withNoArguments().thenReturn(tpBuilder);
-        PowerMockito.whenNew(TpId.class).withAnyArguments().thenReturn(mock(TpId.class));
-        PowerMockito.whenNew(TerminationPointKey.class).withAnyArguments().thenReturn(mock(TerminationPointKey.class));
-        when(tpBuilder.withKey(any(TerminationPointKey.class))).thenReturn(tpBuilder);
 
-        List<TerminationPoint> terminationPointList = new ArrayList<>();
-        TerminationPoint terminationPoint = mock(TerminationPoint.class);
-        terminationPointList.add(terminationPoint);
+        TerminationPoint terminationPoint = new TerminationPointBuilder().setTpId(new TpId(TP_NAME)).build();
+
+        TerminationPointBuilder tpBuilder = mock(TerminationPointBuilder.class);
+        when(tpBuilder.withKey(any(TerminationPointKey.class))).thenReturn(tpBuilder);
         when(tpBuilder.build()).thenReturn(terminationPoint);
-        when(managedNode.getTerminationPoint()).thenReturn(terminationPointList);
+
+        PowerMockito.whenNew(TerminationPointBuilder.class).withNoArguments().thenReturn(tpBuilder);
+
+        when(managedNode.nonnullTerminationPoint()).thenCallRealMethod();
+        when(managedNode.getTerminationPoint()).thenReturn(Map.of(terminationPoint.key(), terminationPoint));
 
         when(managedNode.augmentation(OvsdbBridgeAugmentation.class))
                 .thenReturn(mock(OvsdbBridgeAugmentation.class));
-        TpId tpId = new TpId(TP_NAME);
-        when(terminationPoint.getTpId()).thenReturn(tpId);
 
         Optional<InstanceIdentifier<Node>> testResult = Optional.of(iidNode);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
@@ -410,12 +403,8 @@ public class OvsdbPortUpdateCommandTest {
         PowerMockito.whenNew(Uuid.class).withAnyArguments().thenReturn(mock(Uuid.class));
         when(ovsdbTerminationPointBuilder.setInterfaceUuid(any(Uuid.class))).thenReturn(ovsdbTerminationPointBuilder);
         PowerMockito.mockStatic(SouthboundMapper.class);
-        PowerMockito.when(SouthboundMapper.createInterfaceType(Matchers.anyString()))
-                .thenAnswer(new Answer<Class<? extends InterfaceTypeBase>>() {
-                    public Class<? extends InterfaceTypeBase> answer(InvocationOnMock invocation) throws Exception {
-                        return InterfaceTypeInternal.class;
-                    }
-                });
+        PowerMockito.when(SouthboundMapper.createInterfaceType(anyString()))
+                .thenAnswer(invocation -> InterfaceTypeInternal.class);
         when(ovsdbTerminationPointBuilder.setInterfaceType(any(Class.class))).thenReturn(ovsdbTerminationPointBuilder);
         suppress(method(OvsdbPortUpdateCommand.class, "updateOfPort", Interface.class,
                 OvsdbTerminationPointAugmentationBuilder.class));

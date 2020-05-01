@@ -50,12 +50,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -208,26 +211,22 @@ public final class SouthboundMapper {
         return datapathtype;
     }
 
-    public static  Class<? extends DatapathTypeBase> createDatapathType(final String type) {
-        Preconditions.checkNotNull(type);
+    public static Class<? extends DatapathTypeBase> createDatapathType(final String type) {
         if (type.isEmpty()) {
             return DatapathTypeSystem.class;
-        } else {
-            ImmutableBiMap<String, Class<? extends DatapathTypeBase>> mapper =
-                    SouthboundConstants.DATAPATH_TYPE_MAP.inverse();
-            return mapper.get(type);
         }
+        return SouthboundConstants.DATAPATH_TYPE_MAP.inverse().get(type);
     }
 
     public static Set<String> createOvsdbBridgeProtocols(final OvsdbBridgeAugmentation ovsdbBridgeNode) {
         Set<String> protocols = new HashSet<>();
-        if (ovsdbBridgeNode.getProtocolEntry() != null && ovsdbBridgeNode.getProtocolEntry().size() > 0) {
-            for (ProtocolEntry protocol : ovsdbBridgeNode.getProtocolEntry()) {
-                if (SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) != null) {
-                    protocols.add(SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()));
-                } else {
-                    throw new IllegalArgumentException("Unknown protocol " + protocol.getProtocol());
-                }
+        Map<ProtocolEntryKey, ProtocolEntry> entries = ovsdbBridgeNode.getProtocolEntry();
+        if (entries != null) {
+            for (ProtocolEntry protocol : entries.values()) {
+                Class<? extends OvsdbBridgeProtocolBase> lookup = protocol.getProtocol();
+                final String toAdd = SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol());
+                Preconditions.checkArgument(toAdd != null, "Unknown protocol %s", lookup);
+                protocols.add(toAdd);
             }
         }
         return protocols;
@@ -253,12 +252,15 @@ public final class SouthboundMapper {
             schemaMismatchLog("protocols", "Bridge", e);
         }
         List<ProtocolEntry> protocolList = new ArrayList<>();
-        if (protocols != null && protocols.size() > 0) {
+        if (protocols != null && !protocols.isEmpty()) {
             ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
                     SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
             for (String protocol : protocols) {
-                if (protocol != null && mapper.get(protocol) != null) {
-                    protocolList.add(new ProtocolEntryBuilder().setProtocol(mapper.get(protocol)).build());
+                if (protocol != null) {
+                    final Class<? extends OvsdbBridgeProtocolBase> mapped = mapper.get(protocol);
+                    if (mapped != null) {
+                        protocolList.add(new ProtocolEntryBuilder().setProtocol(mapped).build());
+                    }
                 }
             }
         }
@@ -308,9 +310,9 @@ public final class SouthboundMapper {
             return controllerEntriesCreated;
         }
 
-        final List<ControllerEntry> controllerEntries = ovsdbBridgeAugmentation.getControllerEntry();
+        final Map<ControllerEntryKey, ControllerEntry> controllerEntries = ovsdbBridgeAugmentation.getControllerEntry();
         if (controllerEntries != null) {
-            for (ControllerEntry controllerEntry : controllerEntries) {
+            for (ControllerEntry controllerEntry : controllerEntries.values()) {
                 final Controller controller = updatedControllerRows.get(
                         new UUID(controllerEntry.getControllerUuid().getValue()));
                 addControllerEntries(controllerEntriesCreated, controller);
@@ -354,10 +356,10 @@ public final class SouthboundMapper {
     // This is not called from anywhere but test. Do we need this?
     public static Map<UUID, Controller> createOvsdbController(final OvsdbBridgeAugmentation omn,
             final DatabaseSchema dbSchema) {
-        List<ControllerEntry> controllerEntries = omn.getControllerEntry();
+        Map<ControllerEntryKey, ControllerEntry> controllerEntries = omn.getControllerEntry();
         Map<UUID,Controller> controllerMap = new HashMap<>();
         if (controllerEntries != null && !controllerEntries.isEmpty()) {
-            for (ControllerEntry controllerEntry : controllerEntries) {
+            for (ControllerEntry controllerEntry : controllerEntries.values()) {
                 String controllerNamedUuid = "Controller_" + getRandomUuid();
                 Controller controller = TypedDatabaseSchema.of(dbSchema).getTypedRowWrapper(Controller.class);
                 controller.setTarget(controllerEntry.getTarget().getValue());
@@ -430,9 +432,9 @@ public final class SouthboundMapper {
             return managerEntriesCreated;
         }
 
-        final List<ManagerEntry> managerEntries = ovsdbNodeAugmentation.getManagerEntry();
+        final Map<ManagerEntryKey, ManagerEntry> managerEntries = ovsdbNodeAugmentation.getManagerEntry();
         if (managerEntries != null) {
-            for (ManagerEntry managerEntry : managerEntries) {
+            for (ManagerEntry managerEntry : managerEntries.values()) {
                 final Manager manager = updatedManagerRows.get(managerEntry.getTarget());
                 addManagerEntries(managerEntriesCreated, manager);
             }
@@ -534,9 +536,9 @@ public final class SouthboundMapper {
                 SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
         changes.put(bridgeNodeIid, bridgeNode);
 
-        List<TerminationPoint> terminationPoints = bridgeNode.getTerminationPoint();
-        if (terminationPoints != null && !terminationPoints.isEmpty()) {
-            for (TerminationPoint tp : terminationPoints) {
+        Map<TerminationPointKey, TerminationPoint> terminationPoints = bridgeNode.getTerminationPoint();
+        if (terminationPoints != null) {
+            for (TerminationPoint tp : terminationPoints.values()) {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
                         tp.augmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation != null) {

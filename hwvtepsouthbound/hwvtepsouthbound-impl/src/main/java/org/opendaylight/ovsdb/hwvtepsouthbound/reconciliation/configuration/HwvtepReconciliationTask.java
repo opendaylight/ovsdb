@@ -9,8 +9,8 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
@@ -25,6 +25,7 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactCommandAggregator;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -76,8 +77,9 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
         if (globalConfigNode != null) {
             HwvtepGlobalAugmentation augmentation = globalConfigNode.augmentation(HwvtepGlobalAugmentation.class);
             if (augmentation != null) {
-                if (augmentation.getLogicalSwitches() != null) {
-                    for (LogicalSwitches logicalSwitches : augmentation.getLogicalSwitches()) {
+                Map<LogicalSwitchesKey, LogicalSwitches> switches = augmentation.getLogicalSwitches();
+                if (switches != null) {
+                    for (LogicalSwitches logicalSwitches : switches.values()) {
                         connectionInstance.getDeviceInfo().updateConfigData(LogicalSwitches.class,
                                 nodeId.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class,
                                         logicalSwitches.key()), logicalSwitches);
@@ -102,8 +104,8 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
         return 0;
     }
 
-    private Node readNode(ReadTransaction transaction,
-                          LogicalDatastoreType logicalDatastoreType, InstanceIdentifier<Node> iid) {
+    private static Node readNode(ReadTransaction transaction,
+                                 LogicalDatastoreType logicalDatastoreType, InstanceIdentifier<Node> iid) {
         Optional<Node> optional = HwvtepSouthboundUtil.readNode(transaction, logicalDatastoreType, iid);
         if (optional.isPresent()) {
             return optional.get();

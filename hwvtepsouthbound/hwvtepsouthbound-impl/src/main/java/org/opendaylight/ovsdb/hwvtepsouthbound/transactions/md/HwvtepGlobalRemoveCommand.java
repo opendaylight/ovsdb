@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import com.google.common.util.concurrent.FluentFuture;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
@@ -18,7 +19,9 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Managers;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ManagersKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Switches;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.SwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -51,8 +54,9 @@ public class HwvtepGlobalRemoveCommand extends AbstractTransactionCommand {
                 HwvtepGlobalAugmentation hgAugmentation = hwvtepNode.augmentation(HwvtepGlobalAugmentation.class);
                 if (checkIfOnlyConnectedManager(hgAugmentation)) {
                     if (hgAugmentation != null) {
-                        if (hgAugmentation.getSwitches() != null) {
-                            for (Switches hwSwitch : hgAugmentation.getSwitches()) {
+                        Map<SwitchesKey, Switches> switches = hgAugmentation.getSwitches();
+                        if (switches != null) {
+                            for (Switches hwSwitch : switches.values()) {
                                 LOG.debug("Deleting hwvtep switch {}", hwSwitch);
                                 transaction.delete(
                                         LogicalDatastoreType.OPERATIONAL, hwSwitch.getSwitchRef().getValue());
@@ -74,11 +78,12 @@ public class HwvtepGlobalRemoveCommand extends AbstractTransactionCommand {
         }
     }
 
-    private boolean checkIfOnlyConnectedManager(HwvtepGlobalAugmentation hgAugmentation) {
+    private static boolean checkIfOnlyConnectedManager(HwvtepGlobalAugmentation hgAugmentation) {
         if (hgAugmentation != null) {
             int connectedManager = 0;
-            if (hgAugmentation.getManagers() != null) {
-                for (Managers manager : hgAugmentation.getManagers()) {
+            Map<ManagersKey, Managers> managers = hgAugmentation.getManagers();
+            if (managers != null) {
+                for (Managers manager : managers.values()) {
                     if (manager.isIsConnected()) {
                         connectedManager++;
                         if (connectedManager > ONE_CONNECTED_MANAGER) {

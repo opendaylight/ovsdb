@@ -43,6 +43,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -167,14 +168,12 @@ public class OvsdbControllerUpdateCommandTest {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
         when(node.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
 
-        List<ManagedNodeEntry> managedNodeEntries = new ArrayList<>();
-        ManagedNodeEntry managedNodeEntry = mock(ManagedNodeEntry.class);
-        managedNodeEntries.add(managedNodeEntry);
-        when(ovsdbNodeAugmentation.getManagedNodeEntry()).thenReturn(managedNodeEntries);
         InstanceIdentifier<Node> bridgeIid = mock(InstanceIdentifier.class);
-        OvsdbBridgeRef ovsdbBridgeRef = mock(OvsdbBridgeRef.class);
-        when(managedNodeEntry.getBridgeRef()).thenReturn(ovsdbBridgeRef);
-        when((InstanceIdentifier<Node>) ovsdbBridgeRef.getValue()).thenReturn(bridgeIid);
+        ManagedNodeEntry managedNodeEntry = new ManagedNodeEntryBuilder()
+                .setBridgeRef(new OvsdbBridgeRef(bridgeIid))
+                .build();
+
+        when(ovsdbNodeAugmentation.getManagedNodeEntry()).thenReturn(Map.of(managedNodeEntry.key(), managedNodeEntry));
         Optional<Node> bridgeNode = Optional.of(node);
         when(SouthboundUtil.readNode(transaction, bridgeIid)).thenReturn(bridgeNode);
 

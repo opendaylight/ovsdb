@@ -5,10 +5,8 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -46,7 +44,7 @@ public class ControllerMdsalUtilsAsync {
      *            {@link LogicalDatastoreType} which should be modified
      * @param path
      *            {@link InstanceIdentifier} to read from
-     * @return The {@link CheckedFuture} object to which you can assign a
+     * @return The {@link FluentFuture} object to which you can assign a
      *         callback
      */
     public <D extends DataObject> FluentFuture<? extends @NonNull CommitInfo> delete(
@@ -83,7 +81,7 @@ public class ControllerMdsalUtilsAsync {
      *            {@link InstanceIdentifier} for path to read
      * @param <D>
      *            The data object type
-     * @return The {@link CheckedFuture} object to which you can assign a
+     * @return The {@link FluentFuture} object to which you can assign a
      *         callback
      */
     public <D extends DataObject> FluentFuture<? extends @NonNull CommitInfo> put(
@@ -91,7 +89,7 @@ public class ControllerMdsalUtilsAsync {
                                         final InstanceIdentifier<D> path,
                                         final D data)  {
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.put(logicalDatastoreType, path, data, true);
+        transaction.mergeParentStructurePut(logicalDatastoreType, path, data);
         return transaction.commit();
     }
 
@@ -126,16 +124,21 @@ public class ControllerMdsalUtilsAsync {
      *            The data object type
      * @param withParent
      *            Whether or not to create missing parent.
-     * @return The {@link CheckedFuture} object to which you can assign a
+     * @return The {@link FluentFuture} object to which you can assign a
      *         callback
      */
+    // FIXME: eliminate the boolean flag here to separate out the distinct code paths
     public <D extends DataObject> FluentFuture<? extends @NonNull CommitInfo> merge(
                                         final LogicalDatastoreType logicalDatastoreType,
                                         final InstanceIdentifier<D> path,
                                         final D data,
                                         final boolean withParent)  {
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.merge(logicalDatastoreType, path, data, withParent);
+        if (withParent) {
+            transaction.mergeParentStructureMerge(logicalDatastoreType, path, data);
+        } else {
+            transaction.merge(logicalDatastoreType, path, data);
+        }
         return transaction.commit();
     }
 
@@ -153,6 +156,7 @@ public class ControllerMdsalUtilsAsync {
      * @param withParent
      *            Whether or not to create missing parent.
      */
+    // FIXME: eliminate the boolean flag here to separate out the distinct code paths
     public <D extends DataObject> void merge(
                                         final LogicalDatastoreType logicalDatastoreType,
                                         final InstanceIdentifier<D> path,
@@ -172,7 +176,7 @@ public class ControllerMdsalUtilsAsync {
      *            {@link InstanceIdentifier} for path to read
      * @param <D>
      *            The data object type
-     * @return The {@link CheckedFuture} object to which you can assign a
+     * @return The {@link FluentFuture} object to which you can assign a
      *         callback
      */
     public <D extends DataObject> FluentFuture<Optional<D>> read(
@@ -196,7 +200,7 @@ public class ControllerMdsalUtilsAsync {
     }
 
     /**
-     * Assign a default callback to a {@link CheckedFuture}. It will either log
+     * Assign a default callback to a {@link FluentFuture}. It will either log
      * a message at DEBUG level if the transaction succeed, or will log at ERROR
      * level and throw an {@link IllegalStateException} if the transaction
      * failed.

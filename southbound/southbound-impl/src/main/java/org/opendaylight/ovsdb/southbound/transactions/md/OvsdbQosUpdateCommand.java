@@ -161,12 +161,14 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
                     queue.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
         } else {
             OvsdbNodeAugmentation node = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
-            if (node.getQueues() != null && !node.getQueues().isEmpty()) {
-                for (Queues q : node.getQueues()) {
-                    if (q.getQueueUuid().equals(new Uuid(queueUuid.toString()))) {
+            Map<QueuesKey, Queues> queues = node.getQueues();
+            if (queues != null) {
+                final Uuid uuid = new Uuid(queueUuid.toString());
+                for (Queues q : queues.values()) {
+                    if (uuid.equals(q.getQueueUuid())) {
                         return SouthboundMapper.createInstanceIdentifier(ovsdbNode.getNodeId())
                                 .augmentation(OvsdbNodeAugmentation.class)
-                                .child(Queues.class, new QueuesKey(q.getQueueId()));
+                                .child(Queues.class, q.key());
                     }
                 }
             }

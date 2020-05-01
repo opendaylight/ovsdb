@@ -10,17 +10,16 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -56,26 +55,15 @@ public class QosRemovedCommand implements TransactCommand {
             OvsdbNodeAugmentation update = updated.get(ovsdbNodeIid);
 
             if (original != null && update != null) {
-                List<QosEntries> origQosEntries = original.getQosEntries();
-                List<QosEntries> updatedQosEntries = update.getQosEntries();
+                Map<QosEntriesKey, QosEntries> origQosEntries = original.getQosEntries();
+                Map<QosEntriesKey, QosEntries> updatedQosEntries = update.getQosEntries();
                 if (origQosEntries != null && !origQosEntries.isEmpty()) {
-                    for (QosEntries origQosEntry : origQosEntries) {
+                    for (QosEntries origQosEntry : origQosEntries.values()) {
                         OvsdbNodeAugmentation operNode =
                                 state.getBridgeNode(ovsdbNodeIid).get().augmentation(OvsdbNodeAugmentation.class);
-                        List<QosEntries> operQosEntries = operNode.getQosEntries();
-
-                        boolean found = false;
-                        if (updatedQosEntries != null && !updatedQosEntries.isEmpty()) {
-                            for (QosEntries updatedQosEntry : updatedQosEntries) {
-                                if (origQosEntry.getQosId().equals(updatedQosEntry.getQosId())) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (!found) {
+                        if (updatedQosEntries == null || !updatedQosEntries.containsKey(origQosEntry.key())) {
                             LOG.debug("Received request to delete QoS entry {}", origQosEntry.getQosId());
-                            Uuid qosUuid = getQosEntryUuid(operQosEntries, origQosEntry.getQosId());
+                            Uuid qosUuid = getQosEntryUuid(operNode.getQosEntries(), origQosEntry.key());
                             if (qosUuid != null) {
                                 Qos qos = transaction.getTypedRowSchema(Qos.class);
                                 transaction.add(op.delete(qos.getSchema())
@@ -95,12 +83,12 @@ public class QosRemovedCommand implements TransactCommand {
         }
     }
 
-    private static Uuid getQosEntryUuid(final List<QosEntries> operQosEntries, final Uri qosId) {
+    private static Uuid getQosEntryUuid(final Map<QosEntriesKey, QosEntries> operQosEntries,
+            final QosEntriesKey qosId) {
         if (operQosEntries != null && !operQosEntries.isEmpty()) {
-            for (QosEntries qosEntry : operQosEntries) {
-                if (qosEntry.getQosId().equals(qosId)) {
-                    return qosEntry.getQosUuid();
-                }
+            QosEntries qosEntry = operQosEntries.get(qosId);
+            if (qosEntry != null) {
+                return qosEntry.getQosUuid();
             }
         }
         return null;

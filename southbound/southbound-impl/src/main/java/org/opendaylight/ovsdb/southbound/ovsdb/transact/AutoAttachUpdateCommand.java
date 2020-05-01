@@ -13,7 +13,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -35,8 +34,11 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Autoattach;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.AutoattachKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.AutoattachExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.AutoattachExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.Mappings;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.MappingsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -80,7 +82,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
         if (!state.getBridgeNode(iid).isPresent()) {
             return;
         }
-        final List<Autoattach> autoAttachList = ovsdbNode.getAutoattach();
+        final Map<AutoattachKey, Autoattach> autoAttachList = ovsdbNode.getAutoattach();
         if (autoAttachList != null) {
             if (true) {
                 // FIXME: Remove if loop after ovs community supports external_ids column in AutoAttach Table
@@ -91,8 +93,8 @@ public class AutoAttachUpdateCommand implements TransactCommand {
 
             final OvsdbNodeAugmentation currentOvsdbNode =
                     state.getBridgeNode(iid).get().augmentation(OvsdbNodeAugmentation.class);
-            final List<Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
-            for (final Autoattach autoAttach : autoAttachList) {
+            final Map<AutoattachKey, Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
+            for (final Autoattach autoAttach : autoAttachList.values()) {
                 final AutoAttach autoAttachWrapper = transaction.getTypedRowWrapper(AutoAttach.class);
                 if (autoAttach.getSystemName() != null) {
                     autoAttachWrapper.setSystemName(autoAttach.getSystemName());
@@ -101,20 +103,20 @@ public class AutoAttachUpdateCommand implements TransactCommand {
                     autoAttachWrapper.setSystemDescription(autoAttach.getSystemDescription());
                 }
 
-                final List<Mappings> mappingsList = autoAttach.getMappings();
+                final Map<MappingsKey, Mappings> mappingsList = autoAttach.getMappings();
                 if (mappingsList != null && !mappingsList.isEmpty()) {
                     final Map<Long, Long> newMappings = new HashMap<>();
-                    for (final Mappings mappings : mappingsList) {
-                        final Long mappingsValue = new Long(mappings.getMappingsValue().toString());
-                        newMappings.put(mappings.getMappingsKey().toJava(), mappingsValue);
+                    for (final Mappings mappings : mappingsList.values()) {
+                        newMappings.put(mappings.getMappingsKey().toJava(), mappings.getMappingsValue().longValue());
                     }
                     autoAttachWrapper.setMappings(newMappings);
                 }
 
-                final List<AutoattachExternalIds> externalIds = autoAttach.getAutoattachExternalIds();
+                final Map<AutoattachExternalIdsKey, AutoattachExternalIds> externalIds =
+                        autoAttach.getAutoattachExternalIds();
                 final Map<String, String> externalIdsMap = new HashMap<>();
                 if (externalIds != null) {
-                    for (final AutoattachExternalIds externalId : externalIds) {
+                    for (final AutoattachExternalIds externalId : externalIds.values()) {
                         externalIdsMap.put(externalId.getAutoattachExternalIdKey(),
                                 externalId.getAutoattachExternalIdValue());
                     }
@@ -128,7 +130,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
 //                    LOG.warn("Incomplete AutoAttach external IDs");
 //                }
 
-                final Uuid aaUuid = getAutoAttachUuid(currentAutoAttach, autoAttach.getAutoattachId());
+                final Uuid aaUuid = getAutoAttachUuid(currentAutoAttach, autoAttach.key());
                 if (aaUuid != null) {
                     final UUID uuid = new UUID(aaUuid.getValue());
                     final AutoAttach newAutoAttach = transaction.getTypedRowSchema(AutoAttach.class);
@@ -162,7 +164,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
         }
     }
 
-    private OvsdbBridgeAugmentation getBridge(final InstanceIdentifier<OvsdbNodeAugmentation> key,
+    private static OvsdbBridgeAugmentation getBridge(final InstanceIdentifier<OvsdbNodeAugmentation> key,
             final Uri bridgeUri) {
         final InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid = InstanceIdentifier
                 .create(NetworkTopology.class)
@@ -183,12 +185,12 @@ public class AutoAttachUpdateCommand implements TransactCommand {
         return bridge;
     }
 
-    private Uuid getAutoAttachUuid(final List<Autoattach> currentAutoAttach, final Uri autoattachId) {
-        if (currentAutoAttach != null && !currentAutoAttach.isEmpty()) {
-            for (final Autoattach autoAttach : currentAutoAttach) {
-                if (autoAttach.getAutoattachId().equals(autoattachId)) {
-                    return autoAttach.getAutoattachUuid();
-                }
+    private static Uuid getAutoAttachUuid(final Map<AutoattachKey, Autoattach> currentAutoAttach,
+            final AutoattachKey autoattachId) {
+        if (currentAutoAttach != null) {
+            final Autoattach found = currentAutoAttach.get(autoattachId);
+            if (found != null) {
+                return found.getAutoattachUuid();
             }
         }
         return null;

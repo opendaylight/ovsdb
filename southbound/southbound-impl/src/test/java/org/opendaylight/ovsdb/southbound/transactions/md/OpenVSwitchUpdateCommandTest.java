@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -21,7 +22,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.junit.Before;
@@ -50,9 +50,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.DatapathTypeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.DatapathTypeEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
@@ -202,9 +206,10 @@ public class OpenVSwitchUpdateCommandTest {
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "setNewOtherConfigs", ovsdbNodeBuilder,
             ImmutableMap.of("otherConfigKey", "otherConfigValue"));
 
-        final List<OpenvswitchOtherConfigs> otherConfigsList = ovsdbNodeBuilder.getOpenvswitchOtherConfigs();
+        final Map<OpenvswitchOtherConfigsKey, OpenvswitchOtherConfigs> otherConfigsList =
+                ovsdbNodeBuilder.getOpenvswitchOtherConfigs();
         assertEquals(1, otherConfigsList.size());
-        final OpenvswitchOtherConfigs otherConfig = otherConfigsList.get(0);
+        final OpenvswitchOtherConfigs otherConfig = otherConfigsList.values().iterator().next();
         assertEquals("otherConfigKey", otherConfig.getOtherConfigKey());
         assertEquals("otherConfigValue", otherConfig.getOtherConfigValue());
     }
@@ -253,9 +258,10 @@ public class OpenVSwitchUpdateCommandTest {
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "setNewExternalIds", ovsdbNodeBuilder,
             ImmutableMap.of("externalIdsKey", "externalIdsValue"));
 
-        final List<OpenvswitchExternalIds> externalIdsList = ovsdbNodeBuilder.getOpenvswitchExternalIds();
+        final Map<OpenvswitchExternalIdsKey, OpenvswitchExternalIds> externalIdsList =
+                ovsdbNodeBuilder.getOpenvswitchExternalIds();
         assertEquals(1, externalIdsList.size());
-        final OpenvswitchExternalIds externalId = externalIdsList.get(0);
+        final OpenvswitchExternalIds externalId = externalIdsList.values().iterator().next();
         assertEquals("externalIdsKey", externalId.getExternalIdKey());
         assertEquals("externalIdsValue", externalId.getExternalIdValue());
     }
@@ -287,7 +293,7 @@ public class OpenVSwitchUpdateCommandTest {
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "setInterfaceTypes", ovsdbNodeBuilder, openVSwitch);
         verify(openVSwitch).getIfaceTypesColumn();
 
-        List<InterfaceTypeEntry> interfaceTypeEntries = ovsdbNodeBuilder.getInterfaceTypeEntry();
+        Map<InterfaceTypeEntryKey, InterfaceTypeEntry> interfaceTypeEntries = ovsdbNodeBuilder.getInterfaceTypeEntry();
         assertEquals(14, interfaceTypeEntries.size());
     }
 
@@ -303,10 +309,10 @@ public class OpenVSwitchUpdateCommandTest {
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "setDataPathTypes", ovsdbNodeBuilder, openVSwitch);
 
         verify(openVSwitch).getDatapathTypesColumn();
-        List<DatapathTypeEntry> entries = ovsdbNodeBuilder.getDatapathTypeEntry();
+        Map<DatapathTypeEntryKey, DatapathTypeEntry> entries = ovsdbNodeBuilder.getDatapathTypeEntry();
         assertEquals(2, entries.size());
-        assertEquals(DatapathTypeNetdev.class, entries.get(0).getDatapathType());
-        assertEquals(DatapathTypeSystem.class, entries.get(1).getDatapathType());
+        assertTrue(entries.containsKey(new DatapathTypeEntryKey(DatapathTypeNetdev.class)));
+        assertTrue(entries.containsKey(new DatapathTypeEntryKey(DatapathTypeSystem.class)));
     }
 
     @Test

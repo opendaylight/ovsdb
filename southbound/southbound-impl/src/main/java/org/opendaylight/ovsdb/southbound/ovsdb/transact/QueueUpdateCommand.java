@@ -13,7 +13,6 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -25,7 +24,6 @@ import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.utils.yang.YangUtils;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Queues;
@@ -102,7 +100,7 @@ public class QueueUpdateCommand implements TransactCommand {
 
             OvsdbNodeAugmentation operNode =
                 state.getBridgeNode(iid).get().augmentation(OvsdbNodeAugmentation.class);
-            Uuid operQueueUuid = getQueueEntryUuid(operNode.getQueues(), queueEntry.getQueueId());
+            Uuid operQueueUuid = getQueueEntryUuid(operNode.getQueues(), queueEntry.key());
             if (operQueueUuid == null) {
                 UUID namedUuid = new UUID(SouthboundConstants.QUEUE_NAMED_UUID_PREFIX
                         + TransactUtils.bytesToHexString(queueEntry.getQueueId().getValue().getBytes(UTF_8)));
@@ -121,12 +119,11 @@ public class QueueUpdateCommand implements TransactCommand {
         }
     }
 
-    private static Uuid getQueueEntryUuid(final List<Queues> operQueues, final Uri queueId) {
-        if (operQueues != null && !operQueues.isEmpty()) {
-            for (Queues queueEntry : operQueues) {
-                if (queueEntry.getQueueId().equals(queueId)) {
-                    return queueEntry.getQueueUuid();
-                }
+    private static Uuid getQueueEntryUuid(final Map<QueuesKey, Queues> operQueues, final QueuesKey queueId) {
+        if (operQueues != null) {
+            Queues queueEntry = operQueues.get(queueId);
+            if (queueEntry != null) {
+                return queueEntry.getQueueUuid();
             }
         }
         return null;

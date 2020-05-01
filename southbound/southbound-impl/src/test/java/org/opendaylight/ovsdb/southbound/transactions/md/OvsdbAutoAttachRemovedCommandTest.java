@@ -15,9 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
@@ -96,12 +94,10 @@ public class OvsdbAutoAttachRemovedCommandTest {
 
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
         when(node.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
-        List<Autoattach> autoAttachList = new ArrayList<>();
         Autoattach aaEntry = mock(Autoattach.class);
-        autoAttachList.add(aaEntry);
         when(aaEntry.getAutoattachUuid()).thenReturn(new Uuid(AUTOATTACH_UUID.toString()));
-        when(ovsdbNodeAugmentation.getAutoattach()).thenReturn(autoAttachList);
         when(aaEntry.key()).thenReturn(aaKey);
+        when(ovsdbNodeAugmentation.getAutoattach()).thenReturn(Map.of(aaKey, aaEntry));
 
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
     }

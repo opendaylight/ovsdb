@@ -9,7 +9,6 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public class OvsdbQueueRemovedCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbQueueRemovedCommand.class);
 
-    private Map<UUID, Queue> removedQueueRows;
+    private final Map<UUID, Queue> removedQueueRows;
 
     public OvsdbQueueRemovedCommand(OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
@@ -68,16 +67,14 @@ public class OvsdbQueueRemovedCommand extends AbstractTransactionCommand {
         }
     }
 
-    private QueuesKey getQueueKey(Node node, UUID queueUuid) {
-        List<Queues> queueList = node.augmentation(OvsdbNodeAugmentation.class).getQueues();
+    private static QueuesKey getQueueKey(Node node, UUID queueUuid) {
+        Map<QueuesKey, Queues> queueList = node.augmentation(OvsdbNodeAugmentation.class).getQueues();
         if (queueList == null || queueList.isEmpty()) {
             LOG.debug("Deleting Queue {}, Ovsdb Node {} does not have a Queue list.", queueUuid, node);
             return null;
         }
-        Iterator<Queues> itr = queueList.iterator();
         Uuid quUuid = new Uuid(queueUuid.toString());
-        while (itr.hasNext()) {
-            Queues queue = itr.next();
+        for (Queues queue : queueList.values()) {
             if (queue.getQueueUuid().equals(quUuid)) {
                 return queue.key();
             }
@@ -86,7 +83,7 @@ public class OvsdbQueueRemovedCommand extends AbstractTransactionCommand {
         return null;
     }
 
-    private void deleteQueue(ReadWriteTransaction transaction,
+    private static void deleteQueue(ReadWriteTransaction transaction,
             List<InstanceIdentifier<Queues>> queueIids) {
         for (InstanceIdentifier<Queues> queueIid: queueIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, queueIid);

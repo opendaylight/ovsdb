@@ -5,11 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import com.google.common.collect.Lists;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -22,7 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
@@ -40,12 +37,13 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
+import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractTransactCommand<T extends Identifiable, A extends Augmentation<Node>>
-        implements TransactCommand<T> {
+public abstract class AbstractTransactCommand<T extends Identifiable<I>, I extends Identifier<T>,
+        A extends Augmentation<Node>> implements TransactCommand<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTransactCommand.class);
     protected static final UUID TXUUID = new UUID("TXUUID");
@@ -58,7 +56,8 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         // NO OP
     }
 
-    public AbstractTransactCommand(HwvtepOperationalState state, Collection<DataTreeModification<Node>> changes) {
+    public AbstractTransactCommand(final HwvtepOperationalState state,
+            final Collection<DataTreeModification<Node>> changes) {
         this.hwvtepOperationalState = state;
         this.changes = changes;
     }
@@ -75,26 +74,28 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return changes;
     }
 
-    void updateCurrentTxDeleteData(Class<? extends Identifiable> cls, InstanceIdentifier key, T data) {
+    void updateCurrentTxDeleteData(final Class<? extends Identifiable> cls, final InstanceIdentifier key,
+            final T data) {
         hwvtepOperationalState.updateCurrentTxDeleteData(cls, key);
         markKeyAsInTransit(cls, key);
         addToUpdates(key, data);
     }
 
-    void updateCurrentTxData(Class<? extends Identifiable> cls, InstanceIdentifier key, UUID uuid, T data) {
+    void updateCurrentTxData(final Class<? extends Identifiable> cls, final InstanceIdentifier key, final UUID uuid,
+            final T data) {
         hwvtepOperationalState.updateCurrentTxData(cls, key, uuid);
         markKeyAsInTransit(cls, key);
         addToUpdates(key, data);
     }
 
-    void addToUpdates(InstanceIdentifier key, T data) {
+    void addToUpdates(final InstanceIdentifier key, final T data) {
         T oldData = null;
         Type type = getClass().getGenericSuperclass();
         Type classType = ((ParameterizedType) type).getActualTypeArguments()[0];
         if (getConfigData((Class<? extends Identifiable>) classType, key) != null) {
             oldData = (T) getConfigData((Class<? extends Identifiable>) classType, key).getData();
         }
-        updates.add(new MdsalUpdate<T>(key, data, oldData));
+        updates.add(new MdsalUpdate<>(key, data, oldData));
     }
 
     void processDependencies(final UnMetDependencyGetter<T> unMetDependencyGetter,
@@ -112,7 +113,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         if (isDeleteCmd()) {
             if (deviceInfo.isKeyInTransit((Class<? extends Identifiable>) classType, key)) {
                 inTransitDependencies = new HashMap<>();
-                inTransitDependencies.put((Class<? extends Identifiable>) classType, Lists.newArrayList(key));
+                inTransitDependencies.put(classType, Lists.newArrayList(key));
             }
         } else {
             inTransitDependencies = unMetDependencyGetter.getInTransitDependencies(hwvtepOperationalState, data);
@@ -123,7 +124,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
             //If this key itself is in transit wait for the response of this key itself
             if (deviceInfo.isKeyInTransit((Class<? extends Identifiable>) classType, key)
                     || deviceInfo.isKeyInDependencyQueue(key)) {
-                inTransitDependencies.put((Class<? extends Identifiable>) classType, Lists.newArrayList(key));
+                inTransitDependencies.put(classType, Lists.newArrayList(key));
             }
         }
         LOG.info("Update received for key: {} txId: {}", key, getOperationalState().getTransactionId());
@@ -143,8 +144,8 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
                 AbstractTransactCommand clone = getClone();
 
                 @Override
-                public void onDependencyResolved(HwvtepOperationalState operationalState,
-                                                 TransactionBuilder transactionBuilder) {
+                public void onDependencyResolved(final HwvtepOperationalState operationalState,
+                                                 final TransactionBuilder transactionBuilder) {
                     clone.hwvtepOperationalState = operationalState;
                     HwvtepDeviceInfo.DeviceData deviceData =
                             getDeviceInfo().getConfigData((Class<? extends Identifiable>)getClassType(), key);
@@ -180,8 +181,8 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
                 AbstractTransactCommand clone = getClone();
 
                 @Override
-                public void onDependencyResolved(HwvtepOperationalState operationalState,
-                                                 TransactionBuilder transactionBuilder) {
+                public void onDependencyResolved(final HwvtepOperationalState operationalState,
+                                                 final TransactionBuilder transactionBuilder) {
                     clone.hwvtepOperationalState = operationalState;
                     HwvtepDeviceInfo.DeviceData deviceData = getDeviceInfo()
                             .getConfigData((Class<? extends Identifiable>)getClassType(), key);
@@ -211,18 +212,18 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
     }
 
     @Override
-    public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data,
-            InstanceIdentifier key, Object... extraData) {
+    public void doDeviceTransaction(final TransactionBuilder transaction, final InstanceIdentifier<Node> nodeIid,
+            final T data, final InstanceIdentifier key, final Object... extraData) {
         //tobe removed as part of refactoring patch
     }
 
     @Override
-    public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier<Node> nodeIid, T data,
-            InstanceIdentifier key, Object... extraData) {
+    public void onConfigUpdate(final TransactionBuilder transaction, final InstanceIdentifier<Node> nodeIid,
+            final T data, final InstanceIdentifier key, final Object... extraData) {
         //tobe removed as part of refactoring patch
     }
 
-    protected A augmentation(Node node) {
+    protected A augmentation(final Node node) {
         if (node == null) {
             return null;
         }
@@ -233,16 +234,17 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return (A) augmentation;
     }
 
-    protected List<T> getData(A augmentation) {
-        return Collections.emptyList();
+    protected Map<I, T> getData(final A augmentation) {
+        return Collections.emptyMap();
     }
 
-    protected List<T> getData(Node node) {
+    protected List<T> getData(final Node node) {
         A augmentation = augmentation(node);
         if (augmentation != null) {
-            List<T> data = getData(augmentation);
+            Map<I, T> data = getData(augmentation);
             if (data != null) {
-                return new ArrayList<>(data);
+                // TODO: why are we performing a copy here?
+                return new ArrayList<>(data.values());
             }
         }
         return Collections.emptyList();
@@ -250,7 +252,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
 
     @NonNull
     protected Map<InstanceIdentifier<Node>, List<T>> extractRemoved(
-            Collection<DataTreeModification<Node>> modification, Class<T> class1) {
+            final Collection<DataTreeModification<Node>> modification, final Class<T> class1) {
         Map<InstanceIdentifier<Node>, List<T>> result = new HashMap<>();
         if (modification != null && !modification.isEmpty()) {
             for (DataTreeModification<Node> change : modification) {
@@ -274,7 +276,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
 
     @NonNull
     protected Map<InstanceIdentifier<Node>, List<T>> extractUpdated(
-            Collection<DataTreeModification<Node>> modification, Class<T> class1) {
+            final Collection<DataTreeModification<Node>> modification, final Class<T> class1) {
         Map<InstanceIdentifier<Node>, List<T>> result = new HashMap<>();
         if (modification != null && !modification.isEmpty()) {
             for (DataTreeModification<Node> change : modification) {
@@ -295,7 +297,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return result;
     }
 
-    List<T> getCascadeDeleteData(DataTreeModification<Node> change) {
+    List<T> getCascadeDeleteData(final DataTreeModification<Node> change) {
         if (!cascadeDelete()) {
             return Collections.emptyList();
         }
@@ -317,7 +319,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return Collections.emptyList();
     }
 
-    List<T> getRemoved(DataTreeModification<Node> change) {
+    List<T> getRemoved(final DataTreeModification<Node> change) {
         DataObjectModification<Node> mod = change.getRootNode();
 
         Node removed = TransactUtils.getRemoved(mod);
@@ -326,14 +328,14 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return diffOf(removed, before, updated, true);
     }
 
-    List<T> getUpdated(DataTreeModification<Node> change) {
+    List<T> getUpdated(final DataTreeModification<Node> change) {
         DataObjectModification<Node> mod = change.getRootNode();
         Node updated = TransactUtils.getUpdated(mod);
         Node before = mod.getDataBefore();
         return diffOf(updated, before, false);
     }
 
-    List<T> diffOf(Node include, Node node1, Node node2, boolean compareKeyOnly) {
+    List<T> diffOf(final Node include, final Node node1, final Node node2, final boolean compareKeyOnly) {
         List<T> data1 = getData(include);
         List<T> data2 = diffOf(node1, node2, compareKeyOnly);
         if (HwvtepSouthboundUtil.isEmpty(data1) && HwvtepSouthboundUtil.isEmpty(data2)) {
@@ -344,7 +346,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return result;
     }
 
-    List<T> diffOf(Node node1, Node node2, boolean compareKeyOnly) {
+    List<T> diffOf(final Node node1, final Node node2, final boolean compareKeyOnly) {
         List<T> result = new ArrayList<>();
 
         List<T> list1 = getData(node1);
@@ -385,7 +387,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return classType;
     }
 
-    protected boolean areEqual(T obj1, T obj2) {
+    protected boolean areEqual(final T obj1, final T obj2) {
         return obj1.key().equals(obj2.key());
     }
 
@@ -416,12 +418,12 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
     }
 
     @Override
-    public void onSuccess(TransactionBuilder deviceTx) {
+    public void onSuccess(final TransactionBuilder deviceTx) {
         onCommandSucceeded();
     }
 
     @Override
-    public void onFailure(TransactionBuilder deviceTx) {
+    public void onFailure(final TransactionBuilder deviceTx) {
         onCommandFailed();
     }
 
@@ -431,11 +433,12 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
     protected void onCommandFailed() {
     }
 
-    void updateControllerTxHistory(TransactionType transactionType, Object element) {
+    void updateControllerTxHistory(final TransactionType transactionType, final Object element) {
         getOperationalState().getDeviceInfo().addToControllerTx(transactionType, element);
     }
 
-    public <T> HwvtepDeviceInfo.DeviceData fetchDeviceData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+    public <T> HwvtepDeviceInfo.DeviceData fetchDeviceData(final Class<? extends Identifiable> cls,
+            final InstanceIdentifier key) {
         HwvtepDeviceInfo.DeviceData deviceData  = getDeviceOpData(cls, key);
         if (deviceData == null) {
             LOG.debug("Could not find data for key {}", key);
@@ -443,7 +446,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
                     getTableReader().getHwvtepTableEntryUUID(cls, key, null);
             if (optional.isPresent()) {
                 LOG.debug("Found the data for key from device {} ", key);
-                getDeviceInfo().updateDeviceOperData(cls, key, optional.get().getUuid(), (T)optional.get());
+                getDeviceInfo().updateDeviceOperData(cls, key, optional.get().getUuid(), optional.get());
                 return getDeviceOpData(cls, key);
             } else {
                 LOG.info("Could not Find the data for key from device {} ", key);
@@ -452,39 +455,42 @@ public abstract class AbstractTransactCommand<T extends Identifiable, A extends 
         return deviceData;
     }
 
-    protected String getKeyStr(InstanceIdentifier iid) {
+    protected String getKeyStr(final InstanceIdentifier iid) {
         return iid.toString();
     }
 
-    public <K extends Identifiable> void addJobToQueue(DependentJob<K> job) {
+    public <K extends Identifiable> void addJobToQueue(final DependentJob<K> job) {
         hwvtepOperationalState.getDeviceInfo().putKeyInDependencyQueue(job.getKey());
         hwvtepOperationalState.getDeviceInfo().addJobToQueue(job);
     }
 
-    public void markKeyAsInTransit(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+    public void markKeyAsInTransit(final Class<? extends Identifiable> cls, final InstanceIdentifier key) {
         hwvtepOperationalState.getDeviceInfo().markKeyAsInTransit(cls, key);
     }
 
-    public HwvtepDeviceInfo.DeviceData getDeviceOpData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+    public HwvtepDeviceInfo.DeviceData getDeviceOpData(final Class<? extends Identifiable> cls,
+            final InstanceIdentifier key) {
         return getOperationalState().getDeviceInfo().getDeviceOperData(cls, key);
     }
 
-    public void clearConfigData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+    public void clearConfigData(final Class<? extends Identifiable> cls, final InstanceIdentifier key) {
         hwvtepOperationalState.getDeviceInfo().clearConfigData(cls, key);
     }
 
-    public HwvtepDeviceInfo.DeviceData getConfigData(Class<? extends Identifiable> cls, InstanceIdentifier key) {
+    public HwvtepDeviceInfo.DeviceData getConfigData(final Class<? extends Identifiable> cls,
+            final InstanceIdentifier key) {
         return hwvtepOperationalState.getDeviceInfo().getConfigData(cls, key);
     }
 
-    public void updateConfigData(Class<? extends Identifiable> cls, InstanceIdentifier key, Object data) {
+    public void updateConfigData(final Class<? extends Identifiable> cls, final InstanceIdentifier key,
+            final Object data) {
         hwvtepOperationalState.getDeviceInfo().updateConfigData(cls, key, data);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     public AbstractTransactCommand getClone() {
         try {
-            return (AbstractTransactCommand) getClass().getConstructor(HwvtepOperationalState.class, Collection.class)
+            return getClass().getConstructor(HwvtepOperationalState.class, Collection.class)
                     .newInstance(hwvtepOperationalState, changes);
         } catch (Throwable e) {
             LOG.error("Failed to clone the cmd ", e);

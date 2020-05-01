@@ -91,6 +91,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>javax.inject</groupId>
       <artifactId>javax.inject</artifactId>
+      <scope>provided</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -118,7 +119,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
-      <artifactId>mdsal-binding-dom-adapter</artifactId>
+      <artifactId>mdsal-binding-test-utils</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

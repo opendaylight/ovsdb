@@ -87,7 +87,7 @@ public class OvsdbBridgeUpdateCommandTest {
     private final Map<UUID,Bridge> updatedBridgeRows = new HashMap<>();
     private final Map<UUID, Bridge> oldBridgeRows = new HashMap<>();
     private OvsdbBridgeUpdateCommand ovsdbBridgeUpdateCommand;
-    private Map<NodeId, Node> updatedBridgeNodes = new HashMap<>();
+    private final Map<NodeId, Node> updatedBridgeNodes = new HashMap<>();
 
     @Before
     public void setUp() throws Exception {
@@ -240,7 +240,11 @@ public class OvsdbBridgeUpdateCommandTest {
         when(SouthboundMapper.createInstanceIdentifier(any(InstanceIdentifierCodec.class),
                 any(OvsdbConnectionInstance.class), any(Bridge.class)))
                 .thenReturn(bridgeIid);
-        ManagedNodeEntry managedBridge = mock(ManagedNodeEntry.class);
+
+        ManagedNodeEntry managedBridge = new ManagedNodeEntryBuilder()
+                .setBridgeRef(new OvsdbBridgeRef(mock(InstanceIdentifier.class)))
+                .build();
+
         ManagedNodeEntryBuilder managedNodeEntryBuilder = mock(ManagedNodeEntryBuilder.class);
         PowerMockito.whenNew(ManagedNodeEntryBuilder.class).withNoArguments().thenReturn(managedNodeEntryBuilder);
         PowerMockito.whenNew(OvsdbBridgeRef.class).withAnyArguments().thenReturn(mock(OvsdbBridgeRef.class));
@@ -254,9 +258,8 @@ public class OvsdbBridgeUpdateCommandTest {
                 .thenReturn(connectionNode);
 
         //for logger
-        List<ManagedNodeEntry> value = new ArrayList<>();
-        value.add(managedBridge);
-        when(ovsdbConnectionAugmentationBuilder.getManagedNodeEntry()).thenReturn(value);
+        when(ovsdbConnectionAugmentationBuilder.getManagedNodeEntry())
+            .thenReturn(Map.of(managedBridge.key(), managedBridge));
 
         Node node = mock(Node.class);
         when(connectionNode.build()).thenReturn(node);

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import com.google.common.base.Preconditions;
@@ -33,7 +32,6 @@ import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
@@ -117,7 +115,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         }
     }
 
-    private InstanceIdentifier<TunnelIps> getTunnelIpIid(final String tunnelIp,
+    private static InstanceIdentifier<TunnelIps> getTunnelIpIid(final String tunnelIp,
             final InstanceIdentifier<Node> psIid) {
         IpAddress ip = IpAddressBuilder.getDefaultInstance(tunnelIp);
         TunnelIps tunnelIps = new TunnelIpsBuilder().withKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build();
@@ -143,7 +141,8 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
             IpAddress ip = IpAddressBuilder.getDefaultInstance(tunnelIp);
             InstanceIdentifier<TunnelIps> tunnelIpsInstanceIdentifier = getTunnelIpIid(tunnelIp, psIid);
             TunnelIps tunnelIps = new TunnelIpsBuilder().withKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build();
-            transaction.put(LogicalDatastoreType.OPERATIONAL, tunnelIpsInstanceIdentifier, tunnelIps, true);
+            transaction.mergeParentStructurePut(LogicalDatastoreType.OPERATIONAL, tunnelIpsInstanceIdentifier,
+                tunnelIps);
         }
     }
 
@@ -209,17 +208,15 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
 
-        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
-        List<Switches> switches = new ArrayList<>();
         InstanceIdentifier<Node> switchIid =
                 HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), phySwitch);
-        hgAugmentationBuilder.setSwitches(switches);
         Switches physicalSwitch = new SwitchesBuilder().setSwitchRef(new HwvtepPhysicalSwitchRef(switchIid)).build();
-        switches.add(physicalSwitch);
 
-        connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
+        connectionNode.addAugmentation(new HwvtepGlobalAugmentationBuilder()
+            .setSwitches(Map.of(physicalSwitch.key(), physicalSwitch))
+            .build());
 
-        LOG.debug("Update node with physicalswitch ref {}", hgAugmentationBuilder.getSwitches().iterator().next());
+        LOG.debug("Update node with physicalswitch ref {}", physicalSwitch);
         return connectionNode.build();
     }
 

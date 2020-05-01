@@ -16,7 +16,6 @@ import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
@@ -37,10 +36,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class SouthboundUtil {
-
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundUtil.class);
     private static final String SCHEMA_VERSION_MISMATCH =
             "{} column for {} table is not supported by this version of the {} schema: {}";
+    private static final InterfaceExternalIds INTERACE_CREATED_BY_OPENDAYLIGHT = createExternalIdsForInterface(
+        SouthboundConstants.CREATED_BY, SouthboundConstants.ODL);
+    private static final PortExternalIds PORT_CREATED_BY_OPENDAYLIGHT = createExternalIdsForPort(
+        SouthboundConstants.CREATED_BY, SouthboundConstants.ODL);
 
     private SouthboundUtil() {
         // Prevent instantiating a utility class
@@ -188,6 +190,14 @@ public final class SouthboundUtil {
         return new InterfaceExternalIdsBuilder()
             .setExternalIdKey(key)
             .setExternalIdValue(value).build();
+    }
+
+    public static InterfaceExternalIds interfaceCreatedByOpenDaylight() {
+        return INTERACE_CREATED_BY_OPENDAYLIGHT;
+    }
+
+    public static PortExternalIds portCreatedByOpenDaylight() {
+        return PORT_CREATED_BY_OPENDAYLIGHT;
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")

@@ -15,7 +15,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerNotifyingDataChangeListener;
 import org.opendaylight.ovsdb.utils.mdsal.utils.NotifyingDataChangeListener;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
@@ -38,9 +37,9 @@ public class NodeInfo {
     public long datapathId;
     public Node ovsdbNode;
     public Node bridgeNode;
-    private ControllerNotifyingDataChangeListener ovsdbWaiter;
-    private ControllerNotifyingDataChangeListener bridgeWaiter;
-    private final List<ControllerNotifyingDataChangeListener> waitList;
+    private NotifyingDataChangeListener ovsdbWaiter;
+    private NotifyingDataChangeListener bridgeWaiter;
+    private final List<NotifyingDataChangeListener> waitList;
     private final OvsdbItUtils itUtils;
 
     /**
@@ -50,7 +49,7 @@ public class NodeInfo {
      * @param waitList for tracking outstanding md-sal events
      */
     NodeInfo(ConnectionInfo connectionInfo, OvsdbItUtils itUtils,
-            List<ControllerNotifyingDataChangeListener> waitList) {
+            List<NotifyingDataChangeListener> waitList) {
         this.connectionInfo = connectionInfo;
         this.itUtils = itUtils;
         this.waitList = waitList;
@@ -59,11 +58,11 @@ public class NodeInfo {
     }
 
     private void addWaiters() {
-        ovsdbWaiter = new ControllerNotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL,
-                ControllerNotifyingDataChangeListener.BIT_CREATE, ovsdbIid, waitList);
+        ovsdbWaiter = new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL,
+            NotifyingDataChangeListener.BIT_CREATE, ovsdbIid, waitList);
         ovsdbWaiter.registerDataChangeListener(itUtils.dataBroker);
-        bridgeWaiter = new ControllerNotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL,
-                ControllerNotifyingDataChangeListener.BIT_CREATE, bridgeIid, waitList);
+        bridgeWaiter = new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL,
+            NotifyingDataChangeListener.BIT_CREATE, bridgeIid, waitList);
         bridgeWaiter.registerDataChangeListener(itUtils.dataBroker);
     }
 

@@ -58,7 +58,7 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
     }
 
     /**
-     * Create a new ControllerNotifyingDataChangeListener.
+     * Create a new NotifyingDataChangeListener.
      *
      * @param type DataStore type
      * @param iid of the md-sal object we're waiting for
@@ -82,7 +82,7 @@ public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChang
     }
 
     /**
-     * Completely reset the state of this ControllerNotifyingDataChangeListener.
+     * Completely reset the state of this NotifyingDataChangeListener.
      *
      * @param newType DataStore type
      * @param newIid of the md-sal object we're waiting for

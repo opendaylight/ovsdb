@@ -34,7 +34,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.VlanId;
@@ -70,7 +70,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
     private final Map<UUID, PhysicalPort> oldPPRows;
     private final Map<UUID, PhysicalSwitch> switchUpdatedRows;
     private final Set<UUID> skipReconciliationPorts;
-    private final ControllerMdsalUtils mdsalUtils;
+    private final MdsalUtils mdsalUtils;
 
     public HwvtepPhysicalPortUpdateCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
             final DatabaseSchema dbSchema) {
@@ -79,7 +79,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
         oldPPRows = TyperUtils.extractRowsOld(PhysicalPort.class, getUpdates(), getDbSchema());
         switchUpdatedRows = TyperUtils.extractRowsUpdated(PhysicalSwitch.class, getUpdates(), getDbSchema());
         skipReconciliationPorts = new HashSet<>();
-        mdsalUtils = new ControllerMdsalUtils(key.getDataBroker());
+        mdsalUtils = new MdsalUtils(key.getDataBroker());
         for (Entry<UUID, PhysicalPort> portUpdateEntry : updatedPPRows.entrySet()) {
             Optional<InstanceIdentifier<Node>> switchIid = getTerminationPointSwitch(portUpdateEntry.getKey());
             if (switchIid.isPresent()) {

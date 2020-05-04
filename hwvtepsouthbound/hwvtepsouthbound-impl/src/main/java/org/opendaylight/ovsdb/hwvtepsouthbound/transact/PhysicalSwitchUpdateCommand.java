@@ -31,7 +31,7 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Tunnel;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIps;
@@ -286,7 +286,7 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         } else {
             // TODO/FIXME: Not in operational, do we create a new one?
             LOG.warn("Trying to create tunnel without creating physical locators first");
-            Optional<TerminationPoint> confLocOptional = new ControllerMdsalUtils(getOperationalState().getDataBroker())
+            Optional<TerminationPoint> confLocOptional = new MdsalUtils(getOperationalState().getDataBroker())
                     .readOptional(LogicalDatastoreType.CONFIGURATION, iid);
             if (confLocOptional.isPresent()) {
                 locatorUUID = TransactUtils.createPhysicalLocator(transaction, getOperationalState(), iid);

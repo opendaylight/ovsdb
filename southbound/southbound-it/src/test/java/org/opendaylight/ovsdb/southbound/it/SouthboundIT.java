@@ -56,7 +56,7 @@ import org.opendaylight.ovsdb.lib.notation.Version;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
@@ -196,7 +196,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static int portNumber;
     private static String connectionType;
     private static boolean setup = false;
-    private static ControllerMdsalUtils mdsalUtils = null;
+    private static MdsalUtils mdsalUtils = null;
     private static Node ovsdbNode;
     private static int testMethodsRemaining;
     private static Version schemaVersion;
@@ -444,7 +444,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
 
-        mdsalUtils = new ControllerMdsalUtils(dataBroker);
+        mdsalUtils = new MdsalUtils(dataBroker);
         assertTrue("Did not find " + SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue(), getOvsdbTopology());
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         final InstanceIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);

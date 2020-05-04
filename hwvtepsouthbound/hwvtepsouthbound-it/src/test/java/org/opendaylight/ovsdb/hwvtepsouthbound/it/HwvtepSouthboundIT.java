@@ -42,7 +42,7 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.ovsdb.utils.hwvtepsouthbound.utils.HwvtepSouthboundUtils;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalRef;
@@ -96,7 +96,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     private static final int OVSDB_UPDATE_TIMEOUT = 1000;
     private static final int OVSDB_ROUNDTRIP_TIMEOUT = 10000;
 
-    private static ControllerMdsalUtils mdsalUtils = null;
+    private static MdsalUtils mdsalUtils = null;
     private static boolean setup = false;
     private static int testMethodsRemaining;
     private static String addressStr;
@@ -268,7 +268,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
             }
         }
 
-        mdsalUtils = new ControllerMdsalUtils(dataBroker);
+        mdsalUtils = new MdsalUtils(dataBroker);
         assertTrue("Did not find " + HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID.getValue(), getHwvtepTopology());
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         final InstanceIdentifier<Node> iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);

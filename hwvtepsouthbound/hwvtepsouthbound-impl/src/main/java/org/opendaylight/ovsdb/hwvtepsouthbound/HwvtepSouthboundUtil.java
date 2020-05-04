@@ -24,7 +24,7 @@ import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
+import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalSwitchAttributes;
@@ -165,7 +165,7 @@ public final class HwvtepSouthboundUtil {
             // below
             InstanceIdentifier<Node> path = (InstanceIdentifier<Node>) ref.getValue();
 
-            Optional<Node> optional = new ControllerMdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, path);
+            Optional<Node> optional = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, path);
             if (optional != null && optional.isPresent()) {
                 HwvtepGlobalAugmentation hwvtepNode = null;
                 Node node = optional.get();

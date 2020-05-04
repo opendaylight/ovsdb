@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.config.ConfigProperties;
-import org.opendaylight.ovsdb.utils.mdsal.utils.ControllerMdsalUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IetfInetUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
@@ -128,36 +127,6 @@ public class SouthboundUtils {
         abstract <T extends DataObject> boolean merge(LogicalDatastoreType store, InstanceIdentifier<T> path, T data);
     }
 
-    @Deprecated
-    private static final class ControllerUtilsProvider extends UtilsProvider {
-        private final ControllerMdsalUtils mdsalUtils;
-
-        ControllerUtilsProvider(final ControllerMdsalUtils mdsalUtils) {
-            this.mdsalUtils = requireNonNull(mdsalUtils);
-        }
-
-        @Override
-        <T extends DataObject> T read(LogicalDatastoreType store, InstanceIdentifier<T> path) {
-            return mdsalUtils.read(store, path);
-        }
-
-        @Override
-        <T extends DataObject> boolean put(LogicalDatastoreType store,
-                InstanceIdentifier<T> path, T data) {
-            return mdsalUtils.put(store, path, data);
-        }
-
-        @Override
-        boolean delete(LogicalDatastoreType store, InstanceIdentifier<?> path) {
-            return mdsalUtils.delete(store, path);
-        }
-
-        @Override
-        <T extends DataObject> boolean merge(LogicalDatastoreType store, InstanceIdentifier<T> path, T data) {
-            return mdsalUtils.merge(store, path, data);
-        }
-    }
-
     private static final class MdsalUtilsProvider extends UtilsProvider {
         private final MdsalUtils mdsalUtils;
 
@@ -204,11 +173,6 @@ public class SouthboundUtils {
     private static final Pattern PATTERN = Pattern.compile(FORMAT);
 
     private final UtilsProvider provider;
-
-    @Deprecated
-    public SouthboundUtils(ControllerMdsalUtils mdsalUtils) {
-        provider = new ControllerUtilsProvider(mdsalUtils);
-    }
 
     public SouthboundUtils(MdsalUtils mdsalUtils) {
         provider = new MdsalUtilsProvider(mdsalUtils);

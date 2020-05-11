@@ -186,6 +186,8 @@ public final class TransactUtils {
         transaction.add(op.insert(physicalLocator).withId(locatorUuid));
         hwvtepOperationalState.getDeviceInfo().addToControllerTx(TransactionType.ADD,
                 new StringBuilder(physicalLocator.toString()).append(" Uuid ").append(locatorUuid));
+        LOG.info("CONTROLLER - {} {}", TransactionType.ADD,
+            new StringBuilder(physicalLocator.toString()).append(" Uuid ").append(locatorUuid));
         return new UUID(locatorUuid);
     }
 

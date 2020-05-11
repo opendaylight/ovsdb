@@ -171,9 +171,9 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
         ReadWriteTransaction transaction = db.newReadWriteTransaction();
-        FluentFuture<Optional<Topology>> ovsdbTp = transaction.read(type, path);
+        FluentFuture<Boolean> ovsdbTp = transaction.exists(type, path);
         try {
-            if (!ovsdbTp.get().isPresent()) {
+            if (!ovsdbTp.get().booleanValue()) {
                 TopologyBuilder tpb = new TopologyBuilder();
                 tpb.setTopologyId(SouthboundConstants.OVSDB_TOPOLOGY_ID);
                 transaction.mergeParentStructurePut(type, path, tpb.build());

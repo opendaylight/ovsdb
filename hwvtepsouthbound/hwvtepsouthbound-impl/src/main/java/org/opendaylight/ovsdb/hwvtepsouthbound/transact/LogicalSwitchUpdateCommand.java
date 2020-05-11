@@ -92,6 +92,7 @@ public class LogicalSwitchUpdateCommand
             UUID lsUuid = new UUID(TransactUtils.getLogicalSwitchId(lswitch));
             updateCurrentTxData(LogicalSwitches.class, lsKey, lsUuid, lswitch);
             updateControllerTxHistory(TransactionType.ADD, logicalSwitch);
+            LOG.info("CONTROLLER - {} {}", TransactionType.ADD, logicalSwitch);
         } else {
             String existingLogicalSwitchName = lswitch.getHwvtepNodeName().getValue();
             // Name is immutable, and so we *can't* update it.  So we use extraBridge for the schema stuff
@@ -103,6 +104,7 @@ public class LogicalSwitchUpdateCommand
                     .build());
             transaction.add(op.comment("Logical Switch: Updating " + existingLogicalSwitchName));
             updateControllerTxHistory(TransactionType.UPDATE, logicalSwitch);
+            LOG.info("CONTROLLER - {} {}", TransactionType.UPDATE, logicalSwitch);
         }
     }
 

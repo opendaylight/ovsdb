@@ -22,6 +22,7 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsLocal;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchRef;
@@ -34,6 +35,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacsKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +63,9 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         for (UcastMacsLocal lum : deletedLUMRows) {
             if (lum.getMac() != null && lum.getLogicalSwitchColumn() != null
                     && lum.getLogicalSwitchColumn().getData() != null) {
+                LOG.info("DEVICE - {} LocalUcastMacs for Node {} - {}", TransactionType.DELETE,
+                    getOvsdbConnectionInstance().getInstanceIdentifier().firstKeyOf(Node.class)
+                        .getNodeId().getValue(), lum.getMac());
                 InstanceIdentifier<LocalUcastMacs> lumId = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(HwvtepGlobalAugmentation.class).child(LocalUcastMacs.class,
                                     new LocalUcastMacsKey(getLogicalSwitchRef(lum.getLogicalSwitchColumn().getData()),

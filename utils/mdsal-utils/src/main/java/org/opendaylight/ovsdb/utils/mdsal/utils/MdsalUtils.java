@@ -15,6 +15,7 @@ import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -148,6 +149,33 @@ public class MdsalUtils {
         } while (trialNo++ < MDSAL_MAX_READ_TRIALS);
         logReadFailureError(path, " All read trials exceeded");
         return Optional.empty();
+    }
+
+
+    public boolean exists(
+        final LogicalDatastoreType store, final InstanceIdentifier<? extends DataObject> path) {
+        int trialNo = 0;
+        ReadTransaction transaction = databroker.newReadOnlyTransaction();
+        do {
+            try {
+                FluentFuture<Boolean> result = transaction.exists(store, path);
+                transaction.close();
+                return result.get().booleanValue();
+            } catch (InterruptedException | ExecutionException e) {
+                if (trialNo == 0) {
+                    logReadFailureError(path, " mdsal Read failed exception retrying the read after sleep");
+                }
+                try {
+                    transaction.close();
+                    Thread.sleep(MDSAL_READ_SLEEP_INTERVAL_MS);
+                    transaction = databroker.newReadOnlyTransaction();
+                } catch (InterruptedException e1) {
+                    logReadFailureError(path, " Sleep interrupted");
+                }
+            }
+        } while (trialNo++ < MDSAL_MAX_READ_TRIALS);
+        logReadFailureError(path, " All read trials exceeded");
+        return false;
     }
 
     private <D extends DataObject> void logReadFailureError(

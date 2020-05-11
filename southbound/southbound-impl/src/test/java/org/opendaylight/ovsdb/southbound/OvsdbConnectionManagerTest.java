@@ -189,6 +189,8 @@ public class OvsdbConnectionManagerTest {
         when(db.newReadOnlyTransaction()).thenReturn(tx);
         when(tx.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
                 .thenReturn(mock(FluentFuture.class));
+        when(tx.exists(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
+            .thenReturn(mock(CheckedFuture.class));
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(mock(InstanceIdentifier.class));
         ovsdbConnManager.disconnected(externalClient);
         Map<ConnectionInfo, OvsdbConnectionInstance> testClients = Whitebox.getInternalState(ovsdbConnManager,

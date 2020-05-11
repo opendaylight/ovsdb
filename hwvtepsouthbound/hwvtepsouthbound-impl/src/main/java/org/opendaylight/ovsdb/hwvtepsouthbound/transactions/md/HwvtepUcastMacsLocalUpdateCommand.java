@@ -23,6 +23,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -62,6 +63,8 @@ public class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransactionComman
 
     private void updateData(ReadWriteTransaction transaction, Collection<UcastMacsLocal> ucml) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        LOG.info("DEVICE - {} LocalUcastMacs for Node {} - {}", TransactionType.ADD,
+            connectionIId.firstKeyOf(Node.class).getNodeId().getValue(), ucml);
         Node connectionNode = buildConnectionNode(ucml);
         transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
     }

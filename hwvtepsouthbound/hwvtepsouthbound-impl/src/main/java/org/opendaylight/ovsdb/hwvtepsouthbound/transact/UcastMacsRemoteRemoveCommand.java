@@ -84,6 +84,7 @@ public class UcastMacsRemoteRemoveCommand
     private void removeUcastMacRemote(final TransactionBuilder transaction,
                                       final InstanceIdentifier<Node> instanceIdentifier,
                                       final List<RemoteUcastMacs> macList) {
+        String nodeId = instanceIdentifier.firstKeyOf(Node.class).getNodeId().getValue();
         for (RemoteUcastMacs mac: macList) {
             final InstanceIdentifier<RemoteUcastMacs> macIid =
                     instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class)
@@ -106,7 +107,9 @@ public class UcastMacsRemoteRemoveCommand
                                         .opEqual(logicalSwitchUid))
                                 .and(ucastMacsRemote.getMacColumn().getSchema().opEqual(mac.getMacEntryKey()
                                         .getValue())).build());
-                        LOG.info("CONTROLLER - {} {}", TransactionType.DELETE, ucastMacsRemote);
+                        LOG.info("CONTROLLER - {} Mac:{} LS:{} Node:{}", TransactionType.DELETE,
+                            mac.getMacEntryKey(), logicalSwitchUid, nodeId);
+
                     }
                 }
             }
@@ -116,7 +119,7 @@ public class UcastMacsRemoteRemoveCommand
                 ucastMacsRemote.getUuidColumn().setData(macEntryUUID);
                 transaction.add(op.delete(ucastMacsRemote.getSchema())
                         .where(ucastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
-                LOG.info("CONTROLLER - {} {}", TransactionType.DELETE, ucastMacsRemote);
+                LOG.info("CONTROLLER - {} {} Node:{}", TransactionType.DELETE, ucastMacsRemote, nodeId);
             } else {
                 LOG.trace("Remove failed to find in op datastore key:{} txId:{}", macIid, getOperationalState()
                         .getTransactionId());

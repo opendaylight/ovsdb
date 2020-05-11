@@ -9,7 +9,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -198,9 +197,9 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID));
         ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
-        FluentFuture<Optional<Topology>> hwvtepTp = transaction.read(type, path);
+        FluentFuture<Boolean> hwvtepTp = transaction.exists(type, path);
         try {
-            if (!hwvtepTp.get().isPresent()) {
+            if (!hwvtepTp.get().booleanValue()) {
                 TopologyBuilder tpb = new TopologyBuilder();
                 tpb.setTopologyId(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID);
                 transaction.mergeParentStructurePut(type, path, tpb.build());
@@ -235,6 +234,8 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
             operTopologyRegistration = null;
         }
     }
+
+
 
     private void openOvsdbPort() {
         if (!registered.getAndSet(true)) {

@@ -106,6 +106,9 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         if (hwvtepDeviceEntityOwnershipListener != null) {
             hwvtepDeviceEntityOwnershipListener.close();
         }
+        if (hwvtepOperGlobalListener != null) {
+            hwvtepOperGlobalListener.close();
+        }
 
         for (HwvtepConnectionInstance client: clients.values()) {
             client.disconnect();
@@ -165,8 +168,10 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             hwvtepConnectionInstance = getConnectionInstance(key);
             if (hwvtepConnectionInstance != null) {
                 if (hwvtepConnectionInstance.getInstanceIdentifier() != null) {
+                    int port = hwvtepConnectionInstance.getOvsdbClient().getConnectionInfo().getRemotePort();
                     deviceUpdateHistory.get(hwvtepConnectionInstance.getInstanceIdentifier()).addToHistory(
                             TransactionType.DELETE, new ClientConnected(client.getConnectionInfo().getRemotePort()));
+                    LOG.info("CONTROLLER - {} {}", TransactionType.DELETE, new ClientConnected(port));
                 }
 
 
@@ -486,6 +491,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             TransactionHistory deviceLog = deviceUpdateHistory.get(iid);
             int port = hwvtepConnectionInstance.getOvsdbClient().getConnectionInfo().getRemotePort();
             deviceLog.addToHistory(TransactionType.ADD, new ClientConnected(port));
+            LOG.info("CONTROLLER - {} {}", TransactionType.ADD, new ClientConnected(port));
             hwvtepConnectionInstance.setControllerTxHistory(controllerLog);
             hwvtepConnectionInstance.setDeviceUpdateHistory(deviceLog);
         }

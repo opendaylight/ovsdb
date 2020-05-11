@@ -106,6 +106,9 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         if (hwvtepDeviceEntityOwnershipListener != null) {
             hwvtepDeviceEntityOwnershipListener.close();
         }
+        if (hwvtepOperGlobalListener != null) {
+            hwvtepOperGlobalListener.close();
+        }
 
         for (HwvtepConnectionInstance client: clients.values()) {
             client.disconnect();

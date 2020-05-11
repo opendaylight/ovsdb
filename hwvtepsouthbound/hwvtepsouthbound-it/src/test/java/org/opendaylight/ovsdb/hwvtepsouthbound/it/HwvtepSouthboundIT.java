@@ -306,8 +306,8 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         InstanceIdentifier<Topology> path =
                 InstanceIdentifier.create(NetworkTopology.class).child(Topology.class, new TopologyKey(topologyId));
         for (int i = 0; i < 60; i++) {
-            Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, path);
-            if (topology != null) {
+            Boolean topology = mdsalUtils.exists(LogicalDatastoreType.OPERATIONAL, path);
+            if (topology) {
                 LOG.info("getHwvtepTopology: found {}...", HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID.getValue());
                 found = true;
                 break;

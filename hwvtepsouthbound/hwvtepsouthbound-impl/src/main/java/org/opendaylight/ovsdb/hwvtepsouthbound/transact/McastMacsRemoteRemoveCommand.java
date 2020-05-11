@@ -93,6 +93,7 @@ public class McastMacsRemoteRemoveCommand
                                     final RemoteMcastMacs mac,
                                     final InstanceIdentifier macIid,
                                     final Object... extraData) {
+        String nodeId = instanceIdentifier.firstKeyOf(Node.class).getNodeId().getValue();
         clearConfigData(RemoteMcastMacs.class, macIid);
         long transactionId = getOperationalState().getTransactionId();
         LOG.debug("Remove received for RemoteMcastMacs key: {} txId: {}", macIid, transactionId);
@@ -109,7 +110,9 @@ public class McastMacsRemoteRemoveCommand
                 updateCurrentTxDeleteData(RemoteMcastMacs.class, macIid, mac);
                 updateControllerTxHistory(TransactionType.DELETE, new StringBuilder(mcastMacsRemote.toString())
                         .append(":  LS: ").append(logicalSwitchUid));
-                LOG.info("CONTROLLER - {} {} LS:{}", TransactionType.DELETE, mcastMacsRemote, logicalSwitchUid);
+                LOG.info("CONTROLLER - {} {} LS:{} Node:{}", TransactionType.DELETE,
+                    mcastMacsRemote, logicalSwitchUid, nodeId);
+
             }
         }
         if (!deleted && deviceData != null) {
@@ -121,7 +124,8 @@ public class McastMacsRemoteRemoveCommand
                         .where(mcastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
                 updateControllerTxHistory(TransactionType.DELETE, new StringBuilder(mcastMacsRemote.toString())
                         .append(":  Mac : ").append(macEntryUUID));
-                LOG.info("CONTROLLER - {} {} Mac :{}", TransactionType.DELETE, mcastMacsRemote, macEntryUUID);
+                LOG.info("CONTROLLER - {} {} Mac :{} Node:{}", TransactionType.DELETE,
+                    mcastMacsRemote, macEntryUUID, nodeId);
             } else {
                 LOG.error("Failed to delete remote mcast entry as it is not found in device {}", macIid);
                 getDeviceInfo().clearConfigData(RemoteMcastMacs.class, macIid);

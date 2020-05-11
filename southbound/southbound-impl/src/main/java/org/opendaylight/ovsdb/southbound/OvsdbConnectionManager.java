@@ -638,14 +638,14 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 reconciliationManager.enqueueForRetry(task);
                 break;
             case ON_DISCONNECT: {
-                FluentFuture<Optional<Node>> readNodeFuture;
+                FluentFuture<Boolean> readNodeFuture;
                 try (ReadTransaction tx = db.newReadOnlyTransaction()) {
-                    readNodeFuture = tx.read(LogicalDatastoreType.CONFIGURATION, iid);
+                    readNodeFuture = tx.exists(LogicalDatastoreType.CONFIGURATION, iid);
                 }
-                readNodeFuture.addCallback(new FutureCallback<Optional<Node>>() {
+                readNodeFuture.addCallback(new FutureCallback<Boolean>() {
                     @Override
-                    public void onSuccess(final Optional<Node> node) {
-                        if (node.isPresent()) {
+                    public void onSuccess(final Boolean node) {
+                        if (node.booleanValue()) {
                             LOG.info("Disconnected/Failed connection {} was controller initiated, attempting "
                                     + "reconnection", ovsdbNode.getConnectionInfo());
                             reconciliationManager.enqueue(task);

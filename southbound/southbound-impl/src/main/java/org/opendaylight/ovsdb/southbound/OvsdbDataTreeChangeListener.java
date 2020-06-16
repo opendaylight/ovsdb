@@ -143,12 +143,9 @@ public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListe
                 if (ovsdbNodeModification != null) {
                     OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.getDataBefore();
                     if (ovsdbNode != null) {
-                        ConnectionInfo key = ovsdbNode.getConnectionInfo();
-                        InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
                         try {
                             cm.disconnect(ovsdbNode);
                             LOG.info("OVSDB node has been disconnected:{}", ovsdbNode);
-                            cm.stopConnectionReconciliationIfActive(iid.firstIdentifierOf(Node.class), ovsdbNode);
                         } catch (UnknownHostException e) {
                             LOG.warn("Failed to disconnect ovsdbNode", e);
                         }

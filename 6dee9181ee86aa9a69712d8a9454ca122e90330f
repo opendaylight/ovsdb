@@ -16,6 +16,24 @@
       "revId": "6dee9181ee86aa9a69712d8a9454ca122e90330f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "befc00b1_f0184344",
+        "filename": "southbound/southbound-impl/src/main/java/org/opendaylight/ovsdb/southbound/OvsdbDataTreeChangeListener.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2020-06-17T09:12:15Z",
+      "side": 0,
+      "message": "Ah, I see -- stopConnectionReconciliationIfActive() vs. stopBridgeConfigReconciliationIfActive() 😞\n\nthis is quite weird worklow.",
+      "parentUuid": "0d9de13d_0f0ddfa7",
+      "revId": "6dee9181ee86aa9a69712d8a9454ca122e90330f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
     }
   ]
 }

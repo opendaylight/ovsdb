@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Chetan Arakere Gowdru <chetan.arakere@altencalsoftlabs.com>
+Code-Review+1: Chandra Shekar S <chandra.shekar.s@ericsson.com>
+Submitted-by: Chetan Arakere Gowdru <chetan.arakere@altencalsoftlabs.com>
+Submitted-at: Fri, 26 Jun 2020 12:27:43 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/ovsdb/+/89661
+Project: ovsdb
+Branch: refs/heads/master

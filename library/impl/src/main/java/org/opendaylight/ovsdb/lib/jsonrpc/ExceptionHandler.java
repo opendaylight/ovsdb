@@ -35,7 +35,7 @@ public class ExceptionHandler extends ChannelDuplexHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         if (ctx.channel().isActive()) {
-            LOG.error("Exception occurred while processing connection pipeline", cause);
+            LOG.warn("Exception occurred while processing connection pipeline", cause);
             if ((cause instanceof InvalidEncodingException)
                     || (cause instanceof TooLongFrameException || (cause instanceof DecoderException))) {
                 LOG.info("Disconnecting channel to ovsdb {}", ctx.channel());

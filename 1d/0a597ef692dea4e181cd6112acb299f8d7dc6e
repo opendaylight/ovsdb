@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Robert Varga <nite@hq.sk>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Sat, 18 Jul 2020 06:49:31 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/ovsdb/+/91389
+Project: ovsdb
+Branch: refs/heads/stable/magnesium

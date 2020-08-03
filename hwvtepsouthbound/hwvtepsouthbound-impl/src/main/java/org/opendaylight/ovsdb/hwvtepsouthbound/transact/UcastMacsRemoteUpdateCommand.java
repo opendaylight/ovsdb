@@ -128,7 +128,7 @@ public class UcastMacsRemoteUpdateCommand
             addToUpdates(macKey, remoteUcastMac);
         } else {
             LOG.warn("Unable to update remoteUcastMacs {} because uuid not found in the operational store txId: {}",
-                    macKey, getOperationalState().getTransactionId());
+                getNodeKeyStr(macKey)   , getOperationalState().getTransactionId());
         }
         return;
     }
@@ -211,5 +211,10 @@ public class UcastMacsRemoteUpdateCommand
             getDeviceInfo().updateRemoteUcast(
                     (InstanceIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue(), macIid, mac);
         }
+    }
+
+    @Override
+    protected String getKeyStr(InstanceIdentifier<RemoteUcastMacs> iid) {
+        return getLsKeyStr(iid.firstKeyOf(RemoteUcastMacs.class).getLogicalSwitchRef().getValue());
     }
 }

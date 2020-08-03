@@ -247,4 +247,8 @@ public class McastMacsRemoteUpdateCommand
         }
     }
 
+    @Override
+    protected String getKeyStr(InstanceIdentifier<RemoteMcastMacs> iid) {
+        return getLsKeyStr(iid.firstKeyOf(RemoteMcastMacs.class).getLogicalSwitchRef().getValue());
+    }
 }

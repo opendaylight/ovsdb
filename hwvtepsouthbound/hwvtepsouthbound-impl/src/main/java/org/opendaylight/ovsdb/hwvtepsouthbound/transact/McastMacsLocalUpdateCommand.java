@@ -133,4 +133,9 @@ public class McastMacsLocalUpdateCommand
     protected Map<LocalMcastMacsKey, LocalMcastMacs> getData(final HwvtepGlobalAugmentation augmentation) {
         return augmentation.getLocalMcastMacs();
     }
+
+    @Override
+    protected String getKeyStr(InstanceIdentifier<LocalMcastMacs> iid) {
+        return getLsKeyStr(iid.firstKeyOf(LocalMcastMacs.class).getLogicalSwitchRef().getValue());
+    }
 }

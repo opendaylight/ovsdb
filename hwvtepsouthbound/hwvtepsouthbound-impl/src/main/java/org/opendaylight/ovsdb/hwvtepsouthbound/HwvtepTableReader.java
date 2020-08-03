@@ -61,6 +61,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
@@ -166,7 +167,7 @@ public class HwvtepTableReader {
                     .getValue();
             UUID lsUUID = getLsUuid(lsIid);
             if (lsUUID == null) {
-                LOG.warn("Could not find uuid for ls key {}", lsIid);
+                LOG.warn("Could not find uuid for ls key {}", getNodeKeyStr(lsIid));
                 return null;
             }
 
@@ -174,6 +175,15 @@ public class HwvtepTableReader {
             conditions.add(macTable.getLogicalSwitchColumn().getSchema().opEqual(lsUUID));
             return conditions;
         }
+    }
+
+    protected <T extends DataObject> String getNodeKeyStr(InstanceIdentifier<T> iid) {
+        return iid.firstKeyOf(Node.class).getNodeId().getValue() + "." + getLsKeyStr(iid);
+    }
+
+    protected <T extends DataObject> String getLsKeyStr(InstanceIdentifier<T> iid) {
+        return ((InstanceIdentifier<LogicalSwitches>)iid).firstKeyOf(LogicalSwitches.class)
+            .getHwvtepNodeName().getValue();
     }
 
     public UUID getLsUuid(InstanceIdentifier lsIid) {

@@ -211,4 +211,8 @@ public class LogicalSwitchUcastsRemoveCommand
         return true;
     }
 
+    @Override
+    protected String getKeyStr(InstanceIdentifier<LogicalSwitches> iid) {
+        return iid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
+    }
 }

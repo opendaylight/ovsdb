@@ -150,4 +150,9 @@ public class LogicalSwitchUpdateCommand
     protected boolean areEqual(final LogicalSwitches sw1, final LogicalSwitches sw2) {
         return sw1.key().equals(sw2.key()) && Objects.equals(sw1.getTunnelKey(), sw2.getTunnelKey());
     }
+
+    @Override
+    protected String getKeyStr(InstanceIdentifier<LogicalSwitches> iid) {
+        return iid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
+    }
 }

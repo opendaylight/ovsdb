@@ -91,4 +91,9 @@ public class LogicalSwitchRemoveCommand
             getDeviceInfo().clearLogicalSwitchRefs(mdsalUpdate.getKey());
         }
     }
+
+    @Override
+    protected String getKeyStr(InstanceIdentifier<LogicalSwitches> iid) {
+        return iid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
+    }
 }

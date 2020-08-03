@@ -29,5 +29,10 @@
             <argument ref="hwvtepSouthboundProvider" />
         </action>
     </command>
+    <command>
+        <action class="org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDisconnectCliCmd">
+            <property name="dataBroker" ref="dataBroker" />
+        </action>
+    </command>
     </command-bundle>
 </blueprint>

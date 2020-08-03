@@ -60,7 +60,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,6 +129,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 externalClient.getConnectionInfo().getLocalPort());
         try {
             List<String> databases = externalClient.getDatabases().get(DB_FETCH_TIMEOUT, TimeUnit.MILLISECONDS);
+            if (databases.contains(SouthboundConstants.HARDWARE_VTEP)) {
+                return;
+            }
             if (databases.contains(SouthboundConstants.OPEN_V_SWITCH)) {
                 OvsdbConnectionInstance client = connectedButCallBacksNotRegistered(externalClient);
                 // Register Cluster Ownership for ConnectionInfo
@@ -136,7 +142,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 });
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOG.warn("OvsdbConnectionManager Unable to fetch Database list from device {}."
+            LOG.error("OvsdbConnectionManager Unable to fetch Database list from device {}."
                     + "Disconnecting from the device.", externalClient.getConnectionInfo().getRemoteAddress(), e);
             externalClient.disconnect();
         }
@@ -185,7 +191,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 client.getConnectionInfo().getLocalAddress(),
                 client.getConnectionInfo().getLocalPort());
         ConnectionInfo key = SouthboundMapper.createConnectionInfo(client);
-        OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstance(key);
+        OvsdbConnectionInstance ovsdbConnectionInstance = removeConnectionInstance(key);
         if (ovsdbConnectionInstance != null) {
             // Unregister Entity ownership as soon as possible ,so this instance should
             // not be used as a candidate in Entity election (given that this instance is
@@ -195,8 +201,13 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 LOG.info("Ovsdb Library disconnected {} this controller instance has ownership", key);
                 deleteOperNodeAndReleaseOwnership(ovsdbConnectionInstance);
             } else {
-                LOG.info("Ovsdb Library disconnected {} this controller does not have ownership", key);
+                LOG.error("OVSDB disconnected in follower node not deleting operational topology node {}",
+                    ovsdbConnectionInstance.getInstanceIdentifier());
                 unregisterEntityForOwnership(ovsdbConnectionInstance);
+            }
+            if (ovsdbConnectionInstance.getInstanceIdentifier() != null) {
+                nodeIdVsConnectionInstance.remove(
+                    ovsdbConnectionInstance.getInstanceIdentifier(), ovsdbConnectionInstance);
             }
             removeConnectionInstance(key);
 
@@ -311,9 +322,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         clients.put(connectionInfo, instance);
     }
 
-    private void removeConnectionInstance(final ConnectionInfo key) {
+    private OvsdbConnectionInstance removeConnectionInstance(final ConnectionInfo key) {
         ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
-        clients.remove(connectionInfo);
+        return clients.remove(connectionInfo);
     }
 
     @VisibleForTesting
@@ -360,10 +371,16 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
     }
 
-    public OvsdbConnectionInstance getConnectionInstance(final InstanceIdentifier<Node> nodePath) {
-        if (nodeIdVsConnectionInstance.get(nodePath) != null) {
+    public OvsdbConnectionInstance getConnectionInstance(InstanceIdentifier<Node> nodePath) {
+        if (nodeIdVsConnectionInstance.containsKey(nodePath)) {
             return nodeIdVsConnectionInstance.get(nodePath);
         }
+        nodePath = getGlobalNodeIid(nodePath);
+        if (nodeIdVsConnectionInstance.containsKey(nodePath)) {
+            return nodeIdVsConnectionInstance.get(nodePath);
+        }
+        return null;
+        /*
         try {
             ReadTransaction transaction = db.newReadOnlyTransaction();
             FluentFuture<Optional<Node>> nodeFuture = transaction.read(
@@ -379,7 +396,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Failed to get Ovsdb Node {}",nodePath, e);
             return null;
-        }
+        }*/
     }
 
     public OvsdbClient getClient(final ConnectionInfo connectionInfo) {
@@ -478,7 +495,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
             //*this* instance of southbound plugin is owner of the device,
             //so register for monitor callbacks
-            ovsdbConnectionInstance.registerCallbacks(instanceIdentifierCodec);
+            registerCallbacks(ovsdbConnectionInstance);
             LOG.trace("Ovsdb isUpgradeInProgress {}", upgradeState.isUpgradeInProgress());
             if (!upgradeState.isUpgradeInProgress()) {
                 reconcileBridgeConfigurations(ovsdbConnectionInstance);
@@ -570,6 +587,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             LOG.info("Ovsdb InstanceIdentifier {} generated for device "
                     + "connection {}",iid,ovsdbConnectionInstance.getConnectionInfo());
             ovsdbConnectionInstance.setInstanceIdentifier(iid);
+            nodeIdVsConnectionInstance.put(
+                ovsdbConnectionInstance.getInstanceIdentifier(), ovsdbConnectionInstance);
         }
         Entity deviceEntity = new Entity(ENTITY_TYPE, iid);
         LOG.debug("Ovsdb Entity {} created for device connection {}",
@@ -582,13 +601,12 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     private void registerEntityForOwnership(final OvsdbConnectionInstance ovsdbConnectionInstance) {
-        putConnectionInstance(ovsdbConnectionInstance.getMDConnectionInfo(), ovsdbConnectionInstance);
 
         Entity candidateEntity = getEntityFromConnectionInstance(ovsdbConnectionInstance);
         if (entityConnectionMap.containsKey(candidateEntity)) {
-            LOG.error("Ovsdb Old connection still hanging for {}", candidateEntity);
-            disconnected(ovsdbConnectionInstance.getOvsdbClient());
-            //TODO do cleanup for old connection or stale check
+            OvsdbConnectionInstance oldInstance = entityConnectionMap.get(candidateEntity);
+            LOG.error("Cleaning up the old connection for {}", candidateEntity);
+            disconnected(oldInstance.getOvsdbClient());
         }
         nodeIdVsConnectionInstance.put((InstanceIdentifier<Node>) candidateEntity.getIdentifier(),
                 ovsdbConnectionInstance);
@@ -603,18 +621,37 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         } catch (CandidateAlreadyRegisteredException e) {
             LOG.warn("OVSDB entity {} was already registered for ownership", candidateEntity, e);
         }
+        handleOwnershipState(candidateEntity, ovsdbConnectionInstance);
+    }
+
+    private void handleOwnershipState(Entity candidateEntity, OvsdbConnectionInstance ovsdbConnectionInstance) {
         //If entity already has owner, it won't get notification from EntityOwnershipService
-        java.util.Optional<EntityOwnershipState> ownershipStateOpt =
-                entityOwnershipService.getOwnershipState(candidateEntity);
+        //so cache the connection instances.
+        Optional<EntityOwnershipState> ownershipStateOpt =
+            entityOwnershipService.getOwnershipState(candidateEntity);
         if (ownershipStateOpt.isPresent()) {
             EntityOwnershipState ownershipState = ownershipStateOpt.get();
+            putConnectionInstance(ovsdbConnectionInstance.getMDConnectionInfo(), ovsdbConnectionInstance);
             if (ownershipState == EntityOwnershipState.OWNED_BY_OTHER) {
                 ovsdbConnectionInstance.setHasDeviceOwnership(false);
+                LOG.info("OVSDB entity of Node {} {} is already owned by other southbound plugin "
+                        + "instance, so *this* instance is NOT an OWNER of the device",
+                    SouthboundUtil.getOvsdbNodeId(ovsdbConnectionInstance.getInstanceIdentifier()),
+                    ovsdbConnectionInstance.getConnectionInfo());
             } else if (ownershipState == EntityOwnershipState.IS_OWNER) {
                 ovsdbConnectionInstance.setHasDeviceOwnership(true);
-                ovsdbConnectionInstance.registerCallbacks(instanceIdentifierCodec);
+                registerCallbacks(ovsdbConnectionInstance);
             }
         }
+    }
+
+    private void registerCallbacks(OvsdbConnectionInstance ovsdbConnectionInstance) {
+        LOG.info("RegisterCallbacks for Node {} {} ",
+            SouthboundUtil.getOvsdbNodeId(ovsdbConnectionInstance.getInstanceIdentifier()) ,
+            ovsdbConnectionInstance.getConnectionInfo());
+        putConnectionInstance(ovsdbConnectionInstance.getMDConnectionInfo(), ovsdbConnectionInstance);
+        ovsdbConnectionInstance.setHasDeviceOwnership(true);
+        ovsdbConnectionInstance.registerCallbacks(instanceIdentifierCodec);
     }
 
     private void unregisterEntityForOwnership(final OvsdbConnectionInstance ovsdbConnectionInstance) {
@@ -712,5 +749,16 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     public Map<ConnectionInfo, OvsdbConnectionInstance> getClients() {
         return clients;
+    }
+
+    public static InstanceIdentifier<Node> getGlobalNodeIid(final InstanceIdentifier<Node> bridgeNodIid) {
+        String nodeId = bridgeNodIid.firstKeyOf(Node.class).getNodeId().getValue();
+        int bridgeIdx = nodeId.indexOf("bridge");
+        if (bridgeIdx > 0) {
+            nodeId = nodeId.substring(0, bridgeIdx - 1);
+        } else {
+            return null;
+        }
+        return bridgeNodIid.firstIdentifierOf(Topology.class).child(Node.class , new NodeKey(new NodeId(nodeId)));
     }
 }

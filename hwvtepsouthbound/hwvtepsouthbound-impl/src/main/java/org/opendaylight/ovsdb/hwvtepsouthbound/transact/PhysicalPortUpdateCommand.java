@@ -122,7 +122,7 @@ public class PhysicalPortUpdateCommand
             LOG.warn("Port not present in opdata store {}", key);
         } else {
             if (deviceData.getData() == null || !(deviceData.getData() instanceof PhysicalPort)) {
-                LOG.error("Failed to get the device data for port {}", key);
+                LOG.error("Failed to get the device data for port {}", getKeyStr(key));
             }
             Map<Long, UUID> bindingMap = setVlanBindings(nodeIid, physicalPort, data, key, transaction);
             PhysicalPort tp = (PhysicalPort) deviceData.getData();

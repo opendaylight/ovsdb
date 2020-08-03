@@ -154,4 +154,8 @@ public class UcastMacsRemoteRemoveCommand
         return true;
     }
 
+    @Override
+    protected String getKeyStr(InstanceIdentifier<RemoteUcastMacs> iid) {
+        return getLsKeyStr(iid.firstKeyOf(RemoteUcastMacs.class).getLogicalSwitchRef().getValue());
+    }
 }

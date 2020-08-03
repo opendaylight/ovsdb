@@ -16,12 +16,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactCommandAggregator;
@@ -29,9 +31,11 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -80,7 +84,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
 
         updateData(changes);
 
-        disconnect(changes);
+        disconnect2(changes);
         /*
         for (DataTreeModification<Node> change : changes) {
             final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
@@ -181,7 +185,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
         }
     }
 
-    private void disconnect(Collection<DataTreeModification<Node>> changes) {
+    /*private void disconnect(Collection<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
             final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             final DataObjectModification<Node> mod = change.getRootNode();
@@ -198,7 +202,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
                 }
             }
         }
-    }
+    }*/
 
     private Node getCreated(DataObjectModification<Node> mod) {
         if (mod.getModificationType() == ModificationType.WRITE && mod.getDataBefore() == null) {
@@ -207,12 +211,12 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
         return null;
     }
 
-    private Node getRemoved(DataObjectModification<Node> mod) {
+    /*private Node getRemoved(DataObjectModification<Node> mod) {
         if (mod.getModificationType() == ModificationType.DELETE) {
             return mod.getDataBefore();
         }
         return null;
-    }
+    }*/
 
     private Node getUpdated(DataObjectModification<Node> mod) {
         Node node = null;
@@ -280,5 +284,38 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
         }
         LOG.trace("Connection Change Map: {}", result);
         return result;
+    }
+
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private void disconnect2(Collection<DataTreeModification<Node>> changes) {
+        for (DataTreeModification<Node> change : changes) {
+            String nodeId = change.getRootPath().getRootIdentifier().firstKeyOf(Node.class).getNodeId().getValue();
+            if (!nodeId.contains("/disconnect")) {
+                continue;
+            }
+            int reconcileIndex = nodeId.indexOf("/disconnect");
+            String globalNodeId = nodeId.substring(0, reconcileIndex);
+            InstanceIdentifier<Node> globalNodeIid = change.getRootPath()
+                .getRootIdentifier().firstIdentifierOf(Topology.class)
+                .child(Node.class, new NodeKey(new NodeId(globalNodeId)));
+            HwvtepConnectionInstance connectionInstance = hcm.getConnectionInstanceFromNodeIid(globalNodeIid);
+            if (connectionInstance != null) {
+                LOG.error("Disconnecting from controller {}", nodeId);
+                new Thread(() -> {
+                    ReadWriteTransaction tx = db.newReadWriteTransaction();
+                    tx.delete(LogicalDatastoreType.CONFIGURATION, change.getRootPath().getRootIdentifier());
+                    try {
+                        tx.commit().get();
+                    } catch (ExecutionException | InterruptedException e) {
+                        LOG.error("Failed to delete the node {}", change.getRootPath().getRootIdentifier());
+                    }
+                }).start();
+                try {
+                    connectionInstance.disconnect();
+                } catch (Exception e) {
+                    LOG.debug("Failed to disconnect");
+                }
+            }
+        }
     }
 }

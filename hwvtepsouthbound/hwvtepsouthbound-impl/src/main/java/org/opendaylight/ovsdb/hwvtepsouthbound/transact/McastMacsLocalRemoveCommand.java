@@ -103,4 +103,9 @@ public class McastMacsLocalRemoveCommand
     protected boolean isDeleteCmd() {
         return true;
     }
+
+    @Override
+    protected String getKeyStr(InstanceIdentifier<LocalMcastMacs> iid) {
+        return getLsKeyStr(iid.firstKeyOf(LocalMcastMacs.class).getLogicalSwitchRef().getValue());
+    }
 }

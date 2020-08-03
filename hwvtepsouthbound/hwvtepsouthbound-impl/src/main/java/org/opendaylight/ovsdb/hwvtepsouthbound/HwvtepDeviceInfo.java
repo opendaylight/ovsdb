@@ -262,6 +262,7 @@ public class HwvtepDeviceInfo {
         if (deviceData != null) {
             uuid = deviceData.getUuid();
             data = deviceData.getData();
+            LOG.trace("Uuid already present for the key going in transit {}", key);
         }
         HwvtepSouthboundUtil.updateData(opKeyVsData, cls, key,
                 new DeviceData(key, uuid, data, DeviceDataStatus.IN_TRANSIT));

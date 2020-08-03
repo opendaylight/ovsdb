@@ -181,9 +181,14 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                 // HWVTEP device.
                 if (hwvtepConnectionInstance.getHasDeviceOwnership()) {
                     unregisterEntityForOwnership(hwvtepConnectionInstance);
+                    LOG.info("Client disconnected from the Leader. Delete the Hvtep Node {} ",
+                        hwvtepConnectionInstance.getInstanceIdentifier());
                     txInvoker.invoke(new HwvtepGlobalRemoveCommand(hwvtepConnectionInstance, null, null));
                 } else {
                     unregisterEntityForOwnership(hwvtepConnectionInstance);
+                    LOG.info("Client disconnected from the Follower. Not deleteing the Hvtep Node {} ",
+                        hwvtepConnectionInstance.getInstanceIdentifier());
+
                     //Do not delete if client disconnected from follower HwvtepGlobalRemoveCommand
                 }
 
@@ -246,10 +251,10 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         // In such cases, we will see if the hwvtepConnectionInstance has same externalClient.
         if (hwvtepConnectionInstance != null) {
             if (hwvtepConnectionInstance.hasOvsdbClient(externalClient)) {
-                LOG.warn("HWVTEP Connection Instance {} already exists for client {}", key, externalClient);
+                LOG.info("HWVTEP Connection Instance {} already exists for client {}", key, externalClient);
                 return hwvtepConnectionInstance;
             }
-            LOG.warn("HWVTEP Connection Instance {} being replaced with client {}", key, externalClient);
+            LOG.info("HWVTEP Connection Instance {} being replaced with client {}", key, externalClient);
             hwvtepConnectionInstance.disconnect();
 
             // Unregister Cluster Ownership for ConnectionInfo
@@ -290,6 +295,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         PhysicalSwitchAugmentation switchNode = node.augmentation(PhysicalSwitchAugmentation.class);
         if (hwvtepGlobal != null) {
             if (hwvtepGlobal.getConnectionInfo() != null) {
+                LOG.debug("Get the ConnectionInfo from HwvtepGlobal {}", hwvtepGlobal.getConnectionInfo());
                 return getConnectionInstance(hwvtepGlobal.getConnectionInfo());
             } else {
                 //TODO: Case of user configured connection for now
@@ -298,6 +304,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             }
         }
         else if (switchNode != null) {
+            LOG.debug("Get the ConnectionInfo from PhysicalSwitch");
             return getConnectionInstance(switchNode);
         } else {
             LOG.warn("This is not a node that gives any hint how to find its OVSDB Manager: {}",node);
@@ -321,6 +328,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
         InstanceIdentifier<Node> globalNodeIid = HwvtepSouthboundUtil.getGlobalNodeIid(nodeIid);
         if (globalNodeIid != null) {
+            LOG.debug("Get the ConnectionInfo from HwvtepGlobal : {}", globalNodeIid);
             return nodeIidVsConnectionInstance.get(globalNodeIid);
         }
         return null;
@@ -395,6 +403,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         Entity candidateEntity = getEntityFromConnectionInstance(hwvtepConnectionInstance);
         if (entityConnectionMap.get(candidateEntity) != null) {
             InstanceIdentifier<Node> iid = hwvtepConnectionInstance.getInstanceIdentifier();
+            LOG.info("Calling disconnect before processing new connection for {}", candidateEntity);
             disconnected(entityConnectionMap.get(candidateEntity).getOvsdbClient());
             hwvtepConnectionInstance.setInstanceIdentifier(iid);
             putConnectionInstance(hwvtepConnectionInstance.getInstanceIdentifier(), hwvtepConnectionInstance);
@@ -469,7 +478,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         } else {
             globalRow = null;
         }
-        LOG.trace("Fetched global {} from hardware_vtep schema", globalRow);
+        LOG.info("Fetched global {} from hardware_vtep schema", globalRow);
         return globalRow;
     }
 
@@ -481,7 +490,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             iid = HwvtepSouthboundMapper.getInstanceIdentifier(hwvtepGlobalRow);
             /* Let's set the iid now */
             hwvtepConnectionInstance.setInstanceIdentifier(iid);
-            LOG.info("InstanceIdentifier {} generated for device "
+            LOG.trace("InstanceIdentifier {} generated for device "
                     + "connection {}",iid, hwvtepConnectionInstance.getConnectionInfo());
             controllerTxHistory.putIfAbsent(iid,
                     new TransactionHistory(TRANSACTION_HISTORY_CAPACITY, TRANSACTION_HISTORY_WATERMARK));
@@ -600,7 +609,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             // If entity has no owner, clean up the operational data store (it's possible because owner controller
             // might went down abruptly and didn't get a chance to clean up the operational data store.
             if (!ownershipChange.getState().hasOwner()) {
-                LOG.debug("{} has no owner, cleaning up the operational data store", ownershipChange.getEntity());
+                LOG.info("{} has no owner, cleaning up the operational data store", ownershipChange.getEntity());
                 // Below code might look weird but it's required. We want to give first opportunity to the
                 // previous owner of the device to clean up the operational data store if there is no owner now.
                 // That way we will avoid lot of nasty md-sal exceptions because of concurrent delete.

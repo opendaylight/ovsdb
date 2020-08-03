@@ -127,7 +127,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I>, I exten
                 inTransitDependencies.put(classType, Lists.newArrayList(key));
             }
         }
-        LOG.info("Update received for key: {} txId: {}", key, getOperationalState().getTransactionId());
+        LOG.info("Update received for key: {} txId: {}", getNodeKeyStr(key), getOperationalState().getTransactionId());
         if (HwvtepSouthboundUtil.isEmptyMap(confingDependencies)
                 && HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies)) {
             doDeviceTransaction(transaction, nodeIid, data, key, extraData);
@@ -205,7 +205,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I>, I exten
                     clone.onSuccess(transaction);
                 }
             };
-            LOG.info("Update Adding to op wait queue for key: {} txId: {}", key, transactionId);
+            LOG.info("Update Adding to op wait queue for key: {} txId: {}", getNodeKeyStr(key), transactionId);
             addJobToQueue(opWaitingJob);
             return;
         }
@@ -441,22 +441,18 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I>, I exten
             final InstanceIdentifier key) {
         HwvtepDeviceInfo.DeviceData deviceData  = getDeviceOpData(cls, key);
         if (deviceData == null) {
-            LOG.debug("Could not find data for key {}", key);
+            LOG.debug("Could not find data for key {}", getNodeKeyStr(key));
             java.util.Optional<TypedBaseTable> optional =
                     getTableReader().getHwvtepTableEntryUUID(cls, key, null);
             if (optional.isPresent()) {
-                LOG.debug("Found the data for key from device {} ", key);
+                LOG.debug("Found the data for key from device {} ", getNodeKeyStr(key));
                 getDeviceInfo().updateDeviceOperData(cls, key, optional.get().getUuid(), optional.get());
                 return getDeviceOpData(cls, key);
             } else {
-                LOG.info("Could not Find the data for key from device {} ", key);
+                LOG.info("Could not Find the data for key from device {} ", getNodeKeyStr(key));
             }
         }
         return deviceData;
-    }
-
-    protected String getKeyStr(final InstanceIdentifier iid) {
-        return iid.toString();
     }
 
     public <K extends Identifiable> void addJobToQueue(final DependentJob<K> job) {
@@ -508,5 +504,18 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I>, I exten
 
     public HwvtepOperationalState newOperState() {
         return new HwvtepOperationalState(getConnectionInstance());
+    }
+
+    protected String getNodeKeyStr(InstanceIdentifier<T> iid) {
+        return getClassType().getTypeName() + "." + iid.firstKeyOf(Node.class).getNodeId().getValue() + "." + getKeyStr(iid);
+    }
+
+    protected String getKeyStr(InstanceIdentifier<T> iid) {
+        return iid.toString();
+    }
+
+    protected String getLsKeyStr(InstanceIdentifier iid) {
+        return ((InstanceIdentifier<LogicalSwitches>)iid).firstKeyOf(LogicalSwitches.class)
+            .getHwvtepNodeName().getValue();
     }
 }

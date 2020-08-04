@@ -60,6 +60,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 public interface SouthboundConstants {
 
     String OPEN_V_SWITCH = "Open_vSwitch";
+    String HARDWARE_VTEP = "hardware_vtep";
     TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
     String OVSDB_URI_PREFIX = "ovsdb";
     String BRIDGE_URI_PREFIX = "bridge";

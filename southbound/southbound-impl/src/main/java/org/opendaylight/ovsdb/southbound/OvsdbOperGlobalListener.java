@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
@@ -39,6 +40,10 @@ public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<
     private DataBroker db;
     private final OvsdbConnectionManager ovsdbConnectionManager;
     private final TransactionInvoker txInvoker;
+    private static final Map<InstanceIdentifier<Node>, ScheduledFuture> TIMEOUT_FTS = new ConcurrentHashMap<>();
+    private static Map<InstanceIdentifier<Node>, List<OnlyOnceRunnable>> deletePendingJobs
+        = CacheHelper.createCacheForDeleteJobs();
+
 
     OvsdbOperGlobalListener(DataBroker db, OvsdbConnectionManager ovsdbConnectionManager,
                             TransactionInvoker txInvoker) {
@@ -66,6 +71,7 @@ public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void onDataTreeChanged(Collection<DataTreeModification<Node>> changes) {
+        LOG.trace("onDataTreeChanged: ");
         changes.forEach((change) -> {
             try {
                 InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
@@ -73,23 +79,27 @@ public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<
                 Node addNode = getCreated(mod);
                 if (addNode != null) {
                     OPER_NODE_CACHE.put(key, addNode);
+                    deletePendingJobs.put(key, new CopyOnWriteArrayList<>());
                     LOG.info("Node added to oper {}", SouthboundUtil.getOvsdbNodeId(key));
                 }
                 Node removedNode = getRemoved(mod);
                 if (removedNode != null) {
-                    OPER_NODE_CACHE.remove(key);
+                    Node cacheRemovedNode = OPER_NODE_CACHE.remove(key);
                     LOG.info("Node deleted from oper {}", SouthboundUtil.getOvsdbNodeId(key));
+                    deletePendingJobs.remove(key);
 
                     OvsdbConnectionInstance connectionInstance = ovsdbConnectionManager.getConnectionInstance(key);
                     if (connectionInstance != null && connectionInstance.isActive()
-                            && connectionInstance.getHasDeviceOwnership() != null
-                            && connectionInstance.getHasDeviceOwnership()) {
-                        //Oops some one deleted the node held by me This should never happen.
+                        && connectionInstance.getHasDeviceOwnership() != null
+                        && connectionInstance.getHasDeviceOwnership()) {
+                        LOG.error("Unexpected oper node delete received, Adding the node {} back to oper datastore",
+                            SouthboundUtil.getOvsdbNodeId(key));
                         //put the node back in oper
                         txInvoker.invoke(transaction -> {
                             transaction.put(LogicalDatastoreType.OPERATIONAL, key, removedNode);
                         });
-
+                        OPER_NODE_CACHE.put(key, cacheRemovedNode);
+                        deletePendingJobs.put(key, new CopyOnWriteArrayList<>());
                     }
                 }
 
@@ -103,8 +113,6 @@ public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<
         });
     }
 
-    private static final Map<InstanceIdentifier<Node>, ScheduledFuture> TIMEOUT_FTS = new ConcurrentHashMap<>();
-
     public static void runAfterTimeoutIfNodeNotCreated(InstanceIdentifier<Node> iid, Runnable job) {
         ScheduledFuture<?> ft = TIMEOUT_FTS.get(iid);
         if (ft != null) {
@@ -117,6 +125,10 @@ public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<
             }
         }, SouthboundConstants.EOS_TIMEOUT, TimeUnit.SECONDS);
         TIMEOUT_FTS.put(iid, ft);
+    }
+
+    public static void runAfterNodeDeleted(InstanceIdentifier<Node> iid, Runnable job) {
+        CacheHelper.runAfterKeyIsRemoved(job, deletePendingJobs, iid);
     }
 
     private Node getCreated(DataObjectModification<Node> mod) {

@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.Futures;
 import java.net.InetAddress;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -77,6 +78,7 @@ public class OvsdbConnectionManagerTest {
     private Map<ConnectionInfo,OvsdbConnectionInstance> clients;
     private Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers;
     private Map<Entity, OvsdbConnectionInstance> entityConnectionMap;
+    private Map<Entity, List<OnlyOnceRunnable>> pendingEosReleaseJobs;
 
     @Mock private InstanceIdentifier<Node> iid;
 
@@ -90,6 +92,7 @@ public class OvsdbConnectionManagerTest {
         field(OvsdbConnectionManager.class, "ovsdbConnection").set(ovsdbConnManager, ovsdbConnection);
         field(OvsdbConnectionManager.class, "alreadyProcessedClients").set(ovsdbConnManager, new HashMap());
         entityConnectionMap = new ConcurrentHashMap<>();
+        pendingEosReleaseJobs = CacheHelper.createCacheForDeleteJobs();
 
         OvsdbConnectionInfo info = mock(OvsdbConnectionInfo.class);
         doReturn(mock(InetAddress.class)).when(info).getRemoteAddress();
@@ -122,7 +125,7 @@ public class OvsdbConnectionManagerTest {
 
         //TODO: Write unit tests for entity ownership service related code.
         suppress(MemberMatcher.method(OvsdbConnectionManager.class, "registerEntityForOwnership",
-                OvsdbConnectionInstance.class));
+                OvsdbConnectionInstance.class, Entity.class));
 
         ReadTransaction tx = mock(ReadTransaction.class);
         when(db.newReadOnlyTransaction()).thenReturn(tx);
@@ -178,7 +181,7 @@ public class OvsdbConnectionManagerTest {
 
         // TODO: Write unit tests for EntityOwnershipService
         suppress(MemberMatcher.method(OvsdbConnectionManager.class, "unregisterEntityForOwnership",
-                OvsdbConnectionInstance.class));
+                OvsdbConnectionInstance.class, Entity.class));
         instanceIdentifiers = new ConcurrentHashMap<>();
         field(OvsdbConnectionManager.class, "instanceIdentifiers").set(ovsdbConnManager, instanceIdentifiers);
         field(OvsdbConnectionManager.class, "nodeIdVsConnectionInstance").set(ovsdbConnManager, new HashMap<>());
@@ -212,7 +215,7 @@ public class OvsdbConnectionManagerTest {
 
         // TODO: Write unit tests for entity ownership service related code.
         suppress(MemberMatcher.method(OvsdbConnectionManager.class, "unregisterEntityForOwnership",
-                OvsdbConnectionInstance.class));
+                OvsdbConnectionInstance.class, Entity.class));
         ovsdbConnManager.disconnect(ovsdbNode);
         verify(ovsdbConnectionInstance).disconnect();
     }
@@ -363,7 +366,7 @@ public class OvsdbConnectionManagerTest {
                 OvsdbConnectionInstance.class));
         //TODO: Write unit tests for entity ownership service related code.
         suppress(MemberMatcher.method(OvsdbConnectionManager.class, "registerEntityForOwnership",
-                OvsdbConnectionInstance.class));
+                OvsdbConnectionInstance.class, Entity.class));
         assertEquals("ERROR", client, ovsdbConnManager.connect(PowerMockito.mock(InstanceIdentifier.class), ovsdbNode));
     }
 
@@ -376,6 +379,8 @@ public class OvsdbConnectionManagerTest {
         entityConnectionMap.put(entity, ovsdbConnInstance);
 
         field(OvsdbConnectionManager.class, "entityConnectionMap").set(ovsdbConnManager, entityConnectionMap);
+        field(OvsdbConnectionManager.class, "pendingEosReleaseJobs").set(ovsdbConnManager,
+            pendingEosReleaseJobs);
         doNothing().when(ovsdbConnManager).putConnectionInstance(any(ConnectionInfo.class),
             any(OvsdbConnectionInstance.class));
         EntityOwnershipChange ownershipChange = new EntityOwnershipChange(entity,

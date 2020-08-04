@@ -83,6 +83,7 @@ public class OvsdbConnectionInstance {
     private OvsdbNodeAugmentation initialCreateData = null;
     private final Map<UUID, InstanceIdentifier<Node>> ports = new ConcurrentHashMap<>();
     private final Map<String, InstanceIdentifier<Node>> portInterfaces = new ConcurrentHashMap<>();
+    private final Object deviceOwnershipCandidateRegistrationLock = new Object();
 
     OvsdbConnectionInstance(final ConnectionInfo key, final OvsdbClient client, final TransactionInvoker txInvoker,
                             final InstanceIdentifier<Node> iid) {
@@ -414,9 +415,12 @@ public class OvsdbConnectionInstance {
     }
 
     public void closeDeviceOwnershipCandidateRegistration() {
-        if (deviceOwnershipCandidateRegistration != null) {
-            this.deviceOwnershipCandidateRegistration.close();
-            setHasDeviceOwnership(Boolean.FALSE);
+        synchronized (deviceOwnershipCandidateRegistrationLock) {
+            if (deviceOwnershipCandidateRegistration != null) {
+                this.deviceOwnershipCandidateRegistration.close();
+                this.deviceOwnershipCandidateRegistration = null;
+                setHasDeviceOwnership(Boolean.FALSE);
+            }
         }
     }
 

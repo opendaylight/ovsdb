@@ -12,14 +12,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>ovsdb-binding-parent</artifactId>
-    <version>1.9.4-SNAPSHOT</version>
+    <version>1.9.4</version>
     <relativePath>../../commons/binding-parent</relativePath>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>southbound-impl</artifactId>
-  <version>1.9.4-SNAPSHOT</version>
+  <version>1.9.4</version>
   <packaging>bundle</packaging>
   <!-- <name> formatting is used by autorelease to parse and notify projects on
        build failure. Please do not modify this unless you have a good reason. -->
@@ -73,13 +73,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.infrautils</groupId>
       <artifactId>ready-api</artifactId>
-      <version>1.6.4-SNAPSHOT</version>
+      <version>1.6.4</version>
     </dependency>
     <!-- external dependencies -->
     <dependency>
       <groupId>org.opendaylight.infrautils</groupId>
       <artifactId>diagstatus-api</artifactId>
-      <version>1.6.4-SNAPSHOT</version>
+      <version>1.6.4</version>
     </dependency>
     <dependency>
       <groupId>javax.inject</groupId>

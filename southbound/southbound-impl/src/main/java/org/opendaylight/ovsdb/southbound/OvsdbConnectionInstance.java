@@ -47,7 +47,10 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.TableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
+import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
+import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
+import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangeEvent;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommand;
@@ -62,6 +65,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.southboundrpc.rev190820.configure.termination.point.with.qos.input.EgressQos;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.southboundrpc.rev190820.configure.termination.point.with.qos.input.IngressQos;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
@@ -430,6 +435,78 @@ public class OvsdbConnectionInstance {
 
     public OvsdbClient getOvsdbClient() {
         return client;
+    }
+
+    public void updateInterfaceWithIngressParams(String terminationPoint, List<IngressQos> ingressQos) {
+        LOG.info("updateInterfaceWithIngressParams terminationPoint {}, ingressQos {}", terminationPoint, ingressQos);
+        for (Map.Entry<TypedDatabaseSchema,TransactInvoker> entry: transactInvokers.entrySet()) {
+            TransactionBuilder transaction = new TransactionBuilder(this.client, entry.getKey());
+            // Update interface
+            Interface ovsInterface =
+                TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Interface.class);
+            updateInterfacewithQoS(ovsInterface, ingressQos);
+            Interface extraInterface = TyperUtils.getTypedRowWrapper(
+                transaction.getDatabaseSchema(), Interface.class);
+            extraInterface.setName("");
+            transaction.add(op.update(ovsInterface)
+                .where(extraInterface.getNameColumn().getSchema().opEqual(terminationPoint))
+                .build());
+            LOG.trace("Calling invoking of transaction to update the Qos Ingress Parameter");
+            invoke(transaction);
+        }
+    }
+
+    private static void updateInterfacewithQoS(final Interface ovsInterface, List<IngressQos> ingressQosList) {
+        for (IngressQos ingressQos: ingressQosList) {
+            LOG.trace("updateInterfacewithQoS {}", ingressQos);
+            switch (ingressQos.getIngressQosParam()) {
+                case "ingress_policing_burst" :
+                    ovsInterface.setIngressPolicingBurst(Long.valueOf(ingressQos.getIngressQosParamValue()));
+                    break;
+                case "ingress_policing_rate" :
+                    ovsInterface.setIngressPolicingRate(Long.valueOf(ingressQos.getIngressQosParamValue()));
+                    break;
+                default :
+                    LOG.warn("Unknown QoS configuration {}:{} on interface {}, Ignoring",
+                        ingressQos.getIngressQosParam(), ingressQos.getIngressQosParamValue(), ovsInterface.getName());
+            }
+        }
+    }
+
+    public void updatePortWithEgressParams(String terminationPoint, List<EgressQos> egressQos) {
+        LOG.info("updatePortWithEgressParams terminationPoint {}, egressQos {}", terminationPoint, egressQos);
+        for (Map.Entry<TypedDatabaseSchema,TransactInvoker> entry: transactInvokers.entrySet()) {
+            TransactionBuilder transaction = new TransactionBuilder(this.client, entry.getKey());
+            // Update interface
+            Port ovsPort = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
+            updatePortWithQos(ovsPort, egressQos);
+            Port extraPort = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), Port.class);
+            extraPort.setName("");
+            transaction.add(op.update(ovsPort)
+                .where(extraPort.getNameColumn().getSchema().opEqual(terminationPoint))
+                .build());
+            LOG.trace("Calling invoking of transaction to update the Qos Egress Parameter for port {}",
+                terminationPoint);
+            invoke(transaction);
+        }
+    }
+
+    private static void updatePortWithQos(final Port ovsPort, List<EgressQos> egressQosList) {
+        for (EgressQos egressQos: egressQosList) {
+            LOG.trace("updatePortWithQos {}", egressQos);
+            switch (egressQos.getEgressQosParam()) {
+                case "qos":
+                    Set<UUID> qosSet = new HashSet<>();
+                    if (egressQos.getEgressQosParamValue() != null && !egressQos.getEgressQosParamValue().isEmpty()) {
+                        qosSet.add(new UUID(egressQos.getEgressQosParamValue()));
+                    }
+                    ovsPort.setQos(qosSet);
+                    break;
+                default:
+                    LOG.warn("Egress Param {}:{} not support on configuration on Port {}",
+                        egressQos.getEgressQosParam(), egressQos.getEgressQosParamValue(), ovsPort.getName());
+            }
+        }
     }
 
 }

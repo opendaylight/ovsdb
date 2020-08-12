@@ -1,0 +1,57 @@
+module south-bound-rpc {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:southboundrpc";
+    prefix "southboundrpc";
+
+    import yang-ext { prefix "ext"; }
+    import ietf-inet-types { prefix inet; revision-date 2013-07-15; }
+    import ietf-yang-types { prefix yang; revision-date "2013-07-15";}
+
+    revision "2019-08-20" {
+        description "RPC's for Qos Ingress and Egress Configuration";
+    }
+
+    identity node-context {
+        description "A node-context is a classifier for node elements which
+                     allows an RPC to provide a service on behalf of a
+                     particular element in the data tree.";
+    }
+
+    rpc configure-termination-point-with-qos {
+      description "Configure Termination Point entities with Qos";
+      input {
+            leaf node {
+                ext:context-reference "node-context";
+                type "instance-identifier";
+                mandatory true;
+            }
+            leaf termination-point-name {
+                type string;
+                mandatory true;
+            }
+	    list ingress-qos {
+                key "ingress-qos-param";
+                leaf ingress-qos-param {
+                    type string;
+                }
+                leaf ingress-qos-param-value {
+                    type string;
+                }
+	    }
+            list egress-qos {
+                key "egress-qos-param";
+                leaf egress-qos-param {
+                    type string;
+                }
+                leaf egress-qos-param-value {
+                    type string;
+                }
+            }
+      }
+      output {
+          leaf status {
+              type string;
+          }
+      }
+   }
+}

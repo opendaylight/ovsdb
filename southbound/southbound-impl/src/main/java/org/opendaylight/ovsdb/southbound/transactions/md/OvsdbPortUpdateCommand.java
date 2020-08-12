@@ -12,12 +12,14 @@ import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
@@ -390,44 +392,89 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     }
 
     private void updateQos(final ReadWriteTransaction transaction, final Node node,
-                           InstanceIdentifier<TerminationPoint> tpPath, final Entry<UUID, Port> port,
-                           final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+        InstanceIdentifier<TerminationPoint> tpPath, final Entry<UUID, Port> port,
+        final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
         if (port.getValue() == null) {
             return;
         }
-        Collection<UUID> qosUuidCol = port.getValue().getQosColumn().getData();
-        if (!qosUuidCol.isEmpty()) {
-            UUID qosUuid = qosUuidCol.iterator().next();
 
-            NodeId nodeId = node.getNodeId();
-            OvsdbNodeAugmentation ovsdbNode = node.augmentation(OvsdbNodeAugmentation.class);
+        Collection<UUID> newQoSList = (port.getValue() != null && port.getValue().getQosColumn() != null)
+            ? port.getValue().getQosColumn().getData() : Collections.emptyList();
+        Collection<UUID> oldQoSList = Collections.emptyList();
+        NodeId nodeId = node.getNodeId();
+        OvsdbNodeAugmentation ovsdbNode = node.augmentation(OvsdbNodeAugmentation.class);
+        if (portOldRows.containsKey(port.getKey())
+            && portOldRows.get(port.getKey()).getQosColumn() != null) {
+            oldQoSList = portOldRows.get(port.getKey()).getQosColumn().getData();
+        }
 
-            // Delete an older QoS entry
-            if (portOldRows.containsKey(port.getKey()) && portOldRows.get(port.getKey()).getQosColumn() != null) {
-                Collection<UUID> oldQos = portOldRows.get(port.getKey()).getQosColumn().getData();
-                if (!oldQos.isEmpty()) {
-                    UUID oldQosUuid = oldQos.iterator().next();
-                    if (!oldQosUuid.equals(qosUuid)) {
-                        InstanceIdentifier<QosEntries> oldQosIid = getQosIid(nodeId, ovsdbNode, oldQosUuid);
-                        if (oldQosIid != null) {
-                            InstanceIdentifier<QosEntry> oldPortQosIid = tpPath
-                                .augmentation(OvsdbTerminationPointAugmentation.class)
-                                .child(QosEntry.class,
-                                      new QosEntryKey(Long.valueOf(SouthboundConstants.PORT_QOS_LIST_KEY)));
-                            transaction.delete(LogicalDatastoreType.OPERATIONAL, oldPortQosIid);
-                        }
-                    }
-                }
-            }
+        LOG.trace("oldQoSList {}, newQoSList {}" , oldQoSList, newQoSList);
 
-            InstanceIdentifier<QosEntries> qosIid = getQosIid(nodeId, ovsdbNode, qosUuid);
-            if (qosIid != null) {
-                List<QosEntry> qosList = new ArrayList<>();
+        if (newQoSList != null && !newQoSList.isEmpty() && (oldQoSList == null || oldQoSList
+            .isEmpty())) {
+            // case 1 QoS apply to port
+            List<QosEntry> qosList = new ArrayList<>();
+            for (UUID qosUuid : newQoSList) {
+                InstanceIdentifier<QosEntries> qosIid = getQosIid(nodeId, ovsdbNode, qosUuid);
                 OvsdbQosRef qosRef = new OvsdbQosRef(qosIid);
                 qosList.add(new QosEntryBuilder()
                     .withKey(new QosEntryKey(Long.valueOf(SouthboundConstants.PORT_QOS_LIST_KEY)))
                     .setQosRef(qosRef).build());
-                ovsdbTerminationPointBuilder.setQosEntry(qosList);
+            }
+            ovsdbTerminationPointBuilder.setQosEntry(qosList);
+        }
+
+        if (oldQoSList != null && !oldQoSList.isEmpty() && (newQoSList == null || newQoSList
+            .isEmpty())) {
+            //case 2 QoS remove on port
+            for (UUID qosUuid : oldQoSList) {
+                InstanceIdentifier<QosEntries> oldQosIid = getQosIid(nodeId, ovsdbNode, qosUuid);
+                if (oldQosIid != null) {
+                    InstanceIdentifier<QosEntry> oldPortQosIid = tpPath
+                        .augmentation(OvsdbTerminationPointAugmentation.class)
+                        .child(QosEntry.class,
+                            new QosEntryKey(Long.valueOf(SouthboundConstants.PORT_QOS_LIST_KEY)));
+                    transaction.delete(LogicalDatastoreType.OPERATIONAL, oldPortQosIid);
+                }
+            }
+            ovsdbTerminationPointBuilder.setQosEntry(new ArrayList<>());
+        }
+
+        if ((oldQoSList != null && !oldQoSList.isEmpty()) && (newQoSList != null && !newQoSList
+            .isEmpty())) {
+            Collection<UUID> oldQoSList2 = oldQoSList;
+            // case 3 QoS change on port from one to another
+            Collection<UUID> removedQoSList = oldQoSList.stream()
+                .filter(uuid -> (!newQoSList.contains(uuid)))
+                .collect(Collectors.toList());
+            Collection<UUID> addedQoSList = newQoSList.stream()
+                .filter(uuid -> (!oldQoSList2.contains(uuid)))
+                .collect(Collectors.toList());
+
+            LOG.trace("Adding qos Uuid {}", addedQoSList);
+            LOG.trace("Removed qos Uuid {}", removedQoSList);
+
+            // add all the newQoSList
+            List<QosEntry> qosList = new ArrayList<>();
+            for (UUID qosUuid : newQoSList) {
+                InstanceIdentifier<QosEntries> qosIid = getQosIid(nodeId, ovsdbNode, qosUuid);
+                OvsdbQosRef qosRef = new OvsdbQosRef(qosIid);
+                qosList.add(new QosEntryBuilder()
+                    .withKey(new QosEntryKey(Long.valueOf(SouthboundConstants.PORT_QOS_LIST_KEY)))
+                    .setQosRef(qosRef).build());
+            }
+            ovsdbTerminationPointBuilder.setQosEntry(qosList);
+
+            // remove the qos entries
+            for (UUID qosUuid : removedQoSList) {
+                InstanceIdentifier<QosEntries> oldQosIid = getQosIid(nodeId, ovsdbNode, qosUuid);
+                if (oldQosIid != null) {
+                    InstanceIdentifier<QosEntry> oldPortQosIid = tpPath
+                        .augmentation(OvsdbTerminationPointAugmentation.class)
+                        .child(QosEntry.class,
+                            new QosEntryKey(Long.valueOf(SouthboundConstants.PORT_QOS_LIST_KEY)));
+                    transaction.delete(LogicalDatastoreType.OPERATIONAL, oldPortQosIid);
+                }
             }
         }
     }
@@ -436,11 +483,13 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     private InstanceIdentifier<QosEntries> getQosIid(NodeId nodeId, OvsdbNodeAugmentation ovsdbNode, UUID qosUuid) {
         // Search for the QoS entry first in the operational datastore
         final Uuid uuid = new Uuid(qosUuid.toString());
-        for (QosEntries qosEntry : ovsdbNode.nonnullQosEntries().values()) {
-            if (uuid.equals(qosEntry.getQosUuid())) {
-                return SouthboundMapper.createInstanceIdentifier(nodeId)
+        if (ovsdbNode != null) {
+            for (QosEntries qosEntry : ovsdbNode.nonnullQosEntries().values()) {
+                if (uuid.equals(new Uuid(qosUuid.toString()))) {
+                    return SouthboundMapper.createInstanceIdentifier(nodeId)
                         .augmentation(OvsdbNodeAugmentation.class)
-                        .child(QosEntries.class, qosEntry.key());
+                        .child(QosEntries.class, new QosEntriesKey(qosEntry.getQosId()));
+                }
             }
         }
 

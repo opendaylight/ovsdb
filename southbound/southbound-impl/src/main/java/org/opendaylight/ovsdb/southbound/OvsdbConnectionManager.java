@@ -51,6 +51,7 @@ import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask;
 import org.opendaylight.ovsdb.southbound.reconciliation.configuration.BridgeConfigReconciliationTask;
 import org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask;
+import org.opendaylight.ovsdb.southbound.rpc.SouthBoundRpcServiceImpl;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeRemoveCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.serviceutils.upgrade.UpgradeState;
@@ -88,12 +89,14 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private final ReconciliationManager reconciliationManager;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
     private final UpgradeState upgradeState;
+    private final SouthBoundRpcServiceImpl southBoundRpcService;
 
     public OvsdbConnectionManager(final DataBroker db,final TransactionInvoker txInvoker,
                                   final EntityOwnershipService entityOwnershipService,
                                   final OvsdbConnection ovsdbConnection,
                                   final InstanceIdentifierCodec instanceIdentifierCodec,
-                                  final UpgradeState upgradeState) {
+                                  final UpgradeState upgradeState,
+                                  final SouthBoundRpcServiceImpl southBoundRpcService) {
         this.db = db;
         this.txInvoker = txInvoker;
         this.entityOwnershipService = entityOwnershipService;
@@ -102,6 +105,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         this.reconciliationManager = new ReconciliationManager(db, instanceIdentifierCodec);
         this.instanceIdentifierCodec = instanceIdentifierCodec;
         this.upgradeState = upgradeState;
+        this.southBoundRpcService = southBoundRpcService;
     }
 
     @Override
@@ -483,6 +487,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             if (!upgradeState.isUpgradeInProgress()) {
                 reconcileBridgeConfigurations(ovsdbConnectionInstance);
             }
+            southBoundRpcService.registerRpc(SouthboundUtil
+                .getOvsdbNodeId(ovsdbConnectionInstance.getInstanceIdentifier()));
         } else {
             //You were owner of the device, but now you are not. With the current ownership
             //grant mechanism, this scenario should not occur. Because this scenario will occur
@@ -620,6 +626,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private void unregisterEntityForOwnership(final OvsdbConnectionInstance ovsdbConnectionInstance) {
         ovsdbConnectionInstance.closeDeviceOwnershipCandidateRegistration();
         entityConnectionMap.remove(ovsdbConnectionInstance.getConnectedEntity(), ovsdbConnectionInstance);
+        southBoundRpcService.deregisterRpc(SouthboundUtil
+            .getOvsdbNodeId(ovsdbConnectionInstance.getInstanceIdentifier()));
     }
 
     private void retryConnection(final InstanceIdentifier<Node> iid, final OvsdbNodeAugmentation ovsdbNode,

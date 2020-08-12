@@ -40,6 +40,7 @@ import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.southbound.reconciliation.OvsdbUpgradeStateListener;
+import org.opendaylight.ovsdb.southbound.rpc.SouthBoundRpcServiceImpl;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.serviceutils.upgrade.UpgradeState;
@@ -82,6 +83,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     private static List<String> reconcileBridgeInclusionList = new ArrayList<>();
     private static List<String> reconcileBridgeExclusionList = new ArrayList<>();
     private OvsdbUpgradeStateListener ovsdbUpgradeStateListener;
+    private final SouthBoundRpcServiceImpl southBoundRpcService;
 
     @Inject
     public SouthboundProvider(@Reference final DataBroker dataBroker,
@@ -91,7 +93,8 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
                               @Reference final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
                               @Reference final SystemReadyMonitor systemReadyMonitor,
                               @Reference final DiagStatusService diagStatusService,
-                              @Reference final UpgradeState upgradeState) {
+                              @Reference final UpgradeState upgradeState,
+                              @Reference final SouthBoundRpcServiceImpl southBoundRpcService) {
         SouthboundProvider.db = dataBroker;
         this.entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
@@ -101,6 +104,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
                 bindingNormalizedNodeSerializer);
         this.systemReadyMonitor = systemReadyMonitor;
         this.upgradeState = upgradeState;
+        this.southBoundRpcService = southBoundRpcService;
         LOG.info("SouthboundProvider ovsdbConnectionService Initialized");
     }
 
@@ -113,14 +117,14 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         ovsdbStatusProvider.reportStatus(ServiceState.STARTING, "OVSDB initialization in progress");
         this.txInvoker = new TransactionInvokerImpl(db);
         cm = new OvsdbConnectionManager(db, txInvoker, entityOwnershipService, ovsdbConnection,
-                instanceIdentifierCodec, upgradeState);
+                instanceIdentifierCodec, upgradeState, southBoundRpcService);
         ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(db, cm, instanceIdentifierCodec);
         ovsdbOperGlobalListener = new OvsdbOperGlobalListener(db, cm, txInvoker);
 
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
                 new SouthboundPluginInstanceEntityOwnershipListener(this,this.entityOwnershipService);
-
+        southBoundRpcService.setCm(cm);
         //register instance entity to get the ownership of the provider
         Entity instanceEntity = new Entity(ENTITY_TYPE, ENTITY_TYPE);
         try {

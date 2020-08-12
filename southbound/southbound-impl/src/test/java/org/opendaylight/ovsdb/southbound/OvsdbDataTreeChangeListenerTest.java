@@ -21,6 +21,7 @@ import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBro
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.southbound.rpc.SouthBoundRpcServiceImpl;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
 import org.opendaylight.serviceutils.upgrade.UpgradeState;
@@ -49,10 +50,12 @@ public class OvsdbDataTreeChangeListenerTest extends AbstractConcurrentDataBroke
         dataBroker = getDataBroker();
         EntityOwnershipService entityOwnershipService = mock(EntityOwnershipService.class);
         InstanceIdentifierCodec instanceIdentifierCodec = mock(InstanceIdentifierCodec.class);
+        SouthBoundRpcServiceImpl southBoundRpcService = mock(SouthBoundRpcServiceImpl.class);
         UpgradeState upgradeState = mock(UpgradeState.class);
         listener = new OvsdbDataTreeChangeListener(dataBroker,
                 new OvsdbConnectionManager(dataBroker, new TransactionInvokerImpl(dataBroker), entityOwnershipService,
-                        ovsdbConnection, instanceIdentifierCodec, upgradeState), instanceIdentifierCodec);
+                        ovsdbConnection, instanceIdentifierCodec, upgradeState, southBoundRpcService),
+            instanceIdentifierCodec);
     }
 
     @Test

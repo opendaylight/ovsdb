@@ -125,11 +125,13 @@ public class TransactionInvokerImpl implements TransactionInvoker,TransactionCha
             @Override
             public void onSuccess(final Object result) {
                 forgetSuccessfulTransaction(transaction);
+                command.onSuccess();
             }
 
             @Override
             public void onFailure(final Throwable throwable) {
                 // NOOP - handled by failure of transaction chain
+                command.onFailure();
             }
         }, MoreExecutors.directExecutor());
     }

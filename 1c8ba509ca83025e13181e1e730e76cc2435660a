@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a0402bd_a58e6824",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 5346
+      },
+      "writtenOn": "2020-08-18T12:12:30Z",
+      "side": 1,
+      "message": "Better to remove this commented code to have cleanner code.",
+      "range": {
+        "startLine": 88,
+        "startChar": 7,
+        "endLine": 114,
+        "endChar": 10
+      },
+      "revId": "1c8ba509ca83025e13181e1e730e76cc2435660a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "71d19326_9379ed64",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 5346
+      },
+      "writtenOn": "2020-08-18T12:12:30Z",
+      "side": 1,
+      "message": "Why commenting this code? \nThis code handles disconnect when Node is removed.\nThe new code handles disconnect retaining the node object.\nYou can retain both the implementations.",
+      "revId": "1c8ba509ca83025e13181e1e730e76cc2435660a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a9bbcb43_16a1a6da",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 5346
+      },
+      "writtenOn": "2020-08-18T12:12:30Z",
+      "side": 1,
+      "message": "Need to have better names.\nMaybe we can use \"disconnect()\" for this method and \"remove()\" for other method.",
+      "range": {
+        "startLine": 290,
+        "startChar": 17,
+        "endLine": 290,
+        "endChar": 28
+      },
+      "revId": "1c8ba509ca83025e13181e1e730e76cc2435660a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c577d9a8_41587502",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDisconnectCliCmd.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 5346
+      },
+      "writtenOn": "2020-08-18T12:12:30Z",
+      "side": 1,
+      "message": "2020",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "1c8ba509ca83025e13181e1e730e76cc2435660a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    }
+  ]
+}

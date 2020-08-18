@@ -63,4 +63,20 @@ public class HwvtepOperationalCommandAggregator implements TransactionCommand {
         }
         connectionInstance.getDeviceInfo().onOperDataAvailable();
     }
+
+    @Override
+    public void onSuccess() {
+
+        for (TransactionCommand command : commands) {
+            command.onSuccess();
+        }
+    }
+
+    @Override
+    public void onFailure() {
+        for (TransactionCommand command : commands) {
+            command.onFailure();
+        }
+    }
+
 }

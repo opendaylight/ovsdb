@@ -33,7 +33,7 @@ public class TransactCommandAggregator implements TransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(TransactCommandAggregator.class);
 
     private final List<TransactCommand> commands = new ArrayList<>();
-    private AtomicInteger retryCount = new AtomicInteger(HwvtepSouthboundConstants.CHAIN_RETRY_COUNT);
+    private final AtomicInteger retryCount = new AtomicInteger(HwvtepSouthboundConstants.CHAIN_RETRY_COUNT);
     private final HwvtepOperationalState operationalState;
     /* stores the modified and deleted data for each child type of each node id
        Map<nodeid , Pair < updated, deleted >
@@ -111,16 +111,16 @@ public class TransactCommandAggregator implements TransactCommand {
         }
     }
 
-    private boolean isMacOnlyUpdate(final Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
-                                    final Map<Class<? extends Identifiable>, List<Identifiable>> deletedData) {
+    private static boolean isMacOnlyUpdate(final Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
+                                           final Map<Class<? extends Identifiable>, List<Identifiable>> deletedData) {
         return updatedData.containsKey(RemoteUcastMacs.class) && updatedData.size() == 1
                 || deletedData.containsKey(RemoteUcastMacs.class) && deletedData.size() == 1;
     }
 
-    private void extractDataChanged(final InstanceIdentifier<Node> key,
-                                    final DataObjectModification<Node> mod,
-                                    final Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
-                                    final Map<Class<? extends Identifiable>, List<Identifiable>> deletedData) {
+    private static void extractDataChanged(final InstanceIdentifier<Node> key,
+                                           final DataObjectModification<Node> mod,
+                                           final Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
+                                           final Map<Class<? extends Identifiable>, List<Identifiable>> deletedData) {
 
         extractDataChanged(mod.getModifiedChildren(), updatedData, deletedData);
         DataObjectModification<HwvtepGlobalAugmentation> aug = mod.getModifiedAugmentation(
@@ -135,9 +135,10 @@ public class TransactCommandAggregator implements TransactCommand {
         }
     }
 
-    private void extractDataChanged(final Collection<? extends DataObjectModification<? extends DataObject>> children,
-                                    final Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
-                                    final Map<Class<? extends Identifiable>, List<Identifiable>> deletedData) {
+    private static void extractDataChanged(
+            final Collection<? extends DataObjectModification<? extends DataObject>> children,
+                    final Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
+                    final Map<Class<? extends Identifiable>, List<Identifiable>> deletedData) {
         if (children == null) {
             return;
         }
@@ -175,8 +176,8 @@ public class TransactCommandAggregator implements TransactCommand {
         }
     }
 
-    private void addToUpdatedData(Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
-                                  Class<? extends Identifiable> childClass, Identifiable identifiable) {
+    private static void addToUpdatedData(Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
+                                         Class<? extends Identifiable> childClass, Identifiable identifiable) {
         updatedData.computeIfAbsent(childClass, (cls) -> new ArrayList<>());
         updatedData.get(childClass).add(identifiable);
     }

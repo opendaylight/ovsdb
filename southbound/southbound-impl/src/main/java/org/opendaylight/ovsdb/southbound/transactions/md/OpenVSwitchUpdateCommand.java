@@ -195,7 +195,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         ovsdbNodeBuilder.setOpenvswitchExternalIds(externalIdsList);
     }
 
-    private void setInterfaceTypes(
+    private static void setInterfaceTypes(
             OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
             OpenVSwitch openVSwitch) {
         try {
@@ -218,9 +218,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setDataPathTypes(
-            OvsdbNodeAugmentationBuilder ovsdbNodeBuilder,
-            OpenVSwitch openVSwitch) {
+    private static void setDataPathTypes(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, OpenVSwitch openVSwitch) {
         try {
             Set<String> dptypes = openVSwitch.getDatapathTypesColumn()
                     .getData();
@@ -242,7 +240,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setOvsVersion(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, OpenVSwitch openVSwitch) {
+    private static void setOvsVersion(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, OpenVSwitch openVSwitch) {
         try {
             ovsdbNodeBuilder.setOvsVersion(openVSwitch.getOvsVersionColumn().getData().iterator().next());
         } catch (NoSuchElementException e) {
@@ -250,7 +248,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setDbVersion(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, OpenVSwitch openVSwitch) {
+    private static void setDbVersion(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, OpenVSwitch openVSwitch) {
         try {
             ovsdbNodeBuilder.setDbVersion(openVSwitch.getDbVersionColumn().getData().iterator().next());
         } catch (NoSuchElementException e) {

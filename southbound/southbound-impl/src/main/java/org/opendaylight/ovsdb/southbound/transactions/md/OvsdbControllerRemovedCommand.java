@@ -32,9 +32,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
 
     private final InstanceIdentifierCodec instanceIdentifierCodec;
-    private Map<UUID, Bridge> oldBridgeRows;
-    private Map<UUID, Controller> removedControllerRows;
-    private Map<UUID, Bridge> updatedBridgeRows;
+    private final Map<UUID, Bridge> oldBridgeRows;
+    private final Map<UUID, Controller> removedControllerRows;
+    private final Map<UUID, Bridge> updatedBridgeRows;
 
     public OvsdbControllerRemovedCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
@@ -56,7 +56,7 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void deleteControllers(ReadWriteTransaction transaction,
+    private static void deleteControllers(ReadWriteTransaction transaction,
             List<InstanceIdentifier<ControllerEntry>> controllerEntryIids) {
         for (InstanceIdentifier<ControllerEntry> controllerEntryIid: controllerEntryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, controllerEntryIid);

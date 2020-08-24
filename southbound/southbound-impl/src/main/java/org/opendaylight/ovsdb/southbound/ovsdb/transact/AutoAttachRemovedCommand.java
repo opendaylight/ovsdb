@@ -58,9 +58,9 @@ public class AutoAttachRemovedCommand implements TransactCommand {
                 TransactUtils.extractUpdated(events, OvsdbNodeAugmentation.class));
     }
 
-    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-                         final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> original,
-                         final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
+    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+                                final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> original,
+                                final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
 
         for (final Map.Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originalEntry :
                 original.entrySet()) {
@@ -93,7 +93,7 @@ public class AutoAttachRemovedCommand implements TransactCommand {
         }
     }
 
-    private void deleteAutoAttach(final TransactionBuilder transaction,
+    private static void deleteAutoAttach(final TransactionBuilder transaction,
             final InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid,
             final Uuid autoattachUuid) {
 

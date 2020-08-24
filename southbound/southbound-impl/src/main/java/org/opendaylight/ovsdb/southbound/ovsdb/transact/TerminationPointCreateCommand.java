@@ -78,7 +78,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
                 TransactUtils.extractCreatedOrUpdated(modifications, Node.class), instanceIdentifierCodec);
     }
 
-    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
                     createdTerminationPoints,
             final Map<InstanceIdentifier<Node>, Node> nodes, final InstanceIdentifierCodec instanceIdentifierCodec) {
@@ -130,7 +130,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
 
     }
 
-    private void createInterface(
+    private static void createInterface(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
         ovsInterface.setName(terminationPoint.getName());
@@ -153,7 +153,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         }
     }
 
-    private void createPort(
+    private static void createPort(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port port, final String interfaceUuid, final String opendaylightIid) {
 
@@ -166,7 +166,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         createPortExternalIds(terminationPoint, port, opendaylightIid);
     }
 
-    private void createOfPort(
+    private static void createOfPort(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -176,7 +176,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         }
     }
 
-    private void createOfPortRequest(
+    private static void createOfPortRequest(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -186,7 +186,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         }
     }
 
-    private void createInterfaceOptions(
+    private static void createInterfaceOptions(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -201,7 +201,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         }
     }
 
-    private void createInterfaceExternalIds(
+    private static void createInterfaceExternalIds(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -222,7 +222,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         }
     }
 
-    private void createInterfaceOtherConfig(
+    private static void createInterfaceOtherConfig(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -242,7 +242,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         }
     }
 
-    private void createInterfaceLldp(
+    private static void createInterfaceLldp(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -262,8 +262,8 @@ public class TerminationPointCreateCommand implements TransactCommand {
         }
     }
 
-    private void createInterfaceBfd(final OvsdbTerminationPointAugmentation terminationPoint,
-                    final Interface ovsInterface) {
+    private static void createInterfaceBfd(final OvsdbTerminationPointAugmentation terminationPoint,
+            final Interface ovsInterface) {
 
         try {
             Map<InterfaceBfdKey, InterfaceBfd> interfaceBfdList = terminationPoint.getInterfaceBfd();
@@ -280,8 +280,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         }
     }
 
-    private void createPortExternalIds(
-            final OvsdbTerminationPointAugmentation terminationPoint,
+    private static void createPortExternalIds(final OvsdbTerminationPointAugmentation terminationPoint,
             final Port port, final String opendaylightIid) {
 
         // Set the iid external_id
@@ -306,7 +305,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         }
     }
 
-    private void createPortVlanTag(
+    private static void createPortVlanTag(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port port) {
 
@@ -317,7 +316,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         }
     }
 
-    private void createPortVlanTrunk(
+    private static void createPortVlanTrunk(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port port) {
 
@@ -333,7 +332,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         }
     }
 
-    private void createPortVlanMode(
+    private static void createPortVlanMode(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port port) {
         if (terminationPoint.getVlanMode() != null) {
@@ -344,7 +343,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
         }
     }
 
-    private void createPortOtherConfig(
+    private static void createPortOtherConfig(
             final OvsdbTerminationPointAugmentation terminationPoint,
             final Port ovsPort) {
         Map<PortOtherConfigsKey, PortOtherConfigs> portOtherConfigs =

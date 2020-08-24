@@ -160,7 +160,8 @@ public class PhysicalPortUpdateCommand
         return;
     }
 
-    private void setName(final PhysicalPort physicalPort, final HwvtepPhysicalPortAugmentation inputPhysicalPort) {
+    private static void setName(final PhysicalPort physicalPort,
+            final HwvtepPhysicalPortAugmentation inputPhysicalPort) {
         if (inputPhysicalPort.getHwvtepNodeName() != null) {
             physicalPort.setName(inputPhysicalPort.getHwvtepNodeName().getValue());
         }

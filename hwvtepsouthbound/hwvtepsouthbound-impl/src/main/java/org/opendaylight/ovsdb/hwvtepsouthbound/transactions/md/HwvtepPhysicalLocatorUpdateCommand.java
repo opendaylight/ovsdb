@@ -83,7 +83,7 @@ public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionComma
         }
     }
 
-    private void setEncapsType(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder,
+    private static void setEncapsType(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder,
             PhysicalLocator locator) {
         String encapsType = locator.getEncapsulationTypeColumn().getData();
         if (HwvtepSouthboundMapper.createEncapsulationType(encapsType) != null) {
@@ -91,7 +91,7 @@ public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionComma
         }
     }
 
-    private void setDstIp(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder,
+    private static void setDstIp(HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder,
             PhysicalLocator locator) {
         tpAugmentationBuilder.setDstIp(IpAddressBuilder.getDefaultInstance(locator.getDstIpColumn().getData()));
     }

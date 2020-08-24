@@ -124,7 +124,7 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
     }
 
 
-    private InstanceIdentifier<Node> createInstanceIdentifier(final String nodeIdString) {
+    private static InstanceIdentifier<Node> createInstanceIdentifier(final String nodeIdString) {
         NodeId nodeId = new NodeId(new Uri(nodeIdString));
         NodeKey nodeKey = new NodeKey(nodeId);
         TopologyKey topoKey = new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID);

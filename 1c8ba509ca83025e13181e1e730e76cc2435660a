@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6978b635_fa4e678e",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2020-08-24T03:55:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a0402bd_a58e6824",
+      "range": {
+        "startLine": 88,
+        "startChar": 7,
+        "endLine": 114,
+        "endChar": 10
+      },
+      "revId": "1c8ba509ca83025e13181e1e730e76cc2435660a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "71d19326_9379ed64",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
         "patchSetId": 4
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "b0555d11_13787156",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2020-08-24T03:55:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "71d19326_9379ed64",
+      "revId": "1c8ba509ca83025e13181e1e730e76cc2435660a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a9bbcb43_16a1a6da",
         "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
         "patchSetId": 4
@@ -53,6 +95,30 @@
       "writtenOn": "2020-08-18T12:12:30Z",
       "side": 1,
       "message": "Need to have better names.\nMaybe we can use \"disconnect()\" for this method and \"remove()\" for other method.",
+      "range": {
+        "startLine": 290,
+        "startChar": 17,
+        "endLine": 290,
+        "endChar": 28
+      },
+      "revId": "1c8ba509ca83025e13181e1e730e76cc2435660a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "64789695_2605687d",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDataChangeListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2020-08-24T03:55:19Z",
+      "side": 1,
+      "message": "renamed as disconnectViaCli",
+      "parentUuid": "a9bbcb43_16a1a6da",
       "range": {
         "startLine": 290,
         "startChar": 17,
@@ -85,6 +151,30 @@
       "revId": "1c8ba509ca83025e13181e1e730e76cc2435660a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "081dd164_9014955d",
+        "filename": "hwvtepsouthbound/hwvtepsouthbound-impl/src/main/java/org/opendaylight/ovsdb/hwvtepsouthbound/HwvtepDisconnectCliCmd.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 6545
+      },
+      "writtenOn": "2020-08-24T03:55:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c577d9a8_41587502",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "1c8ba509ca83025e13181e1e730e76cc2435660a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

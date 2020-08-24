@@ -36,7 +36,7 @@ public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbOperGlobalListener.class);
 
     private ListenerRegistration<OvsdbOperGlobalListener> registration;
-    private DataBroker db;
+    private final DataBroker db;
     private final OvsdbConnectionManager ovsdbConnectionManager;
     private final TransactionInvoker txInvoker;
 
@@ -119,22 +119,22 @@ public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<
         TIMEOUT_FTS.put(iid, ft);
     }
 
-    private Node getCreated(DataObjectModification<Node> mod) {
-        if ((mod.getModificationType() == DataObjectModification.ModificationType.WRITE)
-                && (mod.getDataBefore() == null)) {
+    private static Node getCreated(DataObjectModification<Node> mod) {
+        if (mod.getModificationType() == DataObjectModification.ModificationType.WRITE
+                && mod.getDataBefore() == null) {
             return mod.getDataAfter();
         }
         return null;
     }
 
-    private Node getRemoved(DataObjectModification<Node> mod) {
+    private static Node getRemoved(DataObjectModification<Node> mod) {
         if (mod.getModificationType() == DataObjectModification.ModificationType.DELETE) {
             return mod.getDataBefore();
         }
         return null;
     }
 
-    private Node getUpdated(DataObjectModification<Node> mod) {
+    private static Node getUpdated(DataObjectModification<Node> mod) {
         Node node = null;
         switch (mod.getModificationType()) {
             case SUBTREE_MODIFIED:
@@ -151,12 +151,9 @@ public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<
         return node;
     }
 
-    private InstanceIdentifier<Node> getWildcardPath() {
-        InstanceIdentifier<Node> path = InstanceIdentifier
-                .create(NetworkTopology.class)
+    private static InstanceIdentifier<Node> getWildcardPath() {
+        return InstanceIdentifier.create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class);
-        return path;
     }
-
 }

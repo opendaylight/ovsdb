@@ -144,7 +144,7 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         return null;
     }
 
-    private MacAddress getMacAddress(String mac) {
+    private static MacAddress getMacAddress(String mac) {
         if (mac.equals(HwvtepSouthboundConstants.UNKNOWN_DST_STRING)) {
             return HwvtepSouthboundConstants.UNKNOWN_DST_MAC;
         } else {

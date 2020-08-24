@@ -39,8 +39,8 @@ import org.slf4j.LoggerFactory;
 public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbManagersUpdateCommand.class);
 
-    private Map<UUID, Manager> updatedManagerRows;
-    private Map<UUID, OpenVSwitch> updatedOpenVSwitchRows;
+    private final Map<UUID, Manager> updatedManagerRows;
+    private final Map<UUID, OpenVSwitch> updatedOpenVSwitchRows;
 
     public OvsdbManagersUpdateCommand(OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
@@ -151,7 +151,7 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
                 .child(ManagerEntry.class, managerEntry.key());
     }
 
-    private Map<Uri, Manager> getUriManagerMap(Map<UUID,Manager> uuidManagerMap) {
+    private static Map<Uri, Manager> getUriManagerMap(Map<UUID,Manager> uuidManagerMap) {
         Map<Uri, Manager> uriManagerMap = new HashMap<>();
         for (Map.Entry<UUID, Manager> uuidManagerMapEntry : uuidManagerMap.entrySet()) {
             uriManagerMap.put(

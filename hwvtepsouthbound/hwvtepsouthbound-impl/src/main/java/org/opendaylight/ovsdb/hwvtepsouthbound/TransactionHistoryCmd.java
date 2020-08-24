@@ -85,7 +85,7 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
         });
     }
 
-    private List<Pair<HwvtepTransactionLogElement, Boolean>> mergeLogsByDate(
+    private static List<Pair<HwvtepTransactionLogElement, Boolean>> mergeLogsByDate(
             List<HwvtepTransactionLogElement> logs1,
             List<HwvtepTransactionLogElement> logs2) {
 

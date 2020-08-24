@@ -231,7 +231,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     }
 
     @SuppressWarnings("IllegalCatch")
-    private Optional<Node> readNode(final ReadWriteTransaction transaction, final InstanceIdentifier<Node> nodePath) {
+    private static Optional<Node> readNode(final ReadWriteTransaction transaction,
+            final InstanceIdentifier<Node> nodePath) {
         Optional<Node> node = Optional.empty();
         try {
             node = SouthboundUtil.readNode(transaction, nodePath);
@@ -466,7 +467,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                         new Uri(SouthboundConstants.QOS_URI_PREFIX + "://" + qosUuid.toString())));
     }
 
-    private void updateIfIndex(final Interface interf,
+    private static void updateIfIndex(final Interface interf,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
         Set<Long> ifIndexSet = null;
         try {
@@ -483,8 +484,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateMac(final Interface interf,
-                           final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+    private static void updateMac(final Interface interf,
+                                  final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
         Set<String> macSet = null;
         try {
             if (interf.getMacColumn() != null) {
@@ -504,8 +505,8 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateMacInUse(final Interface interf,
-                               final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
+    private static void updateMacInUse(final Interface interf,
+                                       final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
         Set<String> macInUseSet = null;
         try {
             if (interf.getMacInUseColumn() != null) {
@@ -648,7 +649,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateInterfaceLldp(final Interface interf,
+    private static void updateInterfaceLldp(final Interface interf,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         try {
@@ -693,7 +694,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateInterfaceBfdStatus(final Interface interf,
+    private static void updateInterfaceBfdStatus(final Interface interf,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         try {
@@ -718,7 +719,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateInterfaceBfd(final Interface interf,
+    private static void updateInterfaceBfd(final Interface interf,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         try {
@@ -744,7 +745,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void updateInterfacePolicing(final Interface interf,
+    private static void updateInterfacePolicing(final Interface interf,
             final OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder) {
 
         Long ingressPolicingRate = null;

@@ -121,7 +121,7 @@ public class BridgeConfigReconciliationTaskTest {
                 .build();
     }
 
-    private Map<InstanceIdentifier<?>, DataObject> createExpectedConfigurationChanges(final Node bridgeNode) {
+    private static Map<InstanceIdentifier<?>, DataObject> createExpectedConfigurationChanges(final Node bridgeNode) {
         OvsdbBridgeAugmentation ovsdbBridge = bridgeNode.augmentation(OvsdbBridgeAugmentation.class);
 
         Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();

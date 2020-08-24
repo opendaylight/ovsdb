@@ -179,7 +179,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         psAugmentationBuilder.setManagedBy(new HwvtepGlobalRef(connectionNodePath));
     }
 
-    private void setPhysicalSwitchId(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
+    private static void setPhysicalSwitchId(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
             PhysicalSwitch phySwitch) {
         if (phySwitch.getName() != null) {
             psAugmentationBuilder.setHwvtepNodeName(new HwvtepNodeName(phySwitch.getName()));
@@ -189,7 +189,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         }
     }
 
-    private void setManagementIps(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
+    private static void setManagementIps(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
             PhysicalSwitch phySwitch) {
         if (phySwitch.getManagementIpsColumn() != null && phySwitch.getManagementIpsColumn().getData() != null
                 && !phySwitch.getManagementIpsColumn().getData().isEmpty()) {
@@ -229,7 +229,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         return nodeKey.getNodeId();
     }
 
-    private <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
+    private static <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
             List<InstanceIdentifier<T>> entryIids) {
         for (InstanceIdentifier<T> entryIid : entryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
@@ -255,7 +255,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         return result;
     }
 
-    private void setSwitchFaultStatus(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
+    private static void setSwitchFaultStatus(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
             PhysicalSwitch phySwitch) {
         if (phySwitch.getSwitchFaultStatusColumn() != null && phySwitch.getSwitchFaultStatusColumn().getData() != null
                 && !phySwitch.getSwitchFaultStatusColumn().getData().isEmpty()) {

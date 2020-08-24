@@ -83,8 +83,7 @@ public class HwvtepCacheDisplayCmd implements Action {
     }
 
     @SuppressWarnings("checkstyle:RegexpSinglelineJava")
-    private void print(InstanceIdentifier<Node> iid,
-                                           HwvtepConnectionInstance connectionInstance) {
+    private static void print(InstanceIdentifier<Node> iid, HwvtepConnectionInstance connectionInstance) {
         PrintStream printStream = System.out;
         printStream.print("Printing for Node :  ");
         printStream.println(iid.firstKeyOf(Node.class).getNodeId().getValue());
@@ -116,7 +115,7 @@ public class HwvtepCacheDisplayCmd implements Action {
 
     }
 
-    private void printEntry(PrintStream console, Map.Entry<Class<? extends Identifiable>,
+    private static void printEntry(PrintStream console, Map.Entry<Class<? extends Identifiable>,
             Map<InstanceIdentifier, HwvtepDeviceInfo.DeviceData>> entry) {
         Class<? extends Identifiable> cls = entry.getKey();
         Map<InstanceIdentifier, HwvtepDeviceInfo.DeviceData> map = entry.getValue();
@@ -127,7 +126,7 @@ public class HwvtepCacheDisplayCmd implements Action {
         });
     }
 
-    private void printTable(PrintStream console, String clsName, HwvtepDeviceInfo.DeviceData deviceData) {
+    private static void printTable(PrintStream console, String clsName, HwvtepDeviceInfo.DeviceData deviceData) {
         console.print("    ");
         if (clsName.equals("LogicalSwitches")) {
             printLogicalSwitches(console, deviceData);
@@ -152,12 +151,12 @@ public class HwvtepCacheDisplayCmd implements Action {
         console.println(deviceData.getUuid());
     }
 
-    private void printLogicalSwitches(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
+    private static void printLogicalSwitches(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
         InstanceIdentifier<LogicalSwitches> ls = deviceData.getKey();
         console.print(ls.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue());
     }
 
-    private void printRemoteMcasts(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
+    private static void printRemoteMcasts(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
         InstanceIdentifier<RemoteMcastMacs> remoteMcastMacsIid = deviceData.getKey();
         String macAddress = remoteMcastMacsIid.firstKeyOf(RemoteMcastMacs.class).getMacEntryKey().getValue();
         String logicalSwitchRef = remoteMcastMacsIid.firstKeyOf(RemoteMcastMacs.class).getLogicalSwitchRef().getValue()
@@ -167,7 +166,7 @@ public class HwvtepCacheDisplayCmd implements Action {
         console.print(macEntryDetails);
     }
 
-    private void printRemoteUcasts(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
+    private static void printRemoteUcasts(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
         InstanceIdentifier<RemoteUcastMacs> remoteUcastMacsIid = deviceData.getKey();
         String macAddress = remoteUcastMacsIid.firstKeyOf(RemoteUcastMacs.class).getMacEntryKey().getValue();
         String logicalSwitchRef = remoteUcastMacsIid.firstKeyOf(RemoteUcastMacs.class).getLogicalSwitchRef().getValue()
@@ -177,7 +176,7 @@ public class HwvtepCacheDisplayCmd implements Action {
         console.print(macEntryDetails);
     }
 
-    private void printTerminationPoint(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
+    private static void printTerminationPoint(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
         InstanceIdentifier<TerminationPoint> terminationPointIid = deviceData.getKey();
         console.print(terminationPointIid.firstKeyOf(TerminationPoint.class).getTpId().getValue());
         try {
@@ -188,12 +187,12 @@ public class HwvtepCacheDisplayCmd implements Action {
         }
     }
 
-    private void printNode(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
+    private static void printNode(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
         InstanceIdentifier<Node> ls = deviceData.getKey();
         console.print(ls.firstKeyOf(Node.class).getNodeId().getValue());
     }
 
-    private void printCommon(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
+    private static void printCommon(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
         console.print(deviceData.getKey());
         console.print(" ");
         if (deviceData.getData() == null && deviceData.getStatus() != HwvtepDeviceInfo.DeviceDataStatus.IN_TRANSIT) {
@@ -204,7 +203,7 @@ public class HwvtepCacheDisplayCmd implements Action {
         console.println(deviceData.getUuid());
     }
 
-    private void printEntryUUID(PrintStream console, Map.Entry<Class<? extends Identifiable>, Map<UUID,
+    private static void printEntryUUID(PrintStream console, Map.Entry<Class<? extends Identifiable>, Map<UUID,
             HwvtepDeviceInfo.DeviceData>> entry) {
         Class<? extends Identifiable> cls = entry.getKey();
         Map<UUID, HwvtepDeviceInfo.DeviceData> map = entry.getValue();
@@ -214,6 +213,4 @@ public class HwvtepCacheDisplayCmd implements Action {
             printTable(console, clsName, deviceData);
         });
     }
-
-
 }

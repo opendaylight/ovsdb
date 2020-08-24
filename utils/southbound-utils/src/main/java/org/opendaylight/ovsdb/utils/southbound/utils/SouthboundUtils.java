@@ -1327,7 +1327,7 @@ public class SouthboundUtils {
         return false;
     }
 
-    private List<BridgeExternalIds> setBridgeExternalIds() {
+    private static List<BridgeExternalIds> setBridgeExternalIds() {
         List<BridgeExternalIds> externalIdsList = new ArrayList<>();
         externalIdsList.add(new BridgeExternalIdsBuilder()
                 .setBridgeExternalIdKey(CREATED_BY)

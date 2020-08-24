@@ -56,7 +56,7 @@ public class QosUpdateCommand implements TransactCommand {
                 instanceIdentifierCodec);
     }
 
-    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Map<InstanceIdentifier<QosEntries>, QosEntries> createdOrUpdated,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         for (Entry<InstanceIdentifier<QosEntries>, QosEntries> qosMapEntry: createdOrUpdated.entrySet()) {

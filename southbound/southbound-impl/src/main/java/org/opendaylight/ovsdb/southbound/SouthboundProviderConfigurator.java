@@ -39,17 +39,17 @@ public class SouthboundProviderConfigurator {
 
     public void setBridgesReconciliationInclusionList(String bridgeListStr) {
         if (bridgeListStr != null && !bridgeListStr.equals("")) {
-            southboundProvider.setBridgesReconciliationInclusionList(getBridgesList(bridgeListStr));
+            SouthboundProvider.setBridgesReconciliationInclusionList(getBridgesList(bridgeListStr));
         }
     }
 
     public void setBridgesReconciliationExclusionList(String bridgeListStr) {
         if (bridgeListStr != null && !bridgeListStr.equals("")) {
-            southboundProvider.setBridgesReconciliationExclusionList(getBridgesList(bridgeListStr));
+            SouthboundProvider.setBridgesReconciliationExclusionList(getBridgesList(bridgeListStr));
         }
     }
 
-    private List<String> getBridgesList(final String bridgeListStr) {
+    private static List<String> getBridgesList(final String bridgeListStr) {
         List<String> bridgeList = new ArrayList<>();
         StringTokenizer tokenizer = new StringTokenizer(bridgeListStr, ",");
         while (tokenizer.hasMoreTokens()) {
@@ -69,12 +69,12 @@ public class SouthboundProviderConfigurator {
                 } else if (paramEntry.getKey().equalsIgnoreCase(BRIDGES_RECONCILIATION_INCLUSION_LIST_PARAM)) {
                     String bridgeListStr = (String)paramEntry.getValue();
                     if (bridgeListStr != null && !bridgeListStr.equals("")) {
-                        southboundProvider.setBridgesReconciliationInclusionList(getBridgesList(bridgeListStr));
+                        SouthboundProvider.setBridgesReconciliationInclusionList(getBridgesList(bridgeListStr));
                     }
                 } else if (paramEntry.getKey().equalsIgnoreCase(BRIDGES_RECONCILIATION_EXCLUSION_LIST_PARAM)) {
                     String bridgeListStr = (String)paramEntry.getValue();
                     if (bridgeListStr != null && !bridgeListStr.equals("")) {
-                        southboundProvider.setBridgesReconciliationExclusionList(getBridgesList(bridgeListStr));
+                        SouthboundProvider.setBridgesReconciliationExclusionList(getBridgesList(bridgeListStr));
                     }
                 }
             }

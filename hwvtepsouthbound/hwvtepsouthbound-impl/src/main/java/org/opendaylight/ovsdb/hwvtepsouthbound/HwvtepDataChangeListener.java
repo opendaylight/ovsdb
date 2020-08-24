@@ -200,21 +200,21 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
         }
     }
 
-    private Node getCreated(DataObjectModification<Node> mod) {
+    private static Node getCreated(DataObjectModification<Node> mod) {
         if (mod.getModificationType() == ModificationType.WRITE && mod.getDataBefore() == null) {
             return mod.getDataAfter();
         }
         return null;
     }
 
-    private Node getRemoved(DataObjectModification<Node> mod) {
+    private static Node getRemoved(DataObjectModification<Node> mod) {
         if (mod.getModificationType() == ModificationType.DELETE) {
             return mod.getDataBefore();
         }
         return null;
     }
 
-    private Node getUpdated(DataObjectModification<Node> mod) {
+    private static Node getUpdated(DataObjectModification<Node> mod) {
         Node node = null;
         switch (mod.getModificationType()) {
             case SUBTREE_MODIFIED:
@@ -231,7 +231,7 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
         return node;
     }
 
-    private Node getOriginal(DataObjectModification<Node> mod) {
+    private static Node getOriginal(DataObjectModification<Node> mod) {
         Node node = null;
         switch (mod.getModificationType()) {
             case SUBTREE_MODIFIED:
@@ -249,12 +249,10 @@ public class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener
         return node;
     }
 
-    private InstanceIdentifier<Node> getWildcardPath() {
-        InstanceIdentifier<Node> path = InstanceIdentifier
-                        .create(NetworkTopology.class)
+    private static InstanceIdentifier<Node> getWildcardPath() {
+        return InstanceIdentifier.create(NetworkTopology.class)
                         .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                         .child(Node.class);
-        return path;
     }
 
     private Map<HwvtepConnectionInstance, Collection<DataTreeModification<Node>>> changesByConnectionInstance(

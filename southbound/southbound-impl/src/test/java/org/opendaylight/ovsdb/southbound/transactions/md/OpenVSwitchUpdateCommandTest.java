@@ -142,8 +142,7 @@ public class OpenVSwitchUpdateCommandTest {
                         OpenVSwitch.class));
         when(nodeBuilder.setNodeId(any(NodeId.class))).thenReturn(nodeBuilder);
         when(ovsdbNodeBuilder.build()).thenReturn(mock(OvsdbNodeAugmentation.class));
-        when(nodeBuilder.addAugmentation(eq(OvsdbNodeAugmentation.class), any(OvsdbNodeAugmentation.class)))
-                .thenReturn(nodeBuilder);
+        when(nodeBuilder.addAugmentation(any(OvsdbNodeAugmentation.class))).thenReturn(nodeBuilder);
         when(nodeBuilder.build()).thenReturn(mock(Node.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),

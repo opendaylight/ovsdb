@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
 class ReconciliationTaskManager {
     private static final Logger LOG = LoggerFactory.getLogger(ReconciliationTaskManager.class);
 
-    private final ConcurrentHashMap<ReconciliationTask,Future<?>> reconciliationTaskCache
-            = new ConcurrentHashMap();
+    private final ConcurrentHashMap<ReconciliationTask, Future<?>> reconciliationTaskCache
+            = new ConcurrentHashMap<>();
 
     public boolean isTaskQueued(ReconciliationTask task) {
         return reconciliationTaskCache.containsKey(task);

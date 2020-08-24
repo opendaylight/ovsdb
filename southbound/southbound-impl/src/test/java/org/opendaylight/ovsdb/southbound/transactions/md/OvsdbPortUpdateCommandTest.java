@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -229,8 +228,7 @@ public class OvsdbPortUpdateCommandTest {
                 OvsdbTerminationPointAugmentationBuilder.class, Interface.class));
 
         when(tpAugmentationBuilder.build()).thenReturn(mock(OvsdbTerminationPointAugmentation.class));
-        when(tpBuilder.addAugmentation(eq(OvsdbTerminationPointAugmentation.class),
-                any(OvsdbTerminationPointAugmentation.class))).thenReturn(tpBuilder);
+        when(tpBuilder.addAugmentation(any(OvsdbTerminationPointAugmentation.class))).thenReturn(tpBuilder);
         when(tpBuilder.build()).thenReturn(mock(TerminationPoint.class));
         portOldRows = new HashMap<>();
         portOldRows.put(uuid, port);

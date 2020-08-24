@@ -227,9 +227,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     }
 
     void addNode(final LogicalDatastoreType logicalDatastoreType) throws Exception {
-        NodeBuilder nodeBuilder = prepareNode(nodeIid);
-        HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
-        nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, builder.build());
+        NodeBuilder nodeBuilder = prepareNode(nodeIid).addAugmentation(new HwvtepGlobalAugmentationBuilder().build());
         WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         transaction.mergeParentStructurePut(logicalDatastoreType, nodeIid, nodeBuilder.build());
         transaction.commit();
@@ -257,7 +255,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         if (RemoteMcastMacs.class == dataObject) {
             TestBuilders.addRemoteMcastMacs(nodeIid, builder, data);
         }
-        nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, builder.build());
+        nodeBuilder.addAugmentation(builder.build());
         return mergeNode(logicalDatastoreType, nodeIid, nodeBuilder);
     }
 

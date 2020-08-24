@@ -66,11 +66,9 @@ public class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactionComma
     private Node buildConnectionNode(final Collection<UcastMacsRemote> macRemotes) {
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
-        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
         List<RemoteUcastMacs> remoteUMacs = new ArrayList<>();
         macRemotes.forEach(mac -> remoteUMacs.add(buildRemoteUcast(mac)));
-        hgAugmentationBuilder.setRemoteUcastMacs(remoteUMacs);
-        connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
+        connectionNode.addAugmentation(new HwvtepGlobalAugmentationBuilder().setRemoteUcastMacs(remoteUMacs).build());
         return connectionNode.build();
     }
 
@@ -87,8 +85,7 @@ public class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactionComma
             UUID locUUID = macRemote.getLocatorColumn().getData();
             PhysicalLocator physicalLocator = updatedPLocRows.get(locUUID);
             if (physicalLocator == null) {
-                physicalLocator = (PhysicalLocator) getOvsdbConnectionInstance()
-                        .getDeviceInfo().getPhysicalLocator(locUUID);
+                physicalLocator = getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocator(locUUID);
             }
             if (physicalLocator != null) {
                 InstanceIdentifier<TerminationPoint> plIid = HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid,

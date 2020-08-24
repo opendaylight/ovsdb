@@ -88,7 +88,7 @@ public class OvsdbConnectionManagerTest {
         field(OvsdbConnectionManager.class, "entityOwnershipService").set(ovsdbConnManager, entityOwnershipService);
         field(OvsdbConnectionManager.class, "reconciliationManager").set(ovsdbConnManager, reconciliationManager);
         field(OvsdbConnectionManager.class, "ovsdbConnection").set(ovsdbConnManager, ovsdbConnection);
-        field(OvsdbConnectionManager.class, "alreadyProcessedClients").set(ovsdbConnManager, new HashMap());
+        field(OvsdbConnectionManager.class, "alreadyProcessedClients").set(ovsdbConnManager, new HashMap<>());
         entityConnectionMap = new ConcurrentHashMap<>();
 
         OvsdbConnectionInfo info = mock(OvsdbConnectionInfo.class);

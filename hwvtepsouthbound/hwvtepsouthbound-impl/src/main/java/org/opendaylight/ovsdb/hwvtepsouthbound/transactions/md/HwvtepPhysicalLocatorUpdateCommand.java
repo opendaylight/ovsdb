@@ -23,7 +23,6 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
@@ -71,7 +70,7 @@ public class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionComma
                 tpAugmentationBuilder.setPhysicalLocatorUuid(new Uuid(locator.getUuid().toString()));
                 setEncapsType(tpAugmentationBuilder, locator);
                 setDstIp(tpAugmentationBuilder, locator);
-                tpBuilder.addAugmentation(HwvtepPhysicalLocatorAugmentation.class, tpAugmentationBuilder.build());
+                tpBuilder.addAugmentation(tpAugmentationBuilder.build());
                 if (oldPLocRows.containsKey(locUpdate.getKey())) {
                     transaction.merge(LogicalDatastoreType.OPERATIONAL,
                             tpPath, tpBuilder.build());

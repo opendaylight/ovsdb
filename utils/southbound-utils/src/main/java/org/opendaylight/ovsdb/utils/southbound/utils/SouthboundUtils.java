@@ -229,16 +229,14 @@ public class SouthboundUtils {
     }
 
     public static Node createNode(ConnectionInfo key) {
-        NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setNodeId(createNodeId(key.getRemoteIp(), key.getRemotePort()));
-        nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class, createOvsdbAugmentation(key));
-        return nodeBuilder.build();
+        return new NodeBuilder()
+                .setNodeId(createNodeId(key.getRemoteIp(), key.getRemotePort()))
+                .addAugmentation(createOvsdbAugmentation(key))
+                .build();
     }
 
     public static OvsdbNodeAugmentation createOvsdbAugmentation(ConnectionInfo key) {
-        OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
-        ovsdbNodeBuilder.setConnectionInfo(key);
-        return ovsdbNodeBuilder.build();
+        return new OvsdbNodeAugmentationBuilder().setConnectionInfo(key).build();
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
@@ -618,7 +616,7 @@ public class SouthboundUtils {
             DatapathId datapathId = new DatapathId(dpid);
             ovsdbBridgeAugmentationBuilder.setDatapathId(datapathId);
         }
-        bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
+        bridgeNodeBuilder.addAugmentation(ovsdbBridgeAugmentationBuilder.build());
         LOG.debug("Built with the intent to store bridge data {}",
                 ovsdbBridgeAugmentationBuilder.toString());
         boolean result = provider.merge(LogicalDatastoreType.CONFIGURATION,
@@ -686,7 +684,7 @@ public class SouthboundUtils {
             if (isOvsdbNodeDpdk(ovsdbNode)) {
                 ovsdbBridgeAugmentationBuilder.setDatapathType(DatapathTypeNetdev.class);
             }
-            bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
+            bridgeNodeBuilder.addAugmentation(ovsdbBridgeAugmentationBuilder.build());
 
             Node node = bridgeNodeBuilder.build();
             result = provider.put(LogicalDatastoreType.CONFIGURATION, bridgeIid, node);
@@ -754,13 +752,12 @@ public class SouthboundUtils {
             return true;
         }
 
-        NodeBuilder nodeBuilder = new NodeBuilder(bridgeNode);
-        OvsdbBridgeAugmentationBuilder augBuilder = new OvsdbBridgeAugmentationBuilder(bridgeAug);
-
-        augBuilder.setControllerEntry(newControllerEntries);
-        nodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, augBuilder.build());
         InstanceIdentifier<Node> bridgeIid = createInstanceIdentifier(ovsdbNode.key(), bridgeName);
-        return provider.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, nodeBuilder.build());
+        return provider.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, new NodeBuilder(bridgeNode)
+            .addAugmentation(new OvsdbBridgeAugmentationBuilder(bridgeAug)
+                .setControllerEntry(newControllerEntries)
+                .build())
+            .build());
     }
 
     private static void setManagedBy(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
@@ -810,11 +807,11 @@ public class SouthboundUtils {
             tpAugmentationBuilder.setInterfaceExternalIds(externalIdsList);
         }
 
-        TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(bridgeNode, portName);
-        tpBuilder.withKey(InstanceIdentifier.keyOf(tpIid));
-        tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
-        return provider.merge(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
+        return provider.merge(LogicalDatastoreType.CONFIGURATION, tpIid, new TerminationPointBuilder()
+            .withKey(InstanceIdentifier.keyOf(tpIid))
+            .addAugmentation(tpAugmentationBuilder.build())
+            .build());
     }
 
     public Boolean addTerminationPoint(Node bridgeNode, String portName, String type) {
@@ -840,11 +837,11 @@ public class SouthboundUtils {
         }
         tpAugmentationBuilder.setOptions(optionsList);
 
-        TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(bridgeNode, portName);
-        tpBuilder.withKey(InstanceIdentifier.keyOf(tpIid));
-        tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
-        return provider.merge(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
+        return provider.merge(LogicalDatastoreType.CONFIGURATION, tpIid, new TerminationPointBuilder()
+            .withKey(InstanceIdentifier.keyOf(tpIid))
+            .addAugmentation(tpAugmentationBuilder.build())
+            .build());
     }
 
     public Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName, String type) {
@@ -856,10 +853,10 @@ public class SouthboundUtils {
         if (type != null) {
             tpAugmentationBuilder.setInterfaceType(OVSDB_INTERFACE_TYPE_MAP.get(type));
         }
-        TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
-        tpBuilder.withKey(InstanceIdentifier.keyOf(tpIid));
-        tpBuilder.addAugmentation(OvsdbTerminationPointAugmentation.class, tpAugmentationBuilder.build());
-        return provider.merge(LogicalDatastoreType.CONFIGURATION, tpIid, tpBuilder.build());
+        return provider.merge(LogicalDatastoreType.CONFIGURATION, tpIid, new TerminationPointBuilder()
+            .withKey(InstanceIdentifier.keyOf(tpIid))
+            .addAugmentation(tpAugmentationBuilder.build())
+            .build());
     }
 
     public Boolean addPatchTerminationPoint(Node node, String bridgeName, String portName, String peerPortName) {

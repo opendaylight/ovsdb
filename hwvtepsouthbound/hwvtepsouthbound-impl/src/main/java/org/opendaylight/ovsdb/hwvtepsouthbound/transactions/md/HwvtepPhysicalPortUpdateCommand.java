@@ -130,7 +130,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                         new HwvtepPhysicalPortAugmentationBuilder();
                 buildTerminationPoint(tpAugmentationBuilder, portUpdate);
                 setPortFaultStatus(tpAugmentationBuilder, portUpdate);
-                tpBuilder.addAugmentation(HwvtepPhysicalPortAugmentation.class, tpAugmentationBuilder.build());
+                tpBuilder.addAugmentation(tpAugmentationBuilder.build());
                 if (oldPPRows.containsKey(portUpdateEntry.getKey())) {
                     transaction.merge(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
                 } else {

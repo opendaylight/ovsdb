@@ -89,12 +89,10 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             setOtherConfig(transaction, ovsdbNodeBuilder, oldEntry, openVSwitch);
             ovsdbNodeBuilder.setConnectionInfo(getConnectionInfo());
 
-            NodeBuilder nodeBuilder = new NodeBuilder();
-            nodeBuilder.setNodeId(getNodeId(openVSwitch));
-            nodeBuilder.addAugmentation(OvsdbNodeAugmentation.class,
-                    ovsdbNodeBuilder.build());
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath,
-                    nodeBuilder.build());
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath, new NodeBuilder()
+                .setNodeId(getNodeId(openVSwitch))
+                .addAugmentation(ovsdbNodeBuilder.build())
+                .build());
         }
     }
 

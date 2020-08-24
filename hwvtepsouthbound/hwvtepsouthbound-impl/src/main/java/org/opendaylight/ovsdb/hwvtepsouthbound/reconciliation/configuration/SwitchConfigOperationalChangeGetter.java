@@ -80,7 +80,7 @@ public final class SwitchConfigOperationalChangeGetter {
             if (augmentation != null && augmentation.getVlanBindings() != null
                     && !augmentation.getVlanBindings().isEmpty()) {
                 builder.setVlanBindings(augmentation.getVlanBindings());
-                terminationPointBuilder.addAugmentation(HwvtepPhysicalPortAugmentation.class, builder.build());
+                terminationPointBuilder.addAugmentation(builder.build());
 
                 final TerminationPoint newTp = terminationPointBuilder.build();
                 result.put(newTp.key(), newTp);

@@ -73,11 +73,9 @@ public class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransactionComman
         //Update node with UcastMacsLocal reference
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
-        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
         List<LocalUcastMacs> umclList = new ArrayList<>();
         ucml.forEach(mac -> umclList.add(buildLocalUcastMac(mac)));
-        hgAugmentationBuilder.setLocalUcastMacs(umclList);
-        connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
+        connectionNode.addAugmentation(new HwvtepGlobalAugmentationBuilder().setLocalUcastMacs(umclList).build());
         return connectionNode.build();
     }
 
@@ -93,7 +91,7 @@ public class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransactionComman
             UUID plocUUID = ucml.getLocatorColumn().getData();
             PhysicalLocator physicalLocator = updatedPLocRows.get(plocUUID);
             if (physicalLocator == null) {
-                physicalLocator = (PhysicalLocator) getOvsdbConnectionInstance()
+                physicalLocator = getOvsdbConnectionInstance()
                         .getDeviceInfo().getPhysicalLocator(plocUUID);
             }
             if (physicalLocator != null) {

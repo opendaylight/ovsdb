@@ -61,7 +61,7 @@ public class GlobalUpdateCommand extends AbstractTransactionCommand {
             NodeBuilder nodeBuilder = new NodeBuilder();
             nodeBuilder.setNodeId(getNodeId(hwvtepGlobal));
             HwvtepGlobalAugmentation hwvtepGlobalAugmentation = hwvtepGlobalBuilder.build();
-            nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, hwvtepGlobalAugmentation);
+            nodeBuilder.addAugmentation(hwvtepGlobalAugmentation);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath, nodeBuilder.build());
             getOvsdbConnectionInstance().setHwvtepGlobalAugmentation(hwvtepGlobalAugmentation);
             addToDeviceUpdate(TransactionType.ADD, hwvtepGlobal);

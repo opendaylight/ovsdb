@@ -102,9 +102,7 @@ public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand
 
         List<LogicalRouters> routers = new ArrayList<>();
         routers.add(lrBuilder.build());
-        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
-        hgAugmentationBuilder.setLogicalRouters(routers);
-        connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
+        connectionNode.addAugmentation(new HwvtepGlobalAugmentationBuilder().setLogicalRouters(routers).build());
         return connectionNode.build();
     }
 

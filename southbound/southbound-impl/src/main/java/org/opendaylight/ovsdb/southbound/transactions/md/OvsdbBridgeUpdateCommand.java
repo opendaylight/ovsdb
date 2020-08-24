@@ -46,7 +46,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
@@ -222,7 +221,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         managedBridges.add(managedBridge);
         ovsdbConnectionAugmentationBuilder.setManagedNodeEntry(managedBridges);
 
-        connectionNode.addAugmentation(OvsdbNodeAugmentation.class, ovsdbConnectionAugmentationBuilder.build());
+        connectionNode.addAugmentation(ovsdbConnectionAugmentationBuilder.build());
 
         LOG.debug("Update node with bridge node ref {}",
                 ovsdbConnectionAugmentationBuilder.getManagedNodeEntry().values().iterator().next());
@@ -246,7 +245,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         setManagedBy(ovsdbBridgeAugmentationBuilder);
         setAutoAttach(ovsdbBridgeAugmentationBuilder, bridge);
         setStpEnalbe(ovsdbBridgeAugmentationBuilder,bridge);
-        bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
+        bridgeNodeBuilder.addAugmentation(ovsdbBridgeAugmentationBuilder.build());
 
         LOG.debug("Built with the intent to store bridge data {}",
                 ovsdbBridgeAugmentationBuilder.build());

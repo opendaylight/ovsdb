@@ -101,10 +101,7 @@ public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand
         List<LogicalSwitches> switches = new ArrayList<>();
         switches.add(lsBuilder.build());
 
-        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
-        hgAugmentationBuilder.setLogicalSwitches(switches);
-        connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
+        connectionNode.addAugmentation(new HwvtepGlobalAugmentationBuilder().setLogicalSwitches(switches).build());
         return connectionNode.build();
     }
-
 }

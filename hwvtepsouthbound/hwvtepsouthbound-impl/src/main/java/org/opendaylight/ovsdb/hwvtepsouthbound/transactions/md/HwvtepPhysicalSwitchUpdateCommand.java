@@ -158,7 +158,7 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
         setTunnels(psAugmentationBuilder, phySwitch);
         setSwitchFaultStatus(psAugmentationBuilder, phySwitch);
 
-        psNodeBuilder.addAugmentation(PhysicalSwitchAugmentation.class, psAugmentationBuilder.build());
+        psNodeBuilder.addAugmentation(psAugmentationBuilder.build());
 
         LOG.trace("Built with the intent to store PhysicalSwitch data {}", psAugmentationBuilder.build());
         return psNodeBuilder.build();

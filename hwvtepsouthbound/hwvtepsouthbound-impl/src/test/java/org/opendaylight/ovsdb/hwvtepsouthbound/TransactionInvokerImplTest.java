@@ -26,7 +26,6 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -147,10 +146,8 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
         public void execute(final ReadWriteTransaction transaction) {
             NodeBuilder nodeBuilder = new NodeBuilder();
             nodeBuilder.setNodeId(iid.firstKeyOf(Node.class).getNodeId());
-            HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
-            nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, builder.build());
+            nodeBuilder.addAugmentation(new HwvtepGlobalAugmentationBuilder().build());
             transaction.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, iid, nodeBuilder.build());
-
         }
     }
 

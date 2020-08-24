@@ -44,8 +44,8 @@ public final class GlobalConfigOperationalChangeGetter {
         //fire removal of local ucast macs so that logical switches will be deleted
         fillLocalMacsToBeRemoved(oldAugmentation, configNode, opNode);
 
-        newNodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, newAugmentation.build());
-        oldNodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, oldAugmentation.build());
+        newNodeBuilder.addAugmentation(newAugmentation.build());
+        oldNodeBuilder.addAugmentation(oldAugmentation.build());
 
         return new DataTreeModificationImpl<>(nodeId, newNodeBuilder.build(), oldNodeBuilder.build());
     }

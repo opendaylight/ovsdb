@@ -25,7 +25,6 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.Manager;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Managers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ManagersBuilder;
@@ -95,9 +94,7 @@ public class HwvtepManagerUpdateCommand extends AbstractTransactionCommand {
         List<Managers> managersList = new ArrayList<>();
         managersList.add(managersBuilder.build());
 
-        HwvtepGlobalAugmentationBuilder hgAugmentationBuilder = new HwvtepGlobalAugmentationBuilder();
-        hgAugmentationBuilder.setManagers(managersList);
-        connectionNode.addAugmentation(HwvtepGlobalAugmentation.class, hgAugmentationBuilder.build());
+        connectionNode.addAugmentation(new HwvtepGlobalAugmentationBuilder().setManagers(managersList).build());
         return connectionNode.build();
         // TODO Deletion of other config
     }

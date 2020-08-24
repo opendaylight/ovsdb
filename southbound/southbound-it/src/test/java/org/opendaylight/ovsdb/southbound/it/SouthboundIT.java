@@ -841,11 +841,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         NodeBuilder portNodeBuilder = new NodeBuilder();
         NodeId portNodeId = SouthboundMapper.createManagedNodeId(portIid);
         portNodeBuilder.setNodeId(portNodeId);
-        TerminationPointBuilder entry = new TerminationPointBuilder();
-        entry.withKey(new TerminationPointKey(new TpId(portName)));
-        entry.addAugmentation(
-                OvsdbTerminationPointAugmentation.class,
-                ovsdbTerminationPointAugmentationBuilder.build());
+        TerminationPointBuilder entry = new TerminationPointBuilder()
+                .withKey(new TerminationPointKey(new TpId(portName)))
+                .addAugmentation(ovsdbTerminationPointAugmentationBuilder.build());
         portNodeBuilder.setTerminationPoint(Collections.singletonList(entry.build()));
         boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
                 portIid, portNodeBuilder.build());
@@ -901,7 +899,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             ovsdbBridgeAugmentationBuilder.setBridgeExternalIds(externalIds);
             ovsdbBridgeAugmentationBuilder.setControllerEntry(controllerEntries);
             ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
-            bridgeNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class, ovsdbBridgeAugmentationBuilder.build());
+            bridgeNodeBuilder.addAugmentation(ovsdbBridgeAugmentationBuilder.build());
             LOG.debug("Built with the intent to store bridge data {}", ovsdbBridgeAugmentationBuilder);
             Assert.assertTrue(
                     mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid, bridgeNodeBuilder.build()));
@@ -1549,9 +1547,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
                     TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
                     tpUpdateBuilder.withKey(new TerminationPointKey(new TpId(testBridgeAndPortName)));
-                    tpUpdateBuilder.addAugmentation(
-                            OvsdbTerminationPointAugmentation.class,
-                            tpUpdateAugmentationBuilder.build());
+                    tpUpdateBuilder.addAugmentation(tpUpdateAugmentationBuilder.build());
                     portUpdateNodeBuilder.setTerminationPoint(Collections.singletonList(tpUpdateBuilder.build()));
                     Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
                             portIid, portUpdateNodeBuilder.build()));
@@ -1781,9 +1777,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
             TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
             tpUpdateBuilder.withKey(new TerminationPointKey(new TpId(portName)));
-            tpUpdateBuilder.addAugmentation(
-                    OvsdbTerminationPointAugmentation.class,
-                    tpUpdateAugmentationBuilder.build());
+            tpUpdateBuilder.addAugmentation(tpUpdateAugmentationBuilder.build());
             tpUpdateBuilder.setTpId(new TpId(portName));
             portUpdateNodeBuilder.setTerminationPoint(Collections.singletonList(tpUpdateBuilder.build()));
             Assert.assertTrue(
@@ -1849,9 +1843,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
                 TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
                 tpUpdateBuilder.withKey(new TerminationPointKey(new TpId(portName)));
-                tpUpdateBuilder.addAugmentation(
-                        OvsdbTerminationPointAugmentation.class,
-                        tpUpdateAugmentationBuilder.build());
+                tpUpdateBuilder.addAugmentation(tpUpdateAugmentationBuilder.build());
                 tpUpdateBuilder.setTpId(new TpId(portName));
                 portUpdateNodeBuilder.setTerminationPoint(Collections.singletonList(tpUpdateBuilder.build()));
                 Assert.assertTrue(
@@ -1942,9 +1934,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
                 TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
                 tpUpdateBuilder.withKey(new TerminationPointKey(new TpId(portName)));
-                tpUpdateBuilder.addAugmentation(
-                        OvsdbTerminationPointAugmentation.class,
-                        tpUpdateAugmentationBuilder.build());
+                tpUpdateBuilder.addAugmentation(tpUpdateAugmentationBuilder.build());
                 tpUpdateBuilder.setTpId(new TpId(portName));
                 portUpdateNodeBuilder.setTerminationPoint(Collections.singletonList(tpUpdateBuilder.build()));
                 Assert.assertTrue(
@@ -2004,9 +1994,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             tpUpdateAugmentationBuilder.setName(portName);
             TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
             tpUpdateBuilder.withKey(new TerminationPointKey(new TpId(portName)));
-            tpUpdateBuilder.addAugmentation(
-                    OvsdbTerminationPointAugmentation.class,
-                    tpUpdateAugmentationBuilder.build());
+            tpUpdateBuilder.addAugmentation(tpUpdateAugmentationBuilder.build());
             tpUpdateBuilder.setTpId(new TpId(portName));
 
             Assert.assertTrue(
@@ -2084,8 +2072,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"));
                 setManagedBy(bridgeCreateAugmentationBuilder, connectionInfo);
                 helper.writeValues(bridgeCreateAugmentationBuilder, updateFromTestCase.inputValues);
-                bridgeCreateNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class,
-                        bridgeCreateAugmentationBuilder.build());
+                bridgeCreateNodeBuilder.addAugmentation(bridgeCreateAugmentationBuilder.build());
                 LOG.debug("Built with the intent to store bridge data {}", bridgeCreateAugmentationBuilder);
                 Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid,
                         bridgeCreateNodeBuilder.build()));
@@ -2108,8 +2095,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 final Node bridgeNode = getBridgeNode(connectionInfo, testBridgeName);
                 bridgeUpdateNodeBuilder.setNodeId(bridgeNode.getNodeId());
                 bridgeUpdateNodeBuilder.withKey(bridgeNode.key());
-                bridgeUpdateNodeBuilder.addAugmentation(OvsdbBridgeAugmentation.class,
-                        bridgeUpdateAugmentationBuilder.build());
+                bridgeUpdateNodeBuilder.addAugmentation(bridgeUpdateAugmentationBuilder.build());
                 Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, bridgeIid,
                         bridgeUpdateNodeBuilder.build()));
                 Thread.sleep(OVSDB_UPDATE_TIMEOUT);

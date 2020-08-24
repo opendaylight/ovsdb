@@ -254,8 +254,7 @@ public class OvsdbBridgeUpdateCommandTest {
                 .thenReturn(ovsdbConnectionAugmentationBuilder);
 
         when(ovsdbConnectionAugmentationBuilder.build()).thenReturn(mock(OvsdbNodeAugmentation.class));
-        when(connectionNode.addAugmentation(eq(OvsdbNodeAugmentation.class), any(OvsdbNodeAugmentation.class)))
-                .thenReturn(connectionNode);
+        when(connectionNode.addAugmentation(any(OvsdbNodeAugmentation.class))).thenReturn(connectionNode);
 
         //for logger
         when(ovsdbConnectionAugmentationBuilder.getManagedNodeEntry())
@@ -305,8 +304,7 @@ public class OvsdbBridgeUpdateCommandTest {
                 OvsdbBridgeAugmentationBuilder.class));
 
         when(ovsdbBridgeAugmentationBuilder.build()).thenReturn(mock(OvsdbBridgeAugmentation.class));
-        when(bridgeNodeBuilder.addAugmentation(eq(OvsdbBridgeAugmentation.class), any(OvsdbBridgeAugmentation.class)))
-                .thenReturn(bridgeNodeBuilder);
+        when(bridgeNodeBuilder.addAugmentation(any(OvsdbBridgeAugmentation.class))).thenReturn(bridgeNodeBuilder);
         Node node = mock(Node.class);
         when(bridgeNodeBuilder.build()).thenReturn(node);
         assertEquals(node, Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "buildBridgeNode", bridge));

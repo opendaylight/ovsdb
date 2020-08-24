@@ -19,7 +19,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
@@ -111,12 +110,11 @@ public final class TestBuilders {
         if (nodeIid != null) {
             tpBuilder.withKey(tpKey);
             tpBuilder.setTpId(tpKey.getTpId());
-            HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder =
-                    new HwvtepPhysicalLocatorAugmentationBuilder();
-            tpAugmentationBuilder.setPhysicalLocatorUuid(getUUid(ip));
-            tpAugmentationBuilder.setEncapsulationType(HwvtepSouthboundMapper.createEncapsulationType(VXLAN_OVER_IPV4));
-            tpAugmentationBuilder.setDstIp(IpAddressBuilder.getDefaultInstance(ip));
-            tpBuilder.addAugmentation(HwvtepPhysicalLocatorAugmentation.class, tpAugmentationBuilder.build());
+            tpBuilder.addAugmentation(new HwvtepPhysicalLocatorAugmentationBuilder()
+                .setPhysicalLocatorUuid(getUUid(ip))
+                .setEncapsulationType(HwvtepSouthboundMapper.createEncapsulationType(VXLAN_OVER_IPV4))
+                .setDstIp(IpAddressBuilder.getDefaultInstance(ip))
+                .build());
         }
         return tpBuilder.build();
     }

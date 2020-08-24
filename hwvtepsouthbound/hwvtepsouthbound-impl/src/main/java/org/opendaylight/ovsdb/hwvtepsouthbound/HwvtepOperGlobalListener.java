@@ -130,7 +130,7 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
         }
     }
 
-    private void connect(Collection<DataTreeModification<Node>> changes) {
+    private static void connect(Collection<DataTreeModification<Node>> changes) {
         changes.forEach((change) -> {
             InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             DataObjectModification<Node> mod = change.getRootNode();
@@ -158,7 +158,7 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
         });
     }
 
-    private void updated(Collection<DataTreeModification<Node>> changes) {
+    private static void updated(Collection<DataTreeModification<Node>> changes) {
         changes.forEach((change) -> {
             InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             DataObjectModification<Node> mod = change.getRootNode();
@@ -236,7 +236,7 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
                 .child(Node.class);
     }
 
-    private Node getUpdated(DataObjectModification<Node> mod) {
+    private static Node getUpdated(DataObjectModification<Node> mod) {
         Node node = null;
         switch (mod.getModificationType()) {
             case SUBTREE_MODIFIED:
@@ -252,6 +252,4 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
         }
         return node;
     }
-
-
 }

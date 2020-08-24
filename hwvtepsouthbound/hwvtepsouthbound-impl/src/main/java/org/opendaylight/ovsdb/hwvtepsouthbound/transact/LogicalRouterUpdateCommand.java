@@ -95,7 +95,7 @@ public class LogicalRouterUpdateCommand
 
     }
 
-    private void setDescription(final LogicalRouter logicalRouter, final LogicalRouters inputRouter) {
+    private static void setDescription(final LogicalRouter logicalRouter, final LogicalRouters inputRouter) {
         if (inputRouter.getHwvtepNodeDescription() != null) {
             logicalRouter.setDescription(inputRouter.getHwvtepNodeDescription());
         } else {
@@ -103,7 +103,7 @@ public class LogicalRouterUpdateCommand
         }
     }
 
-    private void setName(final LogicalRouter logicalRouter, final LogicalRouters inputRouter,
+    private static void setName(final LogicalRouter logicalRouter, final LogicalRouters inputRouter,
             final Optional<LogicalRouters> inputRouterOptional) {
         if (inputRouter.getHwvtepNodeName() != null) {
             logicalRouter.setName(inputRouter.getHwvtepNodeName().getValue());

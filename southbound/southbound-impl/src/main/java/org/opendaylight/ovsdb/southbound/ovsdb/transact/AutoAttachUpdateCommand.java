@@ -75,7 +75,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
         }
     }
 
-    private void updateAutoAttach(final TransactionBuilder transaction, final BridgeOperationalState state,
+    private static void updateAutoAttach(final TransactionBuilder transaction, final BridgeOperationalState state,
             final InstanceIdentifier<OvsdbNodeAugmentation> iid,
             final OvsdbNodeAugmentation ovsdbNode) {
 

@@ -130,7 +130,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         return SouthboundConstants.QUEUE_URI_PREFIX + "://" + queue.getUuid().toString();
     }
 
-    private void setOtherConfig(ReadWriteTransaction transaction,
+    private static void setOtherConfig(ReadWriteTransaction transaction,
             QueuesBuilder queuesBuilder, Queue oldQueue, Queue queue,
             InstanceIdentifier<Node> nodeIId) {
         Map<String, String> oldOtherConfigs = null;
@@ -150,7 +150,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void removeOldConfigs(ReadWriteTransaction transaction,
+    private static void removeOldConfigs(ReadWriteTransaction transaction,
             QueuesBuilder queuesBuilder, Map<String, String> oldOtherConfigs,
             Queue queue, InstanceIdentifier<Node> nodeIId) {
         InstanceIdentifier<Queues> queueIId = nodeIId
@@ -165,7 +165,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setNewOtherConfigs(QueuesBuilder queuesBuilder,
+    private static void setNewOtherConfigs(QueuesBuilder queuesBuilder,
             Map<String, String> otherConfig) {
         List<QueuesOtherConfig> otherConfigList = new ArrayList<>();
         for (Entry<String, String> entry : otherConfig.entrySet()) {
@@ -179,7 +179,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         queuesBuilder.setQueuesOtherConfig(otherConfigList);
     }
 
-    private void setExternalIds(ReadWriteTransaction transaction,
+    private static void setExternalIds(ReadWriteTransaction transaction,
             QueuesBuilder queuesBuilder, Queue oldQueue, Queue queue,
             InstanceIdentifier<Node> nodeIId) {
         Map<String, String> oldExternalIds = null;
@@ -199,7 +199,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void removeOldExternalIds(ReadWriteTransaction transaction,
+    private static void removeOldExternalIds(ReadWriteTransaction transaction,
             QueuesBuilder queuesBuilder, Map<String, String> oldExternalIds,
             Queue queue, InstanceIdentifier<Node> nodeIId) {
         InstanceIdentifier<Queues> queueIId = nodeIId
@@ -214,7 +214,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setNewExternalIds(QueuesBuilder queuesBuilder,
+    private static void setNewExternalIds(QueuesBuilder queuesBuilder,
             Map<String, String> externalIds) {
         List<QueuesExternalIds> externalIdsList = new ArrayList<>();
         for (Entry<String, String> entry : externalIds.entrySet()) {

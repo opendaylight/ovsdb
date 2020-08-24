@@ -87,14 +87,14 @@ public class HwvtepReconciliationManager implements ClusteredDataTreeChangeListe
         }
     }
 
-    private Node getCreated(DataObjectModification<Node> mod) {
+    private static Node getCreated(DataObjectModification<Node> mod) {
         if (mod.getModificationType() == ModificationType.WRITE && mod.getDataBefore() == null) {
             return mod.getDataAfter();
         }
         return null;
     }
 
-    private Node getRemoved(DataObjectModification<Node> mod) {
+    private static Node getRemoved(DataObjectModification<Node> mod) {
         if (mod.getModificationType() == ModificationType.DELETE) {
             return mod.getDataBefore();
         }

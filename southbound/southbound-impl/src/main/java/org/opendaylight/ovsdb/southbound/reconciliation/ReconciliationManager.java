@@ -193,7 +193,7 @@ public class ReconciliationManager implements AutoCloseable {
         }
     }
 
-    private LoadingCache<NodeKey, NodeConnectionMetadata> buildBridgeNodeCache() {
+    private static LoadingCache<NodeKey, NodeConnectionMetadata> buildBridgeNodeCache() {
         return CacheBuilder.newBuilder()
                 .expireAfterWrite(BRIDGE_CACHE_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
                 .build(new CacheLoader<NodeKey, NodeConnectionMetadata>() {
@@ -265,7 +265,7 @@ public class ReconciliationManager implements AutoCloseable {
 
     @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
             justification = "https://github.com/spotbugs/spotbugs/issues/811")
-    private Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+    private static Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
         filterTerminationPointsForBridge(NodeKey nodeKey,
             Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
             terminationPoints) {

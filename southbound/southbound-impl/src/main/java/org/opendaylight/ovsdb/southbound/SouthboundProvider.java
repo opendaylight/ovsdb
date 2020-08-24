@@ -165,7 +165,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         }
     }
 
-    private void initializeOvsdbTopology(final LogicalDatastoreType type) {
+    private static void initializeOvsdbTopology(final LogicalDatastoreType type) {
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));

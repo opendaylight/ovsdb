@@ -106,7 +106,7 @@ public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand
         return connectionNode.build();
     }
 
-    private void setStaticRoutes(final LogicalRouter router, final LogicalRoutersBuilder lrBuilder) {
+    private static void setStaticRoutes(final LogicalRouter router, final LogicalRoutersBuilder lrBuilder) {
         if (isRouterHasStaticRoutes(router)) {
             List<StaticRoutes> routes = new ArrayList<>();
             for (Entry<String, String> entry : router.getStaticRoutesColumn().getData().entrySet()) {
@@ -119,7 +119,7 @@ public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand
         }
     }
 
-    private boolean isRouterHasStaticRoutes(final LogicalRouter router) {
+    private static boolean isRouterHasStaticRoutes(final LogicalRouter router) {
         return router != null && router.getStaticRoutesColumn() != null
                 && router.getStaticRoutesColumn().getData() != null
                 && !router.getStaticRoutesColumn().getData().isEmpty();
@@ -144,7 +144,7 @@ public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand
         }
     }
 
-    private boolean isRouterHasAcls(final LogicalRouter router) {
+    private static boolean isRouterHasAcls(final LogicalRouter router) {
         return router != null && router.getAclBindingColumn() != null
                 && router.getAclBindingColumn().getData() != null
                 && !router.getAclBindingColumn().getData().isEmpty();
@@ -169,7 +169,7 @@ public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand
         }
     }
 
-    private boolean isRouterHasSwitchBindings(final LogicalRouter router) {
+    private static boolean isRouterHasSwitchBindings(final LogicalRouter router) {
         return router != null && router.getSwitchBindingColumn() != null
                 && router.getSwitchBindingColumn().getData() != null
                 && !router.getSwitchBindingColumn().getData().isEmpty();

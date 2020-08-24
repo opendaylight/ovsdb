@@ -180,7 +180,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setOtherConfig(ReadWriteTransaction transaction,
+    private static void setOtherConfig(ReadWriteTransaction transaction,
             QosEntriesBuilder qosEntryBuilder, Qos oldQos, Qos qos,
             InstanceIdentifier<Node> nodeIId) {
         Map<String, String> oldOtherConfigs = null;
@@ -200,7 +200,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void removeOldConfigs(ReadWriteTransaction transaction,
+    private static void removeOldConfigs(ReadWriteTransaction transaction,
             QosEntriesBuilder qosEntryBuilder, Map<String, String> oldOtherConfigs,
             Qos qos, InstanceIdentifier<Node> nodeIId) {
         InstanceIdentifier<QosEntries> qosIId = nodeIId
@@ -215,7 +215,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setNewOtherConfigs(QosEntriesBuilder qosEntryBuilder,
+    private static void setNewOtherConfigs(QosEntriesBuilder qosEntryBuilder,
             Map<String, String> otherConfig) {
         List<QosOtherConfig> otherConfigList = new ArrayList<>();
         for (Entry<String, String> entry : otherConfig.entrySet()) {
@@ -229,7 +229,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         qosEntryBuilder.setQosOtherConfig(otherConfigList);
     }
 
-    private void setExternalIds(ReadWriteTransaction transaction,
+    private static void setExternalIds(ReadWriteTransaction transaction,
             QosEntriesBuilder qosEntryBuilder, Qos oldQos, Qos qos,
             InstanceIdentifier<Node> nodeIId) {
         Map<String, String> oldExternalIds = null;
@@ -249,7 +249,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void removeOldExternalIds(ReadWriteTransaction transaction,
+    private static void removeOldExternalIds(ReadWriteTransaction transaction,
             QosEntriesBuilder qosEntryBuilder, Map<String, String> oldExternalIds,
             Qos qos, InstanceIdentifier<Node> nodeIId) {
         InstanceIdentifier<QosEntries> qosIId = nodeIId
@@ -264,7 +264,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setNewExternalIds(QosEntriesBuilder qosEntryBuilder,
+    private static void setNewExternalIds(QosEntriesBuilder qosEntryBuilder,
             Map<String, String> externalIds) {
         List<QosExternalIds> externalIdsList = new ArrayList<>();
         for (Entry<String, String> entry : externalIds.entrySet()) {
@@ -298,7 +298,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void removeOldQueues(ReadWriteTransaction transaction,
+    private static void removeOldQueues(ReadWriteTransaction transaction,
             QosEntriesBuilder qosEntryBuilder, Map<Long, UUID> oldQueueList,
             Qos qos, InstanceIdentifier<Node> nodeIId) {
         InstanceIdentifier<QosEntries> qosIId = nodeIId

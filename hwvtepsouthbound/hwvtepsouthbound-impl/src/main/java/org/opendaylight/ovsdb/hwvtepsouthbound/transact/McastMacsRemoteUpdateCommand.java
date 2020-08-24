@@ -148,13 +148,13 @@ public class McastMacsRemoteUpdateCommand
         }
     }
 
-    private void setIpAddress(final McastMacsRemote mcastMacsRemote, final RemoteMcastMacs inputMac) {
+    private static void setIpAddress(final McastMacsRemote mcastMacsRemote, final RemoteMcastMacs inputMac) {
         if (inputMac.getIpaddr() != null) {
             mcastMacsRemote.setIpAddress(inputMac.getIpaddr().getIpv4Address().getValue());
         }
     }
 
-    private void setMac(final McastMacsRemote mcastMacsRemote, final RemoteMcastMacs inputMac) {
+    private static void setMac(final McastMacsRemote mcastMacsRemote, final RemoteMcastMacs inputMac) {
         if (inputMac.getMacEntryKey() != null) {
             if (inputMac.getMacEntryKey().equals(HwvtepSouthboundConstants.UNKNOWN_DST_MAC)) {
                 mcastMacsRemote.setMac(HwvtepSouthboundConstants.UNKNOWN_DST_STRING);
@@ -179,7 +179,7 @@ public class McastMacsRemoteUpdateCommand
                 && Objects.equals(macs1.getLocatorSet(), macs2.getLocatorSet());
     }
 
-    private boolean compareLocatorSets(List<LocatorSet> locatorSet1, List<LocatorSet> locatorSet2) {
+    private static boolean compareLocatorSets(List<LocatorSet> locatorSet1, List<LocatorSet> locatorSet2) {
         if (locatorSet1 == null) {
             locatorSet1 = Collections.EMPTY_LIST;
         }

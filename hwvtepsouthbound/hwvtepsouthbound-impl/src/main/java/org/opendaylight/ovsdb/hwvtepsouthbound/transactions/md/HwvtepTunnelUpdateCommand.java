@@ -107,7 +107,7 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setBfdLocalConfigs(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
+    private static void setBfdLocalConfigs(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
         Map<String, String> localConfigs = tunnel.getBfdConfigLocalColumn().getData();
         if (localConfigs != null && !localConfigs.isEmpty()) {
             List<BfdLocalConfigs> localConfigsList = localConfigs.entrySet().stream().map(
@@ -118,7 +118,7 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setBfdRemoteConfigs(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
+    private static void setBfdRemoteConfigs(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
         Map<String, String> remoteConfigs = tunnel.getBfdConfigRemoteColumn().getData();
         if (remoteConfigs != null && !remoteConfigs.isEmpty()) {
             List<BfdRemoteConfigs> remoteConfigsList = remoteConfigs.entrySet().stream().map(
@@ -130,7 +130,7 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
     }
 
 
-    private void setBfdParams(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
+    private static void setBfdParams(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
         Map<String, String> params = tunnel.getBfdParamsColumn().getData();
         if (params != null && !params.isEmpty()) {
             List<BfdParams> paramsList = params.entrySet().stream().map(
@@ -141,7 +141,7 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setBfdStatus(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
+    private static void setBfdStatus(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
         Map<String, String> status = tunnel.getBfdStatusColumn().getData();
         if (status != null && !status.isEmpty()) {
             List<BfdStatus> statusList = status.entrySet().stream().map(

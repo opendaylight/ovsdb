@@ -89,7 +89,7 @@ public class ProtocolRemovedCommandTest {
         Mockito.verify(transaction).add(any(Operation.class));
     }
 
-    private Object setField(final String fieldName) throws Exception {
+    private static Object setField(final String fieldName) throws Exception {
         Field field = Operations.class.getDeclaredField(fieldName);
         field.setAccessible(true);
         field.set(field.get(Operations.class), mock(Operations.class));

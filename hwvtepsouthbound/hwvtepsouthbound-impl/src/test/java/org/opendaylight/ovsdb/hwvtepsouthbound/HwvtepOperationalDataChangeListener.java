@@ -95,8 +95,8 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
         }
     }
 
-    private InstanceIdentifier getKey(InstanceIdentifier<Node> key, DataObjectModification<? extends DataObject> child,
-                                      DataObject data) {
+    private static InstanceIdentifier getKey(InstanceIdentifier<Node> key,
+                                             DataObjectModification<? extends DataObject> child, DataObject data) {
         Class<? extends DataObject> childClass = child.getDataType();
         InstanceIdentifier instanceIdentifier = null;
         if (LogicalSwitches.class == childClass) {
@@ -123,11 +123,9 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
         return (Class<? extends ChildOf<? super HwvtepGlobalAugmentation>>) cls;
     }
 
-    private InstanceIdentifier<Node> getWildcardPath() {
-        InstanceIdentifier<Node> path = InstanceIdentifier
-                        .create(NetworkTopology.class)
+    private static InstanceIdentifier<Node> getWildcardPath() {
+        return InstanceIdentifier.create(NetworkTopology.class)
                         .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                         .child(Node.class);
-        return path;
     }
 }

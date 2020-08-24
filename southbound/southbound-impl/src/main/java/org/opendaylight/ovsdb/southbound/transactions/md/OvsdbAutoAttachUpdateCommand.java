@@ -133,7 +133,7 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setMappings(AutoattachBuilder autoAttachBuilder,
+    private static void setMappings(AutoattachBuilder autoAttachBuilder,
             AutoAttach autoAttach) {
         final Map<Long, Long> mappings = autoAttach.getMappingsColumn().getData();
         final List<Mappings> mappingsList = new ArrayList<>();

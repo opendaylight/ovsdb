@@ -188,7 +188,7 @@ public class LogicalSwitchUcastsRemoveCommand
                 });
     }
 
-    private Map<Long, UUID> excludeVlanBindings(final Set<UUID> deletedLsUuids, final PhysicalPort port) {
+    private static Map<Long, UUID> excludeVlanBindings(final Set<UUID> deletedLsUuids, final PhysicalPort port) {
         return port.getVlanBindingsColumn().getData()
                 .entrySet().stream()
                 .peek(entry -> {

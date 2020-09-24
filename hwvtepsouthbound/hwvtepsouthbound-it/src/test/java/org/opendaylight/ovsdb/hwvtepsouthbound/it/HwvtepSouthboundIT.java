@@ -424,7 +424,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
             psAugBuilder.setManagementIps(managementIps);
             psAugBuilder.setTunnelIps(tunnelIps);
             psAugBuilder.setTunnels(tunnels);
-            psNodeBuilder.addAugmentation(PhysicalSwitchAugmentation.class, psAugBuilder.build());
+            psNodeBuilder.addAugmentation(psAugBuilder.build());
             LOG.debug("Built with intent to store PhysicalSwitch data {}", psAugBuilder);
             Assert.assertTrue(
                     mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, psIid, psNodeBuilder.build()));

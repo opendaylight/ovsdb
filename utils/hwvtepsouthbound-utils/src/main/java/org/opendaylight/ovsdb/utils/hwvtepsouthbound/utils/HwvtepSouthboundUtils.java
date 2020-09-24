@@ -42,16 +42,14 @@ public final class HwvtepSouthboundUtils {
     }
 
     public static Node createNode(ConnectionInfo key) {
-        NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setNodeId(createNodeId(key.getRemoteIp(), key.getRemotePort()));
-        nodeBuilder.addAugmentation(HwvtepGlobalAugmentation.class, createHwvtepAugmentation(key));
-        return nodeBuilder.build();
+        return new NodeBuilder()
+            .setNodeId(createNodeId(key.getRemoteIp(), key.getRemotePort()))
+            .addAugmentation(createHwvtepAugmentation(key))
+            .build();
     }
 
     public static HwvtepGlobalAugmentation createHwvtepAugmentation(ConnectionInfo key) {
-        HwvtepGlobalAugmentationBuilder hwvtepGlobalBuilder = new HwvtepGlobalAugmentationBuilder();
-        hwvtepGlobalBuilder.setConnectionInfo(key);
-        return hwvtepGlobalBuilder.build();
+        return new HwvtepGlobalAugmentationBuilder().setConnectionInfo(key).build();
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key) {

@@ -120,6 +120,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableIt
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.Item;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.common.Uint16;
+import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -652,7 +653,7 @@ public class SouthboundUtils {
     public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
             final Class<? extends DatapathTypeBase> dpType,
             List<BridgeOtherConfigs> otherConfigs,
-            Long maxBackoff, Long inactivityProbe) {
+            Uint32 maxBackoff, Uint32 inactivityProbe) {
         boolean result;
 
         LOG.info("addBridge: node: {}, bridgeName: {}, controller(s): {}", ovsdbNode, bridgeName, controllersStr);
@@ -721,7 +722,7 @@ public class SouthboundUtils {
      * @return success if the write to md-sal was successful
      */
     public boolean setBridgeController(Node ovsdbNode, String bridgeName, List<String> controllers,
-            Long maxBackoff, Long inactivityProbe) {
+            Uint32 maxBackoff, Uint32 inactivityProbe) {
         LOG.debug("setBridgeController: ovsdbNode: {}, bridgeNode: {}, controller(s): {}",
                 ovsdbNode, bridgeName, controllers);
 
@@ -777,7 +778,7 @@ public class SouthboundUtils {
 
     public boolean addTerminationPoint(
             Node bridgeNode, String portName, String type, Map<String, String> options, Map<String, String> externalIds,
-            Long ofPort) {
+            Uint32 ofPort) {
         OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = new OvsdbTerminationPointAugmentationBuilder();
 
         tpAugmentationBuilder.setName(portName);
@@ -1087,7 +1088,7 @@ public class SouthboundUtils {
     }
 
     private static List<ControllerEntry> createControllerEntries(List<String> controllersStr,
-            Long maxBackoff, Long inactivityProbe) {
+            Uint32 maxBackoff, Uint32 inactivityProbe) {
         List<ControllerEntry> controllerEntries = new ArrayList<>();
         if (controllersStr != null) {
             for (String controllerStr : controllersStr) {

@@ -11,6 +11,7 @@ package org.opendaylight.ovsdb.utils.southbound.utils;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -75,6 +76,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
@@ -82,6 +84,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntry;
@@ -116,6 +119,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.Item;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.common.Uint16;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -347,7 +351,7 @@ public class SouthboundUtils {
         }
 
         IpAddress address = createIpAddress(inetAddress);
-        PortNumber port = new PortNumber(Integer.parseInt(portStr));
+        PortNumber port = new PortNumber(Uint16.valueOf(portStr));
 
         LOG.info("connectionInfo: {}", new ConnectionInfoBuilder()
                 .setRemoteIp(address)
@@ -548,12 +552,11 @@ public class SouthboundUtils {
         return result;
     }
 
-    public List<ProtocolEntry> createMdsalProtocols() {
-        List<ProtocolEntry> protocolList = new ArrayList<>();
-        ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
-                OVSDB_PROTOCOL_MAP.inverse();
-        protocolList.add(new ProtocolEntryBuilder().setProtocol(mapper.get("OpenFlow13")).build());
-        return protocolList;
+    public Map<ProtocolEntryKey, ProtocolEntry> createMdsalProtocols() {
+        final ProtocolEntry entry = new ProtocolEntryBuilder()
+                .setProtocol(OVSDB_PROTOCOL_MAP.inverse().get("OpenFlow13"))
+                .build();
+        return Map.of(entry.key(), entry);
     }
 
     /*
@@ -784,27 +787,20 @@ public class SouthboundUtils {
         }
 
         if (options != null && options.size() > 0) {
-            List<Options> optionsList = new ArrayList<>();
-            for (Map.Entry<String, String> entry : options.entrySet()) {
-                OptionsBuilder optionsBuilder = new OptionsBuilder();
-                optionsBuilder.withKey(new OptionsKey(entry.getKey()));
-                optionsBuilder.setOption(entry.getKey());
-                optionsBuilder.setValue(entry.getValue());
-                optionsList.add(optionsBuilder.build());
-            }
-            tpAugmentationBuilder.setOptions(optionsList);
+            tpAugmentationBuilder.setOptions(buildOptions(options));
         }
 
         if (externalIds != null && externalIds.size() > 0) {
-            List<InterfaceExternalIds> externalIdsList = new ArrayList<>();
+            final ImmutableMap.Builder<InterfaceExternalIdsKey, InterfaceExternalIds> builder =
+                    ImmutableMap.builderWithExpectedSize(externalIds.size());
             for (Map.Entry<String, String> entry : externalIds.entrySet()) {
-                InterfaceExternalIdsBuilder interfaceExternalIdsBuilder = new InterfaceExternalIdsBuilder();
-                interfaceExternalIdsBuilder.withKey(new InterfaceExternalIdsKey(entry.getKey()));
-                interfaceExternalIdsBuilder.setExternalIdKey(entry.getKey());
-                interfaceExternalIdsBuilder.setExternalIdValue(entry.getValue());
-                externalIdsList.add(interfaceExternalIdsBuilder.build());
+                final InterfaceExternalIdsKey key = new InterfaceExternalIdsKey(entry.getKey());
+                builder.put(key, new InterfaceExternalIdsBuilder()
+                    .withKey(key)
+                    .setExternalIdValue(entry.getValue())
+                    .build());
             }
-            tpAugmentationBuilder.setInterfaceExternalIds(externalIdsList);
+            tpAugmentationBuilder.setInterfaceExternalIds(builder.build());
         }
 
         InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(bridgeNode, portName);
@@ -815,7 +811,7 @@ public class SouthboundUtils {
     }
 
     public Boolean addTerminationPoint(Node bridgeNode, String portName, String type) {
-        return addTerminationPoint(bridgeNode, portName, type, Collections.EMPTY_MAP, null);
+        return addTerminationPoint(bridgeNode, portName, type, Collections.emptyMap(), null);
     }
 
     public Boolean addTerminationPoint(Node bridgeNode, String bridgeName, String portName,
@@ -827,15 +823,7 @@ public class SouthboundUtils {
             tpAugmentationBuilder.setInterfaceType(OVSDB_INTERFACE_TYPE_MAP.get(type));
         }
 
-        List<Options> optionsList = new ArrayList<>();
-        for (Map.Entry<String, String> entry : options.entrySet()) {
-            OptionsBuilder optionsBuilder = new OptionsBuilder();
-            optionsBuilder.withKey(new OptionsKey(entry.getKey()));
-            optionsBuilder.setOption(entry.getKey());
-            optionsBuilder.setValue(entry.getValue());
-            optionsList.add(optionsBuilder.build());
-        }
-        tpAugmentationBuilder.setOptions(optionsList);
+        tpAugmentationBuilder.setOptions(buildOptions(options));
 
         InstanceIdentifier<TerminationPoint> tpIid = createTerminationPointInstanceIdentifier(bridgeNode, portName);
         return provider.merge(LogicalDatastoreType.CONFIGURATION, tpIid, new TerminationPointBuilder()
@@ -1327,12 +1315,20 @@ public class SouthboundUtils {
         return false;
     }
 
-    private static List<BridgeExternalIds> setBridgeExternalIds() {
-        List<BridgeExternalIds> externalIdsList = new ArrayList<>();
-        externalIdsList.add(new BridgeExternalIdsBuilder()
+    private static Map<BridgeExternalIdsKey, BridgeExternalIds> setBridgeExternalIds() {
+        final BridgeExternalIds ids = new BridgeExternalIdsBuilder()
                 .setBridgeExternalIdKey(CREATED_BY)
                 .setBridgeExternalIdValue(ODL)
-                .build());
-        return externalIdsList;
+                .build();
+        return Map.of(ids.key(), ids);
+    }
+
+    private static Map<OptionsKey, Options> buildOptions(final Map<String, String> options) {
+        final ImmutableMap.Builder<OptionsKey, Options> builder = ImmutableMap.builderWithExpectedSize(options.size());
+        for (Map.Entry<String, String> entry : options.entrySet()) {
+            final OptionsKey key = new OptionsKey(entry.getKey());
+            builder.put(key , new OptionsBuilder().withKey(key).setValue(entry.getValue()).build());
+        }
+        return builder.build();
     }
 }

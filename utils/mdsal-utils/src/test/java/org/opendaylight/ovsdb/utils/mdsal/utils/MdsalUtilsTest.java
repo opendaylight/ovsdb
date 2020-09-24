@@ -35,7 +35,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  * Unit test for class {@link MdsalUtils}.
  */
 @RunWith(MockitoJUnitRunner.class)
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings("unchecked")
 public class MdsalUtilsTest {
 
     @InjectMocks private MdsalUtils mdsalUtils;

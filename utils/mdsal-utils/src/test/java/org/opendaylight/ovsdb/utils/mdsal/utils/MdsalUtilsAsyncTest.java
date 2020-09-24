@@ -102,9 +102,9 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
                 new SupportingNodeKey(new NodeId("id2"), TOPOLOGY_TEST)).build();
 
         final Node data1 = new NodeBuilder(DATA).setSupportingNode(
-                Collections.singletonList(supportingNodeBuilder1)).build();
+                Collections.singletonMap(supportingNodeBuilder1.key(), supportingNodeBuilder1)).build();
         final Node data2 = new NodeBuilder(DATA).setSupportingNode(
-                Collections.singletonList(supportingNodeBuilder2)).build();
+                Collections.singletonMap(supportingNodeBuilder2.key(), supportingNodeBuilder2)).build();
 
         mdsalUtilsAsync.put(LogicalDatastoreType.CONFIGURATION, TEST_IID, data1, operationDesc);
         assertEquals(data1, readDS());
@@ -134,9 +134,9 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
                 new SupportingNodeKey(new NodeId("id2"), TOPOLOGY_TEST)).build();
 
         final Node data1 = new NodeBuilder(DATA).setSupportingNode(
-                Collections.singletonList(supportingNodeBuilder1)).build();
+                Collections.singletonMap(supportingNodeBuilder1.key(), supportingNodeBuilder1)).build();
         final Node data2 = new NodeBuilder(DATA).setSupportingNode(
-                Collections.singletonList(supportingNodeBuilder2)).build();
+                Collections.singletonMap(supportingNodeBuilder2.key(), supportingNodeBuilder2)).build();
 
         mdsalUtilsAsync.merge(LogicalDatastoreType.CONFIGURATION, TEST_IID, data1, operationDesc, true);
         assertEquals(data1, readDS());

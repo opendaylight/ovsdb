@@ -21,7 +21,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import javax.inject.Inject;
@@ -52,8 +52,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfoBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIps;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIpsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelIps;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelIpsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.Tunnels;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
@@ -62,6 +65,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.Uint16;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -100,7 +104,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     private static boolean setup = false;
     private static int testMethodsRemaining;
     private static String addressStr;
-    private static int portNumber;
+    private static Uint16 portNumber;
     private static String connectionType;
     private static Node hwvtepNode;
     @Inject @Filter(timeout = 60000)
@@ -253,8 +257,8 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         addressStr = bundleContext.getProperty(SERVER_IPADDRESS);
         String portStr = bundleContext.getProperty(SERVER_PORT);
         try {
-            portNumber = Integer.parseInt(portStr);
-        } catch (NumberFormatException e) {
+            portNumber = Uint16.valueOf(portStr);
+        } catch (IllegalArgumentException e) {
             fail("Invalid port number " + portStr + System.lineSeparator() + usage() + e);
         }
 
@@ -368,7 +372,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private ConnectionInfo getConnectionInfo(String ipAddressStr, int portNum) {
+    private ConnectionInfo getConnectionInfo(String ipAddressStr, Uint16 portNum) {
         InetAddress inetAddress = null;
         try {
             inetAddress = InetAddress.getByName(ipAddressStr);
@@ -399,9 +403,9 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         TestPhysicalSwitch(final ConnectionInfo connectionInfo, final String name,
                         @Nullable InstanceIdentifier<Node> psIid, @Nullable NodeId psNodeId,
                         @Nullable final String description, final boolean setManagedBy,
-                        @Nullable final List<ManagementIps> managementIps,
-                        @Nullable final List<TunnelIps> tunnelIps,
-                        @Nullable final List<Tunnels> tunnels) {
+                        @Nullable final Map<ManagementIpsKey, ManagementIps> managementIps,
+                        @Nullable final Map<TunnelIpsKey, TunnelIps> tunnelIps,
+                        @Nullable final Map<TunnelsKey, Tunnels> tunnels) {
             this.connectionInfo = connectionInfo;
             this.psName = name;
             NodeBuilder psNodeBuilder = new NodeBuilder();

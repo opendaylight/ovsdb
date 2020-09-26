@@ -87,7 +87,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
             OvsdbTerminationPointAugmentation terminationPoint = entry.getValue();
             LOG.debug("Received request to create termination point {}",
                     terminationPoint.getName());
-            InstanceIdentifier terminationPointIid = entry.getKey();
+            InstanceIdentifier<?> terminationPointIid = entry.getKey();
             Optional<TerminationPoint> terminationPointOptional =
                     state.getBridgeTerminationPoint(terminationPointIid);
             if (!terminationPointOptional.isPresent()) {

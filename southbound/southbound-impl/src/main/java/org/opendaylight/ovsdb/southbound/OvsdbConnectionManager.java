@@ -217,7 +217,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     private void deleteOperNodeAndReleaseOwnership(final OvsdbConnectionInstance ovsdbConnectionInstance) {
         ovsdbConnectionInstance.setHasDeviceOwnership(false);
-        final InstanceIdentifier nodeIid = ovsdbConnectionInstance.getInstanceIdentifier();
+        final InstanceIdentifier<?> nodeIid = ovsdbConnectionInstance.getInstanceIdentifier();
         //remove the node from oper only if it has ownership
         txInvoker.invoke(new OvsdbNodeRemoveCommand(ovsdbConnectionInstance, null, null) {
 

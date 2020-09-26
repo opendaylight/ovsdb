@@ -7,7 +7,8 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
-
     private final InstanceIdentifierCodec instanceIdentifierCodec;
     private final Map<UUID, Bridge> oldBridgeRows;
     private final Map<UUID, Controller> removedControllerRows;
@@ -65,10 +65,9 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
 
     private List<InstanceIdentifier<ControllerEntry>> controllerEntriesToRemove(
             InstanceIdentifier<Node> bridgeIid, Bridge bridge) {
-        Preconditions.checkNotNull(bridgeIid);
-        Preconditions.checkNotNull(bridge);
-        List<InstanceIdentifier<ControllerEntry>> result =
-                new ArrayList<>();
+        requireNonNull(bridgeIid);
+        requireNonNull(bridge);
+        List<InstanceIdentifier<ControllerEntry>> result = new ArrayList<>();
         Bridge oldBridgeNode = oldBridgeRows.get(bridge.getUuid());
 
         if (oldBridgeNode != null && oldBridgeNode.getControllerColumn() != null) {

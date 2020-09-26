@@ -7,10 +7,10 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import static java.util.Objects.requireNonNull;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -347,7 +347,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     public OvsdbConnectionInstance getConnectionInstance(final Node node) {
-        Preconditions.checkNotNull(node);
+        requireNonNull(node);
         OvsdbNodeAugmentation ovsdbNode = node.augmentation(OvsdbNodeAugmentation.class);
         OvsdbBridgeAugmentation ovsdbManagedNode = node.augmentation(OvsdbBridgeAugmentation.class);
         if (ovsdbNode != null) {

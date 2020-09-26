@@ -7,8 +7,9 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FluentFuture;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -49,7 +50,7 @@ public final class SouthboundUtil {
     }
 
     public static Optional<OvsdbNodeAugmentation> getManagingNode(DataBroker db, OvsdbBridgeAttributes mn) {
-        Preconditions.checkNotNull(mn);
+        requireNonNull(mn);
         try {
             OvsdbNodeRef ref = mn.getManagedBy();
             if (ref != null && ref.getValue() != null) {

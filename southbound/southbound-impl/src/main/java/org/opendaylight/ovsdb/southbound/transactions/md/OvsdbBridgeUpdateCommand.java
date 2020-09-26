@@ -7,10 +7,10 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import static java.util.Objects.requireNonNull;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.net.InetAddresses;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -131,8 +131,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     private List<InstanceIdentifier<BridgeOtherConfigs>> bridgeOtherConfigsToRemove(
             InstanceIdentifier<Node> bridgeIid, Bridge bridge) {
-        Preconditions.checkNotNull(bridgeIid);
-        Preconditions.checkNotNull(bridge);
+        requireNonNull(bridgeIid);
+        requireNonNull(bridge);
         List<InstanceIdentifier<BridgeOtherConfigs>> result = new ArrayList<>();
 
         Bridge oldBridge = oldBridgeRows.get(bridge.getUuid());
@@ -155,8 +155,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     private List<InstanceIdentifier<BridgeExternalIds>> externalIdsToRemove(
             InstanceIdentifier<Node> bridgeIid, Bridge bridge) {
-        Preconditions.checkNotNull(bridgeIid);
-        Preconditions.checkNotNull(bridge);
+        requireNonNull(bridgeIid);
+        requireNonNull(bridge);
         List<InstanceIdentifier<BridgeExternalIds>> result = new ArrayList<>();
 
         Bridge oldBridge = oldBridgeRows.get(bridge.getUuid());
@@ -179,8 +179,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     private List<InstanceIdentifier<ProtocolEntry>> protocolEntriesToRemove(
             InstanceIdentifier<Node> bridgeIid, Bridge bridge) {
-        Preconditions.checkNotNull(bridgeIid);
-        Preconditions.checkNotNull(bridge);
+        requireNonNull(bridgeIid);
+        requireNonNull(bridge);
         List<InstanceIdentifier<ProtocolEntry>> result = new ArrayList<>();
         Bridge oldBridge = oldBridgeRows.get(bridge.getUuid());
 

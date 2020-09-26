@@ -7,7 +7,8 @@
  */
 package org.opendaylight.ovsdb.southbound.reconciliation;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -151,7 +152,7 @@ public class ReconciliationManager implements AutoCloseable {
                                            final OvsdbConnectionInstance connectionInstance,
                                            final List<Node> bridgeNodes) {
         LOG.debug("Reconcile Termination Point Configuration for Bridges {}", bridgeNodes);
-        Preconditions.checkNotNull(bridgeNodes, "Bridge Node list must not be null");
+        requireNonNull(bridgeNodes, "Bridge Node list must not be null");
         if (!bridgeNodes.isEmpty()) {
             for (Node node : bridgeNodes) {
                 bridgeNodeCache.put(node.key(),

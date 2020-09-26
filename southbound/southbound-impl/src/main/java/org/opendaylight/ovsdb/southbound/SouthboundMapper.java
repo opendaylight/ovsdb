@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import static java.util.Objects.requireNonNull;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import com.google.common.base.Joiner;
@@ -169,7 +170,7 @@ public final class SouthboundMapper {
     }
 
     public static DatapathId createDatapathId(final Bridge bridge) {
-        Preconditions.checkNotNull(bridge);
+        requireNonNull(bridge);
         if (bridge.getDatapathIdColumn() == null) {
             return null;
         } else {
@@ -178,7 +179,7 @@ public final class SouthboundMapper {
     }
 
     public static DatapathId createDatapathId(final Set<String> dpids) {
-        Preconditions.checkNotNull(dpids);
+        requireNonNull(dpids);
         if (dpids.isEmpty()) {
             return null;
         } else {
@@ -189,7 +190,7 @@ public final class SouthboundMapper {
     }
 
     public static DatapathId createDatapathId(final String dpid) {
-        Preconditions.checkNotNull(dpid);
+        requireNonNull(dpid);
         DatapathId datapath;
         if (dpid.matches("^[0-9a-fA-F]{16}")) {
             Splitter splitter = Splitter.fixedLength(2);
@@ -235,15 +236,11 @@ public final class SouthboundMapper {
     }
 
     public static  Class<? extends InterfaceTypeBase> createInterfaceType(final String type) {
-        Preconditions.checkNotNull(type);
-        return SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get(type);
+        return SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get(requireNonNull(type));
     }
 
     public static String createOvsdbInterfaceType(final Class<? extends InterfaceTypeBase> mdsaltype) {
-        Preconditions.checkNotNull(mdsaltype);
-        ImmutableBiMap<Class<? extends InterfaceTypeBase>, String> mapper =
-                SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.inverse();
-        return mapper.get(mdsaltype);
+        return SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.inverse().get(requireNonNull(mdsaltype));
     }
 
     public static List<ProtocolEntry> createMdsalProtocols(final Bridge bridge) {
@@ -484,7 +481,7 @@ public final class SouthboundMapper {
      * @return class matching the input QoS type {@link QosTypeBase}
      */
     public static  Class<? extends QosTypeBase> createQosType(final String type) {
-        Preconditions.checkNotNull(type);
+        requireNonNull(type);
         if (type.isEmpty()) {
             LOG.info("QoS type not supplied");
             return QosTypeBase.class;

@@ -7,8 +7,9 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +31,10 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
-
-    private Map<UUID, OpenVSwitch> oldOpenVSwitchRows;
-    private Map<UUID, Manager> removedManagerRows;
-    private Map<UUID, OpenVSwitch> updatedOpenVSwitchRows;
-    private Map<UUID, Manager> updatedManagerRows;
+    private final Map<UUID, OpenVSwitch> oldOpenVSwitchRows;
+    private final Map<UUID, Manager> removedManagerRows;
+    private final Map<UUID, OpenVSwitch> updatedOpenVSwitchRows;
+    private final Map<UUID, Manager> updatedManagerRows;
 
     public OvsdbManagersRemovedCommand(OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
@@ -66,8 +66,8 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
     @VisibleForTesting
     List<InstanceIdentifier<ManagerEntry>> managerEntriesToRemove(
             InstanceIdentifier<Node> ovsdbNodeIid, OpenVSwitch openVSwitch) {
-        Preconditions.checkNotNull(ovsdbNodeIid);
-        Preconditions.checkNotNull(openVSwitch);
+        requireNonNull(ovsdbNodeIid);
+        requireNonNull(openVSwitch);
 
         List<InstanceIdentifier<ManagerEntry>> result =
                 new ArrayList<>();

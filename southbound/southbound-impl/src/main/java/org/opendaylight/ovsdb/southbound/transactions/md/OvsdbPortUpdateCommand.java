@@ -73,7 +73,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.QosEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.QosEntryBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.QosEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.TrunksBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -87,6 +86,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.Uint16;
+import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -342,7 +343,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             Iterator<Long> itr = vlanId.iterator();
             // There are no loops here, just get the first element.
             int id = itr.next().intValue();
-            ovsdbTerminationPointBuilder.setVlanTag(new VlanId(id));
+            ovsdbTerminationPointBuilder.setVlanTag(new VlanId(Uint16.valueOf(id)));
         }
     }
 
@@ -356,7 +357,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             for (Long trunk: portTrunks) {
                 if (trunk != null) {
                     modelTrunks.add(new TrunksBuilder()
-                        .setTrunk(new VlanId(trunk.intValue())).build());
+                        .setTrunk(new VlanId(Uint16.valueOf(trunk.intValue()))).build());
                 }
             }
         }
@@ -412,8 +413,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                         if (oldQosIid != null) {
                             InstanceIdentifier<QosEntry> oldPortQosIid = tpPath
                                 .augmentation(OvsdbTerminationPointAugmentation.class)
-                                .child(QosEntry.class,
-                                      new QosEntryKey(Long.valueOf(SouthboundConstants.PORT_QOS_LIST_KEY)));
+                                .child(QosEntry.class, SouthboundConstants.PORT_QOS_LIST_KEY);
                             transaction.delete(LogicalDatastoreType.OPERATIONAL, oldPortQosIid);
                         }
                     }
@@ -422,12 +422,11 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
 
             InstanceIdentifier<QosEntries> qosIid = getQosIid(nodeId, ovsdbNode, qosUuid);
             if (qosIid != null) {
-                List<QosEntry> qosList = new ArrayList<>();
-                OvsdbQosRef qosRef = new OvsdbQosRef(qosIid);
-                qosList.add(new QosEntryBuilder()
-                    .withKey(new QosEntryKey(Long.valueOf(SouthboundConstants.PORT_QOS_LIST_KEY)))
-                    .setQosRef(qosRef).build());
-                ovsdbTerminationPointBuilder.setQosEntry(qosList);
+                ovsdbTerminationPointBuilder.setQosEntry(
+                    Map.of(SouthboundConstants.PORT_QOS_LIST_KEY, new QosEntryBuilder()
+                        .withKey(SouthboundConstants.PORT_QOS_LIST_KEY)
+                        .setQosRef(new OvsdbQosRef(qosIid))
+                        .build()));
             }
         }
     }
@@ -475,7 +474,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             }
             if (ifIndexSet != null && !ifIndexSet.isEmpty()) {
                 for (Long ifIndex : ifIndexSet) {
-                    ovsdbTerminationPointBuilder.setIfindex(ifIndex);
+                    ovsdbTerminationPointBuilder.setIfindex(Uint32.valueOf(ifIndex));
                 }
             }
         } catch (SchemaVersionMismatchException e) {
@@ -534,11 +533,9 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             Iterator<Long> ofPortsIter = ofPorts.iterator();
             long ofPort = ofPortsIter.next();
             if (ofPort >= 0) {
-                ovsdbTerminationPointBuilder
-                    .setOfport(ofPort);
+                ovsdbTerminationPointBuilder.setOfport(Uint32.valueOf(ofPort));
             } else {
-                LOG.debug("Received negative value for ofPort from ovsdb for {} {}",
-                        interf.getName(),ofPort);
+                LOG.debug("Received negative value for ofPort from ovsdb for {} {}", interf.getName(),ofPort);
             }
         }
     }
@@ -557,11 +554,9 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             Iterator<Long> ofPortRequestsIter = ofPortRequests.iterator();
             int ofPort = ofPortRequestsIter.next().intValue();
             if (ofPort >= 0) {
-                ovsdbTerminationPointBuilder
-                    .setOfportRequest(ofPort);
+                ovsdbTerminationPointBuilder.setOfportRequest(Uint16.valueOf(ofPort));
             } else {
-                LOG.debug("Received negative value for ofPort from ovsdb for {} {}",
-                        interf.getName(),ofPort);
+                LOG.debug("Received negative value for ofPort from ovsdb for {} {}", interf.getName(),ofPort);
             }
         }
     }
@@ -754,7 +749,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         if (ingressPolicingRate != null) {
             if (ingressPolicingRate >= 0) {
                 ovsdbTerminationPointBuilder
-                    .setIngressPolicingRate(ingressPolicingRate);
+                    .setIngressPolicingRate(Uint32.valueOf(ingressPolicingRate));
             } else {
                 LOG.debug("Received negative value for ingressPolicingRate from ovsdb for {} {}",
                         interf.getName(),ingressPolicingRate);
@@ -768,7 +763,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         if (ingressPolicingBurst != null) {
             if (ingressPolicingBurst >= 0) {
                 ovsdbTerminationPointBuilder
-                    .setIngressPolicingBurst(ingressPolicingBurst);
+                    .setIngressPolicingBurst(Uint32.valueOf(ingressPolicingBurst));
             } else {
                 LOG.debug("Received negative value for ingressPolicingBurst from ovsdb for {} {}",
                         interf.getName(),ingressPolicingBurst);

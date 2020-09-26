@@ -7,8 +7,7 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -34,6 +33,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.MappingsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.Uint16;
+import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,19 +136,17 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
 
     private static void setMappings(AutoattachBuilder autoAttachBuilder,
             AutoAttach autoAttach) {
-        final Map<Long, Long> mappings = autoAttach.getMappingsColumn().getData();
-        final List<Mappings> mappingsList = new ArrayList<>();
-        for (final Entry<Long, Long> entry : mappings.entrySet()) {
+        final Map<MappingsKey, Mappings> mappings = new LinkedHashMap<>();
+        for (final Entry<Long, Long> entry : autoAttach.getMappingsColumn().getData().entrySet()) {
             final Long mappingsKey = entry.getKey();
-            final Integer mappingsValue = Integer.valueOf(entry.getValue().intValue());
             if (mappingsKey != null) {
-                mappingsList.add(new MappingsBuilder()
-                        .withKey(new MappingsKey(mappingsKey))
-                        .setMappingsKey(mappingsKey)
-                        .setMappingsValue(mappingsValue)
-                        .build());
+                final MappingsKey key = new MappingsKey(Uint32.valueOf(mappingsKey));
+                mappings.put(key, new MappingsBuilder()
+                    .withKey(key)
+                    .setMappingsValue(Uint16.valueOf(entry.getValue().intValue()))
+                    .build());
             }
-            autoAttachBuilder.setMappings(mappingsList);
+            autoAttachBuilder.setMappings(mappings);
         }
     }
 

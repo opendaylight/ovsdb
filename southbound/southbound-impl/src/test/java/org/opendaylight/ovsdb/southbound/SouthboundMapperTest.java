@@ -62,6 +62,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.Uint32;
 
 public class SouthboundMapperTest {
 
@@ -357,7 +358,7 @@ public class SouthboundMapperTest {
 
         assertEquals(Collections.singletonList(new ManagerEntryBuilder()
                 .setConnected(true)
-                .setNumberOfConnections(999L)
+                .setNumberOfConnections(Uint32.valueOf(999))
                 .setTarget(Uri.getDefaultInstance("dummy"))
                 .build()), SouthboundMapper.createManagerEntries(ovsdbNode, updatedManagerRows));
 
@@ -365,7 +366,7 @@ public class SouthboundMapperTest {
         statusAttributeMap.remove("n_connections");
         assertEquals(Collections.singletonList(new ManagerEntryBuilder()
                 .setConnected(true)
-                .setNumberOfConnections(1L)
+                .setNumberOfConnections(Uint32.ONE)
                 .setTarget(Uri.getDefaultInstance("dummy"))
                 .build()), SouthboundMapper.createManagerEntries(ovsdbNode, updatedManagerRows));
     }
@@ -412,7 +413,7 @@ public class SouthboundMapperTest {
 
         assertEquals(Collections.singletonList(new ManagerEntryBuilder()
                 .setConnected(true)
-                .setNumberOfConnections(999L)
+                .setNumberOfConnections(Uint32.valueOf(999))
                 .setTarget(Uri.getDefaultInstance("dummy"))
                 .build()), SouthboundMapper.createManagerEntries(ovsdbNode, updatedManagerRows));
 
@@ -420,7 +421,7 @@ public class SouthboundMapperTest {
         statusAttributeMap.remove("n_connections");
         assertEquals(Collections.singletonList(new ManagerEntryBuilder()
                 .setConnected(true)
-                .setNumberOfConnections(1L)
+                .setNumberOfConnections(Uint32.ONE)
                 .setTarget(Uri.getDefaultInstance("dummy"))
                 .build()), SouthboundMapper.createManagerEntries(ovsdbNode, updatedManagerRows));
     }

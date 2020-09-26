@@ -69,6 +69,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.Uint16;
+import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -340,11 +342,12 @@ public final class SouthboundMapper {
 
             if (controller.getMaxBackoffColumn() != null && controller.getMaxBackoffColumn().getData() != null
                     && !controller.getMaxBackoffColumn().getData().isEmpty()) {
-                builder.setMaxBackoff(controller.getMaxBackoffColumn().getData().iterator().next());
+                builder.setMaxBackoff(Uint32.valueOf(controller.getMaxBackoffColumn().getData().iterator().next()));
             }
             if (controller.getInactivityProbeColumn() != null && controller.getInactivityProbeColumn().getData() != null
                     && !controller.getInactivityProbeColumn().getData().isEmpty()) {
-                builder.setInactivityProbe(controller.getInactivityProbeColumn().getData().iterator().next());
+                builder.setInactivityProbe(
+                    Uint32.valueOf(controller.getInactivityProbeColumn().getData().iterator().next()));
             }
             controllerEntries.add(builder
                     .setTarget(new Uri(targetString))
@@ -376,9 +379,9 @@ public final class SouthboundMapper {
     public static ConnectionInfo createConnectionInfo(final OvsdbClient client) {
         ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
         connectionInfoBuilder.setRemoteIp(createIpAddress(client.getConnectionInfo().getRemoteAddress()));
-        connectionInfoBuilder.setRemotePort(new PortNumber(client.getConnectionInfo().getRemotePort()));
+        connectionInfoBuilder.setRemotePort(new PortNumber(Uint16.valueOf(client.getConnectionInfo().getRemotePort())));
         connectionInfoBuilder.setLocalIp(createIpAddress(client.getConnectionInfo().getLocalAddress()));
-        connectionInfoBuilder.setLocalPort(new PortNumber(client.getConnectionInfo().getLocalPort()));
+        connectionInfoBuilder.setLocalPort(new PortNumber(Uint16.valueOf(client.getConnectionInfo().getLocalPort())));
         return connectionInfoBuilder.build();
     }
 
@@ -453,18 +456,18 @@ public final class SouthboundMapper {
                                             final Manager manager) {
 
         if (manager != null && manager.getTargetColumn() != null) {
-            long numberOfConnections = 0;
+            Uint32 numberOfConnections = Uint32.ZERO;
             final String targetString = manager.getTargetColumn().getData();
 
             final Map<String, String> statusAttributeMap =
                             manager.getStatusColumn() == null ? null : manager.getStatusColumn().getData();
             if (statusAttributeMap != null && statusAttributeMap.containsKey(N_CONNECTIONS_STR)) {
                 String numberOfConnectionValueStr = statusAttributeMap.get(N_CONNECTIONS_STR);
-                numberOfConnections = Integer.parseInt(numberOfConnectionValueStr);
+                numberOfConnections = Uint32.valueOf(numberOfConnectionValueStr);
             } else {
                 final boolean isConnected = manager.getIsConnectedColumn().getData();
                 if (isConnected) {
-                    numberOfConnections = 1;
+                    numberOfConnections = Uint32.ONE;
                 }
             }
             managerEntries.add(new ManagerEntryBuilder()

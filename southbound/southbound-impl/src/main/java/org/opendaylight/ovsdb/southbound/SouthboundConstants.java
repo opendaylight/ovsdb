@@ -55,7 +55,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxHfsc;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxHtb;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxSfq;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.QosEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
+import org.opendaylight.yangtools.yang.common.Uint32;
 
 public interface SouthboundConstants {
 
@@ -66,7 +68,7 @@ public interface SouthboundConstants {
     String TP_URI_PREFIX = "terminationpoint";
     String QOS_URI_PREFIX = "qos";
     String QOS_NAMED_UUID_PREFIX = "QOS";
-    Integer PORT_QOS_LIST_KEY = 1;
+    QosEntryKey PORT_QOS_LIST_KEY = new QosEntryKey(Uint32.ONE);
     String QUEUE_URI_PREFIX = "queue";
     String QUEUE_NAMED_UUID_PREFIX = "QUEUE";
     String AUTOATTACH_URI_PREFIX = "autoattach";

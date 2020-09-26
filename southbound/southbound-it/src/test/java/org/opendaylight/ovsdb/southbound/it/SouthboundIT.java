@@ -162,7 +162,9 @@ import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
+import org.opendaylight.yangtools.yang.common.Uint8;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -190,10 +192,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static final String FORMAT_STR = "%s_%s_%d";
     private static final Version AUTOATTACH_FROM_VERSION = Version.fromString("7.11.2");
     private static final Version IF_INDEX_FROM_VERSION = Version.fromString("7.2.1");
-    private static final Long MAX_BACKOFF = 10000L;
-    private static final Long INACTIVITY_PROBE = 30000L;
+    private static final Uint32 MAX_BACKOFF = Uint32.valueOf(10000);
+    private static final Uint32 INACTIVITY_PROBE = Uint32.valueOf(30000);
     private static String addressStr;
-    private static int portNumber;
+    private static Uint16 portNumber;
     private static String connectionType;
     private static boolean setup = false;
     private static MdsalUtils mdsalUtils = null;
@@ -430,8 +432,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         addressStr = bundleContext.getProperty(SouthboundITConstants.SERVER_IPADDRESS);
         String portStr = bundleContext.getProperty(SouthboundITConstants.SERVER_PORT);
         try {
-            portNumber = Integer.parseInt(portStr);
-        } catch (NumberFormatException e) {
+            portNumber = Uint16.valueOf(portStr);
+        } catch (IllegalArgumentException e) {
             fail("Invalid port number " + portStr + System.lineSeparator() + usage());
         }
         connectionType = bundleContext.getProperty(SouthboundITConstants.CONNECTION_TYPE);
@@ -530,7 +532,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static ConnectionInfo getConnectionInfo(final String ipAddressStr, final int portNum) {
+    private static ConnectionInfo getConnectionInfo(final String ipAddressStr, final Uint16 portNum) {
         InetAddress inetAddress = null;
         try {
             inetAddress = InetAddress.getByName(ipAddressStr);
@@ -768,10 +770,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     Assert.assertEquals(setUri.toString(), entry.getTarget().toString());
                 }
                 if (entry.getMaxBackoff() != null) {
-                    Assert.assertEquals(entry.getMaxBackoff(), MAX_BACKOFF);
+                    Assert.assertEquals(MAX_BACKOFF, entry.getMaxBackoff());
                 }
                 if (entry.getInactivityProbe() != null) {
-                    Assert.assertEquals(entry.getInactivityProbe(),INACTIVITY_PROBE);
+                    Assert.assertEquals(INACTIVITY_PROBE, entry.getInactivityProbe());
                 }
             }
         }
@@ -1025,8 +1027,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertEquals(aaUuid, bridge.getAutoAttach());
 
                 // UPDATE: Update mappings column of AutoAttach table that was created
-                List<Mappings> mappings = ImmutableList.of(new MappingsBuilder().setMappingsKey(100L)
-                        .setMappingsValue(200).build());
+                List<Mappings> mappings = ImmutableList.of(new MappingsBuilder().setMappingsKey(Uint32.valueOf(100))
+                        .setMappingsValue(Uint16.valueOf(200)).build());
                 Autoattach updatedAa = new AutoattachBuilder()
                         .setAutoattachId(new Uri(testAutoattachId))
                         .setMappings(mappings)
@@ -1177,7 +1179,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          */
         TestQueue(final ConnectionInfo connectionInfo,
                                   final Uri queueId,
-                                  final Short queueDscp,
+                                  final Uint8 queueDscp,
                                   @Nullable final List<QueuesExternalIds> externalIds,
                                   @Nullable final List<QueuesOtherConfig> otherConfigs) {
             this.connectionInfo = connectionInfo;
@@ -1376,7 +1378,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testCRDTerminationPointOfPort() throws InterruptedException {
-        final Long ofportExpected = 45002L;
+        final Uint32 ofportExpected = Uint32.valueOf(45002);
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
 
@@ -1403,9 +1405,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
                         terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
-                    Long ofPort = ovsdbTerminationPointAugmentation.getOfport().toJava();
+                    Uint32 ofPort = ovsdbTerminationPointAugmentation.getOfport();
                     // if ephemeral port 45002 is in use, ofPort is set to 1
-                    Assert.assertTrue(ofPort.equals(ofportExpected) || ofPort.equals(1L));
+                    Assert.assertTrue(ofPort.equals(ofportExpected) || ofPort.equals(Uint32.ONE));
                     LOG.info("ofPort: {}", ofPort);
                 }
             }
@@ -1420,8 +1422,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testCRDTerminationPointOfPortRequest() throws InterruptedException {
-        final Long ofportExpected = 45008L;
-        final Long ofportInput = 45008L;
+        final Uint32 ofportExpected = Uint32.valueOf(45008);
+        final Uint32 ofportInput = Uint32.valueOf(45008);
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
 
@@ -1435,7 +1437,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     createGenericOvsdbTerminationPointAugmentationBuilder();
             String portName = "testOfPortRequest";
             ovsdbTerminationBuilder.setName(portName);
-            Integer ofPortRequestExpected = ofportExpected.intValue();
+            Uint16 ofPortRequestExpected = ofportExpected.toUint16();
             ovsdbTerminationBuilder.setOfport(ofportInput);
             ovsdbTerminationBuilder.setOfportRequest(ofPortRequestExpected);
             Assert.assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
@@ -1448,13 +1450,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
                         terminationPoint.augmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
-                    Long ofPort = ovsdbTerminationPointAugmentation.getOfport().toJava();
+                    Uint32 ofPort = ovsdbTerminationPointAugmentation.getOfport();
                     // if ephemeral port 45008 is in use, ofPort is set to 1
-                    Assert.assertTrue(ofPort.equals(ofportExpected) || ofPort.equals(1L));
+                    Assert.assertTrue(ofPort.equals(ofportExpected) || ofPort.equals(Uint32.ONE));
                     LOG.info("ofPort: {}", ofPort);
 
-                    Integer ofPortRequest = ovsdbTerminationPointAugmentation.getOfportRequest().toJava();
-                    Assert.assertTrue(ofPortRequest.equals(ofPortRequestExpected));
+                    Uint16 ofPortRequest = ovsdbTerminationPointAugmentation.getOfportRequest();
+                    Assert.assertEquals(ofPortRequestExpected, ofPortRequest);
                     LOG.info("ofPortRequest: {}", ofPortRequest);
                 }
             }
@@ -1732,8 +1734,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     @Test
     public void testCRUDTerminationPointVlan() throws InterruptedException {
-        final Integer createdVlanId = 4000;
-        final Integer updatedVlanId = 4001;
+        final Uint16 createdVlanId = Uint16.valueOf(4000);
+        final Uint16 updatedVlanId = Uint16.valueOf(4001);
 
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
 
@@ -1761,8 +1763,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                     VlanId actualVlanId = ovsdbTerminationPointAugmentation.getVlanTag();
                     Assert.assertNotNull(actualVlanId);
-                    Integer actualVlanIdInt = actualVlanId.getValue().toJava();
-                    Assert.assertEquals(createdVlanId, actualVlanIdInt);
+                    Assert.assertEquals(createdVlanId, actualVlanId.getValue());
                 }
             }
 
@@ -1791,8 +1792,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 if (ovsdbTerminationPointAugmentation.getName().equals(portName)) {
                     VlanId actualVlanId = ovsdbTerminationPointAugmentation.getVlanTag();
                     Assert.assertNotNull(actualVlanId);
-                    Integer actualVlanIdInt = actualVlanId.getValue().toJava();
-                    Assert.assertEquals(updatedVlanId, actualVlanIdInt);
+                    Assert.assertEquals(updatedVlanId, actualVlanId.getValue());
                 }
             }
 
@@ -1865,32 +1865,31 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static List<Set<Integer>> generateVlanSets() {
+    private static List<Set<Uint16>> generateVlanSets() {
         int min = 0;
         int max = 4095;
         return Lists.newArrayList(
-                Collections.<Integer>emptySet(),
-                Collections.singleton(2222),
-                Sets.newHashSet(min, max, min + 1, max - 1, (max - min) / 2));
+                Collections.<Uint16>emptySet(),
+                Collections.singleton(Uint16.valueOf(2222)),
+                Sets.newHashSet(Uint16.valueOf(min), Uint16.valueOf(max), Uint16.valueOf(min + 1),
+                    Uint16.valueOf(max - 1), Uint16.valueOf((max - min) / 2)));
     }
 
-    private static List<Trunks> buildTrunkList(Set<Integer> trunkSet) {
+    private static List<Trunks> buildTrunkList(Set<Uint16> trunkSet) {
         List<Trunks> trunkList = new ArrayList<>();
-        for (Integer trunk : trunkSet) {
-            TrunksBuilder trunkBuilder = new TrunksBuilder();
-            trunkBuilder.setTrunk(new VlanId(trunk));
-            trunkList.add(trunkBuilder.build());
+        for (Uint16 trunk : trunkSet) {
+            trunkList.add(new TrunksBuilder().setTrunk(new VlanId(trunk)).build());
         }
         return trunkList;
     }
 
     @Test
     public void testCRUDTerminationPointVlanTrunks() throws InterruptedException {
-        final List<Trunks> updatedTrunks = buildTrunkList(Collections.singleton(2011));
+        final List<Trunks> updatedTrunks = buildTrunkList(Collections.singleton(Uint16.valueOf(2011)));
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        Iterable<Set<Integer>> vlanSets = generateVlanSets();
+        Iterable<Set<Uint16>> vlanSets = generateVlanSets();
         int testCase = 0;
-        for (Set<Integer> vlanSet : vlanSets) {
+        for (Set<Uint16> vlanSet : vlanSets) {
             ++testCase;
             // CREATE
             try (TestBridge testBridge = new TestBridge(connectionInfo, SouthboundITConstants.BRIDGE_NAME)) {
@@ -2157,7 +2156,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         Uri queueUri = new Uri("QUEUE-A1");
 
-        try (TestQueue testQueue = new TestQueue(connectionInfo, queueUri, Short.valueOf("25"), null, null)) {
+        try (TestQueue testQueue = new TestQueue(connectionInfo, queueUri, Uint8.valueOf(25), null, null)) {
             OvsdbNodeAugmentation ovsdbNodeAugmentation = getOvsdbNode(connectionInfo,
                     LogicalDatastoreType.OPERATIONAL);
             Queues operQueue = getQueue(queueUri, ovsdbNodeAugmentation);
@@ -2268,7 +2267,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
                 // CREATE: and update the test queue with starting values.
                 try (TestQueue testQueue = new TestQueue(connectionInfo, new Uri(testQueueId),
-                        Short.valueOf("45"), null, null)) {
+                        Uint8.valueOf(45), null, null)) {
                     QueuesBuilder queuesBuilder = new QueuesBuilder();
                     queuesBuilder.setQueueId(new Uri(testQueueId));
                     InstanceIdentifier<Queues> queueIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
@@ -2353,8 +2352,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         String testQueueId = "testQueueDscp";
 
         // CREATE: and update the test queue with starting values.
-        try (TestQueue testQueue = new TestQueue(connectionInfo, new Uri(testQueueId), (short) 0, null, null)) {
-            for (Short dscp = 1; dscp < 64; dscp++) {
+        try (TestQueue testQueue = new TestQueue(connectionInfo, new Uri(testQueueId), Uint8.ZERO, null, null)) {
+            for (short dscp = 1; dscp < 64; dscp++) {
                 QueuesBuilder queuesBuilder = new QueuesBuilder();
                 queuesBuilder.setQueueId(new Uri(testQueueId));
                 InstanceIdentifier<Queues> queueIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
@@ -2364,7 +2363,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, queueIid);
                 queueOperationalListener.registerDataChangeListener();
 
-                queuesBuilder.setDscp(dscp);
+                queuesBuilder.setDscp(Uint8.valueOf(dscp));
                 Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
                         queueIid, queuesBuilder.build()));
                 queueOperationalListener.waitForUpdate(OVSDB_ROUNDTRIP_TIMEOUT);
@@ -2375,9 +2374,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         LogicalDatastoreType.OPERATIONAL);
                 Queues operQueue = getQueue(new Uri(testQueueId), ovsdbNodeAugmentation);
                 Assert.assertNotNull(operQueue);
-                Short operDscp = operQueue.getDscp().toJava();
-                Assert.assertNotNull(operDscp);
-                Assert.assertEquals(dscp, operDscp);
+                Assert.assertEquals(dscp, operQueue.getDscp().toJava());
             }
 
             // DELETE handled by TestQueue
@@ -2488,9 +2485,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         // CREATE: and update the test queue with starting values.
         try (TestQos testQos = new TestQos(connectionInfo, new Uri(testQosId),
                 SouthboundMapper.createQosType(SouthboundConstants.QOS_LINUX_HTB), null, null);
-                TestQueue testQueue1 = new TestQueue(connectionInfo, new Uri("queue1"), Short.valueOf("12"), null,
+                TestQueue testQueue1 = new TestQueue(connectionInfo, new Uri("queue1"), Uint8.valueOf(12), null,
                     null);
-                TestQueue testQueue2 = new TestQueue(connectionInfo, new Uri("queue2"), Short.valueOf("35"), null,
+                TestQueue testQueue2 = new TestQueue(connectionInfo, new Uri("queue2"), Uint8.valueOf(35), null,
                     null)) {
             QosEntriesBuilder qosBuilder = new QosEntriesBuilder();
             qosBuilder.setQosId(new Uri(testQosId));

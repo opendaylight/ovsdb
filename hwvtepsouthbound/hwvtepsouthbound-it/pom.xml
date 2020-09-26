@@ -80,7 +80,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>javax.inject</groupId>
       <artifactId>javax.inject</artifactId>
-      <version>1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

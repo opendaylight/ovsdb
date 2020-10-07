@@ -191,8 +191,7 @@ public class OpenVSwitchUpdateCommandTest {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(KeyedInstanceIdentifier.class));
 
-        //suppress getNodeId()
-        doReturn(null).when(openVSwitchUpdateCommand).getNodeId(any());
+        doReturn(new NodeId("foo")).when(openVSwitchUpdateCommand).getNodeId(any());
         OpenVSwitch ovs = mock(OpenVSwitch.class);
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "removeOldConfigs",
                 transaction, ImmutableMap.of("OpenvswitchOtherConfigsKey", "OpenvswitchOtherConfigsValue"), ovs);

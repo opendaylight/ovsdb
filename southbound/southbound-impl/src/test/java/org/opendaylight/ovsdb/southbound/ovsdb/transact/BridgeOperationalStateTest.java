@@ -54,7 +54,7 @@ public class BridgeOperationalStateTest {
 
     private final InstanceIdentifier<Node> nodeIid = InstanceIdentifier.create(NetworkTopology.class)
             .child(Topology.class).child(Node.class);
-    private final Node brNode = new NodeBuilder().build();
+    private final Node brNode = new NodeBuilder().setNodeId(new NodeId("bar")).build();
 
     @Mock private BridgeOperationalState briOperationState;
     @Mock private DataBroker db;

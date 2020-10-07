@@ -30,6 +30,7 @@ import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
+import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -40,7 +41,7 @@ public class InstanceIdentifierCodecTest {
     private DataSchemaContextTree dataSchemaContextTree;
 
     @Mock
-    private SchemaContext context;
+    private EffectiveModelContext context;
     @Mock
     private BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
     @Mock

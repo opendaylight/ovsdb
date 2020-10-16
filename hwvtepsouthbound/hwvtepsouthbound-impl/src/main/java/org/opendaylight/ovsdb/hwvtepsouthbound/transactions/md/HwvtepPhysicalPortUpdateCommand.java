@@ -191,11 +191,11 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
             LOG.info("addToDeviceUpdate {}", portUpdate);
             getDeviceInfo().updateDeviceOperData(VlanBindings.class, tpPath,
                     portUpdate.getUuid(), portUpdate);
-            getDeviceInfo().scheduleTransaction((transactionBuilder) -> {
+            getDeviceInfo().scheduleTransaction(transactionBuilder -> {
                 InstanceIdentifier psIid = tpPath.firstIdentifierOf(Node.class);
                 HwvtepOperationalState operState = new HwvtepOperationalState(getOvsdbConnectionInstance());
                 PhysicalPortUpdateCommand portUpdateCommand = new PhysicalPortUpdateCommand(
-                        operState, Collections.EMPTY_LIST);
+                        operState, Collections.emptyList());
                 TerminationPoint cfgPoint = (TerminationPoint) data.getData();
                 portUpdateCommand.updatePhysicalPort(transactionBuilder, psIid,
                             Lists.newArrayList(cfgPoint));

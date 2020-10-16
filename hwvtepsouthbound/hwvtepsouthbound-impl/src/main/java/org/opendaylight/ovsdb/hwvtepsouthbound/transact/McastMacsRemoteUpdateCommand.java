@@ -181,16 +181,16 @@ public class McastMacsRemoteUpdateCommand
 
     private static boolean compareLocatorSets(List<LocatorSet> locatorSet1, List<LocatorSet> locatorSet2) {
         if (locatorSet1 == null) {
-            locatorSet1 = Collections.EMPTY_LIST;
+            locatorSet1 = Collections.emptyList();
         }
         if (locatorSet2 == null) {
-            locatorSet2 = Collections.EMPTY_LIST;
+            locatorSet2 = Collections.emptyList();
         }
         if (locatorSet1.size() != locatorSet2.size()) {
             return false;
         }
-        Set set1 = Sets.newHashSet(locatorSet1);
-        Set set2 = Sets.newHashSet(locatorSet2);
+        Set<LocatorSet> set1 = Sets.newHashSet(locatorSet1);
+        Set<LocatorSet> set2 = Sets.newHashSet(locatorSet2);
         return set1.containsAll(set2);
     }
 
@@ -199,7 +199,7 @@ public class McastMacsRemoteUpdateCommand
         @Override
         public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final RemoteMcastMacs data) {
             if (data == null) {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
             return Lists.newArrayList(data.getLogicalSwitchRef().getValue());
         }
@@ -207,7 +207,7 @@ public class McastMacsRemoteUpdateCommand
         @Override
         public List<InstanceIdentifier<?>> getTerminationPointDependencies(final RemoteMcastMacs data) {
             if (data == null || HwvtepSouthboundUtil.isEmpty(data.getLocatorSet())) {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
             List<InstanceIdentifier<?>> locators = new ArrayList<>();
             for (LocatorSet locator: data.getLocatorSet()) {
@@ -248,7 +248,7 @@ public class McastMacsRemoteUpdateCommand
     }
 
     @Override
-    protected String getKeyStr(InstanceIdentifier<RemoteMcastMacs> iid) {
+    protected String getKeyStr(final InstanceIdentifier<RemoteMcastMacs> iid) {
         return getLsKeyStr(iid.firstKeyOf(RemoteMcastMacs.class).getLogicalSwitchRef().getValue());
     }
 }

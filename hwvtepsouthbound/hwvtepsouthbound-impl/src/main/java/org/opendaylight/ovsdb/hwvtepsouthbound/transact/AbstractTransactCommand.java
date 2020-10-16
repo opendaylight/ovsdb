@@ -340,7 +340,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
         List<T> data1 = getData(include);
         List<T> data2 = diffOf(node1, node2, compareKeyOnly);
         if (HwvtepSouthboundUtil.isEmpty(data1) && HwvtepSouthboundUtil.isEmpty(data2)) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         List<T> result = new ArrayList<>(data1);
         result.addAll(data2);
@@ -354,14 +354,14 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
         List<T> list2 = getData(node2);
 
         if (HwvtepSouthboundUtil.isEmpty(list1)) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         if (HwvtepSouthboundUtil.isEmpty(list2)) {
-            return HwvtepSouthboundUtil.isEmpty(list1) ? Collections.EMPTY_LIST : list1;
+            return HwvtepSouthboundUtil.isEmpty(list1) ? Collections.emptyList() : list1;
         }
 
-        Map<Object, T> map1 = list1.stream().collect(Collectors.toMap(ele -> ele.key(), ele -> ele));
-        Map<Object, T> map2 = list2.stream().collect(Collectors.toMap(ele -> ele.key(), ele -> ele));
+        Map<Object, T> map1 = list1.stream().collect(Collectors.toMap(Identifiable::key, ele -> ele));
+        Map<Object, T> map2 = list2.stream().collect(Collectors.toMap(Identifiable::key, ele -> ele));
         map1.entrySet().forEach(entry1 -> {
             T val2 = map2.remove(entry1.getKey());
             if (compareKeyOnly) {
@@ -507,16 +507,16 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
         return new HwvtepOperationalState(getConnectionInstance());
     }
 
-    protected String getNodeKeyStr(InstanceIdentifier<T> iid) {
+    protected String getNodeKeyStr(final InstanceIdentifier<T> iid) {
         return getClassType().getTypeName() + "."
             + iid.firstKeyOf(Node.class).getNodeId().getValue() + "." + getKeyStr(iid);
     }
 
-    protected String getKeyStr(InstanceIdentifier<T> iid) {
+    protected String getKeyStr(final InstanceIdentifier<T> iid) {
         return iid.toString();
     }
 
-    protected String getLsKeyStr(InstanceIdentifier iid) {
+    protected String getLsKeyStr(final InstanceIdentifier iid) {
         return ((InstanceIdentifier<LogicalSwitches>)iid).firstKeyOf(LogicalSwitches.class)
             .getHwvtepNodeName().getValue();
     }

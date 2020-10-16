@@ -47,12 +47,12 @@ public class LogicalRouterRemoveCommand
 
         for (Entry<InstanceIdentifier<Node>, List<LogicalRouters>> created: removed.entrySet()) {
             if (!HwvtepSouthboundUtil.isEmpty(created.getValue())) {
-                getOperationalState().getDeviceInfo().scheduleTransaction(new TransactCommand() {
+                getOperationalState().getDeviceInfo().scheduleTransaction(new TransactCommand<>() {
                     @Override
                     public void execute(final TransactionBuilder transactionBuilder) {
                         HwvtepConnectionInstance connectionInstance = getDeviceInfo().getConnectionInstance();
                         HwvtepOperationalState operState = new HwvtepOperationalState(
-                                connectionInstance.getDataBroker(), connectionInstance, Collections.EMPTY_LIST);
+                                connectionInstance.getDataBroker(), connectionInstance, Collections.emptyList());
                         hwvtepOperationalState = operState;
                         deviceTransaction = transactionBuilder;
                         LOG.debug("Running delete logical router in seperate tx {}", created.getKey());

@@ -21,11 +21,11 @@ public final class EmptyDependencyGetter extends UnMetDependencyGetter {
 
     @Override
     public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(Identifiable data) {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     @Override
     public List<InstanceIdentifier<?>> getTerminationPointDependencies(Identifiable data) {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 }

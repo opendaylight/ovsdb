@@ -183,7 +183,7 @@ public class UcastMacsRemoteUpdateCommand
         @Override
         public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final RemoteUcastMacs data) {
             if (data == null) {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
             return Lists.newArrayList(data.getLogicalSwitchRef().getValue());
         }
@@ -191,7 +191,7 @@ public class UcastMacsRemoteUpdateCommand
         @Override
         public List<InstanceIdentifier<?>> getTerminationPointDependencies(final RemoteUcastMacs data) {
             if (data == null) {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
             return Lists.newArrayList(data.getLocatorRef().getValue());
         }
@@ -214,7 +214,7 @@ public class UcastMacsRemoteUpdateCommand
     }
 
     @Override
-    protected String getKeyStr(InstanceIdentifier<RemoteUcastMacs> iid) {
+    protected String getKeyStr(final InstanceIdentifier<RemoteUcastMacs> iid) {
         return getLsKeyStr(iid.firstKeyOf(RemoteUcastMacs.class).getLogicalSwitchRef().getValue());
     }
 }

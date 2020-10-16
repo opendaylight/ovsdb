@@ -395,7 +395,7 @@ public class HwvtepOperationalState {
         if (currentTxDeletedKeys.containsKey(cls)) {
             return currentTxDeletedKeys.get(cls).keySet();
         }
-        return Collections.EMPTY_SET;
+        return Collections.emptySet();
     }
 
     public List<? extends Identifiable> getUpdatedData(final InstanceIdentifier<Node> key,
@@ -405,7 +405,7 @@ public class HwvtepOperationalState {
             result = modifiedData.get(key).getLeft().get(cls);
         }
         if (result == null) {
-            result = Collections.EMPTY_LIST;
+            result = Collections.emptyList();
         }
         return result;
     }
@@ -417,7 +417,7 @@ public class HwvtepOperationalState {
             result = modifiedData.get(key).getRight().get(cls);
         }
         if (result == null) {
-            result = Collections.EMPTY_LIST;
+            result = Collections.emptyList();
         }
         return result;
     }

@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -183,8 +183,7 @@ public class HwvtepOperationalState {
     }
 
     public Optional<HwvtepGlobalAugmentation> getHwvtepGlobalAugmentation(final InstanceIdentifier<?> iid) {
-        Preconditions.checkNotNull(iid);
-        Optional<Node> nodeOptional = getGlobalNode(iid);
+        Optional<Node> nodeOptional = getGlobalNode(requireNonNull(iid));
         if (nodeOptional.isPresent()) {
             return Optional.ofNullable(nodeOptional.get().augmentation(HwvtepGlobalAugmentation.class));
         }
@@ -192,8 +191,7 @@ public class HwvtepOperationalState {
     }
 
     public Optional<PhysicalSwitchAugmentation> getPhysicalSwitchAugmentation(final InstanceIdentifier<?> iid) {
-        Preconditions.checkNotNull(iid);
-        Optional<Node> nodeOptional = getGlobalNode(iid);
+        Optional<Node> nodeOptional = getGlobalNode(requireNonNull(iid));
         if (nodeOptional.isPresent()) {
             return Optional.ofNullable(nodeOptional.get().augmentation(PhysicalSwitchAugmentation.class));
         }
@@ -202,8 +200,7 @@ public class HwvtepOperationalState {
 
     public Optional<Map<TerminationPointKey, TerminationPoint>> getTerminationPointList(
             final InstanceIdentifier<?> iid) {
-        Preconditions.checkNotNull(iid);
-        Optional<Node> nodeOptional = getGlobalNode(iid);
+        Optional<Node> nodeOptional = getGlobalNode(requireNonNull(iid));
         if (nodeOptional.isPresent() && nodeOptional.get().getTerminationPoint() != null) {
             return Optional.ofNullable(nodeOptional.get().getTerminationPoint());
         }
@@ -212,8 +209,7 @@ public class HwvtepOperationalState {
 
     public Optional<LogicalSwitches> getLogicalSwitches(final InstanceIdentifier<?> iid,
             final LogicalSwitchesKey logicalSwitchesKey) {
-        Preconditions.checkNotNull(iid);
-        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(requireNonNull(iid));
         if (nodeOptional.isPresent()) {
             LogicalSwitches lswitch = nodeOptional.get().nonnullLogicalSwitches().get(logicalSwitchesKey);
             if (lswitch != null) {
@@ -228,8 +224,7 @@ public class HwvtepOperationalState {
     }
 
     public Optional<Tunnels> getTunnels(final InstanceIdentifier<?> iid, final TunnelsKey tunnelsKey) {
-        Preconditions.checkNotNull(iid);
-        Optional<PhysicalSwitchAugmentation> psOptional = getPhysicalSwitchAugmentation(iid);
+        Optional<PhysicalSwitchAugmentation> psOptional = getPhysicalSwitchAugmentation(requireNonNull(iid));
         if (psOptional.isPresent()) {
             Tunnels tunnel = psOptional.get().nonnullTunnels().get(tunnelsKey);
             if (tunnel != null) {
@@ -246,8 +241,8 @@ public class HwvtepOperationalState {
 
     public Optional<HwvtepPhysicalPortAugmentation> getPhysicalPortAugmentation(final InstanceIdentifier<?> iid,
             final HwvtepNodeName hwvtepNodeName) {
-        Preconditions.checkNotNull(iid);
-        Optional<Map<TerminationPointKey, TerminationPoint>> nodeOptional = getTerminationPointList(iid);
+        Optional<Map<TerminationPointKey, TerminationPoint>> nodeOptional =
+                getTerminationPointList(requireNonNull(iid));
         if (nodeOptional.isPresent()) {
             for (TerminationPoint tp : nodeOptional.get().values()) {
                 HwvtepPhysicalPortAugmentation hppAugmentation =
@@ -262,8 +257,8 @@ public class HwvtepOperationalState {
 
     public Optional<HwvtepPhysicalLocatorAugmentation> getPhysicalLocatorAugmentation(final InstanceIdentifier<?> iid,
             final IpAddress dstIp, final Class<? extends EncapsulationTypeBase> encapType) {
-        Preconditions.checkNotNull(iid);
-        Optional<Map<TerminationPointKey, TerminationPoint>> nodeOptional = getTerminationPointList(iid);
+        Optional<Map<TerminationPointKey, TerminationPoint>> nodeOptional =
+                getTerminationPointList(requireNonNull(iid));
         if (nodeOptional.isPresent()) {
             for (TerminationPoint tp : nodeOptional.get().values()) {
                 HwvtepPhysicalLocatorAugmentation hppAugmentation =
@@ -288,8 +283,7 @@ public class HwvtepOperationalState {
     }
 
     public Optional<LocalMcastMacs> getLocalMcastMacs(final InstanceIdentifier<?> iid, final LocalMcastMacsKey key) {
-        Preconditions.checkNotNull(iid);
-        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(requireNonNull(iid));
         if (nodeOptional.isPresent()) {
             LocalMcastMacs mac = nodeOptional.get().nonnullLocalMcastMacs().get(key);
             if (mac != null) {
@@ -300,8 +294,7 @@ public class HwvtepOperationalState {
     }
 
     public Optional<RemoteMcastMacs> getRemoteMcastMacs(final InstanceIdentifier<?> iid, final RemoteMcastMacsKey key) {
-        Preconditions.checkNotNull(iid);
-        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(requireNonNull(iid));
         if (nodeOptional.isPresent()) {
             RemoteMcastMacs mac = nodeOptional.get().nonnullRemoteMcastMacs().get(key);
             if (mac != null) {
@@ -312,8 +305,7 @@ public class HwvtepOperationalState {
     }
 
     public Optional<LocalUcastMacs> getLocalUcastMacs(final InstanceIdentifier<?> iid, final LocalUcastMacsKey key) {
-        Preconditions.checkNotNull(iid);
-        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(requireNonNull(iid));
         if (nodeOptional.isPresent()) {
             LocalUcastMacs mac = nodeOptional.get().nonnullLocalUcastMacs().get(key);
             if (mac != null) {
@@ -324,8 +316,7 @@ public class HwvtepOperationalState {
     }
 
     public Optional<RemoteUcastMacs> getRemoteUcastMacs(final InstanceIdentifier<?> iid, final RemoteUcastMacsKey key) {
-        Preconditions.checkNotNull(iid);
-        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(requireNonNull(iid));
         if (nodeOptional.isPresent()) {
             RemoteUcastMacs mac = nodeOptional.get().nonnullRemoteUcastMacs().get(key);
             if (mac != null) {
@@ -337,8 +328,7 @@ public class HwvtepOperationalState {
 
     public Optional<LogicalRouters> getLogicalRouters(final InstanceIdentifier<?> iid,
             final LogicalRoutersKey logicalRoutersKey) {
-        Preconditions.checkNotNull(iid);
-        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(iid);
+        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(requireNonNull(iid));
         if (nodeOptional.isPresent()) {
             LogicalRouters lrouter = nodeOptional.get().nonnullLogicalRouters().get(logicalRoutersKey);
             if (lrouter != null) {

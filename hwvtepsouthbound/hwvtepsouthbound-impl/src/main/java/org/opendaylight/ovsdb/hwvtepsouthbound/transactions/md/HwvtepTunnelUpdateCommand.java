@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -72,8 +72,8 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
     }
 
     private void updateTunnel(ReadWriteTransaction transaction, Tunnel tunnel) {
-        Preconditions.checkNotNull(tunnel.getLocalColumn().getData());
-        Preconditions.checkNotNull(tunnel.getRemoteColumn().getData());
+        final UUID localData = requireNonNull(tunnel.getLocalColumn().getData());
+        final UUID remoteData = requireNonNull(tunnel.getRemoteColumn().getData());
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         //TODO remove these reads
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
@@ -90,9 +90,9 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
         if (connection.isPresent() && tunnelIid != null) {
             TunnelsBuilder builder = new TunnelsBuilder();
             builder.setLocalLocatorRef(new HwvtepPhysicalLocatorRef(getPhysicalLocatorRefFromUUID(
-                    getOvsdbConnectionInstance().getInstanceIdentifier(), tunnel.getLocalColumn().getData())));
+                    getOvsdbConnectionInstance().getInstanceIdentifier(), localData)));
             builder.setRemoteLocatorRef(new HwvtepPhysicalLocatorRef(getPhysicalLocatorRefFromUUID(
-                    getOvsdbConnectionInstance().getInstanceIdentifier(), tunnel.getRemoteColumn().getData())));
+                    getOvsdbConnectionInstance().getInstanceIdentifier(), remoteData)));
             builder.setTunnelUuid(new Uuid(tunnel.getUuid().toString()));
             setBfdLocalConfigs(builder, tunnel);
             setBfdRemoteConfigs(builder, tunnel);

@@ -7,13 +7,12 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Copied from org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask
@@ -25,9 +24,6 @@ import org.slf4j.LoggerFactory;
  * Created by Anil Vishnoi (avishnoi@Brocade.com) on 3/9/16.
  */
 public abstract class ReconciliationTask implements Runnable {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ReconciliationTask.class);
-
     protected final ReconciliationManager reconciliationManager;
     protected final HwvtepConnectionManager connectionManager;
     protected final InstanceIdentifier<?> nodeIid;
@@ -36,12 +32,9 @@ public abstract class ReconciliationTask implements Runnable {
     protected ReconciliationTask(ReconciliationManager reconciliationManager, HwvtepConnectionManager connectionManager,
                                  InstanceIdentifier<?> nodeIid,
                                  DataObject configData) {
-        Preconditions.checkNotNull(reconciliationManager, "Reconciliation manager must not be null");
-        Preconditions.checkNotNull(connectionManager, "Connection manager must not be null");
-        Preconditions.checkNotNull(nodeIid, "Node Iid must not be null");
-        this.reconciliationManager = reconciliationManager;
-        this.connectionManager = connectionManager;
-        this.nodeIid = nodeIid;
+        this.reconciliationManager = requireNonNull(reconciliationManager, "Reconciliation manager must not be null");
+        this.connectionManager = requireNonNull(connectionManager, "Connection manager must not be null");
+        this.nodeIid = requireNonNull(nodeIid, "Node Iid must not be null");
         this.configData = configData;
     }
 

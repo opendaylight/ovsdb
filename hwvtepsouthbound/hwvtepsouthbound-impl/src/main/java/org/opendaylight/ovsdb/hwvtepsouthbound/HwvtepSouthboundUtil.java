@@ -7,7 +7,8 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.Collection;
 import java.util.Map;
@@ -139,9 +140,8 @@ public final class HwvtepSouthboundUtil {
 
     public static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db,
                     HwvtepPhysicalSwitchAttributes node) {
-        Preconditions.checkNotNull(node);
         Optional<HwvtepGlobalAugmentation> result = null;
-        HwvtepGlobalRef ref = node.getManagedBy();
+        HwvtepGlobalRef ref = requireNonNull(node).getManagedBy();
         if (ref != null && ref.getValue() != null) {
             result = getManagingNode(db, ref);
         } else {

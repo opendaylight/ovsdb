@@ -5,11 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableBiMap;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.net.InetAddresses;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -223,16 +222,12 @@ public final class HwvtepSouthboundMapper {
                 .build();
     }
 
-
     public static Class<? extends EncapsulationTypeBase> createEncapsulationType(String type) {
-        Preconditions.checkNotNull(type);
-        if (type.isEmpty()) {
+        if (requireNonNull(type).isEmpty()) {
             return EncapsulationTypeVxlanOverIpv4.class;
-        } else {
-            ImmutableBiMap<String, Class<? extends EncapsulationTypeBase>> mapper =
-                    HwvtepSouthboundConstants.ENCAPS_TYPE_MAP.inverse();
-            return mapper.get(type);
         }
+
+        return HwvtepSouthboundConstants.ENCAPS_TYPE_MAP.inverse().get(type);
     }
 
     public static TerminationPointKey getTerminationPointKey(PhysicalLocator physicalLocator) {

@@ -7,7 +7,8 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -238,8 +239,8 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
 
     private List<InstanceIdentifier<SwitchFaultStatus>> getSwitchFaultStatusToRemove(InstanceIdentifier<Node> psIid,
             PhysicalSwitch phySwitch) {
-        Preconditions.checkNotNull(psIid);
-        Preconditions.checkNotNull(phySwitch);
+        requireNonNull(psIid);
+        requireNonNull(phySwitch);
         List<InstanceIdentifier<SwitchFaultStatus>> result = new ArrayList<>();
         PhysicalSwitch oldSwitch = oldPSRows.get(phySwitch.getUuid());
         if (oldSwitch != null && oldSwitch.getSwitchFaultStatusColumn() != null) {

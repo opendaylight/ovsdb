@@ -5,12 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import static java.util.Objects.requireNonNull;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -292,7 +291,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     public HwvtepConnectionInstance getConnectionInstance(final Node node) {
-        Preconditions.checkNotNull(node);
+        requireNonNull(node);
         HwvtepGlobalAugmentation hwvtepGlobal = node.augmentation(HwvtepGlobalAugmentation.class);
         PhysicalSwitchAugmentation switchNode = node.augmentation(PhysicalSwitchAugmentation.class);
         if (hwvtepGlobal != null) {
@@ -383,7 +382,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void registerCallbacks(HwvtepConnectionInstance hwvtepConnectionInstance) {
+    private void registerCallbacks(final HwvtepConnectionInstance hwvtepConnectionInstance) {
         LOG.info("HWVTEP entity {} is owned by this controller registering callbacks",
                 hwvtepConnectionInstance.getConnectionInfo());
         try {
@@ -400,7 +399,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
 
-    private void registerEntityForOwnership(HwvtepConnectionInstance hwvtepConnectionInstance) {
+    private void registerEntityForOwnership(final HwvtepConnectionInstance hwvtepConnectionInstance) {
 
         Entity candidateEntity = getEntityFromConnectionInstance(hwvtepConnectionInstance);
         if (entityConnectionMap.get(candidateEntity) != null) {
@@ -533,7 +532,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     private void retryConnection(final InstanceIdentifier<Node> iid, final HwvtepGlobalAugmentation hwvtepNode,
-                                 ConnectionReconciliationTriggers trigger) {
+                                 final ConnectionReconciliationTriggers trigger) {
         if (hwvtepNode == null) {
             //switch initiated connection
             return;
@@ -719,7 +718,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         return Collections.unmodifiableMap(nodeIidVsConnectionInstance);
     }
 
-    public void cleanupOperationalNode(InstanceIdentifier<Node> nodeIid) {
+    public void cleanupOperationalNode(final InstanceIdentifier<Node> nodeIid) {
         txInvoker.invoke(new HwvtepGlobalRemoveCommand(nodeIid));
     }
 }

@@ -7,7 +7,8 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
-import com.google.common.base.Preconditions;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -326,8 +327,8 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
 
     private List<InstanceIdentifier<PortFaultStatus>> getPortFaultStatusToRemove(
             final InstanceIdentifier<TerminationPoint> tpPath, final PhysicalPort port) {
-        Preconditions.checkNotNull(tpPath);
-        Preconditions.checkNotNull(port);
+        requireNonNull(tpPath);
+        requireNonNull(port);
         List<InstanceIdentifier<PortFaultStatus>> result = new ArrayList<>();
         PhysicalPort oldPort = oldPPRows.get(port.getUuid());
         if (oldPort != null && oldPort.getPortFaultStatusColumn() != null) {

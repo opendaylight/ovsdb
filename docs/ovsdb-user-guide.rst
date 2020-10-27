@@ -192,6 +192,8 @@ HTTP GET:
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/
      or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/
+     or
     http://<controller-ip>:8181/restconf/operational/network-topology:network-topology/topology/ovsdb:1/
 
 Result Body:
@@ -242,6 +244,8 @@ HTTP PUT:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2FHOST1
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:%2F%2FHOST1
 
 Body:
 
@@ -274,6 +278,8 @@ HTTP GET:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/
 
 Result Body:
 
@@ -323,6 +329,8 @@ HTTP GET:
 ::
 
     http://<controller-ip>:8181/restconf/operational/network-topology:network-topology/topology/ovsdb:1/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1?content=nonconfig/
 
 Result Body:
 
@@ -369,6 +377,8 @@ HTTP DELETE:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2FHOST1
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:%2F%2FHOST1
 
 Note in the above example, that */* characters which are part of the
 *node-id* are specified in hexadecimal format as "%2F".
@@ -411,6 +421,8 @@ HTTP GET:
 ::
 
     http://<controller-ip>:8181/restconf/operational/network-topology:network-topology/topology/ovsdb:1/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1?content=nonconfig/
 
 Result Body:
 
@@ -465,6 +477,8 @@ HTTP PUT:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest
 
 Body:
 
@@ -497,6 +511,8 @@ HTTP PUT:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest
 
 Body:
 
@@ -541,6 +557,8 @@ HTTP GET:
 ::
 
     http://<controller-ip>:8181/restconf/operational/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest?content=nonconfig/
 
 Result Body:
 
@@ -598,6 +616,8 @@ HTTP DELETE:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest
 
 Manage Ports
 ^^^^^^^^^^^^
@@ -612,6 +632,8 @@ HTTP PUT:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest/termination-point/testport/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest/termination-point=testport/
 
 Body:
 
@@ -647,6 +669,8 @@ HTTP PUT:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest/termination-point/testport/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest/termination-point=testport/
 
 Body:
 
@@ -676,6 +700,8 @@ HTTP GET:
 ::
 
     http://<controller-ip>:8181/restconf/operational/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest/termination-point/testport/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest/termination-point=testport/
 
 Result Body:
 
@@ -729,6 +755,8 @@ HTTP DELETE:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest2/termination-point/testport/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:%2F%2FHOST1%2Fbridge%2Fbrtest/termination-point=testport/
 
 Overview of QoS and Queue
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -828,6 +856,8 @@ HTTP POST:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/
 
 Body:
 
@@ -868,6 +898,8 @@ HTTP PUT
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:HOST1%2Fbridge%2Fbr-test
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:HOST1%2Fbridge%2Fbr-test
 
 Body:
 
@@ -891,6 +923,8 @@ HTTP PUT:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:HOST1%2Fbridge%2Fbr-test/termination-point/testport/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:HOST1%2Fbridge%2Fbr-test/termination-point=testport/
 
 Body:
 
@@ -915,6 +949,8 @@ HTTP GET:
 ::
 
     http://<controller-ip>:8181/restconf/operational/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:HOST1%2Fbridge%2Fbr-test
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:HOST1%2Fbridge%2Fbr-test
 
 Result Body:
 
@@ -971,6 +1007,8 @@ HTTP PUT:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:HOST1/ovsdb:queues/QUEUE-1/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:HOST1/ovsdb:queues=QUEUE-1/
 
 Body:
 
@@ -1001,6 +1039,8 @@ HTTP GET:
 ::
 
     http://<controller-ip>:8181/restconf/operational/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:HOST1/ovsdb:queues/QUEUE-1/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:HOST1/ovsdb:queues=QUEUE-1/
 
 Result Body:
 
@@ -1042,6 +1082,8 @@ HTTP PUT:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:HOST1/ovsdb:qos-entries/QOS-1/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:HOST1/ovsdb:qos-entries=QOS-1/
 
 Body:
 
@@ -1078,6 +1120,8 @@ HTTP GET:
 ::
 
     http://<controller-ip>:8181/restconf/operational/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:HOST1/ovsdb:qos-entries/QOS-1/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:HOST1/ovsdb:qos-entries=QOS-1?content=nonconfig/
 
 Result Body:
 
@@ -1123,6 +1167,8 @@ HTTP PUT:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:HOST1%2Fbridge%2Fbr-test/termination-point/testport/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:HOST1%2Fbridge%2Fbr-test/termination-point=testport/
 
 Body:
 
@@ -1149,6 +1195,8 @@ HTTP GET:
 ::
 
     http://<controller-ip>:8181/restconf/operational/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:HOST1%2Fbridge%2Fbr-test/termination-point/testport/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:HOST1%2Fbridge%2Fbr-test/termination-point=testport/
 
 Result Body:
 
@@ -1183,6 +1231,9 @@ HTTP GET:
 ::
 
     http://<controller-ip>:8181/restconf/operational/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:HOST1/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:HOST1?content=nonconfig/
+
 
 Result Body (edited to only show information relevant to the QoS and
 Queue entries):
@@ -1257,6 +1308,8 @@ HTTP PUT:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:HOST1%2Fbridge%2Fbr-test/termination-point/testport/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:HOST1%2Fbridge%2Fbr-test/termination-point=testport/
 
 Body:
 
@@ -1283,6 +1336,8 @@ HTTP DELETE:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:HOST1/ovsdb:qos-entries/QOS-1/queue-list/0/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:HOST1/ovsdb:qos-entries=QOS-1/queue-list=0/
 
 Remove Queue
 ''''''''''''
@@ -1295,6 +1350,8 @@ HTTP DELETE:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:HOST1/ovsdb:queues/QUEUE-1/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:HOST1/ovsdb:queues=QUEUE-1/
 
 Remove QoS
 ''''''''''
@@ -1307,6 +1364,8 @@ HTTP DELETE:
 ::
 
     http://<controller-ip>:8181/restconf/config/network-topology:network-topology/topology/ovsdb:1/node/ovsdb:HOST1/ovsdb:qos-entries/QOS-1/
+     or
+    http://<controller-ip>:8181/rests/data/network-topology:network-topology/topology=ovsdb:1/node=ovsdb:HOST1/ovsdb:qos-entries=QOS-1/
 
 References
 ^^^^^^^^^^
@@ -1351,6 +1410,8 @@ device/node are provided.
 
 REST API: POST
 http://odl:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/
+ or
+http://odl:8181/rests/data/network-topology:network-topology/topology=hwvtep:1/
 
 ::
 
@@ -1392,6 +1453,8 @@ switch from the operational data store.
 
 REST API: GET
 http://odl:8181/restconf/operational/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F192.168.1.115:6640
+ or
+http://odl:8181/rests/data/network-topology:network-topology/topology=hwvtep:1/node=hwvtep:%2F%2F192.168.1.115:6640?content=nonconfig/
 
 There is no body in this request.
 
@@ -1446,6 +1509,8 @@ Create a physical switch
 
 REST API: POST
 http://odl:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/
+ or
+http://odl:8181/rests/data/network-topology:network-topology/topology=hwvtep:1/
 
 request body:
 
@@ -1488,6 +1553,8 @@ VxLAN, it is a tunnel network with the same VNI.
 
 REST API: POST
 http://odl:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F192.168.1.115:6640
+ or
+http://odl:8181/rests/data/network-topology:network-topology/topology=hwvtep:1/node=hwvtep:%2F%2F192.168.1.115:6640
 
 request body:
 
@@ -1511,6 +1578,8 @@ described by a physical locator.
 
 REST API: POST
 http://odl:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F192.168.1.115:6640
+ or
+http://odl:8181/rests/data/network-topology:network-topology/topology=hwvtep:1/node=hwvtep:%2F%2F192.168.1.115:6640
 
 request body:
 
@@ -1541,6 +1610,8 @@ remote-mcast-macs entry to handle unknown traffic.
 
 REST API: POST
 http://odl:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F192.168.1.115:6640
+ or
+http://odl:8181/rests/data/network-topology:network-topology/topology=hwvtep:1/node=hwvtep:%2F%2F192.168.1.115:6640
 
 request body:
 
@@ -1577,6 +1648,8 @@ with a physical server or an L2 network and with the vlan 100.
 
 REST API: POST
 http://odl:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F192.168.1.115:6640%2Fphysicalswitch%2Fbr0
+ or
+http://odl:8181/rests/data/network-topology:network-topology/topology=hwvtep:1/node=hwvtep:%2F%2F192.168.1.115:6640%2Fphysicalswitch%2Fbr0
 
 ::
 
@@ -1611,6 +1684,8 @@ Create a remote-ucast-macs
 
 REST API: POST
 http://odl:8181/restconf/config/network-topology:network-topology/topology/hwvtep:1/node/hwvtep:%2F%2F192.168.1.115:6640
+ or
+http://odl:8181/rests/data/network-topology:network-topology/topology=hwvtep:1/node=hwvtep:%2F%2F192.168.1.115:6640
 
 ::
 

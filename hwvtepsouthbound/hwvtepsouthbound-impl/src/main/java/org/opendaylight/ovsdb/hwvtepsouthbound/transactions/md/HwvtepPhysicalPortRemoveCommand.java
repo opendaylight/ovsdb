@@ -66,7 +66,7 @@ public class HwvtepPhysicalPortRemoveCommand extends AbstractTransactionCommand 
                 final InstanceIdentifier<TerminationPoint> nodePath =
                         HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),
                                 updatedPSwitchData).child(TerminationPoint.class,
-                                new TerminationPointKey(new TpId(portName)));
+                                        new TerminationPointKey(new TpId(portName)));
                 addToDeleteTx(transaction, VlanBindings.class, nodePath, port.getUuid());
                 addToDeviceUpdate(TransactionType.DELETE,
                         new PortEvent(port, nodePath.firstKeyOf(Node.class).getNodeId()));

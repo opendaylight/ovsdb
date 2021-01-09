@@ -84,7 +84,7 @@ public class HwvtepGlobalRemoveCommand extends AbstractTransactionCommand {
             Map<ManagersKey, Managers> managers = hgAugmentation.getManagers();
             if (managers != null) {
                 for (Managers manager : managers.values()) {
-                    if (manager.isIsConnected()) {
+                    if (manager.getIsConnected()) {
                         connectedManager++;
                         if (connectedManager > ONE_CONNECTED_MANAGER) {
                             return false;

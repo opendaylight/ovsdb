@@ -64,9 +64,9 @@ public class OvsdbUpgradeStateListener implements ClusteredDataTreeChangeListene
             if (change.getRootNode().getModificationType() == ModificationType.WRITE) {
                 UpgradeConfig before = change.getRootNode().getDataBefore();
                 UpgradeConfig after = change.getRootNode().getDataAfter();
-                if (before != null && before.isUpgradeInProgress() && after != null && !after.isUpgradeInProgress()) {
+                if (before != null && before.getUpgradeInProgress() && after != null && !after.getUpgradeInProgress()) {
                     LOG.info("Upgrade Flag is set from {} to {}, Trigger Reconciliation",
-                        before.isUpgradeInProgress(), after.isUpgradeInProgress());
+                        before.getUpgradeInProgress(), after.getUpgradeInProgress());
                     //TODO Trigger Reconciliation on all the ovsDbConnectionInstance
                     for (Map.Entry<ConnectionInfo, OvsdbConnectionInstance> entry : cm.getClients().entrySet()) {
                         ConnectionInfo connectionInfo = entry.getKey();

@@ -42,6 +42,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.AclBindings;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.AclBindingsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.AclBindingsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.StaticRoutes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.StaticRoutesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.SwitchBindings;
@@ -49,6 +50,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,9 +102,10 @@ public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand
         setStaticRoutes(router, lrBuilder);
         setAclBindings(router, lrBuilder);
 
-        List<LogicalRouters> routers = new ArrayList<>();
-        routers.add(lrBuilder.build());
-        connectionNode.addAugmentation(new HwvtepGlobalAugmentationBuilder().setLogicalRouters(routers).build());
+
+        connectionNode.addAugmentation(new HwvtepGlobalAugmentationBuilder()
+            .setLogicalRouters(BindingMap.of(lrBuilder.build()))
+            .build());
         return connectionNode.build();
     }
 
@@ -127,7 +130,7 @@ public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand
 
     private void setAclBindings(final LogicalRouter router, final LogicalRoutersBuilder builder) {
         if (isRouterHasAcls(router)) {
-            List<AclBindings> bindings = new ArrayList<>();
+            var bindings = BindingMap.<AclBindingsKey, AclBindings>orderedBuilder();
             for (Entry<String, UUID> entry : router.getAclBindingColumn().getData().entrySet()) {
                 AclBindingsBuilder aclBindingBuiler = new AclBindingsBuilder();
                 UUID aclUUID = entry.getValue();
@@ -139,7 +142,7 @@ public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand
                     aclBindingBuiler.setRouterInterface(new IpPrefix(new Ipv4Prefix(entry.getKey())));
                     bindings.add(aclBindingBuiler.build());
                 }
-                builder.setAclBindings(bindings);
+                builder.setAclBindings(bindings.build());
             }
         }
     }

@@ -8,8 +8,6 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -34,6 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,10 +97,10 @@ public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand
             lsBuilder.setTunnelKey(logicalSwitch.getTunnelKeyColumn().getData().iterator().next().toString());
         }
 
-        List<LogicalSwitches> switches = new ArrayList<>();
-        switches.add(lsBuilder.build());
-
-        connectionNode.addAugmentation(new HwvtepGlobalAugmentationBuilder().setLogicalSwitches(switches).build());
-        return connectionNode.build();
+        return connectionNode
+            .addAugmentation(new HwvtepGlobalAugmentationBuilder()
+                .setLogicalSwitches(BindingMap.of(lsBuilder.build()))
+                .build())
+            .build();
     }
 }

@@ -61,6 +61,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -246,7 +247,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
             final HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder) {
         Map<Long, UUID> vlanBindings = portUpdate.getVlanBindingsColumn().getData();
         if (vlanBindings != null && !vlanBindings.isEmpty()) {
-            List<VlanBindings> vlanBindingsList = new ArrayList<>();
+            var vlanBindingsList = BindingMap.<VlanBindingsKey, VlanBindings>orderedBuilder();
             for (Map.Entry<Long, UUID> vlanBindingEntry : vlanBindings.entrySet()) {
                 Long vlanBindingKey = vlanBindingEntry.getKey();
                 UUID vlanBindingValue = vlanBindingEntry.getValue();
@@ -254,7 +255,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
                     vlanBindingsList.add(createVlanBinding(vlanBindingKey, vlanBindingValue));
                 }
             }
-            tpAugmentationBuilder.setVlanBindings(vlanBindingsList);
+            tpAugmentationBuilder.setVlanBindings(vlanBindingsList.build());
         }
     }
 
@@ -316,11 +317,9 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
             final PhysicalPort portUpdate) {
         if (portUpdate.getPortFaultStatusColumn() != null && portUpdate.getPortFaultStatusColumn().getData() != null
                 && !portUpdate.getPortFaultStatusColumn().getData().isEmpty()) {
-            List<PortFaultStatus> portFaultStatusLst = new ArrayList<>();
-            for (String portFaultStatus : portUpdate.getPortFaultStatusColumn().getData()) {
-                portFaultStatusLst.add(new PortFaultStatusBuilder().withKey(new PortFaultStatusKey(portFaultStatus))
-                        .setPortFaultStatusKey(portFaultStatus).build());
-            }
+            var portFaultStatusLst = portUpdate.getPortFaultStatusColumn().getData().stream()
+                .map(portFaultStatus -> new PortFaultStatusBuilder().setPortFaultStatusKey(portFaultStatus).build())
+                .collect(BindingMap.toOrderedMap());
             tpAugmentationBuilder.setPortFaultStatus(portFaultStatusLst);
         }
     }

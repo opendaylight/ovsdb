@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <!-- FIXME: Auto-generated, to be migrated -->
+    <reference id="dataBroker" interface="org.opendaylight.mdsal.binding.api.DataBroker"/>
+    <reference id="bindingNormalizedNodeSerializer" interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer"/>
+    <reference id="dOMSchemaService" interface="org.opendaylight.mdsal.dom.api.DOMSchemaService"/>
+    <reference id="entityOwnershipService" interface="org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService"/>
+    <reference id="ovsdbConnection" interface="org.opendaylight.ovsdb.lib.OvsdbConnection"/>
+    <reference id="upgradeState" interface="org.opendaylight.serviceutils.upgrade.UpgradeState"/>
+    <bean id="hwvtepSouthboundProvider" class="org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundProvider" init-method="init" destroy-method="close">
+        <argument ref="dataBroker"/>
+        <argument ref="entityOwnershipService"/>
+        <argument ref="ovsdbConnection"/>
+        <argument ref="dOMSchemaService"/>
+        <argument ref="bindingNormalizedNodeSerializer"/>
+        <argument ref="upgradeState"/>
+    </bean>
+    <service ref="hwvtepSouthboundProvider" interface="org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundProviderInfo"/>
+
     <!-- FIXME: convert these to proper Karaf commands -->
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
     <command>

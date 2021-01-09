@@ -17,8 +17,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.apache.aries.blueprint.annotation.service.Reference;
-import org.apache.aries.blueprint.annotation.service.Service;
 import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
@@ -52,7 +50,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-@Service(classes = HwvtepSouthboundProviderInfo.class)
 public class HwvtepSouthboundProvider
         implements HwvtepSouthboundProviderInfo, ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
 
@@ -74,19 +71,17 @@ public class HwvtepSouthboundProvider
     private final UpgradeState upgradeState;
 
     @Inject
-    public HwvtepSouthboundProvider(@Reference final DataBroker dataBroker,
-            @Reference final EntityOwnershipService entityOwnershipServiceDependency,
-            @Reference final OvsdbConnection ovsdbConnection,
-            @Reference final DOMSchemaService schemaService,
-            @Reference final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
-            @Reference final UpgradeState upgradeState) {
+    public HwvtepSouthboundProvider(final DataBroker dataBroker, final EntityOwnershipService entityOwnership,
+            final OvsdbConnection ovsdbConnection, final DOMSchemaService schemaService,
+            final BindingNormalizedNodeSerializer serializer,
+            final UpgradeState upgradeState) {
         this.dataBroker = dataBroker;
-        this.entityOwnershipService = entityOwnershipServiceDependency;
+        this.entityOwnershipService = entityOwnership;
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
         this.upgradeState = upgradeState;
-        HwvtepSouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(schemaService,
-                bindingNormalizedNodeSerializer));
+        // FIXME: eliminate this static wiring
+        HwvtepSouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(schemaService, serializer));
         LOG.info("HwvtepSouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
     }
 

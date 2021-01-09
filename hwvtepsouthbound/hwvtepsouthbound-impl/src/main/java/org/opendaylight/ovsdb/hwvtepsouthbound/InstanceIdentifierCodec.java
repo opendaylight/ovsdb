@@ -20,12 +20,16 @@ import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContextListener;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
-public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentifierCodec
-    implements EffectiveModelContextListener {
+public class InstanceIdentifierCodec
+        // FIXME: this really wants to be wired as yangtools-data-codec-gson's codecs, because ...
+        extends AbstractModuleStringInstanceIdentifierCodec implements EffectiveModelContextListener {
+
+    // FIXME: this is not the only interface exposed from binding-dom-codec-api, something different might be more
+    //        appropriate.
+    private final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
 
     private DataSchemaContextTree dataSchemaContextTree;
     private EffectiveModelContext context;
-    private final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
 
     public InstanceIdentifierCodec(final DOMSchemaService schemaService,
             final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
@@ -33,6 +37,7 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
         this.bindingNormalizedNodeSerializer = bindingNormalizedNodeSerializer;
     }
 
+    // ... all of this is dynamic lookups based on injection. OSGi lifecycle gives us this for free ...
     @Override
     protected DataSchemaContextTree getDataContextTree() {
         return dataSchemaContextTree;
@@ -55,6 +60,7 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
         this.dataSchemaContextTree = DataSchemaContextTree.from(schemaContext);
     }
 
+    // FIXME: ... and then this is a separate service built on top of dynamic lifecycle.
     public String serialize(final InstanceIdentifier<?> iid) {
         YangInstanceIdentifier normalizedIid = bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid);
         return serialize(normalizedIid);
@@ -64,7 +70,7 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
         return bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid);
     }
 
-    public  InstanceIdentifier<?> bindingDeserializer(final String iidString) throws DeserializationException {
+    public InstanceIdentifier<?> bindingDeserializer(final String iidString) throws DeserializationException {
         YangInstanceIdentifier normalizedYangIid = deserialize(iidString);
         return bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(normalizedYangIid);
     }

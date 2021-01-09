@@ -54,18 +54,23 @@ public final class HwvtepSouthboundUtil {
         // Prevent instantiating a utility class
     }
 
+    // FIXME: eliminate this static wiring by encaspulating the codec into a service
+    @Deprecated
     public static void setInstanceIdentifierCodec(InstanceIdentifierCodec iidc) {
         instanceIdentifierCodec = iidc;
     }
 
+    // FIXME: this should be an instance method
     public static InstanceIdentifierCodec getInstanceIdentifierCodec() {
         return instanceIdentifierCodec;
     }
 
+    // FIXME: this should be an instance method
     public static String serializeInstanceIdentifier(InstanceIdentifier<?> iid) {
         return instanceIdentifierCodec.serialize(iid);
     }
 
+    // FIXME: this should be an instance method
     public static InstanceIdentifier<?> deserializeInstanceIdentifier(String iidString) {
         InstanceIdentifier<?> result = null;
         try {

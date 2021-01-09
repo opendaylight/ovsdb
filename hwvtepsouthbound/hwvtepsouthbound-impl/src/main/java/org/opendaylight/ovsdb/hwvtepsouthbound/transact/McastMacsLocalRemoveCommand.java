@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -81,22 +80,8 @@ public class McastMacsLocalRemoveCommand
     }
 
     @Override
-    protected UnMetDependencyGetter getDependencyGetter() {
-        return MAC_DEPENDENCY_GETTER;
-    }
-
-    static UnMetDependencyGetter MAC_DEPENDENCY_GETTER = new MacDependencyGetter();
-
-    public static class MacDependencyGetter extends UnMetDependencyGetter<LocalMcastMacs> {
-        @Override
-        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final LocalMcastMacs data) {
-            return Collections.singletonList(data.getLogicalSwitchRef().getValue());
-        }
-
-        @Override
-        public List<InstanceIdentifier<?>> getTerminationPointDependencies(final LocalMcastMacs data) {
-            return Collections.emptyList();
-        }
+    protected UnMetDependencyGetter<LocalMcastMacs> getDependencyGetter() {
+        return MacDependencyGetter.INSTANCE;
     }
 
     @Override
@@ -107,5 +92,24 @@ public class McastMacsLocalRemoveCommand
     @Override
     protected String getKeyStr(InstanceIdentifier<LocalMcastMacs> iid) {
         return getLsKeyStr(iid.firstKeyOf(LocalMcastMacs.class).getLogicalSwitchRef().getValue());
+    }
+
+    // FIXME: hide/move/make this final
+    public static class MacDependencyGetter extends UnMetDependencyGetter<LocalMcastMacs> {
+        static final MacDependencyGetter INSTANCE = new MacDependencyGetter();
+
+        protected MacDependencyGetter() {
+            // Hidden on purpose
+        }
+
+        @Override
+        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final LocalMcastMacs data) {
+            return List.of(data.getLogicalSwitchRef().getValue());
+        }
+
+        @Override
+        public List<InstanceIdentifier<?>> getTerminationPointDependencies(final LocalMcastMacs data) {
+            return List.of();
+        }
     }
 }

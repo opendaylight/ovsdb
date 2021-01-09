@@ -5,13 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -82,26 +80,31 @@ public class UcastMacsLocalRemoveCommand
     }
 
     @Override
-    protected UnMetDependencyGetter getDependencyGetter() {
-        return MAC_DEPENDENCY_GETTER;
-    }
-
-    static UnMetDependencyGetter MAC_DEPENDENCY_GETTER = new MacDependencyGetter();
-
-    public static class MacDependencyGetter extends UnMetDependencyGetter<LocalUcastMacs> {
-        @Override
-        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final LocalUcastMacs data) {
-            return Collections.singletonList(data.getLogicalSwitchRef().getValue());
-        }
-
-        @Override
-        public List<InstanceIdentifier<?>> getTerminationPointDependencies(final LocalUcastMacs data) {
-            return Collections.emptyList();
-        }
+    protected UnMetDependencyGetter<LocalUcastMacs> getDependencyGetter() {
+        return MacDependencyGetter.INSTANCE;
     }
 
     @Override
     protected boolean isDeleteCmd() {
         return true;
+    }
+
+    // FIXME: hide/move/make this final
+    public static class MacDependencyGetter extends UnMetDependencyGetter<LocalUcastMacs> {
+        public static final MacDependencyGetter INSTANCE = new MacDependencyGetter();
+
+        protected MacDependencyGetter() {
+            // Hidden on purpose
+        }
+
+        @Override
+        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final LocalUcastMacs data) {
+            return List.of(data.getLogicalSwitchRef().getValue());
+        }
+
+        @Override
+        public List<InstanceIdentifier<?>> getTerminationPointDependencies(final LocalUcastMacs data) {
+            return List.of();
+        }
     }
 }

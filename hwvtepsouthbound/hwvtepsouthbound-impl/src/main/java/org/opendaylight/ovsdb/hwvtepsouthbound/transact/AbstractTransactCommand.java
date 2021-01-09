@@ -392,7 +392,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
         return obj1.key().equals(obj2.key());
     }
 
-    protected UnMetDependencyGetter getDependencyGetter() {
+    protected UnMetDependencyGetter<T> getDependencyGetter() {
         return null;
     }
 

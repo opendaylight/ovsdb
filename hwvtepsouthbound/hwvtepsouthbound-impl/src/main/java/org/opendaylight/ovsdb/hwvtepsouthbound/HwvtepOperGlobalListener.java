@@ -104,7 +104,7 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
                 NODE_DELET_WAITING_JOBS.get(iid).add(job);
                 //Also delete the node so that reconciliation kicks in
                 deleteTheNodeOfOldConnection(iid, getNodeConnectionInfo(iid));
-                HwvtepSouthboundUtil.getScheduledExecutorService().schedule(() -> {
+                HwvtepSouthboundUtil.schedule(() -> {
                     runPendingJobs(iid);
                 }, HwvtepSouthboundConstants.HWVTEP_REGISTER_CALLBACKS_WAIT_TIMEOUT, TimeUnit.SECONDS);
             } else {
@@ -118,7 +118,7 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
     private synchronized void runPendingJobs(InstanceIdentifier<Node> iid) {
         List<Callable<Void>> jobs = NODE_DELET_WAITING_JOBS.remove(iid);
         if (jobs != null && !jobs.isEmpty()) {
-            jobs.forEach((job) -> {
+            jobs.forEach(job -> {
                 try {
                     LOG.error("Node disconnected job found {} running it now ", iid);
                     job.call();
@@ -131,7 +131,7 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
     }
 
     private static void connect(Collection<DataTreeModification<Node>> changes) {
-        changes.forEach((change) -> {
+        changes.forEach(change -> {
             InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             DataObjectModification<Node> mod = change.getRootNode();
             Node node = getCreated(mod);
@@ -159,7 +159,7 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
     }
 
     private static void updated(Collection<DataTreeModification<Node>> changes) {
-        changes.forEach((change) -> {
+        changes.forEach(change -> {
             InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             DataObjectModification<Node> mod = change.getRootNode();
             Node node = getUpdated(mod);
@@ -174,7 +174,7 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
     }
 
     private void disconnect(Collection<DataTreeModification<Node>> changes) {
-        changes.forEach((change) -> {
+        changes.forEach(change -> {
             InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             DataObjectModification<Node> mod = change.getRootNode();
             Node node = getRemoved(mod);
@@ -194,7 +194,7 @@ public class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener
 
     public void scheduleOldConnectionNodeDelete(InstanceIdentifier<Node> iid) {
         ConnectionInfo oldConnectionInfo = getNodeConnectionInfo(iid);
-        HwvtepSouthboundUtil.getScheduledExecutorService().schedule(() -> {
+        HwvtepSouthboundUtil.schedule(() -> {
             deleteTheNodeOfOldConnection(iid, oldConnectionInfo);
         }, HwvtepSouthboundConstants.STALE_HWVTEP_CLEANUP_DELAY_SECS, TimeUnit.SECONDS);
     }

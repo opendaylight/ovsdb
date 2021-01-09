@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
@@ -39,16 +40,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class HwvtepSouthboundUtil {
-
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundUtil.class);
+    private static final ScheduledExecutorService BACKGROUND_EXECUTOR =
+        Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
+            .setNameFormat("hwvteputil-executor-service-%d")
+            .build());
+
     private static final String SCHEMA_VERSION_MISMATCH =
             "{} column for {} table is not supported by this version of the {} schema: {}";
 
     private static InstanceIdentifierCodec instanceIdentifierCodec;
 
-    private static ScheduledExecutorService scheduledExecutorService = Executors
-            .newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
-                    .setNameFormat("hwvteputil-executor-service-%d").build());
 
     private HwvtepSouthboundUtil() {
         // Prevent instantiating a utility class
@@ -274,7 +276,7 @@ public final class HwvtepSouthboundUtil {
         return 0;
     }
 
-    public static ScheduledExecutorService getScheduledExecutorService() {
-        return scheduledExecutorService;
+    static void schedule(final Runnable command, final int delay, TimeUnit timeUnit) {
+        BACKGROUND_EXECUTOR.schedule(command, delay, timeUnit);
     }
 }

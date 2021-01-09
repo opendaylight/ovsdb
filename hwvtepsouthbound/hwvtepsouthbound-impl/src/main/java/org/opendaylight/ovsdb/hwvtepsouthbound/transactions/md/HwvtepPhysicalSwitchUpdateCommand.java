@@ -41,9 +41,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Switches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.SwitchesBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIps;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIpsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.ManagementIpsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.SwitchFaultStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.SwitchFaultStatusBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.SwitchFaultStatusKey;
@@ -56,6 +54,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,12 +193,11 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
             PhysicalSwitch phySwitch) {
         if (phySwitch.getManagementIpsColumn() != null && phySwitch.getManagementIpsColumn().getData() != null
                 && !phySwitch.getManagementIpsColumn().getData().isEmpty()) {
-            List<ManagementIps> mgmtIps = new ArrayList<>();
-            for (String mgmtIp : phySwitch.getManagementIpsColumn().getData()) {
-                IpAddress ip = IpAddressBuilder.getDefaultInstance(mgmtIp);
-                mgmtIps.add(
-                        new ManagementIpsBuilder().withKey(new ManagementIpsKey(ip)).setManagementIpsKey(ip).build());
-            }
+            var mgmtIps = phySwitch.getManagementIpsColumn().getData().stream()
+                .map(ip -> new ManagementIpsBuilder()
+                    .setManagementIpsKey(IpAddressBuilder.getDefaultInstance(ip))
+                    .build())
+                .collect(BindingMap.toMap());
             psAugmentationBuilder.setManagementIps(mgmtIps);
         }
     }
@@ -260,12 +258,11 @@ public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionComman
             PhysicalSwitch phySwitch) {
         if (phySwitch.getSwitchFaultStatusColumn() != null && phySwitch.getSwitchFaultStatusColumn().getData() != null
                 && !phySwitch.getSwitchFaultStatusColumn().getData().isEmpty()) {
-            List<SwitchFaultStatus> switchFaultStatusLst = new ArrayList<>();
-            for (String switchFaultStatus : phySwitch.getSwitchFaultStatusColumn().getData()) {
-                switchFaultStatusLst
-                        .add(new SwitchFaultStatusBuilder().withKey(new SwitchFaultStatusKey(switchFaultStatus))
-                                .setSwitchFaultStatusKey(switchFaultStatus).build());
-            }
+            var switchFaultStatusLst = phySwitch.getSwitchFaultStatusColumn().getData().stream()
+                .map(switchFaultStatus -> new SwitchFaultStatusBuilder()
+                    .setSwitchFaultStatusKey(switchFaultStatus)
+                    .build())
+                .collect(BindingMap.toOrderedMap());
             psAugmentationBuilder.setSwitchFaultStatus(switchFaultStatusLst);
         }
     }

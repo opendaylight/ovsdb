@@ -8,12 +8,9 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
@@ -26,6 +23,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 
 public final class GlobalConfigOperationalChangeGetter {
 
@@ -53,16 +51,15 @@ public final class GlobalConfigOperationalChangeGetter {
     static void fillLocalMacsToBeRemoved(final HwvtepGlobalAugmentationBuilder oldAugmentation, final Node configNode,
             final Node opNode) {
         Set<String> logicalSwitchNamesToBeRemoved = getLogicalSwitchesToBeRemoved(configNode, opNode);
-        List<LocalUcastMacs> localUcastMacsToBeRemoved = getLocalUcastMacsToBeRemoved(opNode,
-                logicalSwitchNamesToBeRemoved);
-        List<LocalMcastMacs> localMcastMacsToBeRemoved = getLocalMcastMacsToBeRemoved(opNode,
-                logicalSwitchNamesToBeRemoved);
+        var localUcastMacsToBeRemoved = getLocalUcastMacsToBeRemoved(opNode, logicalSwitchNamesToBeRemoved);
+        var localMcastMacsToBeRemoved = getLocalMcastMacsToBeRemoved(opNode, logicalSwitchNamesToBeRemoved);
 
         oldAugmentation.setLocalUcastMacs(localUcastMacsToBeRemoved);
         oldAugmentation.setLocalMcastMacs(localMcastMacsToBeRemoved);
     }
 
-    static List<LocalUcastMacs> getLocalUcastMacsToBeRemoved(final Node opNode, final Set<String> removedSwitchNames) {
+    static Map<LocalUcastMacsKey, LocalUcastMacs> getLocalUcastMacsToBeRemoved(final Node opNode,
+            final Set<String> removedSwitchNames) {
         if (opNode == null || opNode.augmentation(HwvtepGlobalAugmentation.class) == null) {
             return null;
         }
@@ -75,10 +72,11 @@ public final class GlobalConfigOperationalChangeGetter {
                 .filter(mac -> removedSwitchNames.contains(
                         mac.getLogicalSwitchRef().getValue().firstKeyOf(
                                 LogicalSwitches.class).getHwvtepNodeName().getValue()))
-                .collect(Collectors.toList());
+                .collect(BindingMap.toOrderedMap());
     }
 
-    static List<LocalMcastMacs> getLocalMcastMacsToBeRemoved(final Node opNode, final Set<String> removedSwitchNames) {
+    static Map<LocalMcastMacsKey, LocalMcastMacs> getLocalMcastMacsToBeRemoved(final Node opNode,
+            final Set<String> removedSwitchNames) {
         if (opNode == null || opNode.augmentation(HwvtepGlobalAugmentation.class) == null) {
             return null;
         }
@@ -91,7 +89,7 @@ public final class GlobalConfigOperationalChangeGetter {
                 .filter(mac -> removedSwitchNames.contains(
                         mac.getLogicalSwitchRef().getValue().firstKeyOf(
                                 LogicalSwitches.class).getHwvtepNodeName().getValue()))
-                .collect(Collectors.toList());
+                .collect(BindingMap.toOrderedMap());
     }
 
     static  Set<String> getLogicalSwitchesToBeRemoved(final Node configNode, final Node opNode) {
@@ -142,7 +140,7 @@ public final class GlobalConfigOperationalChangeGetter {
         } else {
             newNodeBuilder = new NodeBuilder();
         }
-        newNodeBuilder.setTerminationPoint(new ArrayList<>());
+        newNodeBuilder.setTerminationPoint(Map.of());
         return newNodeBuilder;
     }
 }

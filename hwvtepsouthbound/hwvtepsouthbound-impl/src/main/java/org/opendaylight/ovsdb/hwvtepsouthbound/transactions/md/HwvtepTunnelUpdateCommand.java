@@ -9,10 +9,8 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -29,17 +27,14 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.Tunnels;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.TunnelsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdLocalConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdLocalConfigsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdParams;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdParamsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdRemoteConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdRemoteConfigsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdStatusBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,10 +105,12 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
     private static void setBfdLocalConfigs(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
         Map<String, String> localConfigs = tunnel.getBfdConfigLocalColumn().getData();
         if (localConfigs != null && !localConfigs.isEmpty()) {
-            List<BfdLocalConfigs> localConfigsList = localConfigs.entrySet().stream().map(
-                entry -> new BfdLocalConfigsBuilder().setBfdLocalConfigKey(entry.getKey())
-                    .setBfdLocalConfigValue(entry.getValue()).build()).collect(Collectors.toList());
-
+            var localConfigsList = localConfigs.entrySet().stream()
+                .map(entry -> new BfdLocalConfigsBuilder()
+                    .setBfdLocalConfigKey(entry.getKey())
+                    .setBfdLocalConfigValue(entry.getValue())
+                    .build())
+                .collect(BindingMap.toMap());
             tunnelsBuilder.setBfdLocalConfigs(localConfigsList);
         }
     }
@@ -121,10 +118,12 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
     private static void setBfdRemoteConfigs(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
         Map<String, String> remoteConfigs = tunnel.getBfdConfigRemoteColumn().getData();
         if (remoteConfigs != null && !remoteConfigs.isEmpty()) {
-            List<BfdRemoteConfigs> remoteConfigsList = remoteConfigs.entrySet().stream().map(
-                entry -> new BfdRemoteConfigsBuilder().setBfdRemoteConfigKey(entry.getKey())
-                    .setBfdRemoteConfigValue(entry.getValue()).build()).collect(Collectors.toList());
-
+            var remoteConfigsList = remoteConfigs.entrySet().stream()
+                .map(entry -> new BfdRemoteConfigsBuilder()
+                    .setBfdRemoteConfigKey(entry.getKey())
+                    .setBfdRemoteConfigValue(entry.getValue())
+                    .build())
+                .collect(BindingMap.toMap());
             tunnelsBuilder.setBfdRemoteConfigs(remoteConfigsList);
         }
     }
@@ -133,10 +132,12 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
     private static void setBfdParams(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
         Map<String, String> params = tunnel.getBfdParamsColumn().getData();
         if (params != null && !params.isEmpty()) {
-            List<BfdParams> paramsList = params.entrySet().stream().map(
-                entry -> new BfdParamsBuilder().setBfdParamKey(entry.getKey())
-                    .setBfdParamValue(entry.getValue()).build()).collect(Collectors.toList());
-
+            var paramsList = params.entrySet().stream()
+                .map(entry -> new BfdParamsBuilder()
+                    .setBfdParamKey(entry.getKey())
+                    .setBfdParamValue(entry.getValue())
+                    .build())
+                .collect(BindingMap.toMap());
             tunnelsBuilder.setBfdParams(paramsList);
         }
     }
@@ -144,10 +145,12 @@ public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
     private static void setBfdStatus(TunnelsBuilder tunnelsBuilder, Tunnel tunnel) {
         Map<String, String> status = tunnel.getBfdStatusColumn().getData();
         if (status != null && !status.isEmpty()) {
-            List<BfdStatus> statusList = status.entrySet().stream().map(
-                entry -> new BfdStatusBuilder().setBfdStatusKey(entry.getKey())
-                    .setBfdStatusValue(entry.getValue()).build()).collect(Collectors.toList());
-
+            var statusList = status.entrySet().stream()
+                .map(entry -> new BfdStatusBuilder()
+                    .setBfdStatusKey(entry.getKey())
+                    .setBfdStatusValue(entry.getValue())
+                    .build())
+                .collect(BindingMap.toMap());
             tunnelsBuilder.setBfdStatus(statusList);
         }
     }

@@ -62,6 +62,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.Uint32;
 
 public class SouthboundMapperTest {
@@ -279,7 +280,7 @@ public class SouthboundMapperTest {
 
             String uuidString = "7da709ff-397f-4778-a0e8-994811272fdb";
             OvsdbBridgeAugmentation omn = new OvsdbBridgeAugmentationBuilder()
-                    .setControllerEntry(Collections.singletonList(new ControllerEntryBuilder()
+                    .setControllerEntry(BindingMap.of(new ControllerEntryBuilder()
                             .setControllerUuid(Uuid.getDefaultInstance(uuidString))
                             .setTarget(Uri.getDefaultInstance("uri"))
                             .build()))

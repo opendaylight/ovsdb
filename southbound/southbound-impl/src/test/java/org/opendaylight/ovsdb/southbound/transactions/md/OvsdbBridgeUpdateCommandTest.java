@@ -250,7 +250,7 @@ public class OvsdbBridgeUpdateCommandTest {
         PowerMockito.whenNew(OvsdbBridgeRef.class).withAnyArguments().thenReturn(mock(OvsdbBridgeRef.class));
         when(managedNodeEntryBuilder.setBridgeRef(any(OvsdbBridgeRef.class))).thenReturn(managedNodeEntryBuilder);
         when(managedNodeEntryBuilder.build()).thenReturn(managedBridge);
-        when(ovsdbConnectionAugmentationBuilder.setManagedNodeEntry(any(List.class)))
+        when(ovsdbConnectionAugmentationBuilder.setManagedNodeEntry(any(Map.class)))
                 .thenReturn(ovsdbConnectionAugmentationBuilder);
 
         when(ovsdbConnectionAugmentationBuilder.build()).thenReturn(mock(OvsdbNodeAugmentation.class));
@@ -379,7 +379,7 @@ public class OvsdbBridgeUpdateCommandTest {
         when(bridgeOtherConfigsBuilder.build()).thenReturn(mock(BridgeOtherConfigs.class));
 
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
-        when(ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(any(List.class)))
+        when(ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(any(Map.class)))
                 .thenReturn(ovsdbBridgeAugmentationBuilder);
         Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "setOtherConfig", ovsdbBridgeAugmentationBuilder, bridge);
         verify(bridge).getOtherConfigColumn();
@@ -404,7 +404,7 @@ public class OvsdbBridgeUpdateCommandTest {
         when(bridgeExternalIdsBuilder.build()).thenReturn(mock(BridgeExternalIds.class));
 
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
-        when(ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(any(List.class)))
+        when(ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(any(Map.class)))
                 .thenReturn(ovsdbBridgeAugmentationBuilder);
         Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "setExternalIds", ovsdbBridgeAugmentationBuilder, bridge);
         verify(bridge).getExternalIdsColumn();
@@ -423,10 +423,10 @@ public class OvsdbBridgeUpdateCommandTest {
         when(SouthboundMapper.createMdsalProtocols(any(Bridge.class))).thenReturn(listProtocolEntry);
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
         Bridge bridge = mock(Bridge.class);
-        when(ovsdbBridgeAugmentationBuilder.setProtocolEntry(any(List.class)))
+        when(ovsdbBridgeAugmentationBuilder.setProtocolEntry(any(Map.class)))
                 .thenReturn(ovsdbBridgeAugmentationBuilder);
         Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "setProtocol", ovsdbBridgeAugmentationBuilder, bridge);
-        verify(ovsdbBridgeAugmentationBuilder).setProtocolEntry(any(List.class));
+        verify(ovsdbBridgeAugmentationBuilder).setProtocolEntry(any(Map.class));
 
 
         //Test setDataPath()

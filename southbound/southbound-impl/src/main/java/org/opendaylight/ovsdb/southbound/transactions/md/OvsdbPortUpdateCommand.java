@@ -59,18 +59,22 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceBfdStatusKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldp;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldpBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceLldpKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Options;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.OptionsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIdsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.QosEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.QosEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
@@ -86,6 +90,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
@@ -568,7 +573,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         Map<String, String> interfaceExternalIds =
                 interf.getExternalIdsColumn().getData();
         if (interfaceExternalIds != null && !interfaceExternalIds.isEmpty()) {
-            List<InterfaceExternalIds> externalIdsList = new ArrayList<>();
+            var externalIdsList = BindingMap.<InterfaceExternalIdsKey, InterfaceExternalIds>orderedBuilder();
             for (Entry<String, String> entry : interfaceExternalIds.entrySet()) {
                 String externalIdKey = entry.getKey();
                 String externalIdValue = entry.getValue();
@@ -578,7 +583,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                             .setExternalIdValue(externalIdValue).build());
                 }
             }
-            ovsdbTerminationPointBuilder.setInterfaceExternalIds(externalIdsList);
+            ovsdbTerminationPointBuilder.setInterfaceExternalIds(externalIdsList.build());
         }
     }
 
@@ -588,7 +593,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
 
         Map<String, String> portExternalIds = port.getExternalIdsColumn().getData();
         if (portExternalIds != null && !portExternalIds.isEmpty()) {
-            List<PortExternalIds> externalIdsList = new ArrayList<>();
+            var externalIdsList = BindingMap.<PortExternalIdsKey, PortExternalIds>orderedBuilder();
             for (Entry<String, String> entry : portExternalIds.entrySet()) {
                 String externalIdKey = entry.getKey();
                 String externalIdValue = entry.getValue();
@@ -598,7 +603,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                             .setExternalIdValue(externalIdValue).build());
                 }
             }
-            ovsdbTerminationPointBuilder.setPortExternalIds(externalIdsList);
+            ovsdbTerminationPointBuilder.setPortExternalIds(externalIdsList.build());
         }
     }
 
@@ -608,7 +613,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
 
         Map<String, String> optionsMap = interf.getOptionsColumn().getData();
         if (optionsMap != null && !optionsMap.isEmpty()) {
-            List<Options> options = new ArrayList<>();
+            var options = BindingMap.<OptionsKey, Options>orderedBuilder();
             for (Entry<String, String> entry : optionsMap.entrySet()) {
                 String optionsKeyString = entry.getKey();
                 String optionsValueString = entry.getValue();
@@ -619,7 +624,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                         .setValue(optionsValueString).build());
                 }
             }
-            ovsdbTerminationPointBuilder.setOptions(options);
+            ovsdbTerminationPointBuilder.setOptions(options.build());
         }
     }
 
@@ -629,7 +634,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
 
         Map<String, String> portOtherConfigMap = port.getOtherConfigColumn().getData();
         if (portOtherConfigMap != null && !portOtherConfigMap.isEmpty()) {
-            List<PortOtherConfigs> portOtherConfigs = new ArrayList<>();
+            var portOtherConfigs = BindingMap.<PortOtherConfigsKey, PortOtherConfigs>orderedBuilder();
             for (Entry<String, String> entry : portOtherConfigMap.entrySet()) {
                 String portOtherConfigKeyString = entry.getKey();
                 String portOtherConfigValueString = entry.getValue();
@@ -639,7 +644,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                         .setOtherConfigValue(portOtherConfigValueString).build());
                 }
             }
-            ovsdbTerminationPointBuilder.setPortOtherConfigs(portOtherConfigs);
+            ovsdbTerminationPointBuilder.setPortOtherConfigs(portOtherConfigs.build());
         }
     }
 
@@ -649,7 +654,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         try {
             Map<String, String> interfaceLldpMap = interf.getLldpColumn().getData();
             if (interfaceLldpMap != null && !interfaceLldpMap.isEmpty()) {
-                List<InterfaceLldp> interfaceLldpList = new ArrayList<>();
+                var interfaceLldpList = BindingMap.<InterfaceLldpKey, InterfaceLldp>orderedBuilder();
                 for (Entry<String, String> entry : interfaceLldpMap.entrySet()) {
                     String interfaceLldpKeyString = entry.getKey();
                     String interfaceLldpValueString = entry.getValue();
@@ -661,7 +666,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                 .build());
                     }
                 }
-                ovsdbTerminationPointBuilder.setInterfaceLldp(interfaceLldpList);
+                ovsdbTerminationPointBuilder.setInterfaceLldp(interfaceLldpList.build());
             }
         } catch (SchemaVersionMismatchException e) {
             schemaMismatchLog("lldp", "Interface", e);
@@ -674,7 +679,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
 
         Map<String, String> interfaceOtherConfigMap = interf.getOtherConfigColumn().getData();
         if (interfaceOtherConfigMap != null && !interfaceOtherConfigMap.isEmpty()) {
-            List<InterfaceOtherConfigs> interfaceOtherConfigs = new ArrayList<>();
+            var interfaceOtherConfigs = BindingMap.<InterfaceOtherConfigsKey, InterfaceOtherConfigs>orderedBuilder();
             for (Entry<String, String> entry : interfaceOtherConfigMap.entrySet()) {
                 String interfaceOtherConfigKeyString = entry.getKey();
                 String interfaceOtherConfigValueString = entry.getValue();
@@ -684,7 +689,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                         .setOtherConfigValue(interfaceOtherConfigValueString).build());
                 }
             }
-            ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(interfaceOtherConfigs);
+            ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(interfaceOtherConfigs.build());
         }
     }
 
@@ -694,7 +699,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         try {
             Map<String, String> interfaceBfdStatusMap = interf.getBfdStatusColumn().getData();
             if (interfaceBfdStatusMap != null && !interfaceBfdStatusMap.isEmpty()) {
-                List<InterfaceBfdStatus> interfaceBfdStatusList = new ArrayList<>();
+                var interfaceBfdStatusList = BindingMap.<InterfaceBfdStatusKey, InterfaceBfdStatus>orderedBuilder();
                 for (Entry<String, String> entry : interfaceBfdStatusMap.entrySet()) {
                     String interfaceBfdStatusKeyString = entry.getKey();
                     String interfaceBfdStatusValueString = entry.getValue();
@@ -706,7 +711,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                 .build());
                     }
                 }
-                ovsdbTerminationPointBuilder.setInterfaceBfdStatus(interfaceBfdStatusList);
+                ovsdbTerminationPointBuilder.setInterfaceBfdStatus(interfaceBfdStatusList.build());
             }
         } catch (SchemaVersionMismatchException e) {
             schemaMismatchLog("bfd", "Interface", e);
@@ -719,7 +724,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
         try {
             Map<String, String> interfaceBfdMap = interf.getBfdColumn().getData();
             if (interfaceBfdMap != null && !interfaceBfdMap.isEmpty()) {
-                List<InterfaceBfd> interfaceBfdList = new ArrayList<>();
+                var interfaceBfdList = BindingMap.<InterfaceBfdKey, InterfaceBfd>orderedBuilder();
                 for (Entry<String, String> entry : interfaceBfdMap.entrySet()) {
                     String interfaceBfdKeyString = entry.getKey();
                     String interfaceBfdValueString = entry.getValue();
@@ -731,7 +736,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                                 .build());
                     }
                 }
-                ovsdbTerminationPointBuilder.setInterfaceBfd(interfaceBfdList);
+                ovsdbTerminationPointBuilder.setInterfaceBfd(interfaceBfdList.build());
             }
         } catch (SchemaVersionMismatchException e) {
             schemaMismatchLog("bfd", "Interface", e);

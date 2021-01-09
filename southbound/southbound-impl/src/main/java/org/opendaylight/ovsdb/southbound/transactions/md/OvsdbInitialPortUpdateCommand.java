@@ -25,13 +25,16 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OvsdbInitialPortUpdateCommand extends OvsdbPortUpdateCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbInitialPortUpdateCommand.class);
-    private final Map<NodeId, Node>  updatedBridgeNodes;
+
+    // FIXME: we probably want to store a Map here
     private final Map<NodeId, List<TerminationPoint>> brigeToTerminationPointList = new HashMap<>();
+    private final Map<NodeId, Node>  updatedBridgeNodes;
 
     public OvsdbInitialPortUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
                                          TableUpdates updates, DatabaseSchema dbSchema,
@@ -46,6 +49,7 @@ public class OvsdbInitialPortUpdateCommand extends OvsdbPortUpdateCommand {
         mergeToBridgeNode(transaction);
     }
 
+    @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     protected void updateToDataStore(ReadWriteTransaction transaction, TerminationPointBuilder tpBuilder,
                                      InstanceIdentifier<TerminationPoint> tpPath, boolean merge) {
@@ -77,9 +81,9 @@ public class OvsdbInitialPortUpdateCommand extends OvsdbPortUpdateCommand {
             StringBuilder terminationPointList = new StringBuilder();
             Node bridgeNode = updatedBridgeNodes.get(nodeId);
             if (bridgeNode != null) {
-                NodeBuilder bridgeNodeBuilder = new NodeBuilder(bridgeNode);
-                bridgeNodeBuilder.setTerminationPoint(terminationPoints);
-                Node bridgeNodeWithTerminationPoints = bridgeNodeBuilder.build();
+                Node bridgeNodeWithTerminationPoints = new NodeBuilder(bridgeNode)
+                    .setTerminationPoint(BindingMap.ordered(terminationPoints))
+                    .build();
                 transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNodeWithTerminationPoints);
             }
             terminationPoints.forEach(terminationPoint -> {

@@ -591,7 +591,7 @@ public class OvsdbPortUpdateCommandTest {
         when(interfaceExternalIdsBuilder.build()).thenReturn(mock(InterfaceExternalIds.class));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBldr = mock(
                 OvsdbTerminationPointAugmentationBuilder.class);
-        when(ovsdbTerminationPointBldr.setInterfaceExternalIds(any(List.class))).thenReturn(ovsdbTerminationPointBldr);
+        when(ovsdbTerminationPointBldr.setInterfaceExternalIds(any(Map.class))).thenReturn(ovsdbTerminationPointBldr);
 
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterfaceExternalIds", interf, ovsdbTerminationPointBldr);
         verify(interfaceExternalIdsBuilder).setExternalIdKey(anyString());
@@ -618,7 +618,7 @@ public class OvsdbPortUpdateCommandTest {
         when(portExternalIdsBuilder.build()).thenReturn(mock(PortExternalIds.class));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
                 OvsdbTerminationPointAugmentationBuilder.class);
-        when(ovsdbTerminationPointBuilder.setPortExternalIds(any(List.class))).thenReturn(ovsdbTerminationPointBuilder);
+        when(ovsdbTerminationPointBuilder.setPortExternalIds(any(Map.class))).thenReturn(ovsdbTerminationPointBuilder);
 
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updatePortExternalIds", port, ovsdbTerminationPointBuilder);
         verify(portExternalIdsBuilder).setExternalIdKey(anyString());
@@ -643,7 +643,7 @@ public class OvsdbPortUpdateCommandTest {
         when(portOtherConfigsBuilder.build()).thenReturn(mock(PortOtherConfigs.class));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
                 OvsdbTerminationPointAugmentationBuilder.class);
-        when(ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(any(List.class)))
+        when(ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(any(Map.class)))
                 .thenReturn(ovsdbTerminationPointBuilder);
 
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updatePortOtherConfig", port, ovsdbTerminationPointBuilder);
@@ -670,7 +670,7 @@ public class OvsdbPortUpdateCommandTest {
         when(interfaceOtherConfigsBuilder.build()).thenReturn(mock(InterfaceOtherConfigs.class));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
                 OvsdbTerminationPointAugmentationBuilder.class);
-        when(ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(any(List.class)))
+        when(ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(any(Map.class)))
                 .thenReturn(ovsdbTerminationPointBuilder);
 
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterfaceOtherConfig", interf,

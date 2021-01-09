@@ -5,8 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
-package org.opendaylight.ovsdb.hwvtepsouthbound;
+package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.junit.Assert.assertEquals;
 
@@ -18,11 +17,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
-import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependentJob;
-import org.opendaylight.ovsdb.hwvtepsouthbound.transact.HwvtepOperationalState;
-import org.opendaylight.ovsdb.hwvtepsouthbound.transact.McastMacsRemoteUpdateCommand;
-import org.opendaylight.ovsdb.hwvtepsouthbound.transact.UnMetDependencyGetter;
+import org.opendaylight.ovsdb.hwvtepsouthbound.DataChangeListenerTestBase;
+import org.opendaylight.ovsdb.hwvtepsouthbound.SameThreadScheduledExecutor;
+import org.opendaylight.ovsdb.hwvtepsouthbound.TestBuilders;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -34,7 +31,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.reflect.Whitebox;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class DependencyQueueTest extends DataChangeListenerTestBase {
@@ -52,8 +48,7 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
     Map<Class<? extends Identifiable>, List<InstanceIdentifier>> unMetDependencies;
 
     void setupForTest() throws Exception {
-        mcastMacDataValidator = Whitebox.getInternalState(McastMacsRemoteUpdateCommand.class,
-                UnMetDependencyGetter.class);
+        mcastMacDataValidator = McastMacsRemoteUpdateCommand.MCAST_MAC_DATA_VALIDATOR;
         opState = new HwvtepOperationalState(connectionInstance);
         mac = TestBuilders.buildRemoteMcastMacs(nodeIid,"FF:FF:FF:FF:FF:FF", "ls0",
                 new String[]{"192.168.122.20", "192.168.122.30"});

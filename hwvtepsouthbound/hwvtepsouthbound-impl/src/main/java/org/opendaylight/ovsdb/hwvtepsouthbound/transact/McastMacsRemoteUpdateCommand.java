@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -41,7 +42,9 @@ import org.slf4j.LoggerFactory;
 public class McastMacsRemoteUpdateCommand
         extends AbstractTransactCommand<RemoteMcastMacs, RemoteMcastMacsKey, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(McastMacsRemoteUpdateCommand.class);
-    private static final McastMacUnMetDependencyGetter MCAST_MAC_DATA_VALIDATOR = new McastMacUnMetDependencyGetter();
+
+    @VisibleForTesting
+    static final McastMacUnMetDependencyGetter MCAST_MAC_DATA_VALIDATOR = new McastMacUnMetDependencyGetter();
 
     public McastMacsRemoteUpdateCommand(final HwvtepOperationalState state,
             final Collection<DataTreeModification<Node>> changes) {

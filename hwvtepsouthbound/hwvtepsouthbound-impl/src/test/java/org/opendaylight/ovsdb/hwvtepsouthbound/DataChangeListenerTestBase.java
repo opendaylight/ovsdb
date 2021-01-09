@@ -75,8 +75,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
-
-    static Logger LOG = LoggerFactory.getLogger(DataChangeListenerTestBase.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DataChangeListenerTestBase.class);
 
     static DataBroker dataBroker;
 
@@ -89,13 +88,13 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     Operations operations;
     HwvtepDataChangeListener hwvtepDataChangeListener;
     HwvtepConnectionManager hwvtepConnectionManager;
-    HwvtepConnectionInstance connectionInstance;
+    protected HwvtepConnectionInstance connectionInstance;
 
     ArgumentCaptor<TypedBaseTable> insertOpCapture;
     ArgumentCaptor<List> transactCaptor;
 
     String nodeUuid;
-    InstanceIdentifier<Node> nodeIid;
+    protected InstanceIdentifier<Node> nodeIid;
     InstanceIdentifier<LogicalSwitches> ls0Iid;
     InstanceIdentifier<LogicalSwitches> ls1Iid;
 
@@ -133,7 +132,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         deleteNode(LogicalDatastoreType.CONFIGURATION);
     }
 
-    static final void setFinalStatic(final Class<?> cls, final String fieldName, final Object newValue)
+    protected static final void setFinalStatic(final Class<?> cls, final String fieldName, final Object newValue)
             throws SecurityException, ReflectiveOperationException {
         Field[] fields = FieldUtils.getAllFields(cls);
         for (Field field : fields) {
@@ -241,8 +240,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         tx.commit();
     }
 
-    Node addData(final LogicalDatastoreType logicalDatastoreType, final Class<? extends DataObject> dataObject,
-            final String[]... data) {
+    protected final Node addData(final LogicalDatastoreType logicalDatastoreType,
+            final Class<? extends DataObject> dataObject, final String[]... data) {
         NodeBuilder nodeBuilder = prepareNode(nodeIid);
         HwvtepGlobalAugmentationBuilder builder = new HwvtepGlobalAugmentationBuilder();
         if (LogicalSwitches.class == dataObject) {

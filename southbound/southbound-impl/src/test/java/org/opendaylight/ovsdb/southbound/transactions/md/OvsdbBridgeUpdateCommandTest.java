@@ -455,7 +455,7 @@ public class OvsdbBridgeUpdateCommandTest {
         controllerEntryList.add(controllerEntry);
         when(SouthboundMapper.createControllerEntries(any(Bridge.class), any(Map.class)))
                 .thenReturn(controllerEntryList);
-        when(controllerEntry.isIsConnected()).thenReturn(true);
+        when(controllerEntry.getIsConnected()).thenReturn(true);
         Uri uri = mock(Uri.class);
         when(controllerEntry.getTarget()).thenReturn(uri);
         when(uri.getValue()).thenReturn("tcp:192.168.12.56:6633");
@@ -476,7 +476,7 @@ public class OvsdbBridgeUpdateCommandTest {
                 .thenReturn(ovsdbBridgeAugmentationBuilder);
 
         Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "setOpenFlowNodeRef", ovsdbBridgeAugmentationBuilder, bridge);
-        verify(controllerEntry, times(2)).isIsConnected();
+        verify(controllerEntry, times(2)).getIsConnected();
         verify(ovsdbBridgeAugmentationBuilder).setBridgeOpenflowNodeRef(any(InstanceIdentifier.class));
     }
 }

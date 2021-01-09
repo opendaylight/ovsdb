@@ -106,8 +106,8 @@ public class OvsdbNodeRemoveCommandTest {
         doReturn(new ManagerEntryKey(new Uri("manager"))).when(manager).key();
         doReturn(new ManagerEntryKey(new Uri("manager1"))).when(manager1).key();
 
-        when(manager.isConnected()).thenReturn(true, false, true);
-        when(manager1.isConnected()).thenReturn(true, false, true);
+        when(manager.getConnected()).thenReturn(true, false, true);
+        when(manager1.getConnected()).thenReturn(true, false, true);
         when(manager.getNumberOfConnections()).thenReturn(Uint32.ZERO);
 
         Map<ManagerEntryKey, ManagerEntry> listManagerEntry = new HashMap<>();

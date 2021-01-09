@@ -110,8 +110,8 @@ public class BridgeUpdateCommand implements TransactCommand {
     }
 
     private static void setStpEnalbe(final Bridge bridge, final OvsdbBridgeAugmentation ovsdbManageNode) {
-        if (ovsdbManageNode.isStpEnable() != null) {
-            bridge.setStpEnable(ovsdbManageNode.isStpEnable());
+        if (ovsdbManageNode.getStpEnable() != null) {
+            bridge.setStpEnable(ovsdbManageNode.getStpEnable());
         }
     }
 

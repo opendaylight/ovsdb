@@ -82,7 +82,7 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
             final Map<ManagerEntryKey, ManagerEntry> entries = ovsdbNodeAugmentation.getManagerEntry();
             if (entries != null) {
                 for (ManagerEntry manager : entries.values()) {
-                    if (manager.isConnected()) {
+                    if (manager.getConnected()) {
                         connectedManager++;
                         if (connectedManager > ONE_CONNECTED_MANAGER) {
                             return false;

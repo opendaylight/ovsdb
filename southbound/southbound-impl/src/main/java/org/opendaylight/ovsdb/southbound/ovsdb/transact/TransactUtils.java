@@ -46,7 +46,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 
 // This class needs to be mocked
 @SuppressWarnings("checkstyle:FinalClass")
@@ -317,8 +316,12 @@ public class TransactUtils {
             DataObjectModification<? extends DataObject> change = remainingChanges.remove();
             InstanceIdentifier<? extends DataObject> path = remainingPaths.remove();
             // Is the change relevant?
-            if (clazz.isAssignableFrom(change.getDataType()) && filter.test((DataObjectModification<T>) change)) {
-                result.put((InstanceIdentifier<T>) path, (DataObjectModification<T>) change);
+            if (clazz.isAssignableFrom(change.getDataType())) {
+                @SuppressWarnings("unchecked")
+                final DataObjectModification<T> dao = (DataObjectModification<T>) change;
+                if (filter.test(dao)) {
+                    result.put((InstanceIdentifier<T>) path, dao);
+                }
             }
             // Add any children to the queue
             for (DataObjectModification<? extends DataObject> child : change.getModifiedChildren()) {
@@ -339,17 +342,15 @@ public class TransactUtils {
      */
     private static <N extends Identifiable<K> & ChildOf<? super T>, K extends Identifier<N>, T extends DataObject>
         InstanceIdentifier<? extends DataObject> extendPath(
-            InstanceIdentifier path,
-            DataObjectModification child) {
-        Class<N> item = child.getDataType();
+            InstanceIdentifier<T> path,
+            DataObjectModification<?> child) {
+        @SuppressWarnings("unchecked")
+        final Class<N> item = (Class<N>) child.getDataType();
         if (child.getIdentifier() instanceof InstanceIdentifier.IdentifiableItem) {
-            K key = (K) ((InstanceIdentifier.IdentifiableItem) child.getIdentifier()).getKey();
-            KeyedInstanceIdentifier<N, K> extendedPath = path.child(item, key);
-            return extendedPath;
-        } else {
-            InstanceIdentifier<N> extendedPath = path.child(item);
-            return extendedPath;
+            return path.child(item, ((InstanceIdentifier.IdentifiableItem<N, K>) child.getIdentifier()).getKey());
         }
+
+        return path.child(item);
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>, T> extractRemovedObjects(

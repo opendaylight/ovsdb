@@ -1,28 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-  xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
-  xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
-  odl:use-default-for-reference-types="true">
-
-    <!-- Read default values at startup and inject to HwvtepSouthboundProvider-->
-    <cm:property-placeholder persistent-id="org.opendaylight.ovsdb.hwvtepsouthbound" update-strategy="none">
-        <!-- Setting default values, in case hwvtepsouthbound.cfg file is not present
-        or config property is commented out. This will be overridden if user
-        specify the property in hwvtepsouthbound.cfg file-->
-        <cm:default-properties>
-            <cm:property name="shard-status-check-retry-count" value="1000"/>
-        </cm:default-properties>
-    </cm:property-placeholder>
-
-    <bean id="hwvtepSouthboundProviderConfigurator"
-          class="org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundProviderConfigurator">
-        <cm:managed-properties persistent-id="org.opendaylight.ovsdb.hwvtepsouthbound"
-                               update-strategy="component-managed"
-                               update-method="updateConfigParameter"/>
-        <argument ref="hwvtepSouthboundProvider" />
-        <property name="shardStatusCheckRetryCount" value="${shard-status-check-retry-count}"/>
-    </bean>
-
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <!-- FIXME: convert these to proper Karaf commands -->
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
     <command>
         <action class="org.opendaylight.ovsdb.hwvtepsouthbound.TransactionHistoryCmd">

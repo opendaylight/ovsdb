@@ -52,6 +52,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.Uint16;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +71,7 @@ public final class HwvtepSouthboundMapper {
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClient client) {
         return createInstanceIdentifier(createIpAddress(client.getConnectionInfo().getRemoteAddress()),
-                        new PortNumber(client.getConnectionInfo().getRemotePort()));
+                        new PortNumber(Uint16.valueOf(client.getConnectionInfo().getRemotePort())));
     }
 
     private static InstanceIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
@@ -187,9 +188,9 @@ public final class HwvtepSouthboundMapper {
     public static ConnectionInfo createConnectionInfo(OvsdbClient client) {
         ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
         connectionInfoBuilder.setRemoteIp(createIpAddress(client.getConnectionInfo().getRemoteAddress()));
-        connectionInfoBuilder.setRemotePort(new PortNumber(client.getConnectionInfo().getRemotePort()));
+        connectionInfoBuilder.setRemotePort(new PortNumber(Uint16.valueOf(client.getConnectionInfo().getRemotePort())));
         connectionInfoBuilder.setLocalIp(createIpAddress(client.getConnectionInfo().getLocalAddress()));
-        connectionInfoBuilder.setLocalPort(new PortNumber(client.getConnectionInfo().getLocalPort()));
+        connectionInfoBuilder.setLocalPort(new PortNumber(Uint16.valueOf(client.getConnectionInfo().getLocalPort())));
         return connectionInfoBuilder.build();
     }
 

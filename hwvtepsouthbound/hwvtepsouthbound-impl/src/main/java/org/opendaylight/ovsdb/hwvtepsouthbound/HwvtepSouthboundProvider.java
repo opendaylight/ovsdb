@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import com.google.common.util.concurrent.FluentFuture;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,19 +39,22 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoke
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.utils.mdsal.utils.Scheduler;
+import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
 import org.opendaylight.serviceutils.upgrade.UpgradeState;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-@Service(classes = HwvtepSouthboundProvider.class) // only because HwvtepCacheDisplayCmd needs a @Reference to this
-public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
+@Service(classes = HwvtepSouthboundProviderInfo.class)
+public class HwvtepSouthboundProvider
+        implements HwvtepSouthboundProviderInfo, ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundProvider.class);
     private static final String ENTITY_TYPE = "ovsdb-hwvtepsouthbound-provider";
@@ -244,5 +248,20 @@ public class HwvtepSouthboundProvider implements ClusteredDataTreeChangeListener
 
     public HwvtepConnectionManager getHwvtepConnectionManager() {
         return cm;
+    }
+
+    @Override
+    public Map<InstanceIdentifier<Node>, HwvtepDeviceInfo> getAllConnectedInstances() {
+        return cm.allConnectedInstances();
+    }
+
+    @Override
+    public Map<InstanceIdentifier<Node>, TransactionHistory> getControllerTxHistory() {
+        return cm.controllerTxHistory();
+    }
+
+    @Override
+    public Map<InstanceIdentifier<Node>, TransactionHistory> getDeviceUpdateHistory() {
+        return cm.deviceUpdateHistory();
     }
 }

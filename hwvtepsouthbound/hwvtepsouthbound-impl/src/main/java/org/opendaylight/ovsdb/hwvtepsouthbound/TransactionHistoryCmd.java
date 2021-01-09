@@ -30,7 +30,7 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
     String nodeid;
     private static final String SEPERATOR = "#######################################################";
 
-    private final HwvtepSouthboundProvider hwvtepProvider;
+    private final HwvtepSouthboundProviderInfo hwvtepProvider;
 
     public TransactionHistoryCmd(HwvtepSouthboundProvider hwvtepProvider) {
         this.hwvtepProvider = hwvtepProvider;
@@ -38,20 +38,18 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxLogs
-                = hwvtepProvider.getHwvtepConnectionManager().getControllerTxHistory();
-        Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateLogs
-                = hwvtepProvider.getHwvtepConnectionManager().getDeviceUpdateHistory();
+        Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxLogs = hwvtepProvider.getControllerTxHistory();
+        Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateLogs = hwvtepProvider.getDeviceUpdateHistory();
         if (nodeid != null) {
-            InstanceIdentifier<Node> iid = HwvtepSouthboundMapper.createInstanceIdentifier(new NodeId(nodeid));
-            printLogs(controllerTxLogs, deviceUpdateLogs, iid);
+            printLogs(controllerTxLogs, deviceUpdateLogs,
+                HwvtepSouthboundMapper.createInstanceIdentifier(new NodeId(nodeid)));
         } else {
             Map<InstanceIdentifier<Node>, TransactionHistory> txlogs
                     = controllerTxLogs.isEmpty() ? deviceUpdateLogs : controllerTxLogs;
             txlogs.keySet().forEach(iid -> {
                 printLogs(controllerTxLogs, deviceUpdateLogs, iid);
             });
-            session.getConsole().println("Device tx logs size " + deviceUpdateLogs.keySet().size());
+            session.getConsole().println("Device tx logs size " + deviceUpdateLogs.size());
         }
         return null;
     }
@@ -73,7 +71,7 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
     }
 
     private void printLogs(List<Pair<HwvtepTransactionLogElement, Boolean>> logs) {
-        logs.forEach((pair) -> {
+        logs.forEach(pair -> {
             HwvtepTransactionLogElement log = pair.getLeft();
             session.getConsole().print(new Date(log.getDate()));
             session.getConsole().print(" ");

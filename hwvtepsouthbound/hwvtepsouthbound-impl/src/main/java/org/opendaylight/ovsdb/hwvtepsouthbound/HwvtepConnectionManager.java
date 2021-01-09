@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 import static java.util.Objects.requireNonNull;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -672,14 +673,6 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         return entityConnectionMap.get(entity);
     }
 
-    public Map<InstanceIdentifier<Node>, TransactionHistory> getControllerTxHistory() {
-        return controllerTxHistory;
-    }
-
-    public Map<InstanceIdentifier<Node>, TransactionHistory> getDeviceUpdateHistory() {
-        return deviceUpdateHistory;
-    }
-
     private static class HwvtepDeviceEntityOwnershipListener implements EntityOwnershipListener {
         private final HwvtepConnectionManager hcm;
         private final EntityOwnershipListenerRegistration listenerRegistration;
@@ -700,6 +693,23 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
     }
 
+    final Map<InstanceIdentifier<Node>, HwvtepDeviceInfo> allConnectedInstances() {
+        return Maps.transformValues(Collections.unmodifiableMap(nodeIidVsConnectionInstance),
+            HwvtepConnectionInstance::getDeviceInfo);
+    }
+
+    final Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxHistory() {
+        return Collections.unmodifiableMap(controllerTxHistory);
+    }
+
+    final Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateHistory() {
+        return Collections.unmodifiableMap(deviceUpdateHistory);
+    }
+
+    public void cleanupOperationalNode(final InstanceIdentifier<Node> nodeIid) {
+        txInvoker.invoke(new HwvtepGlobalRemoveCommand(nodeIid));
+    }
+
     private enum ConnectionReconciliationTriggers {
         /*
         Reconciliation trigger for scenario where controller's attempt
@@ -712,13 +722,5 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         initiated connection disconnects.
         */
         ON_DISCONNECT
-    }
-
-    public Map<InstanceIdentifier<Node>, HwvtepConnectionInstance> getAllConnectedInstances() {
-        return Collections.unmodifiableMap(nodeIidVsConnectionInstance);
-    }
-
-    public void cleanupOperationalNode(final InstanceIdentifier<Node> nodeIid) {
-        txInvoker.invoke(new HwvtepGlobalRemoveCommand(nodeIid));
     }
 }

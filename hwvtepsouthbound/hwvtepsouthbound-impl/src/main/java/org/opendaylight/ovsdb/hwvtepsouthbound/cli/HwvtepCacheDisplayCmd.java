@@ -14,9 +14,8 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
-import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundProvider;
+import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundProviderInfo;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
@@ -43,7 +42,7 @@ public class HwvtepCacheDisplayCmd implements Action {
     private String nodeid;
 
     @Reference
-    private HwvtepSouthboundProvider hwvtepSouthboundProvider;
+    private HwvtepSouthboundProviderInfo hwvtepSouthboundProvider;
 
     private static final TopologyId HWVTEP_TOPOLOGY_ID = new TopologyId(new Uri("hwvtep:1"));
     private static final String SEPERATOR = "#######################################################";
@@ -54,10 +53,10 @@ public class HwvtepCacheDisplayCmd implements Action {
     @Override
     @SuppressWarnings("checkstyle:RegexpSinglelineJava")
     public Object execute() throws Exception {
-        Map<InstanceIdentifier<Node>, HwvtepConnectionInstance> allConnectedInstances =
-                hwvtepSouthboundProvider.getHwvtepConnectionManager().getAllConnectedInstances();
+        Map<InstanceIdentifier<Node>, HwvtepDeviceInfo> allConnectedInstances =
+                hwvtepSouthboundProvider.getAllConnectedInstances();
         if (nodeid == null) {
-            allConnectedInstances.entrySet().forEach((entry) -> {
+            allConnectedInstances.entrySet().forEach(entry -> {
                 System.out.println(SEPERATOR + " START " + SEPERATOR);
                 print(entry.getKey(), entry.getValue());
                 System.out.println(SEPERATOR + " END " + SEPERATOR);
@@ -83,7 +82,7 @@ public class HwvtepCacheDisplayCmd implements Action {
     }
 
     @SuppressWarnings("checkstyle:RegexpSinglelineJava")
-    private static void print(InstanceIdentifier<Node> iid, HwvtepConnectionInstance connectionInstance) {
+    private static void print(InstanceIdentifier<Node> iid, HwvtepDeviceInfo deviceInfo) {
         PrintStream printStream = System.out;
         printStream.print("Printing for Node :  ");
         printStream.println(iid.firstKeyOf(Node.class).getNodeId().getValue());
@@ -91,23 +90,21 @@ public class HwvtepCacheDisplayCmd implements Action {
         printStream.println(SECTION_SEPERATOR);
         printStream.println("Config data");
         printStream.println(SECTION_SEPERATOR);
-        HwvtepDeviceInfo deviceInfo = connectionInstance.getDeviceInfo();
-        deviceInfo.getConfigData().entrySet().forEach((entry) -> {
+        deviceInfo.getConfigData().entrySet().forEach(entry -> {
             printEntry(printStream, entry);
         });
-
 
         printStream.println(SECTION_SEPERATOR);
         printStream.println("Oper data");
         printStream.println(SECTION_SEPERATOR);
-        deviceInfo.getOperData().entrySet().forEach((entry) -> {
+        deviceInfo.getOperData().entrySet().forEach(entry -> {
             printEntry(printStream, entry);
         });
 
         printStream.println(SECTION_SEPERATOR);
         printStream.println("Uuid data");
         printStream.println(SECTION_SEPERATOR);
-        deviceInfo.getUuidData().entrySet().forEach((entry) -> {
+        deviceInfo.getUuidData().entrySet().forEach(entry -> {
             printEntryUUID(printStream, entry);
         });
         printStream.println(SECTION_SEPERATOR);
@@ -121,7 +118,7 @@ public class HwvtepCacheDisplayCmd implements Action {
         Map<InstanceIdentifier, HwvtepDeviceInfo.DeviceData> map = entry.getValue();
         String clsName = cls.getSimpleName();
         console.println(clsName + " - ");
-        map.values().forEach((deviceData) -> {
+        map.values().forEach(deviceData -> {
             printTable(console, clsName, deviceData);
         });
     }
@@ -209,7 +206,7 @@ public class HwvtepCacheDisplayCmd implements Action {
         Map<UUID, HwvtepDeviceInfo.DeviceData> map = entry.getValue();
         String clsName = cls.getSimpleName();
         console.println(clsName + " - ");
-        map.values().forEach((deviceData) -> {
+        map.values().forEach(deviceData -> {
             printTable(console, clsName, deviceData);
         });
     }

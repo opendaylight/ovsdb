@@ -249,7 +249,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
             builder.setLogicalSwitches(TestBuilders.logicalSwitches(data));
         }
         if (TerminationPoint.class == dataObject) {
-            builder.setTerminationPoint(TestBuilders.addGlobalTerminationPoints(nodeIid, data);
+            nodeBuilder.setTerminationPoint(TestBuilders.globalTerminationPoints(nodeIid, data));
         }
         if (RemoteUcastMacs.class == dataObject) {
             builder.setRemoteUcastMacs(TestBuilders.remoteUcastMacs(nodeIid, data));
@@ -271,7 +271,6 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
 
     void deleteData(final LogicalDatastoreType logicalDatastoreType, final Class<? extends DataObject> dataObject,
             final String[]... data) {
-        NodeBuilder nodeBuilder = prepareNode(nodeIid);
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         if (LogicalSwitches.class == dataObject) {
             for (LogicalSwitchesKey key : TestBuilders.logicalSwitches(data).keySet()) {
@@ -280,7 +279,9 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
             }
         }
         if (TerminationPoint.class == dataObject) {
-            TestBuilders.addGlobalTerminationPoints(nodeBuilder, nodeIid, data);
+            // FIXME: this is a no-op
+            prepareNode(nodeIid)
+                .setTerminationPoint(TestBuilders.globalTerminationPoints(nodeIid, data));
         }
         if (RemoteUcastMacs.class == dataObject) {
             for (RemoteUcastMacsKey key : TestBuilders.remoteUcastMacs(nodeIid, data).keySet()) {

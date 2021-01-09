@@ -79,6 +79,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
@@ -119,6 +120,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.Item;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
@@ -190,8 +192,8 @@ public class SouthboundUtils {
         provider = new MdsalUtilsProvider(mdsalUtils);
     }
 
-    public static final ImmutableBiMap<String, Class<? extends InterfaceTypeBase>> OVSDB_INTERFACE_TYPE_MAP
-            = new ImmutableBiMap.Builder<String, Class<? extends InterfaceTypeBase>>()
+    public static final ImmutableBiMap<String, Class<? extends InterfaceTypeBase>> OVSDB_INTERFACE_TYPE_MAP =
+        new ImmutableBiMap.Builder<String, Class<? extends InterfaceTypeBase>>()
             .put("internal", InterfaceTypeInternal.class)
             .put("vxlan", InterfaceTypeVxlan.class)
             .put("vxlan-gpe", InterfaceTypeVxlanGpe.class)
@@ -211,8 +213,8 @@ public class SouthboundUtils {
             .put("dpdkvhostuserclient", InterfaceTypeDpdkvhostuserclient.class)
             .build();
 
-    public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>,String> OVSDB_PROTOCOL_MAP
-            = new ImmutableBiMap.Builder<Class<? extends OvsdbBridgeProtocolBase>,String>()
+    public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>, String> OVSDB_PROTOCOL_MAP =
+        new ImmutableBiMap.Builder<Class<? extends OvsdbBridgeProtocolBase>, String>()
             .put(OvsdbBridgeProtocolOpenflow10.class,"OpenFlow10")
             .put(OvsdbBridgeProtocolOpenflow11.class,"OpenFlow11")
             .put(OvsdbBridgeProtocolOpenflow12.class,"OpenFlow12")
@@ -221,11 +223,18 @@ public class SouthboundUtils {
             .put(OvsdbBridgeProtocolOpenflow15.class,"OpenFlow15")
             .build();
 
-    private static final ImmutableBiMap<Class<? extends OvsdbFailModeBase>,String> OVSDB_FAIL_MODE_MAP
-            = new ImmutableBiMap.Builder<Class<? extends OvsdbFailModeBase>,String>()
+    private static final ImmutableBiMap<Class<? extends OvsdbFailModeBase>, String> OVSDB_FAIL_MODE_MAP =
+        new ImmutableBiMap.Builder<Class<? extends OvsdbFailModeBase>, String>()
             .put(OvsdbFailModeStandalone.class,"standalone")
             .put(OvsdbFailModeSecure.class,"secure")
             .build();
+
+    private static final BridgeOtherConfigs OTHER_CONFIG_DISABLE_INBAND = new BridgeOtherConfigsBuilder()
+                .setBridgeOtherConfigKey(DISABLE_IN_BAND)
+                .setBridgeOtherConfigValue("true")
+                .build();
+    private static final Map<BridgeOtherConfigsKey, BridgeOtherConfigs> DEFAULT_OTHER_CONFIGS =
+        BindingMap.of(OTHER_CONFIG_DISABLE_INBAND);
 
     public static NodeId createNodeId(IpAddress ip, PortNumber port) {
         String uriString = OVSDB_URI_PREFIX + "://" + ip.stringValue() + ":" + port.getValue();
@@ -580,9 +589,9 @@ public class SouthboundUtils {
                              final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
                              final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
                              final Class<? extends DatapathTypeBase> dpType,
-                             final List<BridgeExternalIds> externalIds,
-                             final List<ControllerEntry> controllerEntries,
-                             final List<BridgeOtherConfigs> otherConfigs,
+                             final Map<BridgeExternalIdsKey, BridgeExternalIds> externalIds,
+                             final Map<ControllerEntryKey, ControllerEntry> controllerEntries,
+                             final Map<BridgeOtherConfigsKey, BridgeOtherConfigs> otherConfigs,
                              final String dpid, long timeout) throws InterruptedException {
 
         NodeBuilder bridgeNodeBuilder = new NodeBuilder();
@@ -663,23 +672,15 @@ public class SouthboundUtils {
             InstanceIdentifier<Node> bridgeIid = createInstanceIdentifier(ovsdbNode.key(), bridgeName);
             NodeId bridgeNodeId = createManagedNodeId(bridgeIid);
             bridgeNodeBuilder.setNodeId(bridgeNodeId);
-            OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder();
-            ovsdbBridgeAugmentationBuilder.setControllerEntry(createControllerEntries(
-                    controllersStr, maxBackoff, inactivityProbe));
+            OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = new OvsdbBridgeAugmentationBuilder()
+                .setControllerEntry(createControllerEntries(controllersStr, maxBackoff, inactivityProbe));
             ovsdbBridgeAugmentationBuilder.setBridgeName(new OvsdbBridgeName(bridgeName));
             ovsdbBridgeAugmentationBuilder.setProtocolEntry(createMdsalProtocols());
             ovsdbBridgeAugmentationBuilder.setFailMode(OVSDB_FAIL_MODE_MAP.inverse().get("secure"));
             // TODO: Currently netvirt relies on this function to set disabled-in-band=true. However,
             // TODO (cont): a better design would be to have netvirt pass that in. That way this function
             // TODO (cont): can take a null otherConfigs to erase other_configs.
-            if (otherConfigs == null) {
-                otherConfigs = new ArrayList<>();
-            }
-            BridgeOtherConfigsBuilder bridgeOtherConfigsBuilder = new BridgeOtherConfigsBuilder();
-            bridgeOtherConfigsBuilder.setBridgeOtherConfigKey(DISABLE_IN_BAND);
-            bridgeOtherConfigsBuilder.setBridgeOtherConfigValue("true");
-            otherConfigs.add(bridgeOtherConfigsBuilder.build());
-            ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigs);
+            ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(disableInBand(otherConfigs));
             ovsdbBridgeAugmentationBuilder.setBridgeExternalIds(setBridgeExternalIds());
             setManagedByForBridge(ovsdbBridgeAugmentationBuilder, ovsdbNode.key());
             if (dpType != null) {
@@ -697,6 +698,14 @@ public class SouthboundUtils {
             throw new InvalidParameterException("Could not find ConnectionInfo");
         }
         return result;
+    }
+
+    private static Map<BridgeOtherConfigsKey, BridgeOtherConfigs> disableInBand(List<BridgeOtherConfigs> otherConfigs) {
+        return otherConfigs == null || otherConfigs.isEmpty() ? DEFAULT_OTHER_CONFIGS
+            : BindingMap.<BridgeOtherConfigsKey, BridgeOtherConfigs>orderedBuilder(otherConfigs.size() + 1)
+                .addAll(otherConfigs)
+                .add(OTHER_CONFIG_DISABLE_INBAND)
+                .build();
     }
 
     /**
@@ -735,21 +744,18 @@ public class SouthboundUtils {
 
         OvsdbBridgeAugmentation bridgeAug = extractBridgeAugmentation(bridgeNode);
 
-        //Only add controller entries that do not already exist on this bridge
+        Map<ControllerEntryKey, ControllerEntry> currentControllerEntries =
+            createControllerEntries(controllers, maxBackoff, inactivityProbe);
+
+        final Map<ControllerEntryKey, ControllerEntry> newControllerEntries;
+        // Only add controller entries that do not already exist on this bridge
         Map<ControllerEntryKey, ControllerEntry> existingControllerEntries = bridgeAug.getControllerEntry();
-        List<ControllerEntry> newControllerEntries = new ArrayList<>();
         if (existingControllerEntries != null) {
-            NEW_ENTRY_LOOP:
-            for (ControllerEntry newEntry : createControllerEntries(controllers, maxBackoff, inactivityProbe)) {
-                for (ControllerEntry existingEntry : existingControllerEntries.values()) {
-                    if (newEntry.getTarget().equals(existingEntry.getTarget())) {
-                        continue NEW_ENTRY_LOOP;
-                    }
-                }
-                newControllerEntries.add(newEntry);
-            }
+            newControllerEntries = currentControllerEntries.values().stream()
+                .filter(entry -> !existingControllerEntries.containsKey(new ControllerEntryKey(entry.getTarget())))
+                .collect(BindingMap.toOrderedMap());
         } else {
-            newControllerEntries = createControllerEntries(controllers,maxBackoff, inactivityProbe);
+            newControllerEntries = currentControllerEntries;
         }
 
         if (newControllerEntries.isEmpty()) {
@@ -1087,23 +1093,22 @@ public class SouthboundUtils {
         return false;
     }
 
-    private static List<ControllerEntry> createControllerEntries(List<String> controllersStr,
+    private static Map<ControllerEntryKey, ControllerEntry> createControllerEntries(List<String> controllersStr,
             Uint32 maxBackoff, Uint32 inactivityProbe) {
-        List<ControllerEntry> controllerEntries = new ArrayList<>();
-        if (controllersStr != null) {
-            for (String controllerStr : controllersStr) {
-                ControllerEntryBuilder controllerEntryBuilder = new ControllerEntryBuilder();
-                controllerEntryBuilder.setTarget(new Uri(controllerStr));
-                if (maxBackoff != null) {
-                    controllerEntryBuilder.setMaxBackoff(maxBackoff);
-                }
-                if (inactivityProbe != null) {
-                    controllerEntryBuilder.setInactivityProbe(inactivityProbe);
-                }
-                controllerEntries.add(controllerEntryBuilder.build());
-            }
+        if (controllersStr == null) {
+            return Map.of();
         }
-        return controllerEntries;
+
+        BindingMap.Builder<ControllerEntryKey, ControllerEntry> controllerEntries =
+            BindingMap.orderedBuilder(controllersStr.size());
+        for (String controllerStr : controllersStr) {
+            controllerEntries.add(new ControllerEntryBuilder()
+                .setTarget(new Uri(controllerStr))
+                .setMaxBackoff(maxBackoff)
+                .setInactivityProbe(inactivityProbe)
+                .build());
+        }
+        return controllerEntries.build();
     }
 
     public OvsdbTerminationPointAugmentation extractTerminationPointAugmentation(Node bridgeNode, String portName) {

@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -55,17 +55,17 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbFailModeStandalone;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -250,7 +250,7 @@ public class OvsdbBridgeUpdateCommandTest {
         PowerMockito.whenNew(OvsdbBridgeRef.class).withAnyArguments().thenReturn(mock(OvsdbBridgeRef.class));
         when(managedNodeEntryBuilder.setBridgeRef(any(OvsdbBridgeRef.class))).thenReturn(managedNodeEntryBuilder);
         when(managedNodeEntryBuilder.build()).thenReturn(managedBridge);
-        when(ovsdbConnectionAugmentationBuilder.setManagedNodeEntry(any(List.class)))
+        when(ovsdbConnectionAugmentationBuilder.setManagedNodeEntry(any(Map.class)))
                 .thenReturn(ovsdbConnectionAugmentationBuilder);
 
         when(ovsdbConnectionAugmentationBuilder.build()).thenReturn(mock(OvsdbNodeAugmentation.class));
@@ -372,19 +372,13 @@ public class OvsdbBridgeUpdateCommandTest {
         map.put("key", "value");
         when(column.getData()).thenReturn(map);
 
-        BridgeOtherConfigsBuilder bridgeOtherConfigsBuilder = mock(BridgeOtherConfigsBuilder.class);
-        PowerMockito.whenNew(BridgeOtherConfigsBuilder.class).withNoArguments().thenReturn(bridgeOtherConfigsBuilder);
-        when(bridgeOtherConfigsBuilder.setBridgeOtherConfigKey(anyString())).thenReturn(bridgeOtherConfigsBuilder);
-        when(bridgeOtherConfigsBuilder.setBridgeOtherConfigValue(anyString())).thenReturn(bridgeOtherConfigsBuilder);
-        when(bridgeOtherConfigsBuilder.build()).thenReturn(mock(BridgeOtherConfigs.class));
-
-        OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
-        when(ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(any(List.class)))
-                .thenReturn(ovsdbBridgeAugmentationBuilder);
-        Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "setOtherConfig", ovsdbBridgeAugmentationBuilder, bridge);
-        verify(bridge).getOtherConfigColumn();
-        verify(bridgeOtherConfigsBuilder).setBridgeOtherConfigKey(anyString());
-        verify(bridgeOtherConfigsBuilder).setBridgeOtherConfigValue(anyString());
+        var builder = new OvsdbBridgeAugmentationBuilder();
+        OvsdbBridgeUpdateCommand.setOtherConfig(builder, bridge);
+        var list = builder.build().nonnullBridgeOtherConfigs().values();
+        assertEquals(1, list.size());
+        var result = list.iterator().next();
+        assertEquals("key", result.getBridgeOtherConfigKey());
+        assertEquals("value", result.getBridgeOtherConfigValue());
     }
 
     @SuppressWarnings("unchecked")
@@ -397,45 +391,43 @@ public class OvsdbBridgeUpdateCommandTest {
         map.put("key", "value");
         when(column.getData()).thenReturn(map);
 
-        BridgeExternalIdsBuilder bridgeExternalIdsBuilder = mock(BridgeExternalIdsBuilder.class);
-        PowerMockito.whenNew(BridgeExternalIdsBuilder.class).withNoArguments().thenReturn(bridgeExternalIdsBuilder);
-        when(bridgeExternalIdsBuilder.setBridgeExternalIdKey(anyString())).thenReturn(bridgeExternalIdsBuilder);
-        when(bridgeExternalIdsBuilder.setBridgeExternalIdValue(anyString())).thenReturn(bridgeExternalIdsBuilder);
-        when(bridgeExternalIdsBuilder.build()).thenReturn(mock(BridgeExternalIds.class));
-
-        OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
-        when(ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(any(List.class)))
-                .thenReturn(ovsdbBridgeAugmentationBuilder);
-        Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "setExternalIds", ovsdbBridgeAugmentationBuilder, bridge);
-        verify(bridge).getExternalIdsColumn();
-        verify(bridgeExternalIdsBuilder).setBridgeExternalIdKey(anyString());
-        verify(bridgeExternalIdsBuilder).setBridgeExternalIdValue(anyString());
+        var builder = new OvsdbBridgeAugmentationBuilder();
+        OvsdbBridgeUpdateCommand.setExternalIds(builder, bridge);
+        var list = builder.build().nonnullBridgeExternalIds().values();
+        assertEquals(1, list.size());
+        var result = list.iterator().next();
+        assertEquals("key", result.getBridgeExternalIdKey());
+        assertEquals("value", result.getBridgeExternalIdValue());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testSetProtocolAndSetDataPath() throws Exception {
         PowerMockito.mockStatic(SouthboundMapper.class);
 
-        //Test setProtocol()
-        List<ProtocolEntry> listProtocolEntry = new ArrayList<>();
-        listProtocolEntry.add(mock(ProtocolEntry.class));
-        when(SouthboundMapper.createMdsalProtocols(any(Bridge.class))).thenReturn(listProtocolEntry);
-        OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
-        Bridge bridge = mock(Bridge.class);
-        when(ovsdbBridgeAugmentationBuilder.setProtocolEntry(any(List.class)))
-                .thenReturn(ovsdbBridgeAugmentationBuilder);
-        Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "setProtocol", ovsdbBridgeAugmentationBuilder, bridge);
-        verify(ovsdbBridgeAugmentationBuilder).setProtocolEntry(any(List.class));
+        var builder = new OvsdbBridgeAugmentationBuilder();
+        var bridge = mock(Bridge.class);
 
+        // Call setProtocol()
+        when(SouthboundMapper.createMdsalProtocols(any(Bridge.class)))
+                .thenReturn(List.of(new ProtocolEntryBuilder().setProtocol(OvsdbBridgeProtocolBase.class).build()));
+        OvsdbBridgeUpdateCommand.setProtocol(builder, bridge);
 
-        //Test setDataPath()
-        DatapathId dpid = mock(DatapathId.class);
+        // Call setDataPath()
+        var dpid = new DatapathId("00:11:22:33:44:55:66:77");
         when(SouthboundMapper.createDatapathId(any(Bridge.class))).thenReturn(dpid);
-        when(ovsdbBridgeAugmentationBuilder.setDatapathId(any(DatapathId.class)))
-                .thenReturn(ovsdbBridgeAugmentationBuilder);
-        Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "setDataPath", ovsdbBridgeAugmentationBuilder, bridge);
-        verify(ovsdbBridgeAugmentationBuilder).setDatapathId(any(DatapathId.class));
+        OvsdbBridgeUpdateCommand.setDataPath(builder, bridge);
+
+        // Get result
+        var result = builder.build();
+
+        // Assert setProtocol()
+        var protocols = result.nonnullProtocolEntry().values();
+        assertEquals(1, protocols.size());
+        var protocol = protocols.iterator().next();
+        assertEquals(OvsdbBridgeProtocolBase.class, protocol.getProtocol());
+
+        // Assert setDataPath()
+        assertSame(dpid, result.getDatapathId());
     }
 
     @SuppressWarnings("unchecked")

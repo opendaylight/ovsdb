@@ -10,12 +10,11 @@ package org.opendaylight.ovsdb.southbound.transactions.md;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
@@ -33,8 +32,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.DatapathTypeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.DatapathTypeEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.DatapathTypeEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.InterfaceTypeEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchExternalIdsKey;
@@ -50,6 +51,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,7 +136,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
     @VisibleForTesting
     void setNewOtherConfigs(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, Map<String, String> otherConfigs) {
-        List<OpenvswitchOtherConfigs> otherConfigsList = new ArrayList<>();
+        var otherConfigsList = BindingMap.<OpenvswitchOtherConfigsKey, OpenvswitchOtherConfigs>orderedBuilder();
         for (Entry<String, String> entry : otherConfigs.entrySet()) {
             String otherConfigKey = entry.getKey();
             String otherConfigValue = entry.getValue();
@@ -143,7 +145,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
                         .setOtherConfigValue(otherConfigValue).build());
             }
         }
-        ovsdbNodeBuilder.setOpenvswitchOtherConfigs(otherConfigsList);
+        ovsdbNodeBuilder.setOpenvswitchOtherConfigs(otherConfigsList.build());
     }
 
     private void setExternalIds(ReadWriteTransaction transaction,
@@ -183,7 +185,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
     @VisibleForTesting
     void setNewExternalIds(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, Map<String, String> externalIds) {
-        List<OpenvswitchExternalIds> externalIdsList = new ArrayList<>();
+        var externalIdsList = BindingMap.<OpenvswitchExternalIdsKey, OpenvswitchExternalIds>orderedBuilder();
         for (Entry<String, String> entry : externalIds.entrySet()) {
             String externalIdKey = entry.getKey();
             String externalIdValue = entry.getValue();
@@ -192,7 +194,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
                         .setExternalIdValue(externalIdValue).build());
             }
         }
-        ovsdbNodeBuilder.setOpenvswitchExternalIds(externalIdsList);
+        ovsdbNodeBuilder.setOpenvswitchExternalIds(externalIdsList.build());
     }
 
     private static void setInterfaceTypes(
@@ -200,19 +202,16 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             OpenVSwitch openVSwitch) {
         try {
             Set<String> iftypes = openVSwitch.getIfaceTypesColumn().getData();
-            List<InterfaceTypeEntry> ifEntryList = new ArrayList<>();
+            var ifEntryList = BindingMap.<InterfaceTypeEntryKey, InterfaceTypeEntry>orderedBuilder();
             for (String ifType : iftypes) {
-                if (SouthboundMapper.createInterfaceType(ifType) != null) {
-                    InterfaceTypeEntry ifEntry = new InterfaceTypeEntryBuilder()
-                            .setInterfaceType(
-                                    SouthboundMapper.createInterfaceType(ifType))
-                            .build();
-                    ifEntryList.add(ifEntry);
+                var interfaceType = SouthboundMapper.createInterfaceType(ifType);
+                if (interfaceType != null) {
+                    ifEntryList.add(new InterfaceTypeEntryBuilder().setInterfaceType(interfaceType).build());
                 } else {
                     LOG.warn("Interface type {} not present in model", ifType);
                 }
             }
-            ovsdbNodeBuilder.setInterfaceTypeEntry(ifEntryList);
+            ovsdbNodeBuilder.setInterfaceTypeEntry(ifEntryList.build());
         } catch (SchemaVersionMismatchException e) {
             schemaMismatchLog("iface_types", SouthboundConstants.OPEN_V_SWITCH, e);
         }
@@ -220,21 +219,17 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
     private static void setDataPathTypes(OvsdbNodeAugmentationBuilder ovsdbNodeBuilder, OpenVSwitch openVSwitch) {
         try {
-            Set<String> dptypes = openVSwitch.getDatapathTypesColumn()
-                    .getData();
-            List<DatapathTypeEntry> dpEntryList = new ArrayList<>();
+            Set<String> dptypes = openVSwitch.getDatapathTypesColumn().getData();
+            var dpEntryList = BindingMap.<DatapathTypeEntryKey, DatapathTypeEntry>orderedBuilder();
             for (String dpType : dptypes) {
-                if (SouthboundMapper.createDatapathType(dpType) != null) {
-                    DatapathTypeEntry dpEntry = new DatapathTypeEntryBuilder()
-                            .setDatapathType(
-                                    SouthboundMapper.createDatapathType(dpType))
-                            .build();
-                    dpEntryList.add(dpEntry);
+                var datapathType = SouthboundMapper.createDatapathType(dpType);
+                if (datapathType != null) {
+                    dpEntryList.add(new DatapathTypeEntryBuilder().setDatapathType(datapathType).build());
                 } else {
                     LOG.warn("Datapath type {} not present in model", dpType);
                 }
             }
-            ovsdbNodeBuilder.setDatapathTypeEntry(dpEntryList);
+            ovsdbNodeBuilder.setDatapathTypeEntry(dpEntryList.build());
         } catch (SchemaVersionMismatchException e) {
             schemaMismatchLog("datapath_types", SouthboundConstants.OPEN_V_SWITCH, e);
         }
@@ -279,8 +274,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
     }
 
     @VisibleForTesting
-    NodeId getNodeId(OpenVSwitch ovs) {
-        NodeKey nodeKey = getInstanceIdentifier(ovs).firstKeyOf(Node.class);
-        return nodeKey.getNodeId();
+    @NonNull NodeId getNodeId(OpenVSwitch ovs) {
+        return getInstanceIdentifier(ovs).firstKeyOf(Node.class).getNodeId();
     }
 }

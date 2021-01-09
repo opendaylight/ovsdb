@@ -61,14 +61,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIds;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceExternalIdsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.InterfaceOtherConfigsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIdsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.TrunksBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -582,21 +574,13 @@ public class OvsdbPortUpdateCommandTest {
         map.put(EXTERNAL_ID_KEY, EXTERNAL_ID_VALUE);
         when(column.getData()).thenReturn(map);
 
-        InterfaceExternalIdsBuilder interfaceExternalIdsBuilder = mock(InterfaceExternalIdsBuilder.class);
-        PowerMockito.whenNew(InterfaceExternalIdsBuilder.class).withNoArguments()
-                .thenReturn(interfaceExternalIdsBuilder);
-
-        when(interfaceExternalIdsBuilder.setExternalIdKey(anyString())).thenReturn(interfaceExternalIdsBuilder);
-        when(interfaceExternalIdsBuilder.setExternalIdValue(anyString())).thenReturn(interfaceExternalIdsBuilder);
-        when(interfaceExternalIdsBuilder.build()).thenReturn(mock(InterfaceExternalIds.class));
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBldr = mock(
-                OvsdbTerminationPointAugmentationBuilder.class);
-        when(ovsdbTerminationPointBldr.setInterfaceExternalIds(any(List.class))).thenReturn(ovsdbTerminationPointBldr);
-
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterfaceExternalIds", interf, ovsdbTerminationPointBldr);
-        verify(interfaceExternalIdsBuilder).setExternalIdKey(anyString());
-        verify(interfaceExternalIdsBuilder).setExternalIdValue(anyString());
-
+        var builder = new OvsdbTerminationPointAugmentationBuilder();
+        ovsdbPortUpdateCommand.updateInterfaceExternalIds(interf, builder);
+        var list = builder.build().nonnullInterfaceExternalIds().values();
+        assertEquals(1, list.size());
+        var result = list.iterator().next();
+        assertEquals(EXTERNAL_ID_KEY, result.getExternalIdKey());
+        assertEquals(EXTERNAL_ID_VALUE, result.getExternalIdValue());
     }
 
     @SuppressWarnings("unchecked")
@@ -610,19 +594,13 @@ public class OvsdbPortUpdateCommandTest {
         map.put(EXTERNAL_ID_KEY, EXTERNAL_ID_VALUE);
         when(column.getData()).thenReturn(map);
 
-        PortExternalIdsBuilder portExternalIdsBuilder = mock(PortExternalIdsBuilder.class);
-        PowerMockito.whenNew(PortExternalIdsBuilder.class).withNoArguments().thenReturn(portExternalIdsBuilder);
-
-        when(portExternalIdsBuilder.setExternalIdKey(anyString())).thenReturn(portExternalIdsBuilder);
-        when(portExternalIdsBuilder.setExternalIdValue(anyString())).thenReturn(portExternalIdsBuilder);
-        when(portExternalIdsBuilder.build()).thenReturn(mock(PortExternalIds.class));
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
-                OvsdbTerminationPointAugmentationBuilder.class);
-        when(ovsdbTerminationPointBuilder.setPortExternalIds(any(List.class))).thenReturn(ovsdbTerminationPointBuilder);
-
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updatePortExternalIds", port, ovsdbTerminationPointBuilder);
-        verify(portExternalIdsBuilder).setExternalIdKey(anyString());
-        verify(portExternalIdsBuilder).setExternalIdValue(anyString());
+        var builder = new OvsdbTerminationPointAugmentationBuilder();
+        ovsdbPortUpdateCommand.updatePortExternalIds(port, builder);
+        var list = builder.build().nonnullPortExternalIds().values();
+        assertEquals(1, list.size());
+        var result = list.iterator().next();
+        assertEquals(EXTERNAL_ID_KEY, result.getExternalIdKey());
+        assertEquals(EXTERNAL_ID_VALUE, result.getExternalIdValue());
     }
 
     @SuppressWarnings("unchecked")
@@ -635,20 +613,13 @@ public class OvsdbPortUpdateCommandTest {
         map.put(OTHER_CONFIG_KEY, OTHER_CONFIG_VALUE);
         when(column.getData()).thenReturn(map);
 
-        PortOtherConfigsBuilder portOtherConfigsBuilder = mock(PortOtherConfigsBuilder.class);
-        PowerMockito.whenNew(PortOtherConfigsBuilder.class).withNoArguments().thenReturn(portOtherConfigsBuilder);
-
-        when(portOtherConfigsBuilder.setOtherConfigKey(anyString())).thenReturn(portOtherConfigsBuilder);
-        when(portOtherConfigsBuilder.setOtherConfigValue(anyString())).thenReturn(portOtherConfigsBuilder);
-        when(portOtherConfigsBuilder.build()).thenReturn(mock(PortOtherConfigs.class));
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
-                OvsdbTerminationPointAugmentationBuilder.class);
-        when(ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(any(List.class)))
-                .thenReturn(ovsdbTerminationPointBuilder);
-
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updatePortOtherConfig", port, ovsdbTerminationPointBuilder);
-        verify(portOtherConfigsBuilder).setOtherConfigKey(anyString());
-        verify(portOtherConfigsBuilder).setOtherConfigValue(anyString());
+        var builder = new OvsdbTerminationPointAugmentationBuilder();
+        ovsdbPortUpdateCommand.updatePortOtherConfig(port, builder);
+        var list = builder.build().nonnullPortOtherConfigs().values();
+        assertEquals(1, list.size());
+        var result = list.iterator().next();
+        assertEquals(OTHER_CONFIG_KEY, result.getOtherConfigKey());
+        assertEquals(OTHER_CONFIG_VALUE, result.getOtherConfigValue());
     }
 
     @SuppressWarnings("unchecked")
@@ -661,22 +632,13 @@ public class OvsdbPortUpdateCommandTest {
         when(interf.getOtherConfigColumn()).thenReturn(column);
         when(column.getData()).thenReturn(interfaceOtherConfigMap);
 
-        InterfaceOtherConfigsBuilder interfaceOtherConfigsBuilder = mock(InterfaceOtherConfigsBuilder.class);
-        PowerMockito.whenNew(InterfaceOtherConfigsBuilder.class).withNoArguments()
-                .thenReturn(interfaceOtherConfigsBuilder);
-
-        when(interfaceOtherConfigsBuilder.setOtherConfigKey(anyString())).thenReturn(interfaceOtherConfigsBuilder);
-        when(interfaceOtherConfigsBuilder.setOtherConfigValue(anyString())).thenReturn(interfaceOtherConfigsBuilder);
-        when(interfaceOtherConfigsBuilder.build()).thenReturn(mock(InterfaceOtherConfigs.class));
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
-                OvsdbTerminationPointAugmentationBuilder.class);
-        when(ovsdbTerminationPointBuilder.setInterfaceOtherConfigs(any(List.class)))
-                .thenReturn(ovsdbTerminationPointBuilder);
-
-        Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterfaceOtherConfig", interf,
-                ovsdbTerminationPointBuilder);
-        verify(interfaceOtherConfigsBuilder).setOtherConfigKey(anyString());
-        verify(interfaceOtherConfigsBuilder).setOtherConfigValue(anyString());
+        var builder = new OvsdbTerminationPointAugmentationBuilder();
+        ovsdbPortUpdateCommand.updateInterfaceOtherConfig(interf, builder);
+        var list = builder.build().nonnullInterfaceOtherConfigs().values();
+        assertEquals(1, list.size());
+        var result = list.iterator().next();
+        assertEquals(OTHER_CONFIG_KEY, result.getOtherConfigKey());
+        assertEquals(OTHER_CONFIG_VALUE, result.getOtherConfigValue());
     }
 
     @SuppressWarnings("unchecked")

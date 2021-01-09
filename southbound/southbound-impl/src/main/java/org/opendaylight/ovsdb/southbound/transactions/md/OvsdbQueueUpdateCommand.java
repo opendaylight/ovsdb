@@ -5,12 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -41,6 +38,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.Uint8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,9 +164,8 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private static void setNewOtherConfigs(QueuesBuilder queuesBuilder,
-            Map<String, String> otherConfig) {
-        List<QueuesOtherConfig> otherConfigList = new ArrayList<>();
+    private static void setNewOtherConfigs(QueuesBuilder queuesBuilder, Map<String, String> otherConfig) {
+        var otherConfigList = BindingMap.<QueuesOtherConfigKey, QueuesOtherConfig>orderedBuilder();
         for (Entry<String, String> entry : otherConfig.entrySet()) {
             String otherConfigKey = entry.getKey();
             String otherConfigValue = entry.getValue();
@@ -177,7 +174,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
                         .setQueueOtherConfigValue(otherConfigValue).build());
             }
         }
-        queuesBuilder.setQueuesOtherConfig(otherConfigList);
+        queuesBuilder.setQueuesOtherConfig(otherConfigList.build());
     }
 
     private static void setExternalIds(ReadWriteTransaction transaction,
@@ -215,9 +212,8 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private static void setNewExternalIds(QueuesBuilder queuesBuilder,
-            Map<String, String> externalIds) {
-        List<QueuesExternalIds> externalIdsList = new ArrayList<>();
+    private static void setNewExternalIds(QueuesBuilder queuesBuilder, Map<String, String> externalIds) {
+        var externalIdsList = BindingMap.<QueuesExternalIdsKey, QueuesExternalIds>orderedBuilder();
         for (Entry<String, String> entry : externalIds.entrySet()) {
             String extIdKey = entry.getKey();
             String externalIdValue = entry.getValue();
@@ -226,7 +222,6 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
                         .setQueuesExternalIdValue(externalIdValue).build());
             }
         }
-        queuesBuilder.setQueuesExternalIds(externalIdsList);
+        queuesBuilder.setQueuesExternalIds(externalIdsList.build());
     }
-
 }

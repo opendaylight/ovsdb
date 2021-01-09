@@ -8,9 +8,7 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -49,6 +47,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,8 +92,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
      * @param newUpdatedQosRows updated {@link Qos} rows
 
      */
-    private void updateQos(ReadWriteTransaction transaction,
-                                  Map<UUID, Qos> newUpdatedQosRows) {
+    private void updateQos(ReadWriteTransaction transaction, Map<UUID, Qos> newUpdatedQosRows) {
 
         final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
@@ -218,7 +216,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
 
     private static void setNewOtherConfigs(QosEntriesBuilder qosEntryBuilder,
             Map<String, String> otherConfig) {
-        List<QosOtherConfig> otherConfigList = new ArrayList<>();
+        var otherConfigList = BindingMap.<QosOtherConfigKey, QosOtherConfig>orderedBuilder();
         for (Entry<String, String> entry : otherConfig.entrySet()) {
             String otherConfigKey = entry.getKey();
             String otherConfigValue = entry.getValue();
@@ -227,7 +225,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
                         .setOtherConfigValue(otherConfigValue).build());
             }
         }
-        qosEntryBuilder.setQosOtherConfig(otherConfigList);
+        qosEntryBuilder.setQosOtherConfig(otherConfigList.build());
     }
 
     private static void setExternalIds(ReadWriteTransaction transaction,
@@ -267,7 +265,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
 
     private static void setNewExternalIds(QosEntriesBuilder qosEntryBuilder,
             Map<String, String> externalIds) {
-        List<QosExternalIds> externalIdsList = new ArrayList<>();
+        var externalIdsList = BindingMap.<QosExternalIdsKey, QosExternalIds>orderedBuilder();
         for (Entry<String, String> entry : externalIds.entrySet()) {
             String extIdKey = entry.getKey();
             String extIdValue = entry.getValue();
@@ -276,7 +274,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
                         .setQosExternalIdValue(extIdValue).build());
             }
         }
-        qosEntryBuilder.setQosExternalIds(externalIdsList);
+        qosEntryBuilder.setQosExternalIds(externalIdsList.build());
     }
 
     private void setQueueList(ReadWriteTransaction transaction,
@@ -313,10 +311,9 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private void setNewQueues(QosEntriesBuilder qosEntryBuilder,
-            Map<Long, UUID> queueList, Node ovsdbNode) {
+    private void setNewQueues(QosEntriesBuilder qosEntryBuilder, Map<Long, UUID> queueList, Node ovsdbNode) {
         Set<Entry<Long, UUID>> queueEntries = queueList.entrySet();
-        List<QueueList> newQueueList = new ArrayList<>();
+        var newQueueList = BindingMap.<QueueListKey, QueueList>orderedBuilder();
         for (Entry<Long, UUID> queueEntry : queueEntries) {
             InstanceIdentifier<Queues> queueIid = getQueueIid(queueEntry.getValue(), ovsdbNode);
             if (queueIid != null) {
@@ -327,6 +324,6 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
             }
 
         }
-        qosEntryBuilder.setQueueList(newQueueList);
+        qosEntryBuilder.setQueueList(newQueueList.build());
     }
 }

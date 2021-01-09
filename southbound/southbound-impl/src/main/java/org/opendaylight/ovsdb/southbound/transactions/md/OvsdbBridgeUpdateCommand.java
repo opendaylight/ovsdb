@@ -65,6 +65,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -212,14 +213,12 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
 
         OvsdbNodeAugmentationBuilder ovsdbConnectionAugmentationBuilder = new OvsdbNodeAugmentationBuilder();
-        List<ManagedNodeEntry> managedBridges = new ArrayList<>();
         InstanceIdentifier<Node> bridgeIid =
                 SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
                         bridge);
         ManagedNodeEntry managedBridge = new ManagedNodeEntryBuilder().setBridgeRef(
                 new OvsdbBridgeRef(bridgeIid)).build();
-        managedBridges.add(managedBridge);
-        ovsdbConnectionAugmentationBuilder.setManagedNodeEntry(managedBridges);
+        ovsdbConnectionAugmentationBuilder.setManagedNodeEntry(BindingMap.of(managedBridge));
 
         connectionNode.addAugmentation(ovsdbConnectionAugmentationBuilder.build());
 
@@ -288,11 +287,12 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private static void setOtherConfig(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
+    @VisibleForTesting
+    static void setOtherConfig(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
         Map<String, String> otherConfigs = bridge
                 .getOtherConfigColumn().getData();
         if (otherConfigs != null && !otherConfigs.isEmpty()) {
-            List<BridgeOtherConfigs> otherConfigList = new ArrayList<>();
+            var otherConfigList = BindingMap.<BridgeOtherConfigsKey, BridgeOtherConfigs>orderedBuilder();
             for (Entry<String, String> entry : otherConfigs.entrySet()) {
                 String otherConfigKey = entry.getKey();
                 String otherConfigValue = entry.getValue();
@@ -303,15 +303,15 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                             .build());
                 }
             }
-            ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigList);
+            ovsdbBridgeAugmentationBuilder.setBridgeOtherConfigs(otherConfigList.build());
         }
     }
 
-    private static void setExternalIds(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
-        Map<String, String> externalIds = bridge.getExternalIdsColumn()
-                .getData();
+    @VisibleForTesting
+    static void setExternalIds(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
+        Map<String, String> externalIds = bridge.getExternalIdsColumn().getData();
         if (externalIds != null && !externalIds.isEmpty()) {
-            List<BridgeExternalIds> externalIdsList = new ArrayList<>();
+            var externalIdsList = BindingMap.<BridgeExternalIdsKey, BridgeExternalIds>orderedBuilder();
             for (Entry<String, String> entry : externalIds.entrySet()) {
                 String externalIdKey = entry.getKey();
                 String externalIdValue = entry.getValue();
@@ -322,18 +322,20 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                             .build());
                 }
             }
-            ovsdbBridgeAugmentationBuilder.setBridgeExternalIds(externalIdsList);
+            ovsdbBridgeAugmentationBuilder.setBridgeExternalIds(externalIdsList.build());
         }
     }
 
-    private static void setProtocol(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
-        final List<ProtocolEntry> protocols = SouthboundMapper.createMdsalProtocols(bridge);
+    @VisibleForTesting
+    static void setProtocol(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
+        List<ProtocolEntry> protocols = SouthboundMapper.createMdsalProtocols(bridge);
         if (!protocols.isEmpty()) {
-            ovsdbBridgeAugmentationBuilder.setProtocolEntry(protocols);
+            ovsdbBridgeAugmentationBuilder.setProtocolEntry(BindingMap.of(protocols));
         }
     }
 
-    private static void setDataPath(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
+    @VisibleForTesting
+    static void setDataPath(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
         DatapathId dpid = SouthboundMapper.createDatapathId(bridge);
         if (dpid != null) {
             ovsdbBridgeAugmentationBuilder.setDatapathId(dpid);

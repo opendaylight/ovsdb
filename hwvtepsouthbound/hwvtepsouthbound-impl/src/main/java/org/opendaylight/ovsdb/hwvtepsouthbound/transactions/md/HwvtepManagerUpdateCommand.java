@@ -8,8 +8,6 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -26,13 +24,14 @@ import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Managers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ManagersBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.managers.ManagerOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.managers.ManagerOtherConfigsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.managers.ManagerOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,21 +80,22 @@ public class HwvtepManagerUpdateCommand extends AbstractTransactionCommand {
         }
         ManagerOtherConfigsBuilder mocBuilder = new ManagerOtherConfigsBuilder();
         if (manager.getOtherConfigColumn().getData() != null && !manager.getOtherConfigColumn().getData().isEmpty()) {
-            List<ManagerOtherConfigs> mocList = new ArrayList<>();
+            var mocList = BindingMap.<ManagerOtherConfigsKey, ManagerOtherConfigs>orderedBuilder();
             Map<String, String> ocList = manager.getOtherConfigColumn().getData();
             for (Entry<String, String> otherConfigEntry : ocList.entrySet()) {
                 mocBuilder.setOtherConfigKey(otherConfigEntry.getKey());
                 mocBuilder.setOtherConfigValue(otherConfigEntry.getValue());
                 mocList.add(mocBuilder.build());
             }
-            managersBuilder.setManagerOtherConfigs(mocList);
+            managersBuilder.setManagerOtherConfigs(mocList.build());
         }
         managersBuilder.setManagerUuid(new Uuid(manager.getUuid().toString()));
-        List<Managers> managersList = new ArrayList<>();
-        managersList.add(managersBuilder.build());
 
-        connectionNode.addAugmentation(new HwvtepGlobalAugmentationBuilder().setManagers(managersList).build());
-        return connectionNode.build();
+        return connectionNode
+            .addAugmentation(new HwvtepGlobalAugmentationBuilder()
+                .setManagers(BindingMap.of(managersBuilder.build()))
+                .build())
+            .build();
         // TODO Deletion of other config
     }
 }

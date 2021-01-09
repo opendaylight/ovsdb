@@ -8,9 +8,7 @@
 
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -37,6 +35,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 
 public class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
 
@@ -64,12 +63,12 @@ public class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactionComma
     }
 
     private Node buildConnectionNode(final Collection<UcastMacsRemote> macRemotes) {
-        NodeBuilder connectionNode = new NodeBuilder();
-        connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
-        List<RemoteUcastMacs> remoteUMacs = new ArrayList<>();
-        macRemotes.forEach(mac -> remoteUMacs.add(buildRemoteUcast(mac)));
-        connectionNode.addAugmentation(new HwvtepGlobalAugmentationBuilder().setRemoteUcastMacs(remoteUMacs).build());
-        return connectionNode.build();
+        var remoteUMacs = macRemotes.stream().map(this::buildRemoteUcast).collect(BindingMap.toOrderedMap());
+
+        return new NodeBuilder()
+            .setNodeId(getOvsdbConnectionInstance().getNodeId())
+            .addAugmentation(new HwvtepGlobalAugmentationBuilder().setRemoteUcastMacs(remoteUMacs).build())
+            .build();
     }
 
     private RemoteUcastMacs buildRemoteUcast(final UcastMacsRemote macRemote) {

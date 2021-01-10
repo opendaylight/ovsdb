@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,7 +136,8 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
      * @param managerEntry the {@link ManagerEntry}
      * @return the {@link InstanceIdentifier}
      */
-    private InstanceIdentifier<ManagerEntry> getManagerEntryIid(ManagerEntry managerEntry) {
+    @VisibleForTesting
+    final InstanceIdentifier<ManagerEntry> getManagerEntryIid(ManagerEntry managerEntry) {
 
         OvsdbConnectionInstance client = getOvsdbConnectionInstance();
         String nodeString = client.getNodeKey().getNodeId().getValue();

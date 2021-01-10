@@ -18,10 +18,8 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -36,6 +34,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import javax.inject.Inject;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Assert;
@@ -85,8 +84,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Autoattach;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.AutoattachBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.AutoattachKey;
@@ -162,6 +163,7 @@ import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.opendaylight.yangtools.yang.common.Uint8;
@@ -756,15 +758,14 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr,portNumber);
         String controllerTarget = SouthboundUtil.getControllerTarget(ovsdbNode);
         assertNotNull("Failed to get controller target", controllerTarget);
-        List<ControllerEntry> setControllerEntry = createControllerEntry(controllerTarget);
+        ControllerEntry setControllerEntry = createControllerEntry(controllerTarget);
         Uri setUri = new Uri(controllerTarget);
         try (TestBridge testBridge = new TestBridge(connectionInfo, null, SouthboundITConstants.BRIDGE_NAME,null, true,
                 SouthboundConstants.OVSDB_FAIL_MODE_MAP.inverse().get("secure"), true, null, null,
-                setControllerEntry, null)) {
+                BindingMap.of(setControllerEntry), null)) {
             OvsdbBridgeAugmentation bridge = getBridge(connectionInfo);
             Assert.assertNotNull("bridge was not found: " + SouthboundITConstants.BRIDGE_NAME,  bridge);
-            Assert.assertNotNull("ControllerEntry was not found: " + setControllerEntry.iterator().next(),
-                    bridge.getControllerEntry());
+            Assert.assertNotNull("ControllerEntry was not found: " + setControllerEntry, bridge.getControllerEntry());
             for (ControllerEntry entry : bridge.getControllerEntry().values()) {
                 if (entry.getTarget() != null) {
                     Assert.assertEquals(setUri.toString(), entry.getTarget().toString());
@@ -779,14 +780,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static List<ControllerEntry> createControllerEntry(String controllerTarget) {
-        List<ControllerEntry> controllerEntriesList = new ArrayList<>();
-        controllerEntriesList.add(new ControllerEntryBuilder()
+    private static @NonNull ControllerEntry createControllerEntry(String controllerTarget) {
+        return new ControllerEntryBuilder()
                 .setTarget(new Uri(controllerTarget))
                 .setMaxBackoff(MAX_BACKOFF)
                 .setInactivityProbe(INACTIVITY_PROBE)
-                .build());
-        return controllerEntriesList;
+                .build();
     }
 
     private static void setManagedBy(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
@@ -795,12 +794,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }
 
-    private static List<ProtocolEntry> createMdsalProtocols() {
-        List<ProtocolEntry> protocolList = new ArrayList<>();
+    private static Map<ProtocolEntryKey, ProtocolEntry> createMdsalProtocols() {
         ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
                 SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
-        protocolList.add(new ProtocolEntryBuilder().setProtocol(mapper.get("OpenFlow13")).build());
-        return protocolList;
+        return BindingMap.of(new ProtocolEntryBuilder().setProtocol(mapper.get("OpenFlow13")).build());
     }
 
     private static OvsdbTerminationPointAugmentationBuilder createGenericOvsdbTerminationPointAugmentationBuilder() {
@@ -846,7 +843,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         TerminationPointBuilder entry = new TerminationPointBuilder()
                 .withKey(new TerminationPointKey(new TpId(portName)))
                 .addAugmentation(ovsdbTerminationPointAugmentationBuilder.build());
-        portNodeBuilder.setTerminationPoint(Collections.singletonList(entry.build()));
+        portNodeBuilder.setTerminationPoint(BindingMap.of(entry.build()));
         boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
                 portIid, portNodeBuilder.build());
         Thread.sleep(OVSDB_UPDATE_TIMEOUT);
@@ -875,9 +872,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                                   final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
                                   final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
                                   @Nullable final Class<? extends DatapathTypeBase> dpType,
-                                  @Nullable final List<BridgeExternalIds> externalIds,
-                                  @Nullable final List<ControllerEntry> controllerEntries,
-                                  @Nullable final List<BridgeOtherConfigs> otherConfigs) {
+                                  @Nullable final Map<BridgeExternalIdsKey, BridgeExternalIds> externalIds,
+                                  @Nullable final Map<ControllerEntryKey, ControllerEntry> controllerEntries,
+                                  @Nullable final Map<BridgeOtherConfigsKey, BridgeOtherConfigs> otherConfigs) {
             this.connectionInfo = connectionInfo;
             this.bridgeName = bridgeName;
             NodeBuilder bridgeNodeBuilder = new NodeBuilder();
@@ -940,8 +937,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 final Uri bridgeId,
                 @Nullable final String systemName,
                 @Nullable final String systemDescription,
-                @Nullable final List<Mappings> mappings,
-                @Nullable final List<AutoattachExternalIds> externalIds) {
+                @Nullable final Map<MappingsKey, Mappings> mappings,
+                @Nullable final Map<AutoattachExternalIdsKey, AutoattachExternalIds> externalIds) {
             this.connectionInfo = connectionInfo;
             this.autoattachId = autoattachId;
             this.bridgeId = bridgeId;
@@ -1027,8 +1024,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertEquals(aaUuid, bridge.getAutoAttach());
 
                 // UPDATE: Update mappings column of AutoAttach table that was created
-                List<Mappings> mappings = ImmutableList.of(new MappingsBuilder().setMappingsKey(Uint32.valueOf(100))
-                        .setMappingsValue(Uint16.valueOf(200)).build());
+                Map<MappingsKey, Mappings> mappings = BindingMap.of(new MappingsBuilder()
+                        .setMappingsKey(Uint32.valueOf(100))
+                        .setMappingsValue(Uint16.valueOf(200))
+                        .build());
                 Autoattach updatedAa = new AutoattachBuilder()
                         .setAutoattachId(new Uri(testAutoattachId))
                         .setMappings(mappings)
@@ -1062,7 +1061,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 Assert.assertNotNull(operAa);
                 Map<MappingsKey, Mappings> operMappingsList = operAa.getMappings();
                 for (Mappings operMappings : operMappingsList.values()) {
-                    Assert.assertTrue(mappings.contains(operMappings));
+                    Assert.assertTrue(mappings.containsValue(operMappings));
                 }
                 Map<AutoattachExternalIdsKey, AutoattachExternalIds> operExternalIds =
                         operAa.getAutoattachExternalIds();
@@ -1115,8 +1114,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         TestQos(final ConnectionInfo connectionInfo,
                                   final Uri qosId,
                                   final Class<? extends QosTypeBase> qosType,
-                                  @Nullable final List<QosExternalIds> externalIds,
-                                  @Nullable final List<QosOtherConfig> otherConfigs) {
+                                  final @Nullable Map<QosExternalIdsKey, QosExternalIds> externalIds,
+                                  final @Nullable Map<QosOtherConfigKey, QosOtherConfig> otherConfigs) {
             this.connectionInfo = connectionInfo;
             this.qosId = qosId;
 
@@ -1177,11 +1176,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          * @param externalIds The external identifiers if any.
          * @param otherConfigs The other configuration items if any.
          */
-        TestQueue(final ConnectionInfo connectionInfo,
-                                  final Uri queueId,
-                                  final Uint8 queueDscp,
-                                  @Nullable final List<QueuesExternalIds> externalIds,
-                                  @Nullable final List<QueuesOtherConfig> otherConfigs) {
+        TestQueue(final ConnectionInfo connectionInfo, final Uri queueId, final Uint8 queueDscp,
+                  final @Nullable Map<QueuesExternalIdsKey, QueuesExternalIds> externalIds,
+                  final @Nullable Map<QueuesOtherConfigKey, QueuesOtherConfig> otherConfigs) {
             this.connectionInfo = connectionInfo;
             this.queueId = queueId;
 
@@ -1479,7 +1476,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private interface SouthboundTerminationPointHelper<I extends Identifier<T>, T extends Identifiable<I>> {
-        void writeValues(OvsdbTerminationPointAugmentationBuilder builder, List<T> values);
+        void writeValues(OvsdbTerminationPointAugmentationBuilder builder, Map<I, T> values);
 
         Map<I, T> readValues(OvsdbTerminationPointAugmentation augmentation);
     }
@@ -1550,7 +1547,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     TerminationPointBuilder tpUpdateBuilder = new TerminationPointBuilder();
                     tpUpdateBuilder.withKey(new TerminationPointKey(new TpId(testBridgeAndPortName)));
                     tpUpdateBuilder.addAugmentation(tpUpdateAugmentationBuilder.build());
-                    portUpdateNodeBuilder.setTerminationPoint(Collections.singletonList(tpUpdateBuilder.build()));
+                    portUpdateNodeBuilder.setTerminationPoint(BindingMap.of(tpUpdateBuilder.build()));
                     Assert.assertTrue(mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
                             portIid, portUpdateNodeBuilder.build()));
                     Thread.sleep(OVSDB_UPDATE_TIMEOUT);
@@ -1780,7 +1777,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             tpUpdateBuilder.withKey(new TerminationPointKey(new TpId(portName)));
             tpUpdateBuilder.addAugmentation(tpUpdateAugmentationBuilder.build());
             tpUpdateBuilder.setTpId(new TpId(portName));
-            portUpdateNodeBuilder.setTerminationPoint(Collections.singletonList(tpUpdateBuilder.build()));
+            portUpdateNodeBuilder.setTerminationPoint(BindingMap.of(tpUpdateBuilder.build()));
             Assert.assertTrue(
                     mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, portIid, portUpdateNodeBuilder.build()));
             Thread.sleep(OVSDB_UPDATE_TIMEOUT);
@@ -1845,7 +1842,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 tpUpdateBuilder.withKey(new TerminationPointKey(new TpId(portName)));
                 tpUpdateBuilder.addAugmentation(tpUpdateAugmentationBuilder.build());
                 tpUpdateBuilder.setTpId(new TpId(portName));
-                portUpdateNodeBuilder.setTerminationPoint(Collections.singletonList(tpUpdateBuilder.build()));
+                portUpdateNodeBuilder.setTerminationPoint(BindingMap.of(tpUpdateBuilder.build()));
                 Assert.assertTrue(
                         mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, portIid, portUpdateNodeBuilder.build()));
                 Thread.sleep(OVSDB_UPDATE_TIMEOUT);
@@ -1935,7 +1932,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 tpUpdateBuilder.withKey(new TerminationPointKey(new TpId(portName)));
                 tpUpdateBuilder.addAugmentation(tpUpdateAugmentationBuilder.build());
                 tpUpdateBuilder.setTpId(new TpId(portName));
-                portUpdateNodeBuilder.setTerminationPoint(Collections.singletonList(tpUpdateBuilder.build()));
+                portUpdateNodeBuilder.setTerminationPoint(BindingMap.of(tpUpdateBuilder.build()));
                 Assert.assertTrue(
                         mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION, portIid, portUpdateNodeBuilder.build()));
                 Thread.sleep(OVSDB_UPDATE_TIMEOUT);
@@ -2041,7 +2038,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private interface SouthboundBridgeHelper<I extends Identifier<T>, T extends Identifiable<I>> {
-        void writeValues(OvsdbBridgeAugmentationBuilder builder, List<T> values);
+        void writeValues(OvsdbBridgeAugmentationBuilder builder, Map<I, T> values);
 
         Map<I, T> readValues(OvsdbBridgeAugmentation augmentation);
     }
@@ -2171,7 +2168,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static class SouthboundQueuesExternalIdsHelper
             implements SouthboundQueueHelper<QueuesExternalIdsKey, QueuesExternalIds> {
         @Override
-        public void writeValues(QueuesBuilder builder, List<QueuesExternalIds> values) {
+        public void writeValues(QueuesBuilder builder, Map<QueuesExternalIdsKey, QueuesExternalIds> values) {
             builder.setQueuesExternalIds(values);
         }
 
@@ -2184,7 +2181,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static class SouthboundQueuesOtherConfigHelper
             implements SouthboundQueueHelper<QueuesOtherConfigKey, QueuesOtherConfig> {
         @Override
-        public void writeValues(QueuesBuilder builder, List<QueuesOtherConfig> values) {
+        public void writeValues(QueuesBuilder builder, Map<QueuesOtherConfigKey, QueuesOtherConfig> values) {
             builder.setQueuesOtherConfig(values);
         }
 
@@ -2195,7 +2192,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private interface SouthboundQueueHelper<I extends Identifier<T>, T extends Identifiable<I>> {
-        void writeValues(QueuesBuilder builder, List<T> values);
+        void writeValues(QueuesBuilder builder, Map<I, T> values);
 
         Map<I, T> readValues(Queues queue);
     }
@@ -2212,7 +2209,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static class SouthboundQosExternalIdsHelper
             implements SouthboundQosHelper<QosExternalIdsKey, QosExternalIds> {
         @Override
-        public void writeValues(QosEntriesBuilder builder, List<QosExternalIds> values) {
+        public void writeValues(QosEntriesBuilder builder, Map<QosExternalIdsKey, QosExternalIds> values) {
             builder.setQosExternalIds(values);
         }
 
@@ -2225,7 +2222,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static class SouthboundQosOtherConfigHelper
             implements SouthboundQosHelper<QosOtherConfigKey, QosOtherConfig> {
         @Override
-        public void writeValues(QosEntriesBuilder builder, List<QosOtherConfig> values) {
+        public void writeValues(QosEntriesBuilder builder, Map<QosOtherConfigKey, QosOtherConfig> values) {
             builder.setQosOtherConfig(values);
         }
 
@@ -2236,7 +2233,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private interface SouthboundQosHelper<I extends Identifier<T>, T extends Identifiable<I>> {
-        void writeValues(QosEntriesBuilder builder, List<T> values);
+        void writeValues(QosEntriesBuilder builder, Map<I, T> values);
 
         Map<I, T> readValues(QosEntries qos);
     }
@@ -2515,9 +2512,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             InstanceIdentifier<Queues> queue2Iid = testQueue2.getInstanceIdentifier();
             OvsdbQueueRef queue2Ref = new OvsdbQueueRef(queue2Iid);
 
-            List<QueueList> queueList = new ArrayList<>();
-            queueList.add(new QueueListBuilder().setQueueNumber(Uint32.ONE).setQueueRef(queue1Ref).build());
-            queueList.add(new QueueListBuilder().setQueueNumber(Uint32.TWO).setQueueRef(queue2Ref).build());
+            Map<QueueListKey, QueueList> queueList = BindingMap.of(
+                new QueueListBuilder().setQueueNumber(Uint32.ONE).setQueueRef(queue1Ref).build(),
+                new QueueListBuilder().setQueueNumber(Uint32.TWO).setQueueRef(queue2Ref).build());
 
             qosBuilder.setQueueList(queueList);
 
@@ -2533,7 +2530,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             Assert.assertNotNull(operQos);
             Map<QueueListKey, QueueList> operQueueList = operQos.getQueueList();
             Assert.assertNotNull(operQueueList);
-            for (QueueList queueEntry : queueList) {
+            for (QueueList queueEntry : queueList.values()) {
                 Assert.assertTrue(isQueueInList(operQueueList, queueEntry));
             }
 
@@ -2552,7 +2549,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             operQueueList = operQos.getQueueList();
             Assert.assertNotNull(operQueueList);
 
-            for (QueueList queueEntry : queueList) {
+            for (QueueList queueEntry : queueList.values()) {
                 if (queueEntry.getQueueRef().equals(queue2Ref)) {
                     Assert.assertTrue(isQueueInList(operQueueList, queueEntry));
                 } else if (queueEntry.getQueueRef().equals(queue1Ref)) {
@@ -2604,7 +2601,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      */
     private static final class SouthboundTestCase<I extends Identifier<T>, T extends Identifiable<I>> {
         private final String name;
-        private final List<T> inputValues;
+        private final Map<I, T> inputValues;
         private final Map<I, T> expectedValues;
 
         /**
@@ -2616,8 +2613,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          */
         SouthboundTestCase(final String name, final List<T> inputValues, final List<T> expectedValues) {
             this.name = name;
-            this.inputValues = inputValues;
-            this.expectedValues = Maps.uniqueIndex(expectedValues, Identifiable::key);
+            this.inputValues = BindingMap.ordered(inputValues);
+            this.expectedValues = BindingMap.of(expectedValues);
         }
     }
 
@@ -3059,7 +3056,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static class PortExternalIdsSouthboundHelper
             implements SouthboundTerminationPointHelper<PortExternalIdsKey, PortExternalIds> {
         @Override
-        public void writeValues(OvsdbTerminationPointAugmentationBuilder builder, List<PortExternalIds> values) {
+        public void writeValues(OvsdbTerminationPointAugmentationBuilder builder,
+                Map<PortExternalIdsKey, PortExternalIds> values) {
             builder.setPortExternalIds(values);
         }
 
@@ -3072,8 +3070,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static class InterfaceExternalIdsSouthboundHelper
             implements SouthboundTerminationPointHelper<InterfaceExternalIdsKey, InterfaceExternalIds> {
         @Override
-        public void writeValues(
-                OvsdbTerminationPointAugmentationBuilder builder, List<InterfaceExternalIds> values) {
+        public void writeValues(OvsdbTerminationPointAugmentationBuilder builder,
+                Map<InterfaceExternalIdsKey, InterfaceExternalIds> values) {
             builder.setInterfaceExternalIds(values);
         }
 
@@ -3087,8 +3085,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static class InterfaceLldpSouthboundHelper
             implements SouthboundTerminationPointHelper<InterfaceLldpKey, InterfaceLldp> {
         @Override
-        public void writeValues(
-                OvsdbTerminationPointAugmentationBuilder builder, List<InterfaceLldp> values) {
+        public void writeValues(OvsdbTerminationPointAugmentationBuilder builder,
+                Map<InterfaceLldpKey, InterfaceLldp> values) {
             builder.setInterfaceLldp(values);
         }
 
@@ -3100,8 +3098,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static class OptionsSouthboundHelper implements SouthboundTerminationPointHelper<OptionsKey, Options> {
         @Override
-        public void writeValues(
-                OvsdbTerminationPointAugmentationBuilder builder, List<Options> values) {
+        public void writeValues(OvsdbTerminationPointAugmentationBuilder builder, Map<OptionsKey, Options> values) {
             builder.setOptions(values);
         }
 
@@ -3114,8 +3111,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static class InterfaceOtherConfigsSouthboundHelper
             implements SouthboundTerminationPointHelper<InterfaceOtherConfigsKey, InterfaceOtherConfigs> {
         @Override
-        public void writeValues(
-                OvsdbTerminationPointAugmentationBuilder builder, List<InterfaceOtherConfigs> values) {
+        public void writeValues(OvsdbTerminationPointAugmentationBuilder builder,
+                Map<InterfaceOtherConfigsKey, InterfaceOtherConfigs> values) {
             builder.setInterfaceOtherConfigs(values);
         }
 
@@ -3129,8 +3126,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static class PortOtherConfigsSouthboundHelper implements
             SouthboundTerminationPointHelper<PortOtherConfigsKey, PortOtherConfigs> {
         @Override
-        public void writeValues(
-                OvsdbTerminationPointAugmentationBuilder builder, List<PortOtherConfigs> values) {
+        public void writeValues(OvsdbTerminationPointAugmentationBuilder builder,
+                Map<PortOtherConfigsKey, PortOtherConfigs> values) {
             builder.setPortOtherConfigs(values);
         }
 
@@ -3143,8 +3140,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static class BridgeExternalIdsSouthboundHelper
             implements SouthboundBridgeHelper<BridgeExternalIdsKey, BridgeExternalIds> {
         @Override
-        public void writeValues(
-                OvsdbBridgeAugmentationBuilder builder, List<BridgeExternalIds> values) {
+        public void writeValues(OvsdbBridgeAugmentationBuilder builder,
+                Map<BridgeExternalIdsKey, BridgeExternalIds> values) {
             builder.setBridgeExternalIds(values);
         }
 
@@ -3157,8 +3154,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static class BridgeOtherConfigsSouthboundHelper
             implements SouthboundBridgeHelper<BridgeOtherConfigsKey, BridgeOtherConfigs> {
         @Override
-        public void writeValues(
-                OvsdbBridgeAugmentationBuilder builder, List<BridgeOtherConfigs> values) {
+        public void writeValues(OvsdbBridgeAugmentationBuilder builder,
+                Map<BridgeOtherConfigsKey, BridgeOtherConfigs> values) {
             builder.setBridgeOtherConfigs(values);
         }
 

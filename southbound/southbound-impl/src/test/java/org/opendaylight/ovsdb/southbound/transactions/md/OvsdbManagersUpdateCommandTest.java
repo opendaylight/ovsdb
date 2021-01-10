@@ -8,8 +8,11 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.junit.Assert.assertSame;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -39,9 +42,7 @@ import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntryKey;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
@@ -148,19 +149,15 @@ public class OvsdbManagersUpdateCommandTest {
 
     @Test
     public void testGetManagerEntryIid() throws Exception {
-        ManagerEntry managerEntry = mock(ManagerEntry.class);
         OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class, Mockito.RETURNS_DEEP_STUBS);
         when(ovsdbManagersUpdateCommand.getOvsdbConnectionInstance()).thenReturn(client);
         when(client.getNodeKey().getNodeId().getValue()).thenReturn(NODE_ID);
-        PowerMockito.whenNew(Uri.class).withAnyArguments().thenReturn(mock(Uri.class));
 
-        NodeId nodeId = mock(NodeId.class);
-        PowerMockito.whenNew(NodeId.class).withAnyArguments().thenReturn(nodeId);
-        NodeKey nodeKey = mock(NodeKey.class);
-        PowerMockito.whenNew(NodeKey.class).withAnyArguments().thenReturn(nodeKey);
+        ManagerEntry managerEntry = mock(ManagerEntry.class);
         when(managerEntry.key()).thenReturn(mock(ManagerEntryKey.class));
-        assertEquals(KeyedInstanceIdentifier.class,
-                Whitebox.invokeMethod(ovsdbManagersUpdateCommand, "getManagerEntryIid", managerEntry).getClass());
+        InstanceIdentifier<ManagerEntry> iid = ovsdbManagersUpdateCommand.getManagerEntryIid(managerEntry);
+        assertThat(iid, instanceOf(KeyedInstanceIdentifier.class));
+        assertSame(managerEntry.key(), ((KeyedInstanceIdentifier<?, ?>) iid).getKey());
     }
 
     @SuppressWarnings("unchecked")

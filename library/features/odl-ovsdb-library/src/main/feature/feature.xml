@@ -8,8 +8,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
 <features name="odl-ovsdb-library-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
     <feature name="odl-ovsdb-library" version="${project.version}">
-        <feature version="[8,9)">odl-jackson-2.10</feature>
-        <feature version="[8,9)">odl-netty-4</feature>
+        <feature version="[8.1,9)">odl-jackson-2.11</feature>
+        <feature version="[8.1,9)">odl-netty-4</feature>
         <configfile finalname="etc/org.opendaylight.ovsdb.library.cfg">
             mvn:org.opendaylight.ovsdb/library/${project.version}/cfg/config
         </configfile>

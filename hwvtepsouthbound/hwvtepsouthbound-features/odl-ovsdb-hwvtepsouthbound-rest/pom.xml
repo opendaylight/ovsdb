@@ -18,7 +18,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>odl-ovsdb-hwvtepsouthbound-rest</artifactId>
-    <version>1.11.2-SNAPSHOT</version>
+    <version>1.11.3-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <!-- <name> formatting is used by autorelease to parse and notify projects on
@@ -36,7 +36,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <dependency>
             <groupId>org.opendaylight.netconf</groupId>
             <artifactId>odl-restconf</artifactId>
-            <version>1.12.2-SNAPSHOT</version>
+            <version>1.12.3-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

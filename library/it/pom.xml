@@ -11,14 +11,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>it</artifactId>
-    <version>1.13.0-SNAPSHOT</version>
+    <version>1.13.1-SNAPSHOT</version>
     <relativePath>../../commons/it</relativePath>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>library-it</artifactId>
-  <version>1.13.0-SNAPSHOT</version>
+  <version>1.13.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <!-- <name> formatting is used by autorelease to parse and notify projects on
        build failure. Please do not modify this unless you have a good reason. -->
@@ -27,7 +27,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <properties>
     <karaf.distro.groupId>org.opendaylight.ovsdb</karaf.distro.groupId>
     <karaf.distro.artifactId>library-karaf</karaf.distro.artifactId>
-    <karaf.distro.version>1.13.0-SNAPSHOT</karaf.distro.version>
+    <karaf.distro.version>1.13.1-SNAPSHOT</karaf.distro.version>
     <karaf.distro.type>zip</karaf.distro.type>
   </properties>
 

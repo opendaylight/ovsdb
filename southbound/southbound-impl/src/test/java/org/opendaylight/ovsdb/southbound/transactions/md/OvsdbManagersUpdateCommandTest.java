@@ -51,8 +51,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ OvsdbManagersUpdateCommand.class, SouthboundMapper.class, SouthboundUtil.class,
-        InstanceIdentifier.class })
+@PrepareForTest({
+    OvsdbManagersUpdateCommand.class, SouthboundMapper.class, SouthboundUtil.class, InstanceIdentifier.class
+})
 public class OvsdbManagersUpdateCommandTest {
 
     private static final String TARGET_COLUMN_DATA = "Manager Column";

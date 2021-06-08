@@ -7,11 +7,11 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import java.net.URI;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.data.util.AbstractModuleStringInstanceIdentifierCodec;
@@ -49,7 +49,7 @@ public class InstanceIdentifierCodec
     }
 
     @Override
-    protected String prefixForNamespace(final URI namespace) {
+    protected String prefixForNamespace(final XMLNamespace namespace) {
         return context != null ? context.findModule(namespace, Optional.empty()).map(Module::getName).orElse(null)
                 : null;
     }

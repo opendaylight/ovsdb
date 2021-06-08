@@ -58,8 +58,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ OvsdbControllerUpdateCommand.class, SouthboundMapper.class, SouthboundUtil.class,
-        InstanceIdentifier.class })
+@PrepareForTest({
+    OvsdbControllerUpdateCommand.class, SouthboundMapper.class, SouthboundUtil.class, InstanceIdentifier.class
+})
 public class OvsdbControllerUpdateCommandTest {
     private static final String BRIDGE_NAME = "br-int";
     private static final String NODE_ID = "OF|00:00:00:0c:29:70:45:9b";

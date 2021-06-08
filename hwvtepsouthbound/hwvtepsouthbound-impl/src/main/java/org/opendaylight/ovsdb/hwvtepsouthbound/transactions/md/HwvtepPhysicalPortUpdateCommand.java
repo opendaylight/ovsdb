@@ -62,6 +62,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.util.BindingMap;
+import org.opendaylight.yangtools.yang.common.Uint16;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -261,7 +262,7 @@ public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand 
 
     private VlanBindings createVlanBinding(final Long key, final UUID value) {
         VlanBindingsBuilder vbBuilder = new VlanBindingsBuilder();
-        VlanBindingsKey vbKey = new VlanBindingsKey(new VlanId(key.intValue()));
+        VlanBindingsKey vbKey = new VlanBindingsKey(new VlanId(Uint16.valueOf(key)));
         vbBuilder.withKey(vbKey);
         vbBuilder.setVlanIdKey(vbKey.getVlanIdKey());
         HwvtepLogicalSwitchRef switchRef = this.getLogicalSwitchRef(value);

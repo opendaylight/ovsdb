@@ -48,7 +48,8 @@ import org.slf4j.LoggerFactory;
 public final class TransactUtils {
     private static final Logger LOG = LoggerFactory.getLogger(TransactUtils.class);
 
-    private TransactUtils(){
+    private TransactUtils() {
+        // Hidden on purpose
     }
 
     public static Node getCreated(final DataObjectModification<Node> mod) {

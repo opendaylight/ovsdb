@@ -16,8 +16,6 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.getField;
 
 import com.google.common.collect.ImmutableSet;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
@@ -84,12 +83,12 @@ public class InstanceIdentifierCodecTest {
     }
 
     @Test
-    public void testPrefixForNamespace() throws URISyntaxException {
+    public void testPrefixForNamespace() {
         Module module = mock(Module.class);
         final String prefix = "prefix";
         when(module.getName()).thenReturn(prefix);
 
-        URI namespace = new URI("foo");
+        XMLNamespace namespace = XMLNamespace.of("foo");
         when(context.findModules(namespace)).thenReturn(Collections.emptySet());
         assertNull(instanceIdCodec.prefixForNamespace(namespace));
 

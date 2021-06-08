@@ -47,8 +47,10 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ TerminationPointUpdateCommand.class, TransactUtils.class, VlanMode.class,
-        TerminationPointCreateCommand.class, InstanceIdentifier.class, Operations.class })
+@PrepareForTest({
+    TerminationPointUpdateCommand.class, TransactUtils.class, VlanMode.class, TerminationPointCreateCommand.class,
+    InstanceIdentifier.class, Operations.class
+})
 public class TerminationPointUpdateCommandTest {
 
     private static final String TERMINATION_POINT_NAME = "termination point name";

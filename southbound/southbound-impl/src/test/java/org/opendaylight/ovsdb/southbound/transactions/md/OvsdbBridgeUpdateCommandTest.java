@@ -81,8 +81,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ TyperUtils.class, OvsdbBridgeUpdateCommand.class, SouthboundUtil.class, InstanceIdentifier.class,
-        SouthboundMapper.class, NetworkInterface.class })
+@PrepareForTest({
+    TyperUtils.class, OvsdbBridgeUpdateCommand.class, SouthboundUtil.class, InstanceIdentifier.class,
+    SouthboundMapper.class, NetworkInterface.class
+})
 public class OvsdbBridgeUpdateCommandTest {
     private final Map<UUID,Bridge> updatedBridgeRows = new HashMap<>();
     private final Map<UUID, Bridge> oldBridgeRows = new HashMap<>();

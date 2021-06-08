@@ -63,8 +63,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ SouthboundMapper.class, OvsdbConnectionManager.class, OvsdbConnectionService.class,
-        InstanceIdentifier.class, SouthboundUtil.class, Optional.class })
+@PrepareForTest({
+    SouthboundMapper.class, OvsdbConnectionManager.class, OvsdbConnectionService.class, InstanceIdentifier.class,
+    SouthboundUtil.class, Optional.class
+})
 public class OvsdbConnectionManagerTest {
 
     @Mock private OvsdbConnectionManager ovsdbConnManager;

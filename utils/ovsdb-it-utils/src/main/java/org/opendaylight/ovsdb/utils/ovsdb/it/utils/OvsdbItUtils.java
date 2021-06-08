@@ -76,7 +76,7 @@ public class OvsdbItUtils {
             if (bridge != null && bridge.getControllerEntry() != null) {
                 controllerEntry = bridge.getControllerEntry().values().iterator().next();
                 assertEquals(controllerTarget, controllerEntry.getTarget().getValue());
-                if (controllerEntry.isIsConnected()) {
+                if (controllerEntry.getIsConnected()) {
                     LOG.info("isControllerConnected exit: true {}", controllerTarget);
                     return true;
                 }

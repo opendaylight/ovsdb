@@ -7,10 +7,10 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
-import java.net.URI;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.data.util.AbstractModuleStringInstanceIdentifierCodec;
@@ -32,8 +32,8 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
     private DataSchemaContextTree dataSchemaContextTree;
     private SchemaContext context;
 
-    public InstanceIdentifierCodec(DOMSchemaService schemaService,
-            BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
+    public InstanceIdentifierCodec(final DOMSchemaService schemaService,
+            final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
         schemaService.registerSchemaContextListener(this);
         this.bindingNormalizedNodeSerializer = bindingNormalizedNodeSerializer;
     }
@@ -49,35 +49,35 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
     }
 
     @Override
-    protected String prefixForNamespace(final URI namespace) {
+    protected String prefixForNamespace(final XMLNamespace namespace) {
         return context.findModules(namespace).stream().map(Module::getName).findFirst().orElse(null);
     }
 
     @Override
-    public void onModelContextUpdated(EffectiveModelContext schemaContext) {
+    public void onModelContextUpdated(final EffectiveModelContext schemaContext) {
         this.context = schemaContext;
         this.dataSchemaContextTree = DataSchemaContextTree.from(schemaContext);
     }
 
-    public String serialize(InstanceIdentifier<?> iid) {
+    public String serialize(final InstanceIdentifier<?> iid) {
         YangInstanceIdentifier normalizedIid = bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid);
         return serialize(normalizedIid);
     }
 
-    public YangInstanceIdentifier getYangInstanceIdentifier(InstanceIdentifier<?> iid) {
+    public YangInstanceIdentifier getYangInstanceIdentifier(final InstanceIdentifier<?> iid) {
         return bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid);
     }
 
-    public InstanceIdentifier<?> bindingDeserializer(String iidString) throws DeserializationException {
+    public InstanceIdentifier<?> bindingDeserializer(final String iidString) throws DeserializationException {
         YangInstanceIdentifier normalizedYangIid = deserialize(iidString);
         return bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(normalizedYangIid);
     }
 
-    public InstanceIdentifier<?> bindingDeserializer(YangInstanceIdentifier yangIID) {
+    public InstanceIdentifier<?> bindingDeserializer(final YangInstanceIdentifier yangIID) {
         return bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(yangIID);
     }
 
-    public InstanceIdentifier<?> bindingDeserializerOrNull(String iidString) {
+    public InstanceIdentifier<?> bindingDeserializerOrNull(final String iidString) {
         try {
             return bindingDeserializer(iidString);
         } catch (DeserializationException e) {

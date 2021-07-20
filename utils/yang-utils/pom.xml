@@ -25,10 +25,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <dependencies>
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>yang-binding</artifactId>
     </dependency>

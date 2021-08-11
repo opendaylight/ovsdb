@@ -36,7 +36,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <dependency>
             <groupId>org.opendaylight.netconf</groupId>
             <artifactId>odl-mdsal-apidocs</artifactId>
-            <version>1.13.3</version>
+            <version>1.13.4</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

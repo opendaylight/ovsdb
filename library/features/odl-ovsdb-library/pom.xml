@@ -12,7 +12,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>9.0.5</version>
+        <version>9.0.6</version>
         <relativePath/>
     </parent>
 
@@ -28,7 +28,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.odlparent</groupId>
-            <artifactId>odl-jackson-2.11</artifactId>
+            <artifactId>odl-jackson-2.12</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
@@ -41,7 +41,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <dependency>
             <groupId>org.opendaylight.aaa</groupId>
             <artifactId>odl-aaa-cert</artifactId>
-            <version>0.14.2</version>
+            <version>0.14.3</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

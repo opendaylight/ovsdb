@@ -23,4 +23,24 @@
     <property name="bridgesReconciliationExclusionList" value="${bridge-reconciliation-exclusion-list}"/>
   </bean>
 
+  <reference id="diagStatusService" interface="org.opendaylight.infrautils.diagstatus.DiagStatusService"/>
+  <reference id="systemReadyMonitor" interface="org.opendaylight.infrautils.ready.SystemReadyMonitor"/>
+  <reference id="dataBroker" interface="org.opendaylight.mdsal.binding.api.DataBroker"/>
+  <reference id="bindingNormalizedNodeSerializer" interface="org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer"/>
+  <reference id="domSchemaService" interface="org.opendaylight.mdsal.dom.api.DOMSchemaService"/>
+  <reference id="entityOwnershipService" interface="org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService"/>
+  <reference id="ovsdbConnection" interface="org.opendaylight.ovsdb.lib.OvsdbConnection"/>
+  <reference id="upgradeState" interface="org.opendaylight.serviceutils.upgrade.UpgradeState"/>
+
+  <bean id="southboundProvider" class="org.opendaylight.ovsdb.southbound.SouthboundProvider" init-method="init" destroy-method="close">
+    <argument ref="dataBroker"/>
+    <argument ref="entityOwnershipService"/>
+    <argument ref="ovsdbConnection"/>
+    <argument ref="domSchemaService"/>
+    <argument ref="bindingNormalizedNodeSerializer"/>
+    <argument ref="systemReadyMonitor"/>
+    <argument ref="diagStatusService"/>
+    <argument ref="upgradeState"/>
+  </bean>
+
 </blueprint>

@@ -19,7 +19,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.apache.aries.blueprint.annotation.service.Reference;
 import org.opendaylight.infrautils.diagstatus.DiagStatusService;
 import org.opendaylight.infrautils.diagstatus.ServiceState;
 import org.opendaylight.infrautils.ready.SystemReadyMonitor;
@@ -84,21 +83,20 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     private OvsdbUpgradeStateListener ovsdbUpgradeStateListener;
 
     @Inject
-    public SouthboundProvider(@Reference final DataBroker dataBroker,
-                              @Reference final EntityOwnershipService entityOwnershipServiceDependency,
-                              @Reference final OvsdbConnection ovsdbConnection,
-                              @Reference final DOMSchemaService schemaService,
-                              @Reference final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
-                              @Reference final SystemReadyMonitor systemReadyMonitor,
-                              @Reference final DiagStatusService diagStatusService,
-                              @Reference final UpgradeState upgradeState) {
+    public SouthboundProvider(final DataBroker dataBroker,
+                              final EntityOwnershipService entityOwnershipServiceDependency,
+                              final OvsdbConnection ovsdbConnection,
+                              final DOMSchemaService schemaService,
+                              final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
+                              final SystemReadyMonitor systemReadyMonitor,
+                              final DiagStatusService diagStatusService,
+                              final UpgradeState upgradeState) {
         SouthboundProvider.db = dataBroker;
-        this.entityOwnershipService = entityOwnershipServiceDependency;
+        entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
-        this.ovsdbStatusProvider = new OvsdbDiagStatusProvider(diagStatusService);
-        this.instanceIdentifierCodec = new InstanceIdentifierCodec(schemaService,
-                bindingNormalizedNodeSerializer);
+        ovsdbStatusProvider = new OvsdbDiagStatusProvider(diagStatusService);
+        instanceIdentifierCodec = new InstanceIdentifierCodec(schemaService, bindingNormalizedNodeSerializer);
         this.systemReadyMonitor = systemReadyMonitor;
         this.upgradeState = upgradeState;
         LOG.info("SouthboundProvider ovsdbConnectionService Initialized");
@@ -111,7 +109,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     public void init() {
         LOG.info("SouthboundProvider Session Initiated");
         ovsdbStatusProvider.reportStatus(ServiceState.STARTING, "OVSDB initialization in progress");
-        this.txInvoker = new TransactionInvokerImpl(db);
+        txInvoker = new TransactionInvokerImpl(db);
         cm = new OvsdbConnectionManager(db, txInvoker, entityOwnershipService, ovsdbConnection,
                 instanceIdentifierCodec, upgradeState);
         ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(db, cm, instanceIdentifierCodec);
@@ -119,7 +117,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
 
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
-                new SouthboundPluginInstanceEntityOwnershipListener(this,this.entityOwnershipService);
+                new SouthboundPluginInstanceEntityOwnershipListener(this, entityOwnershipService);
 
         //register instance entity to get the ownership of the provider
         Entity instanceEntity = new Entity(ENTITY_TYPE, ENTITY_TYPE);
@@ -227,7 +225,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         }
 
         public void close() {
-            this.listenerRegistration.close();
+            listenerRegistration.close();
         }
 
         @Override

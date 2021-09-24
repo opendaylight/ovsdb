@@ -7,7 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
-import org.apache.aries.blueprint.annotation.service.Service;
 import org.opendaylight.infrautils.diagstatus.DiagStatusService;
 import org.opendaylight.infrautils.diagstatus.ServiceDescriptor;
 import org.opendaylight.infrautils.diagstatus.ServiceState;
@@ -15,7 +14,6 @@ import org.opendaylight.infrautils.diagstatus.ServiceStatusProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Service(classes = ServiceStatusProvider.class)
 public class OvsdbDiagStatusProvider implements ServiceStatusProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbDiagStatusProvider.class);
@@ -30,7 +28,7 @@ public class OvsdbDiagStatusProvider implements ServiceStatusProvider {
     }
 
 
-    public void reportStatus(ServiceState serviceState, String description) {
+    public void reportStatus(final ServiceState serviceState, final String description) {
         LOG.debug("reporting status as {} for {}", serviceState, OVSDB_SERVICE_NAME);
         serviceDescriptor = new ServiceDescriptor(OVSDB_SERVICE_NAME, serviceState, description);
         diagStatusService.report(serviceDescriptor);

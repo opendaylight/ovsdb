@@ -40,8 +40,8 @@ public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<
     private final OvsdbConnectionManager ovsdbConnectionManager;
     private final TransactionInvoker txInvoker;
 
-    OvsdbOperGlobalListener(DataBroker db, OvsdbConnectionManager ovsdbConnectionManager,
-                            TransactionInvoker txInvoker) {
+    OvsdbOperGlobalListener(final DataBroker db, final OvsdbConnectionManager ovsdbConnectionManager,
+                            final TransactionInvoker txInvoker) {
         LOG.info("Registering OvsdbOperGlobalListener");
         this.db = db;
         this.ovsdbConnectionManager = ovsdbConnectionManager;
@@ -65,8 +65,8 @@ public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void onDataTreeChanged(Collection<DataTreeModification<Node>> changes) {
-        changes.forEach((change) -> {
+    public void onDataTreeChanged(final Collection<DataTreeModification<Node>> changes) {
+        changes.forEach(change -> {
             try {
                 InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
                 DataObjectModification<Node> mod = change.getRootNode();
@@ -103,9 +103,11 @@ public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<
         });
     }
 
+    private static final int EOS_TIMEOUT = Integer.getInteger("southbound.eos.timeout.delay.secs", 240);
+
     private static final Map<InstanceIdentifier<Node>, ScheduledFuture> TIMEOUT_FTS = new ConcurrentHashMap<>();
 
-    public static void runAfterTimeoutIfNodeNotCreated(InstanceIdentifier<Node> iid, Runnable job) {
+    public static void runAfterTimeoutIfNodeNotCreated(final InstanceIdentifier<Node> iid, final Runnable job) {
         ScheduledFuture<?> ft = TIMEOUT_FTS.get(iid);
         if (ft != null) {
             ft.cancel(false);
@@ -115,11 +117,11 @@ public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<
             if (!OPER_NODE_CACHE.containsKey(iid)) {
                 job.run();
             }
-        }, SouthboundConstants.EOS_TIMEOUT, TimeUnit.SECONDS);
+        }, EOS_TIMEOUT, TimeUnit.SECONDS);
         TIMEOUT_FTS.put(iid, ft);
     }
 
-    private static Node getCreated(DataObjectModification<Node> mod) {
+    private static Node getCreated(final DataObjectModification<Node> mod) {
         if (mod.getModificationType() == DataObjectModification.ModificationType.WRITE
                 && mod.getDataBefore() == null) {
             return mod.getDataAfter();
@@ -127,14 +129,14 @@ public class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<
         return null;
     }
 
-    private static Node getRemoved(DataObjectModification<Node> mod) {
+    private static Node getRemoved(final DataObjectModification<Node> mod) {
         if (mod.getModificationType() == DataObjectModification.ModificationType.DELETE) {
             return mod.getDataBefore();
         }
         return null;
     }
 
-    private static Node getUpdated(DataObjectModification<Node> mod) {
+    private static Node getUpdated(final DataObjectModification<Node> mod) {
         Node node = null;
         switch (mod.getModificationType()) {
             case SUBTREE_MODIFIED:

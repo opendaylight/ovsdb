@@ -31,4 +31,14 @@
     <property name="jsonRpcDecoderMaxFrameLength" value="${json-rpc-decoder-max-frame-length}"/>
   </bean>
 
+  <reference id="certificateManager" interface="org.opendaylight.aaa.cert.api.ICertificateManager"
+             filter="type=default-certificate-manager"/>
+
+  <bean id="nettyBootstrapFactory" class="org.opendaylight.ovsdb.lib.impl.NettyBootstrapFactory" destroy-method="close"/>
+  <bean id="ovsdbConnectionService" class="org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService">
+    <argument ref="nettyBootstrapFactory"/>
+    <argument ref="certificateManager"/>
+  </bean>
+
+  <service ref="ovsdbConnectionService" interface="org.opendaylight.ovsdb.lib.OvsdbConnection"/>
 </blueprint>

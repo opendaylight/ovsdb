@@ -46,9 +46,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLPeerUnverifiedException;
-import org.apache.aries.blueprint.annotation.service.Reference;
-import org.apache.aries.blueprint.annotation.service.Service;
-import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.aaa.cert.api.ICertificateManager;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
@@ -78,7 +75,6 @@ import org.slf4j.LoggerFactory;
  * and a Singleton object in a non-OSGi environment.
  */
 @Singleton
-@Service(classes = OvsdbConnection.class)
 public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private class ClientChannelInitializer extends ChannelInitializer<SocketChannel> {
         @Override
@@ -198,7 +194,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
             .newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("OVSDBConnNotifSer-%d").build());
 
     private static final StalePassiveConnectionService STALE_PASSIVE_CONNECTION_SERVICE =
-            new StalePassiveConnectionService((client) -> {
+            new StalePassiveConnectionService(client -> {
                 notifyListenerForPassiveConnection(client);
                 return null;
             });
@@ -220,7 +216,7 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
 
     @Inject
     public OvsdbConnectionService(final NettyBootstrapFactory bootstrapFactory,
-            @Reference(filter = "type=default-certificate-manager") final ICertificateManager certManagerSrv) {
+            final ICertificateManager certManagerSrv) {
         this.bootstrapFactory = requireNonNull(bootstrapFactory);
         this.certManagerSrv = certManagerSrv;
     }
@@ -326,8 +322,8 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      */
     @Override
     public synchronized boolean startOvsdbManager() {
-        final int ovsdbListenerPort = this.listenerPort;
-        final String ovsdbListenerIp = this.listenerIp;
+        final int ovsdbListenerPort = listenerPort;
+        final String ovsdbListenerIp = listenerIp;
         if (singletonCreated.getAndSet(true)) {
             return false;
         }
@@ -410,11 +406,11 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     @SuppressWarnings("checkstyle:IllegalCatch")
     private static void handleNewPassiveConnection(final OvsdbClient client) {
         ListenableFuture<List<String>> echoFuture = client.echo();
-        LOG.debug("Send echo message to probe the OVSDB switch {}",client.getConnectionInfo());
+        LOG.debug("Send echo message to probe the OVSDB switch {}", client.getConnectionInfo());
         Futures.addCallback(echoFuture, new FutureCallback<List<String>>() {
             @Override
-            public void onSuccess(@Nullable List<String> result) {
-                LOG.info("Probe was successful to OVSDB switch {}",client.getConnectionInfo());
+            public void onSuccess(final List<String> result) {
+                LOG.info("Probe was successful to OVSDB switch {}", client.getConnectionInfo());
                 //List<OvsdbClient> clientsFromSameNode = getPassiveClientsFromSameNode(client);
                 try {
                     getPassiveClientsFromSameNode(client);

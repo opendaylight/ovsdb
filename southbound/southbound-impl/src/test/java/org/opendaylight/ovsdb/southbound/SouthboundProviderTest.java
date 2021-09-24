@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,7 +25,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.opendaylight.infrautils.diagstatus.DiagStatusService;
 import org.opendaylight.infrautils.ready.testutils.TestSystemReadyMonitor;
 import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
@@ -41,6 +41,7 @@ import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipChangeState;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.southbound.SouthboundProvider.Configuration;
 import org.opendaylight.serviceutils.upgrade.UpgradeState;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
@@ -65,24 +66,24 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 EntityOwnershipCandidateRegistration.class));
     }
 
+    private SouthboundProvider newProvider() {
+        final var configuration = mock(Configuration.class);
+        doReturn(new String[] { }).when(configuration).bridgesReconciliationInclusionList();
+        doReturn(new String[] { }).when(configuration).bridgesReconciliationExclusionList();
+
+        return new SouthboundProvider(getDataBroker(), entityOwnershipService, mock(OvsdbConnection.class),
+            mock(DOMSchemaService.class), mock(BindingNormalizedNodeSerializer.class),
+            new TestSystemReadyMonitor(IMMEDIATE), mock(DiagStatusService.class), mock(UpgradeState.class),
+            configuration);
+    }
+
     @Test
     public void testInit() throws CandidateAlreadyRegisteredException {
         // Indicate that this is the owner
         when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
                 java.util.Optional.of(EntityOwnershipState.from(true, true)));
 
-        try (SouthboundProvider southboundProvider = new SouthboundProvider(
-                getDataBroker(),
-                entityOwnershipService,
-                Mockito.mock(OvsdbConnection.class),
-                Mockito.mock(DOMSchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class),
-                new TestSystemReadyMonitor(IMMEDIATE),
-                Mockito.mock(DiagStatusService.class),
-                Mockito.mock(UpgradeState.class))) {
-
-            // Initiate the session
-            southboundProvider.init();
+        try (SouthboundProvider southboundProvider = newProvider()) {
 
             // Verify that at least one listener was registered
             verify(entityOwnershipService, atLeastOnce()).registerListener(
@@ -99,22 +100,11 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
         when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
                 java.util.Optional.of(EntityOwnershipState.from(true, true)));
 
-        try (SouthboundProvider southboundProvider = new SouthboundProvider(
-                getDataBroker(),
-                entityOwnershipService,
-                Mockito.mock(OvsdbConnection.class),
-                Mockito.mock(DOMSchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class),
-                new TestSystemReadyMonitor(IMMEDIATE),
-                Mockito.mock(DiagStatusService.class),
-                Mockito.mock(UpgradeState.class))) {
-
-            // Initiate the session
-            southboundProvider.init();
+        try (SouthboundProvider southboundProvider = newProvider()) {
 
             // Verify that at least one listener was registered
-            verify(entityOwnershipService, atLeastOnce()).registerListener(
-                    anyString(), any(EntityOwnershipListener.class));
+            verify(entityOwnershipService, atLeastOnce())
+                .registerListener(anyString(), any(EntityOwnershipListener.class));
 
             // Verify that a candidate was registered
             verify(entityOwnershipService).registerCandidate(any(Entity.class));
@@ -129,18 +119,7 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
         when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
             java.util.Optional.of(EntityOwnershipState.from(true, true)));
 
-        try (SouthboundProvider southboundProvider = new SouthboundProvider(
-                getDataBroker(),
-                entityOwnershipService,
-                Mockito.mock(OvsdbConnection.class),
-                Mockito.mock(DOMSchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class),
-                new TestSystemReadyMonitor(IMMEDIATE),
-                Mockito.mock(DiagStatusService.class),
-                Mockito.mock(UpgradeState.class))) {
-
-            southboundProvider.init();
-
+        try (SouthboundProvider southboundProvider = newProvider()) {
             assertEquals(getDataBroker(), SouthboundProvider.getDb());
         }
     }
@@ -154,17 +133,7 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
 
-        try (SouthboundProvider southboundProvider = new SouthboundProvider(
-                getDataBroker(),
-                entityOwnershipService,
-                Mockito.mock(OvsdbConnection.class),
-                Mockito.mock(DOMSchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class),
-                new TestSystemReadyMonitor(IMMEDIATE),
-                Mockito.mock(DiagStatusService.class),
-                Mockito.mock(UpgradeState.class))) {
-
-            southboundProvider.init();
+        try (SouthboundProvider southboundProvider = newProvider()) {
 
             // At this point the OVSDB topology must not be present in either tree
             assertFalse(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION,

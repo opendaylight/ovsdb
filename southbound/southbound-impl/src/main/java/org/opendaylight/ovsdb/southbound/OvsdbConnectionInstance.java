@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.southbound;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,6 +72,15 @@ import org.slf4j.LoggerFactory;
 
 public class OvsdbConnectionInstance {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionInstance.class);
+
+    private static final ImmutableSet<String> SKIP_OVSDB_TABLE = ImmutableSet.of(
+            "Flow_Table",
+            "Mirror",
+            "NetFlow",
+            "sFlow",
+            "IPFIX",
+            "Flow_Sample_Collector_Set");
+
     private final OvsdbClient client;
     private ConnectionInfo connectionInfo;
     private final TransactionInvoker txInvoker;
@@ -86,34 +96,34 @@ public class OvsdbConnectionInstance {
 
     OvsdbConnectionInstance(final ConnectionInfo key, final OvsdbClient client, final TransactionInvoker txInvoker,
                             final InstanceIdentifier<Node> iid) {
-        this.connectionInfo = key;
+        connectionInfo = key;
         this.client = client;
         this.txInvoker = txInvoker;
         // this.key = key;
-        this.instanceIdentifier = iid;
+        instanceIdentifier = iid;
     }
 
-    public void updatePort(UUID uuid, InstanceIdentifier<Node> iid) {
+    public void updatePort(final UUID uuid, final InstanceIdentifier<Node> iid) {
         ports.put(uuid, iid);
     }
 
-    public void removePort(UUID uuid) {
+    public void removePort(final UUID uuid) {
         ports.remove(uuid);
     }
 
-    public InstanceIdentifier<Node> getPort(UUID uuid) {
+    public InstanceIdentifier<Node> getPort(final UUID uuid) {
         return ports.get(uuid);
     }
 
-    public void updatePortInterface(String name, InstanceIdentifier<Node> iid) {
+    public void updatePortInterface(final String name, final InstanceIdentifier<Node> iid) {
         portInterfaces.put(name, iid);
     }
 
-    public void removePortInterface(String name) {
+    public void removePortInterface(final String name) {
         portInterfaces.remove(name);
     }
 
-    public InstanceIdentifier<Node> getPortInterface(String name) {
+    public InstanceIdentifier<Node> getPortInterface(final String name) {
         return portInterfaces.get(name);
     }
 
@@ -154,8 +164,8 @@ public class OvsdbConnectionInstance {
     }
 
     public void registerCallbacks(final InstanceIdentifierCodec instanceIdentifierCodec) {
-        if (this.callback == null) {
-            if (this.initialCreateData != null) {
+        if (callback == null) {
+            if (initialCreateData != null) {
                 this.updateConnectionAttributes(instanceIdentifierCodec);
             }
 
@@ -195,7 +205,7 @@ public class OvsdbConnectionInstance {
         if (tables != null) {
             List<MonitorRequest> monitorRequests = new ArrayList<>();
             for (String tableName : tables) {
-                if (!SouthboundConstants.SKIP_OVSDB_TABLE.contains(tableName)) {
+                if (!SKIP_OVSDB_TABLE.contains(tableName)) {
                     LOG.trace("Southbound monitoring OVSDB schema table {}", tableName);
                     GenericTableSchema tableSchema = dbSchema.table(tableName, GenericTableSchema.class);
                     // We copy the columns so we can clean the set up later
@@ -210,7 +220,7 @@ public class OvsdbConnectionInstance {
                             .with(new MonitorSelect(true, true, true, true)).build());
                 }
             }
-            this.callback.update(monitor(dbSchema, monitorRequests, callback), dbSchema);
+            callback.update(monitor(dbSchema, monitorRequests, callback), dbSchema);
         } else {
             LOG.warn("No tables for schema {} for database {} for key {}",dbSchema,database,connectionInfo);
         }
@@ -218,19 +228,19 @@ public class OvsdbConnectionInstance {
 
     private void updateConnectionAttributes(final InstanceIdentifierCodec instanceIdentifierCodec) {
         LOG.debug("Update attributes of ovsdb node ip: {} port: {}",
-                    this.initialCreateData.getConnectionInfo().getRemoteIp(),
-                    this.initialCreateData.getConnectionInfo().getRemotePort());
+                    initialCreateData.getConnectionInfo().getRemoteIp(),
+                    initialCreateData.getConnectionInfo().getRemotePort());
         for (Map.Entry<TypedDatabaseSchema, TransactInvoker> entry: transactInvokers.entrySet()) {
 
-            TransactionBuilder transaction = new TransactionBuilder(this.client, entry.getKey());
+            TransactionBuilder transaction = new TransactionBuilder(client, entry.getKey());
 
             // OpenVSwitchPart
             OpenVSwitch ovs = transaction.getTypedRowWrapper(OpenVSwitch.class);
 
             Map<OpenvswitchExternalIdsKey, OpenvswitchExternalIds> externalIds =
-                    this.initialCreateData.getOpenvswitchExternalIds();
+                    initialCreateData.getOpenvswitchExternalIds();
 
-            stampInstanceIdentifier(transaction, this.instanceIdentifier.firstIdentifierOf(Node.class),
+            stampInstanceIdentifier(transaction, instanceIdentifier.firstIdentifierOf(Node.class),
                     instanceIdentifierCodec);
 
             try {
@@ -249,7 +259,7 @@ public class OvsdbConnectionInstance {
 
 
             Map<OpenvswitchOtherConfigsKey, OpenvswitchOtherConfigs> otherConfigs =
-                    this.initialCreateData.getOpenvswitchOtherConfigs();
+                    initialCreateData.getOpenvswitchOtherConfigs();
             if (otherConfigs != null) {
                 try {
                     ovs.setOtherConfig(YangUtils.convertYangKeyValueListToMap(otherConfigs,
@@ -365,7 +375,7 @@ public class OvsdbConnectionInstance {
     }
 
     public void setMDConnectionInfo(final ConnectionInfo key) {
-        this.connectionInfo = key;
+        connectionInfo = key;
     }
 
     public InstanceIdentifier<Node> getInstanceIdentifier() {
@@ -381,15 +391,15 @@ public class OvsdbConnectionInstance {
     }
 
     public void setInstanceIdentifier(final InstanceIdentifier<Node> iid) {
-        this.instanceIdentifier = iid;
+        instanceIdentifier = iid;
     }
 
     public Entity getConnectedEntity() {
-        return this.connectedEntity;
+        return connectedEntity;
     }
 
     public void setConnectedEntity(final Entity entity) {
-        this.connectedEntity = entity;
+        connectedEntity = entity;
     }
 
     public Boolean hasOvsdbClient(final OvsdbClient otherClient) {
@@ -410,22 +420,22 @@ public class OvsdbConnectionInstance {
 
     public void setDeviceOwnershipCandidateRegistration(
             @NonNull final EntityOwnershipCandidateRegistration registration) {
-        this.deviceOwnershipCandidateRegistration = registration;
+        deviceOwnershipCandidateRegistration = registration;
     }
 
     public void closeDeviceOwnershipCandidateRegistration() {
         if (deviceOwnershipCandidateRegistration != null) {
-            this.deviceOwnershipCandidateRegistration.close();
+            deviceOwnershipCandidateRegistration.close();
             setHasDeviceOwnership(Boolean.FALSE);
         }
     }
 
     public OvsdbNodeAugmentation getOvsdbNodeAugmentation() {
-        return this.initialCreateData;
+        return initialCreateData;
     }
 
     public void setOvsdbNodeAugmentation(final OvsdbNodeAugmentation ovsdbNodeCreateData) {
-        this.initialCreateData = ovsdbNodeCreateData;
+        initialCreateData = ovsdbNodeCreateData;
     }
 
     public OvsdbClient getOvsdbClient() {

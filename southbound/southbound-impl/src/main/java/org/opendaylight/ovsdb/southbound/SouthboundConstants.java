@@ -107,6 +107,7 @@ public final class SouthboundConstants {
         ImmutableMap.<String,List<String>>builder()
             .put("Open_vSwitch", Arrays.asList("statistics","_version"))
             .put("Port", Arrays.asList("statistics","_version"))
+            // FIXME: this is mutable state!
             .put("Manager", new ArrayList<>(Collections.singletonList("_version")))
             .put("SSL", Collections.singletonList("_version"))
             .put("QoS", Collections.singletonList("_version"))

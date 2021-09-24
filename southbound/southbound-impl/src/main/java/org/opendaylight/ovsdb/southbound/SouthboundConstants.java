@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow10;
@@ -52,13 +53,13 @@ public final class SouthboundConstants {
     }
 
     public static final String OPEN_V_SWITCH = "Open_vSwitch";
-    public static final TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
+    public static final @NonNull TopologyId OVSDB_TOPOLOGY_ID = new TopologyId(new Uri("ovsdb:1"));
     public static final String OVSDB_URI_PREFIX = "ovsdb";
     public static final String BRIDGE_URI_PREFIX = "bridge";
     public static final String TP_URI_PREFIX = "terminationpoint";
     public static final String QOS_URI_PREFIX = "qos";
     public static final String QOS_NAMED_UUID_PREFIX = "QOS";
-    public static final QosEntryKey PORT_QOS_LIST_KEY = new QosEntryKey(Uint32.ONE);
+    public static final @NonNull QosEntryKey PORT_QOS_LIST_KEY = new QosEntryKey(Uint32.ONE);
     public static final String QUEUE_URI_PREFIX = "queue";
     public static final String QUEUE_NAMED_UUID_PREFIX = "QUEUE";
     public static final String AUTOATTACH_URI_PREFIX = "autoattach";

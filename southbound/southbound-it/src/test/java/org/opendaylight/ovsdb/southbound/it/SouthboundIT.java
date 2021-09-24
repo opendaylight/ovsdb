@@ -229,7 +229,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         private NotifyingDataChangeListener(final LogicalDatastoreType type) {
             this.type = type;
-            this.iid = null;
+            iid = null;
         }
 
         private NotifyingDataChangeListener(final LogicalDatastoreType type, final InstanceIdentifier<?> iid) {
@@ -654,7 +654,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         } else {
             for (DatapathTypeEntry dpTypeEntry : datapathTypeEntries.values()) {
                 Class<? extends DatapathTypeBase> dpType = dpTypeEntry.getDatapathType();
-                String dpTypeStr = SouthboundConstants.DATAPATH_TYPE_MAP.get(dpType);
+                String dpTypeStr = SouthboundMapper.DATAPATH_TYPE_MAP.get(dpType);
                 LOG.info("dp type is {}", dpTypeStr);
                 if (dpTypeStr.equals(NETDEV_DP_TYPE)) {
                     LOG.info("Found a DPDK node; adding a corresponding netdev device");
@@ -681,7 +681,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                             LOG.info("DPDK portname and type is {}, {}", testPortname, dpdkType);
                             OvsdbTerminationPointAugmentationBuilder ovsdbTerminationpointBuilder =
                                     createSpecificDpdkOvsdbTerminationPointAugmentationBuilder(testPortname,
-                                            SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get(dpdkType));
+                                            SouthboundMapper.OVSDB_INTERFACE_TYPE_MAP.get(dpdkType));
                             assertTrue(addTerminationPoint(bridgeNodeId, testPortname, ovsdbTerminationpointBuilder));
                         }
 
@@ -695,7 +695,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         for (String dpdkType : dpdkTypes) {
                             String testPortname = "test" + dpdkType + "port";
                             Class<? extends InterfaceTypeBase> dpdkIfType =
-                                    SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get(dpdkType);
+                                    SouthboundMapper.OVSDB_INTERFACE_TYPE_MAP.get(dpdkType);
                             for (TerminationPoint terminationPoint
                                     : terminationPointNode.nonnullTerminationPoint().values()) {
                                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation = terminationPoint
@@ -806,13 +806,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static OvsdbTerminationPointAugmentationBuilder createGenericDpdkOvsdbTerminationPointAugmentationBuilder(
             final String portName) {
-        OvsdbTerminationPointAugmentationBuilder ovsdbTerminationBuilder =
-                createGenericOvsdbTerminationPointAugmentationBuilder();
-        ovsdbTerminationBuilder.setName(portName);
-        Class<? extends InterfaceTypeBase> ifType = SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP
-                .get("dpdk");
-        ovsdbTerminationBuilder.setInterfaceType(ifType);
-        return ovsdbTerminationBuilder;
+        return createGenericOvsdbTerminationPointAugmentationBuilder()
+            .setName(portName)
+            .setInterfaceType(SouthboundMapper.OVSDB_INTERFACE_TYPE_MAP.get("dpdk"));
     }
 
     private static OvsdbTerminationPointAugmentationBuilder createSpecificDpdkOvsdbTerminationPointAugmentationBuilder(
@@ -959,7 +955,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         public void close() {
             final InstanceIdentifier<Autoattach> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
                     .augmentation(OvsdbNodeAugmentation.class)
-                    .child(Autoattach.class, new AutoattachKey(this.autoattachId));
+                    .child(Autoattach.class, new AutoattachKey(autoattachId));
             final NotifyingDataChangeListener aaOperationalListener =
                     new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, iid);
             aaOperationalListener.registerDataChangeListener();
@@ -1133,7 +1129,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         public void close() {
             final InstanceIdentifier<QosEntries> qeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
                     .augmentation(OvsdbNodeAugmentation.class)
-                    .child(QosEntries.class, new QosEntriesKey(this.qosId));
+                    .child(QosEntries.class, new QosEntriesKey(qosId));
             final NotifyingDataChangeListener qosOperationalListener =
                     new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, qeIid);
             qosOperationalListener.registerDataChangeListener();
@@ -1197,7 +1193,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         public void close() {
             InstanceIdentifier<Queues> queuesIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
                     .augmentation(OvsdbNodeAugmentation.class)
-                    .child(Queues.class, new QueuesKey(this.queueId));
+                    .child(Queues.class, new QueuesKey(queueId));
             final NotifyingDataChangeListener queueOperationalListener =
                     new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, queuesIid);
             queueOperationalListener.registerDataChangeListener();

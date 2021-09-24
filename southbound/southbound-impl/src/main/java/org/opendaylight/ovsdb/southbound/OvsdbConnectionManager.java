@@ -97,9 +97,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         this.db = db;
         this.txInvoker = txInvoker;
         this.entityOwnershipService = entityOwnershipService;
-        this.ovsdbDeviceEntityOwnershipListener = new OvsdbDeviceEntityOwnershipListener(this, entityOwnershipService);
+        ovsdbDeviceEntityOwnershipListener = new OvsdbDeviceEntityOwnershipListener(this, entityOwnershipService);
         this.ovsdbConnection = ovsdbConnection;
-        this.reconciliationManager = new ReconciliationManager(db, instanceIdentifierCodec);
+        reconciliationManager = new ReconciliationManager(db, instanceIdentifierCodec);
         this.instanceIdentifierCodec = instanceIdentifierCodec;
         this.upgradeState = upgradeState;
     }
@@ -465,8 +465,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         if (ownershipChange.getState().isOwner() == ovsdbConnectionInstance.getHasDeviceOwnership()) {
             LOG.info("Ovsdb handleOwnershipChanged: no change in ownership for {}. Ownership status is : {}",
                     ovsdbConnectionInstance.getConnectionInfo(), ovsdbConnectionInstance.getHasDeviceOwnership()
-                            ? SouthboundConstants.OwnershipStates.OWNER.getState()
-                            : SouthboundConstants.OwnershipStates.NONOWNER.getState());
+                            ? OwnershipStates.OWNER.getState()
+                            : OwnershipStates.NONOWNER.getState());
             return;
         }
 
@@ -645,7 +645,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 readNodeFuture.addCallback(new FutureCallback<Boolean>() {
                     @Override
                     public void onSuccess(final Boolean node) {
-                        if (node.booleanValue()) {
+                        if (node) {
                             LOG.info("Disconnected/Failed connection {} was controller initiated, attempting "
                                     + "reconnection", ovsdbNode.getConnectionInfo());
                             reconciliationManager.enqueue(task);
@@ -708,6 +708,26 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         initiated connection disconnects.
         */
         ON_DISCONNECT
+    }
+
+    private enum OwnershipStates {
+        OWNER("OWNER"),
+        NONOWNER("NON-OWNER");
+
+        private final String state;
+
+        OwnershipStates(final String state) {
+            this.state = state;
+        }
+
+        @Override
+        public String toString() {
+            return state;
+        }
+
+        String getState() {
+            return state;
+        }
     }
 
     public Map<ConnectionInfo, OvsdbConnectionInstance> getClients() {

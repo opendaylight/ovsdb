@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.southbound;
 import static java.util.Objects.requireNonNull;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -42,13 +43,38 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeNetdev;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeDpdk;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeDpdkr;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeDpdkvhost;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeDpdkvhostuser;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeDpdkvhostuserclient;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeGeneve;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeGre;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeGre64;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeIpsecGre;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeIpsecGre64;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeLisp;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypePatch;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeStt;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeSystem;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeTap;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeVxlan;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeVxlanGpe;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeBase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeEgressPolicer;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxCodel;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxFqCodel;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxHfsc;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxHtb;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.QosTypeLinuxSfq;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
@@ -78,6 +104,43 @@ import org.slf4j.LoggerFactory;
 public final class SouthboundMapper {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundMapper.class);
     private static final String N_CONNECTIONS_STR = "n_connections";
+
+    @VisibleForTesting
+    public static final ImmutableBiMap<Class<? extends DatapathTypeBase>, String> DATAPATH_TYPE_MAP =
+        ImmutableBiMap.of(
+            DatapathTypeSystem.class, "system",
+            DatapathTypeNetdev.class, "netdev");
+    @VisibleForTesting
+    public static final ImmutableBiMap<String, Class<? extends InterfaceTypeBase>> OVSDB_INTERFACE_TYPE_MAP =
+        ImmutableBiMap.<String, Class<? extends InterfaceTypeBase>>builder()
+            .put("internal", InterfaceTypeInternal.class)
+            .put("vxlan", InterfaceTypeVxlan.class)
+            .put("vxlan-gpe", InterfaceTypeVxlanGpe.class)
+            .put("patch", InterfaceTypePatch.class)
+            .put("system", InterfaceTypeSystem.class)
+            .put("tap", InterfaceTypeTap.class)
+            .put("geneve", InterfaceTypeGeneve.class)
+            .put("gre", InterfaceTypeGre.class)
+            .put("ipsec_gre", InterfaceTypeIpsecGre.class)
+            .put("gre64", InterfaceTypeGre64.class)
+            .put("ipsec_gre64", InterfaceTypeIpsecGre64.class)
+            .put("lisp", InterfaceTypeLisp.class)
+            .put("dpdk", InterfaceTypeDpdk.class)
+            .put("dpdkr", InterfaceTypeDpdkr.class)
+            .put("dpdkvhost", InterfaceTypeDpdkvhost.class)
+            .put("dpdkvhostuser", InterfaceTypeDpdkvhostuser.class)
+            .put("dpdkvhostuserclient", InterfaceTypeDpdkvhostuserclient.class)
+            .put("stt", InterfaceTypeStt.class)
+            .build();
+    private static final ImmutableBiMap<Class<? extends QosTypeBase>, String> QOS_TYPE_MAP =
+        ImmutableBiMap.<Class<? extends QosTypeBase>, String>builder()
+            .put(QosTypeLinuxHtb.class, SouthboundConstants.QOS_LINUX_HTB)
+            .put(QosTypeLinuxHfsc.class, SouthboundConstants.QOS_LINUX_HFSC)
+            .put(QosTypeLinuxSfq.class, SouthboundConstants.QOS_LINUX_SFQ)
+            .put(QosTypeLinuxCodel.class, SouthboundConstants.QOS_LINUX_CODEL)
+            .put(QosTypeLinuxFqCodel.class, SouthboundConstants.QOS_LINUX_FQ_CODEL)
+            .put(QosTypeEgressPolicer.class, SouthboundConstants.QOS_EGRESS_POLICER)
+            .build();
 
     private SouthboundMapper() {
 
@@ -203,10 +266,10 @@ public final class SouthboundMapper {
     }
 
     public static String createDatapathType(final OvsdbBridgeAugmentation mdsalbridge) {
-        String datapathtype = SouthboundConstants.DATAPATH_TYPE_MAP.get(DatapathTypeSystem.class);
+        String datapathtype = DATAPATH_TYPE_MAP.get(DatapathTypeSystem.class);
 
         if (mdsalbridge.getDatapathType() != null && !mdsalbridge.getDatapathType().equals(DatapathTypeBase.class)) {
-            datapathtype = SouthboundConstants.DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType());
+            datapathtype = DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType());
             if (datapathtype == null) {
                 throw new IllegalArgumentException("Unknown datapath type " + mdsalbridge.getDatapathType().getName());
             }
@@ -218,7 +281,7 @@ public final class SouthboundMapper {
         if (type.isEmpty()) {
             return DatapathTypeSystem.class;
         }
-        return SouthboundConstants.DATAPATH_TYPE_MAP.inverse().get(type);
+        return DATAPATH_TYPE_MAP.inverse().get(type);
     }
 
     public static Set<String> createOvsdbBridgeProtocols(final OvsdbBridgeAugmentation ovsdbBridgeNode) {
@@ -236,11 +299,11 @@ public final class SouthboundMapper {
     }
 
     public static  Class<? extends InterfaceTypeBase> createInterfaceType(final String type) {
-        return SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.get(requireNonNull(type));
+        return OVSDB_INTERFACE_TYPE_MAP.get(requireNonNull(type));
     }
 
     public static String createOvsdbInterfaceType(final Class<? extends InterfaceTypeBase> mdsaltype) {
-        return SouthboundConstants.OVSDB_INTERFACE_TYPE_MAP.inverse().get(requireNonNull(mdsaltype));
+        return OVSDB_INTERFACE_TYPE_MAP.inverse().get(requireNonNull(mdsaltype));
     }
 
     public static List<ProtocolEntry> createMdsalProtocols(final Bridge bridge) {
@@ -486,8 +549,7 @@ public final class SouthboundMapper {
             LOG.info("QoS type not supplied");
             return QosTypeBase.class;
         } else {
-            ImmutableBiMap<String, Class<? extends QosTypeBase>> mapper =
-                    SouthboundConstants.QOS_TYPE_MAP.inverse();
+            ImmutableBiMap<String, Class<? extends QosTypeBase>> mapper = QOS_TYPE_MAP.inverse();
             if (mapper.get(type) == null) {
                 LOG.info("QoS type not found in model: {}", type);
                 return QosTypeBase.class;
@@ -498,10 +560,10 @@ public final class SouthboundMapper {
     }
 
     public static String createQosType(final Class<? extends QosTypeBase> qosTypeClass) {
-        String qosType = SouthboundConstants.QOS_TYPE_MAP.get(QosTypeBase.class);
+        String qosType = QOS_TYPE_MAP.get(QosTypeBase.class);
 
         if (qosTypeClass != null && !qosTypeClass.equals(QosTypeBase.class)) {
-            qosType = SouthboundConstants.QOS_TYPE_MAP.get(qosTypeClass);
+            qosType = QOS_TYPE_MAP.get(qosTypeClass);
             if (qosType == null) {
                 throw new IllegalArgumentException("Unknown QoS type" + qosTypeClass.getName());
             }

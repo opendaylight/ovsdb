@@ -19,6 +19,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.infrautils.diagstatus.DiagStatusService;
 import org.opendaylight.infrautils.diagstatus.ServiceState;
 import org.opendaylight.infrautils.ready.SystemReadyMonitor;
@@ -163,7 +164,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         }
     }
 
-    private static void initializeOvsdbTopology(final LogicalDatastoreType type) {
+    private static void initializeOvsdbTopology(final @NonNull LogicalDatastoreType type) {
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));

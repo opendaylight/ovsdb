@@ -14,6 +14,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,7 +26,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -40,22 +42,17 @@ import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberModifier;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({TyperUtils.class, SouthboundMapper.class, InstanceIdentifier.class})
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class OvsdbPortRemoveCommandTest {
-
     private static final String PORT_NAME = "port0";
+
     private OvsdbPortRemoveCommand ovsdbPortRemoveCommand;
 
     @Before
-    public void setUp() throws Exception {
-        ovsdbPortRemoveCommand = PowerMockito.mock(OvsdbPortRemoveCommand.class, Mockito.CALLS_REAL_METHODS);
+    public void setUp()  {
+        ovsdbPortRemoveCommand = spy(new OvsdbPortRemoveCommand(null, null, null, null));
     }
 
     @Test
@@ -71,8 +68,7 @@ public class OvsdbPortRemoveCommandTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    public void testExecute() throws Exception {
+    public void testExecute() {
         when(ovsdbPortRemoveCommand.getUpdates()).thenReturn(mock(TableUpdates.class));
         when(ovsdbPortRemoveCommand.getDbSchema()).thenReturn(mock(DatabaseSchema.class));
         UUID uuid = mock(UUID.class);
@@ -80,46 +76,51 @@ public class OvsdbPortRemoveCommandTest {
         Port port = mock(Port.class);
         portRemovedRows.put(uuid, port);
 
-        PowerMockito.mockStatic(TyperUtils.class);
-        PowerMockito.doReturn(portRemovedRows).when(TyperUtils.class);
-        TyperUtils.extractRowsRemoved(eq(Port.class), any(TableUpdates.class), any(DatabaseSchema.class));
+        try (var utils = mockStatic(TyperUtils.class)) {
+            utils.when(() -> TyperUtils.extractRowsRemoved(eq(Port.class), any(TableUpdates.class),
+                any(DatabaseSchema.class))).thenReturn(portRemovedRows);
 
-        Map<UUID, Bridge> bridgeUpdatedRows = new HashMap<>();
-        Bridge updatedBridgeData = mock(Bridge.class);
-        bridgeUpdatedRows.put(uuid, updatedBridgeData);
-        PowerMockito.doReturn(bridgeUpdatedRows).when(TyperUtils.class);
-        TyperUtils.extractRowsUpdated(eq(Bridge.class), any(TableUpdates.class), any(DatabaseSchema.class));
+            Map<UUID, Bridge> bridgeUpdatedRows = new HashMap<>();
+            Bridge updatedBridgeData = mock(Bridge.class);
+            bridgeUpdatedRows.put(uuid, updatedBridgeData);
 
-        Map<UUID, Bridge> bridgeUpdatedOldRows = new HashMap<>();
-        Bridge oldBridgeData = mock(Bridge.class);
-        bridgeUpdatedOldRows.put(uuid, oldBridgeData);
-        PowerMockito.doReturn(bridgeUpdatedOldRows).when(TyperUtils.class);
-        TyperUtils.extractRowsOld(eq(Bridge.class), any(TableUpdates.class), any(DatabaseSchema.class));
+            utils.when(() -> TyperUtils.extractRowsUpdated(eq(Bridge.class), any(TableUpdates.class),
+                any(DatabaseSchema.class))).thenReturn(bridgeUpdatedRows);
 
-        Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
-        when(oldBridgeData.getPortsColumn()).thenReturn(column);
-        Set<UUID> uuids = new HashSet<>();
-        uuids.add(uuid);
-        when(column.getData()).thenReturn(uuids);
+            Map<UUID, Bridge> bridgeUpdatedOldRows = new HashMap<>();
+            Bridge oldBridgeData = mock(Bridge.class);
+            bridgeUpdatedOldRows.put(uuid, oldBridgeData);
 
-        Column<GenericTableSchema, UUID> uuidColumn = mock(Column.class);
-        when(port.getUuidColumn()).thenReturn(uuidColumn);
-        when(uuidColumn.getData()).thenReturn(uuid);
+            utils.when(() -> TyperUtils.extractRowsOld(eq(Bridge.class), any(TableUpdates.class),
+                any(DatabaseSchema.class))).thenReturn(bridgeUpdatedOldRows);
 
-        when(port.getName()).thenReturn(PORT_NAME);
-        InstanceIdentifier<Node> nodeIID = mock(InstanceIdentifier.class);
-        doReturn(mock(OvsdbConnectionInstance.class)).when(ovsdbPortRemoveCommand).getOvsdbConnectionInstance();
+            @SuppressWarnings("unchecked")
+            Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
+            when(oldBridgeData.getPortsColumn()).thenReturn(column);
+            Set<UUID> uuids = new HashSet<>();
+            uuids.add(uuid);
+            when(column.getData()).thenReturn(uuids);
 
-        PowerMockito.mockStatic(SouthboundMapper.class);
-        PowerMockito.doReturn(nodeIID).when(SouthboundMapper.class);
-        SouthboundMapper.createInstanceIdentifier(eq(null),
-            any(OvsdbConnectionInstance.class), any(Bridge.class));
+            @SuppressWarnings("unchecked")
+            Column<GenericTableSchema, UUID> uuidColumn = mock(Column.class);
+            when(port.getUuidColumn()).thenReturn(uuidColumn);
+            when(uuidColumn.getData()).thenReturn(uuid);
 
-        MemberModifier.suppress(MemberModifier.methodsDeclaredIn(InstanceIdentifier.class));
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+            when(port.getName()).thenReturn(PORT_NAME);
+            @SuppressWarnings("unchecked")
+            InstanceIdentifier<Node> nodeIID = mock(InstanceIdentifier.class);
+            doReturn(mock(OvsdbConnectionInstance.class)).when(ovsdbPortRemoveCommand).getOvsdbConnectionInstance();
 
-        ovsdbPortRemoveCommand.execute(transaction);
-        verify(transaction).delete(any(LogicalDatastoreType.class), eq(null));
+            try (var mapper = mockStatic(SouthboundMapper.class)) {
+                mapper.when(() -> SouthboundMapper.createInstanceIdentifier(eq(null),
+                    any(OvsdbConnectionInstance.class), any(Bridge.class))).thenReturn(nodeIID);
+
+                ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
+                doNothing().when(transaction).delete(LogicalDatastoreType.OPERATIONAL, null);
+
+                ovsdbPortRemoveCommand.execute(transaction);
+                verify(transaction).delete(LogicalDatastoreType.OPERATIONAL, null);
+            }
+        }
     }
 }

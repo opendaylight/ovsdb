@@ -8,9 +8,11 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,7 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -28,45 +30,35 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
-import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberMatcher;
-import org.powermock.api.support.membermodification.MemberModifier;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@PrepareForTest({OvsdbBridgeRemovedCommand.class, TyperUtils.class, SouthboundMapper.class, InstanceIdentifier.class})
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class OvsdbBridgeRemovedCommandTest {
-    @Mock private OvsdbBridgeRemovedCommand ovsdbBridgeRemovedCommand;
-    @Mock private OvsdbConnectionInstance key;
-    @Mock private TableUpdates updates;
-    @Mock private DatabaseSchema dbSchema;
+    @Mock
+    private OvsdbBridgeRemovedCommand ovsdbBridgeRemovedCommand;
+    @Mock
+    private OvsdbConnectionInstance key;
+    @Mock
+    private TableUpdates updates;
+    @Mock
+    private DatabaseSchema dbSchema;
 
     @Before
-    public void setUp() throws Exception {
-        ovsdbBridgeRemovedCommand = mock(OvsdbBridgeRemovedCommand.class, Mockito.CALLS_REAL_METHODS);
-        MemberModifier.field(OvsdbBridgeRemovedCommand.class, "key").set(ovsdbBridgeRemovedCommand, key);
-        MemberModifier.field(OvsdbBridgeRemovedCommand.class, "updates").set(ovsdbBridgeRemovedCommand, updates);
-        MemberModifier.field(OvsdbBridgeRemovedCommand.class, "dbSchema").set(ovsdbBridgeRemovedCommand, dbSchema);
+    public void setUp() {
+        ovsdbBridgeRemovedCommand = spy(new OvsdbBridgeRemovedCommand(null, key, updates, dbSchema));
     }
 
     @Test
-    public void testExecute() throws Exception {
-        //suppress calls to parent get methods
-        MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeRemovedCommand.class, "getUpdates"));
+    public void testExecute() {
         when(ovsdbBridgeRemovedCommand.getUpdates()).thenReturn(mock(TableUpdates.class));
-        MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeRemovedCommand.class, "getDbSchema"));
         when(ovsdbBridgeRemovedCommand.getDbSchema()).thenReturn(mock(DatabaseSchema.class));
 
-        PowerMockito.mockStatic(TyperUtils.class);
-        Map<UUID, Bridge> map = new HashMap<>();
-        when(TyperUtils.extractRowsRemoved(eq(Bridge.class), any(TableUpdates.class), any(DatabaseSchema.class)))
-                .thenReturn(map);
+        try (var utils = mockStatic(TyperUtils.class)) {
+            Map<UUID, Bridge> map = new HashMap<>();
+            utils.when(() -> TyperUtils.extractRowsRemoved(eq(Bridge.class), any(TableUpdates.class),
+                any(DatabaseSchema.class))).thenReturn(map);
 
-        ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        ovsdbBridgeRemovedCommand.execute(transaction);
+            ovsdbBridgeRemovedCommand.execute(mock(ReadWriteTransaction.class));
+        }
         verify(ovsdbBridgeRemovedCommand).getUpdates();
         verify(ovsdbBridgeRemovedCommand).getDbSchema();
     }

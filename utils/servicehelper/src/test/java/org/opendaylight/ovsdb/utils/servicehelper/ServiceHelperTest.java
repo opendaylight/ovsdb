@@ -9,40 +9,30 @@ package org.opendaylight.ovsdb.utils.servicehelper;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mockStatic;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.FrameworkUtil;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.osgi.mock.MockBundle;
 
 /**
  * JUnit test for {@link ServiceHelper}.
  */
-@Ignore
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(FrameworkUtil.class)
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ServiceHelperTest {
-    @Test
     /**
-     * Test method for
-     * {@link ServiceHelper#getGlobalInstance(Class, Object)}
+     * Test method for {@link ServiceHelper#getGlobalInstance(Class, Object)}.
      */
+    @Test
     public void getGlobalInstanceTest() {
-        PowerMockito.mockStatic(FrameworkUtil.class);
+        try (var frameworkUtil = mockStatic(FrameworkUtil.class)) {
+            final var mockBundle = new MockBundle();
+            frameworkUtil.when(() -> FrameworkUtil.getBundle(ServiceHelperTest.class)).thenReturn(null, mockBundle);
 
-        PowerMockito.when(FrameworkUtil.getBundle(any(Class.class)))
-                .thenReturn(null);
-        Object object = ServiceHelper.getGlobalInstance(Test.class, this);
-        assertNull("Service should be null", object);
-
-        PowerMockito.when(FrameworkUtil.getBundle(any(Class.class)))
-                .thenReturn(new MockBundle());
-        object = ServiceHelper.getGlobalInstance(Test.class, this);
-        assertNotNull("Service should not be null", object);
+            assertNull(ServiceHelper.getGlobalInstance(Test.class, this));
+            assertNotNull(ServiceHelper.getGlobalInstance(Test.class, this));
+        }
     }
 }

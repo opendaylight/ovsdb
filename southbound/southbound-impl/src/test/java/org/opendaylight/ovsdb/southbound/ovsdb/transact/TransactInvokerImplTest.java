@@ -5,76 +5,68 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.junit.Assert.assertSame;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.api.support.membermodification.MemberModifier;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-@PrepareForTest({TransactInvokerImpl.class})
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class TransactInvokerImplTest {
-
-    @Mock private OvsdbConnectionInstance connectionInstance;
-    @Mock private DatabaseSchema dbSchema;
+    @Mock
+    private OvsdbConnectionInstance connectionInstance;
+    @Mock
+    private DatabaseSchema dbSchema;
     private TransactInvokerImpl transactInvokerImpl;
 
     @Before
     public void setUp() throws Exception {
         transactInvokerImpl = new TransactInvokerImpl(connectionInstance, dbSchema);
-        MemberModifier.field(TransactInvokerImpl.class, "connectionInstance").set(transactInvokerImpl,
-                connectionInstance);
-        MemberModifier.field(TransactInvokerImpl.class, "dbSchema").set(transactInvokerImpl, dbSchema);
     }
 
     @Test
     public void testTransactionInvokerImpl() {
-        TransactInvokerImpl transactInvokerImpl1 = new TransactInvokerImpl(connectionInstance, dbSchema);
-        assertEquals(connectionInstance, Whitebox.getInternalState(transactInvokerImpl1, "connectionInstance"));
-        assertEquals(dbSchema, Whitebox.getInternalState(transactInvokerImpl1, "dbSchema"));
+        assertSame(connectionInstance, Whitebox.getInternalState(transactInvokerImpl, "connectionInstance"));
+        assertSame(dbSchema, Whitebox.getInternalState(transactInvokerImpl, "dbSchema"));
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
+    @SuppressWarnings("unchecked")
     public void testInvoke() throws Exception {
-        TransactCommand command = mock(TransactCommand.class);
-        TransactionBuilder tb = mock(TransactionBuilder.class);
-        PowerMockito.whenNew(TransactionBuilder.class).withAnyArguments().thenReturn(tb);
-        doNothing().when(command).execute(any(TransactionBuilder.class), any(BridgeOperationalState.class),
-                any(DataChangeEvent.class), any(InstanceIdentifierCodec.class));
+        final ListenableFuture<List<OperationResult>> result = mock(ListenableFuture.class);
+        doReturn(List.of()).when(result).get();
 
-        ListenableFuture<List<OperationResult>> result = mock(ListenableFuture.class);
-        when(tb.execute()).thenReturn(result);
-        List<Operation> operation = new ArrayList<>();
-        operation.add(mock(Operation.class));
-        when(tb.getOperations()).thenReturn(operation);
-        List<OperationResult> got = new ArrayList<>();
-        when(result.get()).thenReturn(got);
-        transactInvokerImpl.invoke(command, mock(BridgeOperationalState.class), mock(DataChangeEvent.class),
-                mock(InstanceIdentifierCodec.class));
-        verify(result).get();
+        try (var mocked = mockConstruction(TransactionBuilder.class, withSettings(), (mock, context) -> {
+            doReturn(result).when(mock).execute();
+            doReturn(List.of(mock(Operation.class))).when(mock).getOperations();
+        })) {
+            TransactCommand command = mock(TransactCommand.class);
+            doNothing().when(command).execute(any(TransactionBuilder.class), any(BridgeOperationalState.class),
+                    any(DataChangeEvent.class), any(InstanceIdentifierCodec.class));
+
+            transactInvokerImpl.invoke(command, mock(BridgeOperationalState.class), mock(DataChangeEvent.class),
+                    mock(InstanceIdentifierCodec.class));
+            verify(result).get();
+        }
     }
 }

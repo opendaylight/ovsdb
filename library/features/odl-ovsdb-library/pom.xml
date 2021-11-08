@@ -41,7 +41,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <dependency>
             <groupId>org.opendaylight.aaa</groupId>
             <artifactId>odl-aaa-cert</artifactId>
-            <version>0.14.5</version>
+            <version>0.14.6</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

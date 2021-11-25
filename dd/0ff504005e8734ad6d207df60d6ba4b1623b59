@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng
+Code-Review+2: Robert Varga <nite@hq.sk>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Thu, 25 Nov 2021 18:35:27 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/ovsdb/+/98695
+Project: ovsdb
+Branch: refs/heads/stable/phosphorus

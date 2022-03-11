@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.junit.Assert.assertEquals;
@@ -50,8 +49,6 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 @RunWith(MockitoJUnitRunner.class)
 public class BridgeOperationalStateTest {
     private final Node nd = new NodeBuilder().setNodeId(new NodeId("foo")).build();
-    private final InstanceIdentifier<?> iid = InstanceIdentifier.create(Topology.class);
-
     private final InstanceIdentifier<Node> nodeIid = InstanceIdentifier.create(NetworkTopology.class)
             .child(Topology.class).child(Node.class);
     private final Node brNode = new NodeBuilder().setNodeId(new NodeId("bar")).build();
@@ -96,7 +93,8 @@ public class BridgeOperationalStateTest {
         doReturn(optNode).when(briOperationState).getBridgeNode(any(InstanceIdentifier.class));
         OvsdbBridgeAugmentation ovsdbBriAug = mock(OvsdbBridgeAugmentation.class);
         doReturn(ovsdbBriAug).when(node).augmentation(OvsdbBridgeAugmentation.class);
-        Optional<OvsdbBridgeAugmentation> ovsdbBriAugOptional = briOperationState.getOvsdbBridgeAugmentation(iid);
+        Optional<OvsdbBridgeAugmentation> ovsdbBriAugOptional = briOperationState.getOvsdbBridgeAugmentation(
+            InstanceIdentifier.create(NetworkTopology.class));
         assertNotNull(ovsdbBriAugOptional);
         assertTrue(ovsdbBriAugOptional.get() instanceof OvsdbBridgeAugmentation);
     }
@@ -136,7 +134,7 @@ public class BridgeOperationalStateTest {
         OvsdbTerminationPointAugmentation ovsdbTermPntAug = mock(OvsdbTerminationPointAugmentation.class);
         doReturn(ovsdbTermPntAug).when(termPoint).augmentation(OvsdbTerminationPointAugmentation.class);
         Optional<OvsdbTerminationPointAugmentation> ovsdbTermPointOpt = briOperationState
-                .getOvsdbTerminationPointAugmentation(iid);
+                .getOvsdbTerminationPointAugmentation(InstanceIdentifier.create(NetworkTopology.class));
         assertNotNull(ovsdbTermPointOpt);
         assertTrue(ovsdbTermPointOpt.get() instanceof OvsdbTerminationPointAugmentation);
     }

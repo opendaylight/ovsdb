@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -56,8 +57,9 @@ public final class HwvtepSouthboundUtil {
         // Prevent instantiating a utility class
     }
 
-    // FIXME: eliminate this static wiring by encaspulating the codec into a service
-    @Deprecated
+    // FIXME: eliminate this static wiring by encapsulating the codec into a service
+    @Deprecated(forRemoval = true)
+    @SuppressFBWarnings("EI_EXPOSE_STATIC_REP2")
     public static void setInstanceIdentifierCodec(InstanceIdentifierCodec iidc) {
         instanceIdentifierCodec = iidc;
     }

@@ -51,7 +51,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
+public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(PhysicalSwitchUpdateCommand.class);
 
     public PhysicalSwitchUpdateCommand(final HwvtepOperationalState state,
@@ -235,13 +235,9 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         if (bfdParams != null) {
             Map<String, String> bfdParamMap = new HashMap<>();
             for (BfdParams bfdParam : bfdParams.values()) {
-                bfdParamMap.put(bfdParam.getBfdParamKey(), bfdParam.getBfdParamValue());
+                bfdParamMap.put(bfdParam.requireBfdParamKey(), bfdParam.requireBfdParamValue());
             }
-            try {
-                tunnel.setBfdParams(ImmutableMap.copyOf(bfdParamMap));
-            } catch (NullPointerException e) {
-                LOG.warn("Incomplete BFD Params for tunnel", e);
-            }
+            tunnel.setBfdParams(ImmutableMap.copyOf(bfdParamMap));
         }
     }
 
@@ -250,13 +246,9 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         if (bfdLocalConfigs != null) {
             Map<String, String> configLocalMap = new HashMap<>();
             for (BfdLocalConfigs localConfig : bfdLocalConfigs.values()) {
-                configLocalMap.put(localConfig.getBfdLocalConfigKey(), localConfig.getBfdLocalConfigValue());
+                configLocalMap.put(localConfig.requireBfdLocalConfigKey(), localConfig.requireBfdLocalConfigValue());
             }
-            try {
-                tunnel.setBfdConfigLocal(ImmutableMap.copyOf(configLocalMap));
-            } catch (NullPointerException e) {
-                LOG.warn("Incomplete BFD LocalConfig for tunnel", e);
-            }
+            tunnel.setBfdConfigLocal(ImmutableMap.copyOf(configLocalMap));
         }
     }
 
@@ -265,13 +257,10 @@ public class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         if (bfdRemoteConfigs != null) {
             Map<String, String> configRemoteMap = new HashMap<>();
             for (BfdRemoteConfigs remoteConfig : bfdRemoteConfigs.values()) {
-                configRemoteMap.put(remoteConfig.getBfdRemoteConfigKey(), remoteConfig.getBfdRemoteConfigValue());
+                configRemoteMap.put(remoteConfig.requireBfdRemoteConfigKey(),
+                    remoteConfig.requireBfdRemoteConfigValue());
             }
-            try {
-                tunnel.setBfdConfigRemote(ImmutableMap.copyOf(configRemoteMap));
-            } catch (NullPointerException e) {
-                LOG.warn("Incomplete BFD RemoteConfig for tunnel", e);
-            }
+            tunnel.setBfdConfigRemote(ImmutableMap.copyOf(configRemoteMap));
         }
     }
 

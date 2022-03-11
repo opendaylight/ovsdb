@@ -9,7 +9,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -17,9 +16,9 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HwvtepOperationalCommandAggregator implements TransactionCommand {
-
+public final class HwvtepOperationalCommandAggregator implements TransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperationalCommandAggregator.class);
+
     private List<TransactionCommand> commands = new ArrayList<>();
     private final HwvtepConnectionInstance connectionInstance;
 
@@ -51,15 +50,9 @@ public class HwvtepOperationalCommandAggregator implements TransactionCommand {
     @Override
     public void execute(ReadWriteTransaction transaction) {
         for (TransactionCommand command: commands) {
-            try {
-                // This may be noisy, can be silenced if needed.
-                LOG.trace("Executing command {}", command);
-                command.execute(transaction);
-            } catch (NullPointerException | NoSuchElementException | ClassCastException e) {
-                LOG.error("Execution of command {} failed with the following exception."
-                        + " Continuing the execution of remaining commands", command, e);
-            }
-
+            // This may be noisy, can be silenced if needed.
+            LOG.trace("Executing command {}", command);
+            command.execute(transaction);
         }
         connectionInstance.getDeviceInfo().onOperDataAvailable();
     }

@@ -14,7 +14,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -429,8 +428,6 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         reconciliationManager.cancelTerminationPointReconciliation();
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private void handleOwnershipChanged(final EntityOwnershipChange ownershipChange) {
         OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstanceFromEntity(ownershipChange.getEntity());
         LOG.debug("Ovsdb handleOwnershipChanged: {} event received for device {}",
@@ -676,7 +673,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         reconciliationManager.enqueue(task);
     }
 
-    private static class OvsdbDeviceEntityOwnershipListener implements EntityOwnershipListener {
+    private static final class OvsdbDeviceEntityOwnershipListener implements EntityOwnershipListener {
         private final OvsdbConnectionManager cm;
         private final EntityOwnershipListenerRegistration listenerRegistration;
 

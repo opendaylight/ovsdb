@@ -10,6 +10,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +57,7 @@ public class QosUpdateCommand implements TransactCommand {
                 instanceIdentifierCodec);
     }
 
+    @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Map<InstanceIdentifier<QosEntries>, QosEntries> createdOrUpdated,
             final InstanceIdentifierCodec instanceIdentifierCodec) {

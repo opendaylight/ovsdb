@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -48,6 +49,7 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
                 instanceIdentifierCodec);
     }
 
+    @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private static void execute(final TransactionBuilder transaction,
             final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated,
             final InstanceIdentifierCodec instanceIdentifierCodec) {

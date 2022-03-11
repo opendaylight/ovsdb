@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContextListener;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
-public class InstanceIdentifierCodec
+public final class InstanceIdentifierCodec
         // FIXME: this really wants to be wired as yangtools-data-codec-gson's codecs, because ...
         extends AbstractModuleStringInstanceIdentifierCodec implements EffectiveModelContextListener {
 

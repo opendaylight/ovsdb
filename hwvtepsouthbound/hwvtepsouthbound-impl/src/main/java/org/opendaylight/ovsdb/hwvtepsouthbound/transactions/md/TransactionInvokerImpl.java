@@ -11,6 +11,7 @@ import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -34,8 +35,8 @@ import org.slf4j.LoggerFactory;
  * Copied over as-is from southbound plugin. Good candidate to be common
  * when refactoring code.
  */
-public class TransactionInvokerImpl implements TransactionInvoker,TransactionChainListener, Runnable, AutoCloseable,
-        Thread.UncaughtExceptionHandler {
+public final class TransactionInvokerImpl implements TransactionInvoker, TransactionChainListener, Runnable,
+        AutoCloseable, UncaughtExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionInvokerImpl.class);
     private static final int QUEUE_SIZE = 10000;
 

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * Once an instance is created one must invoke the registerDataChangeListener method
  * with a DataBroker.
  */
-public class NotifyingDataChangeListener implements AutoCloseable, DataTreeChangeListener<DataObject> {
+public final class NotifyingDataChangeListener implements AutoCloseable, DataTreeChangeListener<DataObject> {
     private static final Logger LOG = LoggerFactory.getLogger(NotifyingDataChangeListener.class);
     private static final int RETRY_WAIT = 100;
     private static final int MDSAL_TIMEOUT_OPERATIONAL = 10000;

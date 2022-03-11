@@ -26,9 +26,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HwvtepReconciliationManager implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
-
+public final class HwvtepReconciliationManager implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepReconciliationManager.class);
+
     private final ListenerRegistration<HwvtepReconciliationManager> registration;
     private final HwvtepConnectionManager hcm;
 

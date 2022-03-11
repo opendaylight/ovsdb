@@ -28,7 +28,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PlainLogicalSwitchRemoveCmd
+public final class PlainLogicalSwitchRemoveCmd
         extends AbstractTransactCommand<LogicalSwitches, LogicalSwitchesKey, HwvtepGlobalAugmentation> {
     private static final Logger LOG = LoggerFactory.getLogger(PlainLogicalSwitchRemoveCmd.class);
 

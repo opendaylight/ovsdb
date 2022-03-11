@@ -66,7 +66,7 @@ import org.opendaylight.yangtools.yang.common.Uint16;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand {
+public final class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepPhysicalPortUpdateCommand.class);
     private final Map<UUID, PhysicalPort> updatedPPRows;

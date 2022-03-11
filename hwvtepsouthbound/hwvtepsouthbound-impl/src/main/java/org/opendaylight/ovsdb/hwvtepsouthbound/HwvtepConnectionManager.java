@@ -673,7 +673,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         return entityConnectionMap.get(entity);
     }
 
-    private static class HwvtepDeviceEntityOwnershipListener implements EntityOwnershipListener {
+    private static final class HwvtepDeviceEntityOwnershipListener implements EntityOwnershipListener {
         private final HwvtepConnectionManager hcm;
         private final EntityOwnershipListenerRegistration listenerRegistration;
 

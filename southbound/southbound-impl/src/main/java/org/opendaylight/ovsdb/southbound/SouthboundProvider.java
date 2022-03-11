@@ -60,6 +60,10 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     // FIXME: get rid of this static
     @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
     private static DataBroker db;
+    // FIXME: get rid of this static
+    private static List<String> reconcileBridgeInclusionList = new ArrayList<>();
+    // FIXME: get rid of this static
+    private static List<String> reconcileBridgeExclusionList = new ArrayList<>();
 
     public static DataBroker getDb() {
         return db;
@@ -79,8 +83,6 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     private final AtomicBoolean registered = new AtomicBoolean(false);
     private ListenerRegistration<SouthboundProvider> operTopologyRegistration;
     private final OvsdbDiagStatusProvider ovsdbStatusProvider;
-    private static List<String> reconcileBridgeInclusionList = new ArrayList<>();
-    private static List<String> reconcileBridgeExclusionList = new ArrayList<>();
     private OvsdbUpgradeStateListener ovsdbUpgradeStateListener;
 
     @Inject
@@ -215,7 +217,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         }
     }
 
-    private static class SouthboundPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {
+    private static final class SouthboundPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {
         private final SouthboundProvider sp;
         private final EntityOwnershipListenerRegistration listenerRegistration;
 
@@ -244,10 +246,12 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         }
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_STATIC_REP2")
     public static void setBridgesReconciliationInclusionList(final List<String> bridgeList) {
         reconcileBridgeInclusionList = bridgeList;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_STATIC_REP2")
     public static void setBridgesReconciliationExclusionList(final List<String> bridgeList) {
         reconcileBridgeExclusionList = bridgeList;
     }

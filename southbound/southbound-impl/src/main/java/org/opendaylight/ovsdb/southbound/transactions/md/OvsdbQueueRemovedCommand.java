@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +37,8 @@ public class OvsdbQueueRemovedCommand extends AbstractTransactionCommand {
 
     private final Map<UUID, Queue> removedQueueRows;
 
-    public OvsdbQueueRemovedCommand(OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Non-final for mocking")
+    public OvsdbQueueRemovedCommand(OvsdbConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         removedQueueRows = TyperUtils.extractRowsRemoved(Queue.class, getUpdates(), getDbSchema());
     }

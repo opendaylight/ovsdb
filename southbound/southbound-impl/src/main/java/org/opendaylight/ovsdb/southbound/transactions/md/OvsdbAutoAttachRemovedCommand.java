@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Map;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
@@ -34,8 +35,8 @@ public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
 
     private final Map<UUID, AutoAttach> removedAutoAttachRows;
 
-    public OvsdbAutoAttachRemovedCommand(OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Non-final for mocking")
+    public OvsdbAutoAttachRemovedCommand(OvsdbConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         removedAutoAttachRows = TyperUtils.extractRowsRemoved(AutoAttach.class, getUpdates(), getDbSchema());
     }

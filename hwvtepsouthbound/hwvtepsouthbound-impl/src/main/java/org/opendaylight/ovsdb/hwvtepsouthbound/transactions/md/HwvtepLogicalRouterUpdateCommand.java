@@ -55,8 +55,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand {
+public final class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepLogicalRouterUpdateCommand.class);
+
     private final Map<UUID, LogicalRouter> updatedLRRows;
 
     public HwvtepLogicalRouterUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,

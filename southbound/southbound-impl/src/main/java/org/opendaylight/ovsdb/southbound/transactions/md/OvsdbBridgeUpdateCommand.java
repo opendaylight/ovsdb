@@ -12,6 +12,7 @@ import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.net.InetAddresses;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -77,6 +78,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     private final List<InstanceIdentifier<Node>> updatedBridges = new ArrayList<>();
     private final Map<NodeId, Node> updatedBridgeNodes;
 
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Non-final for mocking")
     public OvsdbBridgeUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema,
                                     Map<NodeId, Node> updatedBridgeNodes) {

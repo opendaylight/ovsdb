@@ -11,6 +11,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -219,6 +220,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
+    @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private static void updateInterfaceOptions(final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -233,6 +235,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
+    @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private static void updateInterfaceExternalIds(final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -253,6 +256,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
+    @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private static void updateInterfaceLldp(final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
         try {
@@ -271,6 +275,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
+    @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private static void updateInterfaceOtherConfig(final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -290,6 +295,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
+    @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private static void updateInterfaceBfd(final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
 
@@ -321,6 +327,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
+    @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private static void updatePortExternalIds(final OvsdbTerminationPointAugmentation terminationPoint,
             final Port port, final String opendaylightIid) {
 
@@ -366,6 +373,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
+    @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private static void updatePortOtherConfig(final OvsdbTerminationPointAugmentation terminationPoint,
             final Port ovsPort) {
         Map<PortOtherConfigsKey, PortOtherConfigs> portOtherConfigs =

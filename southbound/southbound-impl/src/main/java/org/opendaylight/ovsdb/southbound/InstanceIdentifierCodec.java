@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -32,6 +33,7 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
     private DataSchemaContextTree dataSchemaContextTree;
     private SchemaContext context;
 
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Non-final for mocking")
     public InstanceIdentifierCodec(final DOMSchemaService schemaService,
             final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
         schemaService.registerSchemaContextListener(this);

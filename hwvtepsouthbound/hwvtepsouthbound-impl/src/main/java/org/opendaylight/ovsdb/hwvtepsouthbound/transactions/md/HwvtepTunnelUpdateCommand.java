@@ -38,9 +38,9 @@ import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
-
+public final class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepTunnelUpdateCommand.class);
+
     private Map<UUID, Tunnel> updatedTunnelRows;
 
     public HwvtepTunnelUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {

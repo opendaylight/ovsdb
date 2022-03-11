@@ -5,9 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.utils.ovsdb.it.utils;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
 
 import com.esotericsoftware.yamlbeans.YamlException;
@@ -36,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.Assert;
 import org.ops4j.pax.exam.Option;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -95,7 +95,7 @@ import org.slf4j.LoggerFactory;
  * When DockerOvs does not run docker-compose getOvsdbAddress and getOvsdbPort return the address and port specified in
  * the system properties.
  */
-public class DockerOvs implements AutoCloseable {
+public final class DockerOvs implements AutoCloseable {
     private static String ENV_USAGE = "Usage:\n"
         + "-Ddocker.run - explicitly configure whether or not DockerOvs should run docker-compose\n"
         + "-Dovsdbserver.ipaddress - specify IP address of ovsdb server - implies -Ddocker.run=false\n"
@@ -256,9 +256,9 @@ public class DockerOvs implements AutoCloseable {
         //At this point we know we're not running docker and the conn type is active - make sure we have what we need
         //If we have a server address than we require a port too as those
         //are returned in getOvsdbPort() and getOvsdbAddress()
-        Assert.assertNotNull("Attempt to connect to previous running ovs but missing -Dovsdbserver.ipaddress\n"
+        assertNotNull("Attempt to connect to previous running ovs but missing -Dovsdbserver.ipaddress\n"
                                                                                     + ENV_USAGE, envServerAddress);
-        Assert.assertNotNull("Attempt to connect to previous running ovs but missing -Dovsdbserver.port\n"
+        assertNotNull("Attempt to connect to previous running ovs but missing -Dovsdbserver.port\n"
                 + ENV_USAGE, envServerPort);
     }
 
@@ -284,7 +284,7 @@ public class DockerOvs implements AutoCloseable {
         } else if (0 == ProcUtils.tryProcess(null, 5000, psCmd)) {
             LOG.info("DockerOvs.buildDockerCommands docker-compose requires sudo");
         } else {
-            Assert.fail("docker-compose does not seem to work with or without sudo");
+            fail("docker-compose does not seem to work with or without sudo");
         }
 
         if (0 == ProcUtils.tryProcess(null, 5000, dockerPsCmdNoSudo)) {
@@ -294,7 +294,7 @@ public class DockerOvs implements AutoCloseable {
         } else if (0 == ProcUtils.tryProcess(null, 5000, dockerPsCmd)) {
             LOG.info("DockerOvs.buildDockerCommands docker requires sudo");
         } else {
-            Assert.fail("docker does not seem to work with or without sudo");
+            fail("docker does not seem to work with or without sudo");
         }
     }
 
@@ -603,9 +603,9 @@ public class DockerOvs implements AutoCloseable {
      */
     private File createTempDockerComposeFile(String yamlFileName) {
         Bundle bundle = FrameworkUtil.getBundle(this.getClass());
-        Assert.assertNotNull("DockerOvs: bundle is null", bundle);
+        assertNotNull("DockerOvs: bundle is null", bundle);
         URL url = bundle.getResource(envDockerComposeFile);
-        Assert.assertNotNull("DockerOvs: URL is null", url);
+        assertNotNull("DockerOvs: URL is null", url);
 
         File tmpFile = null;
         try {
@@ -621,7 +621,7 @@ public class DockerOvs implements AutoCloseable {
             }
 
         } catch (IOException e) {
-            Assert.fail(e.toString());
+            fail(e.toString());
         }
 
         return tmpFile;

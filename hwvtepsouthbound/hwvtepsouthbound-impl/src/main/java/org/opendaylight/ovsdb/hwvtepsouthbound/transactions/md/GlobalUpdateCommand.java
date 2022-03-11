@@ -32,7 +32,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GlobalUpdateCommand extends AbstractTransactionCommand {
+public final class GlobalUpdateCommand extends AbstractTransactionCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(GlobalUpdateCommand.class);
     private final Map<UUID, Global> updatedHwvtepRows =

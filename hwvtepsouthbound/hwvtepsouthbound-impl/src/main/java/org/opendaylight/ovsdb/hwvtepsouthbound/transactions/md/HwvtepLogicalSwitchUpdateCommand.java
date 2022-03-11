@@ -36,10 +36,10 @@ import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand {
+public final class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionCommand {
+    private static final Logger LOG = LoggerFactory.getLogger(HwvtepLogicalSwitchUpdateCommand.class);
 
     private final Map<UUID, LogicalSwitch> updatedLSRows;
-    private static final Logger LOG = LoggerFactory.getLogger(HwvtepLogicalSwitchUpdateCommand.class);
 
     public HwvtepLogicalSwitchUpdateCommand(HwvtepConnectionInstance key, TableUpdates updates,
             DatabaseSchema dbSchema) {

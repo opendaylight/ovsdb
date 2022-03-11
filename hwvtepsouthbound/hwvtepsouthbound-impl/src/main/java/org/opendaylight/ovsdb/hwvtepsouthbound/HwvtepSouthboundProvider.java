@@ -221,7 +221,7 @@ public class HwvtepSouthboundProvider
         }
     }
 
-    private static class HwvtepsbPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {
+    private static final class HwvtepsbPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {
         private final HwvtepSouthboundProvider hsp;
         private final EntityOwnershipListenerRegistration listenerRegistration;
 

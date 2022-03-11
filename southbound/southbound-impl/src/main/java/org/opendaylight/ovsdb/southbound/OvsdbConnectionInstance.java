@@ -243,34 +243,21 @@ public class OvsdbConnectionInstance {
             stampInstanceIdentifier(transaction, instanceIdentifier.firstIdentifierOf(Node.class),
                     instanceIdentifierCodec);
 
-            try {
-                ovs.setExternalIds(
-                        YangUtils.convertYangKeyValueListToMap(externalIds, OpenvswitchExternalIds::getExternalIdKey,
-                                OpenvswitchExternalIds::getExternalIdValue));
-                Mutate<GenericTableSchema> mutate = op.mutate(ovs)
-                            .addMutation(ovs.getExternalIdsColumn().getSchema(),
-                                Mutator.INSERT,
-                                ovs.getExternalIdsColumn().getData());
-                transaction.add(mutate);
-            } catch (NullPointerException e) {
-                LOG.warn("Incomplete OVSDB Node external IDs", e);
-            }
-
-
+            ovs.setExternalIds(
+                YangUtils.convertYangKeyValueListToMap(externalIds, OpenvswitchExternalIds::requireExternalIdKey,
+                    OpenvswitchExternalIds::requireExternalIdValue));
+            Mutate<GenericTableSchema> mutate = op.mutate(ovs)
+                .addMutation(ovs.getExternalIdsColumn().getSchema(),
+                    Mutator.INSERT, ovs.getExternalIdsColumn().getData());
+            transaction.add(mutate);
 
             Map<OpenvswitchOtherConfigsKey, OpenvswitchOtherConfigs> otherConfigs =
                     initialCreateData.getOpenvswitchOtherConfigs();
             if (otherConfigs != null) {
-                try {
-                    ovs.setOtherConfig(YangUtils.convertYangKeyValueListToMap(otherConfigs,
-                            OpenvswitchOtherConfigs::getOtherConfigKey,
-                            OpenvswitchOtherConfigs::getOtherConfigValue));
-                    transaction.add(op.mutate(ovs).addMutation(ovs.getOtherConfigColumn().getSchema(),
-                        Mutator.INSERT,
-                        ovs.getOtherConfigColumn().getData()));
-                } catch (NullPointerException e) {
-                    LOG.warn("Incomplete OVSDB Node other_config", e);
-                }
+                ovs.setOtherConfig(YangUtils.convertYangKeyValueListToMap(otherConfigs,
+                    OpenvswitchOtherConfigs::requireOtherConfigKey, OpenvswitchOtherConfigs::requireOtherConfigValue));
+                transaction.add(op.mutate(ovs).addMutation(ovs.getOtherConfigColumn().getSchema(),
+                    Mutator.INSERT, ovs.getOtherConfigColumn().getData()));
             }
 
             invoke(transaction);

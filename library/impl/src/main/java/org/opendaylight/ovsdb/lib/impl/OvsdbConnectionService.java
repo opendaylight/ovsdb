@@ -13,7 +13,6 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -435,8 +434,6 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         }, CONNECTION_NOTIFIER_SERVICE);
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private static void handleNewPassiveConnection(final Channel channel) {
         if (!channel.isOpen()) {
             LOG.warn("Channel {} is not open, skipped further processing of the connection.",channel);
@@ -564,8 +561,6 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
         return null;
     }
 
-    @SuppressFBWarnings(value = "UPM_UNCALLED_PRIVATE_METHOD",
-            justification = "https://github.com/spotbugs/spotbugs/issues/811")
     private static List<OvsdbClient> getPassiveClientsFromSameNode(final OvsdbClient ovsdbClient) {
         List<OvsdbClient> passiveClients = new ArrayList<>();
         for (OvsdbClient client : CONNECTIONS.keySet()) {

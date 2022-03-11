@@ -5,14 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.utils.ovsdb.it.utils;
+
+import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +23,7 @@ public final class ProcUtils {
     private static final Logger LOG = LoggerFactory.getLogger(ProcUtils.class);
 
     private ProcUtils() {
+        // Hidden on purpose
     }
 
      /**
@@ -32,8 +33,7 @@ public final class ProcUtils {
      * @throws IOException if something goes wrong on the IO end
      * @throws InterruptedException If this thread is interrupted
      */
-    public static void runProcess(long waitFor, String... words) throws
-            IOException, InterruptedException {
+    public static void runProcess(long waitFor, String... words) throws IOException, InterruptedException {
         runProcess(waitFor, null, words);
     }
 
@@ -48,7 +48,7 @@ public final class ProcUtils {
     public static void runProcess(long waitFor, StringBuilder capturedStdout, String... words)
             throws IOException, InterruptedException {
         int exitValue = tryProcess(null, waitFor, capturedStdout, words);
-        Assert.assertEquals("ProcUtils.runProcess exit code is not 0", 0, exitValue);
+        assertEquals("ProcUtils.runProcess exit code is not 0", 0, exitValue);
     }
 
     public static int runProcess(int reserved, long waitFor, StringBuilder capturedStdout, String... words)
@@ -83,8 +83,8 @@ public final class ProcUtils {
     public static int tryProcess(String logText, long waitFor, StringBuilder capturedStdout, String... words)
             throws IOException, InterruptedException {
 
-        LOG.info("ProcUtils.runProcess {} running \"{}\", waitFor {}",
-                logText != null ? logText : "", words, waitFor);
+        final String procName = logText != null ? logText : "";
+        LOG.info("ProcUtils.runProcess {} running \"{}\", waitFor {}", procName, words, waitFor);
 
         Process proc = new ProcessBuilder(words).start();
         int exitValue = -1;
@@ -98,8 +98,7 @@ public final class ProcUtils {
             exitValue = waitForExitValue(waitFor, proc);
 
             while (stderr.ready()) {
-                LOG.warn("ProcUtils.runProcess {} [stderr]: {}",
-                        logText != null ? logText : "", stderr.readLine());
+                LOG.warn("ProcUtils.runProcess {} [stderr]: {}", procName, stderr.readLine());
             }
 
             StringBuilder stdoutStringBuilder = capturedStdout != null ? capturedStdout : new StringBuilder();
@@ -109,8 +108,7 @@ public final class ProcUtils {
                 stdoutStringBuilder.append(buf, 0, read);
             }
 
-            LOG.info("ProcUtils.runProcess {} [stdout]:\n{}",
-                    logText != null ? logText : "", stdoutStringBuilder.toString());
+            LOG.info("ProcUtils.runProcess {} [stdout]:\n{}", procName, stdoutStringBuilder.toString());
         }
 
         return exitValue;

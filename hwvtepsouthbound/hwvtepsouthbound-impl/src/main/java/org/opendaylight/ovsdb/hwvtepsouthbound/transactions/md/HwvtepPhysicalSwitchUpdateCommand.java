@@ -58,9 +58,9 @@ import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
-
+public final class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepPhysicalSwitchUpdateCommand.class);
+
     private final Map<UUID, PhysicalSwitch> updatedPSRows;
     private Map<UUID, Tunnel> updatedTunnelRows;
     private final Map<UUID, PhysicalSwitch> oldPSRows;

@@ -27,9 +27,9 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HwvtepTunnelRemoveCommand extends AbstractTransactionCommand {
-
+public final class HwvtepTunnelRemoveCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepTunnelRemoveCommand.class);
+
     Collection<Tunnel> deletedTunnelRows = null;
 
     public HwvtepTunnelRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {

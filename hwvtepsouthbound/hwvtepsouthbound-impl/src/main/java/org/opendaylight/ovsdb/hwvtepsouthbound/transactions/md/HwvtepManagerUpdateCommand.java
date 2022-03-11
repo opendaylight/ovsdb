@@ -35,9 +35,9 @@ import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HwvtepManagerUpdateCommand extends AbstractTransactionCommand {
-
+public final class HwvtepManagerUpdateCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepManagerUpdateCommand.class);
+
     private final Map<UUID, Manager> updatedMgrRows;
     private final Map<UUID, Manager> oldMgrRows;
 

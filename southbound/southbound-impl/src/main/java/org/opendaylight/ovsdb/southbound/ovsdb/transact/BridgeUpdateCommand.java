@@ -9,12 +9,14 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -39,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BridgeUpdateCommand implements TransactCommand {
-
     private static final Logger LOG = LoggerFactory.getLogger(BridgeUpdateCommand.class);
 
     @Override
@@ -124,6 +125,7 @@ public class BridgeUpdateCommand implements TransactCommand {
         }
     }
 
+    @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private static void setOpenDaylightExternalIds(final Bridge bridge,
             final InstanceIdentifier<OvsdbBridgeAugmentation> iid, final OvsdbBridgeAugmentation ovsdbManagedNode,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
@@ -140,6 +142,7 @@ public class BridgeUpdateCommand implements TransactCommand {
         bridge.setExternalIds(externalIdMap);
     }
 
+    @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private static void setOpenDaylightOtherConfig(final @NonNull Bridge bridge,
             final @NonNull OvsdbBridgeAugmentation ovsdbManagedNode) {
         try {
@@ -158,9 +161,9 @@ public class BridgeUpdateCommand implements TransactCommand {
         String portNamedUuid = "Port_" + SouthboundMapper.getRandomUuid();
         Port port = transaction.getTypedRowWrapper(Port.class);
         port.setName(ovsdbManagedNode.getBridgeName().getValue());
-        port.setInterfaces(Collections.singleton(TransactUtils.extractNamedUuid(interfaceInsert)));
+        port.setInterfaces(Set.of(TransactUtils.extractNamedUuid(interfaceInsert)));
         transaction.add(op.insert(port).withId(portNamedUuid));
-        bridge.setPorts(Collections.singleton(new UUID(portNamedUuid)));
+        bridge.setPorts(Set.of(new UUID(portNamedUuid)));
     }
 
     private static Insert<GenericTableSchema> setInterface(final TransactionBuilder transaction,
@@ -179,7 +182,7 @@ public class BridgeUpdateCommand implements TransactCommand {
             final OvsdbBridgeAugmentation ovsdbManagedNode) {
         if (ovsdbManagedNode.getFailMode() != null
                 && SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode()) != null) {
-            bridge.setFailMode(Collections.singleton(
+            bridge.setFailMode(Set.of(
                     SouthboundConstants.OVSDB_FAIL_MODE_MAP.get(ovsdbManagedNode.getFailMode())));
         }
     }

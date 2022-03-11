@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,8 +45,8 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
     private final Map<UUID, AutoAttach> updatedAutoAttachRows;
     private final Map<UUID, AutoAttach> oldAutoAttachRows;
 
-    public OvsdbAutoAttachUpdateCommand(OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Non-final for mocking")
+    public OvsdbAutoAttachUpdateCommand(OvsdbConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedAutoAttachRows = TyperUtils.extractRowsUpdated(AutoAttach.class, getUpdates(), getDbSchema());
         oldAutoAttachRows = TyperUtils.extractRowsOld(AutoAttach.class, getUpdates(), getDbSchema());

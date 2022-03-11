@@ -40,7 +40,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransactionCommand {
+public final class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransactionCommand {
 
     private final Map<UUID, McastMacsLocal> updatedMMacsLocalRows;
     private final Map<UUID, PhysicalLocatorSet> updatedPLocSetRows;

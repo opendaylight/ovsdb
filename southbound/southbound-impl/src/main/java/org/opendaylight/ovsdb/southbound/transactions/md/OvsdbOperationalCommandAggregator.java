@@ -8,6 +8,7 @@
 
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,9 +66,10 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
         }
     }
 
+    @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        for (TransactionCommand command: commands) {
+        for (TransactionCommand command : commands) {
             try {
                 command.execute(transaction);
             } catch (NullPointerException | NoSuchElementException | ClassCastException e) {
@@ -78,7 +80,7 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
 
     @Override
     public void onSuccess() {
-        for (TransactionCommand command: commands) {
+        for (TransactionCommand command : commands) {
             command.onSuccess();
         }
     }

@@ -159,7 +159,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
-import org.opendaylight.yangtools.concepts.Builder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.Identifier;
@@ -2678,45 +2677,28 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         private static final int COUNTER_START = 0;
         private int counter = COUNTER_START;
 
-        protected abstract Builder<T> builder();
-
-        protected abstract void setKey(Builder<T> builder, String key);
-
-        protected abstract void setValue(Builder<T> builder, String value);
-
         protected abstract boolean isValueMandatory();
 
         public final T build(final String testName, final String key, final String value) {
-            final Builder<T> builder = builder();
-            this.counter++;
-            if (key != null) {
-                setKey(builder, String.format(FORMAT_STR, testName, key, this.counter));
-            }
-            if (value != null) {
-                setValue(builder, String.format(FORMAT_STR, testName, value, this.counter));
-            }
-            return builder.build();
+            counter++;
+            return build(key == null ? null : String.format(FORMAT_STR, testName, key, counter),
+                value != null ? null : String.format(FORMAT_STR, testName, value, counter));
         }
 
+        abstract @NonNull T build(@Nullable String key, @Nullable String value);
+
         public final void reset() {
-            this.counter = COUNTER_START;
+            counter = COUNTER_START;
         }
     }
 
     private static final class SouthboundQueuesExternalIdsBuilder extends KeyValueBuilder<QueuesExternalIds> {
         @Override
-        protected Builder<QueuesExternalIds> builder() {
-            return new QueuesExternalIdsBuilder();
-        }
-
-        @Override
-        protected void setKey(final Builder<QueuesExternalIds> builder, final String key) {
-            ((QueuesExternalIdsBuilder) builder).setQueuesExternalIdKey(key);
-        }
-
-        @Override
-        protected void setValue(final Builder<QueuesExternalIds> builder, final String value) {
-            ((QueuesExternalIdsBuilder) builder).setQueuesExternalIdValue(value);
+        QueuesExternalIds build(final String key, final String value) {
+            return new QueuesExternalIdsBuilder()
+                .setQueuesExternalIdKey(key)
+                .setQueuesExternalIdValue(value)
+                .build();
         }
 
         @Override
@@ -2727,18 +2709,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static final class SouthboundQueuesOtherConfigBuilder extends KeyValueBuilder<QueuesOtherConfig> {
         @Override
-        protected Builder<QueuesOtherConfig> builder() {
-            return new QueuesOtherConfigBuilder();
-        }
-
-        @Override
-        protected void setKey(final Builder<QueuesOtherConfig> builder, final String key) {
-            ((QueuesOtherConfigBuilder) builder).setQueueOtherConfigKey(key);
-        }
-
-        @Override
-        protected void setValue(final Builder<QueuesOtherConfig> builder, final String value) {
-            ((QueuesOtherConfigBuilder) builder).setQueueOtherConfigValue(value);
+        QueuesOtherConfig build(final String key, final String value) {
+            return new QueuesOtherConfigBuilder()
+                .setQueueOtherConfigKey(key)
+                .setQueueOtherConfigValue(value)
+                .build();
         }
 
         @Override
@@ -2749,18 +2724,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static final class SouthboundQosExternalIdsBuilder extends KeyValueBuilder<QosExternalIds> {
         @Override
-        protected Builder<QosExternalIds> builder() {
-            return new QosExternalIdsBuilder();
-        }
-
-        @Override
-        protected void setKey(final Builder<QosExternalIds> builder, final String key) {
-            ((QosExternalIdsBuilder) builder).setQosExternalIdKey(key);
-        }
-
-        @Override
-        protected void setValue(final Builder<QosExternalIds> builder, final String value) {
-            ((QosExternalIdsBuilder) builder).setQosExternalIdValue(value);
+        QosExternalIds build(final String key, final String value) {
+            return new QosExternalIdsBuilder()
+                .setQosExternalIdKey(key)
+                .setQosExternalIdValue(value)
+                .build();
         }
 
         @Override
@@ -2771,18 +2739,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static final class SouthboundQosOtherConfigBuilder extends KeyValueBuilder<QosOtherConfig> {
         @Override
-        protected Builder<QosOtherConfig> builder() {
-            return new QosOtherConfigBuilder();
-        }
-
-        @Override
-        protected void setKey(final Builder<QosOtherConfig> builder, final String key) {
-            ((QosOtherConfigBuilder) builder).setOtherConfigKey(key);
-        }
-
-        @Override
-        protected void setValue(final Builder<QosOtherConfig> builder, final String value) {
-            ((QosOtherConfigBuilder) builder).setOtherConfigValue(value);
+        QosOtherConfig build(final String key, final String value) {
+            return new QosOtherConfigBuilder()
+                .setOtherConfigKey(key)
+                .setOtherConfigValue(value)
+                .build();
         }
 
         @Override
@@ -2793,18 +2754,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static final class SouthboundPortExternalIdsBuilder extends KeyValueBuilder<PortExternalIds> {
         @Override
-        protected Builder<PortExternalIds> builder() {
-            return new PortExternalIdsBuilder();
-        }
-
-        @Override
-        protected void setKey(final Builder<PortExternalIds> builder, final String key) {
-            ((PortExternalIdsBuilder) builder).setExternalIdKey(key);
-        }
-
-        @Override
-        protected void setValue(final Builder<PortExternalIds> builder, final String value) {
-            ((PortExternalIdsBuilder) builder).setExternalIdValue(value);
+        PortExternalIds build(final String key, final String value) {
+            return new PortExternalIdsBuilder()
+                .setExternalIdKey(key)
+                .setExternalIdValue(value)
+                .build();
         }
 
         @Override
@@ -2815,18 +2769,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static final class SouthboundInterfaceExternalIdsBuilder extends KeyValueBuilder<InterfaceExternalIds> {
         @Override
-        protected Builder<InterfaceExternalIds> builder() {
-            return new InterfaceExternalIdsBuilder();
-        }
-
-        @Override
-        protected void setKey(final Builder<InterfaceExternalIds> builder, final String key) {
-            ((InterfaceExternalIdsBuilder) builder).setExternalIdKey(key);
-        }
-
-        @Override
-        protected void setValue(final Builder<InterfaceExternalIds> builder, final String value) {
-            ((InterfaceExternalIdsBuilder) builder).setExternalIdValue(value);
+        InterfaceExternalIds build(final String key, final String value) {
+            return new InterfaceExternalIdsBuilder()
+                .setExternalIdKey(key)
+                .setExternalIdValue(value)
+                .build();
         }
 
         @Override
@@ -2837,18 +2784,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static final class SouthboundInterfaceLldpBuilder extends KeyValueBuilder<InterfaceLldp> {
         @Override
-        protected Builder<InterfaceLldp> builder() {
-            return new InterfaceLldpBuilder();
-        }
-
-        @Override
-        protected void setKey(final Builder<InterfaceLldp> builder, final String key) {
-            ((InterfaceLldpBuilder) builder).setLldpKey(key);
-        }
-
-        @Override
-        protected void setValue(final Builder<InterfaceLldp> builder, final String value) {
-            ((InterfaceLldpBuilder) builder).setLldpValue(value);
+        InterfaceLldp build(final String key, final String value) {
+            return new InterfaceLldpBuilder()
+                .setLldpKey(key)
+                .setLldpValue(value)
+                .build();
         }
 
         @Override
@@ -2859,18 +2799,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static final class SouthboundOptionsBuilder extends KeyValueBuilder<Options> {
         @Override
-        protected Builder<Options> builder() {
-            return new OptionsBuilder();
-        }
-
-        @Override
-        protected void setKey(final Builder<Options> builder, final String key) {
-            ((OptionsBuilder) builder).setOption(key);
-        }
-
-        @Override
-        protected void setValue(final Builder<Options> builder, final String value) {
-            ((OptionsBuilder) builder).setValue(value);
+        Options build(final String key, final String value) {
+            return new OptionsBuilder()
+                .setOption(key)
+                .setValue(value)
+                .build();
         }
 
         @Override
@@ -2881,18 +2814,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static final class SouthboundInterfaceOtherConfigsBuilder extends KeyValueBuilder<InterfaceOtherConfigs> {
         @Override
-        protected Builder<InterfaceOtherConfigs> builder() {
-            return new InterfaceOtherConfigsBuilder();
-        }
-
-        @Override
-        protected void setKey(final Builder<InterfaceOtherConfigs> builder, final String key) {
-            ((InterfaceOtherConfigsBuilder) builder).setOtherConfigKey(key);
-        }
-
-        @Override
-        protected void setValue(final Builder<InterfaceOtherConfigs> builder, final String value) {
-            ((InterfaceOtherConfigsBuilder) builder).setOtherConfigValue(value);
+        InterfaceOtherConfigs build(final String key, final String value) {
+            return new InterfaceOtherConfigsBuilder()
+                .setOtherConfigKey(key)
+                .setOtherConfigValue(value)
+                .build();
         }
 
         @Override
@@ -2903,18 +2829,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static final class SouthboundPortOtherConfigsBuilder extends KeyValueBuilder<PortOtherConfigs> {
         @Override
-        protected Builder<PortOtherConfigs> builder() {
-            return new PortOtherConfigsBuilder();
-        }
-
-        @Override
-        protected void setKey(final Builder<PortOtherConfigs> builder, final String key) {
-            ((PortOtherConfigsBuilder) builder).setOtherConfigKey(key);
-        }
-
-        @Override
-        protected void setValue(final Builder<PortOtherConfigs> builder, final String value) {
-            ((PortOtherConfigsBuilder) builder).setOtherConfigValue(value);
+        PortOtherConfigs build(final String key, final String value) {
+            return new PortOtherConfigsBuilder()
+                .setOtherConfigKey(key)
+                .setOtherConfigValue(value)
+                .build();
         }
 
         @Override
@@ -2925,18 +2844,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static final class SouthboundBridgeOtherConfigsBuilder extends KeyValueBuilder<BridgeOtherConfigs> {
         @Override
-        protected Builder<BridgeOtherConfigs> builder() {
-            return new BridgeOtherConfigsBuilder();
-        }
-
-        @Override
-        protected void setKey(final Builder<BridgeOtherConfigs> builder, final String key) {
-            ((BridgeOtherConfigsBuilder) builder).setBridgeOtherConfigKey(key);
-        }
-
-        @Override
-        protected void setValue(final Builder<BridgeOtherConfigs> builder, final String value) {
-            ((BridgeOtherConfigsBuilder) builder).setBridgeOtherConfigValue(value);
+        BridgeOtherConfigs build(final String key, final String value) {
+            return new BridgeOtherConfigsBuilder()
+                .setBridgeOtherConfigKey(key)
+                .setBridgeOtherConfigValue(value)
+                .build();
         }
 
         @Override
@@ -2947,18 +2859,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static final class SouthboundBridgeExternalIdsBuilder extends KeyValueBuilder<BridgeExternalIds> {
         @Override
-        protected Builder<BridgeExternalIds> builder() {
-            return new BridgeExternalIdsBuilder();
-        }
-
-        @Override
-        protected void setKey(final Builder<BridgeExternalIds> builder, final String key) {
-            ((BridgeExternalIdsBuilder) builder).setBridgeExternalIdKey(key);
-        }
-
-        @Override
-        protected void setValue(final Builder<BridgeExternalIds> builder, final String value) {
-            ((BridgeExternalIdsBuilder) builder).setBridgeExternalIdValue(value);
+        BridgeExternalIds build(final String key, final String value) {
+            return new BridgeExternalIdsBuilder()
+                .setBridgeExternalIdKey(key)
+                .setBridgeExternalIdValue(value)
+                .build();
         }
 
         @Override

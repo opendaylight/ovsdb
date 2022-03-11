@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Data-tree change listener for OVSDB.
  */
-public class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
+public final class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
 
     /** Our registration. */
     private final ListenerRegistration<DataTreeChangeListener<Node>> registration;

@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -51,6 +52,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
     private final Map<UUID, Queue> updatedQueueRows;
     private final Map<UUID, Queue> oldQueueRows;
 
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Non-final for mocking")
     public OvsdbQueueUpdateCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
             TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);

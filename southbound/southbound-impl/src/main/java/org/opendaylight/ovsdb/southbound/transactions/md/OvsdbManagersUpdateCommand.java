@@ -8,6 +8,7 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import com.google.common.annotations.VisibleForTesting;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +44,8 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
     private Map<UUID, Manager> updatedManagerRows;
     private Map<UUID, OpenVSwitch> updatedOpenVSwitchRows;
 
-    public OvsdbManagersUpdateCommand(OvsdbConnectionInstance key,
-            TableUpdates updates, DatabaseSchema dbSchema) {
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Non-final for mocking")
+    public OvsdbManagersUpdateCommand(OvsdbConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         updatedOpenVSwitchRows = TyperUtils.extractRowsUpdated(OpenVSwitch.class, getUpdates(), getDbSchema());
         updatedManagerRows = TyperUtils.extractRowsUpdated(Manager.class,getUpdates(), getDbSchema());

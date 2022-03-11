@@ -70,13 +70,8 @@ public class TransactCommandAggregator implements TransactCommand {
 
     @Override
     public void execute(TransactionBuilder transaction) {
-        for (TransactCommand command:commands) {
-            try {
-                command.execute(transaction);
-            } catch (NullPointerException e) {
-                LOG.error("Execution of command {} failed with the following exception."
-                        + " Continuing the execution of remaining commands", command, e);
-            }
+        for (TransactCommand command : commands) {
+            command.execute(transaction);
         }
     }
 

@@ -62,11 +62,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>library</artifactId>
       <version>${project.version}</version>
     </dependency>
-      <dependency>
-          <groupId>org.apache.karaf.shell</groupId>
-          <artifactId>org.apache.karaf.shell.console</artifactId>
-          <scope>provided</scope>
-      </dependency>
+    <dependency>
+      <groupId>org.apache.karaf.shell</groupId>
+      <artifactId>org.apache.karaf.shell.console</artifactId>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>schema.hardwarevtep</artifactId>
@@ -123,6 +123,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <configuration>
           <forkCount>1</forkCount>
           <reuseForks>false</reuseForks>
+
+          <!-- FIXME: remove this once we do not muck with static final fields -->
+          <argLine>
+            @{argLine}
+            --add-opens java.base/java.lang=ALL-UNNAMED
+            --add-opens java.base/java.lang.reflect=ALL-UNNAMED
+          </argLine>
         </configuration>
       </plugin>
     </plugins>

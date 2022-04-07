@@ -18,6 +18,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.InetAddress;
@@ -76,6 +78,18 @@ import org.slf4j.LoggerFactory;
 
 public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     private static final Logger LOG = LoggerFactory.getLogger(DataChangeListenerTestBase.class);
+
+    // Hack to hack into Field.class for now
+    private static final VarHandle MODIFIERS;
+
+    static {
+        try {
+            var lookup = MethodHandles.privateLookupIn(Field.class, MethodHandles.lookup());
+            MODIFIERS = lookup.findVarHandle(Field.class, "modifiers", int.class);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     static DataBroker dataBroker;
 
@@ -138,9 +152,12 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         for (Field field : fields) {
             if (fieldName.equals(field.getName())) {
                 field.setAccessible(true);
-                Field modifiersField = Field.class.getDeclaredField("modifiers");
-                modifiersField.setAccessible(true);
-                modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+
+                final int mods = field.getModifiers();
+                if (Modifier.isFinal(mods)) {
+                    MODIFIERS.set(field, mods & ~Modifier.FINAL);
+                }
+
                 field.set(null, newValue);
                 break;
             }
@@ -260,7 +277,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         return mergeNode(logicalDatastoreType, nodeIid, nodeBuilder);
     }
 
-    void deleteData(final LogicalDatastoreType datastoreType, InstanceIdentifier<?>... iids) {
+    void deleteData(final LogicalDatastoreType datastoreType, final InstanceIdentifier<?>... iids) {
         WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
         for (InstanceIdentifier<?> id : iids) {
             transaction.delete(datastoreType, id);

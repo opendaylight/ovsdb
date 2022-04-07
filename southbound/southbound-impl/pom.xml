@@ -173,6 +173,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               <value>org.sonar.java.jacoco.JUnitListener</value>
             </property>
           </properties>
+
+          <!-- FIXME: remove this declaration once powermock is gone -->
+          <argLine>
+            @{argLine}
+            --add-opens java.base/java.lang=ALL-UNNAMED
+            --add-opens java.base/java.lang.reflect=ALL-UNNAMED
+            --add-opens java.base/java.net=ALL-UNNAMED
+            --add-opens java.base/java.util=ALL-UNNAMED
+            --add-opens java.base/java.util.concurrent=ALL-UNNAMED
+            --add-opens java.base/java.util.stream=ALL-UNNAMED
+          </argLine>
         </configuration>
       </plugin>
       <plugin>

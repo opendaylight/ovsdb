@@ -45,7 +45,7 @@ public class JsonRpcDecoder extends ByteToMessageDecoder {
     //Indicates if the frame limit warning was issued
     private boolean maxFrameLimitWasReached = false;
 
-    private final IOContext jacksonIOContext = new IOContext(new BufferRecycler(), null, false);
+    private final IOContext jacksonIOContext = new IOContext(new BufferRecycler(), (Object) null, false);
 
     // context for the previously read incomplete records
     private int lastRecordBytes = 0;

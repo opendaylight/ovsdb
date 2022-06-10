@@ -36,7 +36,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <dependency>
             <groupId>org.opendaylight.netconf</groupId>
             <artifactId>odl-restconf</artifactId>
-            <version>3.0.4</version>
+            <version>3.0.5</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

@@ -90,17 +90,17 @@ public class HwvtepOperationalState {
     public HwvtepOperationalState(final DataBroker db, final HwvtepConnectionInstance connectionInstance,
                                   final Collection<DataTreeModification<Node>> changes) {
         this.connectionInstance = connectionInstance;
-        this.deviceInfo = connectionInstance.getDeviceInfo();
+        deviceInfo = connectionInstance.getDeviceInfo();
         this.db = db;
         this.changes = changes;
-        this.transaction = db.newReadWriteTransaction();
+        transaction = db.newReadWriteTransaction();
     }
 
     public HwvtepOperationalState(final HwvtepConnectionInstance connectionInstance) {
         this.connectionInstance = connectionInstance;
-        this.deviceInfo = connectionInstance.getDeviceInfo();
-        this.db = connectionInstance.getDataBroker();
-        this.changes = null;
+        deviceInfo = connectionInstance.getDeviceInfo();
+        db = connectionInstance.getDataBroker();
+        changes = null;
         transaction = connectionInstance.getDataBroker().newReadWriteTransaction();
         Optional<Node> readNode = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL,
                 connectionInstance.getInstanceIdentifier());
@@ -256,7 +256,7 @@ public class HwvtepOperationalState {
     }
 
     public Optional<HwvtepPhysicalLocatorAugmentation> getPhysicalLocatorAugmentation(final InstanceIdentifier<?> iid,
-            final IpAddress dstIp, final Class<? extends EncapsulationTypeBase> encapType) {
+            final IpAddress dstIp, final EncapsulationTypeBase encapType) {
         Optional<Map<TerminationPointKey, TerminationPoint>> nodeOptional =
                 getTerminationPointList(requireNonNull(iid));
         if (nodeOptional.isPresent()) {

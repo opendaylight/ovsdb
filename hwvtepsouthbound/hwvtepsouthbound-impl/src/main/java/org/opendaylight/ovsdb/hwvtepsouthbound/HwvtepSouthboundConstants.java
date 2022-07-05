@@ -24,9 +24,10 @@ public interface HwvtepSouthboundConstants {
     long PORT_OPEN_MAX_DELAY_IN_MINS = 5;
     String IID_OTHER_CONFIG_KEY = "opendaylight-iid";
     String UUID = "uuid";
-    ImmutableBiMap<Class<? extends EncapsulationTypeBase>,String> ENCAPS_TYPE_MAP
-        = new ImmutableBiMap.Builder<Class<? extends EncapsulationTypeBase>,String>()
-            .put(EncapsulationTypeVxlanOverIpv4.class,"vxlan_over_ipv4").build();
+    ImmutableBiMap<EncapsulationTypeBase, String> ENCAPS_TYPE_MAP =
+        ImmutableBiMap.<EncapsulationTypeBase, String>builder()
+            .put(EncapsulationTypeVxlanOverIpv4.VALUE,"vxlan_over_ipv4")
+            .build();
     MacAddress UNKNOWN_DST_MAC = new MacAddress("00:00:00:00:00:00");
     String UNKNOWN_DST_STRING = "unknown-dst";
     String HWVTEP_URI_PREFIX = "hwvtep";

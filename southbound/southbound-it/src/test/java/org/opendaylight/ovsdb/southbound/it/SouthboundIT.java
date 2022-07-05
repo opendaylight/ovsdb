@@ -249,8 +249,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                             createdIids.add(identifier);
 
                             final DataObject obj = rootNode.getDataAfter();
-                            if (obj instanceof ManagedNodeEntry) {
-                                ManagedNodeEntry managedNodeEntry = (ManagedNodeEntry) obj;
+                            if (obj instanceof ManagedNodeEntry managedNodeEntry) {
                                 LOG.info("{} DataChanged: created managed {}",
                                         managedNodeEntry.getBridgeRef().getValue());
                                 createdIids.add(managedNodeEntry.getBridgeRef().getValue());
@@ -378,9 +377,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     protected String usage() {
-        return "Integration Test needs a valid connection configuration as follows :\n"
-                + "active connection : mvn -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=yyyy verify\n"
-                + "passive connection : mvn -Dovsdbserver.connection=passive verify\n";
+        return """
+            Integration Test needs a valid connection configuration as follows :
+            active connection : mvn -Dovsdbserver.ipaddress=x.x.x.x -Dovsdbserver.port=yyyy verify
+            passive connection : mvn -Dovsdbserver.connection=passive verify
+            """;
     }
 
     @Override
@@ -652,7 +653,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             LOG.info("DPDK not supported on this node.");
         } else {
             for (DatapathTypeEntry dpTypeEntry : datapathTypeEntries.values()) {
-                Class<? extends DatapathTypeBase> dpType = dpTypeEntry.getDatapathType();
+                DatapathTypeBase dpType = dpTypeEntry.getDatapathType();
                 String dpTypeStr = SouthboundMapper.DATAPATH_TYPE_MAP.get(dpType);
                 LOG.info("dp type is {}", dpTypeStr);
                 if (dpTypeStr.equals(NETDEV_DP_TYPE)) {
@@ -693,8 +694,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         // Verify that each termination point has the specific DPDK ifType
                         for (String dpdkType : dpdkTypes) {
                             String testPortname = "test" + dpdkType + "port";
-                            Class<? extends InterfaceTypeBase> dpdkIfType =
-                                    SouthboundMapper.OVSDB_INTERFACE_TYPE_MAP.get(dpdkType);
+                            InterfaceTypeBase dpdkIfType = SouthboundMapper.OVSDB_INTERFACE_TYPE_MAP.get(dpdkType);
                             for (TerminationPoint terminationPoint
                                     : terminationPointNode.nonnullTerminationPoint().values()) {
                                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation = terminationPoint
@@ -787,8 +787,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private static Map<ProtocolEntryKey, ProtocolEntry> createMdsalProtocols() {
-        ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
-                SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
+        ImmutableBiMap<String, OvsdbBridgeProtocolBase> mapper = SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
         return BindingMap.of(new ProtocolEntryBuilder().setProtocol(mapper.get("OpenFlow13")).build());
     }
 
@@ -811,7 +810,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private static OvsdbTerminationPointAugmentationBuilder createSpecificDpdkOvsdbTerminationPointAugmentationBuilder(
-            final String testPortname, final Class<? extends InterfaceTypeBase> dpdkIfType) {
+            final String testPortname, final InterfaceTypeBase dpdkIfType) {
         return createGenericOvsdbTerminationPointAugmentationBuilder()
             .setName(testPortname)
             .setInterfaceType(dpdkIfType);
@@ -855,8 +854,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          */
         TestBridge(final ConnectionInfo connectionInfo, @Nullable InstanceIdentifier<Node> bridgeIid,
                                   final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
-                                  final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
-                                  @Nullable final Class<? extends DatapathTypeBase> dpType,
+                                  final OvsdbFailModeBase failMode, final boolean setManagedBy,
+                                  @Nullable final DatapathTypeBase dpType,
                                   @Nullable final Map<BridgeExternalIdsKey, BridgeExternalIds> externalIds,
                                   @Nullable final Map<ControllerEntryKey, ControllerEntry> controllerEntries,
                                   @Nullable final Map<BridgeOtherConfigsKey, BridgeOtherConfigs> otherConfigs) {
@@ -1093,11 +1092,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          * @param externalIds The external identifiers if any.
          * @param otherConfigs The other configuration items if any.
          */
-        TestQos(final ConnectionInfo connectionInfo,
-                                  final Uri qosId,
-                                  final Class<? extends QosTypeBase> qosType,
-                                  final @Nullable Map<QosExternalIdsKey, QosExternalIds> externalIds,
-                                  final @Nullable Map<QosOtherConfigKey, QosOtherConfig> otherConfigs) {
+        TestQos(final ConnectionInfo connectionInfo, final Uri qosId, final QosTypeBase qosType,
+                final @Nullable Map<QosExternalIdsKey, QosExternalIds> externalIds,
+                final @Nullable Map<QosOtherConfigKey, QosOtherConfig> otherConfigs) {
             this.connectionInfo = connectionInfo;
             this.qosId = qosId;
 

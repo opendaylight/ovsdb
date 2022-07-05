@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
@@ -14,6 +13,7 @@ import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactUtils;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -22,7 +22,6 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsLocal;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -81,7 +80,7 @@ public final class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransaction
         InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
         LocalUcastMacsBuilder ucmlBuilder = new LocalUcastMacsBuilder();
         if (ucml.getIpAddr() != null && !ucml.getIpAddr().isEmpty()) {
-            ucmlBuilder.setIpaddr(IpAddressBuilder.getDefaultInstance(ucml.getIpAddr()));
+            ucmlBuilder.setIpaddr(TransactUtils.parseIpAddress(ucml.getIpAddr()));
         }
         ucmlBuilder.setMacEntryKey(new MacAddress(ucml.getMac()));
         ucmlBuilder.setMacEntryUuid(new Uuid(ucml.getUuid().toString()));

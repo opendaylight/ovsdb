@@ -386,7 +386,6 @@ public class OvsdbPortUpdateCommandTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testUpdateInterface() throws Exception {
         Interface interf = mock(Interface.class);
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
@@ -395,9 +394,8 @@ public class OvsdbPortUpdateCommandTest {
         PowerMockito.whenNew(Uuid.class).withAnyArguments().thenReturn(mock(Uuid.class));
         when(ovsdbTerminationPointBuilder.setInterfaceUuid(any(Uuid.class))).thenReturn(ovsdbTerminationPointBuilder);
         PowerMockito.mockStatic(SouthboundMapper.class);
-        PowerMockito.when(SouthboundMapper.createInterfaceType(anyString()))
-                .thenAnswer(invocation -> InterfaceTypeInternal.class);
-        when(ovsdbTerminationPointBuilder.setInterfaceType(any(Class.class))).thenReturn(ovsdbTerminationPointBuilder);
+        PowerMockito.when(SouthboundMapper.createInterfaceType(anyString())).thenReturn(InterfaceTypeInternal.VALUE);
+        when(ovsdbTerminationPointBuilder.setInterfaceType(any())).thenReturn(ovsdbTerminationPointBuilder);
         suppress(method(OvsdbPortUpdateCommand.class, "updateOfPort", Interface.class,
                 OvsdbTerminationPointAugmentationBuilder.class));
         suppress(method(OvsdbPortUpdateCommand.class, "updateOfPortRequest", Interface.class,
@@ -420,7 +418,7 @@ public class OvsdbPortUpdateCommandTest {
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateInterface", interf, OVSDB_INTERFACE_TYPE,
                 ovsdbTerminationPointBuilder);
         verify(ovsdbTerminationPointBuilder).setInterfaceUuid(any(Uuid.class));
-        verify(ovsdbTerminationPointBuilder).setInterfaceType(any(Class.class));
+        verify(ovsdbTerminationPointBuilder).setInterfaceType(any());
         verify(ovsdbPortUpdateCommand).updateOfPort(any(Interface.class),
                 any(OvsdbTerminationPointAugmentationBuilder.class));
         verify(ovsdbPortUpdateCommand).updateOfPortRequest(any(Interface.class),

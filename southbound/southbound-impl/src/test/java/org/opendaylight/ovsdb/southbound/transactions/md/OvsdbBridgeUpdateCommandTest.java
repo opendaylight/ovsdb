@@ -32,7 +32,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
@@ -50,7 +49,6 @@ import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentationBuilder;
@@ -336,15 +334,14 @@ public class OvsdbBridgeUpdateCommandTest {
         when(bridge.getDatapathTypeColumn()).thenReturn(column);
         when(column.getData()).thenReturn("system");
         PowerMockito.mockStatic(SouthboundMapper.class);
-        when(SouthboundMapper.createDatapathType(anyString()))
-                .thenAnswer((Answer<Class<? extends DatapathTypeBase>>) invocation -> DatapathTypeSystem.class);
+        when(SouthboundMapper.createDatapathType(anyString())).thenReturn(DatapathTypeSystem.VALUE);
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
-        when(ovsdbBridgeAugmentationBuilder.setDatapathType(any(Class.class)))
+        when(ovsdbBridgeAugmentationBuilder.setDatapathType(any()))
                 .thenReturn(ovsdbBridgeAugmentationBuilder);
         Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "setDataPathType", ovsdbBridgeAugmentationBuilder, bridge);
         verify(bridge).getDatapathTypeColumn();
         verify(column).getData();
-        verify(ovsdbBridgeAugmentationBuilder).setDatapathType(any(Class.class));
+        verify(ovsdbBridgeAugmentationBuilder).setDatapathType(any());
     }
 
     @SuppressWarnings("unchecked")
@@ -357,11 +354,11 @@ public class OvsdbBridgeUpdateCommandTest {
         set.add("standalone");
         when(column.getData()).thenReturn(set);
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
-        when(ovsdbBridgeAugmentationBuilder.setFailMode(OvsdbFailModeStandalone.class))
+        when(ovsdbBridgeAugmentationBuilder.setFailMode(OvsdbFailModeStandalone.VALUE))
                 .thenReturn(ovsdbBridgeAugmentationBuilder);
         Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "setFailMode", ovsdbBridgeAugmentationBuilder, bridge);
         verify(bridge, times(5)).getFailModeColumn();
-        verify(ovsdbBridgeAugmentationBuilder).setFailMode(OvsdbFailModeStandalone.class);
+        verify(ovsdbBridgeAugmentationBuilder).setFailMode(OvsdbFailModeStandalone.VALUE);
     }
 
     @SuppressWarnings("unchecked")
@@ -411,7 +408,7 @@ public class OvsdbBridgeUpdateCommandTest {
 
         // Call setProtocol()
         when(SouthboundMapper.createMdsalProtocols(any(Bridge.class)))
-                .thenReturn(List.of(new ProtocolEntryBuilder().setProtocol(OvsdbBridgeProtocolBase.class).build()));
+                .thenReturn(List.of(new ProtocolEntryBuilder().setProtocol(OvsdbBridgeProtocolBase.VALUE).build()));
         OvsdbBridgeUpdateCommand.setProtocol(builder, bridge);
 
         // Call setDataPath()
@@ -426,7 +423,7 @@ public class OvsdbBridgeUpdateCommandTest {
         var protocols = result.nonnullProtocolEntry().values();
         assertEquals(1, protocols.size());
         var protocol = protocols.iterator().next();
-        assertEquals(OvsdbBridgeProtocolBase.class, protocol.getProtocol());
+        assertEquals(OvsdbBridgeProtocolBase.VALUE, protocol.getProtocol());
 
         // Assert setDataPath()
         assertSame(dpid, result.getDatapathId());

@@ -106,44 +106,43 @@ public final class SouthboundMapper {
     private static final String N_CONNECTIONS_STR = "n_connections";
 
     @VisibleForTesting
-    public static final ImmutableBiMap<Class<? extends DatapathTypeBase>, String> DATAPATH_TYPE_MAP =
-        ImmutableBiMap.of(
-            DatapathTypeSystem.class, "system",
-            DatapathTypeNetdev.class, "netdev");
+    public static final ImmutableBiMap<DatapathTypeBase, String> DATAPATH_TYPE_MAP = ImmutableBiMap.of(
+            DatapathTypeSystem.VALUE, "system",
+            DatapathTypeNetdev.VALUE, "netdev");
     @VisibleForTesting
-    public static final ImmutableBiMap<String, Class<? extends InterfaceTypeBase>> OVSDB_INTERFACE_TYPE_MAP =
-        ImmutableBiMap.<String, Class<? extends InterfaceTypeBase>>builder()
-            .put("internal", InterfaceTypeInternal.class)
-            .put("vxlan", InterfaceTypeVxlan.class)
-            .put("vxlan-gpe", InterfaceTypeVxlanGpe.class)
-            .put("patch", InterfaceTypePatch.class)
-            .put("system", InterfaceTypeSystem.class)
-            .put("tap", InterfaceTypeTap.class)
-            .put("geneve", InterfaceTypeGeneve.class)
-            .put("gre", InterfaceTypeGre.class)
-            .put("ipsec_gre", InterfaceTypeIpsecGre.class)
-            .put("gre64", InterfaceTypeGre64.class)
-            .put("ipsec_gre64", InterfaceTypeIpsecGre64.class)
-            .put("lisp", InterfaceTypeLisp.class)
-            .put("dpdk", InterfaceTypeDpdk.class)
-            .put("dpdkr", InterfaceTypeDpdkr.class)
-            .put("dpdkvhost", InterfaceTypeDpdkvhost.class)
-            .put("dpdkvhostuser", InterfaceTypeDpdkvhostuser.class)
-            .put("dpdkvhostuserclient", InterfaceTypeDpdkvhostuserclient.class)
-            .put("stt", InterfaceTypeStt.class)
+    public static final ImmutableBiMap<String, InterfaceTypeBase> OVSDB_INTERFACE_TYPE_MAP =
+        ImmutableBiMap.<String, InterfaceTypeBase>builder()
+            .put("internal", InterfaceTypeInternal.VALUE)
+            .put("vxlan", InterfaceTypeVxlan.VALUE)
+            .put("vxlan-gpe", InterfaceTypeVxlanGpe.VALUE)
+            .put("patch", InterfaceTypePatch.VALUE)
+            .put("system", InterfaceTypeSystem.VALUE)
+            .put("tap", InterfaceTypeTap.VALUE)
+            .put("geneve", InterfaceTypeGeneve.VALUE)
+            .put("gre", InterfaceTypeGre.VALUE)
+            .put("ipsec_gre", InterfaceTypeIpsecGre.VALUE)
+            .put("gre64", InterfaceTypeGre64.VALUE)
+            .put("ipsec_gre64", InterfaceTypeIpsecGre64.VALUE)
+            .put("lisp", InterfaceTypeLisp.VALUE)
+            .put("dpdk", InterfaceTypeDpdk.VALUE)
+            .put("dpdkr", InterfaceTypeDpdkr.VALUE)
+            .put("dpdkvhost", InterfaceTypeDpdkvhost.VALUE)
+            .put("dpdkvhostuser", InterfaceTypeDpdkvhostuser.VALUE)
+            .put("dpdkvhostuserclient", InterfaceTypeDpdkvhostuserclient.VALUE)
+            .put("stt", InterfaceTypeStt.VALUE)
             .build();
-    private static final ImmutableBiMap<Class<? extends QosTypeBase>, String> QOS_TYPE_MAP =
-        ImmutableBiMap.<Class<? extends QosTypeBase>, String>builder()
-            .put(QosTypeLinuxHtb.class, SouthboundConstants.QOS_LINUX_HTB)
-            .put(QosTypeLinuxHfsc.class, SouthboundConstants.QOS_LINUX_HFSC)
-            .put(QosTypeLinuxSfq.class, SouthboundConstants.QOS_LINUX_SFQ)
-            .put(QosTypeLinuxCodel.class, SouthboundConstants.QOS_LINUX_CODEL)
-            .put(QosTypeLinuxFqCodel.class, SouthboundConstants.QOS_LINUX_FQ_CODEL)
-            .put(QosTypeEgressPolicer.class, SouthboundConstants.QOS_EGRESS_POLICER)
+    private static final ImmutableBiMap<QosTypeBase, String> QOS_TYPE_MAP =
+        ImmutableBiMap.<QosTypeBase, String>builder()
+            .put(QosTypeLinuxHtb.VALUE, SouthboundConstants.QOS_LINUX_HTB)
+            .put(QosTypeLinuxHfsc.VALUE, SouthboundConstants.QOS_LINUX_HFSC)
+            .put(QosTypeLinuxSfq.VALUE, SouthboundConstants.QOS_LINUX_SFQ)
+            .put(QosTypeLinuxCodel.VALUE, SouthboundConstants.QOS_LINUX_CODEL)
+            .put(QosTypeLinuxFqCodel.VALUE, SouthboundConstants.QOS_LINUX_FQ_CODEL)
+            .put(QosTypeEgressPolicer.VALUE, SouthboundConstants.QOS_EGRESS_POLICER)
             .build();
 
     private SouthboundMapper() {
-
+        // Hidden on purpose
     }
 
     public static IpAddress createIpAddress(final InetAddress address) {
@@ -266,20 +265,20 @@ public final class SouthboundMapper {
     }
 
     public static String createDatapathType(final OvsdbBridgeAugmentation mdsalbridge) {
-        String datapathtype = DATAPATH_TYPE_MAP.get(DatapathTypeSystem.class);
+        String datapathtype = DATAPATH_TYPE_MAP.get(DatapathTypeSystem.VALUE);
 
-        if (mdsalbridge.getDatapathType() != null && !mdsalbridge.getDatapathType().equals(DatapathTypeBase.class)) {
+        if (mdsalbridge.getDatapathType() != null && !mdsalbridge.getDatapathType().equals(DatapathTypeBase.VALUE)) {
             datapathtype = DATAPATH_TYPE_MAP.get(mdsalbridge.getDatapathType());
             if (datapathtype == null) {
-                throw new IllegalArgumentException("Unknown datapath type " + mdsalbridge.getDatapathType().getName());
+                throw new IllegalArgumentException("Unknown datapath type " + mdsalbridge.getDatapathType());
             }
         }
         return datapathtype;
     }
 
-    public static Class<? extends DatapathTypeBase> createDatapathType(final String type) {
+    public static DatapathTypeBase createDatapathType(final String type) {
         if (type.isEmpty()) {
-            return DatapathTypeSystem.class;
+            return DatapathTypeSystem.VALUE;
         }
         return DATAPATH_TYPE_MAP.inverse().get(type);
     }
@@ -289,7 +288,7 @@ public final class SouthboundMapper {
         Map<ProtocolEntryKey, ProtocolEntry> entries = ovsdbBridgeNode.getProtocolEntry();
         if (entries != null) {
             for (ProtocolEntry protocol : entries.values()) {
-                Class<? extends OvsdbBridgeProtocolBase> lookup = protocol.getProtocol();
+                final OvsdbBridgeProtocolBase lookup = protocol.getProtocol();
                 final String toAdd = SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol());
                 Preconditions.checkArgument(toAdd != null, "Unknown protocol %s", lookup);
                 protocols.add(toAdd);
@@ -298,11 +297,11 @@ public final class SouthboundMapper {
         return protocols;
     }
 
-    public static  Class<? extends InterfaceTypeBase> createInterfaceType(final String type) {
+    public static InterfaceTypeBase createInterfaceType(final String type) {
         return OVSDB_INTERFACE_TYPE_MAP.get(requireNonNull(type));
     }
 
-    public static String createOvsdbInterfaceType(final Class<? extends InterfaceTypeBase> mdsaltype) {
+    public static String createOvsdbInterfaceType(final InterfaceTypeBase mdsaltype) {
         return OVSDB_INTERFACE_TYPE_MAP.inverse().get(requireNonNull(mdsaltype));
     }
 
@@ -315,11 +314,10 @@ public final class SouthboundMapper {
         }
         List<ProtocolEntry> protocolList = new ArrayList<>();
         if (protocols != null && !protocols.isEmpty()) {
-            ImmutableBiMap<String, Class<? extends OvsdbBridgeProtocolBase>> mapper =
-                    SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
+            ImmutableBiMap<String, OvsdbBridgeProtocolBase> mapper = SouthboundConstants.OVSDB_PROTOCOL_MAP.inverse();
             for (String protocol : protocols) {
                 if (protocol != null) {
-                    final Class<? extends OvsdbBridgeProtocolBase> mapped = mapper.get(protocol);
+                    final OvsdbBridgeProtocolBase mapped = mapper.get(protocol);
                     if (mapped != null) {
                         protocolList.add(new ProtocolEntryBuilder().setProtocol(mapped).build());
                     }
@@ -543,29 +541,29 @@ public final class SouthboundMapper {
      * @param type the QoS type to match {@link String}
      * @return class matching the input QoS type {@link QosTypeBase}
      */
-    public static  Class<? extends QosTypeBase> createQosType(final String type) {
+    public static QosTypeBase createQosType(final String type) {
         requireNonNull(type);
         if (type.isEmpty()) {
             LOG.info("QoS type not supplied");
-            return QosTypeBase.class;
+            return QosTypeBase.VALUE;
+        }
+
+        ImmutableBiMap<String, QosTypeBase> mapper = QOS_TYPE_MAP.inverse();
+        if (mapper.get(type) == null) {
+            LOG.info("QoS type not found in model: {}", type);
+            return QosTypeBase.VALUE;
         } else {
-            ImmutableBiMap<String, Class<? extends QosTypeBase>> mapper = QOS_TYPE_MAP.inverse();
-            if (mapper.get(type) == null) {
-                LOG.info("QoS type not found in model: {}", type);
-                return QosTypeBase.class;
-            } else {
-                return mapper.get(type);
-            }
+            return mapper.get(type);
         }
     }
 
-    public static String createQosType(final Class<? extends QosTypeBase> qosTypeClass) {
-        String qosType = QOS_TYPE_MAP.get(QosTypeBase.class);
+    public static String createQosType(final QosTypeBase qosTypeClass) {
+        String qosType = QOS_TYPE_MAP.get(QosTypeBase.VALUE);
 
-        if (qosTypeClass != null && !qosTypeClass.equals(QosTypeBase.class)) {
+        if (qosTypeClass != null && !qosTypeClass.equals(QosTypeBase.VALUE)) {
             qosType = QOS_TYPE_MAP.get(qosTypeClass);
             if (qosType == null) {
-                throw new IllegalArgumentException("Unknown QoS type" + qosTypeClass.getName());
+                throw new IllegalArgumentException("Unknown QoS type" + qosTypeClass);
             }
         }
         return qosType;

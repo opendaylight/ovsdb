@@ -9,9 +9,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
-import com.google.common.collect.Lists;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,7 +28,9 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocatorSet;
 import org.opendaylight.ovsdb.utils.mdsal.utils.MdsalUtils;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv6Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.EncapsulationTypeVxlanOverIpv4;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorAugmentation;
@@ -165,10 +165,10 @@ public final class TransactUtils {
         }
         HwvtepPhysicalLocatorAugmentationBuilder builder = new HwvtepPhysicalLocatorAugmentationBuilder();
         HwvtepPhysicalLocatorAugmentation locatorAugmentation = null;
-        builder.setEncapsulationType(EncapsulationTypeVxlanOverIpv4.class);
+        builder.setEncapsulationType(EncapsulationTypeVxlanOverIpv4.VALUE);
         String tepKey = iid.firstKeyOf(TerminationPoint.class).getTpId().getValue();
         String ip = tepKey.substring(tepKey.indexOf(":") + 1);
-        builder.setDstIp(IpAddressBuilder.getDefaultInstance(ip));
+        builder.setDstIp(parseIpAddress(ip));
         locatorAugmentation = builder.build();
         locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation, operationalState);
         operationalState.updateCurrentTxData(TerminationPoint.class, iid, locatorUuid);
@@ -190,6 +190,15 @@ public final class TransactUtils {
         LOG.info("CONTROLLER - {} {}", TransactionType.ADD,
             new StringBuilder(physicalLocator.toString()).append(" Uuid ").append(locatorUuid));
         return new UUID(locatorUuid);
+    }
+
+    public static IpAddress parseIpAddress(final String ipAddress) {
+        try {
+            return new IpAddress(new Ipv4Address(ipAddress));
+        } catch (IllegalArgumentException e) {
+            LOG.debug("Failed to interpret {} as an Ipv4Address", ipAddress, e);
+        }
+        return new IpAddress(new Ipv6Address(ipAddress));
     }
 
     private static void setEncapsulationType(final PhysicalLocator physicalLocator,
@@ -214,7 +223,7 @@ public final class TransactUtils {
 
     static String sanitizeUUID(final String nodeName) {
         //ovs is not accepting '-' in the named uuids
-        return nodeName.replaceAll("-", "_");
+        return nodeName.replace('-', '_');
     }
 
     public static String getLogicalSwitchId(final LogicalSwitches lswitch) {
@@ -240,11 +249,11 @@ public final class TransactUtils {
             }
             return null;
         }
-        LogicalSwitchUpdateCommand cmd = new LogicalSwitchUpdateCommand(operationalState, Collections.emptyList());
+        LogicalSwitchUpdateCommand cmd = new LogicalSwitchUpdateCommand(operationalState, List.of());
         MdsalUtils mdsalUtils = new MdsalUtils(operationalState.getDataBroker());
         LogicalSwitches ls = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, lswitchIid);
         if (ls != null) {
-            cmd.updateLogicalSwitch(transaction, lswitchIid.firstIdentifierOf(Node.class), Lists.newArrayList(ls));
+            cmd.updateLogicalSwitch(transaction, lswitchIid.firstIdentifierOf(Node.class), List.of(ls));
         } else {
             LOG.error("Could not find logical switch in config ds {}", lswitchIid);
             return null;
@@ -269,8 +278,7 @@ public final class TransactUtils {
                     TerminationPoint.class, iid);
             if (deviceData != null) {
                 Object data = deviceData.getData();
-                if (data instanceof PhysicalLocator) {
-                    PhysicalLocator locator = (PhysicalLocator) data;
+                if (data instanceof PhysicalLocator locator) {
                     locatorsInfo.add(new StringBuilder(locator.getUuid().toString()).append(" ")
                             .append(locator.getDstIpColumn().getData()).toString());
                 } else {

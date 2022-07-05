@@ -16,6 +16,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Range;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.lang.reflect.Method;
 import java.util.Locale;
 import org.eclipse.jdt.annotation.NonNull;
@@ -53,6 +54,7 @@ final class MethodDispatch {
     }
 
     abstract static class FailedInvoker extends Invoker {
+        @SuppressFBWarnings(value = "THROWS_METHOD_THROWS_RUNTIMEEXCEPTION", justification = "Polymorphic throw")
         @Override
         final Object invokeMethod(final Row<GenericTableSchema> row, final Object proxy, final Object[] args) {
             throw newException();
@@ -241,7 +243,7 @@ final class MethodDispatch {
                 builder.put(method, prototype);
             }
         }
-        this.prototypes = builder.build();
+        prototypes = builder.build();
     }
 
     static MethodDispatch forTarget(final Class<?> target) {

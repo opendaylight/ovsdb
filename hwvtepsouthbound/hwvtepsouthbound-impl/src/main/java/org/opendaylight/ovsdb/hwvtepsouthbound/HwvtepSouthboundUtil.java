@@ -100,7 +100,7 @@ public final class HwvtepSouthboundUtil {
             return transaction.read(logicalDatastoreType, connectionIid).get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Read failed from datastore for Node : {}",connectionIid,e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -119,7 +119,7 @@ public final class HwvtepSouthboundUtil {
             return transaction.read(logicalDatastoreType, connectionIid).get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Read failed from datastore for Node : {}",connectionIid,e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -143,7 +143,7 @@ public final class HwvtepSouthboundUtil {
             return transaction.read(logicalDatastoreType, connectionIid).get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Read failed from datastore for Node : {}",connectionIid,e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 

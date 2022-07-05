@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
@@ -14,6 +13,7 @@ import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
+import org.opendaylight.ovsdb.hwvtepsouthbound.transact.TransactUtils;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -21,7 +21,6 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.UcastMacsRemote;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
@@ -77,7 +76,7 @@ public final class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactio
         rumBuilder.setMacEntryKey(new MacAddress(macRemote.getMac()));
         rumBuilder.setMacEntryUuid(new Uuid(macRemote.getUuid().toString()));
         if (macRemote.getIpAddr() != null && !macRemote.getIpAddr().isEmpty()) {
-            rumBuilder.setIpaddr(IpAddressBuilder.getDefaultInstance(macRemote.getIpAddr()));
+            rumBuilder.setIpaddr(TransactUtils.parseIpAddress(macRemote.getIpAddr()));
         }
         if (macRemote.getLocatorColumn() != null
                 && macRemote.getLocatorColumn().getData() != null) {

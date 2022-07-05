@@ -59,8 +59,7 @@ public final class SouthboundUtil {
                 // Note: erasure makes this safe in combination with the typecheck below
                 InstanceIdentifier<Node> path = (InstanceIdentifier<Node>) ref.getValue();
 
-                FluentFuture<Optional<Node>> nf = transaction.read(
-                        LogicalDatastoreType.OPERATIONAL, path);
+                FluentFuture<Optional<Node>> nf = transaction.read(LogicalDatastoreType.OPERATIONAL, path);
                 transaction.close();
                 Optional<Node> optional = nf.get();
                 if (optional != null && optional.isPresent()) {
@@ -104,7 +103,7 @@ public final class SouthboundUtil {
             }
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Read Operational/DS for Node failed! {}", connectionIid, e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
         return node;
     }
@@ -121,7 +120,7 @@ public final class SouthboundUtil {
             }
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Read Operational/DS for Node failed! {}", connectionIid, e);
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
         return node;
     }

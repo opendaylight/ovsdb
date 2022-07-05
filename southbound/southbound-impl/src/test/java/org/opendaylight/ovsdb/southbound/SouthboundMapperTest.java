@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound;
 
 import static org.junit.Assert.assertEquals;
@@ -27,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -38,12 +36,12 @@ import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.Manager;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv6Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeNetdev;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.DatapathTypeSystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.InterfaceTypeInternal;
@@ -70,7 +68,7 @@ public class SouthboundMapperTest {
 
     @Test
     public void testCreateIpAddress() throws Exception {
-        IpAddress ipAddress = IpAddressBuilder.getDefaultInstance("127.0.0.1");
+        IpAddress ipAddress = new IpAddress(new Ipv4Address("127.0.0.1"));
         InetAddress inetAddress = InetAddress.getByAddress(new byte[] {127, 0, 0, 1});
         assertEquals("Incorrect IP address created", ipAddress, SouthboundMapper.createIpAddress(inetAddress));
     }
@@ -141,12 +139,12 @@ public class SouthboundMapperTest {
     @Test
     public void testCreateInetAddress() throws Exception {
         // IPv4 address
-        IpAddress ipV4Address = IpAddressBuilder.getDefaultInstance("99.99.99.99");
+        IpAddress ipV4Address = new IpAddress(new Ipv4Address("99.99.99.99"));
         assertEquals("Incorrect InetAddress received", InetAddress.getByAddress(new byte[] {99, 99, 99, 99}),
                 SouthboundMapper.createInetAddress(ipV4Address));
 
         // IPv6 address
-        IpAddress ipV6Address = IpAddressBuilder.getDefaultInstance("0000:0000:0000:0000:0000:9999:FE1E:8329");
+        IpAddress ipV6Address = new IpAddress(new Ipv6Address("0000:0000:0000:0000:0000:9999:FE1E:8329"));
         assertEquals("Incorrect InetAddress received", InetAddress.getByAddress(
                 new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 0x99, (byte) 0x99, (byte) 0xFE, 0x1E, (byte) 0x83,
                     0x29 }),
@@ -175,28 +173,25 @@ public class SouthboundMapperTest {
     @Test
     public void testCreateDatapathType() throws Exception {
         OvsdbBridgeAugmentation mdsalbridge = mock(OvsdbBridgeAugmentation.class);
-        when(mdsalbridge.getDatapathType()).thenAnswer(
-                (Answer<Class<? extends DatapathTypeBase>>) invocation -> DatapathTypeNetdev.class);
+        when(mdsalbridge.getDatapathType()).thenReturn(DatapathTypeNetdev.VALUE);
         assertEquals("netdev", SouthboundMapper.createDatapathType(mdsalbridge));
 
-        when(mdsalbridge.getDatapathType()).thenAnswer(
-                (Answer<Class<? extends DatapathTypeBase>>) invocation -> DatapathTypeSystem.class);
+        when(mdsalbridge.getDatapathType()).thenReturn(DatapathTypeSystem.VALUE);
         assertEquals("system", SouthboundMapper.createDatapathType(mdsalbridge));
     }
 
     @Test
     public void testCreateDatapathType1() {
-        assertEquals(DatapathTypeSystem.class, SouthboundMapper.createDatapathType(""));
-        assertEquals(DatapathTypeSystem.class, SouthboundMapper.createDatapathType("system"));
-        assertEquals(DatapathTypeNetdev.class, SouthboundMapper.createDatapathType("netdev"));
+        assertEquals(DatapathTypeSystem.VALUE, SouthboundMapper.createDatapathType(""));
+        assertEquals(DatapathTypeSystem.VALUE, SouthboundMapper.createDatapathType("system"));
+        assertEquals(DatapathTypeNetdev.VALUE, SouthboundMapper.createDatapathType("netdev"));
     }
 
     @Test
     public void testCreateOvsdbBridgeProtocols() {
         OvsdbBridgeAugmentation ovsdbBridgeNode = mock(OvsdbBridgeAugmentation.class);
-        List<ProtocolEntry> protocolList = new ArrayList<>();
         ProtocolEntry protocolEntry = new ProtocolEntryBuilder()
-                .setProtocol(OvsdbBridgeProtocolOpenflow10.class)
+                .setProtocol(OvsdbBridgeProtocolOpenflow10.VALUE)
                 .build();
 
         when(ovsdbBridgeNode.getProtocolEntry()).thenReturn(Map.of(protocolEntry.key(), protocolEntry));
@@ -207,14 +202,14 @@ public class SouthboundMapperTest {
 
     @Test
     public void testCreateInterfaceType() {
-        assertEquals(InterfaceTypeInternal.class, SouthboundMapper.createInterfaceType("internal"));
-        assertEquals(InterfaceTypeVxlan.class, SouthboundMapper.createInterfaceType("vxlan"));
+        assertEquals(InterfaceTypeInternal.VALUE, SouthboundMapper.createInterfaceType("internal"));
+        assertEquals(InterfaceTypeVxlan.VALUE, SouthboundMapper.createInterfaceType("vxlan"));
     }
 
     @Test
     public void testCreateOvsdbInterfaceType() {
-        assertEquals("internal", SouthboundMapper.createOvsdbInterfaceType(InterfaceTypeInternal.class));
-        assertEquals("vxlan", SouthboundMapper.createOvsdbInterfaceType(InterfaceTypeVxlan.class));
+        assertEquals("internal", SouthboundMapper.createOvsdbInterfaceType(InterfaceTypeInternal.VALUE));
+        assertEquals("vxlan", SouthboundMapper.createOvsdbInterfaceType(InterfaceTypeVxlan.VALUE));
     }
 
     @SuppressWarnings("unchecked")
@@ -229,7 +224,7 @@ public class SouthboundMapperTest {
 
         List<ProtocolEntry> returnedProtocols = SouthboundMapper.createMdsalProtocols(bridge);
         assertEquals(value.size(), returnedProtocols.size());
-        assertEquals(OvsdbBridgeProtocolOpenflow10.class, returnedProtocols.get(0).getProtocol());
+        assertEquals(OvsdbBridgeProtocolOpenflow10.VALUE, returnedProtocols.get(0).getProtocol());
     }
 
     @SuppressWarnings("unchecked")
@@ -306,16 +301,16 @@ public class SouthboundMapperTest {
         when(client.getConnectionInfo().getLocalPort()).thenReturn(8081);
 
         ConnectionInfo returnedConnectionInfo = SouthboundMapper.createConnectionInfo(client);
-        assertEquals(IpAddressBuilder.getDefaultInstance("1.2.3.4"), returnedConnectionInfo.getRemoteIp());
+        assertEquals(new IpAddress(new Ipv4Address("1.2.3.4")), returnedConnectionInfo.getRemoteIp());
         assertEquals(8080, returnedConnectionInfo.getRemotePort().getValue().toJava());
-        assertEquals(IpAddressBuilder.getDefaultInstance("1.2.3.5"), returnedConnectionInfo.getLocalIp());
+        assertEquals(new IpAddress(new Ipv4Address("1.2.3.5")), returnedConnectionInfo.getLocalIp());
         assertEquals(8081, returnedConnectionInfo.getLocalPort().getValue().toJava());
     }
 
     @Test
     public void testSuppressLocalIpPort() throws Exception {
         ConnectionInfo connectionInfo = mock(ConnectionInfo.class);
-        IpAddress ipAddress = IpAddressBuilder.getDefaultInstance("1.2.3.4");
+        IpAddress ipAddress = new IpAddress(new Ipv4Address("1.2.3.4"));
         when(connectionInfo.getRemoteIp()).thenReturn(ipAddress);
         PortNumber portNumber = PortNumber.getDefaultInstance("8080");
         when(connectionInfo.getRemotePort()).thenReturn(portNumber);

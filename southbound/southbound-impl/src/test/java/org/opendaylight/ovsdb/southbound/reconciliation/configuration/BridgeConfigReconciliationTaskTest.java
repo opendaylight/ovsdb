@@ -107,7 +107,7 @@ public class BridgeConfigReconciliationTaskTest {
 
     private Node createBridgeNode(final String bridgeName) {
         ProtocolEntry protocolEntry = new ProtocolEntryBuilder()
-                .setProtocol(OvsdbBridgeProtocolOpenflow10.class)
+                .setProtocol(OvsdbBridgeProtocolOpenflow10.VALUE)
                 .build();
         ControllerEntry controllerEntry = new ControllerEntryBuilder().setTarget(new Uri("mock")).build();
 

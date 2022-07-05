@@ -147,7 +147,7 @@ public class TerminationPointCreateCommand implements TransactCommand {
 
     private static void createInterfaceType(final OvsdbTerminationPointAugmentation terminationPoint,
             final Interface ovsInterface) {
-        Class<? extends InterfaceTypeBase> mdsaltype = terminationPoint.getInterfaceType();
+        InterfaceTypeBase mdsaltype = terminationPoint.getInterfaceType();
         if (mdsaltype != null) {
             ovsInterface.setType(SouthboundMapper.createOvsdbInterfaceType(mdsaltype));
         }

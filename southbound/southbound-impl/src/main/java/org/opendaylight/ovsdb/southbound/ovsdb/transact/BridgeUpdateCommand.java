@@ -172,7 +172,7 @@ public class BridgeUpdateCommand implements TransactCommand {
         String interfaceNamedUuid = "Interface_" + SouthboundMapper.getRandomUuid();
         Interface interfaceOvs = transaction.getTypedRowWrapper(Interface.class);
         interfaceOvs.setName(ovsdbManagedNode.getBridgeName().getValue());
-        interfaceOvs.setType(SouthboundMapper.createOvsdbInterfaceType(InterfaceTypeInternal.class));
+        interfaceOvs.setType(SouthboundMapper.createOvsdbInterfaceType(InterfaceTypeInternal.VALUE));
         Insert<GenericTableSchema> result = op.insert(interfaceOvs).withId(interfaceNamedUuid);
         transaction.add(result);
         return result;

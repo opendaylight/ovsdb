@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.assertEquals;
@@ -309,8 +308,8 @@ public class OpenVSwitchUpdateCommandTest {
         verify(openVSwitch).getDatapathTypesColumn();
         Map<DatapathTypeEntryKey, DatapathTypeEntry> entries = ovsdbNodeBuilder.getDatapathTypeEntry();
         assertEquals(2, entries.size());
-        assertTrue(entries.containsKey(new DatapathTypeEntryKey(DatapathTypeNetdev.class)));
-        assertTrue(entries.containsKey(new DatapathTypeEntryKey(DatapathTypeSystem.class)));
+        assertTrue(entries.containsKey(new DatapathTypeEntryKey(DatapathTypeNetdev.VALUE)));
+        assertTrue(entries.containsKey(new DatapathTypeEntryKey(DatapathTypeSystem.VALUE)));
     }
 
     @Test

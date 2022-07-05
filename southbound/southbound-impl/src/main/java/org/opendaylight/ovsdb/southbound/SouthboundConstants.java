@@ -80,20 +80,19 @@ public final class SouthboundConstants {
     public static final String CREATED_BY = "created_by";
     public static final String ODL = "odl";
 
-    public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>, String> OVSDB_PROTOCOL_MAP =
-        ImmutableBiMap.<Class<? extends OvsdbBridgeProtocolBase>, String>builder()
-            .put(OvsdbBridgeProtocolOpenflow10.class, "OpenFlow10")
-            .put(OvsdbBridgeProtocolOpenflow11.class, "OpenFlow11")
-            .put(OvsdbBridgeProtocolOpenflow12.class, "OpenFlow12")
-            .put(OvsdbBridgeProtocolOpenflow13.class, "OpenFlow13")
-            .put(OvsdbBridgeProtocolOpenflow14.class, "OpenFlow14")
-            .put(OvsdbBridgeProtocolOpenflow15.class, "OpenFlow15")
+    public static final ImmutableBiMap<OvsdbBridgeProtocolBase, String> OVSDB_PROTOCOL_MAP =
+        ImmutableBiMap.<OvsdbBridgeProtocolBase, String>builder()
+            .put(OvsdbBridgeProtocolOpenflow10.VALUE, "OpenFlow10")
+            .put(OvsdbBridgeProtocolOpenflow11.VALUE, "OpenFlow11")
+            .put(OvsdbBridgeProtocolOpenflow12.VALUE, "OpenFlow12")
+            .put(OvsdbBridgeProtocolOpenflow13.VALUE, "OpenFlow13")
+            .put(OvsdbBridgeProtocolOpenflow14.VALUE, "OpenFlow14")
+            .put(OvsdbBridgeProtocolOpenflow15.VALUE, "OpenFlow15")
             .build();
 
-    public static final ImmutableBiMap<Class<? extends OvsdbFailModeBase>, String> OVSDB_FAIL_MODE_MAP =
-        ImmutableBiMap.of(
-            OvsdbFailModeStandalone.class, "standalone",
-            OvsdbFailModeSecure.class,     "secure");
+    public static final ImmutableBiMap<OvsdbFailModeBase, String> OVSDB_FAIL_MODE_MAP = ImmutableBiMap.of(
+            OvsdbFailModeStandalone.VALUE, "standalone",
+            OvsdbFailModeSecure.VALUE,     "secure");
 
     public static final String IID_EXTERNAL_ID_KEY = "opendaylight-iid";
     public static final String QOS_ID_EXTERNAL_ID_KEY = "opendaylight-qos-id";

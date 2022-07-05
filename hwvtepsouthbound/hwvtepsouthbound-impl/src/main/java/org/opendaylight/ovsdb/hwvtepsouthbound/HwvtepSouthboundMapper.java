@@ -62,19 +62,19 @@ public final class HwvtepSouthboundMapper {
     private HwvtepSouthboundMapper() {
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(final NodeId nodeId) {
         return InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                 .child(Node.class,new NodeKey(nodeId));
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(OvsdbClient client) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(final OvsdbClient client) {
         return createInstanceIdentifier(createIpAddress(client.getConnectionInfo().getRemoteAddress()),
                         new PortNumber(Uint16.valueOf(client.getConnectionInfo().getRemotePort())));
     }
 
-    private static InstanceIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
+    private static InstanceIdentifier<Node> createInstanceIdentifier(final IpAddress ip, final PortNumber port) {
         String uriString = HwvtepSouthboundConstants.HWVTEP_URI_PREFIX + "://"
                 + ip.stringValue() + ":" + port.getValue();
         Uri uri = new Uri(uriString);
@@ -86,22 +86,22 @@ public final class HwvtepSouthboundMapper {
         return path;
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(HwvtepConnectionInstance client,
-            PhysicalSwitch physicalSwitch) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(final HwvtepConnectionInstance client,
+            final PhysicalSwitch physicalSwitch) {
         //TODO: Clean this up
         return createInstanceIdentifier(client, new HwvtepNodeName(physicalSwitch.getName()));
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(HwvtepConnectionInstance client,
-                    HwvtepNodeName psName) {
+    public static InstanceIdentifier<Node> createInstanceIdentifier(final HwvtepConnectionInstance client,
+                    final HwvtepNodeName psName) {
         NodeKey nodeKey = new NodeKey(createManagedNodeId(client, psName));
         return InstanceIdentifier.builder(NetworkTopology.class)
                         .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                         .child(Node.class, nodeKey).build();
     }
 
-    public static InstanceIdentifier<LogicalSwitches> createInstanceIdentifier(HwvtepConnectionInstance client,
-            LogicalSwitch logicalSwitch) {
+    public static InstanceIdentifier<LogicalSwitches> createInstanceIdentifier(final HwvtepConnectionInstance client,
+            final LogicalSwitch logicalSwitch) {
         InstanceIdentifier<LogicalSwitches> iid = null;
         iid = InstanceIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
@@ -124,8 +124,9 @@ public final class HwvtepSouthboundMapper {
                 .build();
     }
 
-    public static InstanceIdentifier<Tunnels> createInstanceIdentifier(InstanceIdentifier<Node> nodeIid,
-            InstanceIdentifier<TerminationPoint> localTpIid, InstanceIdentifier<TerminationPoint> remoteTpIid) {
+    public static InstanceIdentifier<Tunnels> createInstanceIdentifier(final InstanceIdentifier<Node> nodeIid,
+            final InstanceIdentifier<TerminationPoint> localTpIid,
+            final InstanceIdentifier<TerminationPoint> remoteTpIid) {
 
         TunnelsKey tunnelsKey = new TunnelsKey(new HwvtepPhysicalLocatorRef(localTpIid),
                 new HwvtepPhysicalLocatorRef(remoteTpIid));
@@ -134,13 +135,13 @@ public final class HwvtepSouthboundMapper {
         return tunnelInstanceId;
     }
 
-    public static InstanceIdentifier<TerminationPoint> createInstanceIdentifier(InstanceIdentifier<Node> nodeIid,
-            PhysicalLocator physicalLocator) {
+    public static InstanceIdentifier<TerminationPoint> createInstanceIdentifier(final InstanceIdentifier<Node> nodeIid,
+            final PhysicalLocator physicalLocator) {
         return nodeIid.child(TerminationPoint.class, getTerminationPointKey(physicalLocator));
     }
 
-    public static InstanceIdentifier<VlanBindings> createInstanceIdentifier(HwvtepConnectionInstance client,
-            InstanceIdentifier<TerminationPoint> tpPath, VlanBindings vlanBindings) {
+    public static InstanceIdentifier<VlanBindings> createInstanceIdentifier(final HwvtepConnectionInstance client,
+            final InstanceIdentifier<TerminationPoint> tpPath, final VlanBindings vlanBindings) {
         return tpPath.augmentation(HwvtepPhysicalPortAugmentation.class).child(VlanBindings.class,
                 new VlanBindingsKey(vlanBindings.key()));
 
@@ -154,19 +155,19 @@ public final class HwvtepSouthboundMapper {
         return path;
     }
 
-    public static NodeId createManagedNodeId(InstanceIdentifier<Node> iid) {
+    public static NodeId createManagedNodeId(final InstanceIdentifier<Node> iid) {
         NodeKey nodeKey = iid.firstKeyOf(Node.class);
         return nodeKey.getNodeId();
     }
 
-    public static NodeId createManagedNodeId(HwvtepConnectionInstance client, HwvtepNodeName psName) {
+    public static NodeId createManagedNodeId(final HwvtepConnectionInstance client, final HwvtepNodeName psName) {
         String nodeString = client.getNodeKey().getNodeId().getValue()
                         + "/" + HwvtepSouthboundConstants.PSWITCH_URI_PREFIX + "/" + psName.getValue();
         NodeId nodeId = new NodeId(new Uri(nodeString));
         return nodeId;
     }
 
-    public static IpAddress createIpAddress(InetAddress address) {
+    public static IpAddress createIpAddress(final InetAddress address) {
         IpAddress ip = null;
         if (address instanceof Inet4Address) {
             ip = createIpAddress((Inet4Address)address);
@@ -176,16 +177,16 @@ public final class HwvtepSouthboundMapper {
         return ip;
     }
 
-    public static IpAddress createIpAddress(Inet4Address address) {
+    public static IpAddress createIpAddress(final Inet4Address address) {
         return IetfInetUtil.INSTANCE.ipAddressFor(address);
     }
 
-    public static IpAddress createIpAddress(Inet6Address address) {
+    public static IpAddress createIpAddress(final Inet6Address address) {
         Ipv6Address ipv6 = new Ipv6Address(address.getHostAddress());
         return new IpAddress(ipv6);
     }
 
-    public static ConnectionInfo createConnectionInfo(OvsdbClient client) {
+    public static ConnectionInfo createConnectionInfo(final OvsdbClient client) {
         ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
         connectionInfoBuilder.setRemoteIp(createIpAddress(client.getConnectionInfo().getRemoteAddress()));
         connectionInfoBuilder.setRemotePort(new PortNumber(Uint16.valueOf(client.getConnectionInfo().getRemotePort())));
@@ -194,14 +195,14 @@ public final class HwvtepSouthboundMapper {
         return connectionInfoBuilder.build();
     }
 
-    public static ConnectionInfo suppressLocalIpPort(ConnectionInfo connectionInfo) {
+    public static ConnectionInfo suppressLocalIpPort(final ConnectionInfo connectionInfo) {
         ConnectionInfoBuilder connectionInfoBuilder = new ConnectionInfoBuilder();
         connectionInfoBuilder.setRemoteIp(connectionInfo.getRemoteIp());
         connectionInfoBuilder.setRemotePort(connectionInfo.getRemotePort());
         return connectionInfoBuilder.build();
     }
 
-    public static InetAddress createInetAddress(IpAddress ip) throws UnknownHostException {
+    public static InetAddress createInetAddress(final IpAddress ip) throws UnknownHostException {
         if (ip.getIpv4Address() != null) {
             return InetAddresses.forString(ip.getIpv4Address().getValue());
         } else if (ip.getIpv6Address() != null) {
@@ -211,7 +212,7 @@ public final class HwvtepSouthboundMapper {
         }
     }
 
-    public static InstanceIdentifier<Node> getInstanceIdentifier(Global global) {
+    public static InstanceIdentifier<Node> getInstanceIdentifier(final Global global) {
         String nodeString = HwvtepSouthboundConstants.HWVTEP_URI_PREFIX + "://"
                 + HwvtepSouthboundConstants.UUID + "/" + global.getUuid().toString();
         NodeId nodeId = new NodeId(new Uri(nodeString));
@@ -223,15 +224,15 @@ public final class HwvtepSouthboundMapper {
                 .build();
     }
 
-    public static Class<? extends EncapsulationTypeBase> createEncapsulationType(String type) {
+    public static EncapsulationTypeBase createEncapsulationType(final String type) {
         if (requireNonNull(type).isEmpty()) {
-            return EncapsulationTypeVxlanOverIpv4.class;
+            return EncapsulationTypeVxlanOverIpv4.VALUE;
         }
 
         return HwvtepSouthboundConstants.ENCAPS_TYPE_MAP.inverse().get(type);
     }
 
-    public static TerminationPointKey getTerminationPointKey(PhysicalLocator physicalLocator) {
+    public static TerminationPointKey getTerminationPointKey(final PhysicalLocator physicalLocator) {
         TerminationPointKey tpKey = null;
         if (physicalLocator.getEncapsulationTypeColumn().getData() != null
                 && physicalLocator.getDstIpColumn().getData() != null) {

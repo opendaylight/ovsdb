@@ -184,7 +184,7 @@ public class SouthboundUtils {
     private static final String FORMAT = "(\\d+)\\.(\\d+)\\.(\\d+)";
     private static final Pattern PATTERN = Pattern.compile(FORMAT);
     // DPDK interface type
-    private static final InterfaceTypeEntryKey DPDK_IFACE_KEY = new InterfaceTypeEntryKey(InterfaceTypeDpdk.class);
+    private static final InterfaceTypeEntryKey DPDK_IFACE_KEY = new InterfaceTypeEntryKey(InterfaceTypeDpdk.VALUE);
 
     private final UtilsProvider provider;
 
@@ -192,41 +192,41 @@ public class SouthboundUtils {
         provider = new MdsalUtilsProvider(mdsalUtils);
     }
 
-    public static final ImmutableBiMap<String, Class<? extends InterfaceTypeBase>> OVSDB_INTERFACE_TYPE_MAP =
-        new ImmutableBiMap.Builder<String, Class<? extends InterfaceTypeBase>>()
-            .put("internal", InterfaceTypeInternal.class)
-            .put("vxlan", InterfaceTypeVxlan.class)
-            .put("vxlan-gpe", InterfaceTypeVxlanGpe.class)
-            .put("patch", InterfaceTypePatch.class)
-            .put("system", InterfaceTypeSystem.class)
-            .put("tap", InterfaceTypeTap.class)
-            .put("geneve", InterfaceTypeGeneve.class)
-            .put("gre", InterfaceTypeGre.class)
-            .put("ipsec_gre", InterfaceTypeIpsecGre.class)
-            .put("gre64", InterfaceTypeGre64.class)
-            .put("ipsec_gre64", InterfaceTypeIpsecGre64.class)
-            .put("lisp", InterfaceTypeLisp.class)
-            .put("dpdk", InterfaceTypeDpdk.class)
-            .put("dpdkr", InterfaceTypeDpdkr.class)
-            .put("dpdkvhost", InterfaceTypeDpdkvhost.class)
-            .put("dpdkvhostuser", InterfaceTypeDpdkvhostuser.class)
-            .put("dpdkvhostuserclient", InterfaceTypeDpdkvhostuserclient.class)
+    public static final ImmutableBiMap<String, InterfaceTypeBase> OVSDB_INTERFACE_TYPE_MAP =
+        ImmutableBiMap.<String, InterfaceTypeBase>builder()
+            .put("internal", InterfaceTypeInternal.VALUE)
+            .put("vxlan", InterfaceTypeVxlan.VALUE)
+            .put("vxlan-gpe", InterfaceTypeVxlanGpe.VALUE)
+            .put("patch", InterfaceTypePatch.VALUE)
+            .put("system", InterfaceTypeSystem.VALUE)
+            .put("tap", InterfaceTypeTap.VALUE)
+            .put("geneve", InterfaceTypeGeneve.VALUE)
+            .put("gre", InterfaceTypeGre.VALUE)
+            .put("ipsec_gre", InterfaceTypeIpsecGre.VALUE)
+            .put("gre64", InterfaceTypeGre64.VALUE)
+            .put("ipsec_gre64", InterfaceTypeIpsecGre64.VALUE)
+            .put("lisp", InterfaceTypeLisp.VALUE)
+            .put("dpdk", InterfaceTypeDpdk.VALUE)
+            .put("dpdkr", InterfaceTypeDpdkr.VALUE)
+            .put("dpdkvhost", InterfaceTypeDpdkvhost.VALUE)
+            .put("dpdkvhostuser", InterfaceTypeDpdkvhostuser.VALUE)
+            .put("dpdkvhostuserclient", InterfaceTypeDpdkvhostuserclient.VALUE)
             .build();
 
-    public static final ImmutableBiMap<Class<? extends OvsdbBridgeProtocolBase>, String> OVSDB_PROTOCOL_MAP =
-        new ImmutableBiMap.Builder<Class<? extends OvsdbBridgeProtocolBase>, String>()
-            .put(OvsdbBridgeProtocolOpenflow10.class,"OpenFlow10")
-            .put(OvsdbBridgeProtocolOpenflow11.class,"OpenFlow11")
-            .put(OvsdbBridgeProtocolOpenflow12.class,"OpenFlow12")
-            .put(OvsdbBridgeProtocolOpenflow13.class,"OpenFlow13")
-            .put(OvsdbBridgeProtocolOpenflow14.class,"OpenFlow14")
-            .put(OvsdbBridgeProtocolOpenflow15.class,"OpenFlow15")
+    public static final ImmutableBiMap<OvsdbBridgeProtocolBase, String> OVSDB_PROTOCOL_MAP =
+        ImmutableBiMap.<OvsdbBridgeProtocolBase, String>builder()
+            .put(OvsdbBridgeProtocolOpenflow10.VALUE, "OpenFlow10")
+            .put(OvsdbBridgeProtocolOpenflow11.VALUE, "OpenFlow11")
+            .put(OvsdbBridgeProtocolOpenflow12.VALUE, "OpenFlow12")
+            .put(OvsdbBridgeProtocolOpenflow13.VALUE, "OpenFlow13")
+            .put(OvsdbBridgeProtocolOpenflow14.VALUE, "OpenFlow14")
+            .put(OvsdbBridgeProtocolOpenflow15.VALUE, "OpenFlow15")
             .build();
 
-    private static final ImmutableBiMap<Class<? extends OvsdbFailModeBase>, String> OVSDB_FAIL_MODE_MAP =
-        new ImmutableBiMap.Builder<Class<? extends OvsdbFailModeBase>, String>()
-            .put(OvsdbFailModeStandalone.class,"standalone")
-            .put(OvsdbFailModeSecure.class,"secure")
+    private static final ImmutableBiMap<OvsdbFailModeBase, String> OVSDB_FAIL_MODE_MAP =
+        ImmutableBiMap.<OvsdbFailModeBase, String>builder()
+            .put(OvsdbFailModeStandalone.VALUE, "standalone")
+            .put(OvsdbFailModeSecure.VALUE, "secure")
             .build();
 
     private static final BridgeOtherConfigs OTHER_CONFIG_DISABLE_INBAND = new BridgeOtherConfigsBuilder()
@@ -587,8 +587,8 @@ public class SouthboundUtils {
      */
     public boolean addBridge(final ConnectionInfo connectionInfo, InstanceIdentifier<Node> bridgeIid,
                              final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
-                             final Class<? extends OvsdbFailModeBase> failMode, final boolean setManagedBy,
-                             final Class<? extends DatapathTypeBase> dpType,
+                             final OvsdbFailModeBase failMode, final boolean setManagedBy,
+                             final DatapathTypeBase dpType,
                              final Map<BridgeExternalIdsKey, BridgeExternalIds> externalIds,
                              final Map<ControllerEntryKey, ControllerEntry> controllerEntries,
                              final Map<BridgeOtherConfigsKey, BridgeOtherConfigs> otherConfigs,
@@ -640,14 +640,13 @@ public class SouthboundUtils {
         return result;
     }
 
-    public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
-            final Class<? extends DatapathTypeBase> dpType, String mac) {
+    public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr, DatapathTypeBase dpType,
+            String mac) {
         return addBridge(ovsdbNode, bridgeName, controllersStr, dpType, mac, null, null);
     }
 
-    public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
-                             final Class<? extends DatapathTypeBase> dpType, String mac,
-                             Long maxBackoff, Long inactivityProbe) {
+    public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr, DatapathTypeBase dpType,
+                             String mac, Long maxBackoff, Long inactivityProbe) {
         List<BridgeOtherConfigs> otherConfigs = new ArrayList<>();
         if (mac != null) {
             otherConfigs.add(new BridgeOtherConfigsBuilder()
@@ -658,9 +657,8 @@ public class SouthboundUtils {
         return addBridge(ovsdbNode, bridgeName, controllersStr, dpType, otherConfigs, null, null);
     }
 
-    public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr,
-            final Class<? extends DatapathTypeBase> dpType, List<BridgeOtherConfigs> otherConfigs,
-            Uint32 maxBackoff, Uint32 inactivityProbe) {
+    public boolean addBridge(Node ovsdbNode, String bridgeName, List<String> controllersStr, DatapathTypeBase dpType,
+            List<BridgeOtherConfigs> otherConfigs, Uint32 maxBackoff, Uint32 inactivityProbe) {
         LOG.info("addBridge: node: {}, bridgeName: {}, controller(s): {}", ovsdbNode, bridgeName, controllersStr);
         ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
         if (connectionInfo == null) {
@@ -684,7 +682,7 @@ public class SouthboundUtils {
             ovsdbBridgeAugmentationBuilder.setDatapathType(dpType);
         }
         if (isOvsdbNodeDpdk(ovsdbNode)) {
-            ovsdbBridgeAugmentationBuilder.setDatapathType(DatapathTypeNetdev.class);
+            ovsdbBridgeAugmentationBuilder.setDatapathType(DatapathTypeNetdev.VALUE);
         }
 
         InstanceIdentifier<Node> bridgeIid = createInstanceIdentifier(ovsdbNode.key(), bridgeName);
@@ -890,8 +888,7 @@ public class SouthboundUtils {
             try {
                 openFlowPort = Short.parseShort(portString);
             } catch (NumberFormatException e) {
-                LOG.warn("Invalid port:{}, use default({})", portString,
-                        openFlowPort, e);
+                LOG.warn("Invalid port:{}, use default({})", portString, openFlowPort, e);
             }
         }
         return openFlowPort;
@@ -984,7 +981,7 @@ public class SouthboundUtils {
         long dpid = 0L;
         String datapathId = getDatapathId(node);
         if (datapathId != null) {
-            dpid = new BigInteger(datapathId.replaceAll(":", ""), 16).longValue();
+            dpid = new BigInteger(datapathId.replace(":", ""), 16).longValue();
         }
         return dpid;
     }
@@ -1036,13 +1033,9 @@ public class SouthboundUtils {
     private static boolean matchesBridgeName(ManagedNodeEntry managedNode, String bridgeName) {
         InstanceIdentifier<?> bridgeIid = managedNode.getBridgeRef().getValue();
         for (PathArgument bridgeIidPathArg : bridgeIid.getPathArguments()) {
-            if (bridgeIidPathArg instanceof IdentifiableItem<?, ?>) {
-                IdentifiableItem<?, ?> identifiableItem = (IdentifiableItem<?, ?>) bridgeIidPathArg;
+            if (bridgeIidPathArg instanceof IdentifiableItem<?, ?> identifiableItem) {
                 Identifier<?> key = identifiableItem.getKey();
-                if (key instanceof NodeKey) {
-                    // Do not combine the above if with that below, we want to
-                    // avoid the toString() call in the else if this is a NodeKey
-                    NodeKey nodeKey = (NodeKey) key;
+                if (key instanceof NodeKey nodeKey) {
                     if (nodeKey.getNodeId().getValue().contains(bridgeName)) {
                         return true;
                     }

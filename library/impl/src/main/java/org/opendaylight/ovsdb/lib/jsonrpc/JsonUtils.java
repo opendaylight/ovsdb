@@ -15,13 +15,14 @@ public final class JsonUtils {
     private static final ObjectWriter PRETTY_WRITER = new ObjectMapper().writerWithDefaultPrettyPrinter();
 
     private JsonUtils() {
+        // Hidden on purpose
     }
 
     public static String prettyString(final Object jsonNode) {
         try {
             return PRETTY_WRITER.writeValueAsString(jsonNode);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
     }
 }

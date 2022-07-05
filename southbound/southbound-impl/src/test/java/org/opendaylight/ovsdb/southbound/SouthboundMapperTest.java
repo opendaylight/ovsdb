@@ -38,7 +38,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.schema.openvswitch.Manager;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddressBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
@@ -70,7 +70,7 @@ public class SouthboundMapperTest {
 
     @Test
     public void testCreateIpAddress() throws Exception {
-        IpAddress ipAddress = IpAddressBuilder.getDefaultInstance("127.0.0.1");
+        IpAddress ipAddress = new IpAddress(new Ipv4Address("127.0.0.1"));
         InetAddress inetAddress = InetAddress.getByAddress(new byte[] {127, 0, 0, 1});
         assertEquals("Incorrect IP address created", ipAddress, SouthboundMapper.createIpAddress(inetAddress));
     }

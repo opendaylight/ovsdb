@@ -81,7 +81,7 @@ public abstract class TableSchema<E extends TableSchema<E>> {
             return instance.newInstance(this);
         } catch (InstantiationException | IllegalAccessException
                 | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException("exception constructing instance of clazz " + clazz, e);
+            throw new IllegalStateException("exception constructing instance of clazz " + clazz, e);
         }
     }
 

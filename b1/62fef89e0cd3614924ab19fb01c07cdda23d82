@@ -1,0 +1,8 @@
+Verified+1: Anil Belur <abelur@linuxfoundation.org>
+Verified+1: jenkins-releng ODL
+Code-Review+2: Anil Belur <abelur@linuxfoundation.org>
+Submitted-by: Anil Belur <abelur@linuxfoundation.org>
+Submitted-at: Thu, 11 Aug 2022 13:29:46 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/ovsdb/+/101774
+Project: ovsdb
+Branch: refs/heads/stable/sulfur

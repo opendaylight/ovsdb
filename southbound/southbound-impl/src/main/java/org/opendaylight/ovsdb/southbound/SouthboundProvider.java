@@ -39,10 +39,8 @@ import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListenerRegistratio
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
-import org.opendaylight.ovsdb.southbound.reconciliation.OvsdbUpgradeStateListener;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
-import org.opendaylight.serviceutils.upgrade.UpgradeState;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
@@ -79,11 +77,9 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     private final OvsdbConnection ovsdbConnection;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
     private final SystemReadyMonitor systemReadyMonitor;
-    private final UpgradeState upgradeState;
     private final AtomicBoolean registered = new AtomicBoolean(false);
     private ListenerRegistration<SouthboundProvider> operTopologyRegistration;
     private final OvsdbDiagStatusProvider ovsdbStatusProvider;
-    private OvsdbUpgradeStateListener ovsdbUpgradeStateListener;
 
     @Inject
     public SouthboundProvider(final DataBroker dataBroker,
@@ -92,8 +88,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
                               final DOMSchemaService schemaService,
                               final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
                               final SystemReadyMonitor systemReadyMonitor,
-                              final DiagStatusService diagStatusService,
-                              final UpgradeState upgradeState) {
+                              final DiagStatusService diagStatusService) {
         SouthboundProvider.db = dataBroker;
         entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
@@ -101,7 +96,6 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         ovsdbStatusProvider = new OvsdbDiagStatusProvider(diagStatusService);
         instanceIdentifierCodec = new InstanceIdentifierCodec(schemaService, bindingNormalizedNodeSerializer);
         this.systemReadyMonitor = systemReadyMonitor;
-        this.upgradeState = upgradeState;
         LOG.info("SouthboundProvider ovsdbConnectionService Initialized");
     }
 
@@ -114,7 +108,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         ovsdbStatusProvider.reportStatus(ServiceState.STARTING, "OVSDB initialization in progress");
         txInvoker = new TransactionInvokerImpl(db);
         cm = new OvsdbConnectionManager(db, txInvoker, entityOwnershipService, ovsdbConnection,
-                instanceIdentifierCodec, upgradeState);
+                instanceIdentifierCodec);
         ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(db, cm, instanceIdentifierCodec);
         ovsdbOperGlobalListener = new OvsdbOperGlobalListener(db, cm, txInvoker);
 
@@ -138,7 +132,6 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
 
         LOG.trace("Registering listener for path {}", treeId);
         operTopologyRegistration = db.registerDataTreeChangeListener(treeId, this);
-        ovsdbUpgradeStateListener = new OvsdbUpgradeStateListener(db, cm);
     }
 
     @Override
@@ -161,9 +154,6 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
             operTopologyRegistration = null;
         }
         ovsdbStatusProvider.reportStatus(ServiceState.UNREGISTERED, "OVSDB Service stopped");
-        if (ovsdbUpgradeStateListener != null) {
-            ovsdbUpgradeStateListener.close();
-        }
     }
 
     private static void initializeOvsdbTopology(final @NonNull LogicalDatastoreType type) {
@@ -267,9 +257,5 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     @VisibleForTesting
     boolean isRegistered() {
         return registered.get();
-    }
-
-    public UpgradeState getUpgradeState() {
-        return upgradeState;
     }
 }

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -52,7 +53,6 @@ import org.opendaylight.ovsdb.southbound.reconciliation.configuration.BridgeConf
 import org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.ovsdb.southbound.transactions.md.OvsdbNodeRemoveCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
-import org.opendaylight.serviceutils.upgrade.UpgradeState;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
@@ -66,8 +66,7 @@ import org.slf4j.LoggerFactory;
 
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
 
-    private final Map<ConnectionInfo, OvsdbConnectionInstance> clients =
-            new ConcurrentHashMap<>();
+    private final ConcurrentMap<ConnectionInfo, OvsdbConnectionInstance> clients = new ConcurrentHashMap<>();
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionManager.class);
     private static final String ENTITY_TYPE = "ovsdb";
     private static final int DB_FETCH_TIMEOUT = 1000;
@@ -86,13 +85,11 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private final OvsdbConnection ovsdbConnection;
     private final ReconciliationManager reconciliationManager;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
-    private final UpgradeState upgradeState;
 
     public OvsdbConnectionManager(final DataBroker db,final TransactionInvoker txInvoker,
                                   final EntityOwnershipService entityOwnershipService,
                                   final OvsdbConnection ovsdbConnection,
-                                  final InstanceIdentifierCodec instanceIdentifierCodec,
-                                  final UpgradeState upgradeState) {
+                                  final InstanceIdentifierCodec instanceIdentifierCodec) {
         this.db = db;
         this.txInvoker = txInvoker;
         this.entityOwnershipService = entityOwnershipService;
@@ -100,7 +97,6 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         this.ovsdbConnection = ovsdbConnection;
         reconciliationManager = new ReconciliationManager(db, instanceIdentifierCodec);
         this.instanceIdentifierCodec = instanceIdentifierCodec;
-        this.upgradeState = upgradeState;
     }
 
     @Override
@@ -406,7 +402,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     public void reconcileConnection(final InstanceIdentifier<Node> iid, final OvsdbNodeAugmentation ovsdbNode) {
-        this.retryConnection(iid, ovsdbNode,
+        retryConnection(iid, ovsdbNode,
                 ConnectionReconciliationTriggers.ON_CONTROLLER_INITIATED_CONNECTION_FAILURE);
 
     }
@@ -476,10 +472,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             //*this* instance of southbound plugin is owner of the device,
             //so register for monitor callbacks
             ovsdbConnectionInstance.registerCallbacks(instanceIdentifierCodec);
-            LOG.trace("Ovsdb isUpgradeInProgress {}", upgradeState.isUpgradeInProgress());
-            if (!upgradeState.isUpgradeInProgress()) {
-                reconcileBridgeConfigurations(ovsdbConnectionInstance);
-            }
+
+            reconcileBridgeConfigurations(ovsdbConnectionInstance);
         } else {
             //You were owner of the device, but now you are not. With the current ownership
             //grant mechanism, this scenario should not occur. Because this scenario will occur
@@ -665,7 +659,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
     }
 
-    public void reconcileBridgeConfigurations(final OvsdbConnectionInstance client) {
+    private void reconcileBridgeConfigurations(final OvsdbConnectionInstance client) {
         final InstanceIdentifier<Node> nodeIid = client.getInstanceIdentifier();
         final ReconciliationTask task = new BridgeConfigReconciliationTask(
                 reconciliationManager, OvsdbConnectionManager.this, nodeIid, client, instanceIdentifierCodec);
@@ -725,9 +719,5 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         String getState() {
             return state;
         }
-    }
-
-    public Map<ConnectionInfo, OvsdbConnectionInstance> getClients() {
-        return clients;
     }
 }

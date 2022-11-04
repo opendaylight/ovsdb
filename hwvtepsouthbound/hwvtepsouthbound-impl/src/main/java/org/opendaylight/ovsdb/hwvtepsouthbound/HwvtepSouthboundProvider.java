@@ -38,7 +38,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoke
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.utils.mdsal.utils.Scheduler;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
-import org.opendaylight.serviceutils.upgrade.UpgradeState;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
@@ -68,18 +67,15 @@ public class HwvtepSouthboundProvider
     private HwvtepReconciliationManager hwvtepReconciliationManager;
     private final AtomicBoolean registered = new AtomicBoolean(false);
     private ListenerRegistration<HwvtepSouthboundProvider> operTopologyRegistration;
-    private final UpgradeState upgradeState;
 
     @Inject
     public HwvtepSouthboundProvider(final DataBroker dataBroker, final EntityOwnershipService entityOwnership,
             final OvsdbConnection ovsdbConnection, final DOMSchemaService schemaService,
-            final BindingNormalizedNodeSerializer serializer,
-            final UpgradeState upgradeState) {
+            final BindingNormalizedNodeSerializer serializer) {
         this.dataBroker = dataBroker;
-        this.entityOwnershipService = entityOwnership;
+        entityOwnershipService = entityOwnership;
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
-        this.upgradeState = upgradeState;
         // FIXME: eliminate this static wiring
         HwvtepSouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(schemaService, serializer));
         LOG.info("HwvtepSouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
@@ -93,10 +89,11 @@ public class HwvtepSouthboundProvider
         LOG.info("HwvtepSouthboundProvider Session Initiated");
         txInvoker = new TransactionInvokerImpl(dataBroker);
         cm = new HwvtepConnectionManager(dataBroker, txInvoker, entityOwnershipService, ovsdbConnection);
-        registerConfigListenerPostUpgrade();
+        hwvtepDTListener = new HwvtepDataChangeListener(dataBroker, cm);
+        hwvtepReconciliationManager = new HwvtepReconciliationManager(dataBroker, cm);
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
-                new HwvtepsbPluginInstanceEntityOwnershipListener(this,this.entityOwnershipService);
+                new HwvtepsbPluginInstanceEntityOwnershipListener(this,entityOwnershipService);
 
         //register instance entity to get the ownership of the provider
         Entity instanceEntity = new Entity(ENTITY_TYPE, ENTITY_TYPE);
@@ -120,17 +117,6 @@ public class HwvtepSouthboundProvider
                 LOG.error("Timed out to get eos notification opening the port now");
             }
         }, HwvtepSouthboundConstants.PORT_OPEN_MAX_DELAY_IN_MINS, TimeUnit.MINUTES);
-    }
-
-    private void registerConfigListenerPostUpgrade() {
-        if (upgradeState.isUpgradeInProgress()) {
-            LOG.error("Upgrade is in progress delay config data change listener registration");
-            Scheduler.getScheduledExecutorService().schedule(this::registerConfigListenerPostUpgrade,
-                    60, TimeUnit.SECONDS);
-            return;
-        }
-        hwvtepDTListener = new HwvtepDataChangeListener(dataBroker, cm);
-        hwvtepReconciliationManager = new HwvtepReconciliationManager(dataBroker, cm);
     }
 
     @Override
@@ -232,7 +218,7 @@ public class HwvtepSouthboundProvider
         }
 
         public void close() {
-            this.listenerRegistration.close();
+            listenerRegistration.close();
         }
 
         @Override

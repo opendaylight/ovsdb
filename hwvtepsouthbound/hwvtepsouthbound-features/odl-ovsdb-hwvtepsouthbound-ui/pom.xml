@@ -12,7 +12,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>11.0.1</version>
+        <version>11.0.2</version>
         <relativePath/>
     </parent>
 
@@ -36,7 +36,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <dependency>
             <groupId>org.opendaylight.netconf</groupId>
             <artifactId>odl-mdsal-apidocs</artifactId>
-            <version>4.0.2</version>
+            <version>4.0.3</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

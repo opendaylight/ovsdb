@@ -18,7 +18,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>ovsdb</artifactId>
-  <version>1.14.3-SNAPSHOT</version>
+  <version>1.14.4-SNAPSHOT</version>
   <name>${project.artifactId}</name> <!-- Used by Sonar to set project name -->
   <packaging>pom</packaging>
 

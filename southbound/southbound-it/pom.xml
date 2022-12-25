@@ -12,13 +12,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>it</artifactId>
-    <version>1.15.1-SNAPSHOT</version>
+    <version>1.15.2-SNAPSHOT</version>
     <relativePath>../../commons/it</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.ovsdb</groupId>
   <artifactId>southbound-it</artifactId>
-  <version>1.15.1-SNAPSHOT</version>
+  <version>1.15.2-SNAPSHOT</version>
   <packaging>jar</packaging>
   <!-- <name> formatting is used by autorelease to parse and notify projects on
        build failure. Please do not modify this unless you have a good reason. -->

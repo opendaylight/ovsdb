@@ -31,8 +31,8 @@
 
   <reference id="certificateManager" interface="org.opendaylight.aaa.cert.api.ICertificateManager"
              filter="type=default-certificate-manager"/>
+  <reference id="nettyBootstrapFactory" interface="org.opendaylight.ovsdb.lib.impl.NettyBootstrapFactory"/>
 
-  <bean id="nettyBootstrapFactory" class="org.opendaylight.ovsdb.lib.impl.NettyBootstrapFactory" destroy-method="close"/>
   <bean id="ovsdbConnectionService" class="org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService">
     <argument ref="nettyBootstrapFactory"/>
     <argument ref="certificateManager"/>

@@ -15,10 +15,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.util.concurrent.FluentFuture;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
@@ -56,6 +54,7 @@ import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BridgeConfigReconciliationTaskTest {
@@ -75,16 +74,13 @@ public class BridgeConfigReconciliationTaskTest {
         NodeKey nodeKey = new NodeKey(new NodeId(new Uri(NODE_ID)));
 
         iid = SouthboundMapper.createInstanceIdentifier(nodeKey.getNodeId());
-        SouthboundProvider.setBridgesReconciliationInclusionList(Arrays.asList(BR_INT));
+        SouthboundProvider.setBridgesReconciliationInclusionList(List.of(BR_INT));
         Node brIntNode = createBridgeNode(NODE_ID + "/bridge/" + BR_INT);
-        Optional<Node> nodeOptional = Optional.of(brIntNode);
-        FluentFuture<Optional<Node>> readNodeFuture =
-                FluentFutures.immediateFluentFuture(nodeOptional);
         when(reconciliationManager.getDb()).thenReturn(db);
         ReadTransaction tx = mock(ReadTransaction.class);
         Mockito.when(db.newReadOnlyTransaction()).thenReturn(tx);
         Mockito.when(tx.read(any(LogicalDatastoreType.class),any(InstanceIdentifier.class)))
-                .thenReturn(readNodeFuture);
+                .thenReturn(FluentFutures.immediateFluentFuture(Optional.of(brIntNode)));
 
         when(topology.getNode()).thenReturn(Map.of(brIntNode.key(), brIntNode));
 
@@ -106,17 +102,14 @@ public class BridgeConfigReconciliationTaskTest {
     }
 
     private Node createBridgeNode(final String bridgeName) {
-        ProtocolEntry protocolEntry = new ProtocolEntryBuilder()
-                .setProtocol(OvsdbBridgeProtocolOpenflow10.VALUE)
-                .build();
-        ControllerEntry controllerEntry = new ControllerEntryBuilder().setTarget(new Uri("mock")).build();
-
         return new NodeBuilder()
                 .setNodeId(new NodeId(new Uri(bridgeName)))
                 .addAugmentation(new OvsdbBridgeAugmentationBuilder()
                     .setManagedBy(new OvsdbNodeRef(iid))
-                    .setProtocolEntry(Collections.singletonMap(protocolEntry.key(), protocolEntry))
-                    .setControllerEntry(Collections.singletonMap(controllerEntry.key(), controllerEntry))
+                    .setProtocolEntry(BindingMap.of(
+                        new ProtocolEntryBuilder().setProtocol(OvsdbBridgeProtocolOpenflow10.VALUE).build()))
+                    .setControllerEntry(BindingMap.of(
+                        new ControllerEntryBuilder().setTarget(new Uri("mock")).build()))
                     .build())
                 .build();
     }

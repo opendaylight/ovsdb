@@ -7,10 +7,12 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
+import java.util.concurrent.ExecutionException;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -25,39 +27,30 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
+@Service
 @Command(scope = "hwvtep", name = "disconnect", description = "Disconnect a node")
-public class HwvtepDisconnectCliCmd extends OsgiCommandSupport {
-
-    private DataBroker dataBroker;
-
-    @Option(name = "-nodeid", description = "Node Id",
-        required = false, multiValued = false)
-    String nodeid;
-
+public class HwvtepDisconnectCliCmd implements Action {
     public static final TopologyId HWVTEP_TOPOLOGY_ID = new TopologyId(new Uri("hwvtep:1"));
 
-    public void setDataBroker(DataBroker dataBroker) {
-        this.dataBroker = dataBroker;
-    }
+    @Reference
+    private DataBroker dataBroker;
 
+    @Option(name = "-nodeid", description = "Node Id", required = false, multiValued = false)
+    private String nodeid;
+
+    @SuppressWarnings("checkstyle:RegexpSinglelineJava")
     @Override
-    @SuppressFBWarnings("UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
-    protected Object doExecute() throws Exception {
-        ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
-        tx.put(LogicalDatastoreType.CONFIGURATION, getIid(),
-            new NodeBuilder().setNodeId(new NodeId(new Uri(nodeid + "/disconnect"))).build());
-        tx.commit().get();
-        session.getConsole().println("Successfully disconnected " + nodeid);
-        return "";
-    }
+    public Object execute() throws InterruptedException, ExecutionException {
+        final var nodeKey = new NodeKey(new NodeId(new Uri(nodeid + "/disconnect")));
 
-    private InstanceIdentifier<Node> getIid() {
-        NodeId nodeId = new NodeId(new Uri(nodeid + "/disconnect"));
-        NodeKey nodeKey = new NodeKey(nodeId);
-        TopologyKey topoKey = new TopologyKey(HWVTEP_TOPOLOGY_ID);
-        return InstanceIdentifier.builder(NetworkTopology.class)
-            .child(Topology.class, topoKey)
+        ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+        tx.put(LogicalDatastoreType.CONFIGURATION, InstanceIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(HWVTEP_TOPOLOGY_ID))
             .child(Node.class, nodeKey)
-            .build();
+            .build(),
+            new NodeBuilder().withKey(nodeKey).build());
+        tx.commit().get();
+        System.out.println("Successfully disconnected " + nodeid);
+        return "";
     }
 }

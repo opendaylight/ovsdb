@@ -7,6 +7,8 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,8 +34,8 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
 
     private final HwvtepSouthboundProviderInfo hwvtepProvider;
 
-    public TransactionHistoryCmd(HwvtepSouthboundProvider hwvtepProvider) {
-        this.hwvtepProvider = hwvtepProvider;
+    public TransactionHistoryCmd(final HwvtepSouthboundProviderInfo hwvtepProvider) {
+        this.hwvtepProvider = requireNonNull(hwvtepProvider);
     }
 
     @Override
@@ -54,9 +56,9 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
         return null;
     }
 
-    private void printLogs(Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxLogs,
-                           Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateLogs,
-                           InstanceIdentifier<Node> iid) {
+    private void printLogs(final Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxLogs,
+                           final Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateLogs,
+                           final InstanceIdentifier<Node> iid) {
         session.getConsole().println(SEPERATOR + " START " + SEPERATOR);
         List<HwvtepTransactionLogElement> controllerTxLog = controllerTxLogs.get(iid).getElements()
                 .stream().map(ele -> new HwvtepTransactionLogElement(ele, false)).collect(Collectors.toList());
@@ -70,7 +72,7 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
         session.getConsole().println();
     }
 
-    private void printLogs(List<Pair<HwvtepTransactionLogElement, Boolean>> logs) {
+    private void printLogs(final List<Pair<HwvtepTransactionLogElement, Boolean>> logs) {
         logs.forEach(pair -> {
             HwvtepTransactionLogElement log = pair.getLeft();
             session.getConsole().print(new Date(log.getDate()));
@@ -84,8 +86,8 @@ public class TransactionHistoryCmd extends OsgiCommandSupport {
     }
 
     private static List<Pair<HwvtepTransactionLogElement, Boolean>> mergeLogsByDate(
-            List<HwvtepTransactionLogElement> logs1,
-            List<HwvtepTransactionLogElement> logs2) {
+            final List<HwvtepTransactionLogElement> logs1,
+            final List<HwvtepTransactionLogElement> logs2) {
 
         ArrayList<Pair<HwvtepTransactionLogElement, Boolean>> result = new ArrayList();
         int firstIdx = 0;

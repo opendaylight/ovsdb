@@ -24,7 +24,7 @@
     </command>
     <command>
         <action class="org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDisconnectCliCmd">
-            <property name="dataBroker" ref="dataBroker" />
+            <argument ref="dataBroker" />
         </action>
     </command>
     </command-bundle>

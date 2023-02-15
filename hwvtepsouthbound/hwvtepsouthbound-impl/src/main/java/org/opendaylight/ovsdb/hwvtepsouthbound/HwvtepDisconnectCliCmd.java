@@ -7,6 +7,8 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import static java.util.Objects.requireNonNull;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
@@ -27,37 +29,31 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 @Command(scope = "hwvtep", name = "disconnect", description = "Disconnect a node")
 public class HwvtepDisconnectCliCmd extends OsgiCommandSupport {
+    public static final TopologyId HWVTEP_TOPOLOGY_ID = new TopologyId(new Uri("hwvtep:1"));
 
-    private DataBroker dataBroker;
+    private final DataBroker dataBroker;
 
     @Option(name = "-nodeid", description = "Node Id",
         required = false, multiValued = false)
     String nodeid;
 
-    public static final TopologyId HWVTEP_TOPOLOGY_ID = new TopologyId(new Uri("hwvtep:1"));
-
-    public void setDataBroker(DataBroker dataBroker) {
-        this.dataBroker = dataBroker;
+    public HwvtepDisconnectCliCmd(final DataBroker dataBroker) {
+        this.dataBroker = requireNonNull(dataBroker);
     }
 
     @Override
     @SuppressFBWarnings("UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
     protected Object doExecute() throws Exception {
+        final var nodeKey = new NodeKey(new NodeId(new Uri(nodeid + "/disconnect")));
+
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
-        tx.put(LogicalDatastoreType.CONFIGURATION, getIid(),
-            new NodeBuilder().setNodeId(new NodeId(new Uri(nodeid + "/disconnect"))).build());
+        tx.put(LogicalDatastoreType.CONFIGURATION, InstanceIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(HWVTEP_TOPOLOGY_ID))
+            .child(Node.class, nodeKey)
+            .build(),
+            new NodeBuilder().withKey(nodeKey).build());
         tx.commit().get();
         session.getConsole().println("Successfully disconnected " + nodeid);
         return "";
-    }
-
-    private InstanceIdentifier<Node> getIid() {
-        NodeId nodeId = new NodeId(new Uri(nodeid + "/disconnect"));
-        NodeKey nodeKey = new NodeKey(nodeId);
-        TopologyKey topoKey = new TopologyKey(HWVTEP_TOPOLOGY_ID);
-        return InstanceIdentifier.builder(NetworkTopology.class)
-            .child(Topology.class, topoKey)
-            .child(Node.class, nodeKey)
-            .build();
     }
 }

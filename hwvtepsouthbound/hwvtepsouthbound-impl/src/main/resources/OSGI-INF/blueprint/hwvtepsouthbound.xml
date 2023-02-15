@@ -14,18 +14,4 @@
         <argument ref="bindingNormalizedNodeSerializer"/>
     </bean>
     <service ref="hwvtepSouthboundProvider" interface="org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundProviderInfo"/>
-
-    <!-- FIXME: convert these to proper Karaf commands -->
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
-    <command>
-        <action class="org.opendaylight.ovsdb.hwvtepsouthbound.TransactionHistoryCmd">
-            <argument ref="hwvtepSouthboundProvider" />
-        </action>
-    </command>
-    <command>
-        <action class="org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDisconnectCliCmd">
-            <property name="dataBroker" ref="dataBroker" />
-        </action>
-    </command>
-    </command-bundle>
 </blueprint>

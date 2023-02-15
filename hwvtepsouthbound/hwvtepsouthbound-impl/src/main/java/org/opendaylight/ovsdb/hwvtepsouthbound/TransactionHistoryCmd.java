@@ -7,6 +7,7 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,78 +15,79 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
+@Service
 @Command(scope = "hwvtep", name = "txlog", description = "prints hwvtep tx log")
-public class TransactionHistoryCmd extends OsgiCommandSupport {
-
-    @Option(name = "-nodeid", description = "Node Id",
-            required = false, multiValued = false)
-    String nodeid;
+public class TransactionHistoryCmd implements Action {
     private static final String SEPERATOR = "#######################################################";
 
-    private final HwvtepSouthboundProviderInfo hwvtepProvider;
+    @Reference
+    private HwvtepSouthboundProviderInfo hwvtepProvider;
 
-    public TransactionHistoryCmd(HwvtepSouthboundProvider hwvtepProvider) {
-        this.hwvtepProvider = hwvtepProvider;
-    }
+    @Option(name = "-nodeid", description = "Node Id", required = false, multiValued = false)
+    private String nodeid;
 
+    @SuppressWarnings("checkstyle:RegexpSinglelineJava")
     @Override
-    protected Object doExecute() throws Exception {
+    public Object execute() {
+        final PrintStream out = System.out;
+
         Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxLogs = hwvtepProvider.getControllerTxHistory();
         Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateLogs = hwvtepProvider.getDeviceUpdateHistory();
         if (nodeid != null) {
-            printLogs(controllerTxLogs, deviceUpdateLogs,
+            printLogs(out, controllerTxLogs, deviceUpdateLogs,
                 HwvtepSouthboundMapper.createInstanceIdentifier(new NodeId(nodeid)));
         } else {
             Map<InstanceIdentifier<Node>, TransactionHistory> txlogs
                     = controllerTxLogs.isEmpty() ? deviceUpdateLogs : controllerTxLogs;
-            txlogs.keySet().forEach(iid -> {
-                printLogs(controllerTxLogs, deviceUpdateLogs, iid);
-            });
-            session.getConsole().println("Device tx logs size " + deviceUpdateLogs.size());
+            txlogs.keySet().forEach(iid -> printLogs(out, controllerTxLogs, deviceUpdateLogs, iid));
+            out.println("Device tx logs size " + deviceUpdateLogs.size());
         }
         return null;
     }
 
-    private void printLogs(Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxLogs,
-                           Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateLogs,
-                           InstanceIdentifier<Node> iid) {
-        session.getConsole().println(SEPERATOR + " START " + SEPERATOR);
+    private static void printLogs(final PrintStream out,
+                                  final Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxLogs,
+                                  final Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateLogs,
+                                  final InstanceIdentifier<Node> iid) {
+        out.println(SEPERATOR + " START " + SEPERATOR);
         List<HwvtepTransactionLogElement> controllerTxLog = controllerTxLogs.get(iid).getElements()
                 .stream().map(ele -> new HwvtepTransactionLogElement(ele, false)).collect(Collectors.toList());
         List<HwvtepTransactionLogElement> deviceUpdateLog = deviceUpdateLogs.get(iid).getElements()
                 .stream().map(ele -> new HwvtepTransactionLogElement(ele, true)).collect(Collectors.toList());
         List<Pair<HwvtepTransactionLogElement, Boolean>> allLogs = mergeLogsByDate(controllerTxLog, deviceUpdateLog);
-        session.getConsole().print("Printing for Node :  ");
-        session.getConsole().println(iid.firstKeyOf(Node.class).getNodeId().getValue());
-        printLogs(allLogs);
-        session.getConsole().println(SEPERATOR + " END " + SEPERATOR);
-        session.getConsole().println();
+        out.print("Printing for Node :  ");
+        out.println(iid.firstKeyOf(Node.class).getNodeId().getValue());
+        printLogs(out, allLogs);
+        out.println(SEPERATOR + " END " + SEPERATOR);
+        out.println();
     }
 
-    private void printLogs(List<Pair<HwvtepTransactionLogElement, Boolean>> logs) {
+    private static void printLogs(final PrintStream out, final List<Pair<HwvtepTransactionLogElement, Boolean>> logs) {
         logs.forEach(pair -> {
             HwvtepTransactionLogElement log = pair.getLeft();
-            session.getConsole().print(new Date(log.getDate()));
-            session.getConsole().print(" ");
-            session.getConsole().print(pair.getRight() ? "CONTROLLER" : "DEVICE");
-            session.getConsole().print(" ");
-            session.getConsole().print(log.getTransactionType());
-            session.getConsole().print(" ");
-            session.getConsole().println(log.getData());
+            out.print(new Date(log.getDate()));
+            out.print(" ");
+            out.print(pair.getRight() ? "CONTROLLER" : "DEVICE");
+            out.print(" ");
+            out.print(log.getTransactionType());
+            out.print(" ");
+            out.println(log.getData());
         });
     }
 
     private static List<Pair<HwvtepTransactionLogElement, Boolean>> mergeLogsByDate(
-            List<HwvtepTransactionLogElement> logs1,
-            List<HwvtepTransactionLogElement> logs2) {
+            final List<HwvtepTransactionLogElement> logs1,
+            final List<HwvtepTransactionLogElement> logs2) {
 
         ArrayList<Pair<HwvtepTransactionLogElement, Boolean>> result = new ArrayList();
         int firstIdx = 0;

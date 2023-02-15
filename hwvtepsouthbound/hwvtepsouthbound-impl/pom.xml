@@ -64,7 +64,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.apache.karaf.shell</groupId>
-      <artifactId>org.apache.karaf.shell.console</artifactId>
+      <artifactId>org.apache.karaf.shell.core</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -127,6 +127,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             --add-opens java.base/java.lang.reflect=ALL-UNNAMED
           </argLine>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.karaf.tooling</groupId>
+        <artifactId>karaf-services-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

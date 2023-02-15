@@ -79,9 +79,6 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 new TestSystemReadyMonitor(IMMEDIATE),
                 Mockito.mock(DiagStatusService.class))) {
 
-            // Initiate the session
-            southboundProvider.init();
-
             // Verify that at least one listener was registered
             verify(entityOwnershipService, atLeastOnce()).registerListener(
                     anyString(), any(EntityOwnershipListener.class));
@@ -105,9 +102,6 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 Mockito.mock(BindingNormalizedNodeSerializer.class),
                 new TestSystemReadyMonitor(IMMEDIATE),
                 Mockito.mock(DiagStatusService.class))) {
-
-            // Initiate the session
-            southboundProvider.init();
 
             // Verify that at least one listener was registered
             verify(entityOwnershipService, atLeastOnce()).registerListener(
@@ -135,8 +129,6 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 new TestSystemReadyMonitor(IMMEDIATE),
                 Mockito.mock(DiagStatusService.class))) {
 
-            southboundProvider.init();
-
             assertEquals(getDataBroker(), SouthboundProvider.getDb());
         }
     }
@@ -158,8 +150,6 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 Mockito.mock(BindingNormalizedNodeSerializer.class),
                 new TestSystemReadyMonitor(IMMEDIATE),
                 Mockito.mock(DiagStatusService.class))) {
-
-            southboundProvider.init();
 
             // At this point the OVSDB topology must not be present in either tree
             assertFalse(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION,

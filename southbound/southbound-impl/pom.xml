@@ -102,6 +102,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>jakarta.annotation-api</artifactId>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.metatype.annotations</artifactId>
+    </dependency>
 
     <!-- testing dependencies -->
     <dependency>

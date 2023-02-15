@@ -10,12 +10,10 @@ package org.opendaylight.ovsdb.southbound;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.FluentFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -47,11 +45,31 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
+@Component(service = { }, configurationPid = "org.opendaylight.ovsdb.southbound")
+@Designate(ocd = SouthboundProvider.Configuration.class)
+// non-final for testing
 public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
+    @ObjectClassDefinition
+    public @interface Configuration {
+        @AttributeDefinition
+        boolean skip$_$monitoring$_$manager$_$status() default false;
+        @AttributeDefinition
+        String[] bridge$_$reconciliation$_$inclusion$_$list();
+        @AttributeDefinition
+        String[] bridge$_$reconciliation$_$exclusion$_$list();
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundProvider.class);
     private static final String ENTITY_TYPE = "ovsdb-southbound-provider";
 
@@ -59,27 +77,42 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
     private static DataBroker db;
     // FIXME: get rid of this static
-    private static List<String> reconcileBridgeInclusionList = new ArrayList<>();
+    private static List<String> reconcileBridgeInclusionList = List.of();
     // FIXME: get rid of this static
-    private static List<String> reconcileBridgeExclusionList = new ArrayList<>();
+    private static List<String> reconcileBridgeExclusionList = List.of();
 
     public static DataBroker getDb() {
         return db;
     }
 
-    private OvsdbConnectionManager cm;
-    private TransactionInvoker txInvoker;
-    private OvsdbDataTreeChangeListener ovsdbDataTreeChangeListener;
-    private OvsdbOperGlobalListener ovsdbOperGlobalListener;
+    public static List<String> getBridgesReconciliationInclusionList() {
+        return reconcileBridgeInclusionList;
+    }
+
+    public static List<String> getBridgesReconciliationExclusionList() {
+        return reconcileBridgeExclusionList;
+    }
+
+    @VisibleForTesting
+    @SuppressFBWarnings("EI_EXPOSE_STATIC_REP2")
+    public static void setBridgesReconciliationInclusionList(final List<String> list) {
+        reconcileBridgeInclusionList = list;
+    }
+
+    private final OvsdbConnectionManager cm;
+    private final TransactionInvoker txInvoker;
+    private final OvsdbDataTreeChangeListener ovsdbDataTreeChangeListener;
+    private final OvsdbOperGlobalListener ovsdbOperGlobalListener;
     private final EntityOwnershipService entityOwnershipService;
-    private EntityOwnershipCandidateRegistration registration;
-    private SouthboundPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
+    private final SouthboundPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private final OvsdbConnection ovsdbConnection;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
     private final SystemReadyMonitor systemReadyMonitor;
     private final AtomicBoolean registered = new AtomicBoolean(false);
-    private ListenerRegistration<SouthboundProvider> operTopologyRegistration;
     private final OvsdbDiagStatusProvider ovsdbStatusProvider;
+
+    private EntityOwnershipCandidateRegistration registration;
+    private ListenerRegistration<SouthboundProvider> operTopologyRegistration;
 
     @Inject
     public SouthboundProvider(final DataBroker dataBroker,
@@ -89,7 +122,50 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
                               final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
                               final SystemReadyMonitor systemReadyMonitor,
                               final DiagStatusService diagStatusService) {
-        SouthboundProvider.db = dataBroker;
+        this(dataBroker, entityOwnershipServiceDependency, ovsdbConnection, schemaService,
+            bindingNormalizedNodeSerializer, systemReadyMonitor, diagStatusService, false, List.of(), List.of());
+    }
+
+    @Activate
+    public SouthboundProvider(@Reference final DataBroker dataBroker,
+                              @Reference final EntityOwnershipService entityOwnershipServiceDependency,
+                              @Reference final OvsdbConnection ovsdbConnection,
+                              @Reference final DOMSchemaService schemaService,
+                              @Reference final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
+                              @Reference final SystemReadyMonitor systemReadyMonitor,
+                              @Reference final DiagStatusService diagStatusService,
+                              final Configuration configuration) {
+        this(dataBroker, entityOwnershipServiceDependency, ovsdbConnection, schemaService,
+            bindingNormalizedNodeSerializer, systemReadyMonitor, diagStatusService,
+            configuration.skip$_$monitoring$_$manager$_$status(),
+            List.of(configuration.bridge$_$reconciliation$_$inclusion$_$list()),
+            List.of(configuration.bridge$_$reconciliation$_$exclusion$_$list()));
+    }
+
+    @SuppressFBWarnings(
+        value = { "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD" },
+        justification = "This is not a final class due to deep mocking. There is a FIXME for the static wiring above")
+    public SouthboundProvider(final DataBroker dataBroker,
+                              final EntityOwnershipService entityOwnershipServiceDependency,
+                              final OvsdbConnection ovsdbConnection,
+                              final DOMSchemaService schemaService,
+                              final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
+                              final SystemReadyMonitor systemReadyMonitor,
+                              final DiagStatusService diagStatusService,
+                              final boolean skipMonitoringManagerStatus,
+                              final List<String> bridgeReconciliationInclusions,
+                              final List<String> bridgeReconciliationExclusions) {
+        // FIXME: get rid of this static wiring
+        db = dataBroker;
+        reconcileBridgeInclusionList = bridgeReconciliationInclusions;
+        reconcileBridgeExclusionList = bridgeReconciliationExclusions;
+        LOG.debug("skipManagerStatus set to {}", skipMonitoringManagerStatus);
+        if (skipMonitoringManagerStatus) {
+            SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get("Manager").add("status");
+        } else {
+            SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get("Manager").remove("status");
+        }
+
         entityOwnershipService = entityOwnershipServiceDependency;
         registration = null;
         this.ovsdbConnection = ovsdbConnection;
@@ -97,20 +173,13 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         instanceIdentifierCodec = new InstanceIdentifierCodec(schemaService, bindingNormalizedNodeSerializer);
         this.systemReadyMonitor = systemReadyMonitor;
         LOG.info("SouthboundProvider ovsdbConnectionService Initialized");
-    }
 
-    /**
-     * Used by blueprint when starting the container.
-     */
-    @PostConstruct
-    public void init() {
-        LOG.info("SouthboundProvider Session Initiated");
         ovsdbStatusProvider.reportStatus(ServiceState.STARTING, "OVSDB initialization in progress");
-        txInvoker = new TransactionInvokerImpl(db);
-        cm = new OvsdbConnectionManager(db, txInvoker, entityOwnershipService, ovsdbConnection,
+        txInvoker = new TransactionInvokerImpl(dataBroker);
+        cm = new OvsdbConnectionManager(dataBroker, txInvoker, entityOwnershipService, ovsdbConnection,
                 instanceIdentifierCodec);
-        ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(db, cm, instanceIdentifierCodec);
-        ovsdbOperGlobalListener = new OvsdbOperGlobalListener(db, cm, txInvoker);
+        ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(dataBroker, cm, instanceIdentifierCodec);
+        ovsdbOperGlobalListener = new OvsdbOperGlobalListener(dataBroker, cm, txInvoker);
 
         //Register listener for entityOnwership changes
         providerOwnershipChangeListener =
@@ -121,8 +190,8 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         try {
             registration = entityOwnershipService.registerCandidate(instanceEntity);
         } catch (CandidateAlreadyRegisteredException e) {
-            LOG.warn("OVSDB Southbound Provider instance entity {} was already "
-                    + "registered for ownership", instanceEntity, e);
+            LOG.warn("OVSDB Southbound Provider instance entity {} was already registered for ownership",
+                instanceEntity, e);
         }
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
@@ -131,11 +200,13 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
                 DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, path);
 
         LOG.trace("Registering listener for path {}", treeId);
-        operTopologyRegistration = db.registerDataTreeChangeListener(treeId, this);
+        operTopologyRegistration = dataBroker.registerDataTreeChangeListener(treeId, this);
+        LOG.info("SouthboundProvider Session Initiated");
     }
 
-    @Override
     @PreDestroy
+    @Deactivate
+    @Override
     public void close() {
         LOG.info("SouthboundProvider Closed");
         try {
@@ -225,33 +296,6 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         public void ownershipChanged(final EntityOwnershipChange ownershipChange) {
             sp.handleOwnershipChange(ownershipChange);
         }
-    }
-
-    public void setSkipMonitoringManagerStatus(final boolean flag) {
-        LOG.debug("skipManagerStatus set to {}", flag);
-        if (flag) {
-            SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get("Manager").add("status");
-        } else {
-            SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get("Manager").remove("status");
-        }
-    }
-
-    @SuppressFBWarnings("EI_EXPOSE_STATIC_REP2")
-    public static void setBridgesReconciliationInclusionList(final List<String> bridgeList) {
-        reconcileBridgeInclusionList = bridgeList;
-    }
-
-    @SuppressFBWarnings("EI_EXPOSE_STATIC_REP2")
-    public static void setBridgesReconciliationExclusionList(final List<String> bridgeList) {
-        reconcileBridgeExclusionList = bridgeList;
-    }
-
-    public static List<String> getBridgesReconciliationInclusionList() {
-        return reconcileBridgeInclusionList;
-    }
-
-    public static List<String> getBridgesReconciliationExclusionList() {
-        return reconcileBridgeExclusionList;
     }
 
     @VisibleForTesting

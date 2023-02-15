@@ -54,6 +54,12 @@ import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.jsonrpc.ExceptionHandler;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcDecoder;
 import org.opendaylight.ovsdb.lib.jsonrpc.JsonRpcEndpoint;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +80,23 @@ import org.slf4j.LoggerFactory;
  * and a Singleton object in a non-OSGi environment.
  */
 @Singleton
+@Component(service = OvsdbConnection.class, configurationPid = "org.opendaylight.ovsdb.library")
+@Designate(ocd = OvsdbConnectionService.Configuration.class)
 public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
+    @ObjectClassDefinition
+    public @interface Configuration {
+        @AttributeDefinition
+        String ovsdb$_$listener$_$ip() default DEFAULT_LISTENER_IP;
+        @AttributeDefinition(min = "1", max = "65535")
+        int ovsdb$_$listener$_$port() default DEFAULT_LISTENER_PORT;
+        @AttributeDefinition
+        int ovsdb$_$rpc$_$task$_$timeout() default DEFAULT_RPC_TASK_TIMEOUT;
+        @AttributeDefinition
+        boolean use$_$ssl() default false;
+        @AttributeDefinition
+        int json$_$rpc$_$decoder$_$max$_$frame$_$length() default DEFAULT_JSON_RPC_DECODER_MAX_FRAME_LENGTH;
+    }
+
     private class ClientChannelInitializer extends ChannelInitializer<SocketChannel> {
         @Override
         public void initChannel(final SocketChannel channel) throws Exception {
@@ -180,9 +202,11 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionService.class);
     private static final int IDLE_READER_TIMEOUT = 30;
     private static final int READ_TIMEOUT = 180;
-    private static final String OVSDB_RPC_TASK_TIMEOUT_PARAM = "ovsdb-rpc-task-timeout";
-    private static final String USE_SSL = "use-ssl";
     private static final int RETRY_PERIOD = 100; // retry after 100 milliseconds
+    private static final String DEFAULT_LISTENER_IP = "0.0.0.0";
+    private static final int DEFAULT_LISTENER_PORT = 6640;
+    private static final int DEFAULT_RPC_TASK_TIMEOUT = 1000;
+    private static final int DEFAULT_JSON_RPC_DECODER_MAX_FRAME_LENGTH = 100000;
 
     private static final StringEncoder UTF8_ENCODER = new StringEncoder(StandardCharsets.UTF_8);
 
@@ -198,26 +222,53 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                 return null;
             });
 
+    // FIXME: these should not be static
     private static final Set<OvsdbConnectionListener> CONNECTION_LISTENERS = ConcurrentHashMap.newKeySet();
     private static final Map<OvsdbClient, Channel> CONNECTIONS = new ConcurrentHashMap<>();
 
     private final NettyBootstrapFactory bootstrapFactory;
-
-    private volatile boolean useSSL = false;
     private final ICertificateManager certManagerSrv;
 
-    private volatile int jsonRpcDecoderMaxFrameLength = 100000;
-    private volatile Channel serverChannel;
+    private final boolean useSSL;
+    private final int jsonRpcDecoderMaxFrameLength;
 
     private final AtomicBoolean singletonCreated = new AtomicBoolean(false);
-    private volatile String listenerIp = "0.0.0.0";
-    private volatile int listenerPort = 6640;
+    private volatile Channel serverChannel;
+
+    private final String listenerIp;
+    private final int listenerPort;
 
     @Inject
     public OvsdbConnectionService(final NettyBootstrapFactory bootstrapFactory,
             final ICertificateManager certManagerSrv) {
+        this(bootstrapFactory, certManagerSrv, DEFAULT_LISTENER_IP, DEFAULT_LISTENER_PORT, DEFAULT_RPC_TASK_TIMEOUT,
+            false, DEFAULT_JSON_RPC_DECODER_MAX_FRAME_LENGTH);
+    }
+
+    @Activate
+    public OvsdbConnectionService(@Reference final NettyBootstrapFactory bootstrapFactory,
+            @Reference(target = "(type=default-certificate-manager)") final ICertificateManager certManagerSrv,
+            final Configuration configuration) {
+        this(bootstrapFactory, certManagerSrv, configuration.ovsdb$_$listener$_$ip(),
+            configuration.ovsdb$_$listener$_$port(), configuration.ovsdb$_$rpc$_$task$_$timeout(),
+            configuration.use$_$ssl(), configuration.json$_$rpc$_$decoder$_$max$_$frame$_$length());
+    }
+
+    public OvsdbConnectionService(final NettyBootstrapFactory bootstrapFactory,
+            final ICertificateManager certManagerSrv, final String listenerIp, final int listenerPort,
+            final int ovsdbRpcTaskTimeout, final boolean useSSL, final int jsonRpcDecoderMaxFrameLength) {
         this.bootstrapFactory = requireNonNull(bootstrapFactory);
-        this.certManagerSrv = certManagerSrv;
+        this.certManagerSrv = requireNonNull(certManagerSrv);
+        this.listenerIp = requireNonNull(listenerIp);
+        this.listenerPort = listenerPort;
+        this.useSSL = useSSL;
+        this.jsonRpcDecoderMaxFrameLength = jsonRpcDecoderMaxFrameLength;
+
+        // FIXME: static state!
+        JsonRpcEndpoint.setReaperInterval(ovsdbRpcTaskTimeout);
+        LOG.info("OVSDB IP for listening connection is set to : {}", listenerIp);
+        LOG.info("OVSDB port for listening connection is set to : {}", listenerPort);
+        LOG.info("Json Rpc Decoder Max Frame Length set to : {}", jsonRpcDecoderMaxFrameLength);
     }
 
     /**
@@ -385,7 +436,6 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
      * OVSDB Passive listening thread that uses Netty ServerBootstrap to open
      * passive connection with Ssl and handle channel callbacks.
      */
-    @SuppressWarnings("checkstyle:IllegalCatch")
     private void ovsdbManagerWithSsl(final String ip, final int port, final ServerChannelInitializer channelHandler) {
         bootstrapFactory.newServer()
             .handler(new LoggingHandler(LogLevel.INFO))
@@ -581,54 +631,6 @@ public class OvsdbConnectionService implements AutoCloseable, OvsdbConnection {
                 LOG.trace("Connection {} notified to listener {}", client.getConnectionInfo(), listener);
                 listener.connected(client);
             });
-        }
-    }
-
-    public void setOvsdbRpcTaskTimeout(final int timeout) {
-        JsonRpcEndpoint.setReaperInterval(timeout);
-    }
-
-    /**
-     * Set useSSL flag.
-     *
-     * @param flag boolean for using ssl
-     */
-    public void setUseSsl(final boolean flag) {
-        useSSL = flag;
-    }
-
-    /**
-     * Blueprint property setter method. Blueprint call this method and set the value of json rpc decoder
-     * max frame length to the value configured for config option (json-rpc-decoder-max-frame-length) in
-     * the configuration file. This option is only configured at the  boot time of the controller. Any
-     * change at the run time will have no impact.
-     * @param maxFrameLength Max frame length (default : 100000)
-     */
-    public void setJsonRpcDecoderMaxFrameLength(final int maxFrameLength) {
-        jsonRpcDecoderMaxFrameLength = maxFrameLength;
-        LOG.info("Json Rpc Decoder Max Frame Length set to : {}", jsonRpcDecoderMaxFrameLength);
-    }
-
-    public void setOvsdbListenerIp(final String ip) {
-        LOG.info("OVSDB IP for listening connection is set to : {}", ip);
-        listenerIp = ip;
-    }
-
-    public void setOvsdbListenerPort(final int portNumber) {
-        LOG.info("OVSDB port for listening connection is set to : {}", portNumber);
-        listenerPort = portNumber;
-    }
-
-    public void updateConfigParameter(final Map<String, Object> configParameters) {
-        if (configParameters != null && !configParameters.isEmpty()) {
-            LOG.debug("Config parameters received : {}", configParameters.entrySet());
-            for (Map.Entry<String, Object> paramEntry : configParameters.entrySet()) {
-                if (paramEntry.getKey().equalsIgnoreCase(OVSDB_RPC_TASK_TIMEOUT_PARAM)) {
-                    setOvsdbRpcTaskTimeout(Integer.parseInt((String)paramEntry.getValue()));
-                } else if (paramEntry.getKey().equalsIgnoreCase(USE_SSL)) {
-                    useSSL = Boolean.parseBoolean(paramEntry.getValue().toString());
-                }
-            }
         }
     }
 }

@@ -106,6 +106,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.component.annotations</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.metatype.annotations</artifactId>
+    </dependency>
 
     <!-- Testing Dependencies -->
     <dependency>
@@ -145,6 +149,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               org.opendaylight.ovsdb.lib.*,
               org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.library.impl.rev141210
             </Export-Package>
+
+            <!-- FIXME: remove this instruction once aaa-cert is converted -->
+            <_dsannotations-options>norequirements</_dsannotations-options>
           </instructions>
         </configuration>
       </plugin>

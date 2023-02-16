@@ -57,7 +57,7 @@ public final class TransactionInvokerImpl implements TransactionInvoker, Transac
 
     public TransactionInvokerImpl(final DataBroker db) {
         this.db = db;
-        this.chain = db.createTransactionChain(this);
+        chain = db.createTransactionChain(this);
         ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("transaction-invoker-impl-%d")
                 .setUncaughtExceptionHandler(this).build();
         executor = Executors.newSingleThreadExecutor(threadFact);
@@ -207,9 +207,9 @@ public final class TransactionInvokerImpl implements TransactionInvoker, Transac
     }
 
     @Override
-    public void close() throws Exception {
-        this.chain.close();
-        this.executor.shutdown();
+    public void close() {
+        chain.close();
+        executor.shutdown();
     }
 
     @Override

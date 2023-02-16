@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -45,10 +44,15 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
+@Component(service = HwvtepSouthboundProviderInfo.class)
 public class HwvtepSouthboundProvider
         implements HwvtepSouthboundProviderInfo, ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
 
@@ -64,14 +68,16 @@ public class HwvtepSouthboundProvider
     private EntityOwnershipCandidateRegistration registration;
     private HwvtepsbPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private HwvtepDataChangeListener hwvtepDTListener;
-    private HwvtepReconciliationManager hwvtepReconciliationManager;
+    private final HwvtepReconciliationManager hwvtepReconciliationManager;
     private final AtomicBoolean registered = new AtomicBoolean(false);
     private ListenerRegistration<HwvtepSouthboundProvider> operTopologyRegistration;
 
     @Inject
-    public HwvtepSouthboundProvider(final DataBroker dataBroker, final EntityOwnershipService entityOwnership,
-            final OvsdbConnection ovsdbConnection, final DOMSchemaService schemaService,
-            final BindingNormalizedNodeSerializer serializer) {
+    @Activate
+    public HwvtepSouthboundProvider(@Reference final DataBroker dataBroker,
+            @Reference final EntityOwnershipService entityOwnership,
+            @Reference final OvsdbConnection ovsdbConnection, @Reference final DOMSchemaService schemaService,
+            @Reference final BindingNormalizedNodeSerializer serializer) {
         this.dataBroker = dataBroker;
         entityOwnershipService = entityOwnership;
         registration = null;
@@ -79,14 +85,6 @@ public class HwvtepSouthboundProvider
         // FIXME: eliminate this static wiring
         HwvtepSouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(schemaService, serializer));
         LOG.info("HwvtepSouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
-    }
-
-    /**
-     * Used by blueprint when starting the container.
-     */
-    @PostConstruct
-    public void init() {
-        LOG.info("HwvtepSouthboundProvider Session Initiated");
         txInvoker = new TransactionInvokerImpl(dataBroker);
         cm = new HwvtepConnectionManager(dataBroker, txInvoker, entityOwnershipService, ovsdbConnection);
         hwvtepDTListener = new HwvtepDataChangeListener(dataBroker, cm);
@@ -117,20 +115,17 @@ public class HwvtepSouthboundProvider
                 LOG.error("Timed out to get eos notification opening the port now");
             }
         }, HwvtepSouthboundConstants.PORT_OPEN_MAX_DELAY_IN_MINS, TimeUnit.MINUTES);
+
+        LOG.info("HwvtepSouthboundProvider Session Initiated");
     }
 
-    @Override
     @PreDestroy
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    public void close() throws Exception {
-        LOG.info("HwvtepSouthboundProvider Closed");
+    @Deactivate
+    @Override
+    public void close() {
         if (txInvoker != null) {
-            try {
-                txInvoker.close();
-                txInvoker = null;
-            } catch (Exception e) {
-                LOG.error("HWVTEP Southbound Provider failed to close TransactionInvoker", e);
-            }
+            txInvoker.close();
+            txInvoker = null;
         }
         if (cm != null) {
             cm.close();
@@ -152,6 +147,7 @@ public class HwvtepSouthboundProvider
             operTopologyRegistration.close();
             operTopologyRegistration = null;
         }
+        LOG.info("HwvtepSouthboundProvider Closed");
     }
 
     private void initializeHwvtepTopology(final LogicalDatastoreType type) {
@@ -196,8 +192,6 @@ public class HwvtepSouthboundProvider
             operTopologyRegistration = null;
         }
     }
-
-
 
     private void openOvsdbPort() {
         if (!registered.getAndSet(true)) {

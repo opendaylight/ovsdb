@@ -96,14 +96,14 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         this.db = db;
         this.txInvoker = txInvoker;
         this.entityOwnershipService = entityOwnershipService;
-        this.hwvtepDeviceEntityOwnershipListener = new HwvtepDeviceEntityOwnershipListener(this,entityOwnershipService);
-        this.reconciliationManager = new ReconciliationManager(db);
-        this.hwvtepOperGlobalListener = new HwvtepOperGlobalListener(db, this);
+        hwvtepDeviceEntityOwnershipListener = new HwvtepDeviceEntityOwnershipListener(this,entityOwnershipService);
+        reconciliationManager = new ReconciliationManager(db);
+        hwvtepOperGlobalListener = new HwvtepOperGlobalListener(db, this);
         this.ovsdbConnectionService = ovsdbConnectionService;
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (hwvtepDeviceEntityOwnershipListener != null) {
             hwvtepDeviceEntityOwnershipListener.close();
         }
@@ -111,7 +111,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             hwvtepOperGlobalListener.close();
         }
 
-        for (HwvtepConnectionInstance client: clients.values()) {
+        for (HwvtepConnectionInstance client : clients.values()) {
             client.disconnect();
         }
         DependencyQueue.close();
@@ -518,7 +518,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     public void reconcileConnection(final InstanceIdentifier<Node> iid, final HwvtepGlobalAugmentation hwvtepNode) {
-        this.retryConnection(iid, hwvtepNode,
+        retryConnection(iid, hwvtepNode,
                 ConnectionReconciliationTriggers.ON_CONTROLLER_INITIATED_CONNECTION_FAILURE);
     }
 

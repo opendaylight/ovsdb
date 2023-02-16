@@ -227,10 +227,6 @@ public class HwvtepSouthboundProvider
         }
     }
 
-    public HwvtepConnectionManager getHwvtepConnectionManager() {
-        return cm;
-    }
-
     @Override
     public Map<InstanceIdentifier<Node>, HwvtepDeviceInfo> getAllConnectedInstances() {
         return cm.allConnectedInstances();

@@ -22,12 +22,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.binding.api.Transaction;
 import org.opendaylight.mdsal.binding.api.TransactionChain;
 import org.opendaylight.mdsal.binding.api.TransactionChainListener;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +42,8 @@ import org.slf4j.LoggerFactory;
  * Copied over as-is from southbound plugin. Good candidate to be common
  * when refactoring code.
  */
+@Singleton
+@Component(service = TransactionInvoker.class)
 public final class TransactionInvokerImpl implements TransactionInvoker, TransactionChainListener, Runnable,
         AutoCloseable, UncaughtExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionInvokerImpl.class);
@@ -55,7 +64,9 @@ public final class TransactionInvokerImpl implements TransactionInvoker, Transac
     private volatile ReadWriteTransaction transactionInFlight = null;
     private Iterator<TransactionCommand> commandIterator = null;
 
-    public TransactionInvokerImpl(final DataBroker db) {
+    @Inject
+    @Activate
+    public TransactionInvokerImpl(@Reference final DataBroker db) {
         this.db = db;
         chain = db.createTransactionChain(this);
         ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("transaction-invoker-impl-%d")
@@ -206,6 +217,8 @@ public final class TransactionInvokerImpl implements TransactionInvoker, Transac
         return result;
     }
 
+    @PreDestroy
+    @Deactivate
     @Override
     public void close() {
         chain.close();

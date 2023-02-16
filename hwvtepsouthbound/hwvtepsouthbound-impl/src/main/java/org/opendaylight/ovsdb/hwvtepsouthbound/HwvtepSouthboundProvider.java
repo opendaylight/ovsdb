@@ -33,7 +33,6 @@ import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration.HwvtepReconciliationManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
-import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.utils.mdsal.utils.Scheduler;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
@@ -64,7 +63,6 @@ public final class HwvtepSouthboundProvider
     private final OvsdbConnection ovsdbConnection;
 
     private HwvtepConnectionManager cm;
-    private TransactionInvoker txInvoker;
     private EntityOwnershipCandidateRegistration registration;
     private HwvtepsbPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private HwvtepDataChangeListener hwvtepDTListener;
@@ -77,7 +75,8 @@ public final class HwvtepSouthboundProvider
     public HwvtepSouthboundProvider(@Reference final DataBroker dataBroker,
             @Reference final EntityOwnershipService entityOwnership,
             @Reference final OvsdbConnection ovsdbConnection, @Reference final DOMSchemaService schemaService,
-            @Reference final BindingNormalizedNodeSerializer serializer) {
+            @Reference final BindingNormalizedNodeSerializer serializer,
+            @Reference final TransactionInvoker txInvoker) {
         this.dataBroker = dataBroker;
         entityOwnershipService = entityOwnership;
         registration = null;
@@ -85,7 +84,6 @@ public final class HwvtepSouthboundProvider
         // FIXME: eliminate this static wiring
         HwvtepSouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(schemaService, serializer));
         LOG.info("HwvtepSouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
-        txInvoker = new TransactionInvokerImpl(dataBroker);
         cm = new HwvtepConnectionManager(dataBroker, txInvoker, entityOwnershipService, ovsdbConnection);
         hwvtepDTListener = new HwvtepDataChangeListener(dataBroker, cm);
         hwvtepReconciliationManager = new HwvtepReconciliationManager(dataBroker, cm);
@@ -123,10 +121,6 @@ public final class HwvtepSouthboundProvider
     @Deactivate
     @Override
     public void close() {
-        if (txInvoker != null) {
-            txInvoker.close();
-            txInvoker = null;
-        }
         if (cm != null) {
             cm.close();
             cm = null;

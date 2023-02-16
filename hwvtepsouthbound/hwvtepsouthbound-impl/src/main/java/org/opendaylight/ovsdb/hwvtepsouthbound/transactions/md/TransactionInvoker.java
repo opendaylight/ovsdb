@@ -10,6 +10,4 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 public interface TransactionInvoker {
 
     void invoke(TransactionCommand command);
-
-    void close();
 }

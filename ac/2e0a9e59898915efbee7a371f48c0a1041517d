@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng ODL
+Code-Review+2: Stephen Kitt <skitt@redhat.com>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Fri, 03 Mar 2023 14:16:45 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/ovsdb/+/104755
+Project: ovsdb
+Branch: refs/heads/master

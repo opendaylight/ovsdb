@@ -50,7 +50,7 @@ public class HwvtepGlobalRemoveCommand extends AbstractTransactionCommand {
         try {
             Optional<Node> hwvtepGlobalOptional = hwvtepGlobalFuture.get();
             if (hwvtepGlobalOptional.isPresent()) {
-                Node hwvtepNode = hwvtepGlobalOptional.get();
+                Node hwvtepNode = hwvtepGlobalOptional.orElseThrow();
                 HwvtepGlobalAugmentation hgAugmentation = hwvtepNode.augmentation(HwvtepGlobalAugmentation.class);
                 if (checkIfOnlyConnectedManager(hgAugmentation)) {
                     if (hgAugmentation != null) {

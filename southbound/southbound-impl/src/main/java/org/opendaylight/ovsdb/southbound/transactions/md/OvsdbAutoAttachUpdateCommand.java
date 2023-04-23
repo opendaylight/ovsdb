@@ -91,7 +91,7 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
                         final Optional<Autoattach> optionalAutoattach =
                                 transaction.read(LogicalDatastoreType.OPERATIONAL, currentIid).get();
                         if (optionalAutoattach.isPresent()) {
-                            currentAutoattach = optionalAutoattach.get();
+                            currentAutoattach = optionalAutoattach.orElseThrow();
                         }
                     } catch (final InterruptedException | ExecutionException e) {
                         LOG.debug("AutoAttach table entries not found in operational datastore, need to create it.", e);
@@ -125,7 +125,7 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
 
                 final Autoattach autoAttachEntry = autoAttachBuilder.build();
                 LOG.trace("Update Ovsdb Node {} with AutoAttach table entries {}",
-                        ovsdbNode.get().getNodeId(), autoAttachEntry);
+                        ovsdbNode.orElseThrow().getNodeId(), autoAttachEntry);
                 final InstanceIdentifier<Autoattach> iid = nodeIId
                         .augmentation(OvsdbNodeAugmentation.class)
                         .child(Autoattach.class, autoAttachEntry.key());

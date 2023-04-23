@@ -58,7 +58,7 @@ public final class HwvtepManagerUpdateCommand extends AbstractTransactionCommand
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
-            LOG.debug("Connection {} is present", connection.get());
+            LOG.debug("Connection {} is present", connection.orElseThrow());
             Node connectionNode = buildConnectionNode(manager);
             transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
             addToDeviceUpdate(TransactionType.ADD, manager);

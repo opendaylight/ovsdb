@@ -109,7 +109,7 @@ public abstract class UnMetDependencyGetter<T extends Identifiable> {
             DataBroker db = opState.getConnectionInstance().getDataBroker();
             Optional data = HwvtepSouthboundUtil.readNode(db, LogicalDatastoreType.CONFIGURATION, key);
             if (data.isPresent()) {
-                opState.getDeviceInfo().updateConfigData(cls, key, data.get());
+                opState.getDeviceInfo().updateConfigData(cls, key, data.orElseThrow());
                 return true;
             }
             return false;

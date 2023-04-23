@@ -54,17 +54,17 @@ public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
                     SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
             // FIXME: Iterate on external_ids instead of uuid when Open vSwitch supports external_ids column
             for (final UUID autoAttachUuid : removedAutoAttachRows.keySet()) {
-                final AutoattachKey autoAttachKey = getAutoAttachKeyToRemove(ovsdbNode.get(), autoAttachUuid);
+                final AutoattachKey autoAttachKey = getAutoAttachKeyToRemove(ovsdbNode.orElseThrow(), autoAttachUuid);
                 if (autoAttachKey != null) {
                     final InstanceIdentifier<Autoattach> iid = ovsdbNodeIid
                             .augmentation(OvsdbNodeAugmentation.class)
                             .child(Autoattach.class, autoAttachKey);
                     transaction.delete(LogicalDatastoreType.OPERATIONAL, iid);
                     LOG.debug("AutoAttach table {} for Ovsdb Node {} is deleted", autoAttachUuid,
-                            ovsdbNode.get().getNodeId());
+                            ovsdbNode.orElseThrow().getNodeId());
                 } else {
                     LOG.warn("AutoAttach table {} not found for Ovsdb Node {} to delete", autoAttachUuid,
-                            ovsdbNode.get().getNodeId());
+                            ovsdbNode.orElseThrow().getNodeId());
                 }
             }
         }

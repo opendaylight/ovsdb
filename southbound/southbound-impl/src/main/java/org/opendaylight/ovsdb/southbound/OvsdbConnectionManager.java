@@ -335,7 +335,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     public OvsdbConnectionInstance getConnectionInstance(final OvsdbBridgeAttributes mn) {
         Optional<OvsdbNodeAugmentation> optional = SouthboundUtil.getManagingNode(db, mn);
         if (optional.isPresent()) {
-            return getConnectionInstance(optional.get().getConnectionInfo());
+            return getConnectionInstance(optional.orElseThrow().getConnectionInfo());
         } else {
             return null;
         }
@@ -366,7 +366,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             transaction.close();
             Optional<Node> optional = nodeFuture.get();
             if (optional.isPresent()) {
-                return this.getConnectionInstance(optional.get());
+                return this.getConnectionInstance(optional.orElseThrow());
             } else {
                 LOG.debug("Node was not found on the path in the operational DS: {}", nodePath);
                 return null;
@@ -500,7 +500,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         txInvoker.invoke(transaction -> {
             Optional<Node> ovsdbNodeOpt = SouthboundUtil.readNode(transaction, nodeIid);
             if (ovsdbNodeOpt.isPresent()) {
-                Node ovsdbNode = ovsdbNodeOpt.get();
+                Node ovsdbNode = ovsdbNodeOpt.orElseThrow();
                 OvsdbNodeAugmentation nodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
                 if (nodeAugmentation != null) {
                     Map<ManagedNodeEntryKey, ManagedNodeEntry> entries = nodeAugmentation.getManagedNodeEntry();
@@ -598,7 +598,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         java.util.Optional<EntityOwnershipState> ownershipStateOpt =
                 entityOwnershipService.getOwnershipState(candidateEntity);
         if (ownershipStateOpt.isPresent()) {
-            EntityOwnershipState ownershipState = ownershipStateOpt.get();
+            EntityOwnershipState ownershipState = ownershipStateOpt.orElseThrow();
             if (ownershipState == EntityOwnershipState.OWNED_BY_OTHER) {
                 ovsdbConnectionInstance.setHasDeviceOwnership(false);
             } else if (ownershipState == EntityOwnershipState.IS_OWNER) {

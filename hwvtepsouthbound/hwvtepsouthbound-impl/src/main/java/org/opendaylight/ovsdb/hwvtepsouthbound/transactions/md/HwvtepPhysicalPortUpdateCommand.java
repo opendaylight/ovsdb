@@ -86,7 +86,7 @@ public final class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCo
         for (Entry<UUID, PhysicalPort> portUpdateEntry : updatedPPRows.entrySet()) {
             Optional<InstanceIdentifier<Node>> switchIid = getTerminationPointSwitch(portUpdateEntry.getKey());
             if (switchIid.isPresent()) {
-                if (getDeviceInfo().getDeviceOperData(Node.class, switchIid.get()) == null) {
+                if (getDeviceInfo().getDeviceOperData(Node.class, switchIid.orElseThrow()) == null) {
                     //This is the first update from switch do not have to do reconciliation of this port
                     //it is taken care by switch reconciliation
                     skipReconciliationPorts.add(portUpdateEntry.getKey());
@@ -105,7 +105,7 @@ public final class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCo
         LOG.trace("PhysicalPortTable updated: {}", updatedPPRows);
         Optional<Node> node = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (node.isPresent()) {
-            updateTerminationPoints(transaction, node.get());
+            updateTerminationPoints(transaction, node.orElseThrow());
             // TODO: Handle Deletion of VLAN Bindings
         }
     }
@@ -128,7 +128,8 @@ public final class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCo
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
                 tpBuilder.withKey(tpKey);
                 tpBuilder.setTpId(tpKey.getTpId());
-                InstanceIdentifier<TerminationPoint> tpPath = getInstanceIdentifier(switchIid.get(), portUpdate);
+                InstanceIdentifier<TerminationPoint> tpPath =
+                    getInstanceIdentifier(switchIid.orElseThrow(), portUpdate);
                 HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder =
                         new HwvtepPhysicalPortAugmentationBuilder();
                 buildTerminationPoint(tpAugmentationBuilder, portUpdate);
@@ -301,7 +302,7 @@ public final class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCo
             for (Switches managedNodeEntry : switchNodes.values()) {
                 @SuppressWarnings("unchecked")
                 Node switchNode = HwvtepSouthboundUtil.readNode(transaction,
-                                (InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue()).get();
+                                (InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue()).orElseThrow();
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(tpName));
                 TerminationPoint terminationPoint = switchNode.nonnullTerminationPoint().get(tpKey);
                 if (terminationPoint != null) {

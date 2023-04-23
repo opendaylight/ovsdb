@@ -44,7 +44,7 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
         try {
             ovsdbNodeOptional = ovsdbNodeFuture.get();
             if (ovsdbNodeOptional.isPresent()) {
-                Node ovsdbNode = ovsdbNodeOptional.get();
+                Node ovsdbNode = ovsdbNodeOptional.orElseThrow();
                 OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
                 if (checkIfOnlyConnectedManager(ovsdbNodeAugmentation)) {
                     if (ovsdbNodeAugmentation != null) {

@@ -54,10 +54,10 @@ public class UcastMacsLocalRemoveCommand
             Optional<LocalUcastMacs> operationalMacOptional =
                     getOperationalState().getLocalUcastMacs(instanceIdentifier, mac.key());
             UcastMacsLocal ucastMacsLocal = transaction.getTypedRowSchema(UcastMacsLocal.class);
-            if (operationalMacOptional.isPresent() && operationalMacOptional.get().getMacEntryUuid() != null) {
+            if (operationalMacOptional.isPresent() && operationalMacOptional.orElseThrow().getMacEntryUuid() != null) {
                 //when mac entry is deleted, its referenced locators are deleted automatically.
                 //locators in config DS is not deleted and user need to be removed explicitly by user.
-                UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
+                UUID macEntryUUID = new UUID(operationalMacOptional.orElseThrow().getMacEntryUuid().getValue());
                 ucastMacsLocal.getUuidColumn().setData(macEntryUUID);
                 transaction.add(op.delete(ucastMacsLocal.getSchema())
                         .where(ucastMacsLocal.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());

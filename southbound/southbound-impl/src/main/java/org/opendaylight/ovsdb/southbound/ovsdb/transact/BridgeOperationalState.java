@@ -52,20 +52,18 @@ public class BridgeOperationalState {
     }
 
     public Optional<OvsdbBridgeAugmentation> getOvsdbBridgeAugmentation(InstanceIdentifier<?> iid) {
-        Optional<Node> nodeOptional = getBridgeNode(iid);
-        if (nodeOptional.isPresent()) {
-            return Optional.ofNullable(nodeOptional.get().augmentation(OvsdbBridgeAugmentation.class));
-        }
-        return Optional.empty();
+        return getBridgeNode(iid)
+            .flatMap(node -> Optional.ofNullable(node.augmentation(OvsdbBridgeAugmentation.class)));
     }
 
     public Optional<TerminationPoint> getBridgeTerminationPoint(InstanceIdentifier<?> iid) {
         if (iid != null) {
             Optional<Node> nodeOptional = getBridgeNode(iid);
-            if (nodeOptional.isPresent() && nodeOptional.get().getTerminationPoint() != null) {
+            if (nodeOptional.isPresent()) {
+                Node node = nodeOptional.orElseThrow();
                 TerminationPointKey key = iid.firstKeyOf(TerminationPoint.class);
                 if (key != null) {
-                    final TerminationPoint tp = nodeOptional.get().nonnullTerminationPoint().get(key);
+                    final TerminationPoint tp = node.nonnullTerminationPoint().get(key);
                     if (tp != null) {
                         return Optional.of(tp);
                     }
@@ -78,18 +76,16 @@ public class BridgeOperationalState {
     }
 
     public Optional<OvsdbTerminationPointAugmentation> getOvsdbTerminationPointAugmentation(InstanceIdentifier<?> iid) {
-        Optional<TerminationPoint> tpOptional = getBridgeTerminationPoint(iid);
-        if (tpOptional.isPresent()) {
-            return Optional.ofNullable(tpOptional.get().augmentation(OvsdbTerminationPointAugmentation.class));
-        }
-        return Optional.empty();
+        return getBridgeTerminationPoint(iid)
+            .flatMap(tp -> Optional.ofNullable(tp.augmentation(OvsdbTerminationPointAugmentation.class)));
     }
 
     public Optional<ControllerEntry> getControllerEntry(InstanceIdentifier<?> iid) {
         if (iid != null) {
             Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
             if (ovsdbBridgeOptional.isPresent()) {
-                Map<ControllerEntryKey, ControllerEntry> entries = ovsdbBridgeOptional.get().getControllerEntry();
+                Map<ControllerEntryKey, ControllerEntry> entries =
+                    ovsdbBridgeOptional.orElseThrow().getControllerEntry();
                 if (entries != null) {
                     ControllerEntryKey key = iid.firstKeyOf(ControllerEntry.class);
                     if (key != null) {
@@ -108,7 +104,7 @@ public class BridgeOperationalState {
         if (iid != null) {
             Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
             if (ovsdbBridgeOptional.isPresent()) {
-                Map<ProtocolEntryKey, ProtocolEntry> entries = ovsdbBridgeOptional.get().getProtocolEntry();
+                Map<ProtocolEntryKey, ProtocolEntry> entries = ovsdbBridgeOptional.orElseThrow().getProtocolEntry();
                 if (entries != null) {
                     ProtocolEntryKey key = iid.firstKeyOf(ProtocolEntry.class);
                     if (key != null) {

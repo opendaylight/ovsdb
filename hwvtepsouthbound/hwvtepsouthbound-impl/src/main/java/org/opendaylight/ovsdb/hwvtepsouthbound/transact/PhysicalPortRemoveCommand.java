@@ -59,7 +59,7 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
             if (operationalPhysicalPortOptional.isPresent()) {
                 PhysicalPort physicalPort = transaction.getTypedRowWrapper(PhysicalPort.class);
                 physicalPort.setVlanBindings(new HashMap<>());
-                HwvtepPhysicalPortAugmentation updatedPhysicalPort = operationalPhysicalPortOptional.get();
+                HwvtepPhysicalPortAugmentation updatedPhysicalPort = operationalPhysicalPortOptional.orElseThrow();
                 String existingPhysicalPortName = updatedPhysicalPort.getHwvtepNodeName().getValue();
                 PhysicalPort extraPhyscialPort = transaction.getTypedRowWrapper(PhysicalPort.class);
                 extraPhyscialPort.setName("");

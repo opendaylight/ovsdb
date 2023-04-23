@@ -117,7 +117,7 @@ public class MdsalUtils {
             final LogicalDatastoreType store, final InstanceIdentifier<? extends DataObject> path) {
         Optional<D> optionalDataObject = readOptional(store, path);
         if (optionalDataObject.isPresent()) {
-            return optionalDataObject.get();
+            return optionalDataObject.orElseThrow();
         }
         LOG.debug("{}: Failed to read {}",
                 Thread.currentThread().getStackTrace()[1], path);

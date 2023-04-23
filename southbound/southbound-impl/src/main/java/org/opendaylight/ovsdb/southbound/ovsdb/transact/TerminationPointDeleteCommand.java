@@ -73,7 +73,7 @@ public class TerminationPointDeleteCommand implements TransactCommand {
             Optional<OvsdbTerminationPointAugmentation> tpAugmentation =
                     state.getOvsdbTerminationPointAugmentation(removedTpIid);
             if (tpAugmentation.isPresent()) {
-                OvsdbTerminationPointAugmentation tp = tpAugmentation.get();
+                OvsdbTerminationPointAugmentation tp = tpAugmentation.orElseThrow();
                 if (tp.getPortUuid() != null) {
                     UUID portUuid = new UUID(tp.getPortUuid().getValue());
                     Bridge bridge = transaction.getTypedRowSchema(Bridge.class);

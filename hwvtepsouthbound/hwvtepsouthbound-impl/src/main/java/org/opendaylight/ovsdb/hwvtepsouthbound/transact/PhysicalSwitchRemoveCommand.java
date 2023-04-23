@@ -55,8 +55,8 @@ public class PhysicalSwitchRemoveCommand extends AbstractTransactCommand {
                 getOperationalState().getPhysicalSwitchAugmentation(iid);
         PhysicalSwitch physicalSwitch = transaction.getTypedRowSchema(PhysicalSwitch.class);
         if (operationalPhysicalSwitchOptional.isPresent()
-                && operationalPhysicalSwitchOptional.get().getPhysicalSwitchUuid() != null) {
-            UUID physicalSwitchUuid = new UUID(operationalPhysicalSwitchOptional.get()
+                && operationalPhysicalSwitchOptional.orElseThrow().getPhysicalSwitchUuid() != null) {
+            UUID physicalSwitchUuid = new UUID(operationalPhysicalSwitchOptional.orElseThrow()
                     .getPhysicalSwitchUuid().getValue());
             Global global = transaction.getTypedRowSchema(Global.class);
             transaction.add(op.delete(physicalSwitch.getSchema())

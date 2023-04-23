@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
@@ -443,11 +444,11 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
         HwvtepDeviceInfo.DeviceData deviceData  = getDeviceOpData(cls, key);
         if (deviceData == null) {
             LOG.debug("Could not find data for key {}", getNodeKeyStr(key));
-            java.util.Optional<TypedBaseTable> optional =
-                    getTableReader().getHwvtepTableEntryUUID(cls, key, null);
+            Optional<TypedBaseTable> optional = getTableReader().getHwvtepTableEntryUUID(cls, key, null);
             if (optional.isPresent()) {
+                TypedBaseTable table = optional.orElseThrow();
                 LOG.debug("Found the data for key from device {} ", getNodeKeyStr(key));
-                getDeviceInfo().updateDeviceOperData(cls, key, optional.get().getUuid(), optional.get());
+                getDeviceInfo().updateDeviceOperData(cls, key, table.getUuid(), table);
                 return getDeviceOpData(cls, key);
             } else {
                 LOG.info("Could not Find the data for key from device {} ", getNodeKeyStr(key));

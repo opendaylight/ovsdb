@@ -171,11 +171,11 @@ public abstract class DependentJob<T extends Identifiable> {
                 Optional<TypedBaseTable> latestDeviceStatus = deviceInfo.getConnectionInstance()
                         .getHwvtepTableReader().getHwvtepTableEntryUUID(cls, iid, controllerData.getUuid());
 
-                TypedBaseTable latestDeviceData = latestDeviceStatus.isPresent() ? latestDeviceStatus.get() : null;
+                TypedBaseTable latestDeviceData = latestDeviceStatus.orElse(null);
 
                 if (INTRANSIT_DATA_CREATED.test(controllerData, latestDeviceStatus)) {
                     LOG.info("Intransit expired key is actually created but update is missed/delayed {}", iid);
-                    deviceInfo.updateDeviceOperData(cls, iid, latestDeviceStatus.get().getUuid(), latestDeviceData);
+                    deviceInfo.updateDeviceOperData(cls, iid, latestDeviceData.getUuid(), latestDeviceData);
 
                 } else if (INTRANSIT_DATA_NOT_CREATED.test(controllerData, latestDeviceStatus)) {
                     LOG.info("Intransit expired key is actually not created but update is missed/delayed {}", iid);
@@ -189,7 +189,7 @@ public abstract class DependentJob<T extends Identifiable> {
                 } else if (INTRANSIT_DATA_NOT_DELETED.test(controllerData, latestDeviceStatus)) {
                     //not deleted from device we will reuse existing uuid
                     LOG.info("Intransit expired key is actually not deleted but update is missed/delayed {}", iid);
-                    deviceInfo.updateDeviceOperData(cls, iid, latestDeviceStatus.get().getUuid(), latestDeviceData);
+                    deviceInfo.updateDeviceOperData(cls, iid, latestDeviceData.getUuid(), latestDeviceData);
                 }
             } else if (DATA_INTRANSIT.test(controllerData)) {
                 //device status is still in transit

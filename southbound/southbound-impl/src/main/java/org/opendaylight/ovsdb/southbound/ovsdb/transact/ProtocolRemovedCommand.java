@@ -58,7 +58,7 @@ public class ProtocolRemovedCommand implements TransactCommand {
             Optional<ProtocolEntry> protocolEntryOptional = state.getProtocolEntry(protocolIid);
             if (ovsdbBridge != null
                     && protocolEntryOptional.isPresent()) {
-                ProtocolEntry protocolEntry = protocolEntryOptional.get();
+                ProtocolEntry protocolEntry = protocolEntryOptional.orElseThrow();
                 if (protocolEntry != null && protocolEntry.getProtocol() != null) {
                     Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
                     String protocolString = SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocolEntry.getProtocol());

@@ -63,13 +63,13 @@ public class UcastMacsLocalUpdateCommand
             setIpAddress(ucastMacsLocal, localUcastMac);
             setLocator(transaction, ucastMacsLocal, localUcastMac);
             setLogicalSwitch(ucastMacsLocal, localUcastMac);
-            if (!operationalMacOptional.isPresent()) {
+            if (operationalMacOptional.isEmpty()) {
                 setMac(ucastMacsLocal, localUcastMac, operationalMacOptional);
                 LOG.trace("execute: creating LocalUcastMac entry: {}", ucastMacsLocal);
                 transaction.add(op.insert(ucastMacsLocal));
                 transaction.add(op.comment("UcastMacLocal: Creating " + localUcastMac.getMacEntryKey().getValue()));
-            } else if (operationalMacOptional.get().getMacEntryUuid() != null) {
-                UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
+            } else if (operationalMacOptional.orElseThrow().getMacEntryUuid() != null) {
+                UUID macEntryUUID = new UUID(operationalMacOptional.orElseThrow().getMacEntryUuid().getValue());
                 UcastMacsLocal extraMac = transaction.getTypedRowSchema(UcastMacsLocal.class);
                 extraMac.getUuidColumn().setData(macEntryUUID);
                 LOG.trace("execute: updating LocalUcastMac entry: {}", ucastMacsLocal);
@@ -92,7 +92,7 @@ public class UcastMacsLocalUpdateCommand
             Optional<LogicalSwitches> operationalSwitchOptional =
                     getOperationalState().getLogicalSwitches(lswitchIid);
             if (operationalSwitchOptional.isPresent()) {
-                Uuid logicalSwitchUuid = operationalSwitchOptional.get().getLogicalSwitchUuid();
+                Uuid logicalSwitchUuid = operationalSwitchOptional.orElseThrow().getLogicalSwitchUuid();
                 UUID logicalSwitchUUID = new UUID(logicalSwitchUuid.getValue());
                 ucastMacsLocal.setLogicalSwitch(logicalSwitchUUID);
             } else {
@@ -116,7 +116,7 @@ public class UcastMacsLocalUpdateCommand
                     getOperationalState().getPhysicalLocatorAugmentation(iid);
             if (operationalLocatorOptional.isPresent()) {
                 //if exist, get uuid
-                HwvtepPhysicalLocatorAugmentation locatorAugmentation = operationalLocatorOptional.get();
+                HwvtepPhysicalLocatorAugmentation locatorAugmentation = operationalLocatorOptional.orElseThrow();
                 locatorUuid = new UUID(locatorAugmentation.getPhysicalLocatorUuid().getValue());
             } else {
                 //if no, get it from config DS and create id
@@ -124,7 +124,7 @@ public class UcastMacsLocalUpdateCommand
                         getOperationalState().getDataBroker()).readOptional(LogicalDatastoreType.CONFIGURATION, iid);
                 if (configLocatorOptional.isPresent()) {
                     HwvtepPhysicalLocatorAugmentation locatorAugmentation =
-                            configLocatorOptional.get().augmentation(HwvtepPhysicalLocatorAugmentation.class);
+                            configLocatorOptional.orElseThrow().augmentation(HwvtepPhysicalLocatorAugmentation.class);
                     locatorUuid = TransactUtils.createPhysicalLocator(transaction, locatorAugmentation,
                             getOperationalState());
                 } else {
@@ -148,8 +148,8 @@ public class UcastMacsLocalUpdateCommand
             final Optional<LocalUcastMacs> inputSwitchOptional) {
         if (inputMac.getMacEntryKey() != null) {
             ucastMacsLocal.setMac(inputMac.getMacEntryKey().getValue());
-        } else if (inputSwitchOptional.isPresent() && inputSwitchOptional.get().getMacEntryKey() != null) {
-            ucastMacsLocal.setMac(inputSwitchOptional.get().getMacEntryKey().getValue());
+        } else if (inputSwitchOptional.isPresent() && inputSwitchOptional.orElseThrow().getMacEntryKey() != null) {
+            ucastMacsLocal.setMac(inputSwitchOptional.orElseThrow().getMacEntryKey().getValue());
         }
     }
 

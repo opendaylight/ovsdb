@@ -122,7 +122,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                 @Override
                 public void onSuccess(@Nullable final Optional<Topology> optionalTopology) {
                     if (optionalTopology != null && optionalTopology.isPresent()) {
-                        Map<NodeKey, Node> nodes = optionalTopology.get().getNode();
+                        Map<NodeKey, Node> nodes = optionalTopology.orElseThrow().getNode();
                         if (nodes != null) {
                             for (Node node : nodes.values()) {
                                 String bridgeNodeIid = node.getNodeId().getValue();
@@ -160,7 +160,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                     @Override
                     public void onSuccess(@Nullable final Optional<Node> optionalTopology) {
                         if (optionalTopology != null && optionalTopology.isPresent()) {
-                            Node node = optionalTopology.get();
+                            Node node = optionalTopology.orElseThrow();
                             if (node != null) {
                                 bridgeNodeList.add(node);
                             }

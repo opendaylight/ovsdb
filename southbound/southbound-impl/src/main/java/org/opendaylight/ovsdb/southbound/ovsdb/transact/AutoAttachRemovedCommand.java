@@ -82,7 +82,7 @@ public class AutoAttachRemovedCommand implements TransactCommand {
                         return;
                     }
                     final OvsdbNodeAugmentation currentOvsdbNode =
-                            state.getBridgeNode(ovsdbNodeIid).get().augmentation(OvsdbNodeAugmentation.class);
+                            state.getBridgeNode(ovsdbNodeIid).orElseThrow().augmentation(OvsdbNodeAugmentation.class);
                     final Map<AutoattachKey, Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
                     for (final Autoattach origAutoattach : origAutoattachList.values()) {
                         deleteAutoAttach(transaction, ovsdbNodeIid, getAutoAttachUuid(currentAutoAttach,
@@ -145,14 +145,14 @@ public class AutoAttachRemovedCommand implements TransactCommand {
             final Optional<Node> nodeOptional = SouthboundUtil.readNode(transaction, nodeIid);
             if (nodeOptional.isPresent()) {
                 final Map<ManagedNodeEntryKey, ManagedNodeEntry> managedNodes =
-                        nodeOptional.get().augmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
+                        nodeOptional.orElseThrow().augmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
                 for (final ManagedNodeEntry managedNode : managedNodes.values()) {
                     final OvsdbBridgeRef ovsdbBridgeRef = managedNode.getBridgeRef();
                     final InstanceIdentifier<OvsdbBridgeAugmentation> brIid = ovsdbBridgeRef.getValue()
                             .firstIdentifierOf(Node.class).augmentation(OvsdbBridgeAugmentation.class);
                     final Optional<OvsdbBridgeAugmentation> optionalBridge =
                             transaction.read(LogicalDatastoreType.OPERATIONAL, brIid).get();
-                    bridge = optionalBridge.get();
+                    bridge = optionalBridge.orElseThrow();
                     if (bridge != null && bridge.getAutoAttach() != null
                             && bridge.getAutoAttach().equals(aaUuid)) {
                         return bridge;

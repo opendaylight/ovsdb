@@ -170,11 +170,7 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
                 Optional<Node> optNode;
                 try {
                     optNode = future.get();
-                    if (optNode.isPresent()) {
-                        assertEquals(DATA, optNode.get());
-                    } else {
-                        fail("Couldn't read node");
-                    }
+                    assertEquals(Optional.of(DATA), optNode);
                 } catch (InterruptedException | ExecutionException e) {
                     fail(e.getMessage());
                 }
@@ -192,7 +188,7 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
             final Optional<Node> result = databroker.newReadOnlyTransaction().read(
                     LogicalDatastoreType.CONFIGURATION, TEST_IID).get();
             if (result.isPresent()) {
-                return result.get();
+                return result.orElseThrow();
             }
         } catch (InterruptedException | ExecutionException e) {
             fail(e.getMessage());

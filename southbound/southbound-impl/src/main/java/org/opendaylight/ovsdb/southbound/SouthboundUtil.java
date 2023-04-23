@@ -54,17 +54,18 @@ public final class SouthboundUtil {
         try {
             OvsdbNodeRef ref = mn.getManagedBy();
             if (ref != null && ref.getValue() != null) {
-                ReadTransaction transaction = db.newReadOnlyTransaction();
-                @SuppressWarnings("unchecked")
-                // Note: erasure makes this safe in combination with the typecheck below
-                InstanceIdentifier<Node> path = (InstanceIdentifier<Node>) ref.getValue();
+                FluentFuture<Optional<Node>> nf;
+                try (ReadTransaction transaction = db.newReadOnlyTransaction()) {
+                    @SuppressWarnings("unchecked")
+                    // Note: erasure makes this safe in combination with the typecheck below
+                    InstanceIdentifier<Node> path = (InstanceIdentifier<Node>) ref.getValue();
+                    nf = transaction.read(LogicalDatastoreType.OPERATIONAL, path);
+                }
 
-                FluentFuture<Optional<Node>> nf = transaction.read(LogicalDatastoreType.OPERATIONAL, path);
-                transaction.close();
                 Optional<Node> optional = nf.get();
                 if (optional != null && optional.isPresent()) {
                     OvsdbNodeAugmentation ovsdbNode = null;
-                    Node node = optional.get();
+                    Node node = optional.orElseThrow();
                     if (node instanceof OvsdbNodeAugmentation) {
                         ovsdbNode = (OvsdbNodeAugmentation) node;
                     } else if (node != null) {

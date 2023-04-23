@@ -81,9 +81,10 @@ public class LogicalRouterRemoveCommand
                     getOperationalState().getLogicalRouters(instanceIdentifier, lrouter.key());
 
             if (operationalRouterOptional.isPresent()
-                    && operationalRouterOptional.get().getLogicalRouterUuid() != null) {
+                    && operationalRouterOptional.orElseThrow().getLogicalRouterUuid() != null) {
                 LogicalRouter logicalRouter = transaction.getTypedRowSchema(LogicalRouter.class);
-                UUID logicalRouterUuid = new UUID(operationalRouterOptional.get().getLogicalRouterUuid().getValue());
+                UUID logicalRouterUuid = new UUID(
+                    operationalRouterOptional.orElseThrow().getLogicalRouterUuid().getValue());
                 transaction.add(op.delete(logicalRouter.getSchema())
                         .where(logicalRouter.getUuidColumn().getSchema().opEqual(logicalRouterUuid)).build());
                 transaction.add(op.comment("Logical Router: Deleting " + lrouter.getHwvtepNodeName().getValue()));

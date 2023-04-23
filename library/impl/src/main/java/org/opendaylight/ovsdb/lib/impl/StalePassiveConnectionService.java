@@ -105,9 +105,10 @@ public class StalePassiveConnectionService implements AutoCloseable {
                 .map(entry -> entry.getKey())
                 .findFirst();
         if (clientOptional.isPresent()) {
-            LOG.info("Sending notification for client {}", clientOptional.get().getConnectionInfo());
-            pendingClients.remove(clientOptional.get());
-            clientNotificationCallback.apply(clientOptional.get());
+            OvsdbClient client = clientOptional.orElseThrow();
+            LOG.info("Sending notification for client {}", client.getConnectionInfo());
+            pendingClients.remove(client);
+            clientNotificationCallback.apply(client);
         }
     }
 

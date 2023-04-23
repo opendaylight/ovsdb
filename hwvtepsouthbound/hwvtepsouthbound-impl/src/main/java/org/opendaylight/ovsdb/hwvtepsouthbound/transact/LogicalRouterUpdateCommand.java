@@ -80,7 +80,7 @@ public class LogicalRouterUpdateCommand
                 updateCurrentTxData(LogicalRouters.class, routerKey, lrUuid, lrouter);
                 updateControllerTxHistory(TransactionType.ADD, logicalRouter);
             } else {
-                LogicalRouters updatedLRouter = operationalRouterOptional.get();
+                LogicalRouters updatedLRouter = operationalRouterOptional.orElseThrow();
                 String existingLogicalRouterName = updatedLRouter.getHwvtepNodeName().getValue();
                 LogicalRouter extraLogicalRouter = transaction.getTypedRowWrapper(LogicalRouter.class);
                 extraLogicalRouter.setName("");
@@ -107,8 +107,8 @@ public class LogicalRouterUpdateCommand
             final Optional<LogicalRouters> inputRouterOptional) {
         if (inputRouter.getHwvtepNodeName() != null) {
             logicalRouter.setName(inputRouter.getHwvtepNodeName().getValue());
-        } else if (inputRouterOptional.isPresent() && inputRouterOptional.get().getHwvtepNodeName() != null) {
-            logicalRouter.setName(inputRouterOptional.get().getHwvtepNodeName().getValue());
+        } else if (inputRouterOptional.isPresent() && inputRouterOptional.orElseThrow().getHwvtepNodeName() != null) {
+            logicalRouter.setName(inputRouterOptional.orElseThrow().getHwvtepNodeName().getValue());
         }
     }
 
@@ -123,7 +123,7 @@ public class LogicalRouterUpdateCommand
                 Optional<LogicalSwitches> operationalSwitchOptional =
                         getOperationalState().getLogicalSwitches(lswitchIid);
                 if (operationalSwitchOptional.isPresent()) {
-                    Uuid logicalSwitchUuid = operationalSwitchOptional.get().getLogicalSwitchUuid();
+                    Uuid logicalSwitchUuid = operationalSwitchOptional.orElseThrow().getLogicalSwitchUuid();
                     bindingMap.put(switchBinding.getDestinationAddress().getIpv4Prefix().getValue(),
                             new UUID(logicalSwitchUuid.getValue()));
                 } else {
@@ -145,12 +145,10 @@ public class LogicalRouterUpdateCommand
                 Optional<Acls> operationalAclOptional =
                         getOperationalState().getAcls(aclIid);
                 if (operationalAclOptional.isPresent()) {
-                    Uuid aclUuid = operationalAclOptional.get().getAclUuid();
-                    bindingMap.put(aclBinding.getRouterInterface().stringValue(),
-                            new UUID(aclUuid.getValue()));
+                    Uuid aclUuid = operationalAclOptional.orElseThrow().getAclUuid();
+                    bindingMap.put(aclBinding.getRouterInterface().stringValue(), new UUID(aclUuid.getValue()));
                 } else {
-                    bindingMap.put(aclBinding.getRouterInterface().stringValue(),
-                            TransactUtils.getAclUUID(aclIid));
+                    bindingMap.put(aclBinding.getRouterInterface().stringValue(), TransactUtils.getAclUUID(aclIid));
                 }
             }
             logicalRouter.setAclBinding(bindingMap);

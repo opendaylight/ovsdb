@@ -62,7 +62,7 @@ public class ProtocolUpdateCommand implements TransactCommand {
                         state.getOvsdbBridgeAugmentation(bridgeIid);
                 OvsdbBridgeAugmentation ovsdbBridge;
                 if (bridgeOptional.isPresent()) {
-                    ovsdbBridge = bridgeOptional.get();
+                    ovsdbBridge = bridgeOptional.orElseThrow();
                 } else {
                     ovsdbBridge = bridges.get(bridgeIid);
                 }

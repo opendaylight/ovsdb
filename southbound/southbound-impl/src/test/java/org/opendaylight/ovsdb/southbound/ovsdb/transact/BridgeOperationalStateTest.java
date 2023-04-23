@@ -77,8 +77,7 @@ public class BridgeOperationalStateTest {
 
     @Test
     public void testGetBridgeNode() {
-        Optional<Node> optNodes = briOperationState.getBridgeNode(nodeIid);
-        assertEquals(brNode, optNodes.get());
+        assertEquals(Optional.of(brNode), briOperationState.getBridgeNode(nodeIid));
     }
 
     @Test
@@ -96,7 +95,7 @@ public class BridgeOperationalStateTest {
         Optional<OvsdbBridgeAugmentation> ovsdbBriAugOptional = briOperationState.getOvsdbBridgeAugmentation(
             InstanceIdentifier.create(NetworkTopology.class));
         assertNotNull(ovsdbBriAugOptional);
-        assertTrue(ovsdbBriAugOptional.get() instanceof OvsdbBridgeAugmentation);
+        assertTrue(ovsdbBriAugOptional.orElseThrow() instanceof OvsdbBridgeAugmentation);
     }
 
     @Test
@@ -136,7 +135,7 @@ public class BridgeOperationalStateTest {
         Optional<OvsdbTerminationPointAugmentation> ovsdbTermPointOpt = briOperationState
                 .getOvsdbTerminationPointAugmentation(InstanceIdentifier.create(NetworkTopology.class));
         assertNotNull(ovsdbTermPointOpt);
-        assertTrue(ovsdbTermPointOpt.get() instanceof OvsdbTerminationPointAugmentation);
+        assertTrue(ovsdbTermPointOpt.orElseThrow() instanceof OvsdbTerminationPointAugmentation);
     }
 
     @Test

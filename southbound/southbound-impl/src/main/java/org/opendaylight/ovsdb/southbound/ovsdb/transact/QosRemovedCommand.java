@@ -59,8 +59,8 @@ public class QosRemovedCommand implements TransactCommand {
                 Map<QosEntriesKey, QosEntries> updatedQosEntries = update.getQosEntries();
                 if (origQosEntries != null && !origQosEntries.isEmpty()) {
                     for (QosEntries origQosEntry : origQosEntries.values()) {
-                        OvsdbNodeAugmentation operNode =
-                                state.getBridgeNode(ovsdbNodeIid).get().augmentation(OvsdbNodeAugmentation.class);
+                        OvsdbNodeAugmentation operNode = state.getBridgeNode(ovsdbNodeIid).orElseThrow()
+                                .augmentation(OvsdbNodeAugmentation.class);
                         if (updatedQosEntries == null || !updatedQosEntries.containsKey(origQosEntry.key())) {
                             LOG.debug("Received request to delete QoS entry {}", origQosEntry.getQosId());
                             Uuid qosUuid = getQosEntryUuid(operNode.getQosEntries(), origQosEntry.key());

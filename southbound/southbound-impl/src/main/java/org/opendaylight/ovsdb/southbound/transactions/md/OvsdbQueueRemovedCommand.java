@@ -56,7 +56,7 @@ public class OvsdbQueueRemovedCommand extends AbstractTransactionCommand {
             InstanceIdentifier<Node> ovsdbNodeIid =
                     SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
             for (UUID queueUuid : removedQueueRows.keySet()) {
-                QueuesKey queueKey = getQueueKey(ovsdbNode.get(), queueUuid);
+                QueuesKey queueKey = getQueueKey(ovsdbNode.orElseThrow(), queueUuid);
                 if (queueKey != null) {
                     InstanceIdentifier<Queues> iid = ovsdbNodeIid
                         .augmentation(OvsdbNodeAugmentation.class)

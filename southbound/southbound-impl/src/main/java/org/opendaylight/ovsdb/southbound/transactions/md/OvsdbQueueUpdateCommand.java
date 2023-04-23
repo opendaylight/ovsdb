@@ -99,7 +99,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
                 setExternalIds(transaction, queuesBuilder, oldQueue, queue, nodeIId);
 
                 Queues queues = queuesBuilder.build();
-                LOG.debug("Update Ovsdb Node {} with queue entries {}",ovsdbNode.get(), queues);
+                LOG.debug("Update Ovsdb Node {} with queue entries {}",ovsdbNode.orElseThrow(), queues);
                 InstanceIdentifier<Queues> iid = nodeIId
                         .augmentation(OvsdbNodeAugmentation.class)
                         .child(Queues.class, queues.key());

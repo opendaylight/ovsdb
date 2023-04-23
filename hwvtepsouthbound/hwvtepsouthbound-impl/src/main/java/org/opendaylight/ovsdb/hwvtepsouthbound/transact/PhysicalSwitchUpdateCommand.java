@@ -88,7 +88,7 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         PhysicalSwitch physicalSwitch = transaction.getTypedRowWrapper(PhysicalSwitch.class);
         setDescription(physicalSwitch, physicalSwitchAugmentation);
         setManagementIps(physicalSwitch, physicalSwitchAugmentation);
-        setTunnuleIps(physicalSwitch, operationalPhysicalSwitchOptional.get());
+        setTunnuleIps(physicalSwitch, operationalPhysicalSwitchOptional.orElseThrow());
         try {
             setTunnels(transaction, iid, physicalSwitch, physicalSwitchAugmentation,
                             operationalPhysicalSwitchOptional.isPresent());
@@ -113,7 +113,7 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
             transaction.add(op.comment("Global: Mutating "
                             + physicalSwitchAugmentation.getHwvtepNodeName().getValue() + " " + pswitchUuid));
         } else {
-            PhysicalSwitchAugmentation updatedPhysicalSwitch = operationalPhysicalSwitchOptional.get();
+            PhysicalSwitchAugmentation updatedPhysicalSwitch = operationalPhysicalSwitchOptional.orElseThrow();
             String existingPhysicalSwitchName = updatedPhysicalSwitch.getHwvtepNodeName().getValue();
             /* In case TOR devices don't allow creation of PhysicalSwitch name might be null
              * as user is only adding configurable parameters to MDSAL like BFD params
@@ -121,7 +121,8 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
              * TODO Note: Consider handling tunnel udpate/remove in separate command
              */
             if (existingPhysicalSwitchName == null) {
-                existingPhysicalSwitchName = operationalPhysicalSwitchOptional.get().getHwvtepNodeName().getValue();
+                existingPhysicalSwitchName = operationalPhysicalSwitchOptional.orElseThrow()
+                    .getHwvtepNodeName().getValue();
             }
             // Name is immutable, and so we *can't* update it.  So we use extraPhysicalSwitch for the schema stuff
             PhysicalSwitch extraPhysicalSwitch = transaction.getTypedRowWrapper(PhysicalSwitch.class);
@@ -140,8 +141,8 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         if (physicalSwitchAugmentation.getHwvtepNodeName() != null) {
             physicalSwitch.setName(physicalSwitchAugmentation.getHwvtepNodeName().getValue());
         } else if (operationalPhysicalSwitchOptional.isPresent()
-                && operationalPhysicalSwitchOptional.get().getHwvtepNodeName() != null) {
-            physicalSwitch.setName(operationalPhysicalSwitchOptional.get().getHwvtepNodeName().getValue());
+                && operationalPhysicalSwitchOptional.orElseThrow().getHwvtepNodeName() != null) {
+            physicalSwitch.setName(operationalPhysicalSwitchOptional.orElseThrow().getHwvtepNodeName().getValue());
         }
     }
 
@@ -218,7 +219,7 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
                         transaction.add(op.comment("PhysicalSwitch: Mutating " + tunnelUuid));
                     }
                 } else {
-                    UUID uuid = new UUID(opTunnelOpt.get().getTunnelUuid().getValue());
+                    UUID uuid = new UUID(opTunnelOpt.orElseThrow().getTunnelUuid().getValue());
                     Tunnel extraTunnel = transaction.getTypedRowSchema(Tunnel.class);
                     extraTunnel.getUuidColumn().setData(uuid);
                     transaction.add(op.update(newTunnel)
@@ -270,7 +271,7 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
                         getOperationalState().getPhysicalLocatorAugmentation(iid);
         if (opLocOptional.isPresent()) {
             // Get Locator UUID from operational
-            HwvtepPhysicalLocatorAugmentation locatorAug = opLocOptional.get();
+            HwvtepPhysicalLocatorAugmentation locatorAug = opLocOptional.orElseThrow();
             locatorUUID = new UUID(locatorAug.getPhysicalLocatorUuid().getValue());
         } else {
             // TODO/FIXME: Not in operational, do we create a new one?

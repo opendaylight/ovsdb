@@ -66,8 +66,8 @@ public class McastMacsLocalUpdateCommand
                 LOG.trace("execute: create LocalMcastMac entry: {}", mcastMacsLocal);
                 transaction.add(op.insert(mcastMacsLocal));
                 transaction.add(op.comment("McastMacLocal: Creating " + localMcastMac.getMacEntryKey().getValue()));
-            } else if (operationalMacOptional.get().getMacEntryUuid() != null) {
-                UUID macEntryUUID = new UUID(operationalMacOptional.get().getMacEntryUuid().getValue());
+            } else if (operationalMacOptional.orElseThrow().getMacEntryUuid() != null) {
+                UUID macEntryUUID = new UUID(operationalMacOptional.orElseThrow().getMacEntryUuid().getValue());
                 McastMacsLocal extraMac = transaction.getTypedRowSchema(McastMacsLocal.class);
                 extraMac.getUuidColumn().setData(macEntryUUID);
                 LOG.trace("execute: update LocalMcastMac entry: {}", mcastMacsLocal);
@@ -90,7 +90,7 @@ public class McastMacsLocalUpdateCommand
             Optional<LogicalSwitches> operationalSwitchOptional =
                     getOperationalState().getLogicalSwitches(lswitchIid);
             if (operationalSwitchOptional.isPresent()) {
-                Uuid logicalSwitchUuid = operationalSwitchOptional.get().getLogicalSwitchUuid();
+                Uuid logicalSwitchUuid = operationalSwitchOptional.orElseThrow().getLogicalSwitchUuid();
                 UUID logicalSwitchUUID = new UUID(logicalSwitchUuid.getValue());
                 mcastMacsLocal.setLogicalSwitch(logicalSwitchUUID);
             } else {
@@ -124,8 +124,8 @@ public class McastMacsLocalUpdateCommand
             } else {
                 mcastMacsLocal.setMac(inputMac.getMacEntryKey().getValue());
             }
-        } else if (inputSwitchOptional.isPresent() && inputSwitchOptional.get().getMacEntryKey() != null) {
-            mcastMacsLocal.setMac(inputSwitchOptional.get().getMacEntryKey().getValue());
+        } else if (inputSwitchOptional.isPresent() && inputSwitchOptional.orElseThrow().getMacEntryKey() != null) {
+            mcastMacsLocal.setMac(inputSwitchOptional.orElseThrow().getMacEntryKey().getValue());
         }
     }
 

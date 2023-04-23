@@ -61,7 +61,7 @@ public class ControllerUpdateCommand implements TransactCommand {
                 Optional<OvsdbBridgeAugmentation> bridgeOptional =
                         state.getOvsdbBridgeAugmentation(bridgeIid);
                 OvsdbBridgeAugmentation ovsdbBridge = bridgeOptional.isPresent()
-                    ? bridgeOptional.get() : bridges.get(bridgeIid);
+                    ? bridgeOptional.orElseThrow() : bridges.get(bridgeIid);
                 if (ovsdbBridge != null
                         && ovsdbBridge.getBridgeName() != null
                         && entry.getValue() != null

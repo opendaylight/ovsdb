@@ -174,7 +174,7 @@ public final class HwvtepSouthboundUtil {
             Optional<Node> optional = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, path);
             if (optional != null && optional.isPresent()) {
                 HwvtepGlobalAugmentation hwvtepNode = null;
-                Node node = optional.get();
+                Node node = optional.orElseThrow();
                 if (node instanceof HwvtepGlobalAugmentation) {
                     hwvtepNode = (HwvtepGlobalAugmentation) node;
                 } else if (node != null) {

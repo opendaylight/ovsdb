@@ -119,7 +119,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
             // Bug#6136
             Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = state.getOvsdbBridgeAugmentation(iid);
             if (ovsdbBridgeOptional != null && ovsdbBridgeOptional.isPresent()) {
-                OvsdbBridgeAugmentation operBridge = ovsdbBridgeOptional.get();
+                OvsdbBridgeAugmentation operBridge = ovsdbBridgeOptional.orElseThrow();
                 if (operBridge != null) {
                     Port port = transaction.getTypedRowWrapper(Port.class);
                     updatePort(terminationPoint, port, operBridge, opendaylightIid);
@@ -194,7 +194,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         try (ReadTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
             Optional<Node> nodeOptional = SouthboundUtil.readNode(transaction, iidNode);
             if (nodeOptional.isPresent()) {
-                operNode = nodeOptional.get().augmentation(OvsdbNodeAugmentation.class);
+                operNode = nodeOptional.orElseThrow().augmentation(OvsdbNodeAugmentation.class);
             }
         } catch (Exception exp) {
             LOG.error("Error in getting the brideNode for {}", iidNode, exp);

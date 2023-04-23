@@ -189,10 +189,9 @@ public class HwvtepTableReader {
     public UUID getLsUuid(InstanceIdentifier lsIid) {
         UUID lsUUID = connectionInstance.getDeviceInfo().getUUID(LogicalSwitches.class, lsIid);
         if (lsUUID == null) {
-            Optional<TypedBaseTable> optional =
-                    getHwvtepTableEntryUUID(LogicalSwitches.class, lsIid, null);
+            Optional<TypedBaseTable> optional = getHwvtepTableEntryUUID(LogicalSwitches.class, lsIid, null);
             if (optional.isPresent()) {
-                lsUUID = optional.get().getUuid();
+                return optional.orElseThrow().getUuid();
             }
         }
         return lsUUID;

@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
@@ -106,10 +105,6 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
 
     private static Node readNode(ReadTransaction transaction,
                                  LogicalDatastoreType logicalDatastoreType, InstanceIdentifier<Node> iid) {
-        Optional<Node> optional = HwvtepSouthboundUtil.readNode(transaction, logicalDatastoreType, iid);
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        return null;
+        return HwvtepSouthboundUtil.readNode(transaction, logicalDatastoreType, iid).orElse(null);
     }
 }

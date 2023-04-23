@@ -121,8 +121,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements DataChangeEvent {
         InstanceIdentifier<Node> nodeEntryIid = bridgeIid.firstIdentifierOf(Node.class);
 
         Optional<?> bridgeNode =  SouthboundUtil.readNode(db.newReadWriteTransaction(),nodeEntryIid);
-        if (bridgeNode.isPresent() && bridgeNode.get() instanceof Node) {
-            Node node = (Node)bridgeNode.get();
+        if (bridgeNode.isPresent() && bridgeNode.orElseThrow() instanceof Node node) {
             OvsdbBridgeAugmentation bridge = node.augmentation(OvsdbBridgeAugmentation.class);
             if (bridge != null && bridge.getManagedBy() != null) {
                 return bridge.getManagedBy().getValue();

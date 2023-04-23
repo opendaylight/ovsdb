@@ -101,7 +101,7 @@ public class QueueUpdateCommand implements TransactCommand {
             }
 
             OvsdbNodeAugmentation operNode =
-                state.getBridgeNode(iid).get().augmentation(OvsdbNodeAugmentation.class);
+                state.getBridgeNode(iid).orElseThrow().augmentation(OvsdbNodeAugmentation.class);
             Uuid operQueueUuid = getQueueEntryUuid(operNode.getQueues(), queueEntry.key());
             if (operQueueUuid == null) {
                 UUID namedUuid = new UUID(SouthboundConstants.QUEUE_NAMED_UUID_PREFIX

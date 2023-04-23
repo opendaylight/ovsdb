@@ -57,7 +57,7 @@ public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
             InstanceIdentifier<Node> ovsdbNodeIid =
                     SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
             for (UUID qosUuid : removedQosRows.keySet()) {
-                QosEntriesKey qosKey = getQosEntriesKey(ovsdbNode.get(), qosUuid);
+                QosEntriesKey qosKey = getQosEntriesKey(ovsdbNode.orElseThrow(), qosUuid);
                 if (qosKey != null) {
                     InstanceIdentifier<QosEntries> iid = ovsdbNodeIid
                         .augmentation(OvsdbNodeAugmentation.class)

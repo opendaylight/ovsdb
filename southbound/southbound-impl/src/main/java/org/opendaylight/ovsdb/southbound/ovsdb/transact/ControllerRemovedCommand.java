@@ -56,7 +56,7 @@ public class ControllerRemovedCommand implements TransactCommand {
             OvsdbBridgeAugmentation ovsdbBridge = modifiedBridges.get(bridgeIid);
             Optional<ControllerEntry> controllerEntryOptional = state.getControllerEntry(controllerIid);
             if (ovsdbBridge != null && controllerEntryOptional.isPresent()) {
-                ControllerEntry controllerEntry = controllerEntryOptional.get();
+                ControllerEntry controllerEntry = controllerEntryOptional.orElseThrow();
                 Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
                 bridge.setController(Collections.singleton(new UUID(controllerEntry.getControllerUuid().getValue())));
                 transaction.add(op.mutate(bridge).addMutation(bridge.getControllerColumn().getSchema(),

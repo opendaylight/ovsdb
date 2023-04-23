@@ -104,20 +104,18 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
                 QosEntriesBuilder qosEntryBuilder = new QosEntriesBuilder();
                 qosEntryBuilder.setQosId(new Uri(getQosId(qos)));
                 qosEntryBuilder.setQosUuid(new Uuid(entry.getKey().toString()));
-                qosEntryBuilder.setQosType(
-                        SouthboundMapper.createQosType(qos.getTypeColumn().getData()));
+                qosEntryBuilder.setQosType(SouthboundMapper.createQosType(qos.getTypeColumn().getData()));
                 Qos oldQos = oldQosRows.get(entry.getKey());
                 setOtherConfig(transaction, qosEntryBuilder, oldQos, qos, nodeIId);
                 setExternalIds(transaction, qosEntryBuilder, oldQos, qos, nodeIId);
-                setQueueList(transaction, qosEntryBuilder, oldQos, qos, nodeIId, ovsdbNode.get());
+                setQueueList(transaction, qosEntryBuilder, oldQos, qos, nodeIId, ovsdbNode.orElseThrow());
 
                 QosEntries qosEntry = qosEntryBuilder.build();
-                LOG.debug("Update Ovsdb Node {} with qos entries {}",ovsdbNode.get(), qosEntry);
+                LOG.debug("Update Ovsdb Node {} with qos entries {}", ovsdbNode.orElseThrow(), qosEntry);
                 InstanceIdentifier<QosEntries> iid = nodeIId
                         .augmentation(OvsdbNodeAugmentation.class)
                         .child(QosEntries.class, qosEntry.key());
-                transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                        iid, qosEntry);
+                transaction.merge(LogicalDatastoreType.OPERATIONAL, iid, qosEntry);
             }
         }
     }

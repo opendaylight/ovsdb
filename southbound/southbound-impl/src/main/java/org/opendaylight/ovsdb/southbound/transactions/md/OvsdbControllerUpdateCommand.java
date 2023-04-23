@@ -143,16 +143,17 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, connectionIId);
         if (ovsdbNode.isPresent()) {
-            OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.get().augmentation(OvsdbNodeAugmentation.class);
+            OvsdbNodeAugmentation ovsdbNodeAugmentation =
+                ovsdbNode.orElseThrow().augmentation(OvsdbNodeAugmentation.class);
             if (ovsdbNodeAugmentation != null) {
-                final Map<ManagedNodeEntryKey, ManagedNodeEntry> managedNodeEntries
-                    = ovsdbNodeAugmentation.getManagedNodeEntry();
+                final Map<ManagedNodeEntryKey, ManagedNodeEntry> managedNodeEntries =
+                    ovsdbNodeAugmentation.getManagedNodeEntry();
                 for (ManagedNodeEntry managedNodeEntry : managedNodeEntries.values()) {
                     final InstanceIdentifier<Node> bridgeIid =
                             (InstanceIdentifier<Node>) managedNodeEntry.getBridgeRef().getValue();
                     final Optional<Node> bridgeNode = SouthboundUtil.readNode(transaction, bridgeIid);
                     if (bridgeNode.isPresent()) {
-                        bridgeNodes.put(bridgeIid, bridgeNode.get());
+                        bridgeNodes.put(bridgeIid, bridgeNode.orElseThrow());
                     } else {
                         LOG.warn("OVSDB bridge node was not found: {}", bridgeIid);
                     }

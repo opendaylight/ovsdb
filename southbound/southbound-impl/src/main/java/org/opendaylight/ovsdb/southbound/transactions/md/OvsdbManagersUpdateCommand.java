@@ -117,10 +117,9 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, connectionIId);
         if (ovsdbNode.isPresent()) {
             final List<ManagerEntry> managerEntries =
-                    SouthboundMapper.createManagerEntries(ovsdbNode.get(), newUpdatedManagerRows);
+                    SouthboundMapper.createManagerEntries(ovsdbNode.orElseThrow(), newUpdatedManagerRows);
 
-            LOG.debug("Update Ovsdb Node : {} with manager entries : {}",
-                    ovsdbNode.get(), managerEntries);
+            LOG.debug("Update Ovsdb Node : {} with manager entries : {}", ovsdbNode.orElseThrow(), managerEntries);
             for (ManagerEntry managerEntry : managerEntries) {
                 InstanceIdentifier<ManagerEntry> iid = connectionIId
                         .augmentation(OvsdbNodeAugmentation.class)

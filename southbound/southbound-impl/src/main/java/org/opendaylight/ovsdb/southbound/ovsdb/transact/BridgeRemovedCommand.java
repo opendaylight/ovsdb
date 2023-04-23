@@ -55,8 +55,9 @@ public class BridgeRemovedCommand implements TransactCommand {
             Bridge bridge = transaction.getTypedRowSchema(Bridge.class);
             Optional<OvsdbBridgeAugmentation> ovsdbAugmentationOptional = state
                     .getOvsdbBridgeAugmentation(ovsdbManagedNodeIid);
-            if (ovsdbAugmentationOptional.isPresent() && ovsdbAugmentationOptional.get().getBridgeUuid() != null) {
-                UUID bridgeUuid = new UUID(ovsdbAugmentationOptional.get().getBridgeUuid().getValue());
+            if (ovsdbAugmentationOptional.isPresent()
+                && ovsdbAugmentationOptional.orElseThrow().getBridgeUuid() != null) {
+                UUID bridgeUuid = new UUID(ovsdbAugmentationOptional.orElseThrow().getBridgeUuid().getValue());
                 OpenVSwitch ovs = transaction.getTypedRowSchema(OpenVSwitch.class);
                 transaction.add(op.delete(bridge.getSchema())
                         .where(bridge.getUuidColumn().getSchema().opEqual(bridgeUuid)).build());

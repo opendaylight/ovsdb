@@ -105,7 +105,7 @@ public class HwvtepOperationalState {
         Optional<Node> readNode = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL,
                 connectionInstance.getInstanceIdentifier());
         if (readNode.isPresent()) {
-            operationalNodes.put(connectionInstance.getInstanceIdentifier(), readNode.get());
+            operationalNodes.put(connectionInstance.getInstanceIdentifier(), readNode.orElseThrow());
         }
     }
 
@@ -145,20 +145,19 @@ public class HwvtepOperationalState {
                 //for example, when creating physical port, logical switch is needed
                 //but logical switch is in HwvtepGlobalAugmentation rather than PhysicalSwitchAugmentation
                 if (readNode.isPresent()) {
-                    operationalNodes.put(entry.getKey(), readNode.get());
-                    HwvtepGlobalAugmentation hgAugmentation =
-                            readNode.get().augmentation(HwvtepGlobalAugmentation.class);
-                    PhysicalSwitchAugmentation psAugmentation =
-                            readNode.get().augmentation(PhysicalSwitchAugmentation.class);
-                    if (hgAugmentation != null && hgAugmentation.getSwitches() != null) {
-                        for (Switches pswitch : hgAugmentation.getSwitches().values()) {
+                    Node rdNode = readNode.orElseThrow();
+                    operationalNodes.put(entry.getKey(), rdNode);
+                    HwvtepGlobalAugmentation hgAugmentation = rdNode.augmentation(HwvtepGlobalAugmentation.class);
+                    PhysicalSwitchAugmentation psAugmentation = rdNode.augmentation(PhysicalSwitchAugmentation.class);
+                    if (hgAugmentation != null) {
+                        for (Switches pswitch : hgAugmentation.nonnullSwitches().values()) {
                             @SuppressWarnings("unchecked")
                             InstanceIdentifier<Node> psNodeIid =
                                     (InstanceIdentifier<Node>) pswitch.getSwitchRef().getValue();
                             Optional<Node> psNode =
                                 new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, psNodeIid);
                             if (psNode.isPresent()) {
-                                operationalNodes.put(psNodeIid, psNode.get());
+                                operationalNodes.put(psNodeIid, psNode.orElseThrow());
                             }
                         }
                     }
@@ -169,7 +168,7 @@ public class HwvtepOperationalState {
                         Optional<Node> hgNode = new MdsalUtils(db).readOptional(
                                 LogicalDatastoreType.OPERATIONAL, hgNodeIid);
                         if (hgNode.isPresent()) {
-                            operationalNodes.put(hgNodeIid, hgNode.get());
+                            operationalNodes.put(hgNodeIid, hgNode.orElseThrow());
                         }
                     }
                 }
@@ -183,40 +182,25 @@ public class HwvtepOperationalState {
     }
 
     public Optional<HwvtepGlobalAugmentation> getHwvtepGlobalAugmentation(final InstanceIdentifier<?> iid) {
-        Optional<Node> nodeOptional = getGlobalNode(requireNonNull(iid));
-        if (nodeOptional.isPresent()) {
-            return Optional.ofNullable(nodeOptional.get().augmentation(HwvtepGlobalAugmentation.class));
-        }
-        return Optional.empty();
+        return getGlobalNode(requireNonNull(iid))
+            .flatMap(node -> Optional.ofNullable(node.augmentation(HwvtepGlobalAugmentation.class)));
     }
 
     public Optional<PhysicalSwitchAugmentation> getPhysicalSwitchAugmentation(final InstanceIdentifier<?> iid) {
-        Optional<Node> nodeOptional = getGlobalNode(requireNonNull(iid));
-        if (nodeOptional.isPresent()) {
-            return Optional.ofNullable(nodeOptional.get().augmentation(PhysicalSwitchAugmentation.class));
-        }
-        return Optional.empty();
+        return getGlobalNode(requireNonNull(iid))
+            .flatMap(node -> Optional.ofNullable(node.augmentation(PhysicalSwitchAugmentation.class)));
     }
 
     public Optional<Map<TerminationPointKey, TerminationPoint>> getTerminationPointList(
             final InstanceIdentifier<?> iid) {
-        Optional<Node> nodeOptional = getGlobalNode(requireNonNull(iid));
-        if (nodeOptional.isPresent() && nodeOptional.get().getTerminationPoint() != null) {
-            return Optional.ofNullable(nodeOptional.get().getTerminationPoint());
-        }
-        return Optional.empty();
+        return getGlobalNode(requireNonNull(iid))
+            .flatMap(node -> Optional.ofNullable(node.getTerminationPoint()));
     }
 
     public Optional<LogicalSwitches> getLogicalSwitches(final InstanceIdentifier<?> iid,
             final LogicalSwitchesKey logicalSwitchesKey) {
-        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(requireNonNull(iid));
-        if (nodeOptional.isPresent()) {
-            LogicalSwitches lswitch = nodeOptional.get().nonnullLogicalSwitches().get(logicalSwitchesKey);
-            if (lswitch != null) {
-                return Optional.of(lswitch);
-            }
-        }
-        return Optional.empty();
+        return getHwvtepGlobalAugmentation(requireNonNull(iid))
+            .flatMap(node -> Optional.ofNullable(node.nonnullLogicalSwitches().get(logicalSwitchesKey)));
     }
 
     public Optional<LogicalSwitches> getLogicalSwitches(final InstanceIdentifier<LogicalSwitches> iid) {
@@ -224,14 +208,8 @@ public class HwvtepOperationalState {
     }
 
     public Optional<Tunnels> getTunnels(final InstanceIdentifier<?> iid, final TunnelsKey tunnelsKey) {
-        Optional<PhysicalSwitchAugmentation> psOptional = getPhysicalSwitchAugmentation(requireNonNull(iid));
-        if (psOptional.isPresent()) {
-            Tunnels tunnel = psOptional.get().nonnullTunnels().get(tunnelsKey);
-            if (tunnel != null) {
-                return Optional.of(tunnel);
-            }
-        }
-        return Optional.empty();
+        return getPhysicalSwitchAugmentation(requireNonNull(iid))
+            .flatMap(ps -> Optional.ofNullable(ps.nonnullTunnels().get(tunnelsKey)));
     }
 
     public Optional<Tunnels> getTunnels(final InstanceIdentifier<Tunnels> iid) {
@@ -244,11 +222,11 @@ public class HwvtepOperationalState {
         Optional<Map<TerminationPointKey, TerminationPoint>> nodeOptional =
                 getTerminationPointList(requireNonNull(iid));
         if (nodeOptional.isPresent()) {
-            for (TerminationPoint tp : nodeOptional.get().values()) {
+            for (TerminationPoint tp : nodeOptional.orElseThrow().values()) {
                 HwvtepPhysicalPortAugmentation hppAugmentation =
                         tp.augmentation(HwvtepPhysicalPortAugmentation.class);
                 if (hppAugmentation != null && hppAugmentation.getHwvtepNodeName().equals(hwvtepNodeName)) {
-                    return Optional.ofNullable(hppAugmentation);
+                    return Optional.of(hppAugmentation);
                 }
             }
         }
@@ -260,7 +238,7 @@ public class HwvtepOperationalState {
         Optional<Map<TerminationPointKey, TerminationPoint>> nodeOptional =
                 getTerminationPointList(requireNonNull(iid));
         if (nodeOptional.isPresent()) {
-            for (TerminationPoint tp : nodeOptional.get().values()) {
+            for (TerminationPoint tp : nodeOptional.orElseThrow().values()) {
                 HwvtepPhysicalLocatorAugmentation hppAugmentation =
                         tp.augmentation(HwvtepPhysicalLocatorAugmentation.class);
                 if (hppAugmentation != null && hppAugmentation.getDstIp().equals(dstIp)
@@ -274,73 +252,38 @@ public class HwvtepOperationalState {
 
     public Optional<HwvtepPhysicalLocatorAugmentation>
             getPhysicalLocatorAugmentation(final InstanceIdentifier<TerminationPoint> iid) {
-        Optional<TerminationPoint> tp =
-            new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
-        if (tp.isPresent()) {
-            return Optional.ofNullable(tp.get().augmentation(HwvtepPhysicalLocatorAugmentation.class));
-        }
-        return Optional.empty();
+        Optional<TerminationPoint> optTp = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
+        return optTp.flatMap(tp -> Optional.ofNullable(tp.augmentation(HwvtepPhysicalLocatorAugmentation.class)));
     }
 
     public Optional<LocalMcastMacs> getLocalMcastMacs(final InstanceIdentifier<?> iid, final LocalMcastMacsKey key) {
-        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(requireNonNull(iid));
-        if (nodeOptional.isPresent()) {
-            LocalMcastMacs mac = nodeOptional.get().nonnullLocalMcastMacs().get(key);
-            if (mac != null) {
-                return Optional.of(mac);
-            }
-        }
-        return Optional.empty();
+        return getHwvtepGlobalAugmentation(requireNonNull(iid))
+            .flatMap(node -> Optional.ofNullable(node.nonnullLocalMcastMacs().get(key)));
     }
 
     public Optional<RemoteMcastMacs> getRemoteMcastMacs(final InstanceIdentifier<?> iid, final RemoteMcastMacsKey key) {
-        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(requireNonNull(iid));
-        if (nodeOptional.isPresent()) {
-            RemoteMcastMacs mac = nodeOptional.get().nonnullRemoteMcastMacs().get(key);
-            if (mac != null) {
-                return Optional.of(mac);
-            }
-        }
-        return Optional.empty();
+        return getHwvtepGlobalAugmentation(requireNonNull(iid))
+            .flatMap(node -> Optional.ofNullable(node.nonnullRemoteMcastMacs().get(key)));
     }
 
     public Optional<LocalUcastMacs> getLocalUcastMacs(final InstanceIdentifier<?> iid, final LocalUcastMacsKey key) {
-        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(requireNonNull(iid));
-        if (nodeOptional.isPresent()) {
-            LocalUcastMacs mac = nodeOptional.get().nonnullLocalUcastMacs().get(key);
-            if (mac != null) {
-                return Optional.of(mac);
-            }
-        }
-        return Optional.empty();
+        return getHwvtepGlobalAugmentation(requireNonNull(iid))
+            .flatMap(node -> Optional.ofNullable(node.nonnullLocalUcastMacs().get(key)));
     }
 
     public Optional<RemoteUcastMacs> getRemoteUcastMacs(final InstanceIdentifier<?> iid, final RemoteUcastMacsKey key) {
-        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(requireNonNull(iid));
-        if (nodeOptional.isPresent()) {
-            RemoteUcastMacs mac = nodeOptional.get().nonnullRemoteUcastMacs().get(key);
-            if (mac != null) {
-                return Optional.of(mac);
-            }
-        }
-        return Optional.empty();
+        return getHwvtepGlobalAugmentation(requireNonNull(iid))
+            .flatMap(node -> Optional.ofNullable(node.nonnullRemoteUcastMacs().get(key)));
     }
 
     public Optional<LogicalRouters> getLogicalRouters(final InstanceIdentifier<?> iid,
             final LogicalRoutersKey logicalRoutersKey) {
-        Optional<HwvtepGlobalAugmentation> nodeOptional = getHwvtepGlobalAugmentation(requireNonNull(iid));
-        if (nodeOptional.isPresent()) {
-            LogicalRouters lrouter = nodeOptional.get().nonnullLogicalRouters().get(logicalRoutersKey);
-            if (lrouter != null) {
-                return Optional.of(lrouter);
-            }
-        }
-        return Optional.empty();
+        return getHwvtepGlobalAugmentation(requireNonNull(iid))
+            .flatMap(node -> Optional.ofNullable(node.nonnullLogicalRouters().get(logicalRoutersKey)));
     }
 
     public Optional<Acls> getAcls(final InstanceIdentifier<Acls> iid) {
-        Optional<Acls> acl = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
-        return acl;
+        return new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
     }
 
     public ReadWriteTransaction getReadWriteTransaction() {

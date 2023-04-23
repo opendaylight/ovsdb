@@ -317,7 +317,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     public HwvtepConnectionInstance getConnectionInstance(final HwvtepPhysicalSwitchAttributes node) {
         Optional<HwvtepGlobalAugmentation> optional = HwvtepSouthboundUtil.getManagingNode(db, node);
         if (optional.isPresent()) {
-            return getConnectionInstance(optional.get().getConnectionInfo());
+            return getConnectionInstance(optional.orElseThrow().getConnectionInfo());
         } else {
             return null;
         }
@@ -431,7 +431,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         java.util.Optional<EntityOwnershipState> ownershipStateOpt =
                 entityOwnershipService.getOwnershipState(candidateEntity);
         if (ownershipStateOpt.isPresent()) {
-            EntityOwnershipState ownershipState = ownershipStateOpt.get();
+            EntityOwnershipState ownershipState = ownershipStateOpt.orElseThrow();
             putConnectionInstance(hwvtepConnectionInstance.getMDConnectionInfo(), hwvtepConnectionInstance);
             if (ownershipState != EntityOwnershipState.NO_OWNER) {
                 hwvtepConnectionInstance.setHasDeviceOwnership(ownershipState == EntityOwnershipState.IS_OWNER);
@@ -561,7 +561,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
                     @Override
                     public void onSuccess(final Optional<Node> node) {
                         if (node.isPresent()) {
-                            HwvtepGlobalAugmentation augmentation = node.get()
+                            HwvtepGlobalAugmentation augmentation = node.orElseThrow()
                                     .augmentation(HwvtepGlobalAugmentation.class);
                             if (augmentation == null || augmentation.getConnectionInfo() == null) {
                                 return;

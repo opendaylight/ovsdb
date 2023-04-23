@@ -48,7 +48,7 @@ public final class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactio
         }
         Optional<Node> node = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (node.isPresent()) {
-            updateTerminationPoints(transaction, node.get());
+            updateTerminationPoints(transaction, node.orElseThrow());
         }
     }
 

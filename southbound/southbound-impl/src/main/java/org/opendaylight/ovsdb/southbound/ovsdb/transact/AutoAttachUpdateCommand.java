@@ -92,7 +92,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
             }
 
             final OvsdbNodeAugmentation currentOvsdbNode =
-                    state.getBridgeNode(iid).get().augmentation(OvsdbNodeAugmentation.class);
+                    state.getBridgeNode(iid).orElseThrow().augmentation(OvsdbNodeAugmentation.class);
             final Map<AutoattachKey, Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
             for (final Autoattach autoAttach : autoAttachList.values()) {
                 final AutoAttach autoAttachWrapper = transaction.getTypedRowWrapper(AutoAttach.class);
@@ -177,7 +177,7 @@ public class AutoAttachUpdateCommand implements TransactCommand {
             final Optional<OvsdbBridgeAugmentation> bridgeOptional =
                     transaction.read(LogicalDatastoreType.OPERATIONAL, bridgeIid).get();
             if (bridgeOptional.isPresent()) {
-                bridge = bridgeOptional.get();
+                bridge = bridgeOptional.orElseThrow();
             }
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Error reading from datastore", e);

@@ -43,9 +43,9 @@ import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.Identifiable;
-import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.Key;
+import org.opendaylight.yangtools.yang.binding.KeyAware;
 
 // This class needs to be mocked
 @SuppressWarnings("checkstyle:FinalClass")
@@ -340,7 +340,7 @@ public class TransactUtils {
      * @param child The child modification to include.
      * @return The extended path.
      */
-    private static <N extends Identifiable<K> & ChildOf<? super T>, K extends Identifier<N>, T extends DataObject>
+    private static <N extends KeyAware<K> & ChildOf<? super T>, K extends Key<N>, T extends DataObject>
         InstanceIdentifier<? extends DataObject> extendPath(
             InstanceIdentifier<T> path,
             DataObjectModification<?> child) {

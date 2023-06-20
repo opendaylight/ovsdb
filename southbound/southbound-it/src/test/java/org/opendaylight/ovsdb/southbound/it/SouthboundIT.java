@@ -160,9 +160,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.Identifiable;
-import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.Key;
+import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.Uint16;
@@ -1445,7 +1445,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static <I extends Identifier<T>, T extends Identifiable<I>> void assertExpectedExist(
+    private static <I extends Key<T>, T extends KeyAware<I>> void assertExpectedExist(
             final Map<I, T> expected, final Map<I, T> test) {
         if (expected != null && test != null) {
             for (T exp : expected.values()) {
@@ -1454,7 +1454,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private interface SouthboundTerminationPointHelper<I extends Identifier<T>, T extends Identifiable<I>> {
+    private interface SouthboundTerminationPointHelper<I extends Key<T>, T extends KeyAware<I>> {
         void writeValues(OvsdbTerminationPointAugmentationBuilder builder, Map<I, T> values);
 
         Map<I, T> readValues(OvsdbTerminationPointAugmentation augmentation);
@@ -1465,7 +1465,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      *
      * @see <code>SouthboundIT.generatePortExternalIdsTestCases()</code> for specific test case information
      */
-    private static <I extends Identifier<T>, T extends Identifiable<I>> void testCRUDTerminationPoint(
+    private static <I extends Key<T>, T extends KeyAware<I>> void testCRUDTerminationPoint(
             final KeyValueBuilder<T> builder, final String prefix, final SouthboundTerminationPointHelper<I, T> helper)
             throws InterruptedException {
         final int terminationPointTestIndex = 0;
@@ -2016,13 +2016,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 new BridgeOtherConfigsSouthboundHelper());
     }
 
-    private interface SouthboundBridgeHelper<I extends Identifier<T>, T extends Identifiable<I>> {
+    private interface SouthboundBridgeHelper<I extends Key<T>, T extends KeyAware<I>> {
         void writeValues(OvsdbBridgeAugmentationBuilder builder, Map<I, T> values);
 
         Map<I, T> readValues(OvsdbBridgeAugmentation augmentation);
     }
 
-    private static <I extends Identifier<T>, T extends Identifiable<I>> void testCRUDBridge(final String prefix,
+    private static <I extends Key<T>, T extends KeyAware<I>> void testCRUDBridge(final String prefix,
             final KeyValueBuilder<T> builder, final SouthboundBridgeHelper<I, T> helper) throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
@@ -2172,7 +2172,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private interface SouthboundQueueHelper<I extends Identifier<T>, T extends Identifiable<I>> {
+    private interface SouthboundQueueHelper<I extends Key<T>, T extends KeyAware<I>> {
         void writeValues(QueuesBuilder builder, Map<I, T> values);
 
         Map<I, T> readValues(Queues queue);
@@ -2213,7 +2213,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private interface SouthboundQosHelper<I extends Identifier<T>, T extends Identifiable<I>> {
+    private interface SouthboundQosHelper<I extends Key<T>, T extends KeyAware<I>> {
         void writeValues(QosEntriesBuilder builder, Map<I, T> values);
 
         Map<I, T> readValues(QosEntries qos);
@@ -2228,7 +2228,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         return null;
     }
 
-    private static <I extends Identifier<T>, T extends Identifiable<I>> void testCRUDQueue(
+    private static <I extends Key<T>, T extends KeyAware<I>> void testCRUDQueue(
             final KeyValueBuilder<T> builder, final String prefix, final SouthboundQueueHelper<I, T> helper)
             throws InterruptedException {
 
@@ -2360,7 +2360,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     }
 
-    private static <I extends Identifier<T>, T extends Identifiable<I>> void testCRUDQos(
+    private static <I extends Key<T>, T extends KeyAware<I>> void testCRUDQos(
             final KeyValueBuilder<T> builder, final String prefix, final SouthboundQosHelper<I, T> helper)
             throws InterruptedException {
 
@@ -2580,7 +2580,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      *
      * @param <T> The type of data used for the test case.
      */
-    private static final class SouthboundTestCase<I extends Identifier<T>, T extends Identifiable<I>> {
+    private static final class SouthboundTestCase<I extends Key<T>, T extends KeyAware<I>> {
         private final String name;
         private final Map<I, T> inputValues;
         private final Map<I, T> expectedValues;
@@ -2604,7 +2604,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      *
      * @param <T> The type of data used for the test case.
      */
-    private static final class SouthboundTestCaseBuilder<I extends Identifier<T>, T extends Identifiable<I>> {
+    private static final class SouthboundTestCaseBuilder<I extends Key<T>, T extends KeyAware<I>> {
         private String name;
         private List<T> inputValues;
         private List<T> expectedValues;
@@ -2873,7 +2873,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      * Generates the test cases involved in testing key-value-based data.  See inline comments for descriptions of
      * the particular cases considered.
      */
-    private static <I extends Identifier<T>, T extends Identifiable<I>> List<SouthboundTestCase<I, T>>
+    private static <I extends Key<T>, T extends KeyAware<I>> List<SouthboundTestCase<I, T>>
             generateKeyValueTestCases(final KeyValueBuilder<T> builder, final String testName) {
         List<SouthboundTestCase<I, T>> testCases = new ArrayList<>();
 

@@ -154,6 +154,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
             operTopologyRegistration = null;
         }
         ovsdbStatusProvider.reportStatus(ServiceState.UNREGISTERED, "OVSDB Service stopped");
+        ovsdbStatusProvider.close();
     }
 
     private static void initializeOvsdbTopology(final @NonNull LogicalDatastoreType type) {

@@ -14,9 +14,9 @@ import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.ChoiceIn;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.Identifiable;
-import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.Key;
+import org.opendaylight.yangtools.yang.binding.KeyAware;
 
 public class DataObjectModificationImpl<T extends DataObject> implements DataObjectModification<T> {
 
@@ -82,14 +82,14 @@ public class DataObjectModificationImpl<T extends DataObject> implements DataObj
 
     @Override
     @SuppressWarnings("unchecked")
-    public <C extends Identifiable<K> & ChildOf<? super T>, K extends Identifier<C>> DataObjectModification<C>
+    public <C extends KeyAware<K> & ChildOf<? super T>, K extends Key<C>> DataObjectModification<C>
         getModifiedChildListItem(final Class<C> listItem, final K listKey) {
         return (DataObjectModification<C>) getModifiedChild(InstanceIdentifier.IdentifiableItem.of(listItem, listKey));
     }
 
     @Override
-    public <H extends ChoiceIn<? super T> & DataObject, C extends Identifiable<K> & ChildOf<? super H>,
-            K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(Class<H> caseType,
+    public <H extends ChoiceIn<? super T> & DataObject, C extends KeyAware<K> & ChildOf<? super H>,
+            K extends Key<C>> DataObjectModification<C> getModifiedChildListItem(Class<H> caseType,
                     Class<C> listItem, K listKey) {
         return null;
     }

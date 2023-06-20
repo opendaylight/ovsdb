@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.HashSet;
@@ -21,8 +20,8 @@ import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +31,8 @@ public abstract class AbstractTransactionCommand<T extends DataObject> implement
     private final TableUpdates updates;
     private final DatabaseSchema dbSchema;
     protected final HwvtepConnectionInstance key;
-    protected Set<Pair<Class<? extends Identifiable>, InstanceIdentifier>> addedKeys = new HashSet<>();
-    protected Set<Pair<Class<? extends Identifiable>, InstanceIdentifier>> deletedKeys = new HashSet<>();
+    protected Set<Pair<Class<? extends KeyAware>, InstanceIdentifier>> addedKeys = new HashSet<>();
+    protected Set<Pair<Class<? extends KeyAware>, InstanceIdentifier>> deletedKeys = new HashSet<>();
     protected HwvtepDeviceInfo deviceInfo;
 
 
@@ -70,11 +69,11 @@ public abstract class AbstractTransactionCommand<T extends DataObject> implement
         deviceInfo.addToDeviceUpdate(transactionType, element);
     }
 
-    public void clearDeviceOpUUID(Class<? extends Identifiable> cls, InstanceIdentifier iid, UUID uuid) {
+    public void clearDeviceOpUUID(Class<? extends KeyAware> cls, InstanceIdentifier iid, UUID uuid) {
         deviceInfo.clearDeviceOperUUID(cls, iid, uuid);
     }
 
-    public void addToDeleteTx(ReadWriteTransaction tx, Class<? extends Identifiable> cls, InstanceIdentifier iid,
+    public void addToDeleteTx(ReadWriteTransaction tx, Class<? extends KeyAware> cls, InstanceIdentifier iid,
                               UUID uuid) {
         if (deviceInfo.isAvailableInOperDs(cls, iid)) {
             tx.delete(LogicalDatastoreType.OPERATIONAL, iid);
@@ -83,7 +82,7 @@ public abstract class AbstractTransactionCommand<T extends DataObject> implement
         clearDeviceOpUUID(cls, iid, uuid);
     }
 
-    public void addToUpdateTx(Class<? extends Identifiable> cls, InstanceIdentifier iid, UUID uuid,
+    public void addToUpdateTx(Class<? extends KeyAware> cls, InstanceIdentifier iid, UUID uuid,
                               Object southboundData) {
         addedKeys.add(Pair.of(cls, iid));
         deviceInfo.updateDeviceOperData(cls, iid, uuid, southboundData);

@@ -115,11 +115,11 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.Item;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.binding.Key;
 import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -335,7 +335,7 @@ public class SouthboundUtils {
     }
 
     public static IpAddress createIpAddress(Inet4Address address) {
-        return IetfInetUtil.INSTANCE.ipAddressFor(address);
+        return IetfInetUtil.ipAddressFor(address);
     }
 
     public static IpAddress createIpAddress(Inet6Address address) {
@@ -1034,7 +1034,7 @@ public class SouthboundUtils {
         InstanceIdentifier<?> bridgeIid = managedNode.getBridgeRef().getValue();
         for (PathArgument bridgeIidPathArg : bridgeIid.getPathArguments()) {
             if (bridgeIidPathArg instanceof IdentifiableItem<?, ?> identifiableItem) {
-                Identifier<?> key = identifiableItem.getKey();
+                Key<?> key = identifiableItem.getKey();
                 if (key instanceof NodeKey nodeKey) {
                     if (nodeKey.getNodeId().getValue().contains(bridgeName)) {
                         return true;
@@ -1042,8 +1042,8 @@ public class SouthboundUtils {
                 } else if (key.toString().contains(bridgeName)) {
                     return true;
                 }
-            } else if (bridgeIidPathArg instanceof Item<?>) {
-                if (((Item<?>) bridgeIidPathArg).getType().getName().contains(bridgeName)) {
+            } else if (bridgeIidPathArg instanceof Item<?> item) {
+                if (item.getType().getName().contains(bridgeName)) {
                     return true;
                 }
             } else {

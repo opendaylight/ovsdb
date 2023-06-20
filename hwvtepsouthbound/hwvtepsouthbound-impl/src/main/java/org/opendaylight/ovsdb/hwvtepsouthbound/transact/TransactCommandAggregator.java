@@ -24,8 +24,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +41,8 @@ public class TransactCommandAggregator implements TransactCommand {
        child type is the child of hwvtep Global augmentation
      */
     private final Map<InstanceIdentifier<Node>,
-            Pair<Map<Class<? extends Identifiable>, List<Identifiable>>,
-                Map<Class<? extends Identifiable>, List<Identifiable>>>> modifiedData = new HashMap<>();
+            Pair<Map<Class<? extends KeyAware>, List<KeyAware>>,
+                Map<Class<? extends KeyAware>, List<KeyAware>>>> modifiedData = new HashMap<>();
 
 
     public TransactCommandAggregator(HwvtepOperationalState state, Collection<DataTreeModification<Node>> changes) {
@@ -76,13 +76,13 @@ public class TransactCommandAggregator implements TransactCommand {
     }
 
     @Override
-    public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier nodeIid, Identifiable data,
+    public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier nodeIid, KeyAware data,
                                InstanceIdentifier key,
                                Object... extraData) {
     }
 
     @Override
-    public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier nodeIid, Identifiable data,
+    public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier nodeIid, KeyAware data,
                                     InstanceIdentifier key,
                                     Object... extraData) {
     }
@@ -92,8 +92,8 @@ public class TransactCommandAggregator implements TransactCommand {
         for (DataTreeModification<Node> change : changes) {
             final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
             final DataObjectModification<Node> mod = change.getRootNode();
-            final Map<Class<? extends Identifiable>, List<Identifiable>> updatedData = new HashMap<>();
-            final Map<Class<? extends Identifiable>, List<Identifiable>> deletedData = new HashMap<>();
+            final Map<Class<? extends KeyAware>, List<KeyAware>> updatedData = new HashMap<>();
+            final Map<Class<? extends KeyAware>, List<KeyAware>> deletedData = new HashMap<>();
             extractDataChanged(key, mod, updatedData, deletedData);
             modifiedData.put(key, Pair.of(updatedData, deletedData));
             operationalState.setModifiedData(modifiedData);
@@ -106,16 +106,16 @@ public class TransactCommandAggregator implements TransactCommand {
         }
     }
 
-    private static boolean isMacOnlyUpdate(final Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
-                                           final Map<Class<? extends Identifiable>, List<Identifiable>> deletedData) {
+    private static boolean isMacOnlyUpdate(final Map<Class<? extends KeyAware>, List<KeyAware>> updatedData,
+                                           final Map<Class<? extends KeyAware>, List<KeyAware>> deletedData) {
         return updatedData.containsKey(RemoteUcastMacs.class) && updatedData.size() == 1
                 || deletedData.containsKey(RemoteUcastMacs.class) && deletedData.size() == 1;
     }
 
     private static void extractDataChanged(final InstanceIdentifier<Node> key,
                                            final DataObjectModification<Node> mod,
-                                           final Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
-                                           final Map<Class<? extends Identifiable>, List<Identifiable>> deletedData) {
+                                           final Map<Class<? extends KeyAware>, List<KeyAware>> updatedData,
+                                           final Map<Class<? extends KeyAware>, List<KeyAware>> deletedData) {
 
         extractDataChanged(mod.getModifiedChildren(), updatedData, deletedData);
         DataObjectModification<HwvtepGlobalAugmentation> aug = mod.getModifiedAugmentation(
@@ -132,18 +132,18 @@ public class TransactCommandAggregator implements TransactCommand {
 
     private static void extractDataChanged(
             final Collection<? extends DataObjectModification<? extends DataObject>> children,
-                    final Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
-                    final Map<Class<? extends Identifiable>, List<Identifiable>> deletedData) {
+                    final Map<Class<? extends KeyAware>, List<KeyAware>> updatedData,
+                    final Map<Class<? extends KeyAware>, List<KeyAware>> deletedData) {
         if (children == null) {
             return;
         }
         for (DataObjectModification<? extends DataObject> child : children) {
-            Class<? extends Identifiable> childClass = (Class<? extends Identifiable>) child.getDataType();
+            Class<? extends KeyAware> childClass = (Class<? extends KeyAware>) child.getDataType();
             switch (child.getModificationType()) {
                 case WRITE:
                 case SUBTREE_MODIFIED:
                     DataObject dataAfter = child.getDataAfter();
-                    if (!(dataAfter instanceof Identifiable)) {
+                    if (!(dataAfter instanceof KeyAware)) {
                         continue;
                     }
                     DataObject before = child.getDataBefore();
@@ -155,15 +155,15 @@ public class TransactCommandAggregator implements TransactCommand {
                          */
                         continue;
                     }
-                    Identifiable identifiable = (Identifiable) dataAfter;
+                    KeyAware identifiable = (KeyAware) dataAfter;
                     addToUpdatedData(updatedData, childClass, identifiable);
                     break;
                 case DELETE:
                     DataObject dataBefore = child.getDataBefore();
-                    if (!(dataBefore instanceof Identifiable)) {
+                    if (!(dataBefore instanceof KeyAware)) {
                         continue;
                     }
-                    addToUpdatedData(deletedData, childClass, (Identifiable)dataBefore);
+                    addToUpdatedData(deletedData, childClass, (KeyAware)dataBefore);
                     break;
                 default:
                     break;
@@ -171,8 +171,8 @@ public class TransactCommandAggregator implements TransactCommand {
         }
     }
 
-    private static void addToUpdatedData(Map<Class<? extends Identifiable>, List<Identifiable>> updatedData,
-                                         Class<? extends Identifiable> childClass, Identifiable identifiable) {
+    private static void addToUpdatedData(Map<Class<? extends KeyAware>, List<KeyAware>> updatedData,
+                                         Class<? extends KeyAware> childClass, KeyAware identifiable) {
         updatedData.computeIfAbsent(childClass, (cls) -> new ArrayList<>());
         updatedData.get(childClass).add(identifiable);
     }
@@ -192,6 +192,4 @@ public class TransactCommandAggregator implements TransactCommand {
     public boolean retry() {
         return retryCount.decrementAndGet() > 0;
     }
-
-
 }

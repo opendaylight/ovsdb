@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.function.Function;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.yangtools.yang.binding.Identifiable;
-import org.opendaylight.yangtools.yang.binding.Identifier;
+import org.opendaylight.yangtools.yang.binding.Key;
+import org.opendaylight.yangtools.yang.binding.KeyAware;
 
 /**
  * YANG utility functions.
@@ -65,7 +65,7 @@ public final class YangUtils {
      * @param <V> The value type.
      * @return The map.
      */
-    public static <I extends Identifier<T>, T extends Identifiable<I>, K, V>
+    public static <I extends Key<T>, T extends KeyAware<I>, K, V>
             @NonNull Map<K, V> copyYangKeyValueListToMap(@NonNull Map<K, V> map,
             @Nullable Map<I, T> yangList, @NonNull Function<T, K> keyExtractor,
             @NonNull Function<T, V> valueExtractor) {
@@ -102,7 +102,7 @@ public final class YangUtils {
      * @param <V> The value type.
      * @return The map.
      */
-    public static <I extends Identifier<T>, T extends Identifiable<I>, K, V> @NonNull Map<K, V>
+    public static <I extends Key<T>, T extends KeyAware<I>, K, V> @NonNull Map<K, V>
             convertYangKeyValueListToMap(@Nullable Map<I, T> yangList,
             @NonNull Function<T, K> keyExtractor, @NonNull Function<T, V> valueExtractor) {
         return copyYangKeyValueListToMap(new HashMap<>(), yangList, keyExtractor, valueExtractor);

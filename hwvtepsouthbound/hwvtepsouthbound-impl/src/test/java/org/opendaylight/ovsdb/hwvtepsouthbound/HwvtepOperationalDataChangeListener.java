@@ -28,8 +28,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +78,7 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
     }
 
     private void updateDeviceOpData(InstanceIdentifier<Node> key, DataObjectModification<? extends DataObject> mod) {
-        Class<? extends Identifiable> childClass = (Class<? extends Identifiable>) mod.getDataType();
+        Class<? extends KeyAware> childClass = (Class<? extends KeyAware>) mod.getDataType();
         InstanceIdentifier instanceIdentifier = getKey(key, mod, mod.getDataAfter());
         switch (mod.getModificationType()) {
             case WRITE:

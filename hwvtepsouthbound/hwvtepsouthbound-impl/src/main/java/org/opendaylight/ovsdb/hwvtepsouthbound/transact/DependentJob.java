@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import java.util.List;
@@ -19,12 +18,12 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class DependentJob<T extends Identifiable> {
+public abstract class DependentJob<T extends KeyAware> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DependentJob.class);
 
@@ -133,7 +132,7 @@ public abstract class DependentJob<T extends Identifiable> {
     public void onSuccess() {
     }
 
-    public abstract static class ConfigWaitingJob<T extends Identifiable> extends DependentJob<T> {
+    public abstract static class ConfigWaitingJob<T extends KeyAware> extends DependentJob<T> {
 
         public ConfigWaitingJob(InstanceIdentifier key, T data,
                 Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies) {
@@ -150,7 +149,7 @@ public abstract class DependentJob<T extends Identifiable> {
         }
     }
 
-    public abstract static class OpWaitingJob<T extends Identifiable> extends DependentJob<T> {
+    public abstract static class OpWaitingJob<T extends KeyAware> extends DependentJob<T> {
 
         public OpWaitingJob(InstanceIdentifier key, T data,
                 Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies,

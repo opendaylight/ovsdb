@@ -38,13 +38,13 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.Identifiable;
-import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.Key;
+import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataObject, I extends Identifier<T>,
+public abstract class AbstractTransactCommand<T extends KeyAware<I> & DataObject, I extends Key<T>,
         A extends Augmentation<Node>> implements TransactCommand<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTransactCommand.class);
@@ -76,14 +76,14 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
         return changes;
     }
 
-    void updateCurrentTxDeleteData(final Class<? extends Identifiable> cls, final InstanceIdentifier key,
+    void updateCurrentTxDeleteData(final Class<? extends KeyAware> cls, final InstanceIdentifier key,
             final T data) {
         hwvtepOperationalState.updateCurrentTxDeleteData(cls, key);
         markKeyAsInTransit(cls, key);
         addToUpdates(key, data);
     }
 
-    void updateCurrentTxData(final Class<? extends Identifiable> cls, final InstanceIdentifier key, final UUID uuid,
+    void updateCurrentTxData(final Class<? extends KeyAware> cls, final InstanceIdentifier key, final UUID uuid,
             final T data) {
         hwvtepOperationalState.updateCurrentTxData(cls, key, uuid);
         markKeyAsInTransit(cls, key);
@@ -94,8 +94,8 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
         T oldData = null;
         Type type = getClass().getGenericSuperclass();
         Type classType = ((ParameterizedType) type).getActualTypeArguments()[0];
-        if (getConfigData((Class<? extends Identifiable>) classType, key) != null) {
-            oldData = (T) getConfigData((Class<? extends Identifiable>) classType, key).getData();
+        if (getConfigData((Class<? extends KeyAware>) classType, key) != null) {
+            oldData = (T) getConfigData((Class<? extends KeyAware>) classType, key).getData();
         }
         updates.add(new MdsalUpdate<>(key, data, oldData));
     }
@@ -113,7 +113,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
         Map confingDependencies = Collections.emptyMap();
 
         if (isDeleteCmd()) {
-            if (deviceInfo.isKeyInTransit((Class<? extends Identifiable>) classType, key)) {
+            if (deviceInfo.isKeyInTransit((Class<? extends KeyAware>) classType, key)) {
                 inTransitDependencies = new HashMap<>();
                 inTransitDependencies.put(classType, Lists.newArrayList(key));
             }
@@ -124,7 +124,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
             confingDependencies.remove(TerminationPoint.class);
 
             //If this key itself is in transit wait for the response of this key itself
-            if (deviceInfo.isKeyInTransit((Class<? extends Identifiable>) classType, key)
+            if (deviceInfo.isKeyInTransit((Class<? extends KeyAware>) classType, key)
                     || deviceInfo.isKeyInDependencyQueue(key)) {
                 inTransitDependencies.put(classType, Lists.newArrayList(key));
             }
@@ -134,9 +134,9 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
                 && HwvtepSouthboundUtil.isEmptyMap(inTransitDependencies)) {
             doDeviceTransaction(transaction, nodeIid, data, key, extraData);
             if (isDeleteCmd()) {
-                getDeviceInfo().clearConfigData((Class<? extends Identifiable>) classType, key);
+                getDeviceInfo().clearConfigData((Class<? extends KeyAware>) classType, key);
             } else {
-                getDeviceInfo().updateConfigData((Class<? extends Identifiable>) classType, key, data);
+                getDeviceInfo().updateConfigData((Class<? extends KeyAware>) classType, key, data);
             }
         }
 
@@ -150,7 +150,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
                                                  final TransactionBuilder transactionBuilder) {
                     clone.hwvtepOperationalState = operationalState;
                     HwvtepDeviceInfo.DeviceData deviceData =
-                            getDeviceInfo().getConfigData((Class<? extends Identifiable>)getClassType(), key);
+                            getDeviceInfo().getConfigData((Class<? extends KeyAware>)getClassType(), key);
                     T latest = data;
                     if (deviceData != null && deviceData.getData() != null) {
                         latest = (T) deviceData.getData();
@@ -187,7 +187,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
                                                  final TransactionBuilder transactionBuilder) {
                     clone.hwvtepOperationalState = operationalState;
                     HwvtepDeviceInfo.DeviceData deviceData = getDeviceInfo()
-                            .getConfigData((Class<? extends Identifiable>)getClassType(), key);
+                            .getConfigData((Class<? extends KeyAware>)getClassType(), key);
                     T latest = data;
                     if (deviceData != null && deviceData.getData() != null) {
                         latest = (T) deviceData.getData();
@@ -262,7 +262,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
                 if (!Objects.equals(hwvtepOperationalState.getConnectionInstance().getInstanceIdentifier(), key)) {
                     continue;
                 }
-                Class<? extends Identifiable> classType = (Class<? extends Identifiable>) getClassType();
+                Class<? extends KeyAware> classType = (Class<? extends KeyAware>) getClassType();
                 List<T> removed;
                 if (getOperationalState().isInReconciliation()) {
                     removed = getRemoved(change);
@@ -286,7 +286,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
                 if (!Objects.equals(hwvtepOperationalState.getConnectionInstance().getInstanceIdentifier(), key)) {
                     continue;
                 }
-                Class<? extends Identifiable> classType = (Class<? extends Identifiable>) getClassType();
+                Class<? extends KeyAware> classType = (Class<? extends KeyAware>) getClassType();
                 List<T> updated = null;
                 if (getOperationalState().isInReconciliation()) {
                     updated = getUpdated(change);
@@ -361,8 +361,8 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
             return HwvtepSouthboundUtil.isEmpty(list1) ? Collections.emptyList() : list1;
         }
 
-        Map<Object, T> map1 = list1.stream().collect(Collectors.toMap(Identifiable::key, ele -> ele));
-        Map<Object, T> map2 = list2.stream().collect(Collectors.toMap(Identifiable::key, ele -> ele));
+        Map<Object, T> map1 = list1.stream().collect(Collectors.toMap(KeyAware::key, ele -> ele));
+        Map<Object, T> map2 = list2.stream().collect(Collectors.toMap(KeyAware::key, ele -> ele));
         map1.entrySet().forEach(entry1 -> {
             T val2 = map2.remove(entry1.getKey());
             if (compareKeyOnly) {
@@ -439,7 +439,7 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
         getOperationalState().getDeviceInfo().addToControllerTx(transactionType, element);
     }
 
-    public <T> HwvtepDeviceInfo.DeviceData fetchDeviceData(final Class<? extends Identifiable> cls,
+    public <T> HwvtepDeviceInfo.DeviceData fetchDeviceData(final Class<? extends KeyAware> cls,
             final InstanceIdentifier key) {
         HwvtepDeviceInfo.DeviceData deviceData  = getDeviceOpData(cls, key);
         if (deviceData == null) {
@@ -457,30 +457,30 @@ public abstract class AbstractTransactCommand<T extends Identifiable<I> & DataOb
         return deviceData;
     }
 
-    public <K extends Identifiable> void addJobToQueue(final DependentJob<K> job) {
+    public <K extends KeyAware> void addJobToQueue(final DependentJob<K> job) {
         hwvtepOperationalState.getDeviceInfo().putKeyInDependencyQueue(job.getKey());
         hwvtepOperationalState.getDeviceInfo().addJobToQueue(job);
     }
 
-    public void markKeyAsInTransit(final Class<? extends Identifiable> cls, final InstanceIdentifier key) {
+    public void markKeyAsInTransit(final Class<? extends KeyAware> cls, final InstanceIdentifier key) {
         hwvtepOperationalState.getDeviceInfo().markKeyAsInTransit(cls, key);
     }
 
-    public HwvtepDeviceInfo.DeviceData getDeviceOpData(final Class<? extends Identifiable> cls,
+    public HwvtepDeviceInfo.DeviceData getDeviceOpData(final Class<? extends KeyAware> cls,
             final InstanceIdentifier key) {
         return getOperationalState().getDeviceInfo().getDeviceOperData(cls, key);
     }
 
-    public void clearConfigData(final Class<? extends Identifiable> cls, final InstanceIdentifier key) {
+    public void clearConfigData(final Class<? extends KeyAware> cls, final InstanceIdentifier key) {
         hwvtepOperationalState.getDeviceInfo().clearConfigData(cls, key);
     }
 
-    public HwvtepDeviceInfo.DeviceData getConfigData(final Class<? extends Identifiable> cls,
+    public HwvtepDeviceInfo.DeviceData getConfigData(final Class<? extends KeyAware> cls,
             final InstanceIdentifier key) {
         return hwvtepOperationalState.getDeviceInfo().getConfigData(cls, key);
     }
 
-    public void updateConfigData(final Class<? extends Identifiable> cls, final InstanceIdentifier key,
+    public void updateConfigData(final Class<? extends KeyAware> cls, final InstanceIdentifier key,
             final Object data) {
         hwvtepOperationalState.getDeviceInfo().updateConfigData(cls, key, data);
     }

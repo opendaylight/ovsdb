@@ -47,6 +47,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>mdsal-eos-binding-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>com.guicedee.services</groupId>
       <artifactId>javax.inject</artifactId>
       <optional>true</optional>

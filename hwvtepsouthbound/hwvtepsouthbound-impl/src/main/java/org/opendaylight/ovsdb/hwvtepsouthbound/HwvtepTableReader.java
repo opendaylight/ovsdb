@@ -64,8 +64,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +99,7 @@ public class HwvtepTableReader {
         TerminationPoint.class, PhysicalLocator.class,
         VlanBindings.class, PhysicalPort.class);
 
-    private final ImmutableMap<Class<? extends Identifiable<?>>, WhereClauseGetter<?>> whereClauseGetters;
+    private final ImmutableMap<Class<? extends KeyAware<?>>, WhereClauseGetter<?>> whereClauseGetters;
     private final ImmutableClassToInstanceMap<TypedBaseTable<?>> tables;
     private final HwvtepConnectionInstance connectionInstance;
 
@@ -114,7 +114,7 @@ public class HwvtepTableReader {
         }
 
         final Builder<TypedBaseTable<?>> tableBuilder = ImmutableClassToInstanceMap.<TypedBaseTable<?>>builder();
-        final ImmutableMap.Builder<Class<? extends Identifiable<?>>, WhereClauseGetter<?>> whereBuilder =
+        final ImmutableMap.Builder<Class<? extends KeyAware<?>>, WhereClauseGetter<?>> whereBuilder =
                 ImmutableMap.builderWithExpectedSize(4);
 
         if (dbSchema != null) {
@@ -253,7 +253,7 @@ public class HwvtepTableReader {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public Optional<TypedBaseTable> getHwvtepTableEntryUUID(final Class<? extends Identifiable> cls,
+    public Optional<TypedBaseTable> getHwvtepTableEntryUUID(final Class<? extends KeyAware> cls,
                                                             final InstanceIdentifier iid,
                                                             final UUID existingUUID) {
         final TypedDatabaseSchema dbSchema;
@@ -317,7 +317,7 @@ public class HwvtepTableReader {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public List<TypedBaseTable> getHwvtepTableEntries(final Class<? extends Identifiable> cls) {
+    public List<TypedBaseTable> getHwvtepTableEntries(final Class<? extends KeyAware> cls) {
         final TypedDatabaseSchema dbSchema;
         try {
             dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();

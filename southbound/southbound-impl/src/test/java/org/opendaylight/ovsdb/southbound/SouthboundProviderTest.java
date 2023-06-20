@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.infrautils.diagstatus.DiagStatusService;
+import org.opendaylight.infrautils.diagstatus.ServiceRegistration;
 import org.opendaylight.infrautils.ready.testutils.TestSystemReadyMonitor;
 import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBrokerTest;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
@@ -48,8 +49,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 
 public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
-
     private EntityOwnershipService entityOwnershipService;
+    private DiagStatusService diagStatusService;
 
     public SouthboundProviderTest() {
         super(true);
@@ -62,6 +63,9 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 mock(EntityOwnershipListenerRegistration.class));
         when(entityOwnershipService.registerCandidate(any(Entity.class))).thenReturn(mock(
                 EntityOwnershipCandidateRegistration.class));
+
+        diagStatusService = Mockito.mock(DiagStatusService.class);
+        when(diagStatusService.register(any())).thenReturn(Mockito.mock(ServiceRegistration.class));
     }
 
     @Test
@@ -77,7 +81,7 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class),
                 new TestSystemReadyMonitor(IMMEDIATE),
-                Mockito.mock(DiagStatusService.class))) {
+                diagStatusService)) {
 
             // Initiate the session
             southboundProvider.init();
@@ -104,7 +108,7 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class),
                 new TestSystemReadyMonitor(IMMEDIATE),
-                Mockito.mock(DiagStatusService.class))) {
+                diagStatusService)) {
 
             // Initiate the session
             southboundProvider.init();
@@ -133,7 +137,7 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class),
                 new TestSystemReadyMonitor(IMMEDIATE),
-                Mockito.mock(DiagStatusService.class))) {
+                diagStatusService)) {
 
             southboundProvider.init();
 
@@ -157,7 +161,7 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class),
                 new TestSystemReadyMonitor(IMMEDIATE),
-                Mockito.mock(DiagStatusService.class))) {
+                diagStatusService)) {
 
             southboundProvider.init();
 

@@ -156,7 +156,7 @@ public final class SouthboundMapper {
     }
 
     public static IpAddress createIpAddress(final Inet4Address address) {
-        return IetfInetUtil.INSTANCE.ipAddressFor(address);
+        return IetfInetUtil.ipAddressFor(address);
     }
 
     public static IpAddress createIpAddress(final Inet6Address address) {

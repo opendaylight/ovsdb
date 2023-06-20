@@ -51,6 +51,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>

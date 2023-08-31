@@ -93,9 +93,9 @@ public class ConfigPropertiesTest {
     }
 
     // Helper classes used to de-mux mock behaviors
-    private static class ConfigPropertiesTestMockingBundleNoContext {
+    private static final class ConfigPropertiesTestMockingBundleNoContext {
     }
 
-    private static class ConfigPropertiesTestMocking {
+    private static final class ConfigPropertiesTestMocking {
     }
 }

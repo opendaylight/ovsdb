@@ -142,7 +142,7 @@ public final class DockerOvs implements AutoCloseable {
     private boolean runDocker;
     private boolean createOdlNetwork;
 
-    private static class DockerComposeServiceInfo {
+    private static final class DockerComposeServiceInfo {
         String name;
         String port;
     }

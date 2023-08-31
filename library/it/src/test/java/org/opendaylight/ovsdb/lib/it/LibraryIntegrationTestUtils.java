@@ -96,7 +96,7 @@ public final class LibraryIntegrationTestUtils {
                 + "passive connection : mvn -Pintegrationtest -Dovsdbserver.connection=passive verify\n";
     }
 
-    private static class PassiveListener implements Callable<OvsdbClient>, OvsdbConnectionListener {
+    private static final class PassiveListener implements Callable<OvsdbClient>, OvsdbConnectionListener {
         OvsdbClient client = null;
 
         @Override

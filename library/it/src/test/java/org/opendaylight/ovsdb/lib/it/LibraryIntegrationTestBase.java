@@ -305,7 +305,7 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
         setSetup(true);
     }
 
-    private class UpdateMonitor implements MonitorCallBack {
+    private final class UpdateMonitor implements MonitorCallBack {
         @Override
         public void update(TableUpdates result, DatabaseSchema unused) {
             updateTableCache(result);

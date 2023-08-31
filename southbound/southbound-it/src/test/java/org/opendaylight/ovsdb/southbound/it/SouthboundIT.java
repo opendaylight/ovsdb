@@ -2144,7 +2144,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         assertNull(operQueue);
     }
 
-    private static class SouthboundQueuesExternalIdsHelper
+    private static final class SouthboundQueuesExternalIdsHelper
             implements SouthboundQueueHelper<QueuesExternalIdsKey, QueuesExternalIds> {
         @Override
         public void writeValues(final QueuesBuilder builder,
@@ -2158,7 +2158,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static class SouthboundQueuesOtherConfigHelper
+    private static final class SouthboundQueuesOtherConfigHelper
             implements SouthboundQueueHelper<QueuesOtherConfigKey, QueuesOtherConfig> {
         @Override
         public void writeValues(final QueuesBuilder builder,
@@ -2187,7 +2187,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         return null;
     }
 
-    private static class SouthboundQosExternalIdsHelper
+    private static final class SouthboundQosExternalIdsHelper
             implements SouthboundQosHelper<QosExternalIdsKey, QosExternalIds> {
         @Override
         public void writeValues(final QosEntriesBuilder builder, final Map<QosExternalIdsKey, QosExternalIds> values) {
@@ -2200,7 +2200,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static class SouthboundQosOtherConfigHelper
+    private static final class SouthboundQosOtherConfigHelper
             implements SouthboundQosHelper<QosOtherConfigKey, QosOtherConfig> {
         @Override
         public void writeValues(final QosEntriesBuilder builder, final Map<QosOtherConfigKey, QosOtherConfig> values) {
@@ -2940,7 +2940,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         return testCases;
     }
 
-    private static class PortExternalIdsSouthboundHelper
+    private static final class PortExternalIdsSouthboundHelper
             implements SouthboundTerminationPointHelper<PortExternalIdsKey, PortExternalIds> {
         @Override
         public void writeValues(final OvsdbTerminationPointAugmentationBuilder builder,
@@ -2955,7 +2955,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static class InterfaceExternalIdsSouthboundHelper
+    private static final class InterfaceExternalIdsSouthboundHelper
             implements SouthboundTerminationPointHelper<InterfaceExternalIdsKey, InterfaceExternalIds> {
         @Override
         public void writeValues(final OvsdbTerminationPointAugmentationBuilder builder,
@@ -2970,7 +2970,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static class InterfaceLldpSouthboundHelper
+    private static final class InterfaceLldpSouthboundHelper
             implements SouthboundTerminationPointHelper<InterfaceLldpKey, InterfaceLldp> {
         @Override
         public void writeValues(final OvsdbTerminationPointAugmentationBuilder builder,
@@ -2984,7 +2984,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static class OptionsSouthboundHelper implements SouthboundTerminationPointHelper<OptionsKey, Options> {
+    private static final class OptionsSouthboundHelper
+            implements SouthboundTerminationPointHelper<OptionsKey, Options> {
         @Override
         public void writeValues(final OvsdbTerminationPointAugmentationBuilder builder,
                 final Map<OptionsKey, Options> values) {
@@ -2997,7 +2998,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static class InterfaceOtherConfigsSouthboundHelper
+    private static final class InterfaceOtherConfigsSouthboundHelper
             implements SouthboundTerminationPointHelper<InterfaceOtherConfigsKey, InterfaceOtherConfigs> {
         @Override
         public void writeValues(final OvsdbTerminationPointAugmentationBuilder builder,
@@ -3012,7 +3013,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static class PortOtherConfigsSouthboundHelper implements
+    private static final class PortOtherConfigsSouthboundHelper implements
             SouthboundTerminationPointHelper<PortOtherConfigsKey, PortOtherConfigs> {
         @Override
         public void writeValues(final OvsdbTerminationPointAugmentationBuilder builder,
@@ -3027,7 +3028,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static class BridgeExternalIdsSouthboundHelper
+    private static final class BridgeExternalIdsSouthboundHelper
             implements SouthboundBridgeHelper<BridgeExternalIdsKey, BridgeExternalIds> {
         @Override
         public void writeValues(final OvsdbBridgeAugmentationBuilder builder,
@@ -3041,7 +3042,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static class BridgeOtherConfigsSouthboundHelper
+    private static final class BridgeOtherConfigsSouthboundHelper
             implements SouthboundBridgeHelper<BridgeOtherConfigsKey, BridgeOtherConfigs> {
         @Override
         public void writeValues(final OvsdbBridgeAugmentationBuilder builder,

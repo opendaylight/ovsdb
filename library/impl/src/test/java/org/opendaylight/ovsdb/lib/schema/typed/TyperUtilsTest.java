@@ -24,11 +24,11 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
  */
 public class TyperUtilsTest {
     @TypedTable(name = "TestTypedTable", database = "Open_vSwitch")
-    private class TestTypedTable {
+    private static final class TestTypedTable {
 
     }
 
-    private class TestUntypedTable {
+    private static final class TestUntypedTable {
 
     }
 

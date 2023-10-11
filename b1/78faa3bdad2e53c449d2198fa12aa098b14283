@@ -1,0 +1,7 @@
+Code-Review+2: Anil Belur <abelur@linuxfoundation.org>
+Verified+1: Anil Belur <abelur@linuxfoundation.org>
+Submitted-by: Anil Belur <abelur@linuxfoundation.org>
+Submitted-at: Wed, 11 Oct 2023 02:52:07 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/ovsdb/+/108337
+Project: ovsdb
+Branch: refs/heads/stable/potassium

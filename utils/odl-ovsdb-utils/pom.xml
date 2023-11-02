@@ -18,7 +18,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>odl-ovsdb-utils</artifactId>
-    <version>1.16.3-SNAPSHOT</version>
+    <version>1.16.3</version>
     <packaging>feature</packaging>
     <!-- <name> formatting is used by autorelease to parse and notify projects on
          build failure. Please do not modify this unless you have a good reason. -->

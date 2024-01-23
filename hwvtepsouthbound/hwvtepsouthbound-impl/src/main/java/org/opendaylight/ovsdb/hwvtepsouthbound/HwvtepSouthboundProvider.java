@@ -45,13 +45,16 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
+@Component(immediate = true, service = HwvtepSouthboundProviderInfo.class)
 public class HwvtepSouthboundProvider
         implements HwvtepSouthboundProviderInfo, ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
-
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundProvider.class);
     private static final String ENTITY_TYPE = "ovsdb-hwvtepsouthbound-provider";
 
@@ -69,9 +72,11 @@ public class HwvtepSouthboundProvider
     private ListenerRegistration<HwvtepSouthboundProvider> operTopologyRegistration;
 
     @Inject
-    public HwvtepSouthboundProvider(final DataBroker dataBroker, final EntityOwnershipService entityOwnership,
-            final OvsdbConnection ovsdbConnection, final DOMSchemaService schemaService,
-            final BindingNormalizedNodeSerializer serializer) {
+    @Activate
+    public HwvtepSouthboundProvider(@Reference final DataBroker dataBroker,
+            @Reference final EntityOwnershipService entityOwnership, @Reference final OvsdbConnection ovsdbConnection,
+            @Reference final DOMSchemaService schemaService,
+            @Reference final BindingNormalizedNodeSerializer serializer) {
         this.dataBroker = dataBroker;
         entityOwnershipService = entityOwnership;
         registration = null;
@@ -79,14 +84,7 @@ public class HwvtepSouthboundProvider
         // FIXME: eliminate this static wiring
         HwvtepSouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(schemaService, serializer));
         LOG.info("HwvtepSouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
-    }
 
-    /**
-     * Used by blueprint when starting the container.
-     */
-    @PostConstruct
-    public void init() {
-        LOG.info("HwvtepSouthboundProvider Session Initiated");
         txInvoker = new TransactionInvokerImpl(dataBroker);
         cm = new HwvtepConnectionManager(dataBroker, txInvoker, entityOwnershipService, ovsdbConnection);
         hwvtepDTListener = new HwvtepDataChangeListener(dataBroker, cm);
@@ -121,6 +119,7 @@ public class HwvtepSouthboundProvider
 
     @Override
     @PreDestroy
+    @Deactivate
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void close() throws Exception {
         LOG.info("HwvtepSouthboundProvider Closed");
@@ -189,7 +188,6 @@ public class HwvtepSouthboundProvider
             LOG.info("*This* instance of HWVTEP southbound provider is set as a SLAVE instance");
         }
     }
-
 
     @Override
     public void onDataTreeChanged(final Collection<DataTreeModification<Topology>> collection) {

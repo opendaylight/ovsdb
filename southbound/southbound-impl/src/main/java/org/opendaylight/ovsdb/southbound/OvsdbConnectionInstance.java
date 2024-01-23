@@ -84,8 +84,8 @@ public class OvsdbConnectionInstance {
     private final OvsdbClient client;
     private ConnectionInfo connectionInfo;
     private final TransactionInvoker txInvoker;
-    private Map<TypedDatabaseSchema, TransactInvoker> transactInvokers;
-    private MonitorCallBack callback;
+    private Map<TypedDatabaseSchema, TransactInvoker> transactInvokers = null;
+    private MonitorCallBack callback = null;
     private InstanceIdentifier<Node> instanceIdentifier;
     private volatile boolean hasDeviceOwnership = false;
     private Entity connectedEntity;

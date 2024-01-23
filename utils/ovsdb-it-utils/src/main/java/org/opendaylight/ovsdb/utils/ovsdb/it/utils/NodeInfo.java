@@ -34,13 +34,15 @@ public class NodeInfo {
     private final ConnectionInfo connectionInfo;
     private final InstanceIdentifier<Node> ovsdbIid;
     private final InstanceIdentifier<Node> bridgeIid;
-    public long datapathId;
-    public Node ovsdbNode;
-    public Node bridgeNode;
-    private NotifyingDataChangeListener ovsdbWaiter;
-    private NotifyingDataChangeListener bridgeWaiter;
     private final List<NotifyingDataChangeListener> waitList;
     private final OvsdbItUtils itUtils;
+
+    private long datapathId;
+    private Node ovsdbNode;
+    private Node bridgeNode;
+    private NotifyingDataChangeListener ovsdbWaiter;
+    private NotifyingDataChangeListener bridgeWaiter;
+
 
     /**
      * Create a new NodeInfo object.
@@ -48,8 +50,8 @@ public class NodeInfo {
      * @param itUtils OvsdbItUtils instance
      * @param waitList for tracking outstanding md-sal events
      */
-    NodeInfo(ConnectionInfo connectionInfo, OvsdbItUtils itUtils,
-            List<NotifyingDataChangeListener> waitList) {
+    NodeInfo(final ConnectionInfo connectionInfo, final OvsdbItUtils itUtils,
+             final List<NotifyingDataChangeListener> waitList) {
         this.connectionInfo = connectionInfo;
         this.itUtils = itUtils;
         this.waitList = waitList;

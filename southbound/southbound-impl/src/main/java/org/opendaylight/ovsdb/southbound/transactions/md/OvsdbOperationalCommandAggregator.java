@@ -31,11 +31,9 @@ public class OvsdbOperationalCommandAggregator implements TransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbOperationalCommandAggregator.class);
     private final List<TransactionCommand> commands = new ArrayList<>();
     private final Map<NodeId, Node> updatedBridgeNodes = new HashMap<>();
-    private boolean initialUpdate;
 
     public OvsdbOperationalCommandAggregator(InstanceIdentifierCodec instanceIdentifierCodec,
             OvsdbConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema, boolean initialUpdate) {
-        this.initialUpdate = initialUpdate;
         commands.add(new OpenVSwitchUpdateCommand(instanceIdentifierCodec, key, updates, dbSchema));
         commands.add(new OvsdbManagersUpdateCommand(key, updates,  dbSchema));
         commands.add(new OvsdbManagersRemovedCommand(key, updates,  dbSchema));

@@ -131,7 +131,6 @@ public class HwvtepDeviceInfo {
         }
     }
 
-    private static AtomicInteger ZERO = new AtomicInteger(0);
     private final Map<InstanceIdentifier<?>, Set<InstanceIdentifier>> tepIdReferences = new ConcurrentHashMap<>();
     private final Map<InstanceIdentifier<LogicalSwitches>, Map<InstanceIdentifier<RemoteUcastMacs>, RemoteUcastMacs>>
             logicalSwitchVsUcasts = new ConcurrentHashMap<>();
@@ -139,19 +138,17 @@ public class HwvtepDeviceInfo {
             logicalSwitchVsMcasts = new ConcurrentHashMap<>();
     private final Map<UUID, PhysicalSwitch> physicalSwitches = new ConcurrentHashMap<>();
     private final Map<UUID, UUID> mapTunnelToPhysicalSwitch = new ConcurrentHashMap<>();
-
+    private final Map<Class<? extends KeyAware>, Map<InstanceIdentifier, DeviceData>> opKeyVsData =
+        new ConcurrentHashMap<>();
+    private final Map<Class<? extends KeyAware>, Map<UUID, DeviceData>> uuidVsData = new ConcurrentHashMap<>();
     private final HwvtepConnectionInstance connectionInstance;
+    private final DependencyQueue dependencyQueue;
 
     private Map<InstanceIdentifier, AtomicInteger> iidInQueueCount = new ConcurrentHashMap<>();
     private Map<Class<? extends KeyAware>, Map<InstanceIdentifier, DeviceData>> configKeyVsData =
             new ConcurrentHashMap<>();
-    private final Map<Class<? extends KeyAware>, Map<InstanceIdentifier, DeviceData>> opKeyVsData =
-            new ConcurrentHashMap<>();
-    private final Map<Class<? extends KeyAware>, Map<UUID, DeviceData>> uuidVsData = new ConcurrentHashMap<>();
-    private final DependencyQueue dependencyQueue;
-    private TransactionHistory controllerTxHistory;
-    private TransactionHistory deviceUpdateHistory;
-
+    private TransactionHistory controllerTxHistory = null;
+    private TransactionHistory deviceUpdateHistory = null;
 
     public HwvtepDeviceInfo(HwvtepConnectionInstance hwvtepConnectionInstance) {
         this.connectionInstance = hwvtepConnectionInstance;

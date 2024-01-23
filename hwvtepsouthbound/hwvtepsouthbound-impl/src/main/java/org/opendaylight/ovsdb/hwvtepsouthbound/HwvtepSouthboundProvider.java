@@ -148,6 +148,10 @@ public class HwvtepSouthboundProvider
             hwvtepDTListener.close();
             hwvtepDTListener = null;
         }
+        if (hwvtepReconciliationManager != null) {
+            hwvtepReconciliationManager.close();
+            hwvtepReconciliationManager = null;
+        }
         if (operTopologyRegistration != null) {
             operTopologyRegistration.close();
             operTopologyRegistration = null;

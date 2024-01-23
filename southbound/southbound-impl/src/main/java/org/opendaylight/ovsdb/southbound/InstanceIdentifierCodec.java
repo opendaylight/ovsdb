@@ -19,19 +19,17 @@ import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContextListener;
 import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentifierCodec
         implements EffectiveModelContextListener {
-
     private static final Logger LOG = LoggerFactory.getLogger(InstanceIdentifierCodec.class);
 
     private final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
 
     private DataSchemaContextTree dataSchemaContextTree;
-    private SchemaContext context;
+    private EffectiveModelContext context = null;
 
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Non-final for mocking")
     public InstanceIdentifierCodec(final DOMSchemaService schemaService,

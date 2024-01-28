@@ -11,7 +11,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>ovsdb-binding-parent</artifactId>
-    <version>1.17.2-SNAPSHOT</version>
+    <version>1.17.2</version>
     <relativePath>../../commons/binding-parent</relativePath>
   </parent>
 

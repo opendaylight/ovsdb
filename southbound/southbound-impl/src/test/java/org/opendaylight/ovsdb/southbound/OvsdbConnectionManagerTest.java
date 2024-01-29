@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound;
 
 import static org.junit.Assert.assertEquals;
@@ -22,8 +21,8 @@ import static org.powermock.api.support.membermodification.MemberModifier.suppre
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import java.net.InetAddress;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,9 +36,8 @@ import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
-import org.opendaylight.mdsal.eos.common.api.EntityOwnershipChangeState;
+import org.opendaylight.mdsal.eos.common.api.EntityOwnershipStateChange;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
@@ -101,8 +99,7 @@ public class OvsdbConnectionManagerTest {
 
         externalClient = mock(OvsdbClient.class, Mockito.RETURNS_DEEP_STUBS);
         doReturn(info).when(externalClient).getConnectionInfo();
-        doReturn(Futures.immediateFuture(Collections.singletonList("Open_vSwitch"))).when(externalClient)
-            .getDatabases();
+        doReturn(Futures.immediateFuture(List.of("Open_vSwitch"))).when(externalClient).getDatabases();
 
         PowerMockito.mockStatic(SouthboundUtil.class);
         when(SouthboundUtil.connectionInfoToString(any(ConnectionInfo.class))).thenReturn("192.18.120.31:8080");
@@ -380,9 +377,7 @@ public class OvsdbConnectionManagerTest {
         field(OvsdbConnectionManager.class, "entityConnectionMap").set(ovsdbConnManager, entityConnectionMap);
         doNothing().when(ovsdbConnManager).putConnectionInstance(any(ConnectionInfo.class),
             any(OvsdbConnectionInstance.class));
-        EntityOwnershipChange ownershipChange = new EntityOwnershipChange(entity,
-                EntityOwnershipChangeState.from(true, false, false));
-        Whitebox.invokeMethod(ovsdbConnManager, "handleOwnershipChanged", ownershipChange);
+        ovsdbConnManager.handleOwnershipChanged(entity, EntityOwnershipStateChange.from(true, false, false));
         verify(ovsdbConnManager).putConnectionInstance(key, ovsdbConnInstance);
     }
 }

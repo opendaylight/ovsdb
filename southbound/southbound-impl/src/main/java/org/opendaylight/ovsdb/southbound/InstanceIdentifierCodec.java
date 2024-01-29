@@ -11,19 +11,19 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
-import org.opendaylight.yangtools.yang.data.util.AbstractModuleStringInstanceIdentifierCodec;
+import org.opendaylight.yangtools.yang.data.util.AbstractStringInstanceIdentifierCodec;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import org.opendaylight.yangtools.yang.model.api.EffectiveModelContextListener;
 import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.stmt.ModuleEffectiveStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentifierCodec
-        implements EffectiveModelContextListener {
+public class InstanceIdentifierCodec extends AbstractStringInstanceIdentifierCodec {
     private static final Logger LOG = LoggerFactory.getLogger(InstanceIdentifierCodec.class);
 
     private final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
@@ -34,7 +34,7 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Non-final for mocking")
     public InstanceIdentifierCodec(final DOMSchemaService schemaService,
             final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
-        schemaService.registerSchemaContextListener(this);
+        schemaService.registerSchemaContextListener(this::onModelContextUpdated);
         this.bindingNormalizedNodeSerializer = bindingNormalizedNodeSerializer;
     }
 
@@ -44,8 +44,9 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
     }
 
     @Override
-    protected Module moduleForPrefix(final String prefix) {
-        return context.findModules(prefix).stream().findFirst().orElse(null);
+    protected QNameModule moduleForPrefix(final String prefix) {
+        return context.findModuleStatements(prefix).stream().findFirst().map(ModuleEffectiveStatement::localQNameModule)
+            .orElse(null);
     }
 
     @Override
@@ -53,8 +54,7 @@ public class InstanceIdentifierCodec extends AbstractModuleStringInstanceIdentif
         return context.findModules(namespace).stream().map(Module::getName).findFirst().orElse(null);
     }
 
-    @Override
-    public void onModelContextUpdated(final EffectiveModelContext schemaContext) {
+    private void onModelContextUpdated(final EffectiveModelContext schemaContext) {
         this.context = schemaContext;
         this.dataSchemaContextTree = DataSchemaContextTree.from(schemaContext);
     }

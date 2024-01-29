@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,10 +15,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -30,18 +29,18 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class HwvtepOperGlobalListener implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
+public final class HwvtepOperGlobalListener implements DataTreeChangeListener<Node>, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperGlobalListener.class);
     private static final Map<InstanceIdentifier<Node>, ConnectionInfo> NODE_CONNECTION_INFO = new ConcurrentHashMap<>();
     private static final Map<InstanceIdentifier<Node>, ScheduledFuture> TIMEOUT_FTS = new ConcurrentHashMap<>();
 
-    private ListenerRegistration<HwvtepOperGlobalListener> registration;
+    private Registration registration;
     private final HwvtepConnectionManager hcm;
     private final DataBroker db;
     private static final Map<InstanceIdentifier<Node>, List<Callable<Void>>> NODE_DELET_WAITING_JOBS
@@ -58,9 +57,9 @@ public final class HwvtepOperGlobalListener implements ClusteredDataTreeChangeLi
 
     private void registerListener() {
         final DataTreeIdentifier<Node> treeId =
-                        DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, getWildcardPath());
+                        DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, getWildcardPath());
 
-        registration = db.registerDataTreeChangeListener(treeId, HwvtepOperGlobalListener.this);
+        registration = db.registerTreeChangeListener(treeId, this);
     }
 
     @Override
@@ -72,7 +71,7 @@ public final class HwvtepOperGlobalListener implements ClusteredDataTreeChangeLi
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void onDataTreeChanged(final Collection<DataTreeModification<Node>> changes) {
+    public void onDataTreeChanged(final List<DataTreeModification<Node>> changes) {
         LOG.trace("onDataTreeChanged: ");
         try {
             connect(changes);
@@ -130,9 +129,9 @@ public final class HwvtepOperGlobalListener implements ClusteredDataTreeChangeLi
         }
     }
 
-    private static void connect(Collection<DataTreeModification<Node>> changes) {
+    private static void connect(List<DataTreeModification<Node>> changes) {
         changes.forEach(change -> {
-            InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+            InstanceIdentifier<Node> key = change.getRootPath().path();
             DataObjectModification<Node> mod = change.getRootNode();
             Node node = getCreated(mod);
             if (node == null) {
@@ -158,9 +157,9 @@ public final class HwvtepOperGlobalListener implements ClusteredDataTreeChangeLi
         });
     }
 
-    private static void updated(Collection<DataTreeModification<Node>> changes) {
+    private static void updated(List<DataTreeModification<Node>> changes) {
         changes.forEach(change -> {
-            InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+            InstanceIdentifier<Node> key = change.getRootPath().path();
             DataObjectModification<Node> mod = change.getRootNode();
             Node node = getUpdated(mod);
             if (node != null) {
@@ -173,9 +172,9 @@ public final class HwvtepOperGlobalListener implements ClusteredDataTreeChangeLi
         return CONNECTED_NODES.get(key);
     }
 
-    private void disconnect(Collection<DataTreeModification<Node>> changes) {
+    private void disconnect(List<DataTreeModification<Node>> changes) {
         changes.forEach(change -> {
-            InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+            InstanceIdentifier<Node> key = change.getRootPath().path();
             DataObjectModification<Node> mod = change.getRootNode();
             Node node = getRemoved(mod);
             if (node != null) {

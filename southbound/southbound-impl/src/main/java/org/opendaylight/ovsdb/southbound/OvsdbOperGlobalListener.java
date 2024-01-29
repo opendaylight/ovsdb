@@ -7,15 +7,15 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -25,17 +25,17 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class OvsdbOperGlobalListener implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
+public final class OvsdbOperGlobalListener implements DataTreeChangeListener<Node>, AutoCloseable {
     public static final ConcurrentMap<InstanceIdentifier<Node>, Node> OPER_NODE_CACHE = new ConcurrentHashMap<>();
 
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbOperGlobalListener.class);
 
-    private ListenerRegistration<OvsdbOperGlobalListener> registration;
+    private Registration registration;
     private final DataBroker db;
     private final OvsdbConnectionManager ovsdbConnectionManager;
     private final TransactionInvoker txInvoker;
@@ -50,9 +50,11 @@ public final class OvsdbOperGlobalListener implements ClusteredDataTreeChangeLis
     }
 
     public void registerListener() {
-        DataTreeIdentifier<Node> treeId =
-            DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, getWildcardPath());
-        registration = db.registerDataTreeChangeListener(treeId, this);
+        registration = db.registerTreeChangeListener(DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL,
+            InstanceIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class)
+                .build()), this);
     }
 
     @Override
@@ -65,10 +67,10 @@ public final class OvsdbOperGlobalListener implements ClusteredDataTreeChangeLis
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void onDataTreeChanged(final Collection<DataTreeModification<Node>> changes) {
+    public void onDataTreeChanged(final List<DataTreeModification<Node>> changes) {
         changes.forEach(change -> {
             try {
-                InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+                InstanceIdentifier<Node> key = change.getRootPath().path();
                 DataObjectModification<Node> mod = change.getRootNode();
                 Node addNode = getCreated(mod);
                 if (addNode != null) {
@@ -122,40 +124,34 @@ public final class OvsdbOperGlobalListener implements ClusteredDataTreeChangeLis
     }
 
     private static Node getCreated(final DataObjectModification<Node> mod) {
-        if (mod.getModificationType() == DataObjectModification.ModificationType.WRITE
-                && mod.getDataBefore() == null) {
-            return mod.getDataAfter();
+        if (mod.modificationType() == DataObjectModification.ModificationType.WRITE
+                && mod.dataBefore() == null) {
+            return mod.dataAfter();
         }
         return null;
     }
 
     private static Node getRemoved(final DataObjectModification<Node> mod) {
-        if (mod.getModificationType() == DataObjectModification.ModificationType.DELETE) {
-            return mod.getDataBefore();
+        if (mod.modificationType() == DataObjectModification.ModificationType.DELETE) {
+            return mod.dataBefore();
         }
         return null;
     }
 
     private static Node getUpdated(final DataObjectModification<Node> mod) {
         Node node = null;
-        switch (mod.getModificationType()) {
+        switch (mod.modificationType()) {
             case SUBTREE_MODIFIED:
-                node = mod.getDataAfter();
+                node = mod.dataAfter();
                 break;
             case WRITE:
-                if (mod.getDataBefore() !=  null) {
-                    node = mod.getDataAfter();
+                if (mod.dataBefore() !=  null) {
+                    node = mod.dataAfter();
                 }
                 break;
             default:
                 break;
         }
         return node;
-    }
-
-    private static InstanceIdentifier<Node> getWildcardPath() {
-        return InstanceIdentifier.create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class);
     }
 }

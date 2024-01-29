@@ -7,11 +7,11 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
-import java.util.Collection;
-import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
+import java.util.List;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -21,24 +21,24 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class HwvtepReconciliationManager implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
+public final class HwvtepReconciliationManager implements DataTreeChangeListener<Node>, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepReconciliationManager.class);
 
-    private final ListenerRegistration<HwvtepReconciliationManager> registration;
+    private final Registration registration;
     private final HwvtepConnectionManager hcm;
 
     public HwvtepReconciliationManager(DataBroker db, HwvtepConnectionManager hcm) {
         this.hcm = hcm;
 
         final InstanceIdentifier<Node> iid = HwvtepSouthboundMapper.createInstanceIdentifier();
-        final DataTreeIdentifier<Node> treeId = DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, iid);
+        final DataTreeIdentifier<Node> treeId = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, iid);
         LOG.trace("Registering listener for path {}", treeId);
-        registration = db.registerDataTreeChangeListener(treeId, HwvtepReconciliationManager.this);
+        registration = db.registerTreeChangeListener(treeId, this);
     }
 
     @Override
@@ -49,14 +49,14 @@ public final class HwvtepReconciliationManager implements ClusteredDataTreeChang
     }
 
     @Override
-    public void onDataTreeChanged(Collection<DataTreeModification<Node>> changes) {
+    public void onDataTreeChanged(List<DataTreeModification<Node>> changes) {
         processConnectedNodes(changes);
         processDisconnectedNodes(changes);
     }
 
-    private void processDisconnectedNodes(Collection<DataTreeModification<Node>> changes) {
+    private void processDisconnectedNodes(List<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+            final InstanceIdentifier<Node> key = change.getRootPath().path();
             final DataObjectModification<Node> mod = change.getRootNode();
             Node deleted = getRemoved(mod);
             if (deleted != null) {
@@ -68,7 +68,7 @@ public final class HwvtepReconciliationManager implements ClusteredDataTreeChang
         }
     }
 
-    private void processConnectedNodes(Collection<DataTreeModification<Node>> changes) {
+    private void processConnectedNodes(List<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
             DataObjectModification<Node> mod = change.getRootNode();
             Node node = getCreated(mod);
@@ -88,15 +88,15 @@ public final class HwvtepReconciliationManager implements ClusteredDataTreeChang
     }
 
     private static Node getCreated(DataObjectModification<Node> mod) {
-        if (mod.getModificationType() == ModificationType.WRITE && mod.getDataBefore() == null) {
-            return mod.getDataAfter();
+        if (mod.modificationType() == ModificationType.WRITE && mod.dataBefore() == null) {
+            return mod.dataAfter();
         }
         return null;
     }
 
     private static Node getRemoved(DataObjectModification<Node> mod) {
-        if (mod.getModificationType() == ModificationType.DELETE) {
-            return mod.getDataBefore();
+        if (mod.modificationType() == ModificationType.DELETE) {
+            return mod.dataBefore();
         }
         return null;
     }

@@ -32,11 +32,11 @@ import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.binding.api.Transaction;
 import org.opendaylight.mdsal.binding.api.TransactionChain;
-import org.opendaylight.mdsal.binding.api.TransactionChainListener;
+import org.opendaylight.yangtools.yang.common.Empty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class TransactionInvokerImpl implements TransactionInvoker,TransactionChainListener, Runnable,
+public final class TransactionInvokerImpl implements TransactionInvoker, FutureCallback<Empty>, Runnable,
         AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionInvokerImpl.class);
     private static final int QUEUE_SIZE = 10000;
@@ -55,7 +55,8 @@ public final class TransactionInvokerImpl implements TransactionInvoker,Transact
 
     public TransactionInvokerImpl(final DataBroker db) {
         this.db = db;
-        this.chain = db.createTransactionChain(this);
+        chain = db.createTransactionChain();
+        chain.addCallback(this);
         ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("transaction-invoker-impl-%d").build();
         executor = Executors.newSingleThreadExecutor(threadFact);
         executor.execute(this);
@@ -64,8 +65,9 @@ public final class TransactionInvokerImpl implements TransactionInvoker,Transact
     @VisibleForTesting
     TransactionInvokerImpl(final DataBroker db, final ExecutorService executor) {
         this.db = db;
-        this.chain = db.createTransactionChain(this);
         this.executor = executor;
+        this.chain = db.createTransactionChain();
+        chain.addCallback(this);
     }
 
     @VisibleForTesting
@@ -183,7 +185,8 @@ public final class TransactionInvokerImpl implements TransactionInvoker,Transact
     @VisibleForTesting
     synchronized void resetTransactionQueue() {
         chain.close();
-        chain = db.createTransactionChain(this);
+        chain = db.createTransactionChain();
+        chain.addCallback(this);
         pendingTransactions.clear();
         failedTransactionQueue.clear();
     }

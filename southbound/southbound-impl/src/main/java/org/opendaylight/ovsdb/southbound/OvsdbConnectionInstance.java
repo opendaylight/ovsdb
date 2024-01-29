@@ -25,7 +25,6 @@ import java.util.concurrent.ExecutionException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipCandidateRegistration;
 import org.opendaylight.ovsdb.lib.LockAquisitionCallback;
 import org.opendaylight.ovsdb.lib.LockStolenCallback;
 import org.opendaylight.ovsdb.lib.MonitorCallBack;
@@ -66,6 +65,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +89,7 @@ public class OvsdbConnectionInstance {
     private InstanceIdentifier<Node> instanceIdentifier;
     private volatile boolean hasDeviceOwnership = false;
     private Entity connectedEntity;
-    private EntityOwnershipCandidateRegistration deviceOwnershipCandidateRegistration;
+    private Registration deviceOwnershipCandidateRegistration;
     private OvsdbNodeAugmentation initialCreateData = null;
     private final Map<UUID, InstanceIdentifier<Node>> ports = new ConcurrentHashMap<>();
     private final Map<String, InstanceIdentifier<Node>> portInterfaces = new ConcurrentHashMap<>();
@@ -405,8 +405,7 @@ public class OvsdbConnectionInstance {
         }
     }
 
-    public void setDeviceOwnershipCandidateRegistration(
-            @NonNull final EntityOwnershipCandidateRegistration registration) {
+    public void setDeviceOwnershipCandidateRegistration(final @NonNull Registration registration) {
         deviceOwnershipCandidateRegistration = registration;
     }
 

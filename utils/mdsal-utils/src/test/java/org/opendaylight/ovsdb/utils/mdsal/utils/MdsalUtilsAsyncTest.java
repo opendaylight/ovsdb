@@ -38,6 +38,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.node.attributes.SupportingNodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.node.attributes.SupportingNodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
@@ -101,10 +102,8 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
         final SupportingNode supportingNodeBuilder2 = new SupportingNodeBuilder().withKey(
                 new SupportingNodeKey(new NodeId("id2"), TOPOLOGY_TEST)).build();
 
-        final Node data1 = new NodeBuilder(DATA).setSupportingNode(
-                Collections.singletonMap(supportingNodeBuilder1.key(), supportingNodeBuilder1)).build();
-        final Node data2 = new NodeBuilder(DATA).setSupportingNode(
-                Collections.singletonMap(supportingNodeBuilder2.key(), supportingNodeBuilder2)).build();
+        final Node data1 = new NodeBuilder(DATA).setSupportingNode(BindingMap.of(supportingNodeBuilder1)).build();
+        final Node data2 = new NodeBuilder(DATA).setSupportingNode(BindingMap.of(supportingNodeBuilder2)).build();
 
         mdsalUtilsAsync.put(LogicalDatastoreType.CONFIGURATION, TEST_IID, data1, operationDesc);
         assertEquals(data1, readDS());
@@ -115,7 +114,7 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
 
             @Override
             public void onSuccess(final CommitInfo result) {
-                assertEquals(1, readDS().getSupportingNode().size());
+                assertEquals(1, readDS().nonnullSupportingNode().size());
             }
 
             @Override
@@ -147,7 +146,7 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
 
             @Override
             public void onSuccess(final CommitInfo result) {
-                assertEquals(2, readDS().getSupportingNode().size());
+                assertEquals(2, readDS().nonnullSupportingNode().size());
             }
 
             @Override

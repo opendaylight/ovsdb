@@ -32,12 +32,10 @@ import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.binding.api.Transaction;
 import org.opendaylight.mdsal.binding.api.TransactionChain;
-import org.opendaylight.mdsal.binding.api.TransactionChainListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class TransactionInvokerImpl implements TransactionInvoker,TransactionChainListener, Runnable,
-        AutoCloseable {
+public final class TransactionInvokerImpl implements TransactionInvoker, Runnable, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionInvokerImpl.class);
     private static final int QUEUE_SIZE = 10000;
 
@@ -55,7 +53,7 @@ public final class TransactionInvokerImpl implements TransactionInvoker,Transact
 
     public TransactionInvokerImpl(final DataBroker db) {
         this.db = db;
-        this.chain = db.createTransactionChain(this);
+        chain = db.createTransactionChain();
         ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("transaction-invoker-impl-%d").build();
         executor = Executors.newSingleThreadExecutor(threadFact);
         executor.execute(this);
@@ -64,8 +62,8 @@ public final class TransactionInvokerImpl implements TransactionInvoker,Transact
     @VisibleForTesting
     TransactionInvokerImpl(final DataBroker db, final ExecutorService executor) {
         this.db = db;
-        this.chain = db.createTransactionChain(this);
         this.executor = executor;
+        this.chain = db.createTransactionChain();
     }
 
     @VisibleForTesting
@@ -91,18 +89,6 @@ public final class TransactionInvokerImpl implements TransactionInvoker,Transact
         if (!inputQueue.offer(command)) {
             LOG.error("inputQueue is full (size: {}) - could not offer {}", inputQueue.size(), command);
         }
-    }
-
-    @Override
-    public void onTransactionChainFailed(final TransactionChain chainArg,
-            final Transaction transaction, final Throwable cause) {
-        LOG.error("Failed to write operational topology", cause);
-        offerFailedTransaction(transaction);
-    }
-
-    @Override
-    public void onTransactionChainSuccessful(final TransactionChain chainArg) {
-        // NO OP
     }
 
     @Override
@@ -136,8 +122,9 @@ public final class TransactionInvokerImpl implements TransactionInvoker,Transact
 
                 @Override
                 public void onFailure(final Throwable throwable) {
+                    LOG.error("Failed to write operational topology", throwable);
+                    offerFailedTransaction(transaction);
                     command.onFailure(throwable);
-                    // NOOP - handled by failure of transaction chain
                 }
             }, MoreExecutors.directExecutor());
         } catch (IllegalStateException e) {
@@ -183,7 +170,7 @@ public final class TransactionInvokerImpl implements TransactionInvoker,Transact
     @VisibleForTesting
     synchronized void resetTransactionQueue() {
         chain.close();
-        chain = db.createTransactionChain(this);
+        chain = db.createTransactionChain();
         pendingTransactions.clear();
         failedTransactionQueue.clear();
     }

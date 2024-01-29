@@ -31,13 +31,12 @@ import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipCandidateRegistration;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListener;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListenerRegistration;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
+import org.opendaylight.mdsal.eos.common.api.EntityOwnershipStateChange;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
@@ -60,6 +59,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -586,8 +586,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         entityConnectionMap.put(candidateEntity, ovsdbConnectionInstance);
         ovsdbConnectionInstance.setConnectedEntity(candidateEntity);
         try {
-            EntityOwnershipCandidateRegistration registration =
-                    entityOwnershipService.registerCandidate(candidateEntity);
+            Registration registration = entityOwnershipService.registerCandidate(candidateEntity);
             ovsdbConnectionInstance.setDeviceOwnershipCandidateRegistration(registration);
             LOG.info("OVSDB entity {} is registered for ownership.", candidateEntity);
 
@@ -595,8 +594,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             LOG.warn("OVSDB entity {} was already registered for ownership", candidateEntity, e);
         }
         //If entity already has owner, it won't get notification from EntityOwnershipService
-        java.util.Optional<EntityOwnershipState> ownershipStateOpt =
-                entityOwnershipService.getOwnershipState(candidateEntity);
+        Optional<EntityOwnershipState> ownershipStateOpt = entityOwnershipService.getOwnershipState(candidateEntity);
         if (ownershipStateOpt.isPresent()) {
             EntityOwnershipState ownershipState = ownershipStateOpt.orElseThrow();
             if (ownershipState == EntityOwnershipState.OWNED_BY_OTHER) {
@@ -669,7 +667,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     private static final class OvsdbDeviceEntityOwnershipListener implements EntityOwnershipListener {
         private final OvsdbConnectionManager cm;
-        private final EntityOwnershipListenerRegistration listenerRegistration;
+        private final Registration listenerRegistration;
 
         OvsdbDeviceEntityOwnershipListener(final OvsdbConnectionManager cm,
                 final EntityOwnershipService entityOwnershipService) {
@@ -682,7 +680,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
 
         @Override
-        public void ownershipChanged(final EntityOwnershipChange ownershipChange) {
+        public void ownershipChanged(final Entity entity, final EntityOwnershipStateChange change,
+                final boolean inJeopardy) {
             cm.handleOwnershipChanged(ownershipChange);
         }
     }

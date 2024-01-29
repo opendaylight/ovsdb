@@ -8,6 +8,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
 <features name="odl-ovsdb-hwvtepsouthbound-rest-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
     <feature name="odl-ovsdb-hwvtepsouthbound-rest" version="${project.version}">
-        <feature version="[6,7)">odl-restconf</feature>
+        <feature version="[7,8)">odl-restconf</feature>
     </feature>
 </features>

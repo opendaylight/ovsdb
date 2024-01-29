@@ -14,7 +14,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
-import org.opendaylight.yangtools.yang.data.util.AbstractModuleStringInstanceIdentifierCodec;
+import org.opendaylight.yangtools.yang.data.util.AbstractStringInstanceIdentifierCodec;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContextListener;
@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 
 public final class InstanceIdentifierCodec
         // FIXME: this really wants to be wired as yangtools-data-codec-gson's codecs, because ...
-        extends AbstractModuleStringInstanceIdentifierCodec implements EffectiveModelContextListener {
+        extends AbstractStringInstanceIdentifierCodec implements EffectiveModelContextListener {
 
     // FIXME: this is not the only interface exposed from binding-dom-codec-api, something different might be more
     //        appropriate.

@@ -35,16 +35,20 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
@@ -58,9 +62,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-    OvsdbControllerUpdateCommand.class, SouthboundMapper.class, SouthboundUtil.class, InstanceIdentifier.class
-})
+@PrepareForTest({ OvsdbControllerUpdateCommand.class, SouthboundMapper.class, SouthboundUtil.class })
 public class OvsdbControllerUpdateCommandTest {
     private static final String BRIDGE_NAME = "br-int";
     private static final String NODE_ID = "OF|00:00:00:0c:29:70:45:9b";
@@ -126,8 +128,12 @@ public class OvsdbControllerUpdateCommandTest {
         // suppress call to getControllerEntryIid()
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         Map<UUID, Controller> updatedControllerRows = new HashMap<>();
-        doReturn(mock(InstanceIdentifier.class)).when(ovsdbControllerUpdateCommand).getControllerEntryIid(
-                any(ControllerEntry.class), any(String.class));
+        doReturn(InstanceIdentifier.create(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+            .child(Node.class, new NodeKey(new NodeId("testNode")))
+            .augmentation(OvsdbBridgeAugmentation.class)
+            .child(ControllerEntry.class, new ControllerEntryKey(new Uri("testEntry"))))
+            .when(ovsdbControllerUpdateCommand).getControllerEntryIid(any(ControllerEntry.class), any(String.class));
         doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(ControllerEntry.class));
         Whitebox.invokeMethod(ovsdbControllerUpdateCommand, "updateController", transaction, updatedControllerRows,
@@ -137,14 +143,15 @@ public class OvsdbControllerUpdateCommandTest {
         verify(bridge).getNameColumn();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testUpdateController2() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         Map<UUID, Controller> updatedControllerRows = new HashMap<>();
         Map<InstanceIdentifier<Node>, Node> bridgeNodes = new HashMap<>();
         Node node = mock(Node.class);
-        InstanceIdentifier<Node> bridgeIid = mock(InstanceIdentifier.class);
+        InstanceIdentifier<Node> bridgeIid = InstanceIdentifier.create(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+            .child(Node.class, new NodeKey(new NodeId("testNode")));
         bridgeNodes.put(bridgeIid, node);
         PowerMockito.doReturn(bridgeNodes).when(ovsdbControllerUpdateCommand, "getBridgeNodes",
                 any(ReadWriteTransaction.class));
@@ -154,12 +161,13 @@ public class OvsdbControllerUpdateCommandTest {
                 any(ReadWriteTransaction.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testGetBridgeNodes() throws Exception {
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbControllerUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
-        InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);
+        InstanceIdentifier<Node> connectionIId = InstanceIdentifier.create(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+            .child(Node.class, new NodeKey(new NodeId("testConnection")));
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(connectionIId);
         PowerMockito.mockStatic(SouthboundUtil.class);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
@@ -169,7 +177,9 @@ public class OvsdbControllerUpdateCommandTest {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
         when(node.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
 
-        InstanceIdentifier<Node> bridgeIid = mock(InstanceIdentifier.class);
+        InstanceIdentifier<Node> bridgeIid = InstanceIdentifier.create(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+            .child(Node.class, new NodeKey(new NodeId("testBridge")));
         ManagedNodeEntry managedNodeEntry = new ManagedNodeEntryBuilder()
                 .setBridgeRef(new OvsdbBridgeRef(bridgeIid))
                 .build();

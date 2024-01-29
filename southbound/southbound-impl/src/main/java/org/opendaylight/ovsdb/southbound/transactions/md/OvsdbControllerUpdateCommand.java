@@ -185,8 +185,8 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
         NodeId nodeId = new NodeId(new Uri(nodeString));
         NodeKey nodeKey = new NodeKey(nodeId);
         InstanceIdentifier<Node> bridgeIid = InstanceIdentifier.builder(NetworkTopology.class)
-                .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class,nodeKey)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class, nodeKey)
                 .build();
 
         return bridgeIid

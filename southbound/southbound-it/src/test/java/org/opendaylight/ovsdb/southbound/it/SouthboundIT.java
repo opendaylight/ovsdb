@@ -237,7 +237,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
 
         @Override
-        public void onDataTreeChanged(final Collection<DataTreeModification<DataObject>> changes) {
+        public void onDataTreeChanged(final List<DataTreeModification<DataObject>> changes) {
             for (DataTreeModification<DataObject> change: changes) {
                 DataObjectModification<DataObject> rootNode = change.getRootNode();
                 final InstanceIdentifier<DataObject> identifier = change.getRootPath().getRootIdentifier();

@@ -31,13 +31,11 @@ import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipCandidateRegistration;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListener;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListenerRegistration;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
+import org.opendaylight.mdsal.eos.common.api.EntityOwnershipStateChange;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
@@ -60,6 +58,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -424,16 +423,17 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         reconciliationManager.cancelTerminationPointReconciliation();
     }
 
-    private void handleOwnershipChanged(final EntityOwnershipChange ownershipChange) {
-        OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstanceFromEntity(ownershipChange.getEntity());
-        LOG.debug("Ovsdb handleOwnershipChanged: {} event received for device {}",
-                ownershipChange, ovsdbConnectionInstance != null ? ovsdbConnectionInstance.getConnectionInfo()
-                        : "that's currently NOT registered by *this* southbound plugin instance");
+    @VisibleForTesting
+    void handleOwnershipChanged(final Entity entity, final EntityOwnershipStateChange change) {
+        OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstanceFromEntity(entity);
+        LOG.debug("Ovsdb handleOwnershipChanged: {} event received for device {}", change,
+            ovsdbConnectionInstance != null ? ovsdbConnectionInstance.getConnectionInfo()
+                : "that's currently NOT registered by *this* southbound plugin instance");
 
         if (ovsdbConnectionInstance == null) {
-            if (ownershipChange.getState().isOwner()) {
+            if (change.isOwner()) {
                 LOG.warn("Ovsdb handleOwnershipChanged: *this* instance is elected as an owner of the device {} but it "
-                        + "is NOT registered for ownership", ownershipChange.getEntity());
+                        + "is NOT registered for ownership", entity);
             } else {
                 // EntityOwnershipService sends notification to all the nodes, irrespective of whether
                 // that instance registered for the device ownership or not. It is to make sure that
@@ -441,21 +441,21 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                 // running instance can clear up the operational data store even though it was not
                 // connected to the device.
                 LOG.debug("Ovsdb handleOwnershipChanged: No connection instance found for {}",
-                    ownershipChange.getEntity());
+                    entity);
             }
 
             // If entity has no owner, clean up the operational data store (it's possible because owner controller
             // might went down abruptly and didn't get a chance to clean up the operational data store.
-            if (!ownershipChange.getState().hasOwner()) {
-                LOG.info("Ovsdb {} has no owner, cleaning up the operational data store", ownershipChange.getEntity());
-                cleanEntityOperationalData(ownershipChange.getEntity());
+            if (!change.hasOwner()) {
+                LOG.info("Ovsdb {} has no owner, cleaning up the operational data store", entity);
+                cleanEntityOperationalData(entity);
             }
             return;
         }
         //Connection detail need to be cached, irrespective of ownership result.
         putConnectionInstance(ovsdbConnectionInstance.getMDConnectionInfo(),ovsdbConnectionInstance);
 
-        if (ownershipChange.getState().isOwner() == ovsdbConnectionInstance.getHasDeviceOwnership()) {
+        if (change.isOwner() == ovsdbConnectionInstance.getHasDeviceOwnership()) {
             LOG.info("Ovsdb handleOwnershipChanged: no change in ownership for {}. Ownership status is : {}",
                     ovsdbConnectionInstance.getConnectionInfo(), ovsdbConnectionInstance.getHasDeviceOwnership()
                             ? OwnershipStates.OWNER.getState()
@@ -463,9 +463,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             return;
         }
 
-        ovsdbConnectionInstance.setHasDeviceOwnership(ownershipChange.getState().isOwner());
+        ovsdbConnectionInstance.setHasDeviceOwnership(change.isOwner());
         // You were not an owner, but now you are
-        if (ownershipChange.getState().isOwner()) {
+        if (change.isOwner()) {
             LOG.info("Ovsdb handleOwnershipChanged: *this* southbound plugin instance is an OWNER of the device {}",
                     ovsdbConnectionInstance.getConnectionInfo());
 
@@ -586,8 +586,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         entityConnectionMap.put(candidateEntity, ovsdbConnectionInstance);
         ovsdbConnectionInstance.setConnectedEntity(candidateEntity);
         try {
-            EntityOwnershipCandidateRegistration registration =
-                    entityOwnershipService.registerCandidate(candidateEntity);
+            Registration registration = entityOwnershipService.registerCandidate(candidateEntity);
             ovsdbConnectionInstance.setDeviceOwnershipCandidateRegistration(registration);
             LOG.info("OVSDB entity {} is registered for ownership.", candidateEntity);
 
@@ -595,8 +594,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             LOG.warn("OVSDB entity {} was already registered for ownership", candidateEntity, e);
         }
         //If entity already has owner, it won't get notification from EntityOwnershipService
-        java.util.Optional<EntityOwnershipState> ownershipStateOpt =
-                entityOwnershipService.getOwnershipState(candidateEntity);
+        Optional<EntityOwnershipState> ownershipStateOpt = entityOwnershipService.getOwnershipState(candidateEntity);
         if (ownershipStateOpt.isPresent()) {
             EntityOwnershipState ownershipState = ownershipStateOpt.orElseThrow();
             if (ownershipState == EntityOwnershipState.OWNED_BY_OTHER) {
@@ -669,7 +667,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     private static final class OvsdbDeviceEntityOwnershipListener implements EntityOwnershipListener {
         private final OvsdbConnectionManager cm;
-        private final EntityOwnershipListenerRegistration listenerRegistration;
+        private final Registration listenerRegistration;
 
         OvsdbDeviceEntityOwnershipListener(final OvsdbConnectionManager cm,
                 final EntityOwnershipService entityOwnershipService) {
@@ -682,8 +680,9 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
 
         @Override
-        public void ownershipChanged(final EntityOwnershipChange ownershipChange) {
-            cm.handleOwnershipChanged(ownershipChange);
+        public void ownershipChanged(final Entity entity, final EntityOwnershipStateChange change,
+                final boolean inJeopardy) {
+            cm.handleOwnershipChanged(entity, change);
         }
     }
 

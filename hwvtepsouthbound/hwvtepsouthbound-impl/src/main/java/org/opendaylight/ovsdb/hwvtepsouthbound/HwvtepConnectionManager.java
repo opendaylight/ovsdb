@@ -32,13 +32,11 @@ import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipCandidateRegistration;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListener;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListenerRegistration;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
+import org.opendaylight.mdsal.eos.common.api.EntityOwnershipStateChange;
 import org.opendaylight.ovsdb.hwvtepsouthbound.events.ClientConnected;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationTask;
@@ -64,6 +62,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -414,8 +413,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         hwvtepConnectionInstance.setConnectedEntity(candidateEntity);
 
         try {
-            EntityOwnershipCandidateRegistration registration =
-                    entityOwnershipService.registerCandidate(candidateEntity);
+            Registration registration = entityOwnershipService.registerCandidate(candidateEntity);
             hwvtepConnectionInstance.setDeviceOwnershipCandidateRegistration(registration);
             LOG.info("HWVTEP entity {} is registered for ownership.", candidateEntity);
         } catch (CandidateAlreadyRegisteredException e) {
@@ -428,8 +426,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             final HwvtepConnectionInstance hwvtepConnectionInstance) {
         //If entity already has owner, it won't get notification from EntityOwnershipService
         //so cache the connection instances.
-        java.util.Optional<EntityOwnershipState> ownershipStateOpt =
-                entityOwnershipService.getOwnershipState(candidateEntity);
+        Optional<EntityOwnershipState> ownershipStateOpt = entityOwnershipService.getOwnershipState(candidateEntity);
         if (ownershipStateOpt.isPresent()) {
             EntityOwnershipState ownershipState = ownershipStateOpt.orElseThrow();
             putConnectionInstance(hwvtepConnectionInstance.getMDConnectionInfo(), hwvtepConnectionInstance);
@@ -589,34 +586,32 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
     }
 
-    public void handleOwnershipChanged(final EntityOwnershipChange ownershipChange) {
-        HwvtepConnectionInstance hwvtepConnectionInstance =
-                getConnectionInstanceFromEntity(ownershipChange.getEntity());
+    public void handleOwnershipChanged(final Entity entity, final EntityOwnershipStateChange change) {
+        HwvtepConnectionInstance hwvtepConnectionInstance = getConnectionInstanceFromEntity(entity);
         LOG.info("handleOwnershipChanged: {} event received for device {}",
-                ownershipChange, hwvtepConnectionInstance != null ? hwvtepConnectionInstance.getConnectionInfo()
+            change, hwvtepConnectionInstance != null ? hwvtepConnectionInstance.getConnectionInfo()
                         : "THAT'S NOT REGISTERED BY THIS SOUTHBOUND PLUGIN INSTANCE");
 
         if (hwvtepConnectionInstance == null) {
-            if (ownershipChange.getState().isOwner()) {
-                LOG.warn("handleOwnershipChanged: found no connection instance for {}", ownershipChange.getEntity());
+            if (change.isOwner()) {
+                LOG.warn("handleOwnershipChanged: found no connection instance for {}", entity);
             } else {
                 // EntityOwnershipService sends notification to all the nodes, irrespective of whether
                 // that instance registered for the device ownership or not. It is to make sure that
                 // If all the controller instance that was connected to the device are down, so the
                 // running instance can clear up the operational data store even though it was not
                 // connected to the device.
-                LOG.debug("handleOwnershipChanged: found no connection instance for {}", ownershipChange.getEntity());
+                LOG.debug("handleOwnershipChanged: found no connection instance for {}", entity);
             }
 
             // If entity has no owner, clean up the operational data store (it's possible because owner controller
             // might went down abruptly and didn't get a chance to clean up the operational data store.
-            if (!ownershipChange.getState().hasOwner()) {
-                LOG.info("{} has no owner, cleaning up the operational data store", ownershipChange.getEntity());
+            if (!change.hasOwner()) {
+                LOG.info("{} has no owner, cleaning up the operational data store", entity);
                 // Below code might look weird but it's required. We want to give first opportunity to the
                 // previous owner of the device to clean up the operational data store if there is no owner now.
                 // That way we will avoid lot of nasty md-sal exceptions because of concurrent delete.
-                InstanceIdentifier<Node> nodeIid =
-                        (InstanceIdentifier<Node>) ownershipChange.getEntity().getIdentifier();
+                InstanceIdentifier<Node> nodeIid = (InstanceIdentifier<Node>) entity.getIdentifier();
                 hwvtepOperGlobalListener.scheduleOldConnectionNodeDelete(nodeIid);
                 /*
                 Assuming node1 was the owner earlier.
@@ -640,15 +635,15 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         //Connection detail need to be cached, irrespective of ownership result.
         putConnectionInstance(hwvtepConnectionInstance.getMDConnectionInfo(), hwvtepConnectionInstance);
 
-        if (ownershipChange.getState().isOwner() == hwvtepConnectionInstance.getHasDeviceOwnership()) {
+        if (change.isOwner() == hwvtepConnectionInstance.getHasDeviceOwnership()) {
             LOG.debug("handleOwnershipChanged: no change in ownership for {}. Ownership status is : {}",
                     hwvtepConnectionInstance.getConnectionInfo(), hwvtepConnectionInstance.getHasDeviceOwnership());
             return;
         }
 
-        hwvtepConnectionInstance.setHasDeviceOwnership(ownershipChange.getState().isOwner());
+        hwvtepConnectionInstance.setHasDeviceOwnership(change.isOwner());
         // You were not an owner, but now you are
-        if (ownershipChange.getState().isOwner()) {
+        if (change.isOwner()) {
             LOG.info("handleOwnershipChanged: *this* southbound plugin instance is owner of device {}",
                     hwvtepConnectionInstance.getConnectionInfo());
 
@@ -675,7 +670,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
     private static final class HwvtepDeviceEntityOwnershipListener implements EntityOwnershipListener {
         private final HwvtepConnectionManager hcm;
-        private final EntityOwnershipListenerRegistration listenerRegistration;
+        private final Registration listenerRegistration;
 
         HwvtepDeviceEntityOwnershipListener(final HwvtepConnectionManager hcm,
                 final EntityOwnershipService entityOwnershipService) {
@@ -688,8 +683,9 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
 
         @Override
-        public void ownershipChanged(final EntityOwnershipChange ownershipChange) {
-            hcm.handleOwnershipChanged(ownershipChange);
+        public void ownershipChanged(final Entity entity, final EntityOwnershipStateChange change,
+                final boolean inJeopardy) {
+            hcm.handleOwnershipChanged(entity, change);
         }
     }
 

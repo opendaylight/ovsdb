@@ -51,7 +51,10 @@ import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactCommand;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.TransactInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -66,8 +69,11 @@ public class OvsdbConnectionInstanceTest {
     @Mock private TransactionInvoker txInvoker;
     @Mock private MonitorCallBack callback;
     @Mock private ConnectionInfo key;
-    @Mock private InstanceIdentifier<Node> instanceIdentifier;
-    private Map<DatabaseSchema,TransactInvoker> transactInvokers;
+
+    private final InstanceIdentifier<Node> instanceIdentifier = InstanceIdentifier.create(NetworkTopology.class)
+        .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+        .child(Node.class, new NodeKey(new NodeId("testNode")));
+    private Map<DatabaseSchema, TransactInvoker> transactInvokers;
 
     @Before
     public void setUp() throws Exception {

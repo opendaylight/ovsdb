@@ -46,6 +46,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Key;
 import org.opendaylight.yangtools.yang.binding.KeyAware;
+import org.opendaylight.yangtools.yang.binding.KeyStep;
 
 // This class needs to be mocked
 @SuppressWarnings("checkstyle:FinalClass")
@@ -55,20 +56,20 @@ public class TransactUtils {
     }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> hasDataBefore() {
-        return input -> input != null && input.getDataBefore() != null;
+        return input -> input != null && input.dataBefore() != null;
     }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> hasDataBeforeAndDataAfter() {
-        return input -> input != null && input.getDataBefore() != null && input.getDataAfter() != null;
+        return input -> input != null && input.dataBefore() != null && input.dataAfter() != null;
     }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> hasNoDataBefore() {
-        return input -> input != null && input.getDataBefore() == null;
+        return input -> input != null && input.dataBefore() == null;
     }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> hasDataAfterAndMatchesFilter(
             final Predicate<DataObjectModification<T>> filter) {
-        return input -> input != null && input.getDataAfter() != null && filter.test(input);
+        return input -> input != null && input.dataAfter() != null && filter.test(input);
     }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> matchesEverything() {
@@ -76,18 +77,16 @@ public class TransactUtils {
     }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>> modificationIsDeletion() {
-        return input -> input != null && input.getModificationType() == DataObjectModification
-                .ModificationType.DELETE;
+        return input -> input != null && input.modificationType() == DataObjectModification.ModificationType.DELETE;
     }
 
     private static <T extends DataObject> Predicate<DataObjectModification<T>>
         modificationIsDeletionAndHasDataBefore() {
-        return input -> input != null && input.getModificationType() == DataObjectModification
-                .ModificationType.DELETE && input.getDataBefore() != null;
+        return input -> input != null && input.modificationType() == DataObjectModification.ModificationType.DELETE
+            && input.dataBefore() != null;
     }
 
-    public static Map<InstanceIdentifier<Node>,Node> extractNode(
-            Map<InstanceIdentifier<?>, DataObject> changes) {
+    public static Map<InstanceIdentifier<Node>,Node> extractNode(final Map<InstanceIdentifier<?>, DataObject> changes) {
         Map<InstanceIdentifier<Node>,Node> result
             = new HashMap<>();
         if (changes != null) {
@@ -108,7 +107,7 @@ public class TransactUtils {
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractCreated(
-            DataChangeEvent changes, Class<T> klazz) {
+            final DataChangeEvent changes, final Class<T> klazz) {
         return extract(changes.getCreatedData(),klazz);
     }
 
@@ -122,12 +121,12 @@ public class TransactUtils {
      * @return The created instances, mapped by instance identifier.
      */
     public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractCreated(
-            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+            final Collection<DataTreeModification<U>> changes, final Class<T> clazz) {
         return extractCreatedOrUpdated(changes, clazz, hasNoDataBefore());
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractUpdated(
-            DataChangeEvent changes, Class<T> klazz) {
+            final DataChangeEvent changes, final Class<T> klazz) {
         return extract(changes.getUpdatedData(),klazz);
     }
 
@@ -141,7 +140,7 @@ public class TransactUtils {
      * @return The updated instances, mapped by instance identifier.
      */
     public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractUpdated(
-            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+            final Collection<DataTreeModification<U>> changes, final Class<T> clazz) {
         return extractCreatedOrUpdated(changes, clazz, hasDataBeforeAndDataAfter());
     }
 
@@ -157,18 +156,18 @@ public class TransactUtils {
      * @return The created or updated instances which satisfy the filter, mapped by instance identifier.
      */
     public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdated(
-            Collection<DataTreeModification<U>> changes, Class<T> clazz,
-            Predicate<DataObjectModification<T>> filter) {
+            final Collection<DataTreeModification<U>> changes, final Class<T> clazz,
+            final Predicate<DataObjectModification<T>> filter) {
         Map<InstanceIdentifier<T>, T> result = new HashMap<>();
         for (Map.Entry<InstanceIdentifier<T>, DataObjectModification<T>> entry : extractDataObjectModifications(changes,
                 clazz, hasDataAfterAndMatchesFilter(filter)).entrySet()) {
-            result.put(entry.getKey(), entry.getValue().getDataAfter());
+            result.put(entry.getKey(), entry.getValue().dataAfter());
         }
         return result;
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractCreatedOrUpdated(
-            DataChangeEvent changes,Class<T> klazz) {
+            final DataChangeEvent changes,final Class<T> klazz) {
         Map<InstanceIdentifier<T>,T> result = extractUpdated(changes,klazz);
         result.putAll(extractCreated(changes,klazz));
         return result;
@@ -184,12 +183,12 @@ public class TransactUtils {
      * @return The created or updated instances, mapped by instance identifier.
      */
     public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdated(
-            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+            final Collection<DataTreeModification<U>> changes, final Class<T> clazz) {
         return extractCreatedOrUpdated(changes, clazz, matchesEverything());
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdatedOrRemoved(
-            DataChangeEvent changes, Class<T> klazz) {
+            final DataChangeEvent changes, final Class<T> klazz) {
         Map<InstanceIdentifier<T>,T> result = extractCreatedOrUpdated(changes,klazz);
         result.putAll(extractRemovedObjects(changes, klazz));
         return result;
@@ -208,14 +207,14 @@ public class TransactUtils {
      */
     public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T>
         extractCreatedOrUpdatedOrRemoved(
-            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+            final Collection<DataTreeModification<U>> changes, final Class<T> clazz) {
         Map<InstanceIdentifier<T>, T> result = extractCreatedOrUpdated(changes, clazz);
         result.putAll(extractRemovedObjects(changes, clazz));
         return result;
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractOriginal(
-            DataChangeEvent changes, Class<T> klazz) {
+            final DataChangeEvent changes, final Class<T> klazz) {
         return extract(changes.getOriginalData(),klazz);
     }
 
@@ -229,17 +228,17 @@ public class TransactUtils {
      * @return The original instances, mapped by instance identifier.
      */
     public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractOriginal(
-            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+            final Collection<DataTreeModification<U>> changes, final Class<T> clazz) {
         Map<InstanceIdentifier<T>, T> result = new HashMap<>();
         for (Map.Entry<InstanceIdentifier<T>, DataObjectModification<T>> entry :
                 extractDataObjectModifications(changes, clazz, hasDataBefore()).entrySet()) {
-            result.put(entry.getKey(), entry.getValue().getDataBefore());
+            result.put(entry.getKey(), entry.getValue().dataBefore());
         }
         return result;
     }
 
     public static <T extends DataObject> Set<InstanceIdentifier<T>> extractRemoved(
-            DataChangeEvent changes, Class<T> klazz) {
+            final DataChangeEvent changes, final Class<T> klazz) {
         Set<InstanceIdentifier<T>> result = new HashSet<>();
         if (changes != null && changes.getRemovedPaths() != null) {
             for (InstanceIdentifier<?> iid : changes.getRemovedPaths()) {
@@ -264,7 +263,7 @@ public class TransactUtils {
      * @return The instance identifiers of removed instances.
      */
     public static <T extends DataObject, U extends DataObject> Set<InstanceIdentifier<T>> extractRemoved(
-            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+            final Collection<DataTreeModification<U>> changes, final Class<T> clazz) {
         return extractDataObjectModifications(changes, clazz, modificationIsDeletion()).keySet();
     }
 
@@ -280,14 +279,14 @@ public class TransactUtils {
      * @return The modifications, mapped by instance identifier.
      */
     private static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, DataObjectModification<T>>
-        extractDataObjectModifications(Collection<DataTreeModification<U>> changes, Class<T> clazz,
-                                       Predicate<DataObjectModification<T>> filter) {
+        extractDataObjectModifications(final Collection<DataTreeModification<U>> changes, final Class<T> clazz,
+                                       final Predicate<DataObjectModification<T>> filter) {
         List<DataObjectModification<? extends DataObject>> dataObjectModifications = new ArrayList<>();
         List<InstanceIdentifier<? extends DataObject>> paths = new ArrayList<>();
         if (changes != null) {
             for (DataTreeModification<? extends DataObject> change : changes) {
                 dataObjectModifications.add(change.getRootNode());
-                paths.add(change.getRootPath().getRootIdentifier());
+                paths.add(change.getRootPath().path());
             }
         }
         return extractDataObjectModifications(dataObjectModifications, paths, clazz, filter);
@@ -306,9 +305,9 @@ public class TransactUtils {
      */
     private static <T extends DataObject> Map<InstanceIdentifier<T>, DataObjectModification<T>>
         extractDataObjectModifications(
-            Collection<DataObjectModification<? extends DataObject>> changes,
-            Collection<InstanceIdentifier<? extends DataObject>> paths, Class<T> clazz,
-            Predicate<DataObjectModification<T>> filter) {
+            final Collection<DataObjectModification<? extends DataObject>> changes,
+            final Collection<InstanceIdentifier<? extends DataObject>> paths, final Class<T> clazz,
+            final Predicate<DataObjectModification<T>> filter) {
         Map<InstanceIdentifier<T>, DataObjectModification<T>> result = new HashMap<>();
         Queue<DataObjectModification<? extends DataObject>> remainingChanges = new LinkedList<>(changes);
         Queue<InstanceIdentifier<? extends DataObject>> remainingPaths = new LinkedList<>(paths);
@@ -316,7 +315,7 @@ public class TransactUtils {
             DataObjectModification<? extends DataObject> change = remainingChanges.remove();
             InstanceIdentifier<? extends DataObject> path = remainingPaths.remove();
             // Is the change relevant?
-            if (clazz.isAssignableFrom(change.getDataType())) {
+            if (clazz.isAssignableFrom(change.dataType())) {
                 @SuppressWarnings("unchecked")
                 final DataObjectModification<T> dao = (DataObjectModification<T>) change;
                 if (filter.test(dao)) {
@@ -324,7 +323,7 @@ public class TransactUtils {
                 }
             }
             // Add any children to the queue
-            for (DataObjectModification<? extends DataObject> child : change.getModifiedChildren()) {
+            for (DataObjectModification<? extends DataObject> child : change.modifiedChildren()) {
                 remainingChanges.add(child);
                 remainingPaths.add(extendPath(path, child));
             }
@@ -342,19 +341,19 @@ public class TransactUtils {
      */
     private static <N extends KeyAware<K> & ChildOf<? super T>, K extends Key<N>, T extends DataObject>
         InstanceIdentifier<? extends DataObject> extendPath(
-            InstanceIdentifier<T> path,
-            DataObjectModification<?> child) {
+            final InstanceIdentifier<T> path,
+            final DataObjectModification<?> child) {
         @SuppressWarnings("unchecked")
-        final Class<N> item = (Class<N>) child.getDataType();
-        if (child.getIdentifier() instanceof InstanceIdentifier.IdentifiableItem) {
-            return path.child(item, ((InstanceIdentifier.IdentifiableItem<N, K>) child.getIdentifier()).getKey());
+        final Class<N> item = (Class<N>) child.dataType();
+        if (child.step() instanceof KeyStep<?, ?> keyStep) {
+            return path.child(item, (K) keyStep.key());
         }
 
         return path.child(item);
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>, T> extractRemovedObjects(
-            DataChangeEvent changes, Class<T> klazz) {
+            final DataChangeEvent changes, final Class<T> klazz) {
         Set<InstanceIdentifier<T>> iids = extractRemoved(changes, klazz);
         return Maps.filterKeys(extractOriginal(changes, klazz),Predicates.in(iids));
     }
@@ -369,17 +368,17 @@ public class TransactUtils {
      * @return The removed instances, keyed by instance identifier.
      */
     public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractRemovedObjects(
-            Collection<DataTreeModification<U>> changes, Class<T> clazz) {
+            final Collection<DataTreeModification<U>> changes, final Class<T> clazz) {
         Map<InstanceIdentifier<T>, T> result = new HashMap<>();
         for (Map.Entry<InstanceIdentifier<T>, DataObjectModification<T>> entry :
                 extractDataObjectModifications(changes, clazz, modificationIsDeletionAndHasDataBefore()).entrySet()) {
-            result.put(entry.getKey(), entry.getValue().getDataBefore());
+            result.put(entry.getKey(), entry.getValue().dataBefore());
         }
         return result;
     }
 
     public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(
-            Map<InstanceIdentifier<?>, DataObject> changes, Class<T> klazz) {
+            final Map<InstanceIdentifier<?>, DataObject> changes, final Class<T> klazz) {
         Map<InstanceIdentifier<T>,T> result = new HashMap<>();
         if (changes != null) {
             for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
@@ -399,7 +398,7 @@ public class TransactUtils {
         return result;
     }
 
-    public static List<Insert> extractInsert(TransactionBuilder transaction, GenericTableSchema schema) {
+    public static List<Insert> extractInsert(final TransactionBuilder transaction, final GenericTableSchema schema) {
         List<Operation> operations = transaction.getOperations();
         List<Insert> inserts = new ArrayList<>();
         for (Operation operation : operations) {
@@ -418,23 +417,25 @@ public class TransactUtils {
      * @param insert - Insert from which to extract the NamedUuid
      * @return UUID - NamedUUID of the Insert
      */
-    public static UUID extractNamedUuid(Insert insert) {
+    public static UUID extractNamedUuid(final Insert insert) {
         String uuidString = insert.getUuidName() != null
                 ? insert.getUuidName() : SouthboundMapper.getRandomUuid();
         insert.setUuidName(uuidString);
         return new UUID(uuidString);
     }
 
-    public static <T extends TableSchema<T>> void stampInstanceIdentifier(TransactionBuilder transaction,
-            InstanceIdentifier<?> iid, TableSchema<T> tableSchema, ColumnSchema<T, Map<String, String>> columnSchema,
-            InstanceIdentifierCodec instanceIdentifierCodec) {
+    public static <T extends TableSchema<T>> void stampInstanceIdentifier(final TransactionBuilder transaction,
+            final InstanceIdentifier<?> iid, final TableSchema<T> tableSchema,
+            final ColumnSchema<T, Map<String, String>> columnSchema,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         transaction.add(
-                stampInstanceIdentifierMutation(transaction, iid, tableSchema, columnSchema, instanceIdentifierCodec));
+            stampInstanceIdentifierMutation(transaction, iid, tableSchema, columnSchema, instanceIdentifierCodec));
     }
 
-    public static <T extends TableSchema<T>> Mutate<T> stampInstanceIdentifierMutation(TransactionBuilder transaction,
-            InstanceIdentifier<?> iid, TableSchema<T> tableSchema, ColumnSchema<T, Map<String, String>> columnSchema,
-            InstanceIdentifierCodec instanceIdentifierCodec) {
+    public static <T extends TableSchema<T>> Mutate<T> stampInstanceIdentifierMutation(
+            final TransactionBuilder transaction, final InstanceIdentifier<?> iid, final TableSchema<T> tableSchema,
+            final ColumnSchema<T, Map<String, String>> columnSchema,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         Map<String,String> externalIdsMap = ImmutableMap.of(SouthboundConstants.IID_EXTERNAL_ID_KEY,
                 instanceIdentifierCodec.serialize(iid));
         Mutate<T> mutate = op.mutate(tableSchema)
@@ -470,7 +471,7 @@ public class TransactUtils {
      * @return The hexadecimal representation of the byte array. If bytes is
      *         null, the string "" is returned
      */
-    public static String bytesToHexString(byte[] bytes) {
+    public static String bytesToHexString(final byte[] bytes) {
 
         if (bytes == null) {
             return "";

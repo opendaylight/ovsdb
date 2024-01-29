@@ -36,12 +36,19 @@ import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.Manager;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
+import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntryKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
@@ -118,8 +125,11 @@ public class OvsdbManagersUpdateCommandTest {
         // mock getManagerEntryIid()
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         Map<UUID, Manager> updatedManagerRows = new HashMap<>();
-        PowerMockito.doReturn(mock(InstanceIdentifier.class)).when(ovsdbManagersUpdateCommand, "getManagerEntryIid",
-                any(ManagerEntry.class));
+        PowerMockito.doReturn(InstanceIdentifier.create(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+            .child(Node.class, new NodeKey(new NodeId("testNode"))).augmentation(OvsdbNodeAugmentation.class)
+            .child(ManagerEntry.class, new ManagerEntryKey(new Uri("testUri"))))
+            .when(ovsdbManagersUpdateCommand, "getManagerEntryIid", any(ManagerEntry.class));
         doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
                 any(ManagerEntry.class));
         Whitebox.invokeMethod(ovsdbManagersUpdateCommand, "updateManagers", transaction, updatedManagerRows,
@@ -133,8 +143,10 @@ public class OvsdbManagersUpdateCommandTest {
     public void testUpdateManagers1() throws Exception {
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbManagersUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
-        InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);
-        when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(connectionIId);
+        when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(
+            InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class, new NodeKey(new NodeId("testNode"))));
 
         Optional<Node> ovsdbNode = Optional.of(mock(Node.class));
         PowerMockito.mockStatic(SouthboundUtil.class);

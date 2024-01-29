@@ -19,8 +19,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -126,11 +126,11 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         }
 
         @Override
-        public void onDataTreeChanged(Collection<DataTreeModification<Node>> changes) {
+        public void onDataTreeChanged(List<DataTreeModification<Node>> changes) {
             for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+                final InstanceIdentifier<Node> key = change.getRootPath().path();
                 final DataObjectModification<Node> mod = change.getRootNode();
-                switch (mod.getModificationType()) {
+                switch (mod.modificationType()) {
                     case DELETE:
                         removedNodes.add(key);
                         break;
@@ -138,15 +138,15 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
                         updatedNodes.add(key);
                         break;
                     case WRITE:
-                        if (mod.getDataBefore() == null) {
-                            LOG.trace("Data added: {}", mod.getDataAfter());
+                        if (mod.dataBefore() == null) {
+                            LOG.trace("Data added: {}", mod.dataAfter());
                             createdNodes.add(key);
                         } else {
                             updatedNodes.add(key);
                         }
                         break;
                     default:
-                        throw new IllegalArgumentException("Unhandled modification type " + mod.getModificationType());
+                        throw new IllegalArgumentException("Unhandled modification type " + mod.modificationType());
                 }
             }
         }
@@ -178,7 +178,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         return combinedOptions;
     }
 
-    private Option[] getOtherOptions() {
+    private static Option[] getOtherOptions() {
         return new Option[] {
                 vmOption("-javaagent:../jars/org.jacoco.agent.jar=destfile=../../jacoco-it.exec"),
                 keepRuntimeFolder()
@@ -228,7 +228,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         return option;
     }
 
-    private Option[] getPropertiesOptions() {
+    private static Option[] getPropertiesOptions() {
         Properties props = new Properties(System.getProperties());
         String ipAddressStr = props.getProperty(SERVER_IPADDRESS, DEFAULT_SERVER_IPADDRESS);
         String portStr = props.getProperty(SERVER_PORT, DEFAULT_SERVER_PORT);
@@ -276,7 +276,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         assertTrue("Did not find " + HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID.getValue(), getHwvtepTopology());
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         final InstanceIdentifier<Node> iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
-        final DataTreeIdentifier<Node> treeId = DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, iid);
+        final DataTreeIdentifier<Node> treeId = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, iid);
 
         dataBroker.registerDataTreeChangeListener(treeId, OPERATIONAL_LISTENER);
 
@@ -303,7 +303,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         setup = true;
     }
 
-    private Boolean getHwvtepTopology() {
+    private static Boolean getHwvtepTopology() {
         LOG.info("getHwvtepTopology: looking for {}...", HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID.getValue());
         Boolean found = false;
         final TopologyId topologyId = HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID;
@@ -328,7 +328,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         return found;
     }
 
-    private Node connectHwvtepNode(ConnectionInfo connectionInfo) throws InterruptedException {
+    private static Node connectHwvtepNode(ConnectionInfo connectionInfo) throws InterruptedException {
         final InstanceIdentifier<Node> iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
         Assert.assertTrue(mdsalUtils.put(LogicalDatastoreType.CONFIGURATION,
                         iid, HwvtepSouthboundUtils.createNode(connectionInfo)));
@@ -348,7 +348,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         LOG.info("Disconnected from {}", HwvtepSouthboundUtils.connectionInfoToString(connectionInfo));
     }
 
-    private void waitForOperationalCreation(InstanceIdentifier<Node> iid) throws InterruptedException {
+    private static void waitForOperationalCreation(InstanceIdentifier<Node> iid) throws InterruptedException {
         synchronized (OPERATIONAL_LISTENER) {
             long start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged creation on {}", iid);
@@ -372,7 +372,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private ConnectionInfo getConnectionInfo(String ipAddressStr, Uint16 portNum) {
+    private static ConnectionInfo getConnectionInfo(String ipAddressStr, Uint16 portNum) {
         InetAddress inetAddress = null;
         try {
             inetAddress = InetAddress.getByName(ipAddressStr);
@@ -511,15 +511,15 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private PhysicalSwitchAugmentation getPhysicalSwitch(ConnectionInfo connectionInfo) {
+    private static PhysicalSwitchAugmentation getPhysicalSwitch(ConnectionInfo connectionInfo) {
         return getPhysicalSwitch(connectionInfo, PS_NAME);
     }
 
-    private PhysicalSwitchAugmentation getPhysicalSwitch(ConnectionInfo connectionInfo, String psName) {
+    private static PhysicalSwitchAugmentation getPhysicalSwitch(ConnectionInfo connectionInfo, String psName) {
         return getPhysicalSwitch(connectionInfo, psName, LogicalDatastoreType.OPERATIONAL);
     }
 
-    private PhysicalSwitchAugmentation getPhysicalSwitch(ConnectionInfo connectionInfo, String psName,
+    private static PhysicalSwitchAugmentation getPhysicalSwitch(ConnectionInfo connectionInfo, String psName,
                     LogicalDatastoreType dataStore) {
         Node psNode = getPhysicalSwitchNode(connectionInfo, psName, dataStore);
         Assert.assertNotNull(psNode);
@@ -528,7 +528,8 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         return psAugmentation;
     }
 
-    private Node getPhysicalSwitchNode(ConnectionInfo connectionInfo, String psName, LogicalDatastoreType dataStore) {
+    private static Node getPhysicalSwitchNode(ConnectionInfo connectionInfo, String psName,
+            LogicalDatastoreType dataStore) {
         InstanceIdentifier<Node> psIid =
                         HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo, new HwvtepNodeName(psName));
         return mdsalUtils.read(dataStore, psIid);

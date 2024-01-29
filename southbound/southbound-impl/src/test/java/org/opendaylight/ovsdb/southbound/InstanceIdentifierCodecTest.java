@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -16,7 +17,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.getField;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.Collections;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -27,6 +28,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
@@ -62,7 +64,7 @@ public class InstanceIdentifierCodecTest {
     @Test
     public void testInstanceIdentifierCodec() throws Exception {
         InstanceIdentifierCodec codec = new InstanceIdentifierCodec(schemaService, bindingNormalizedNodeSerializer);
-        verify(schemaService).registerSchemaContextListener(codec);
+        verify(schemaService).registerSchemaContextListener(any());
     }
 
     @Test
@@ -74,12 +76,14 @@ public class InstanceIdentifierCodecTest {
     @Test
     public void testModuleForPrefix() {
         Module module = mock(Module.class);
-        doReturn(ImmutableSet.of(module)).when(context).findModules("");
-        assertEquals("Found Module", module, instanceIdCodec.moduleForPrefix(""));
+        QNameModule mod = QNameModule.create(XMLNamespace.of("test"));
+        doReturn(Set.of(module)).when(context).findModules("");
+        doReturn(mod).when(module).getQNameModule();
+        assertEquals(mod, instanceIdCodec.moduleForPrefix(""));
         doReturn(ImmutableSet.of(module, mock(Module.class))).when(context).findModules("foo");
-        assertEquals("Found Module", module, instanceIdCodec.moduleForPrefix("foo"));
+        assertEquals(mod, instanceIdCodec.moduleForPrefix("foo"));
 
-        when(context.findModules("bar")).thenReturn(Collections.emptySet());
+        when(context.findModules("bar")).thenReturn(Set.of());
         assertNull(instanceIdCodec.moduleForPrefix("bar"));
     }
 
@@ -90,12 +94,12 @@ public class InstanceIdentifierCodecTest {
         when(module.getName()).thenReturn(prefix);
 
         XMLNamespace namespace = XMLNamespace.of("foo");
-        when(context.findModules(namespace)).thenReturn(Collections.emptySet());
+        when(context.findModules(namespace)).thenReturn(Set.of());
         assertNull(instanceIdCodec.prefixForNamespace(namespace));
 
-        doReturn(ImmutableSet.of(module)).when(context).findModules(namespace);
+        doReturn(Set.of(module)).when(context).findModules(namespace);
         assertEquals("Found prefix", prefix, instanceIdCodec.prefixForNamespace(namespace));
-        doReturn(ImmutableSet.of(module, mock(Module.class))).when(context).findModules(namespace);
+        doReturn(Set.of(module, mock(Module.class))).when(context).findModules(namespace);
         assertEquals("Found prefix", prefix, instanceIdCodec.prefixForNamespace(namespace));
     }
 

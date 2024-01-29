@@ -38,7 +38,16 @@ import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
@@ -49,7 +58,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
     TerminationPointUpdateCommand.class, TransactUtils.class, VlanMode.class, TerminationPointCreateCommand.class,
-    InstanceIdentifier.class, Operations.class
+    Operations.class
 })
 public class TerminationPointUpdateCommandTest {
 
@@ -66,7 +75,11 @@ public class TerminationPointUpdateCommandTest {
     public void testExecute() {
         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> created
             = new HashMap<>();
-        created.put(mock(InstanceIdentifier.class), mock(OvsdbTerminationPointAugmentation.class));
+        created.put(InstanceIdentifier.create(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
+            .child(Node.class, new NodeKey(new NodeId("testNode")))
+            .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp")))
+            .augmentation(OvsdbTerminationPointAugmentation.class), mock(OvsdbTerminationPointAugmentation.class));
         PowerMockito.mockStatic(TransactUtils.class);
         PowerMockito.when(TransactUtils.extractCreated(any(DataChangeEvent.class),
                 eq(OvsdbTerminationPointAugmentation.class))).thenReturn(created);
@@ -77,9 +90,13 @@ public class TerminationPointUpdateCommandTest {
                 any(BridgeOperationalState.class), any(InstanceIdentifier.class),
                 any(OvsdbTerminationPointAugmentation.class), any(InstanceIdentifierCodec.class));
 
-        Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> updated
-            = new HashMap<>();
-        updated.put(mock(InstanceIdentifier.class), mock(OvsdbTerminationPointAugmentation.class));
+        Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> updated =
+            new HashMap<>();
+        updated.put(InstanceIdentifier.create(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
+            .child(Node.class, new NodeKey(new NodeId("testNode")))
+            .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp2")))
+            .augmentation(OvsdbTerminationPointAugmentation.class), mock(OvsdbTerminationPointAugmentation.class));
         PowerMockito.when(TransactUtils.extractUpdated(any(DataChangeEvent.class),
                 eq(OvsdbTerminationPointAugmentation.class))).thenReturn(updated);
 
@@ -134,8 +151,12 @@ public class TerminationPointUpdateCommandTest {
         when(op.update(any(Port.class))).thenReturn(update);
         when(extraPort.getNameColumn()).thenReturn(column);
 
-        InstanceIdentifier<OvsdbTerminationPointAugmentation> iid = mock(InstanceIdentifier.class);
-        terminationPointUpdateCommand.updateTerminationPoint(transaction, state, iid, terminationPoint,
+        terminationPointUpdateCommand.updateTerminationPoint(transaction, state,
+            InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
+                .child(Node.class, new NodeKey(new NodeId("testNode")))
+                .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp")))
+                .augmentation(OvsdbTerminationPointAugmentation.class), terminationPoint,
                 mock(InstanceIdentifierCodec.class));
         verify(transaction, times(1)).add(any(Operation.class));
     }

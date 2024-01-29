@@ -49,17 +49,16 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        for (OpenVSwitch openVSwitch : updatedOpenVSwitchRows.values()) {
-            InstanceIdentifier<Node> ovsdbNodeIid =
-                    SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
-            deleteManagers(transaction, managerEntriesToRemove(ovsdbNodeIid,openVSwitch));
+        for (var openVSwitch : updatedOpenVSwitchRows.values()) {
+            deleteManagers(transaction, managerEntriesToRemove(
+                SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId()), openVSwitch));
         }
     }
 
     @VisibleForTesting
     void deleteManagers(ReadWriteTransaction transaction,
             List<InstanceIdentifier<ManagerEntry>> managerEntryIids) {
-        for (InstanceIdentifier<ManagerEntry> managerEntryIid: managerEntryIids) {
+        for (var managerEntryIid : managerEntryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, managerEntryIid);
         }
     }
@@ -96,7 +95,8 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
         return result;
     }
 
-    private boolean checkIfManagerPresentInUpdatedManagersList(Manager removedManager) {
+    @VisibleForTesting
+    boolean checkIfManagerPresentInUpdatedManagersList(Manager removedManager) {
         for (Map.Entry<UUID, Manager> updatedManager : updatedManagerRows.entrySet()) {
             if (updatedManager.getValue().getTargetColumn().getData()
                     .equals(removedManager.getTargetColumn().getData())) {
@@ -105,5 +105,4 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
         }
         return false;
     }
-
 }

@@ -165,14 +165,12 @@ public final class SouthboundMapper {
     }
 
     public static InstanceIdentifier<Topology> createTopologyInstanceIdentifier() {
-        return InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
+        return InstanceIdentifier.create(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
     }
 
     public static InstanceIdentifier<Node> createInstanceIdentifier(final NodeId nodeId) {
-        return createTopologyInstanceIdentifier()
-                .child(Node.class,new NodeKey(nodeId));
+        return createTopologyInstanceIdentifier().child(Node.class, new NodeKey(nodeId));
     }
 
     @SuppressWarnings("unchecked")

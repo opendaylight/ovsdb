@@ -14,7 +14,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +24,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -41,7 +39,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -87,7 +85,7 @@ public class ReconciliationManager implements AutoCloseable {
     private LoadingCache<NodeKey, NodeConnectionMetadata> bridgeNodeCache = null;
 
     // Listens for new bridge creations in the operational DS
-    private ListenerRegistration<BridgeCreatedDataTreeChangeListener> bridgeCreatedDataTreeChangeRegistration = null;
+    private Registration bridgeCreatedDataTreeChangeRegistration = null;
 
     private final ReconciliationTaskManager reconTaskManager = new ReconciliationTaskManager();
 
@@ -185,10 +183,9 @@ public class ReconciliationManager implements AutoCloseable {
                     new BridgeCreatedDataTreeChangeListener();
             InstanceIdentifier<Node> path = SouthboundMapper.createTopologyInstanceIdentifier()
                     .child(Node.class);
-            DataTreeIdentifier<Node> dataTreeIdentifier =
-                    DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, path);
+            DataTreeIdentifier<Node> dataTreeIdentifier = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, path);
 
-            bridgeCreatedDataTreeChangeRegistration = db.registerDataTreeChangeListener(dataTreeIdentifier,
+            bridgeCreatedDataTreeChangeRegistration = db.registerTreeChangeListener(dataTreeIdentifier,
                     bridgeCreatedDataTreeChangeListener);
         }
     }
@@ -212,9 +209,9 @@ public class ReconciliationManager implements AutoCloseable {
      * is triggered and the bridge entry is removed from the cache.
      * Once cache is empty, either being removed explicitly or expired, the the listener de-registered.
      */
-    class BridgeCreatedDataTreeChangeListener implements ClusteredDataTreeChangeListener<Node> {
+    class BridgeCreatedDataTreeChangeListener implements DataTreeChangeListener<Node> {
         @Override
-        public void onDataTreeChanged(@NonNull Collection<DataTreeModification<Node>> changes) {
+        public void onDataTreeChanged(List<DataTreeModification<Node>> changes) {
             bridgeNodeCache.cleanUp();
             if (!bridgeNodeCache.asMap().isEmpty()) {
                 Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> nodes =

@@ -53,29 +53,28 @@ public final class TransactUtils {
     }
 
     public static Node getCreated(final DataObjectModification<Node> mod) {
-        if (mod.getModificationType() == ModificationType.WRITE
-                        && mod.getDataBefore() == null) {
-            return mod.getDataAfter();
+        if (mod.modificationType() == ModificationType.WRITE && mod.dataBefore() == null) {
+            return mod.dataAfter();
         }
         return null;
     }
 
     public static Node getRemoved(final DataObjectModification<Node> mod) {
-        if (mod.getModificationType() == ModificationType.DELETE) {
-            return mod.getDataBefore();
+        if (mod.modificationType() == ModificationType.DELETE) {
+            return mod.dataBefore();
         }
         return null;
     }
 
     public static Node getUpdated(final DataObjectModification<Node> mod) {
         Node node = null;
-        switch (mod.getModificationType()) {
+        switch (mod.modificationType()) {
             case SUBTREE_MODIFIED:
-                node = mod.getDataAfter();
+                node = mod.dataAfter();
                 break;
             case WRITE:
-                if (mod.getDataBefore() != null) {
-                    node = mod.getDataAfter();
+                if (mod.dataBefore() != null) {
+                    node = mod.dataAfter();
                 }
                 break;
             default:
@@ -86,14 +85,14 @@ public final class TransactUtils {
 
     public static Node getOriginal(final DataObjectModification<Node> mod) {
         Node node = null;
-        switch (mod.getModificationType()) {
+        switch (mod.modificationType()) {
             case SUBTREE_MODIFIED:
             case DELETE:
-                node = mod.getDataBefore();
+                node = mod.dataBefore();
                 break;
             case WRITE:
-                if (mod.getDataBefore() !=  null) {
-                    node = mod.getDataBefore();
+                if (mod.dataBefore() !=  null) {
+                    node = mod.dataBefore();
                 }
                 break;
             default:
@@ -107,7 +106,7 @@ public final class TransactUtils {
             final Collection<DataTreeModification<Node>> changes, final Class<Node> class1) {
         Map<InstanceIdentifier<Node>, Node> result = new HashMap<>();
         for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+            final InstanceIdentifier<Node> key = change.getRootPath().path();
             final DataObjectModification<Node> mod = change.getRootNode();
             Node created = getCreated(mod);
             if (created != null) {

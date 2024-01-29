@@ -5,13 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import java.util.Collection;
-import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
+import java.util.List;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -25,19 +24,14 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
-
-    private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperationalDataChangeListener.class);
-
-    private final ListenerRegistration<HwvtepOperationalDataChangeListener> registration;
+public class HwvtepOperationalDataChangeListener implements DataTreeChangeListener<Node>, AutoCloseable {
+    private final Registration registration;
     private final HwvtepConnectionManager hcm;
     private final DataBroker db;
     private final HwvtepConnectionInstance connectionInstance;
@@ -47,9 +41,8 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
         this.db = db;
         this.hcm = hcm;
         this.connectionInstance = connectionInstance;
-        DataTreeIdentifier<Node> treeId = DataTreeIdentifier
-            .create(LogicalDatastoreType.OPERATIONAL, getWildcardPath());
-        registration = db.registerDataTreeChangeListener(treeId, HwvtepOperationalDataChangeListener.this);
+        DataTreeIdentifier<Node> treeId = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, getWildcardPath());
+        registration = db.registerTreeChangeListener(treeId, this);
     }
 
     @Override
@@ -60,17 +53,17 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
     }
 
     @Override
-    public void onDataTreeChanged(Collection<DataTreeModification<Node>> changes) {
+    public void onDataTreeChanged(List<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+            final InstanceIdentifier<Node> key = change.getRootPath().path();
             final DataObjectModification<Node> mod = change.getRootNode();
-            for (DataObjectModification<? extends DataObject> child : mod.getModifiedChildren()) {
+            for (DataObjectModification<? extends DataObject> child : mod.modifiedChildren()) {
                 updateDeviceOpData(key, child);
             }
             DataObjectModification<HwvtepGlobalAugmentation> aug =
                     mod.getModifiedAugmentation(HwvtepGlobalAugmentation.class);
             if (aug != null) {
-                for (DataObjectModification<? extends DataObject> child : aug.getModifiedChildren()) {
+                for (DataObjectModification<? extends DataObject> child : aug.modifiedChildren()) {
                     updateDeviceOpData(key, child);
                 }
             }
@@ -78,12 +71,12 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
     }
 
     private void updateDeviceOpData(InstanceIdentifier<Node> key, DataObjectModification<? extends DataObject> mod) {
-        Class<? extends KeyAware> childClass = (Class<? extends KeyAware>) mod.getDataType();
-        InstanceIdentifier instanceIdentifier = getKey(key, mod, mod.getDataAfter());
-        switch (mod.getModificationType()) {
+        Class<? extends KeyAware> childClass = (Class<? extends KeyAware>) mod.dataType();
+        InstanceIdentifier instanceIdentifier = getKey(key, mod, mod.dataAfter());
+        switch (mod.modificationType()) {
             case WRITE:
                 connectionInstance.getDeviceInfo().updateDeviceOperData(childClass, instanceIdentifier,
-                        new UUID("uuid"), mod.getDataAfter());
+                        new UUID("uuid"), mod.dataAfter());
                 break;
             case DELETE:
                 connectionInstance.getDeviceInfo().clearDeviceOperData(childClass, instanceIdentifier);
@@ -97,7 +90,7 @@ public class HwvtepOperationalDataChangeListener implements ClusteredDataTreeCha
 
     private static InstanceIdentifier getKey(InstanceIdentifier<Node> key,
                                              DataObjectModification<? extends DataObject> child, DataObject data) {
-        Class<? extends DataObject> childClass = child.getDataType();
+        Class<? extends DataObject> childClass = child.dataType();
         InstanceIdentifier instanceIdentifier = null;
         if (LogicalSwitches.class == childClass) {
             LogicalSwitches ls = (LogicalSwitches)data;

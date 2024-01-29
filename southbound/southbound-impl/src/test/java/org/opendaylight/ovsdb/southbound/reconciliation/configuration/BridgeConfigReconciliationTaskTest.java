@@ -60,14 +60,15 @@ import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 public class BridgeConfigReconciliationTaskTest {
     private static final String BR_INT = "br-int";
     private static final String NODE_ID = "ovsdb://uuid/6ff3d0cf-4102-429d-b41c-f8027a0fd7f4";
-    private BridgeConfigReconciliationTask configurationReconciliationTask;
     @Mock private OvsdbConnectionManager ovsdbConnectionManager;
     @Mock private OvsdbConnectionInstance ovsdbConnectionInstance;
     @Mock private DataBroker db;
     @Mock private ReconciliationManager reconciliationManager;
     @Mock private Topology topology;
-    @Mock private InstanceIdentifier<Node> iid;
     @Mock private SouthboundProvider provider;
+
+    private BridgeConfigReconciliationTask configurationReconciliationTask;
+    private InstanceIdentifier<Node> iid;
 
     @Before
     public void setUp() throws Exception {

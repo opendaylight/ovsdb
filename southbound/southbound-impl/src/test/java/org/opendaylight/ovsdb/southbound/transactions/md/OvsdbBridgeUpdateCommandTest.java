@@ -66,10 +66,14 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
@@ -80,8 +84,8 @@ import org.powermock.reflect.Whitebox;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-    TyperUtils.class, OvsdbBridgeUpdateCommand.class, SouthboundUtil.class, InstanceIdentifier.class,
-    SouthboundMapper.class, NetworkInterface.class
+    TyperUtils.class, OvsdbBridgeUpdateCommand.class, SouthboundUtil.class, SouthboundMapper.class,
+    NetworkInterface.class
 })
 public class OvsdbBridgeUpdateCommandTest {
     private final Map<UUID,Bridge> updatedBridgeRows = new HashMap<>();
@@ -119,7 +123,9 @@ public class OvsdbBridgeUpdateCommandTest {
 
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
-        InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);
+        InstanceIdentifier<Node> connectionIId = InstanceIdentifier.create(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
+            .child(Node.class, new NodeKey(new NodeId("testNode")));
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(connectionIId);
         Optional<Node> connection = Optional.of(mock(Node.class));
         PowerMockito.mockStatic(SouthboundUtil.class);
@@ -158,20 +164,18 @@ public class OvsdbBridgeUpdateCommandTest {
                 Bridge.class));
 
         Bridge bridge = mock(Bridge.class);
-        InstanceIdentifier<Node> connectionIId = mock(InstanceIdentifier.class);
+        InstanceIdentifier<Node> connectionIId = InstanceIdentifier.create(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
+            .child(Node.class, new NodeKey(new NodeId("testNode")));
         Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "updateBridge", transaction, bridge, connectionIId);
         verify(ovsdbBridgeUpdateCommand, times(3)).deleteEntries(any(ReadWriteTransaction.class), eq(null));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testDeleteEntries() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        List<InstanceIdentifier<DataObject>> entryIids = new ArrayList<>();
-        InstanceIdentifier<DataObject> iid = mock(InstanceIdentifier.class);
-        entryIids.add(iid);
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "deleteEntries", transaction, entryIids);
+        ovsdbBridgeUpdateCommand.deleteEntries(transaction, List.of(InstanceIdentifier.create(NetworkTopology.class)));
         verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
     }
 
@@ -193,7 +197,9 @@ public class OvsdbBridgeUpdateCommandTest {
         //test bridgeOtherConfigsToRemove()
         when(oldBridge.getOtherConfigColumn()).thenReturn(column);
         when(bridge.getOtherConfigColumn()).thenReturn(column);
-        InstanceIdentifier<Node> bridgeIid = PowerMockito.mock(InstanceIdentifier.class);
+        InstanceIdentifier<Node> bridgeIid = InstanceIdentifier.create(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
+            .child(Node.class, new NodeKey(new NodeId("testNode")));
         List<InstanceIdentifier<BridgeOtherConfigs>> resultBridgeOtherConfigs = Whitebox
                 .invokeMethod(ovsdbBridgeUpdateCommand, "bridgeOtherConfigsToRemove", bridgeIid, bridge);
         assertEquals(ArrayList.class, resultBridgeOtherConfigs.getClass());
@@ -236,13 +242,17 @@ public class OvsdbBridgeUpdateCommandTest {
         PowerMockito.whenNew(OvsdbNodeAugmentationBuilder.class).withNoArguments()
                 .thenReturn(ovsdbConnectionAugmentationBuilder);
         PowerMockito.mockStatic(SouthboundMapper.class);
-        InstanceIdentifier<Node> bridgeIid = mock(InstanceIdentifier.class);
+        InstanceIdentifier<Node> bridgeIid = InstanceIdentifier.create(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
+            .child(Node.class, new NodeKey(new NodeId("testNode")));
         when(SouthboundMapper.createInstanceIdentifier(any(InstanceIdentifierCodec.class),
                 any(OvsdbConnectionInstance.class), any(Bridge.class)))
                 .thenReturn(bridgeIid);
 
         ManagedNodeEntry managedBridge = new ManagedNodeEntryBuilder()
-                .setBridgeRef(new OvsdbBridgeRef(mock(InstanceIdentifier.class)))
+                .setBridgeRef(new OvsdbBridgeRef(InstanceIdentifier.create(NetworkTopology.class)
+                    .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
+                    .child(Node.class, new NodeKey(new NodeId("testNode")))))
                 .build();
 
         ManagedNodeEntryBuilder managedNodeEntryBuilder = mock(ManagedNodeEntryBuilder.class);
@@ -310,14 +320,16 @@ public class OvsdbBridgeUpdateCommandTest {
         assertEquals(node, Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "buildBridgeNode", bridge));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testSetManagedByAndSetDataPathType() throws Exception {
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
 
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
-        when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(mock(InstanceIdentifier.class));
+        when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(
+            InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
+                .child(Node.class, new NodeKey(new NodeId("testNode"))));
         PowerMockito.whenNew(OvsdbNodeRef.class).withAnyArguments().thenReturn(mock(OvsdbNodeRef.class));
         when(ovsdbBridgeAugmentationBuilder.setManagedBy(any(OvsdbNodeRef.class)))
                 .thenReturn(ovsdbBridgeAugmentationBuilder);
@@ -460,7 +472,10 @@ public class OvsdbBridgeUpdateCommandTest {
 
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
-        when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(mock(InstanceIdentifier.class));
+        when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(
+            InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
+                .child(Node.class, new NodeKey(new NodeId("testNode"))));
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
         Bridge bridge = mock(Bridge.class);
         when(ovsdbBridgeAugmentationBuilder.setBridgeOpenflowNodeRef(any(InstanceIdentifier.class)))

@@ -36,8 +36,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ConnectionInfo;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -62,8 +67,9 @@ public class SouthboundUtilTest {
         when(db.newReadOnlyTransaction()).thenReturn(transaction);
         when(mn.getManagedBy()).thenReturn(ref);
         when(ref.getValue()).thenAnswer(
-                (Answer<InstanceIdentifier<Node>>) invocation -> (InstanceIdentifier<Node>) mock(
-                        InstanceIdentifier.class));
+            (Answer<InstanceIdentifier<Node>>) invocation -> InstanceIdentifier.create(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class, new NodeKey(new NodeId("testNode"))));
         FluentFuture<Optional<Node>> nf = mock(FluentFuture.class);
         when(transaction.read(eq(LogicalDatastoreType.OPERATIONAL), any(InstanceIdentifier.class))).thenReturn(nf);
         doNothing().when(transaction).close();
@@ -92,15 +98,15 @@ public class SouthboundUtilTest {
                 SouthboundUtil.getManagingNode(db, mn));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testReadNode() throws Exception {
-        Optional<DataObject> node = Optional.of(mock(DataObject.class));
+        final var node = Optional.of(mock(Node.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        InstanceIdentifier<DataObject> connectionIid = mock(InstanceIdentifier.class);
-        FluentFuture<Optional<DataObject>> value = mock(FluentFuture.class);
+        InstanceIdentifier<Node> connectionIid = InstanceIdentifier.create(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+            .child(Node.class, new NodeKey(new NodeId("testNode")));
+        FluentFuture<Optional<Node>> value = FluentFutures.immediateFluentFuture(node);
         when(transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid)).thenReturn(value);
-        when(value.get()).thenReturn(node);
         assertEquals("Incorrect Optional object received", node, SouthboundUtil.readNode(transaction, connectionIid));
     }
 

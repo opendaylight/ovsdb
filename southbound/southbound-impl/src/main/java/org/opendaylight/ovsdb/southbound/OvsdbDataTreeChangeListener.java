@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound;
 
 import java.net.ConnectException;
@@ -13,10 +12,10 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
@@ -34,7 +33,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +41,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Data-tree change listener for OVSDB.
  */
-public final class OvsdbDataTreeChangeListener implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
+public final class OvsdbDataTreeChangeListener implements DataTreeChangeListener<Node>, AutoCloseable {
 
     /** Our registration. */
-    private final ListenerRegistration<DataTreeChangeListener<Node>> registration;
+    private final Registration registration;
 
     /** The connection manager. */
     private final OvsdbConnectionManager cm;
@@ -65,8 +64,8 @@ public final class OvsdbDataTreeChangeListener implements ClusteredDataTreeChang
      * @param db The data broker.
      * @param cm The connection manager.
      */
-    OvsdbDataTreeChangeListener(DataBroker db, OvsdbConnectionManager cm,
-            InstanceIdentifierCodec instanceIdentifierCodec) {
+    OvsdbDataTreeChangeListener(final DataBroker db, final OvsdbConnectionManager cm,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         this.cm = cm;
         this.db = db;
         this.instanceIdentifierCodec = instanceIdentifierCodec;
@@ -74,9 +73,8 @@ public final class OvsdbDataTreeChangeListener implements ClusteredDataTreeChang
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class);
-        DataTreeIdentifier<Node> dataTreeIdentifier =
-                DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION, path);
-        registration = db.registerDataTreeChangeListener(dataTreeIdentifier, this);
+        DataTreeIdentifier<Node> dataTreeIdentifier = DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION, path);
+        registration = db.registerTreeChangeListener(dataTreeIdentifier, this);
         LOG.info("OVSDB topology listener has been registered.");
     }
 
@@ -87,7 +85,7 @@ public final class OvsdbDataTreeChangeListener implements ClusteredDataTreeChang
     }
 
     @Override
-    public void onDataTreeChanged(@NonNull Collection<DataTreeModification<Node>> changes) {
+    public void onDataTreeChanged(final List<DataTreeModification<Node>> changes) {
         LOG.trace("onDataTreeChanged: {}", changes);
 
         // Connect first if necessary
@@ -105,14 +103,14 @@ public final class OvsdbDataTreeChangeListener implements ClusteredDataTreeChang
         LOG.trace("onDataTreeChanged: exit");
     }
 
-    private void connect(@NonNull Collection<DataTreeModification<Node>> changes) {
+    private void connect(final @NonNull List<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            if (change.getRootNode().getModificationType() == DataObjectModification.ModificationType.WRITE || change
-                    .getRootNode().getModificationType() == DataObjectModification.ModificationType.SUBTREE_MODIFIED) {
+            if (change.getRootNode().modificationType() == DataObjectModification.ModificationType.WRITE || change
+                    .getRootNode().modificationType() == DataObjectModification.ModificationType.SUBTREE_MODIFIED) {
                 DataObjectModification<OvsdbNodeAugmentation> ovsdbNodeModification =
                         change.getRootNode().getModifiedAugmentation(OvsdbNodeAugmentation.class);
-                if (ovsdbNodeModification != null && ovsdbNodeModification.getDataBefore() == null) {
-                    OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.getDataAfter();
+                if (ovsdbNodeModification != null && ovsdbNodeModification.dataBefore() == null) {
+                    OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.dataAfter();
                     if (ovsdbNode != null) {
                         ConnectionInfo key = ovsdbNode.getConnectionInfo();
                         if (key != null) {
@@ -122,7 +120,7 @@ public final class OvsdbDataTreeChangeListener implements ClusteredDataTreeChang
                                         + "connections to same device, hence dropping the request {}", key, ovsdbNode);
                             } else {
                                 try {
-                                    cm.connect(change.getRootPath().getRootIdentifier(), ovsdbNode);
+                                    cm.connect(change.getRootPath().path(), ovsdbNode);
                                     LOG.info("OVSDB node has been connected: {}",ovsdbNode);
                                 } catch (UnknownHostException | ConnectException e) {
                                     LOG.warn("Failed to connect to ovsdbNode", e);
@@ -135,13 +133,13 @@ public final class OvsdbDataTreeChangeListener implements ClusteredDataTreeChang
         }
     }
 
-    private void disconnect(@NonNull Collection<DataTreeModification<Node>> changes) {
+    private void disconnect(final @NonNull List<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            if (change.getRootNode().getModificationType() == DataObjectModification.ModificationType.DELETE) {
+            if (change.getRootNode().modificationType() == DataObjectModification.ModificationType.DELETE) {
                 DataObjectModification<OvsdbNodeAugmentation> ovsdbNodeModification =
                         change.getRootNode().getModifiedAugmentation(OvsdbNodeAugmentation.class);
                 if (ovsdbNodeModification != null) {
-                    OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.getDataBefore();
+                    OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.dataBefore();
                     if (ovsdbNode != null) {
                         ConnectionInfo key = ovsdbNode.getConnectionInfo();
                         InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
@@ -158,19 +156,19 @@ public final class OvsdbDataTreeChangeListener implements ClusteredDataTreeChang
                 }
             }
 
-            if (change.getRootNode().getModificationType() == DataObjectModification.ModificationType.WRITE) {
+            if (change.getRootNode().modificationType() == DataObjectModification.ModificationType.WRITE) {
                 DataObjectModification<OvsdbNodeAugmentation> ovsdbNodeModification =
                         change.getRootNode().getModifiedAugmentation(OvsdbNodeAugmentation.class);
                 if (ovsdbNodeModification != null) {
                     DataObjectModification<ConnectionInfo> connectionInfoDOM =
                             ovsdbNodeModification.getModifiedChildContainer(ConnectionInfo.class);
                     if (connectionInfoDOM != null) {
-                        if (connectionInfoDOM.getModificationType() == DataObjectModification.ModificationType.DELETE) {
-                            ConnectionInfo key = connectionInfoDOM.getDataBefore();
+                        if (connectionInfoDOM.modificationType() == DataObjectModification.ModificationType.DELETE) {
+                            ConnectionInfo key = connectionInfoDOM.dataBefore();
                             if (key != null) {
                                 InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
                                 try {
-                                    OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.getDataBefore();
+                                    OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.dataBefore();
                                     cm.disconnect(ovsdbNode);
                                     LOG.warn("OVSDB node {} has been disconnected, because connection-info related to "
                                             + "the node is removed by user, but node still exist.", ovsdbNode);
@@ -187,17 +185,17 @@ public final class OvsdbDataTreeChangeListener implements ClusteredDataTreeChang
         }
     }
 
-    private void updateConnections(@NonNull Collection<DataTreeModification<Node>> changes) {
+    private void updateConnections(final @NonNull List<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            switch (change.getRootNode().getModificationType()) {
+            switch (change.getRootNode().modificationType()) {
                 case SUBTREE_MODIFIED:
                 case WRITE:
                     DataObjectModification<OvsdbNodeAugmentation> ovsdbNodeModification =
                         change.getRootNode().getModifiedAugmentation(OvsdbNodeAugmentation.class);
                     if (ovsdbNodeModification != null) {
-                        final OvsdbNodeAugmentation dataBefore = ovsdbNodeModification.getDataBefore();
+                        final OvsdbNodeAugmentation dataBefore = ovsdbNodeModification.dataBefore();
                         if (dataBefore != null) {
-                            OvsdbNodeAugmentation dataAfter = ovsdbNodeModification.getDataAfter();
+                            OvsdbNodeAugmentation dataAfter = ovsdbNodeModification.dataAfter();
                             if (dataAfter != null) {
                                 ConnectionInfo connectionInfo = dataAfter.getConnectionInfo();
                                 if (connectionInfo != null) {
@@ -206,7 +204,7 @@ public final class OvsdbDataTreeChangeListener implements ClusteredDataTreeChang
                                         if (dataBefore != null) {
                                             try {
                                                 cm.disconnect(dataBefore);
-                                                cm.connect(change.getRootPath().getRootIdentifier(), dataAfter);
+                                                cm.connect(change.getRootPath().path(), dataAfter);
                                             } catch (UnknownHostException | ConnectException e) {
                                                 LOG.warn("Error disconnecting from or connecting to ovsdbNode", e);
                                             }
@@ -224,7 +222,7 @@ public final class OvsdbDataTreeChangeListener implements ClusteredDataTreeChang
         }
     }
 
-    private void updateData(@NonNull Collection<DataTreeModification<Node>> changes) {
+    private void updateData(final @NonNull List<DataTreeModification<Node>> changes) {
         for (Entry<OvsdbConnectionInstance, Collection<DataTreeModification<Node>>> connectionInstanceEntry :
                 changesPerConnectionInstance(changes).entrySet()) {
             OvsdbConnectionInstance connectionInstance = connectionInstanceEntry.getKey();
@@ -235,12 +233,12 @@ public final class OvsdbDataTreeChangeListener implements ClusteredDataTreeChang
     }
 
     private Map<OvsdbConnectionInstance, Collection<DataTreeModification<Node>>> changesPerConnectionInstance(
-            @NonNull Collection<DataTreeModification<Node>> changes) {
+            final @NonNull List<DataTreeModification<Node>> changes) {
         Map<OvsdbConnectionInstance, Collection<DataTreeModification<Node>>> result = new HashMap<>();
         for (DataTreeModification<Node> change : changes) {
             OvsdbConnectionInstance client = null;
-            Node dataAfter = change.getRootNode().getDataAfter();
-            Node node =  dataAfter != null ? dataAfter : change.getRootNode().getDataBefore();
+            Node dataAfter = change.getRootNode().dataAfter();
+            Node node =  dataAfter != null ? dataAfter : change.getRootNode().dataBefore();
             if (node != null) {
                 OvsdbNodeAugmentation ovsdbNode = node.augmentation(OvsdbNodeAugmentation.class);
                 if (ovsdbNode != null) {
@@ -261,7 +259,7 @@ public final class OvsdbDataTreeChangeListener implements ClusteredDataTreeChang
 
                 if (client == null) {
                     //Try getting from change root identifier
-                    client = cm.getConnectionInstance(change.getRootPath().getRootIdentifier());
+                    client = cm.getConnectionInstance(change.getRootPath().path());
                 }
             } else {
                 LOG.warn("Following change don't have after/before data {}", change);

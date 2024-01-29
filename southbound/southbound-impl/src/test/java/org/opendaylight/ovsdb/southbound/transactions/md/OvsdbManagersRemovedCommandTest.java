@@ -5,10 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -38,8 +38,10 @@ import org.opendaylight.ovsdb.schema.openvswitch.Manager;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -49,12 +51,11 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-
-@PrepareForTest({SouthboundMapper.class, OvsdbManagersRemovedCommand.class})
+@PrepareForTest(OvsdbManagersRemovedCommand.class)
 @RunWith(PowerMockRunner.class)
 public class OvsdbManagersRemovedCommandTest {
-
     private static final String TARGET_COLUMN_DATA = "Target Column Data";
+
     private OvsdbManagersRemovedCommand ovsdbManagersRemovedCommand;
     private Map<UUID, OpenVSwitch> updatedOpenVSwitchRows;
     private Map<UUID, OpenVSwitch> oldOpenVSwitchRows;
@@ -86,11 +87,9 @@ public class OvsdbManagersRemovedCommandTest {
         updatedOpenVSwitchRows.put(uuid, openVSwitch);
         MemberModifier.field(OvsdbManagersRemovedCommand.class, "updatedOpenVSwitchRows")
                 .set(ovsdbManagersRemovedCommand, updatedOpenVSwitchRows);
-        PowerMockito.mockStatic(SouthboundMapper.class);
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbManagersRemovedCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         when(ovsdbConnectionInstance.getNodeId()).thenReturn(mock(NodeId.class));
-        when(SouthboundMapper.createInstanceIdentifier(any(NodeId.class))).thenReturn(mock(InstanceIdentifier.class));
 
         doNothing().when(ovsdbManagersRemovedCommand).deleteManagers(any(ReadWriteTransaction.class), any(List.class));
         doReturn(mock(List.class)).when(ovsdbManagersRemovedCommand).managerEntriesToRemove(
@@ -103,18 +102,18 @@ public class OvsdbManagersRemovedCommandTest {
             any(OpenVSwitch.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testDeleteManagers() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         List<InstanceIdentifier<ManagerEntry>> managerEntryIids = new ArrayList<>();
-        managerEntryIids.add(mock(InstanceIdentifier.class));
+        managerEntryIids.add(SouthboundMapper.createInstanceIdentifier(new NodeId("test"))
+            .augmentation(OvsdbNodeAugmentation.class)
+            .child(ManagerEntry.class, new ManagerEntryKey(new Uri("testUri"))));
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        Whitebox.invokeMethod(ovsdbManagersRemovedCommand, "deleteManagers", transaction, managerEntryIids);
+        ovsdbManagersRemovedCommand.deleteManagers(transaction, managerEntryIids);
         verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testManagerEntriesToRemove() throws Exception {
         OpenVSwitch openVSwitch = mock(OpenVSwitch.class);
@@ -126,6 +125,7 @@ public class OvsdbManagersRemovedCommandTest {
         when(openVSwitch.getUuid()).thenReturn(uuid);
         MemberModifier.field(OvsdbManagersRemovedCommand.class, "oldOpenVSwitchRows").set(ovsdbManagersRemovedCommand,
                 oldOpenVSwitchRows);
+        @SuppressWarnings("unchecked")
         Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         Set<UUID> set = new HashSet<>();
         UUID controllerUuid = mock(UUID.class);
@@ -134,14 +134,14 @@ public class OvsdbManagersRemovedCommandTest {
         when(oldOvsdbNode.getManagerOptionsColumn()).thenReturn(column);
         when(column.getData()).thenReturn(set);
         when(openVSwitch.getManagerOptionsColumn()).thenReturn(column);
-        InstanceIdentifier<Node> bridgeIid = mock(InstanceIdentifier.class);
-        List<InstanceIdentifier<BridgeOtherConfigs>> resultManagerEntries = Whitebox
-                .invokeMethod(ovsdbManagersRemovedCommand, "managerEntriesToRemove", bridgeIid, openVSwitch);
+        InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(new NodeId("test"));
+
+        List<InstanceIdentifier<ManagerEntry>> resultManagerEntries =
+            ovsdbManagersRemovedCommand.managerEntriesToRemove(bridgeIid, openVSwitch);
         assertEquals(ArrayList.class, resultManagerEntries.getClass());
         verify(oldOvsdbNode, times(2)).getManagerOptionsColumn();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCheckIfManagerPresentInUpdatedManagersList() throws Exception {
         Manager updatedManager = mock(Manager.class);
@@ -150,13 +150,13 @@ public class OvsdbManagersRemovedCommandTest {
         updatedManagerRows.put(uuid, updatedManager);
         MemberModifier.field(OvsdbManagersRemovedCommand.class, "updatedManagerRows").set(ovsdbManagersRemovedCommand,
                 updatedManagerRows);
+        @SuppressWarnings("unchecked")
         Column<GenericTableSchema, String> column = mock(Column.class);
         Manager removedManager = mock(Manager.class);
         when(removedManager.getTargetColumn()).thenReturn(column);
         when(updatedManager.getTargetColumn()).thenReturn(column);
         when(column.getData()).thenReturn(TARGET_COLUMN_DATA);
 
-        assertEquals(true, Whitebox.invokeMethod(ovsdbManagersRemovedCommand,
-                "checkIfManagerPresentInUpdatedManagersList", removedManager));
+        assertTrue(ovsdbManagersRemovedCommand.checkIfManagerPresentInUpdatedManagersList(removedManager));
     }
 }

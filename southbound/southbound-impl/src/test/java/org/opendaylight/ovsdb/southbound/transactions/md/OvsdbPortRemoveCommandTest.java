@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.assertEquals;
@@ -38,7 +37,13 @@ import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberModifier;
@@ -47,10 +52,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({TyperUtils.class, SouthboundMapper.class, InstanceIdentifier.class})
+@PrepareForTest({ TyperUtils.class, SouthboundMapper.class })
 public class OvsdbPortRemoveCommandTest {
-
     private static final String PORT_NAME = "port0";
+
     private OvsdbPortRemoveCommand ovsdbPortRemoveCommand;
 
     @Before
@@ -107,7 +112,9 @@ public class OvsdbPortRemoveCommandTest {
         when(uuidColumn.getData()).thenReturn(uuid);
 
         when(port.getName()).thenReturn(PORT_NAME);
-        InstanceIdentifier<Node> nodeIID = mock(InstanceIdentifier.class);
+        InstanceIdentifier<Node> nodeIID = InstanceIdentifier.create(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
+            .child(Node.class, new NodeKey(new NodeId("testNode2")));
         doReturn(mock(OvsdbConnectionInstance.class)).when(ovsdbPortRemoveCommand).getOvsdbConnectionInstance();
 
         PowerMockito.mockStatic(SouthboundMapper.class);
@@ -120,6 +127,6 @@ public class OvsdbPortRemoveCommandTest {
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
 
         ovsdbPortRemoveCommand.execute(transaction);
-        verify(transaction).delete(any(LogicalDatastoreType.class), eq(null));
+        verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
     }
 }

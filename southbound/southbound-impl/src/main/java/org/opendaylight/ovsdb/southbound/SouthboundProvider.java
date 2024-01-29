@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.southbound;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.FluentFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,8 +20,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.infrautils.diagstatus.DiagStatusService;
 import org.opendaylight.infrautils.diagstatus.ServiceState;
 import org.opendaylight.infrautils.ready.SystemReadyMonitor;
-import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
@@ -30,12 +29,10 @@ import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSeriali
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipCandidateRegistration;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListener;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListenerRegistration;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
+import org.opendaylight.mdsal.eos.common.api.EntityOwnershipStateChange;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
@@ -43,7 +40,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -59,7 +56,7 @@ import org.slf4j.LoggerFactory;
 @Component(service = { }, configurationPid = "org.opendaylight.ovsdb.southbound")
 @Designate(ocd = SouthboundProvider.Configuration.class)
 // non-final for testing
-public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
+public class SouthboundProvider implements DataTreeChangeListener<Topology>, AutoCloseable {
     @ObjectClassDefinition
     public @interface Configuration {
         @AttributeDefinition
@@ -111,8 +108,8 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     private final AtomicBoolean registered = new AtomicBoolean(false);
     private final OvsdbDiagStatusProvider ovsdbStatusProvider;
 
-    private EntityOwnershipCandidateRegistration registration;
-    private ListenerRegistration<SouthboundProvider> operTopologyRegistration;
+    private Registration registration;
+    private Registration operTopologyRegistration;
 
     @Inject
     public SouthboundProvider(final DataBroker dataBroker,
@@ -196,11 +193,10 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
-        DataTreeIdentifier<Topology> treeId =
-                DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, path);
+        DataTreeIdentifier<Topology> treeId = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, path);
 
         LOG.trace("Registering listener for path {}", treeId);
-        operTopologyRegistration = dataBroker.registerDataTreeChangeListener(treeId, this);
+        operTopologyRegistration = dataBroker.registerTreeChangeListener(treeId, this);
         LOG.info("SouthboundProvider Session Initiated");
     }
 
@@ -236,9 +232,8 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         FluentFuture<Boolean> ovsdbTp = transaction.exists(type, path);
         try {
             if (!ovsdbTp.get().booleanValue()) {
-                TopologyBuilder tpb = new TopologyBuilder();
-                tpb.setTopologyId(SouthboundConstants.OVSDB_TOPOLOGY_ID);
-                transaction.mergeParentStructurePut(type, path, tpb.build());
+                transaction.mergeParentStructurePut(type, path,
+                    new TopologyBuilder().setTopologyId(SouthboundConstants.OVSDB_TOPOLOGY_ID).build());
                 transaction.commit();
             } else {
                 transaction.cancel();
@@ -248,8 +243,8 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         }
     }
 
-    public void handleOwnershipChange(final EntityOwnershipChange ownershipChange) {
-        if (ownershipChange.getState().isOwner()) {
+    public void handleOwnershipChange(final EntityOwnershipStateChange change) {
+        if (change.isOwner()) {
             LOG.info("*This* instance of OVSDB southbound provider is set as a MASTER instance");
             LOG.info("Initialize OVSDB topology {} in operational and config data store if not already present",
                     SouthboundConstants.OVSDB_TOPOLOGY_ID);
@@ -261,7 +256,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
     }
 
     @Override
-    public void onDataTreeChanged(final Collection<DataTreeModification<Topology>> collection) {
+    public void onDataTreeChanged(final List<DataTreeModification<Topology>> collection) {
         if (!registered.getAndSet(true)) {
             LOG.info("Starting the ovsdb port");
             ovsdbConnection.registerConnectionListener(cm);
@@ -281,7 +276,7 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
 
     private static final class SouthboundPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {
         private final SouthboundProvider sp;
-        private final EntityOwnershipListenerRegistration listenerRegistration;
+        private final Registration listenerRegistration;
 
         SouthboundPluginInstanceEntityOwnershipListener(final SouthboundProvider sp,
                 final EntityOwnershipService entityOwnershipService) {
@@ -294,8 +289,9 @@ public class SouthboundProvider implements ClusteredDataTreeChangeListener<Topol
         }
 
         @Override
-        public void ownershipChanged(final EntityOwnershipChange ownershipChange) {
-            sp.handleOwnershipChange(ownershipChange);
+        public void ownershipChanged(final Entity entity, final EntityOwnershipStateChange change,
+                final boolean inJeopardy) {
+            sp.handleOwnershipChange(change);
         }
     }
 

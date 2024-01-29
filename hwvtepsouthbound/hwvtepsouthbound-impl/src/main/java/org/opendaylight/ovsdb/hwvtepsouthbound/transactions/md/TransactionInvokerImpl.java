@@ -30,7 +30,6 @@ import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.binding.api.Transaction;
 import org.opendaylight.mdsal.binding.api.TransactionChain;
-import org.opendaylight.mdsal.binding.api.TransactionChainListener;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -44,8 +43,8 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 @Component(service = TransactionInvoker.class)
-public final class TransactionInvokerImpl implements TransactionInvoker, TransactionChainListener, Runnable,
-        AutoCloseable, UncaughtExceptionHandler {
+public final class TransactionInvokerImpl implements TransactionInvoker, Runnable, AutoCloseable,
+        UncaughtExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionInvokerImpl.class);
     private static final int QUEUE_SIZE = 10000;
 
@@ -68,7 +67,7 @@ public final class TransactionInvokerImpl implements TransactionInvoker, Transac
     @Activate
     public TransactionInvokerImpl(@Reference final DataBroker db) {
         this.db = db;
-        chain = db.createTransactionChain(this);
+        chain = db.createTransactionChain();
         ThreadFactory threadFact = new ThreadFactoryBuilder().setNameFormat("transaction-invoker-impl-%d")
                 .setUncaughtExceptionHandler(this).build();
         executor = Executors.newSingleThreadExecutor(threadFact);
@@ -83,17 +82,6 @@ public final class TransactionInvokerImpl implements TransactionInvoker, Transac
         if (!inputQueue.offer(command)) {
             LOG.error("inputQueue is full (size: {}) - could not offer {}", inputQueue.size(), command);
         }
-    }
-
-    @Override
-    public void onTransactionChainFailed(final TransactionChain txChain,
-            final Transaction transaction, final Throwable cause) {
-        offerFailedTransaction(transaction);
-    }
-
-    @Override
-    public void onTransactionChainSuccessful(final TransactionChain txChain) {
-        // NO OP
     }
 
     @Override
@@ -142,7 +130,7 @@ public final class TransactionInvokerImpl implements TransactionInvoker, Transac
 
             @Override
             public void onFailure(final Throwable throwable) {
-                // NOOP - handled by failure of transaction chain
+                offerFailedTransaction(transaction);
                 command.onFailure();
             }
         }, MoreExecutors.directExecutor());
@@ -181,7 +169,7 @@ public final class TransactionInvokerImpl implements TransactionInvoker, Transac
 
     private void resetTransactionQueue() {
         chain.close();
-        chain = db.createTransactionChain(this);
+        chain = db.createTransactionChain();
         pendingTransactions.clear();
         transactionToCommand.clear();
         failedTransactionQueue.clear();

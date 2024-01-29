@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +17,7 @@ import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -44,7 +43,7 @@ public final class NotifyingDataChangeListener implements AutoCloseable, DataTre
     private final Set<InstanceIdentifier<?>> removedIids = ConcurrentHashMap.newKeySet();
     private final Set<InstanceIdentifier<?>> updatedIids = ConcurrentHashMap.newKeySet();
     private final List<NotifyingDataChangeListener> waitList;
-    private ListenerRegistration<?> listenerRegistration;
+    private Registration listenerRegistration;
     private int mdsalTimeout = MDSAL_TIMEOUT_OPERATIONAL;
     private volatile InstanceIdentifier<?> iid;
     private volatile LogicalDatastoreType type;
@@ -102,20 +101,20 @@ public final class NotifyingDataChangeListener implements AutoCloseable, DataTre
         this.mask = mask;
     }
 
-    @Override
     @SuppressFBWarnings("NN_NAKED_NOTIFY")
-    public void onDataTreeChanged(Collection<DataTreeModification<DataObject>> changes) {
+    @Override
+    public void onDataTreeChanged(List<DataTreeModification<DataObject>> changes) {
         if (!listen) {
             return;
         }
 
         for (DataTreeModification<DataObject> change: changes) {
             DataObjectModification<DataObject> rootNode = change.getRootNode();
-            final InstanceIdentifier<DataObject> identifier = change.getRootPath().getRootIdentifier();
-            switch (rootNode.getModificationType()) {
+            final InstanceIdentifier<DataObject> identifier = change.getRootPath().path();
+            switch (rootNode.modificationType()) {
                 case SUBTREE_MODIFIED:
                 case WRITE:
-                    if (rootNode.getDataBefore() == null) {
+                    if (rootNode.dataBefore() == null) {
                         if ((mask & BIT_CREATE) == BIT_CREATE) {
                             LOG.info("{} DataTreeChanged: created {}", type, identifier);
                             createdIids.add(identifier);
@@ -161,7 +160,7 @@ public final class NotifyingDataChangeListener implements AutoCloseable, DataTre
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void registerDataChangeListener(DataBroker dataBroker) {
-        listenerRegistration = dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.create(type,
+        listenerRegistration = dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.of(type,
                 (InstanceIdentifier)iid), this);
     }
 

@@ -14,12 +14,14 @@ import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.ChoiceIn;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.ExactDataObjectStep;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Key;
 import org.opendaylight.yangtools.yang.binding.KeyAware;
+import org.opendaylight.yangtools.yang.binding.KeyStep;
+import org.opendaylight.yangtools.yang.binding.NodeStep;
 
 public class DataObjectModificationImpl<T extends DataObject> implements DataObjectModification<T> {
-
     private final Collection<DataObjectModification<? extends DataObject>> childNodesCache = new ArrayList<>();
     InstanceIdentifier<T> nodeId;
     T newNode;
@@ -33,33 +35,33 @@ public class DataObjectModificationImpl<T extends DataObject> implements DataObj
 
 
     @Override
-    public T getDataBefore() {
+    public T dataBefore() {
         return oldNode;
     }
 
     @Override
-    public T getDataAfter() {
+    public T dataAfter() {
         return newNode;
     }
 
     @Override
-    public Class<T> getDataType() {
+    public Class<T> dataType() {
         return (Class<T>) newNode.getClass();
     }
 
     @Override
-    public InstanceIdentifier.PathArgument getIdentifier() {
-        return nodeId.getPathArguments().iterator().next();
+    public ExactDataObjectStep<T> step() {
+        return (ExactDataObjectStep<T>) nodeId.getPathArguments().iterator().next();
     }
 
     @Override
-    public ModificationType getModificationType() {
+    public ModificationType modificationType() {
         return ModificationType.WRITE;
 
     }
 
     @Override
-    public Collection<DataObjectModification<? extends DataObject>> getModifiedChildren() {
+    public Collection<DataObjectModification<? extends DataObject>> modifiedChildren() {
         return childNodesCache;
     }
 
@@ -76,7 +78,7 @@ public class DataObjectModificationImpl<T extends DataObject> implements DataObj
     }
 
     @Override
-    public DataObjectModification<? extends DataObject> getModifiedChild(final InstanceIdentifier.PathArgument arg) {
+    public DataObjectModification<? extends DataObject> getModifiedChild(final ExactDataObjectStep<?> childArgument) {
         return null;
     }
 
@@ -84,7 +86,7 @@ public class DataObjectModificationImpl<T extends DataObject> implements DataObj
     @SuppressWarnings("unchecked")
     public <C extends KeyAware<K> & ChildOf<? super T>, K extends Key<C>> DataObjectModification<C>
         getModifiedChildListItem(final Class<C> listItem, final K listKey) {
-        return (DataObjectModification<C>) getModifiedChild(InstanceIdentifier.IdentifiableItem.of(listItem, listKey));
+        return (DataObjectModification<C>) getModifiedChild(new KeyStep<>(listItem, listKey));
     }
 
     @Override
@@ -97,7 +99,7 @@ public class DataObjectModificationImpl<T extends DataObject> implements DataObj
     @Override
     @SuppressWarnings("unchecked")
     public <C extends ChildOf<? super T>> DataObjectModification<C> getModifiedChildContainer(final Class<C> arg) {
-        return (DataObjectModification<C>) getModifiedChild(InstanceIdentifier.Item.of(arg));
+        return (DataObjectModification<C>) getModifiedChild(new NodeStep<>(arg));
     }
 
     @Override
@@ -110,7 +112,7 @@ public class DataObjectModificationImpl<T extends DataObject> implements DataObj
     @SuppressWarnings("unchecked")
     public <C extends Augmentation<T> & DataObject> DataObjectModification<C> getModifiedAugmentation(
             final Class<C> augmentation) {
-        return (DataObjectModification<C>) getModifiedChild(InstanceIdentifier.Item.of(augmentation));
+        return (DataObjectModification<C>) getModifiedChild(new NodeStep<>(augmentation));
     }
 
     @Override

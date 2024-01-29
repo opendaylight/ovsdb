@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -23,6 +22,7 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
@@ -33,9 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
-import org.opendaylight.mdsal.binding.api.Transaction;
 import org.opendaylight.mdsal.binding.api.TransactionChain;
-import org.opendaylight.mdsal.binding.api.TransactionChainListener;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionInvokerImplTest {
@@ -46,14 +44,14 @@ public class TransactionInvokerImplTest {
 
     @Before
     public void setUp() {
-        doReturn(chain).when(db).createTransactionChain(any(TransactionChainListener.class));
+        doReturn(chain).when(db).createTransactionChain();
         doNothing().when(chain).close();
     }
 
     @Test
     public void testConstructor() throws InterruptedException {
         try (TransactionInvokerImpl invoker = new TransactionInvokerImpl(db)) {
-            verify(db).createTransactionChain(any(TransactionChainListener.class));
+            verify(db).createTransactionChain();
             assertNotNull(getInternalState(invoker, "executor"));
         }
     }
@@ -69,17 +67,6 @@ public class TransactionInvokerImplTest {
         assertTrue(inputQueue.contains(command));
     }
 
-    @Test
-    public void testOnTransactionChainFailed() {
-        final TransactionInvokerImpl invoker = new TransactionInvokerImpl(db, new ArrayList<>());
-
-        final Transaction transaction = mock(Transaction.class);
-        invoker.onTransactionChainFailed(chain, transaction, new Throwable());
-
-        final Queue<?> failedQueue = getInternalState(invoker, "failedTransactionQueue");
-        assertEquals(1, failedQueue.size());
-        assertTrue(failedQueue.contains(transaction));
-    }
 
     @Test
     public void testExtractResubmitCommands() {
@@ -94,7 +81,11 @@ public class TransactionInvokerImplTest {
             // Given pending transaction order ...
             ImmutableList.of(entry(tx1, cmd1), entry(tx2, cmd2), entry(tx3, cmd3)),
             // .. if tx2 fails ...
-            Collections.singletonList(tx2));
+            List.of(tx2));
+
+        final Queue<?> failedQueue = getInternalState(invoker, "failedTransactionQueue");
+        assertEquals(1, failedQueue.size());
+        assertTrue(failedQueue.contains(tx2));
 
         // .. we want to replay tx2 and tx3
         assertEquals(ImmutableList.of(cmd2, cmd3), invoker.extractResubmitCommands());

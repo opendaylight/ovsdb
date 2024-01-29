@@ -9,6 +9,7 @@ package org.opendaylight.ovsdb.southbound;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -62,7 +63,7 @@ public class InstanceIdentifierCodecTest {
     @Test
     public void testInstanceIdentifierCodec() throws Exception {
         InstanceIdentifierCodec codec = new InstanceIdentifierCodec(schemaService, bindingNormalizedNodeSerializer);
-        verify(schemaService).registerSchemaContextListener(codec);
+        verify(schemaService).registerSchemaContextListener(any());
     }
 
     @Test

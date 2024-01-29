@@ -116,10 +116,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.IdentifiableItem;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.Item;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.binding.Key;
+import org.opendaylight.yangtools.yang.binding.KeyStep;
+import org.opendaylight.yangtools.yang.binding.NodeStep;
 import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -1032,9 +1031,9 @@ public class SouthboundUtils {
     // see OVSDB-470 for background
     private static boolean matchesBridgeName(ManagedNodeEntry managedNode, String bridgeName) {
         InstanceIdentifier<?> bridgeIid = managedNode.getBridgeRef().getValue();
-        for (PathArgument bridgeIidPathArg : bridgeIid.getPathArguments()) {
-            if (bridgeIidPathArg instanceof IdentifiableItem<?, ?> identifiableItem) {
-                Key<?> key = identifiableItem.getKey();
+        for (var bridgeIidPathArg : bridgeIid.getPathArguments()) {
+            if (bridgeIidPathArg instanceof KeyStep<?, ?> identifiableItem) {
+                Key<?> key = identifiableItem.key();
                 if (key instanceof NodeKey nodeKey) {
                     if (nodeKey.getNodeId().getValue().contains(bridgeName)) {
                         return true;
@@ -1042,8 +1041,8 @@ public class SouthboundUtils {
                 } else if (key.toString().contains(bridgeName)) {
                     return true;
                 }
-            } else if (bridgeIidPathArg instanceof Item<?> item) {
-                if (item.getType().getName().contains(bridgeName)) {
+            } else if (bridgeIidPathArg instanceof NodeStep<?> item) {
+                if (item.type().getName().contains(bridgeName)) {
                     return true;
                 }
             } else {

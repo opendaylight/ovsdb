@@ -35,7 +35,6 @@ import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.binding.api.Transaction;
 import org.opendaylight.mdsal.binding.api.TransactionChain;
-import org.opendaylight.mdsal.binding.api.TransactionChainListener;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionInvokerImplTest {
@@ -46,14 +45,14 @@ public class TransactionInvokerImplTest {
 
     @Before
     public void setUp() {
-        doReturn(chain).when(db).createTransactionChain(any(TransactionChainListener.class));
+        doReturn(chain).when(db).createTransactionChain();
         doNothing().when(chain).close();
     }
 
     @Test
     public void testConstructor() throws InterruptedException {
         try (TransactionInvokerImpl invoker = new TransactionInvokerImpl(db)) {
-            verify(db).createTransactionChain(any(TransactionChainListener.class));
+            verify(db).createTransactionChain();
             assertNotNull(getInternalState(invoker, "executor"));
         }
     }

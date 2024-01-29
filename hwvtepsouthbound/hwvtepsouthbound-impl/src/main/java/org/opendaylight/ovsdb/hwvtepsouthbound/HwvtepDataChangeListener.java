@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import java.net.ConnectException;
@@ -17,10 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
-import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
@@ -36,31 +35,31 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class HwvtepDataChangeListener implements ClusteredDataTreeChangeListener<Node>, AutoCloseable {
+public final class HwvtepDataChangeListener implements DataTreeChangeListener<Node>, AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(HwvtepDataChangeListener.class);
 
-    private ListenerRegistration<HwvtepDataChangeListener> registration;
     private final HwvtepConnectionManager hcm;
     private final DataBroker db;
-    private static final Logger LOG = LoggerFactory.getLogger(HwvtepDataChangeListener.class);
+
+    private Registration registration;
 
     HwvtepDataChangeListener(DataBroker db, HwvtepConnectionManager hcm) {
         LOG.info("Registering HwvtepDataChangeListener");
         this.db = db;
         this.hcm = hcm;
-        registerListener();
-    }
-
-    private void registerListener() {
-        final DataTreeIdentifier<Node> treeId =
-                DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION, getWildcardPath());
+        final var treeId = DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION,
+            InstanceIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+            .child(Node.class)
+            .build());
 
         LOG.trace("Registering on path: {}", treeId);
-        registration = db.registerDataTreeChangeListener(treeId, HwvtepDataChangeListener.this);
+        registration = db.registerTreeChangeListener(treeId, this);
     }
 
     @Override
@@ -71,7 +70,7 @@ public final class HwvtepDataChangeListener implements ClusteredDataTreeChangeLi
     }
 
     @Override
-    public void onDataTreeChanged(Collection<DataTreeModification<Node>> changes) {
+    public void onDataTreeChanged(List<DataTreeModification<Node>> changes) {
         LOG.trace("onDataTreeChanged: {}", changes);
 
         /* TODO:
@@ -89,9 +88,9 @@ public final class HwvtepDataChangeListener implements ClusteredDataTreeChangeLi
         disconnectViaCli(changes);
     }
 
-    private void connect(Collection<DataTreeModification<Node>> changes) {
+    private void connect(List<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+            final InstanceIdentifier<Node> key = change.getRootPath().path();
             final DataObjectModification<Node> mod = change.getRootNode();
             Node node = getCreated(mod);
             if (node != null) {
@@ -115,9 +114,9 @@ public final class HwvtepDataChangeListener implements ClusteredDataTreeChangeLi
         }
     }
 
-    private void updateConnections(Collection<DataTreeModification<Node>> changes) {
+    private void updateConnections(List<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+            final InstanceIdentifier<Node> key = change.getRootPath().path();
             final DataObjectModification<Node> mod = change.getRootNode();
             Node updated = getUpdated(mod);
             if (updated != null) {
@@ -145,7 +144,7 @@ public final class HwvtepDataChangeListener implements ClusteredDataTreeChangeLi
         }
     }
 
-    private void updateData(Collection<DataTreeModification<Node>> changes) {
+    private void updateData(List<DataTreeModification<Node>> changes) {
         /* TODO:
          * Get connection instances for each change
          * Update data for each connection
@@ -162,7 +161,7 @@ public final class HwvtepDataChangeListener implements ClusteredDataTreeChangeLi
 
     private void disconnect(Collection<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+            final InstanceIdentifier<Node> key = change.getRootPath().path();
             final DataObjectModification<Node> mod = change.getRootNode();
             Node deleted = getRemoved(mod);
             if (deleted != null) {
@@ -180,28 +179,28 @@ public final class HwvtepDataChangeListener implements ClusteredDataTreeChangeLi
     }
 
     private static Node getCreated(DataObjectModification<Node> mod) {
-        if (mod.getModificationType() == ModificationType.WRITE && mod.getDataBefore() == null) {
-            return mod.getDataAfter();
+        if (mod.modificationType() == ModificationType.WRITE && mod.dataBefore() == null) {
+            return mod.dataAfter();
         }
         return null;
     }
 
     private static Node getRemoved(DataObjectModification<Node> mod) {
-        if (mod.getModificationType() == ModificationType.DELETE) {
-            return mod.getDataBefore();
+        if (mod.modificationType() == ModificationType.DELETE) {
+            return mod.dataBefore();
         }
         return null;
     }
 
     private static Node getUpdated(DataObjectModification<Node> mod) {
         Node node = null;
-        switch (mod.getModificationType()) {
+        switch (mod.modificationType()) {
             case SUBTREE_MODIFIED:
-                node = mod.getDataAfter();
+                node = mod.dataAfter();
                 break;
             case WRITE:
-                if (mod.getDataBefore() != null) {
-                    node = mod.getDataAfter();
+                if (mod.dataBefore() != null) {
+                    node = mod.dataAfter();
                 }
                 break;
             default:
@@ -212,14 +211,14 @@ public final class HwvtepDataChangeListener implements ClusteredDataTreeChangeLi
 
     private static Node getOriginal(DataObjectModification<Node> mod) {
         Node node = null;
-        switch (mod.getModificationType()) {
+        switch (mod.modificationType()) {
             case SUBTREE_MODIFIED:
             case DELETE:
-                node = mod.getDataBefore();
+                node = mod.dataBefore();
                 break;
             case WRITE:
-                if (mod.getDataBefore() != null) {
-                    node = mod.getDataBefore();
+                if (mod.dataBefore() != null) {
+                    node = mod.dataBefore();
                 }
                 break;
             default:
@@ -228,21 +227,15 @@ public final class HwvtepDataChangeListener implements ClusteredDataTreeChangeLi
         return node;
     }
 
-    private static InstanceIdentifier<Node> getWildcardPath() {
-        return InstanceIdentifier.create(NetworkTopology.class)
-                        .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
-                        .child(Node.class);
-    }
-
     private Map<HwvtepConnectionInstance, Collection<DataTreeModification<Node>>> changesByConnectionInstance(
             Collection<DataTreeModification<Node>> changes) {
         Map<HwvtepConnectionInstance, Collection<DataTreeModification<Node>>> result = new HashMap<>();
         for (DataTreeModification<Node> change : changes) {
             final DataObjectModification<Node> mod = change.getRootNode();
             //From original node to get connection instance
-            Node node = mod.getDataBefore() != null ? mod.getDataBefore() : mod.getDataAfter();
+            Node node = mod.dataBefore() != null ? mod.dataBefore() : mod.dataAfter();
             HwvtepConnectionInstance connection = hcm.getConnectionInstanceFromNodeIid(
-                    change.getRootPath().getRootIdentifier());
+                    change.getRootPath().path());
             if (connection != null) {
                 if (!result.containsKey(connection)) {
                     List<DataTreeModification<Node>> tempChanges = new ArrayList<>();
@@ -262,25 +255,24 @@ public final class HwvtepDataChangeListener implements ClusteredDataTreeChangeLi
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void disconnectViaCli(Collection<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            String nodeId = change.getRootPath().getRootIdentifier().firstKeyOf(Node.class).getNodeId().getValue();
+            String nodeId = change.getRootPath().path().firstKeyOf(Node.class).getNodeId().getValue();
             if (!nodeId.contains("/disconnect")) {
                 continue;
             }
             int reconcileIndex = nodeId.indexOf("/disconnect");
             String globalNodeId = nodeId.substring(0, reconcileIndex);
-            InstanceIdentifier<Node> globalNodeIid = change.getRootPath()
-                .getRootIdentifier().firstIdentifierOf(Topology.class)
+            InstanceIdentifier<Node> globalNodeIid = change.getRootPath().path().firstIdentifierOf(Topology.class)
                 .child(Node.class, new NodeKey(new NodeId(globalNodeId)));
             HwvtepConnectionInstance connectionInstance = hcm.getConnectionInstanceFromNodeIid(globalNodeIid);
             if (connectionInstance != null) {
                 LOG.error("Disconnecting from controller {}", nodeId);
                 new Thread(() -> {
                     ReadWriteTransaction tx = db.newReadWriteTransaction();
-                    tx.delete(LogicalDatastoreType.CONFIGURATION, change.getRootPath().getRootIdentifier());
+                    tx.delete(LogicalDatastoreType.CONFIGURATION, change.getRootPath().path());
                     try {
                         tx.commit().get();
                     } catch (ExecutionException | InterruptedException e) {
-                        LOG.error("Failed to delete the node {}", change.getRootPath().getRootIdentifier());
+                        LOG.error("Failed to delete the node {}", change.getRootPath().path());
                     }
                 }).start();
                 try {

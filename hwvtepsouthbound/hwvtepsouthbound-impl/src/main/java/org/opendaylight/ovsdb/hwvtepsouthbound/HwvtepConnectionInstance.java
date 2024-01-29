@@ -58,6 +58,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +74,7 @@ public class HwvtepConnectionInstance {
     private MonitorCallBack callback;
     private volatile boolean hasDeviceOwnership = false;
     private Entity connectedEntity;
-    private EntityOwnershipCandidateRegistration deviceOwnershipCandidateRegistration;
+    private Registration deviceOwnershipCandidateRegistration;
     private HwvtepGlobalAugmentation initialCreatedData = null;
     private final HwvtepDeviceInfo deviceInfo;
     private final DataBroker dataBroker;
@@ -345,8 +346,7 @@ public class HwvtepConnectionInstance {
         }
     }
 
-    public void setDeviceOwnershipCandidateRegistration(
-            @NonNull final EntityOwnershipCandidateRegistration registration) {
+    public void setDeviceOwnershipCandidateRegistration(final @NonNull Registration registration) {
         this.deviceOwnershipCandidateRegistration = registration;
     }
 

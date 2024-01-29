@@ -33,10 +33,8 @@ import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSeriali
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipCandidateRegistration;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListener;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListenerRegistration;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipChangeState;
@@ -45,6 +43,7 @@ import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 
@@ -60,9 +59,8 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
     public void setUp() throws CandidateAlreadyRegisteredException {
         entityOwnershipService = mock(EntityOwnershipService.class);
         when(entityOwnershipService.registerListener(anyString(), any(EntityOwnershipListener.class))).thenReturn(
-                mock(EntityOwnershipListenerRegistration.class));
-        when(entityOwnershipService.registerCandidate(any(Entity.class))).thenReturn(mock(
-                EntityOwnershipCandidateRegistration.class));
+                mock(Registration.class));
+        when(entityOwnershipService.registerCandidate(any(Entity.class))).thenReturn(mock(Registration.class));
 
         diagStatusService = Mockito.mock(DiagStatusService.class);
         when(diagStatusService.register(any())).thenReturn(Mockito.mock(ServiceRegistration.class));

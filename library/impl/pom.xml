@@ -149,9 +149,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
               org.opendaylight.ovsdb.lib.*,
               org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.library.impl.rev141210
             </Export-Package>
-
-            <!-- FIXME: AAA-268: remove this instruction once aaa-cert exposes Provide-Capability -->
-            <_dsannotations-options>norequirements</_dsannotations-options>
           </instructions>
         </configuration>
       </plugin>

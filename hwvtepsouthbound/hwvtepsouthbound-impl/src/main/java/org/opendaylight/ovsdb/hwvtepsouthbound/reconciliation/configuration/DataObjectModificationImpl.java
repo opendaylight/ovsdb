@@ -14,6 +14,8 @@ import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.ChoiceIn;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.DataObjectStep;
+import org.opendaylight.yangtools.yang.binding.ExactDataObjectStep;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Key;
 import org.opendaylight.yangtools.yang.binding.KeyAware;
@@ -33,33 +35,33 @@ public class DataObjectModificationImpl<T extends DataObject> implements DataObj
 
 
     @Override
-    public T getDataBefore() {
+    public T dataBefore() {
         return oldNode;
     }
 
     @Override
-    public T getDataAfter() {
+    public T dataAfter() {
         return newNode;
     }
 
     @Override
-    public Class<T> getDataType() {
+    public Class<T> dataType() {
         return (Class<T>) newNode.getClass();
     }
 
     @Override
-    public InstanceIdentifier.PathArgument getIdentifier() {
-        return nodeId.getPathArguments().iterator().next();
+    public ExactDataObjectStep<T> step() {
+        return (ExactDataObjectStep<T>) nodeId.getPathArguments().iterator().next();
     }
 
     @Override
-    public ModificationType getModificationType() {
+    public ModificationType modificationType() {
         return ModificationType.WRITE;
 
     }
 
     @Override
-    public Collection<DataObjectModification<? extends DataObject>> getModifiedChildren() {
+    public Collection<DataObjectModification<? extends DataObject>> modifiedChildren() {
         return childNodesCache;
     }
 

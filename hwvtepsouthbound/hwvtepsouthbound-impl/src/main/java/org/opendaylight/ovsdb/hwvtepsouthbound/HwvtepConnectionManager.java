@@ -64,6 +64,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -414,8 +415,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         hwvtepConnectionInstance.setConnectedEntity(candidateEntity);
 
         try {
-            EntityOwnershipCandidateRegistration registration =
-                    entityOwnershipService.registerCandidate(candidateEntity);
+            Registration registration = entityOwnershipService.registerCandidate(candidateEntity);
             hwvtepConnectionInstance.setDeviceOwnershipCandidateRegistration(registration);
             LOG.info("HWVTEP entity {} is registered for ownership.", candidateEntity);
         } catch (CandidateAlreadyRegisteredException e) {
@@ -428,8 +428,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             final HwvtepConnectionInstance hwvtepConnectionInstance) {
         //If entity already has owner, it won't get notification from EntityOwnershipService
         //so cache the connection instances.
-        java.util.Optional<EntityOwnershipState> ownershipStateOpt =
-                entityOwnershipService.getOwnershipState(candidateEntity);
+        Optional<EntityOwnershipState> ownershipStateOpt = entityOwnershipService.getOwnershipState(candidateEntity);
         if (ownershipStateOpt.isPresent()) {
             EntityOwnershipState ownershipState = ownershipStateOpt.orElseThrow();
             putConnectionInstance(hwvtepConnectionInstance.getMDConnectionInfo(), hwvtepConnectionInstance);
@@ -675,7 +674,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
     private static final class HwvtepDeviceEntityOwnershipListener implements EntityOwnershipListener {
         private final HwvtepConnectionManager hcm;
-        private final EntityOwnershipListenerRegistration listenerRegistration;
+        private final Registration listenerRegistration;
 
         HwvtepDeviceEntityOwnershipListener(final HwvtepConnectionManager hcm,
                 final EntityOwnershipService entityOwnershipService) {

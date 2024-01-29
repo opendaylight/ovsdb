@@ -11,19 +11,17 @@ import java.util.Optional;
 import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
-import org.opendaylight.yangtools.yang.data.util.AbstractModuleStringInstanceIdentifierCodec;
+import org.opendaylight.yangtools.yang.data.util.AbstractStringInstanceIdentifierCodec;
 import org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import org.opendaylight.yangtools.yang.model.api.EffectiveModelContextListener;
 import org.opendaylight.yangtools.yang.model.api.Module;
 
-public final class InstanceIdentifierCodec
-        // FIXME: this really wants to be wired as yangtools-data-codec-gson's codecs, because ...
-        extends AbstractModuleStringInstanceIdentifierCodec implements EffectiveModelContextListener {
-
+// FIXME: this really wants to be wired as yangtools-data-codec-gson's codecs, because ...
+public final class InstanceIdentifierCodec extends AbstractStringInstanceIdentifierCodec {
     // FIXME: this is not the only interface exposed from binding-dom-codec-api, something different might be more
     //        appropriate.
     private final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer;
@@ -33,7 +31,7 @@ public final class InstanceIdentifierCodec
 
     public InstanceIdentifierCodec(final DOMSchemaService schemaService,
             final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer) {
-        schemaService.registerSchemaContextListener(this);
+        schemaService.registerSchemaContextListener(this::onModelContextUpdated);
         this.bindingNormalizedNodeSerializer = bindingNormalizedNodeSerializer;
     }
 
@@ -44,8 +42,9 @@ public final class InstanceIdentifierCodec
     }
 
     @Override
-    protected Module moduleForPrefix(final String prefix) {
-        return context != null ? context.findModule(prefix, Optional.empty()).orElse(null) : null;
+    protected QNameModule moduleForPrefix(final String prefix) {
+        return context != null ? context.findModule(prefix, Optional.empty()).map(Module::getQNameModule).orElse(null)
+            : null;
     }
 
     @Override
@@ -54,7 +53,6 @@ public final class InstanceIdentifierCodec
                 : null;
     }
 
-    @Override
     public void onModelContextUpdated(final EffectiveModelContext schemaContext) {
         this.context = schemaContext;
         this.dataSchemaContextTree = DataSchemaContextTree.from(schemaContext);

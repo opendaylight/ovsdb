@@ -8,7 +8,7 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import com.google.common.util.concurrent.FluentFuture;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -16,8 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.opendaylight.mdsal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
@@ -25,10 +25,7 @@ import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSeriali
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
 import org.opendaylight.mdsal.eos.binding.api.Entity;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipCandidateRegistration;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipChange;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListener;
-import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipListenerRegistration;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration.HwvtepReconciliationManager;
@@ -41,7 +38,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -53,7 +50,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 @Component(service = HwvtepSouthboundProviderInfo.class)
 public final class HwvtepSouthboundProvider
-        implements HwvtepSouthboundProviderInfo, ClusteredDataTreeChangeListener<Topology>, AutoCloseable {
+        implements HwvtepSouthboundProviderInfo, DataTreeChangeListener<Topology>, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundProvider.class);
     private static final String ENTITY_TYPE = "ovsdb-hwvtepsouthbound-provider";
@@ -63,12 +60,12 @@ public final class HwvtepSouthboundProvider
     private final OvsdbConnection ovsdbConnection;
 
     private HwvtepConnectionManager cm;
-    private EntityOwnershipCandidateRegistration registration;
+    private Registration registration;
     private HwvtepsbPluginInstanceEntityOwnershipListener providerOwnershipChangeListener;
     private HwvtepDataChangeListener hwvtepDTListener;
     private HwvtepReconciliationManager hwvtepReconciliationManager;
     private final AtomicBoolean registered = new AtomicBoolean(false);
-    private ListenerRegistration<HwvtepSouthboundProvider> operTopologyRegistration;
+    private Registration operTopologyRegistration;
 
     @Inject
     @Activate
@@ -102,11 +99,10 @@ public final class HwvtepSouthboundProvider
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID));
-        DataTreeIdentifier<Topology> treeId =
-                DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL, path);
+        DataTreeIdentifier<Topology> treeId = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, path);
 
         LOG.trace("Registering listener for path {}", treeId);
-        operTopologyRegistration = dataBroker.registerDataTreeChangeListener(treeId, this);
+        operTopologyRegistration = dataBroker.registerTreeChangeListener(treeId, this);
         Scheduler.getScheduledExecutorService().schedule(() -> {
             if (!registered.get()) {
                 openOvsdbPort();
@@ -182,7 +178,7 @@ public final class HwvtepSouthboundProvider
 
 
     @Override
-    public void onDataTreeChanged(final Collection<DataTreeModification<Topology>> collection) {
+    public void onDataTreeChanged(final List<DataTreeModification<Topology>> collection) {
         openOvsdbPort();
 
         if (operTopologyRegistration != null) {
@@ -201,7 +197,7 @@ public final class HwvtepSouthboundProvider
 
     private static final class HwvtepsbPluginInstanceEntityOwnershipListener implements EntityOwnershipListener {
         private final HwvtepSouthboundProvider hsp;
-        private final EntityOwnershipListenerRegistration listenerRegistration;
+        private final Registration listenerRegistration;
 
         HwvtepsbPluginInstanceEntityOwnershipListener(final HwvtepSouthboundProvider hsp,
                 final EntityOwnershipService entityOwnershipService) {

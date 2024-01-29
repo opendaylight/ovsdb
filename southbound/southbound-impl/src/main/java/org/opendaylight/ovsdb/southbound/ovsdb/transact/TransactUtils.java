@@ -46,6 +46,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Key;
 import org.opendaylight.yangtools.yang.binding.KeyAware;
+import org.opendaylight.yangtools.yang.binding.KeyStep;
 
 // This class needs to be mocked
 @SuppressWarnings("checkstyle:FinalClass")
@@ -345,9 +346,9 @@ public class TransactUtils {
             InstanceIdentifier<T> path,
             DataObjectModification<?> child) {
         @SuppressWarnings("unchecked")
-        final Class<N> item = (Class<N>) child.getDataType();
-        if (child.getIdentifier() instanceof InstanceIdentifier.IdentifiableItem) {
-            return path.child(item, ((InstanceIdentifier.IdentifiableItem<N, K>) child.getIdentifier()).getKey());
+        final Class<N> item = (Class<N>) child.dataType();
+        if (child.step() instanceof KeyStep<?, ?> keyStep) {
+            return path.child(item, (K) keyStep.key());
         }
 
         return path.child(item);

@@ -240,15 +240,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         public void onDataTreeChanged(final List<DataTreeModification<DataObject>> changes) {
             for (DataTreeModification<DataObject> change: changes) {
                 DataObjectModification<DataObject> rootNode = change.getRootNode();
-                final InstanceIdentifier<DataObject> identifier = change.getRootPath().getRootIdentifier();
-                switch (rootNode.getModificationType()) {
+                final InstanceIdentifier<DataObject> identifier = change.getRootPath().path();
+                switch (rootNode.modificationType()) {
                     case SUBTREE_MODIFIED:
                     case WRITE:
-                        if (rootNode.getDataBefore() == null) {
+                        if (rootNode.dataBefore() == null) {
                             LOG.info("{} DataTreeChanged: created {}", type, identifier);
                             createdIids.add(identifier);
 
-                            final DataObject obj = rootNode.getDataAfter();
+                            final DataObject obj = rootNode.dataAfter();
                             if (obj instanceof ManagedNodeEntry managedNodeEntry) {
                                 LOG.info("{} DataChanged: created managed {}",
                                         managedNodeEntry.getBridgeRef().getValue());
@@ -292,8 +292,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
 
         public void registerDataChangeListener() {
-            dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.create(type,
-                    (InstanceIdentifier)iid), this);
+            dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.of(type, (InstanceIdentifier)iid), this);
         }
 
         public void waitForCreation(final long timeout) throws InterruptedException {
@@ -454,9 +453,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         assertTrue("Did not find " + SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue(), getOvsdbTopology());
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         final InstanceIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
-        dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION,
+        dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION,
                 (InstanceIdentifier)iid), CONFIGURATION_LISTENER);
-        dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.create(LogicalDatastoreType.OPERATIONAL,
+        dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL,
                 (InstanceIdentifier)iid), OPERATIONAL_LISTENER);
 
         ovsdbNode = connectOvsdbNode(connectionInfo);
@@ -2624,7 +2623,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          * @return The builder.
          */
         public SouthboundTestCaseBuilder<I, T> name(final String value) {
-            this.name = value;
+            name = value;
             return this;
         }
 
@@ -2636,7 +2635,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          */
         @SafeVarargs
         public final SouthboundTestCaseBuilder<I, T> input(final T... values) {
-            this.inputValues = Lists.newArrayList(values);
+            inputValues = Lists.newArrayList(values);
             return this;
         }
 
@@ -2646,7 +2645,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          * @return The builder.
          */
         public SouthboundTestCaseBuilder<I, T> expectInputAsOutput() {
-            this.expectedValues = this.inputValues;
+            expectedValues = inputValues;
             return this;
         }
 
@@ -2656,7 +2655,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          * @return The builder.
          */
         public SouthboundTestCaseBuilder<I, T> expectNoOutput() {
-            this.expectedValues = null;
+            expectedValues = null;
             return this;
         }
 

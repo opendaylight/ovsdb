@@ -30,7 +30,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <dependency>
                 <groupId>org.opendaylight.netconf</groupId>
                 <artifactId>netconf-artifacts</artifactId>
-                <version>7.0.0</version>
+                <version>7.0.1</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>

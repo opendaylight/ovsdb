@@ -42,13 +42,12 @@ public class BridgeOperationalState {
     @SuppressWarnings("IllegalCatch")
     public Optional<Node> getBridgeNode(InstanceIdentifier<?> iid) {
         InstanceIdentifier<Node> nodeIid = iid.firstIdentifierOf(Node.class);
-        Optional<Node> bridgeNode = Optional.empty();
         try (ReadTransaction transaction = db.newReadOnlyTransaction()) {
-            bridgeNode = SouthboundUtil.readNode(transaction, nodeIid);
+            return SouthboundUtil.readNode(transaction, nodeIid);
         } catch (Exception exp) {
             LOG.error("Error in getting the brideNode for {}", iid, exp);
+            return Optional.empty();
         }
-        return bridgeNode;
     }
 
     public Optional<OvsdbBridgeAugmentation> getOvsdbBridgeAugmentation(InstanceIdentifier<?> iid) {

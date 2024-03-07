@@ -11,6 +11,7 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -59,8 +60,9 @@ public class QosRemovedCommand implements TransactCommand {
                 Map<QosEntriesKey, QosEntries> updatedQosEntries = update.getQosEntries();
                 if (origQosEntries != null && !origQosEntries.isEmpty()) {
                     for (QosEntries origQosEntry : origQosEntries.values()) {
-                        OvsdbNodeAugmentation operNode = state.getBridgeNode(ovsdbNodeIid).orElseThrow()
-                                .augmentation(OvsdbNodeAugmentation.class);
+                        OvsdbNodeAugmentation operNode = state.getBridgeNode(ovsdbNodeIid)
+                            .orElseThrow(() -> new NoSuchElementException("Cannot find " + ovsdbNodeIid))
+                            .augmentation(OvsdbNodeAugmentation.class);
                         if (updatedQosEntries == null || !updatedQosEntries.containsKey(origQosEntry.key())) {
                             LOG.debug("Received request to delete QoS entry {}", origQosEntry.getQosId());
                             Uuid qosUuid = getQosEntryUuid(operNode.getQosEntries(), origQosEntry.key());

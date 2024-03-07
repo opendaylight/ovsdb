@@ -64,11 +64,12 @@ public class QosUpdateCommand implements TransactCommand {
         for (Entry<InstanceIdentifier<QosEntries>, QosEntries> qosMapEntry: createdOrUpdated.entrySet()) {
             InstanceIdentifier<OvsdbNodeAugmentation> iid =
                     qosMapEntry.getKey().firstIdentifierOf(OvsdbNodeAugmentation.class);
-            if (!state.getBridgeNode(iid).isPresent()) {
+            final var optBridgeNode = state.getBridgeNode(iid);
+            if (optBridgeNode.isEmpty()) {
                 return;
             }
-            OvsdbNodeAugmentation operNode =
-                state.getBridgeNode(iid).orElseThrow().augmentation(OvsdbNodeAugmentation.class);
+
+            OvsdbNodeAugmentation operNode = optBridgeNode.orElseThrow().augmentation(OvsdbNodeAugmentation.class);
 
             QosEntries qosEntry = qosMapEntry.getValue();
             Qos qos = transaction.getTypedRowWrapper(Qos.class);

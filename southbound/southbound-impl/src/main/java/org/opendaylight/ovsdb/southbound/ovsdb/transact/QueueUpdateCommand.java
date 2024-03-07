@@ -58,10 +58,11 @@ public class QueueUpdateCommand implements TransactCommand {
     private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Map<InstanceIdentifier<Queues>, Queues> createdOrUpdated,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
-        for (Entry<InstanceIdentifier<Queues>, Queues> queueMapEntry: createdOrUpdated.entrySet()) {
+        for (Entry<InstanceIdentifier<Queues>, Queues> queueMapEntry : createdOrUpdated.entrySet()) {
             InstanceIdentifier<OvsdbNodeAugmentation> iid =
                     queueMapEntry.getKey().firstIdentifierOf(OvsdbNodeAugmentation.class);
-            if (!state.getBridgeNode(iid).isPresent()) {
+            final var optBridgeNode = state.getBridgeNode(iid);
+            if (optBridgeNode.isEmpty()) {
                 return;
             }
 
@@ -100,23 +101,20 @@ public class QueueUpdateCommand implements TransactCommand {
                 LOG.warn("Incomplete Queue other_config", e);
             }
 
-            OvsdbNodeAugmentation operNode =
-                state.getBridgeNode(iid).orElseThrow().augmentation(OvsdbNodeAugmentation.class);
+            OvsdbNodeAugmentation operNode = optBridgeNode.orElseThrow().augmentation(OvsdbNodeAugmentation.class);
             Uuid operQueueUuid = getQueueEntryUuid(operNode.getQueues(), queueEntry.key());
             if (operQueueUuid == null) {
                 UUID namedUuid = new UUID(SouthboundConstants.QUEUE_NAMED_UUID_PREFIX
                         + TransactUtils.bytesToHexString(queueEntry.getQueueId().getValue().getBytes(UTF_8)));
                 transaction.add(op.insert(queue).withId(namedUuid.toString()));
-                LOG.info("Added queue Uuid : {} for Ovsdb Node : {}",
-                        namedUuid, operNode);
+                LOG.info("Added queue Uuid : {} for Ovsdb Node : {}", namedUuid, operNode);
             } else {
                 UUID uuid = new UUID(operQueueUuid.getValue());
                 Queue extraQueue = transaction.getTypedRowSchema(Queue.class);
                 extraQueue.getUuidColumn().setData(uuid);
                 transaction.add(op.update(queue)
                         .where(extraQueue.getUuidColumn().getSchema().opEqual(uuid)).build());
-                LOG.info("Updated queue entries: {} for Ovsdb Node : {}",
-                        queue, operNode);
+                LOG.info("Updated queue entries: {} for Ovsdb Node : {}", queue, operNode);
             }
         }
     }

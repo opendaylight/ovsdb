@@ -7,6 +7,8 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.FluentFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -71,16 +73,9 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
     private static final String ENTITY_TYPE = "ovsdb-southbound-provider";
 
     // FIXME: get rid of this static
-    @SuppressFBWarnings("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD")
-    private static DataBroker db;
-    // FIXME: get rid of this static
     private static List<String> reconcileBridgeInclusionList = List.of();
     // FIXME: get rid of this static
     private static List<String> reconcileBridgeExclusionList = List.of();
-
-    public static DataBroker getDb() {
-        return db;
-    }
 
     public static List<String> getBridgesReconciliationInclusionList() {
         return reconcileBridgeInclusionList;
@@ -107,6 +102,7 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
     private final SystemReadyMonitor systemReadyMonitor;
     private final AtomicBoolean registered = new AtomicBoolean(false);
     private final OvsdbDiagStatusProvider ovsdbStatusProvider;
+    private final DataBroker dataBroker;
 
     private Registration registration;
     private Registration operTopologyRegistration;
@@ -152,8 +148,8 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
                               final boolean skipMonitoringManagerStatus,
                               final List<String> bridgeReconciliationInclusions,
                               final List<String> bridgeReconciliationExclusions) {
+        this.dataBroker = requireNonNull(dataBroker);
         // FIXME: get rid of this static wiring
-        db = dataBroker;
         reconcileBridgeInclusionList = bridgeReconciliationInclusions;
         reconcileBridgeExclusionList = bridgeReconciliationExclusions;
         LOG.debug("skipManagerStatus set to {}", skipMonitoringManagerStatus);
@@ -224,11 +220,11 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
         ovsdbStatusProvider.close();
     }
 
-    private static void initializeOvsdbTopology(final @NonNull LogicalDatastoreType type) {
+    private void initializeOvsdbTopology(final @NonNull LogicalDatastoreType type) {
         InstanceIdentifier<Topology> path = InstanceIdentifier
                 .create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
-        ReadWriteTransaction transaction = db.newReadWriteTransaction();
+        ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
         FluentFuture<Boolean> ovsdbTp = transaction.exists(type, path);
         try {
             if (!ovsdbTp.get().booleanValue()) {

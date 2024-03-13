@@ -11,11 +11,9 @@ import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
@@ -28,7 +26,6 @@ import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -66,11 +63,9 @@ public class AutoAttachUpdateCommand implements TransactCommand {
         execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, OvsdbNodeAugmentation.class));
     }
 
-    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-                         final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> createdOrUpdated) {
-
-        for (final Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry
-                : createdOrUpdated.entrySet()) {
+    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> createdOrUpdated) {
+        for (var ovsdbNodeEntry : createdOrUpdated.entrySet()) {
             updateAutoAttach(transaction, state, ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
         }
     }
@@ -144,45 +139,44 @@ public class AutoAttachUpdateCommand implements TransactCommand {
                     final String namedUuid = SouthboundMapper.getRandomUuid();
                     final Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
                     transaction.add(op.insert(autoAttachWrapper).withId(namedUuid));
-                    final OvsdbBridgeAugmentation ovsdbBridgeAugmentation = getBridge(iid, bridgeUri);
+
+                    final var ovsdbBridgeAugmentation = getBridge(state, iid, bridgeUri);
                     if (ovsdbBridgeAugmentation != null) {
-                        bridge.setName(ovsdbBridgeAugmentation.getBridgeName().getValue());
-                        bridge.setAutoAttach(Collections.singleton(new UUID(namedUuid)));
+                        final var bridgeName = ovsdbBridgeAugmentation.getBridgeName().getValue();
+                        bridge.setName(bridgeName);
+                        bridge.setAutoAttach(Set.of(new UUID(namedUuid)));
                         LOG.trace("Create Autoattach table {}, and mutate the bridge {}",
-                                autoAttach.getAutoattachId(), getBridge(iid, bridgeUri).getBridgeName().getValue());
+                                autoAttach.getAutoattachId(), bridgeName);
                         transaction.add(op.mutate(bridge)
                                 .addMutation(bridge.getAutoAttachColumn().getSchema(),
                                         Mutator.INSERT,bridge.getAutoAttachColumn().getData())
                                 .where(bridge.getNameColumn().getSchema()
                                         .opEqual(bridge.getNameColumn().getData())).build());
-                        transaction.add(
-                                op.comment("Bridge: Mutating " + ovsdbBridgeAugmentation.getBridgeName().getValue()
-                                + " to add autoattach column " + namedUuid));
+                        transaction.add(op.comment(
+                            "Bridge: Mutating " + bridgeName + " to add autoattach column " + namedUuid));
                     }
                 }
             }
         }
     }
 
-    private static OvsdbBridgeAugmentation getBridge(final InstanceIdentifier<OvsdbNodeAugmentation> key,
-            final Uri bridgeUri) {
-        final InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid = InstanceIdentifier
-                .create(NetworkTopology.class)
+    private static OvsdbBridgeAugmentation getBridge(final BridgeOperationalState state,
+            final InstanceIdentifier<OvsdbNodeAugmentation> key, final Uri bridgeUri) {
+        final InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid = InstanceIdentifier.create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class, new NodeKey(new NodeId(bridgeUri)))
                 .augmentation(OvsdbBridgeAugmentation.class);
 
-        OvsdbBridgeAugmentation bridge = null;
-        try (ReadTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
-            final Optional<OvsdbBridgeAugmentation> bridgeOptional =
-                    transaction.read(LogicalDatastoreType.OPERATIONAL, bridgeIid).get();
+        try (ReadTransaction transaction = state.dataBroker().newReadOnlyTransaction()) {
+            final var bridgeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, bridgeIid).get();
             if (bridgeOptional.isPresent()) {
-                bridge = bridgeOptional.orElseThrow();
+                return bridgeOptional.orElseThrow();
             }
+            LOG.debug("No bridge found for {}", bridgeUri);
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Error reading from datastore", e);
         }
-        return bridge;
+        return null;
     }
 
     private static Uuid getAutoAttachUuid(final Map<AutoattachKey, Autoattach> currentAutoAttach,

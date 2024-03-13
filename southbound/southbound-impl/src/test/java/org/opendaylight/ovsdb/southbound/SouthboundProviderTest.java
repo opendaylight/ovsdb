@@ -7,7 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,6 +19,7 @@ import static org.opendaylight.infrautils.ready.testutils.TestSystemReadyMonitor
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
@@ -68,8 +68,8 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
     @Test
     public void testInit() throws CandidateAlreadyRegisteredException {
         // Indicate that this is the owner
-        when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
-                java.util.Optional.of(EntityOwnershipState.from(true, true)));
+        when(entityOwnershipService.getOwnershipState(any(Entity.class)))
+            .thenReturn(Optional.of(EntityOwnershipState.from(true, true)));
 
         try (SouthboundProvider southboundProvider = new SouthboundProvider(
                 getDataBroker(),
@@ -92,8 +92,8 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
     @Test
     public void testInitWithClose() throws CandidateAlreadyRegisteredException {
         // Indicate that this is the owner
-        when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
-                java.util.Optional.of(EntityOwnershipState.from(true, true)));
+        when(entityOwnershipService.getOwnershipState(any(Entity.class)))
+            .thenReturn(Optional.of(EntityOwnershipState.from(true, true)));
 
         try (SouthboundProvider southboundProvider = new SouthboundProvider(
                 getDataBroker(),
@@ -117,27 +117,9 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
     }
 
     @Test
-    public void testGetDb() {
-        when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
-            java.util.Optional.of(EntityOwnershipState.from(true, true)));
-
-        try (SouthboundProvider southboundProvider = new SouthboundProvider(
-                getDataBroker(),
-                entityOwnershipService,
-                Mockito.mock(OvsdbConnection.class),
-                Mockito.mock(DOMSchemaService.class),
-                Mockito.mock(BindingNormalizedNodeSerializer.class),
-                new TestSystemReadyMonitor(IMMEDIATE),
-                diagStatusService)) {
-
-            assertEquals(getDataBroker(), SouthboundProvider.getDb());
-        }
-    }
-
-    @Test
     public void testHandleOwnershipChange() throws ExecutionException, InterruptedException {
         when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
-            java.util.Optional.of(EntityOwnershipState.from(false, true)));
+            Optional.of(EntityOwnershipState.from(false, true)));
         Entity entity = new Entity("ovsdb-southbound-provider", "ovsdb-southbound-provider");
         KeyedInstanceIdentifier<Topology, TopologyKey> topologyIid = InstanceIdentifier
                 .create(NetworkTopology.class)

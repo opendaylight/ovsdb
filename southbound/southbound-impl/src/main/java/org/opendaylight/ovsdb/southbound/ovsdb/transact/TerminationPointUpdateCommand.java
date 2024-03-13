@@ -30,7 +30,6 @@ import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
-import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.ovsdb.utils.yang.YangUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
@@ -62,7 +61,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TerminationPointUpdateCommand implements TransactCommand {
-
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointUpdateCommand.class);
 
     @Override
@@ -122,7 +120,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
                 OvsdbBridgeAugmentation operBridge = ovsdbBridgeOptional.orElseThrow();
                 if (operBridge != null) {
                     Port port = transaction.getTypedRowWrapper(Port.class);
-                    updatePort(terminationPoint, port, operBridge, opendaylightIid);
+                    updatePort(state, terminationPoint, port, operBridge, opendaylightIid);
                     Port extraPort = transaction.getTypedRowWrapper(Port.class);
                     extraPort.setName("");
                     transaction.add(op.update(port)
@@ -149,26 +147,28 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         updateInterfacePolicing(terminationPoint, ovsInterface);
     }
 
-    private static void updatePort(final OvsdbTerminationPointAugmentation terminationPoint,
-            final Port port, final OvsdbBridgeAugmentation operBridge, final String opendaylightIid) {
+    private static void updatePort(final BridgeOperationalState state,
+            final OvsdbTerminationPointAugmentation terminationPoint, final Port port,
+            final OvsdbBridgeAugmentation operBridge, final String opendaylightIid) {
         updatePortOtherConfig(terminationPoint, port);
         updatePortVlanTag(terminationPoint, port);
         updatePortVlanTrunk(terminationPoint, port);
         updatePortVlanMode(terminationPoint, port);
         updatePortExternalIds(terminationPoint, port, opendaylightIid);
-        updatePortQos(terminationPoint, port, operBridge);
+        updatePortQos(state, terminationPoint, port, operBridge);
     }
 
-    private static void updatePortQos(final OvsdbTerminationPointAugmentation terminationPoint,
-            final Port port, final OvsdbBridgeAugmentation operBridge) {
-
-        Set<UUID> uuidSet = new HashSet<>();
+    private static void updatePortQos(final BridgeOperationalState state,
+            final OvsdbTerminationPointAugmentation terminationPoint, final Port port,
+            final OvsdbBridgeAugmentation operBridge) {
+        final var uuidSet = new HashSet<UUID>();
 
         // First check if QosEntry is present and use that
-        if (terminationPoint.getQosEntry() != null && !terminationPoint.getQosEntry().isEmpty()) {
-            OvsdbQosRef qosRef = terminationPoint.getQosEntry().values().iterator().next().getQosRef();
+        final var tpQosEntry = terminationPoint.getQosEntry();
+        if (tpQosEntry != null && !tpQosEntry.isEmpty()) {
+            OvsdbQosRef qosRef = tpQosEntry.values().iterator().next().getQosRef();
             Uri qosId = qosRef.getValue().firstKeyOf(QosEntries.class).getQosId();
-            OvsdbNodeAugmentation operNode = getOperNode(operBridge);
+            OvsdbNodeAugmentation operNode = getOperNode(state, operBridge);
             if (operNode != null) {
                 Map<QosEntriesKey, QosEntries> entries = operNode.getQosEntries();
                 if (entries != null) {
@@ -187,11 +187,12 @@ public class TerminationPointUpdateCommand implements TransactCommand {
     }
 
     @SuppressWarnings("IllegalCatch")
-    private static OvsdbNodeAugmentation getOperNode(final OvsdbBridgeAugmentation operBridge) {
+    private static OvsdbNodeAugmentation getOperNode(final BridgeOperationalState state,
+            final OvsdbBridgeAugmentation operBridge) {
         @SuppressWarnings("unchecked")
         InstanceIdentifier<Node> iidNode = (InstanceIdentifier<Node>)operBridge.getManagedBy().getValue();
         OvsdbNodeAugmentation operNode = null;
-        try (ReadTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
+        try (ReadTransaction transaction = state.dataBroker().newReadOnlyTransaction()) {
             Optional<Node> nodeOptional = SouthboundUtil.readNode(transaction, iidNode);
             if (nodeOptional.isPresent()) {
                 operNode = nodeOptional.orElseThrow().augmentation(OvsdbNodeAugmentation.class);

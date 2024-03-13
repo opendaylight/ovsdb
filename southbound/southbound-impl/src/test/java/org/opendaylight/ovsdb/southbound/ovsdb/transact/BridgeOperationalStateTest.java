@@ -13,10 +13,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.reflect.Whitebox.getField;
 
 import java.util.Map;
 import java.util.Optional;
@@ -24,7 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
@@ -53,12 +52,14 @@ public class BridgeOperationalStateTest {
             .child(Topology.class).child(Node.class);
     private final Node brNode = new NodeBuilder().setNodeId(new NodeId("bar")).build();
 
-    @Mock private BridgeOperationalState briOperationState;
-    @Mock private DataBroker db;
-    @Mock ReadTransaction mockReadTx;
+    @Mock
+    private BridgeOperationalState briOperationState;
+    @Mock
+    private DataBroker db;
+    @Mock
+    private ReadTransaction mockReadTx;
     private InstanceIdentifier<ProtocolEntry> protocolEntry;
     private InstanceIdentifier<Node> iidNode;
-    private Map<InstanceIdentifier<Node>, Node> operationalNodes;
 
     @Before
     public void setUp() throws Exception {
@@ -67,12 +68,10 @@ public class BridgeOperationalStateTest {
                 .child(Node.class, new NodeKey(nd.getNodeId()));
         protocolEntry = InstanceIdentifier.create(NetworkTopology.class).child(Topology.class).child(Node.class)
                 .augmentation(OvsdbBridgeAugmentation.class).child(ProtocolEntry.class);
-
-        briOperationState = mock(BridgeOperationalState.class, Mockito.CALLS_REAL_METHODS);
-
-        getField(BridgeOperationalState.class,"db").set(briOperationState, db);
         doReturn(mockReadTx).when(db).newReadOnlyTransaction();
         OvsdbOperGlobalListener.OPER_NODE_CACHE.put(nodeIid, brNode);
+
+        briOperationState = spy(new BridgeOperationalState(db));
     }
 
     @Test

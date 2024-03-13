@@ -24,7 +24,6 @@ import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.AutoAttach;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
-import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
@@ -33,7 +32,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Autoattach;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.AutoattachKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -61,9 +59,7 @@ public class AutoAttachRemovedCommand implements TransactCommand {
     private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
                                 final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> original,
                                 final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
-
-        for (final Map.Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originalEntry :
-                original.entrySet()) {
+        for (var originalEntry : original.entrySet()) {
             final InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = originalEntry.getKey();
             final OvsdbNodeAugmentation ovsdbNodeAugmentation = originalEntry.getValue();
             final OvsdbNodeAugmentation deletedOvsdbNodeAugmentation = updated.get(ovsdbNodeIid);
@@ -85,20 +81,20 @@ public class AutoAttachRemovedCommand implements TransactCommand {
                             state.getBridgeNode(ovsdbNodeIid).orElseThrow().augmentation(OvsdbNodeAugmentation.class);
                     final Map<AutoattachKey, Autoattach> currentAutoAttach = currentOvsdbNode.getAutoattach();
                     for (final Autoattach origAutoattach : origAutoattachList.values()) {
-                        deleteAutoAttach(transaction, ovsdbNodeIid, getAutoAttachUuid(currentAutoAttach,
-                            origAutoattach.key()));
+                        deleteAutoAttach(state, transaction, ovsdbNodeIid,
+                            getAutoAttachUuid(currentAutoAttach, origAutoattach.key()));
                     }
                 }
             }
         }
     }
 
-    private static void deleteAutoAttach(final TransactionBuilder transaction,
+    private static void deleteAutoAttach(final BridgeOperationalState state, final TransactionBuilder transaction,
             final InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid,
             final Uuid autoattachUuid) {
 
         LOG.debug("Received request to delete Autoattach entry {}", autoattachUuid);
-        final OvsdbBridgeAugmentation bridgeAugmentation = getBridge(ovsdbNodeIid, autoattachUuid);
+        final OvsdbBridgeAugmentation bridgeAugmentation = getBridge(state, ovsdbNodeIid, autoattachUuid);
         if (autoattachUuid != null && bridgeAugmentation != null) {
             final UUID uuid = new UUID(autoattachUuid.getValue());
             final AutoAttach autoattach = transaction.getTypedRowSchema(AutoAttach.class);
@@ -134,25 +130,23 @@ public class AutoAttachRemovedCommand implements TransactCommand {
         return null;
     }
 
-    private static OvsdbBridgeAugmentation getBridge(final InstanceIdentifier<OvsdbNodeAugmentation> key,
-            final Uuid aaUuid) {
+    private static OvsdbBridgeAugmentation getBridge(final BridgeOperationalState state,
+            final InstanceIdentifier<OvsdbNodeAugmentation> key, final Uuid aaUuid) {
         if (aaUuid == null) {
             return null;
         }
-        OvsdbBridgeAugmentation bridge = null;
-        final InstanceIdentifier<Node> nodeIid = key.firstIdentifierOf(Node.class);
-        try (ReadTransaction transaction = SouthboundProvider.getDb().newReadOnlyTransaction()) {
-            final Optional<Node> nodeOptional = SouthboundUtil.readNode(transaction, nodeIid);
+        try (ReadTransaction transaction = state.dataBroker().newReadOnlyTransaction()) {
+            final var nodeOptional = SouthboundUtil.readNode(transaction, key.firstIdentifierOf(Node.class));
             if (nodeOptional.isPresent()) {
-                final Map<ManagedNodeEntryKey, ManagedNodeEntry> managedNodes =
-                        nodeOptional.orElseThrow().augmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
+                final var managedNodes = nodeOptional.orElseThrow()
+                    .augmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
                 for (final ManagedNodeEntry managedNode : managedNodes.values()) {
                     final OvsdbBridgeRef ovsdbBridgeRef = managedNode.getBridgeRef();
                     final InstanceIdentifier<OvsdbBridgeAugmentation> brIid = ovsdbBridgeRef.getValue()
                             .firstIdentifierOf(Node.class).augmentation(OvsdbBridgeAugmentation.class);
                     final Optional<OvsdbBridgeAugmentation> optionalBridge =
                             transaction.read(LogicalDatastoreType.OPERATIONAL, brIid).get();
-                    bridge = optionalBridge.orElseThrow();
+                    OvsdbBridgeAugmentation bridge = optionalBridge.orElseThrow();
                     if (bridge != null && bridge.getAutoAttach() != null
                             && bridge.getAutoAttach().equals(aaUuid)) {
                         return bridge;
@@ -160,7 +154,7 @@ public class AutoAttachRemovedCommand implements TransactCommand {
                 }
             }
         } catch (InterruptedException | ExecutionException e) {
-            LOG.warn("Error reading from datastore",e);
+            LOG.warn("Error reading from datastore", e);
         }
         return null;
     }

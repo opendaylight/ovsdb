@@ -7,6 +7,8 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -29,20 +31,33 @@ import org.slf4j.LoggerFactory;
 
 public class BridgeOperationalState {
     private static final Logger LOG = LoggerFactory.getLogger(BridgeOperationalState.class);
-    private final DataBroker db;
 
-    public BridgeOperationalState(DataBroker db, DataChangeEvent changes) {
-        this.db = db;
+    private final DataBroker dataBroker;
+
+    public BridgeOperationalState(DataBroker dataBroker) {
+        this.dataBroker = requireNonNull(dataBroker);
     }
 
-    public BridgeOperationalState(DataBroker db, Collection<DataTreeModification<Node>> changes) {
-        this.db = db;
+    @Deprecated
+    public BridgeOperationalState(DataBroker dataBroker, DataChangeEvent changes) {
+        this.dataBroker = requireNonNull(dataBroker);
+    }
+
+    @Deprecated
+    public BridgeOperationalState(DataBroker dataBroker, Collection<DataTreeModification<Node>> changes) {
+        this.dataBroker = requireNonNull(dataBroker);
+    }
+
+    // FIXME: this instance should not be exposed and users just use methods of this class
+    @Deprecated
+    final DataBroker dataBroker() {
+        return dataBroker;
     }
 
     @SuppressWarnings("IllegalCatch")
     public Optional<Node> getBridgeNode(InstanceIdentifier<?> iid) {
         InstanceIdentifier<Node> nodeIid = iid.firstIdentifierOf(Node.class);
-        try (ReadTransaction transaction = db.newReadOnlyTransaction()) {
+        try (ReadTransaction transaction = dataBroker.newReadOnlyTransaction()) {
             return SouthboundUtil.readNode(transaction, nodeIid);
         } catch (Exception exp) {
             LOG.error("Error in getting the brideNode for {}", iid, exp);

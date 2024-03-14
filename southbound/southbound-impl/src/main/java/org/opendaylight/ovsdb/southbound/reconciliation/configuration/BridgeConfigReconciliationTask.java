@@ -12,7 +12,6 @@ import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,9 +69,9 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
     public boolean reconcileConfiguration(final OvsdbConnectionManager connectionManagerOfDevice) {
         String nodeIdVal = nodeIid.firstKeyOf(Node.class).getNodeId().getValue();
         List<String> bridgeReconcileIncludeList = getNodeIdForBridges(nodeIdVal,
-            reconciliationManager.getBridgesReconciliationInclusionList());
+            reconciliationManager.getBridgeInclusions());
         List<String> bridgeReconcileExcludeList = getNodeIdForBridges(nodeIdVal,
-            reconciliationManager.getBridgesReconciliationExclusionList());
+            reconciliationManager.getBridgeExclusions());
 
         LOG.trace("bridgeReconcileIncludeList : {}", bridgeReconcileIncludeList);
         LOG.trace("bridgeReconcileExcludeList : {}", bridgeReconcileExcludeList);
@@ -244,7 +243,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
 
     @VisibleForTesting
     void reconcileBridgeConfigurations(final Map<InstanceIdentifier<?>, DataObject> changes) {
-        DataChangeEvent changeEvents = new DataChangeEvent() {
+        final var event = new DataChangeEvent() {
             @Override
             public Map<InstanceIdentifier<?>, DataObject> getCreatedData() {
                 return changes;
@@ -252,34 +251,34 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
 
             @Override
             public Map<InstanceIdentifier<?>, DataObject> getUpdatedData() {
-                return Collections.emptyMap();
+                return Map.of();
             }
 
             @Override
             public Map<InstanceIdentifier<?>, DataObject> getOriginalData() {
-                return Collections.emptyMap();
+                return Map.of();
             }
 
             @Override
             public Set<InstanceIdentifier<?>> getRemovedPaths() {
-                return Collections.emptySet();
+                return Set.of();
             }
         };
 
-        connectionInstance.transact(new TransactCommandAggregator(),
-                new BridgeOperationalState(reconciliationManager.getDb(), changeEvents),
-                new DataChangesManagedByOvsdbNodeEvent(
-                        reconciliationManager.getDb(),
-                        connectionInstance.getInstanceIdentifier(),
-                        changeEvents), instanceIdentifierCodec);
+        final var dataBroker = reconciliationManager.getDb();
+        connectionInstance.transact(new TransactCommandAggregator(), new BridgeOperationalState(dataBroker),
+            new DataChangesManagedByOvsdbNodeEvent(dataBroker, connectionInstance.getInstanceIdentifier(), event),
+            instanceIdentifierCodec);
     }
 
     @Override
     public void doRetry(final boolean wasPreviousAttemptSuccessful) {
+        // No-op by default
     }
 
     @Override
     public void checkReadinessAndProcess() {
+        // No-op by default
     }
 
     @Override

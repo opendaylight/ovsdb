@@ -9,11 +9,14 @@ package org.opendaylight.ovsdb.southbound.reconciliation;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.escape.CharEscaper;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +27,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
@@ -75,6 +79,15 @@ public class ReconciliationManager implements AutoCloseable {
     private static final int NO_OF_RECONCILER = 10;
     private static final int RECON_TASK_QUEUE_SIZE = 5000;
     private static final long BRIDGE_CACHE_TIMEOUT_IN_SECONDS = 30;
+    private static final CharEscaper DQUOT_ESCAPER = new CharEscaper() {
+        private static final char[] ESCAPED = new char[] { '\\', '"' };
+
+        @Override
+        @SuppressFBWarnings(value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", justification = "API contract")
+        protected char[] escape(final char ch) {
+            return ch == '"' ? ESCAPED : null;
+        }
+    };
 
     private final DataBroker db;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
@@ -88,15 +101,20 @@ public class ReconciliationManager implements AutoCloseable {
     private Registration bridgeCreatedDataTreeChangeRegistration = null;
 
     private final ReconciliationTaskManager reconTaskManager = new ReconciliationTaskManager();
-    private final List<String> reconcileBridgeInclusionList;
-    private final List<String> reconcileBridgeExclusionList;
+    private final List<String> bridgeInclusions;
+    private final List<String> bridgeExclusions;
 
     public ReconciliationManager(final DataBroker db, final InstanceIdentifierCodec instanceIdentifierCodec,
             final List<String> reconcileBridgeInclusionList, final List<String> reconcileBridgeExclusionList) {
-        this.db = db;
-        this.instanceIdentifierCodec = instanceIdentifierCodec;
-        this.reconcileBridgeInclusionList = List.copyOf(reconcileBridgeInclusionList);
-        this.reconcileBridgeExclusionList = List.copyOf(reconcileBridgeExclusionList);
+        this.db = requireNonNull(db);
+        this.instanceIdentifierCodec = requireNonNull(instanceIdentifierCodec);
+        bridgeInclusions = uniqueList(reconcileBridgeInclusionList);
+        bridgeExclusions = uniqueList(reconcileBridgeExclusionList);
+
+        if (LOG.isInfoEnabled()) {
+            LOG.info("OVSDB reconcile bridge inclusions: {}", formatBridgeList(bridgeInclusions));
+            LOG.info("OVSDB reconcile bridge exclusions: {}", formatBridgeList(bridgeExclusions));
+        }
 
         reconcilers = SpecialExecutors.newBoundedCachedThreadPool(NO_OF_RECONCILER, RECON_TASK_QUEUE_SIZE,
                 "ovsdb-reconciler", getClass());
@@ -108,12 +126,35 @@ public class ReconciliationManager implements AutoCloseable {
         bridgeNodeCache = buildBridgeNodeCache();
     }
 
-    public List<String> getBridgesReconciliationInclusionList() {
-        return reconcileBridgeInclusionList;
+    private static List<String> uniqueList(final List<String> list) {
+        return list.stream().distinct().collect(Collectors.toUnmodifiableList());
     }
 
-    public List<String> getBridgesReconciliationExclusionList() {
-        return reconcileBridgeExclusionList;
+    @VisibleForTesting
+    static String formatBridgeList(final List<String> list) {
+        if (list.isEmpty()) {
+            return "[]";
+        }
+
+        final var sb = new StringBuilder();
+        final var it = list.iterator();
+        appendString(sb.append('['), it.next());
+        while (it.hasNext()) {
+            appendString(sb.append(", "), it.next());
+        }
+        return sb.append(']').toString();
+    }
+
+    private static void appendString(final StringBuilder sb, final String str) {
+        sb.append('"').append(DQUOT_ESCAPER.escape(str)).append('"');
+    }
+
+    public List<String> getBridgeInclusions() {
+        return bridgeInclusions;
+    }
+
+    public List<String> getBridgeExclusions() {
+        return bridgeExclusions;
     }
 
     public boolean isEnqueued(final ReconciliationTask task) {
@@ -143,12 +184,12 @@ public class ReconciliationManager implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        if (this.reconcilers != null) {
-            this.reconcilers.shutdownNow();
+        if (reconcilers != null) {
+            reconcilers.shutdownNow();
         }
 
-        if (this.taskTriager != null) {
-            this.taskTriager.shutdownNow();
+        if (taskTriager != null) {
+            taskTriager.shutdownNow();
         }
     }
 
@@ -209,7 +250,7 @@ public class ReconciliationManager implements AutoCloseable {
                 .expireAfterWrite(BRIDGE_CACHE_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
                 .build(new CacheLoader<NodeKey, NodeConnectionMetadata>() {
                     @Override
-                    public NodeConnectionMetadata load(NodeKey nodeKey) throws Exception {
+                    public NodeConnectionMetadata load(final NodeKey nodeKey) throws Exception {
                         // the termination points are explicitly added to the cache, retrieving bridges that are not in
                         // the cache results in NoSuchElementException
                         throw new NoSuchElementException();
@@ -225,7 +266,7 @@ public class ReconciliationManager implements AutoCloseable {
      */
     class BridgeCreatedDataTreeChangeListener implements DataTreeChangeListener<Node> {
         @Override
-        public void onDataTreeChanged(List<DataTreeModification<Node>> changes) {
+        public void onDataTreeChanged(final List<DataTreeModification<Node>> changes) {
             bridgeNodeCache.cleanUp();
             if (!bridgeNodeCache.asMap().isEmpty()) {
                 Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> nodes =
@@ -275,8 +316,8 @@ public class ReconciliationManager implements AutoCloseable {
     }
 
     private static Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
-        filterTerminationPointsForBridge(NodeKey nodeKey,
-            Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+        filterTerminationPointsForBridge(final NodeKey nodeKey,
+            final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
             terminationPoints) {
 
         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
@@ -317,14 +358,14 @@ public class ReconciliationManager implements AutoCloseable {
         }
 
         public void setOperTerminationPoints(
-            Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+            final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
                 operTerminationPoints) {
             this.operTerminationPoints = operTerminationPoints;
         }
 
-        NodeConnectionMetadata(Node node,
-                               OvsdbConnectionManager connectionManager,
-                               OvsdbConnectionInstance connectionInstance) {
+        NodeConnectionMetadata(final Node node,
+                               final OvsdbConnectionManager connectionManager,
+                               final OvsdbConnectionInstance connectionInstance) {
             this.node = node;
             this.connectionManager = connectionManager;
             this.connectionInstance = connectionInstance;
@@ -342,7 +383,7 @@ public class ReconciliationManager implements AutoCloseable {
             return connectionInstance;
         }
 
-        public void setNodeIid(InstanceIdentifier<?> nodeIid) {
+        public void setNodeIid(final InstanceIdentifier<?> nodeIid) {
             this.nodeIid = nodeIid;
         }
 

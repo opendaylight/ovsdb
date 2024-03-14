@@ -20,7 +20,6 @@ import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.suppress;
 
 import com.google.common.util.concurrent.FluentFuture;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -442,7 +441,6 @@ public class OvsdbPortUpdateCommandTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testUpdatePort() throws Exception {
         suppress(method(OvsdbPortUpdateCommand.class, "updateVlan", Port.class,
             OvsdbTerminationPointAugmentationBuilder.class));
@@ -460,7 +458,7 @@ public class OvsdbPortUpdateCommandTest {
                 InstanceIdentifier.class, Entry.class, OvsdbTerminationPointAugmentationBuilder.class));
 
         Node node = mock(Node.class);
-        Entry<UUID, Port> port = new SimpleEntry<>(mock(UUID.class), mock(Port.class));
+        final var port = Map.entry(mock(UUID.class), mock(Port.class));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
                 OvsdbTerminationPointAugmentationBuilder.class);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);

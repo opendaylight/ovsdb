@@ -64,9 +64,9 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
         @AttributeDefinition
         boolean skip$_$monitoring$_$manager$_$status() default false;
         @AttributeDefinition
-        String[] bridge$_$reconciliation$_$inclusion$_$list();
+        String[] bridge$_$reconciliation$_$inclusions();
         @AttributeDefinition
-        String[] bridge$_$reconciliation$_$exclusion$_$list();
+        String[] bridge$_$reconciliation$_$exclusions();
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundProvider.class);
@@ -112,8 +112,8 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
         this(dataBroker, entityOwnershipServiceDependency, ovsdbConnection, schemaService,
             bindingNormalizedNodeSerializer, systemReadyMonitor, diagStatusService,
             configuration.skip$_$monitoring$_$manager$_$status(),
-            List.of(configuration.bridge$_$reconciliation$_$inclusion$_$list()),
-            List.of(configuration.bridge$_$reconciliation$_$exclusion$_$list()));
+            List.of(configuration.bridge$_$reconciliation$_$inclusions()),
+            List.of(configuration.bridge$_$reconciliation$_$exclusions()));
     }
 
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",

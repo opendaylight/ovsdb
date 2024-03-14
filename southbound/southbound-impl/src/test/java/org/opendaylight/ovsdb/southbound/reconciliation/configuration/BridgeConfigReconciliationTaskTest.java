@@ -76,7 +76,7 @@ public class BridgeConfigReconciliationTaskTest {
         iid = SouthboundMapper.createInstanceIdentifier(nodeKey.getNodeId());
         Node brIntNode = createBridgeNode(NODE_ID + "/bridge/" + BR_INT);
         when(reconciliationManager.getDb()).thenReturn(db);
-        when(reconciliationManager.getBridgesReconciliationInclusionList()).thenReturn(List.of(BR_INT));
+        when(reconciliationManager.getBridgeInclusions()).thenReturn(List.of(BR_INT));
         ReadTransaction tx = mock(ReadTransaction.class);
         when(db.newReadOnlyTransaction()).thenReturn(tx);
         when(tx.read(any(LogicalDatastoreType.class),any(InstanceIdentifier.class)))

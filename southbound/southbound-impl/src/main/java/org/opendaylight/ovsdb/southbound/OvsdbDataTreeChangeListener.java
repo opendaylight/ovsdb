@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
@@ -223,12 +222,9 @@ public final class OvsdbDataTreeChangeListener implements DataTreeChangeListener
     }
 
     private void updateData(final @NonNull List<DataTreeModification<Node>> changes) {
-        for (Entry<OvsdbConnectionInstance, Collection<DataTreeModification<Node>>> connectionInstanceEntry :
-                changesPerConnectionInstance(changes).entrySet()) {
-            OvsdbConnectionInstance connectionInstance = connectionInstanceEntry.getKey();
-            Collection<DataTreeModification<Node>> clientChanges = connectionInstanceEntry.getValue();
-            connectionInstance.transact(new TransactCommandAggregator(),
-                    new BridgeOperationalState(db, clientChanges), clientChanges, instanceIdentifierCodec);
+        for (var connectionInstanceEntry : changesPerConnectionInstance(changes).entrySet()) {
+            connectionInstanceEntry.getKey().transact(new TransactCommandAggregator(), new BridgeOperationalState(db),
+                connectionInstanceEntry.getValue(), instanceIdentifierCodec);
         }
     }
 

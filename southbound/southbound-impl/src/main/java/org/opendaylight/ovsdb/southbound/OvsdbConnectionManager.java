@@ -559,8 +559,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
              */
             OpenVSwitch openvswitchRow = getOpenVswitchTableEntry(ovsdbConnectionInstance);
             iid = SouthboundMapper.getInstanceIdentifier(instanceIdentifierCodec, openvswitchRow);
-            LOG.info("Ovsdb InstanceIdentifier {} generated for device "
-                    + "connection {}",iid,ovsdbConnectionInstance.getConnectionInfo());
+            LOG.info("Ovsdb InstanceIdentifier {} generated for device connection {}", iid,
+                ovsdbConnectionInstance.getConnectionInfo());
             ovsdbConnectionInstance.setInstanceIdentifier(iid);
         }
         Entity deviceEntity = new Entity(ENTITY_TYPE, iid);

@@ -12,7 +12,9 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.FluentFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.PreDestroy;
@@ -64,9 +66,9 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
         @AttributeDefinition
         boolean skip$_$monitoring$_$manager$_$status() default false;
         @AttributeDefinition
-        String[] bridge$_$reconciliation$_$inclusion$_$list();
+        String bridge$_$reconciliation$_$inclusion$_$list();
         @AttributeDefinition
-        String[] bridge$_$reconciliation$_$exclusion$_$list();
+        String bridge$_$reconciliation$_$exclusion$_$list();
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundProvider.class);
@@ -112,8 +114,8 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
         this(dataBroker, entityOwnershipServiceDependency, ovsdbConnection, schemaService,
             bindingNormalizedNodeSerializer, systemReadyMonitor, diagStatusService,
             configuration.skip$_$monitoring$_$manager$_$status(),
-            List.of(configuration.bridge$_$reconciliation$_$inclusion$_$list()),
-            List.of(configuration.bridge$_$reconciliation$_$exclusion$_$list()));
+            getBridgesList(configuration.bridge$_$reconciliation$_$inclusion$_$list()),
+            getBridgesList(configuration.bridge$_$reconciliation$_$exclusion$_$list()));
     }
 
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
@@ -271,5 +273,18 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
     @VisibleForTesting
     boolean isRegistered() {
         return registered.get();
+    }
+
+    private static List<String> getBridgesList(final String bridgeListStr) {
+        if (bridgeListStr == null || bridgeListStr.isEmpty()) {
+            return List.of();
+        }
+
+        final var bridgeList = new ArrayList<String>();
+        final var tokenizer = new StringTokenizer(bridgeListStr, ",");
+        while (tokenizer.hasMoreTokens()) {
+            bridgeList.add(tokenizer.nextToken());
+        }
+        return bridgeList;
     }
 }

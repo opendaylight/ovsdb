@@ -93,10 +93,12 @@ public class ReconciliationManager implements AutoCloseable {
 
     public ReconciliationManager(final DataBroker db, final InstanceIdentifierCodec instanceIdentifierCodec,
             final List<String> reconcileBridgeInclusionList, final List<String> reconcileBridgeExclusionList) {
-        this.db = db;
-        this.instanceIdentifierCodec = instanceIdentifierCodec;
-        this.reconcileBridgeInclusionList = List.copyOf(reconcileBridgeInclusionList);
-        this.reconcileBridgeExclusionList = List.copyOf(reconcileBridgeExclusionList);
+        this.db = requireNonNull(db);
+        this.instanceIdentifierCodec = requireNonNull(instanceIdentifierCodec);
+        this.reconcileBridgeInclusionList = requireNonNull(reconcileBridgeInclusionList);
+        LOG.info("OVSDB reconcile bridge inclusions: {}", reconcileBridgeInclusionList);
+        this.reconcileBridgeExclusionList = requireNonNull(reconcileBridgeExclusionList);
+        LOG.info("OVSDB reconcile bridge exclusions: {}", reconcileBridgeExclusionList);
 
         reconcilers = SpecialExecutors.newBoundedCachedThreadPool(NO_OF_RECONCILER, RECON_TASK_QUEUE_SIZE,
                 "ovsdb-reconciler", getClass());
@@ -143,12 +145,12 @@ public class ReconciliationManager implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        if (this.reconcilers != null) {
-            this.reconcilers.shutdownNow();
+        if (reconcilers != null) {
+            reconcilers.shutdownNow();
         }
 
-        if (this.taskTriager != null) {
-            this.taskTriager.shutdownNow();
+        if (taskTriager != null) {
+            taskTriager.shutdownNow();
         }
     }
 
@@ -209,7 +211,7 @@ public class ReconciliationManager implements AutoCloseable {
                 .expireAfterWrite(BRIDGE_CACHE_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)
                 .build(new CacheLoader<NodeKey, NodeConnectionMetadata>() {
                     @Override
-                    public NodeConnectionMetadata load(NodeKey nodeKey) throws Exception {
+                    public NodeConnectionMetadata load(final NodeKey nodeKey) throws Exception {
                         // the termination points are explicitly added to the cache, retrieving bridges that are not in
                         // the cache results in NoSuchElementException
                         throw new NoSuchElementException();
@@ -225,7 +227,7 @@ public class ReconciliationManager implements AutoCloseable {
      */
     class BridgeCreatedDataTreeChangeListener implements DataTreeChangeListener<Node> {
         @Override
-        public void onDataTreeChanged(List<DataTreeModification<Node>> changes) {
+        public void onDataTreeChanged(final List<DataTreeModification<Node>> changes) {
             bridgeNodeCache.cleanUp();
             if (!bridgeNodeCache.asMap().isEmpty()) {
                 Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> nodes =
@@ -275,8 +277,8 @@ public class ReconciliationManager implements AutoCloseable {
     }
 
     private static Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
-        filterTerminationPointsForBridge(NodeKey nodeKey,
-            Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+        filterTerminationPointsForBridge(final NodeKey nodeKey,
+            final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
             terminationPoints) {
 
         Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
@@ -317,14 +319,14 @@ public class ReconciliationManager implements AutoCloseable {
         }
 
         public void setOperTerminationPoints(
-            Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+            final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
                 operTerminationPoints) {
             this.operTerminationPoints = operTerminationPoints;
         }
 
-        NodeConnectionMetadata(Node node,
-                               OvsdbConnectionManager connectionManager,
-                               OvsdbConnectionInstance connectionInstance) {
+        NodeConnectionMetadata(final Node node,
+                               final OvsdbConnectionManager connectionManager,
+                               final OvsdbConnectionInstance connectionInstance) {
             this.node = node;
             this.connectionManager = connectionManager;
             this.connectionInstance = connectionInstance;
@@ -342,7 +344,7 @@ public class ReconciliationManager implements AutoCloseable {
             return connectionInstance;
         }
 
-        public void setNodeIid(InstanceIdentifier<?> nodeIid) {
+        public void setNodeIid(final InstanceIdentifier<?> nodeIid) {
             this.nodeIid = nodeIid;
         }
 

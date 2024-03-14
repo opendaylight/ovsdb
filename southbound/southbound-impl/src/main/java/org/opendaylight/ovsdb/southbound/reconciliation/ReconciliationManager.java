@@ -88,10 +88,16 @@ public class ReconciliationManager implements AutoCloseable {
     private Registration bridgeCreatedDataTreeChangeRegistration = null;
 
     private final ReconciliationTaskManager reconTaskManager = new ReconciliationTaskManager();
+    private final List<String> reconcileBridgeInclusionList;
+    private final List<String> reconcileBridgeExclusionList;
 
-    public ReconciliationManager(final DataBroker db, final InstanceIdentifierCodec instanceIdentifierCodec) {
+    public ReconciliationManager(final DataBroker db, final InstanceIdentifierCodec instanceIdentifierCodec,
+            final List<String> reconcileBridgeInclusionList, final List<String> reconcileBridgeExclusionList) {
         this.db = db;
         this.instanceIdentifierCodec = instanceIdentifierCodec;
+        this.reconcileBridgeInclusionList = List.copyOf(reconcileBridgeInclusionList);
+        this.reconcileBridgeExclusionList = List.copyOf(reconcileBridgeExclusionList);
+
         reconcilers = SpecialExecutors.newBoundedCachedThreadPool(NO_OF_RECONCILER, RECON_TASK_QUEUE_SIZE,
                 "ovsdb-reconciler", getClass());
 
@@ -100,6 +106,14 @@ public class ReconciliationManager implements AutoCloseable {
         taskTriager = Executors.newSingleThreadScheduledExecutor(threadFact);
 
         bridgeNodeCache = buildBridgeNodeCache();
+    }
+
+    public List<String> getBridgesReconciliationInclusionList() {
+        return reconcileBridgeInclusionList;
+    }
+
+    public List<String> getBridgesReconciliationExclusionList() {
+        return reconcileBridgeExclusionList;
     }
 
     public boolean isEnqueued(final ReconciliationTask task) {

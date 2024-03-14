@@ -21,7 +21,6 @@ import static org.powermock.api.support.membermodification.MemberModifier.suppre
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import java.net.InetAddress;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -95,7 +94,7 @@ public class OvsdbConnectionManagerTest {
         field(OvsdbConnectionManager.class, "entityOwnershipService").set(ovsdbConnManager, entityOwnershipService);
         field(OvsdbConnectionManager.class, "reconciliationManager").set(ovsdbConnManager, reconciliationManager);
         field(OvsdbConnectionManager.class, "ovsdbConnection").set(ovsdbConnManager, ovsdbConnection);
-        field(OvsdbConnectionManager.class, "alreadyProcessedClients").set(ovsdbConnManager, new HashMap<>());
+        field(OvsdbConnectionManager.class, "alreadyProcessedClients").set(ovsdbConnManager, new ConcurrentHashMap<>());
         entityConnectionMap = new ConcurrentHashMap<>();
 
         OvsdbConnectionInfo info = mock(OvsdbConnectionInfo.class);
@@ -192,7 +191,8 @@ public class OvsdbConnectionManagerTest {
                 OvsdbConnectionInstance.class));
         instanceIdentifiers = new ConcurrentHashMap<>();
         field(OvsdbConnectionManager.class, "instanceIdentifiers").set(ovsdbConnManager, instanceIdentifiers);
-        field(OvsdbConnectionManager.class, "nodeIdVsConnectionInstance").set(ovsdbConnManager, new HashMap<>());
+        field(OvsdbConnectionManager.class, "nodeIdVsConnectionInstance").set(ovsdbConnManager,
+            new ConcurrentHashMap<>());
 
         MemberModifier.suppress(MemberMatcher.method(OvsdbConnectionManager.class, "reconcileConnection",
                 InstanceIdentifier.class, OvsdbNodeAugmentation.class));

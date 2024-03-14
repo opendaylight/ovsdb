@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
@@ -75,19 +74,18 @@ public class BridgeConfigReconciliationTaskTest {
         NodeKey nodeKey = new NodeKey(new NodeId(new Uri(NODE_ID)));
 
         iid = SouthboundMapper.createInstanceIdentifier(nodeKey.getNodeId());
-        SouthboundProvider.setBridgesReconciliationInclusionList(List.of(BR_INT));
         Node brIntNode = createBridgeNode(NODE_ID + "/bridge/" + BR_INT);
         when(reconciliationManager.getDb()).thenReturn(db);
+        when(reconciliationManager.getBridgesReconciliationInclusionList()).thenReturn(List.of(BR_INT));
         ReadTransaction tx = mock(ReadTransaction.class);
-        Mockito.when(db.newReadOnlyTransaction()).thenReturn(tx);
-        Mockito.when(tx.read(any(LogicalDatastoreType.class),any(InstanceIdentifier.class)))
+        when(db.newReadOnlyTransaction()).thenReturn(tx);
+        when(tx.read(any(LogicalDatastoreType.class),any(InstanceIdentifier.class)))
                 .thenReturn(FluentFutures.immediateFluentFuture(Optional.of(brIntNode)));
 
         when(topology.getNode()).thenReturn(Map.of(brIntNode.key(), brIntNode));
 
-        configurationReconciliationTask =
-                new BridgeConfigReconciliationTask(reconciliationManager, ovsdbConnectionManager, iid,
-                        ovsdbConnectionInstance, mock(InstanceIdentifierCodec.class));
+        configurationReconciliationTask = new BridgeConfigReconciliationTask(reconciliationManager,
+            ovsdbConnectionManager, iid, ovsdbConnectionInstance, mock(InstanceIdentifierCodec.class));
     }
 
     @Test

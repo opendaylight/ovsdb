@@ -11,6 +11,7 @@ import static org.mockito.Mockito.mock;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +52,7 @@ public class OvsdbDataTreeChangeListenerTest extends AbstractConcurrentDataBroke
         InstanceIdentifierCodec instanceIdentifierCodec = mock(InstanceIdentifierCodec.class);
         listener = new OvsdbDataTreeChangeListener(dataBroker,
                 new OvsdbConnectionManager(dataBroker, new TransactionInvokerImpl(dataBroker), entityOwnershipService,
-                        ovsdbConnection, instanceIdentifierCodec), instanceIdentifierCodec);
+                        ovsdbConnection, instanceIdentifierCodec, List.of(), List.of()), instanceIdentifierCodec);
     }
 
     @Test

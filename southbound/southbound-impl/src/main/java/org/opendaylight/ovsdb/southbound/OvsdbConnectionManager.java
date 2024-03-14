@@ -64,21 +64,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoCloseable {
-
-    private final ConcurrentMap<ConnectionInfo, OvsdbConnectionInstance> clients = new ConcurrentHashMap<>();
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbConnectionManager.class);
     private static final String ENTITY_TYPE = "ovsdb";
     private static final int DB_FETCH_TIMEOUT = 1000;
 
+    private final ConcurrentMap<ConnectionInfo, OvsdbConnectionInstance> clients = new ConcurrentHashMap<>();
+    private final ConcurrentMap<OvsdbClient, OvsdbClient> alreadyProcessedClients = new ConcurrentHashMap<>();
+    private final ConcurrentMap<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers =
+            new ConcurrentHashMap<>();
+    private final ConcurrentMap<InstanceIdentifier<Node>, OvsdbConnectionInstance> nodeIdVsConnectionInstance =
+            new ConcurrentHashMap<>();
+    private final ConcurrentMap<Entity, OvsdbConnectionInstance> entityConnectionMap = new ConcurrentHashMap<>();
     private final DataBroker db;
     private final TransactionInvoker txInvoker;
-    private final Map<OvsdbClient, OvsdbClient> alreadyProcessedClients = new ConcurrentHashMap<>();
-    private final Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers =
-            new ConcurrentHashMap<>();
-    private final Map<InstanceIdentifier<Node>, OvsdbConnectionInstance> nodeIdVsConnectionInstance =
-            new ConcurrentHashMap<>();
-    private final Map<Entity, OvsdbConnectionInstance> entityConnectionMap =
-            new ConcurrentHashMap<>();
     private final EntityOwnershipService entityOwnershipService;
     private final OvsdbDeviceEntityOwnershipListener ovsdbDeviceEntityOwnershipListener;
     private final OvsdbConnection ovsdbConnection;
@@ -88,13 +86,16 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     public OvsdbConnectionManager(final DataBroker db,final TransactionInvoker txInvoker,
                                   final EntityOwnershipService entityOwnershipService,
                                   final OvsdbConnection ovsdbConnection,
-                                  final InstanceIdentifierCodec instanceIdentifierCodec) {
+                                  final InstanceIdentifierCodec instanceIdentifierCodec,
+                                  final List<String> reconcileBridgeInclusionList,
+                                  final List<String> reconcileBridgeExclusionList) {
         this.db = db;
         this.txInvoker = txInvoker;
         this.entityOwnershipService = entityOwnershipService;
         ovsdbDeviceEntityOwnershipListener = new OvsdbDeviceEntityOwnershipListener(this, entityOwnershipService);
         this.ovsdbConnection = ovsdbConnection;
-        reconciliationManager = new ReconciliationManager(db, instanceIdentifierCodec);
+        reconciliationManager = new ReconciliationManager(db, instanceIdentifierCodec,
+            reconcileBridgeInclusionList, reconcileBridgeExclusionList);
         this.instanceIdentifierCodec = instanceIdentifierCodec;
     }
 
@@ -658,11 +659,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     private void reconcileBridgeConfigurations(final OvsdbConnectionInstance client) {
-        final InstanceIdentifier<Node> nodeIid = client.getInstanceIdentifier();
-        final ReconciliationTask task = new BridgeConfigReconciliationTask(
-                reconciliationManager, OvsdbConnectionManager.this, nodeIid, client, instanceIdentifierCodec);
-
-        reconciliationManager.enqueue(task);
+        reconciliationManager.enqueue(new BridgeConfigReconciliationTask(reconciliationManager, this,
+            client.getInstanceIdentifier(), client, instanceIdentifierCodec));
     }
 
     private static final class OvsdbDeviceEntityOwnershipListener implements EntityOwnershipListener {

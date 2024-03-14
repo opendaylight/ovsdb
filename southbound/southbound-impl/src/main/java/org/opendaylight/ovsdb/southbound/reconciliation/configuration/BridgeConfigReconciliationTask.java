@@ -26,7 +26,6 @@ import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.ovsdb.southbound.SouthboundProvider;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.BridgeOperationalState;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangeEvent;
 import org.opendaylight.ovsdb.southbound.ovsdb.transact.DataChangesManagedByOvsdbNodeEvent;
@@ -69,12 +68,11 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
 
     @Override
     public boolean reconcileConfiguration(final OvsdbConnectionManager connectionManagerOfDevice) {
-
         String nodeIdVal = nodeIid.firstKeyOf(Node.class).getNodeId().getValue();
         List<String> bridgeReconcileIncludeList = getNodeIdForBridges(nodeIdVal,
-            SouthboundProvider.getBridgesReconciliationInclusionList());
+            reconciliationManager.getBridgesReconciliationInclusionList());
         List<String> bridgeReconcileExcludeList = getNodeIdForBridges(nodeIdVal,
-            SouthboundProvider.getBridgesReconciliationExclusionList());
+            reconciliationManager.getBridgesReconciliationExclusionList());
 
         LOG.trace("bridgeReconcileIncludeList : {}", bridgeReconcileIncludeList);
         LOG.trace("bridgeReconcileExcludeList : {}", bridgeReconcileExcludeList);
@@ -118,9 +116,9 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                 // wildcard on node id (ie: ovsdb://uuid/<device uuid>/bridge/*) r attributes
                 readTopologyFuture = tx.read(LogicalDatastoreType.CONFIGURATION, topologyInstanceIdentifier);
             }
-            readTopologyFuture.addCallback(new FutureCallback<Optional<Topology>>() {
+            readTopologyFuture.addCallback(new FutureCallback<>() {
                 @Override
-                public void onSuccess(@Nullable final Optional<Topology> optionalTopology) {
+                public void onSuccess(final Optional<Topology> optionalTopology) {
                     if (optionalTopology != null && optionalTopology.isPresent()) {
                         Map<NodeKey, Node> nodes = optionalTopology.orElseThrow().getNode();
                         if (nodes != null) {

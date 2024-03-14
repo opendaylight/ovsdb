@@ -72,25 +72,6 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundProvider.class);
     private static final String ENTITY_TYPE = "ovsdb-southbound-provider";
 
-    // FIXME: get rid of this static
-    private static List<String> reconcileBridgeInclusionList = List.of();
-    // FIXME: get rid of this static
-    private static List<String> reconcileBridgeExclusionList = List.of();
-
-    public static List<String> getBridgesReconciliationInclusionList() {
-        return reconcileBridgeInclusionList;
-    }
-
-    public static List<String> getBridgesReconciliationExclusionList() {
-        return reconcileBridgeExclusionList;
-    }
-
-    @VisibleForTesting
-    @SuppressFBWarnings("EI_EXPOSE_STATIC_REP2")
-    public static void setBridgesReconciliationInclusionList(final List<String> list) {
-        reconcileBridgeInclusionList = list;
-    }
-
     private final OvsdbConnectionManager cm;
     private final TransactionInvoker txInvoker;
     private final OvsdbDataTreeChangeListener ovsdbDataTreeChangeListener;
@@ -135,9 +116,8 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
             List.of(configuration.bridge$_$reconciliation$_$exclusion$_$list()));
     }
 
-    @SuppressFBWarnings(
-        value = { "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD" },
-        justification = "This is not a final class due to deep mocking. There is a FIXME for the static wiring above")
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
+        justification = "This is not a final class due to deep mocking")
     public SouthboundProvider(final DataBroker dataBroker,
                               final EntityOwnershipService entityOwnershipServiceDependency,
                               final OvsdbConnection ovsdbConnection,
@@ -146,12 +126,9 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
                               final SystemReadyMonitor systemReadyMonitor,
                               final DiagStatusService diagStatusService,
                               final boolean skipMonitoringManagerStatus,
-                              final List<String> bridgeReconciliationInclusions,
-                              final List<String> bridgeReconciliationExclusions) {
+                              final List<String> bridgeReconciliationInclusionList,
+                              final List<String> bridgeReconciliationExclusionList) {
         this.dataBroker = requireNonNull(dataBroker);
-        // FIXME: get rid of this static wiring
-        reconcileBridgeInclusionList = bridgeReconciliationInclusions;
-        reconcileBridgeExclusionList = bridgeReconciliationExclusions;
         LOG.debug("skipManagerStatus set to {}", skipMonitoringManagerStatus);
         if (skipMonitoringManagerStatus) {
             SouthboundConstants.SKIP_COLUMN_FROM_TABLE.get("Manager").add("status");
@@ -170,7 +147,7 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
         ovsdbStatusProvider.reportStatus(ServiceState.STARTING, "OVSDB initialization in progress");
         txInvoker = new TransactionInvokerImpl(dataBroker);
         cm = new OvsdbConnectionManager(dataBroker, txInvoker, entityOwnershipService, ovsdbConnection,
-                instanceIdentifierCodec);
+                instanceIdentifierCodec, bridgeReconciliationInclusionList, bridgeReconciliationExclusionList);
         ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(dataBroker, cm, instanceIdentifierCodec);
         ovsdbOperGlobalListener = new OvsdbOperGlobalListener(dataBroker, cm, txInvoker);
 

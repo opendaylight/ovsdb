@@ -74,7 +74,7 @@ public class InstanceIdentifierCodecTest {
     @Test
     public void testModuleForPrefix() {
         Module module = mock(Module.class);
-        QNameModule mod = QNameModule.create(XMLNamespace.of("test"));
+        QNameModule mod = QNameModule.of("test");
         doReturn(List.of(module)).when(context).findModules("");
         doReturn(mod).when(module).getQNameModule();
         assertEquals(mod, instanceIdCodec.moduleForPrefix(""));

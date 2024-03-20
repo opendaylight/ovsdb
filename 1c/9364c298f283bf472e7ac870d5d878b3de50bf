@@ -1,0 +1,8 @@
+Verified+1: ODL Required.GHA <releng+odl.required.gha@linuxfoundation.org>
+Verified+1: Robert Varga <nite@hq.sk>
+Code-Review+2: Robert Varga <nite@hq.sk>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Wed, 20 Mar 2024 07:28:23 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/ovsdb/+/110893
+Project: ovsdb
+Branch: refs/heads/stable/potassium

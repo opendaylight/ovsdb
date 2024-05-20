@@ -71,7 +71,6 @@ public final class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactio
     }
 
     private RemoteUcastMacs buildRemoteUcast(final UcastMacsRemote macRemote) {
-        InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
         RemoteUcastMacsBuilder rumBuilder = new RemoteUcastMacsBuilder();
         rumBuilder.setMacEntryKey(new MacAddress(macRemote.getMac()));
         rumBuilder.setMacEntryUuid(new Uuid(macRemote.getUuid().toString()));
@@ -86,6 +85,7 @@ public final class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactio
                 physicalLocator = getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocator(locUUID);
             }
             if (physicalLocator != null) {
+                InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
                 InstanceIdentifier<TerminationPoint> plIid = HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid,
                         physicalLocator);
                 rumBuilder.setLocatorRef(new HwvtepPhysicalLocatorRef(plIid));

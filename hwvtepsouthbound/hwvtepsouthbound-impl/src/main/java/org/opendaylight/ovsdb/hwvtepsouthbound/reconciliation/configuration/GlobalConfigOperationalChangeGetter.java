@@ -93,8 +93,6 @@ public final class GlobalConfigOperationalChangeGetter {
     }
 
     static  Set<String> getLogicalSwitchesToBeRemoved(final Node configNode, final Node opNode) {
-        Set<String> opSwitchNames = new HashSet<>();
-        Set<String> cfgSwitchNames = new HashSet<>();
         Map<LogicalSwitchesKey, LogicalSwitches> cfgLogicalSwitches = null;
         Map<LogicalSwitchesKey, LogicalSwitches> opLogicalSwitches = null;
 
@@ -104,11 +102,13 @@ public final class GlobalConfigOperationalChangeGetter {
         if (configNode != null && configNode.augmentation(HwvtepGlobalAugmentation.class) != null) {
             cfgLogicalSwitches = configNode.augmentation(HwvtepGlobalAugmentation.class).getLogicalSwitches();
         }
+        Set<String> opSwitchNames = new HashSet<>();
         if (opLogicalSwitches != null) {
             for (LogicalSwitches ls : opLogicalSwitches.values()) {
                 opSwitchNames.add(ls.getHwvtepNodeName().getValue());
             }
         }
+        Set<String> cfgSwitchNames = new HashSet<>();
         if (cfgLogicalSwitches != null) {
             for (LogicalSwitches ls : cfgLogicalSwitches.values()) {
                 cfgSwitchNames.add(ls.getHwvtepNodeName().getValue());

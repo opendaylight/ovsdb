@@ -94,9 +94,8 @@ public class PhysicalPortUpdateCommand
                                     final TerminationPoint data, final InstanceIdentifier key,
                                     final Object... extraData) {
         LOG.debug("Processing port doDeviceTransaction {}", data);
-        InstanceIdentifier<Node> psNodeiid = nodeIid;
-        HwvtepPhysicalPortAugmentation port = data.augmentation(
-                HwvtepPhysicalPortAugmentation.class);
+        final InstanceIdentifier<Node> psNodeiid = nodeIid;
+        HwvtepPhysicalPortAugmentation port = data.augmentation(HwvtepPhysicalPortAugmentation.class);
         if (port == null) {
             LOG.info("No port augmentation found for port {}", data);
             return;

@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng ODL
+Verified+1: ODL Required.GHA <releng+odl.required.gha@linuxfoundation.org>
+Code-Review+2: Robert Varga <nite@hq.sk>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Mon, 20 May 2024 11:21:01 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/ovsdb/+/111740
+Project: ovsdb
+Branch: refs/heads/stable/calcium

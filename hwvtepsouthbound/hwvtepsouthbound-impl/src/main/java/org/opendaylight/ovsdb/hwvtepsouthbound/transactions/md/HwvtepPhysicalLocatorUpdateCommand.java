@@ -61,7 +61,7 @@ public final class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactio
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
                 tpBuilder.withKey(tpKey);
                 tpBuilder.setTpId(tpKey.getTpId());
-                InstanceIdentifier<TerminationPoint> tpPath =
+                final InstanceIdentifier<TerminationPoint> tpPath =
                         HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, locator);
                 HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder =
                         new HwvtepPhysicalLocatorAugmentationBuilder();

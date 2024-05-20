@@ -104,8 +104,6 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                 Node before = mod.getDataBefore();
                 if (updated != null && before != null) {
                     List<HwvtepPhysicalPortAugmentation> portListUpdated = new ArrayList<>();
-                    List<HwvtepPhysicalPortAugmentation> portListBefore = new ArrayList<>();
-                    List<HwvtepPhysicalPortAugmentation> portListRemoved = new ArrayList<>();
                     for (TerminationPoint tp : updated.nonnullTerminationPoint().values()) {
                         HwvtepPhysicalPortAugmentation hppAugmentation =
                                 tp.augmentation(HwvtepPhysicalPortAugmentation.class);
@@ -113,6 +111,7 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                             portListUpdated.add(hppAugmentation);
                         }
                     }
+                    List<HwvtepPhysicalPortAugmentation> portListBefore = new ArrayList<>();
                     for (TerminationPoint tp : before.nonnullTerminationPoint().values()) {
                         HwvtepPhysicalPortAugmentation hppAugmentation =
                                 tp.augmentation(HwvtepPhysicalPortAugmentation.class);
@@ -122,6 +121,7 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                     }
                     portListBefore.removeAll(portListUpdated);
                     //then exclude updated physical ports
+                    List<HwvtepPhysicalPortAugmentation> portListRemoved = new ArrayList<>();
                     for (HwvtepPhysicalPortAugmentation portBefore: portListBefore) {
                         int index = 0;
                         for (; index < portListUpdated.size(); index++) {

@@ -1993,10 +1993,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, topologyPath);
         InstanceIdentifier<Node> expectedNodeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
         NodeId expectedNodeId = expectedNodeIid.firstKeyOf(Node.class).getNodeId();
-        Node foundNode = null;
         assertNotNull("Expected to find topology: " + topologyPath, topology);
         assertNotNull("Expected to find some nodes" + topology.getNode());
         LOG.info("expectedNodeId: {}, getNode: {}", expectedNodeId, topology.getNode());
+        Node foundNode = null;
         for (Node node : topology.nonnullNode().values()) {
             if (node.getNodeId().getValue().equals(expectedNodeId.getValue())) {
                 foundNode = node;

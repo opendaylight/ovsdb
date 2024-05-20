@@ -143,7 +143,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             }
             if (optBridgeIid.isPresent()) {
                 InstanceIdentifier<Node> bridgeIid = optBridgeIid.orElseThrow();
-                NodeId bridgeId = SouthboundMapper.createManagedNodeId(bridgeIid);
+                final NodeId bridgeId = SouthboundMapper.createManagedNodeId(bridgeIid);
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(portName));
                 getOvsdbConnectionInstance().updatePortInterface(portName, bridgeIid);
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();

@@ -102,7 +102,7 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
             });
         }
 
-        Set<InstanceIdentifier<?>> removeTerminationPoints = new HashSet<>();
+        final Set<InstanceIdentifier<?>> removeTerminationPoints = new HashSet<>();
         final Map<InstanceIdentifier<?>, DataObject> original = new HashMap<>();
         final InstanceIdentifier<Node> bridgeNodeIid =
                 SouthboundMapper.createInstanceIdentifier(configNodeData.getNodeId());

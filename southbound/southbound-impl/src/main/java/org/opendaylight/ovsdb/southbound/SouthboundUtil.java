@@ -153,7 +153,6 @@ public final class SouthboundUtil {
     }
 
     public static String getControllerTarget(Node ovsdbNode) {
-        String target = null;
         String ipAddr = null;
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
         ConnectionInfo connectionInfo = ovsdbNodeAugmentation.getConnectionInfo();
@@ -166,11 +165,11 @@ public final class SouthboundUtil {
         }
 
         if (ipAddr != null) {
-            target = SouthboundConstants.OPENFLOW_CONNECTION_PROTOCOL + ":"
+            return SouthboundConstants.OPENFLOW_CONNECTION_PROTOCOL + ":"
                     + ipAddr + ":" + SouthboundConstants.DEFAULT_OPENFLOW_PORT;
         }
 
-        return target;
+        return null;
     }
 
     public static String connectionInfoToString(final ConnectionInfo connectionInfo) {

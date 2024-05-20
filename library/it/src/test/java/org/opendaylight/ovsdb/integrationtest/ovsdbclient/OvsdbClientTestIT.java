@@ -102,7 +102,7 @@ public class OvsdbClientTestIT extends LibraryIntegrationTestBase {
                 bridge.multiValuedColumn("flood_vlans", Integer.class);
         ColumnSchema<GenericTableSchema, Map<String, String>> externalIds =
                 bridge.multiValuedColumn("external_ids", String.class, String.class);
-        ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
+        final ColumnSchema<GenericTableSchema, String> name = bridge.column("name", String.class);
         MonitorRequestBuilder<GenericTableSchema> builder = new MonitorRequestBuilder<>(bridge);
         if (filter) {
             builder.addColumn(bridge.column("name"))

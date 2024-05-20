@@ -58,7 +58,7 @@ public class LogicalRouterUpdateCommand
     private void updateLogicalRouter(final TransactionBuilder transaction,
             final InstanceIdentifier<Node> instanceIdentifier, final List<LogicalRouters> routerList) {
         for (LogicalRouters lrouter: routerList) {
-            InstanceIdentifier<LogicalRouters> routerKey = instanceIdentifier
+            final InstanceIdentifier<LogicalRouters> routerKey = instanceIdentifier
                     .augmentation(HwvtepGlobalAugmentation.class).child(LogicalRouters.class, lrouter.key());
             LOG.debug("Creating logical router named: {}", lrouter.getHwvtepNodeName());
 

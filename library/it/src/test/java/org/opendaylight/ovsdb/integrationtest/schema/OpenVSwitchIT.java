@@ -359,7 +359,6 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         String flowTableUuidStr = "testFlowTable";
         String tableName = "flow_table_row_name";
         String overflowPolicy = "evict";
-        String prefixes = "wildcarding prefixes";
         Map<Long, UUID> flowTableBrRef = new HashMap<>();
         flowTableBrRef.put(1L, new UUID(flowTableUuidStr));
         FlowTable flowTable = getClient().createTypedRowWrapper(FlowTable.class);
@@ -367,7 +366,7 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         flowTable.setOverflowPolicy(ImmutableSet.of(overflowPolicy));
         flowTable.setGroups(ImmutableSet.of("group name"));
         if (schemaVersion.compareTo(prefixesAddedVersion) >= 0) {
-            flowTable.setPrefixes(ImmutableSet.of(prefixes));
+            flowTable.setPrefixes(ImmutableSet.of("wildcarding prefixes"));
         }
         if (schemaVersion.compareTo(externalIdAddedVerson) >= 0) {
             flowTable.setExternalIds(ImmutableMap.of("I <3", "OVS"));
@@ -445,8 +444,6 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         String ipfixTarget = "172.16.20.1:4739";
         Long obsDomainId = 112L;
         Long obsPointId = 358L;
-        Long cacheMax = 132L;
-        Long cacheTimeout = 134L;
 
         IPFIX ipfix = getClient().createTypedRowWrapper(IPFIX.class);
         ipfix.setTargets(ImmutableSet.of(ipfixTarget));
@@ -454,8 +451,8 @@ public class OpenVSwitchIT extends LibraryIntegrationTestBase {
         ipfix.setObsPointId(ImmutableSet.of(obsPointId));
         // Only set these rows if the schema version supports it
         if (schemaVersion.compareTo(ipfixCacheFromVersion) >= 0) {
-            ipfix.setCacheMaxFlows(ImmutableSet.of(cacheMax));
-            ipfix.setCacheActiveTimeout(ImmutableSet.of(cacheTimeout));
+            ipfix.setCacheMaxFlows(ImmutableSet.of(132L));
+            ipfix.setCacheActiveTimeout(ImmutableSet.of(134L));
         }
 
         Long sampling = 558L;

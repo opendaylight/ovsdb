@@ -128,7 +128,7 @@ public final class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCo
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
                 tpBuilder.withKey(tpKey);
                 tpBuilder.setTpId(tpKey.getTpId());
-                InstanceIdentifier<TerminationPoint> tpPath =
+                final InstanceIdentifier<TerminationPoint> tpPath =
                     getInstanceIdentifier(switchIid.orElseThrow(), portUpdate);
                 HwvtepPhysicalPortAugmentationBuilder tpAugmentationBuilder =
                         new HwvtepPhysicalPortAugmentationBuilder();

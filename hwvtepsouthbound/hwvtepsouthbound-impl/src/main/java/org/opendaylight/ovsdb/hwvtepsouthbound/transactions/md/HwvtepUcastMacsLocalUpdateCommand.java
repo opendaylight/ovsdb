@@ -77,7 +77,6 @@ public final class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransaction
     }
 
     private LocalUcastMacs buildLocalUcastMac(final UcastMacsLocal ucml) {
-        InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
         LocalUcastMacsBuilder ucmlBuilder = new LocalUcastMacsBuilder();
         if (ucml.getIpAddr() != null && !ucml.getIpAddr().isEmpty()) {
             ucmlBuilder.setIpaddr(TransactUtils.parseIpAddress(ucml.getIpAddr()));
@@ -92,6 +91,7 @@ public final class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransaction
                         .getDeviceInfo().getPhysicalLocator(plocUUID);
             }
             if (physicalLocator != null) {
+                InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
                 InstanceIdentifier<TerminationPoint> plIid =
                         HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, physicalLocator);
                 ucmlBuilder.setLocatorRef(new HwvtepPhysicalLocatorRef(plIid));

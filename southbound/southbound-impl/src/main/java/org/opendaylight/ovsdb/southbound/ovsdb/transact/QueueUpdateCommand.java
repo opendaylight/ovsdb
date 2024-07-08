@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
@@ -19,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Queue;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -36,8 +36,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QueueUpdateCommand implements TransactCommand {
+public class QueueUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(QueueUpdateCommand.class);
+
+    public QueueUpdateCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
@@ -55,7 +59,7 @@ public class QueueUpdateCommand implements TransactCommand {
     }
 
     @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
-    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Map<InstanceIdentifier<Queues>, Queues> createdOrUpdated,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         for (Entry<InstanceIdentifier<Queues>, Queues> queueMapEntry : createdOrUpdated.entrySet()) {

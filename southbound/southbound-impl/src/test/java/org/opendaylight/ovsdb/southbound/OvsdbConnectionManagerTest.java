@@ -41,6 +41,8 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
+import org.opendaylight.ovsdb.lib.operations.DefaultOperations;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionCommand;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
@@ -97,10 +99,12 @@ public class OvsdbConnectionManagerTest {
         field(OvsdbConnectionManager.class, "alreadyProcessedClients").set(ovsdbConnManager, new ConcurrentHashMap<>());
         entityConnectionMap = new ConcurrentHashMap<>();
 
+        InetAddress.getByAddress(new byte[] { 1, 2, 3, 4});
+
         OvsdbConnectionInfo info = mock(OvsdbConnectionInfo.class);
-        doReturn(mock(InetAddress.class)).when(info).getRemoteAddress();
+        doReturn(InetAddress.getByAddress(new byte[] { 1, 2, 3, 4})).when(info).getRemoteAddress();
         doReturn(8080).when(info).getRemotePort();
-        doReturn(mock(InetAddress.class)).when(info).getLocalAddress();
+        doReturn(InetAddress.getByAddress(new byte[] { 5, 6, 7, 8})).when(info).getLocalAddress();
         doReturn(8080).when(info).getLocalPort();
 
         externalClient = mock(OvsdbClient.class, Mockito.RETURNS_DEEP_STUBS);
@@ -162,7 +166,7 @@ public class OvsdbConnectionManagerTest {
                 OvsdbConnectionInstance.class));
         doNothing().when(client).createTransactInvokers();
         PowerMockito.whenNew(OvsdbConnectionInstance.class).withArguments(any(ConnectionInfo.class),
-                any(OvsdbClient.class), any(TransactionInvoker.class), any(InstanceIdentifier.class))
+            any(OvsdbClient.class), any(Operations.class), any(TransactionInvoker.class), any(InstanceIdentifier.class))
                 .thenReturn(client);
 
         assertEquals("Error, did not receive correct OvsdbConnectionInstance object", client,
@@ -394,7 +398,8 @@ public class OvsdbConnectionManagerTest {
         Entity entity = new Entity("entityType", "entityName");
         ConnectionInfo key = mock(ConnectionInfo.class);
 
-        OvsdbConnectionInstance ovsdbConnInstance = new OvsdbConnectionInstance(key, externalClient, txInvoker, iid);
+        OvsdbConnectionInstance ovsdbConnInstance = new OvsdbConnectionInstance(key, externalClient,
+            new DefaultOperations(), txInvoker, iid);
         entityConnectionMap.put(entity, ovsdbConnInstance);
 
         field(OvsdbConnectionManager.class, "entityConnectionMap").set(ovsdbConnManager, entityConnectionMap);

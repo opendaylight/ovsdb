@@ -266,7 +266,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
             }
         };
 
-        connectionInstance.transact(new TransactCommandAggregator(),
+        connectionInstance.transact(new TransactCommandAggregator(connectionInstance.ops()),
                 new BridgeOperationalState(reconciliationManager.getDb(), changeEvents),
                 new DataChangesManagedByOvsdbNodeEvent(
                         reconciliationManager.getDb(),

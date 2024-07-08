@@ -40,6 +40,7 @@ import org.opendaylight.ovsdb.lib.MonitorHandle;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
 import org.opendaylight.ovsdb.lib.message.TableUpdates;
+import org.opendaylight.ovsdb.lib.operations.DefaultOperations;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
@@ -77,7 +78,8 @@ public class OvsdbConnectionInstanceTest {
 
     @Before
     public void setUp() throws Exception {
-        ovsdbConnectionInstance = spy(new OvsdbConnectionInstance(key, client, txInvoker, instanceIdentifier));
+        ovsdbConnectionInstance = spy(new OvsdbConnectionInstance(key, client, new DefaultOperations(), txInvoker,
+            instanceIdentifier));
     }
 
     @Test

@@ -45,6 +45,7 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
@@ -77,6 +78,7 @@ public class HwvtepConnectionInstance {
     private HwvtepGlobalAugmentation initialCreatedData = null;
     private final HwvtepDeviceInfo deviceInfo;
     private final DataBroker dataBroker;
+    private final Operations ops;
     private final HwvtepConnectionManager hwvtepConnectionManager;
     private static final ScheduledExecutorService SCHEDULED_EXECUTOR_SERVICE = Executors
         .newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
@@ -90,7 +92,7 @@ public class HwvtepConnectionInstance {
 
     HwvtepConnectionInstance(final HwvtepConnectionManager hwvtepConnectionManager, final ConnectionInfo key,
             final OvsdbClient client, final InstanceIdentifier<Node> iid, final TransactionInvoker txInvoker,
-            final DataBroker dataBroker) {
+            final DataBroker dataBroker, final Operations ops) {
         this.hwvtepConnectionManager = hwvtepConnectionManager;
         this.connectionInfo = key;
         this.client = client;
@@ -98,6 +100,7 @@ public class HwvtepConnectionInstance {
         this.txInvoker = txInvoker;
         this.deviceInfo = new HwvtepDeviceInfo(this);
         this.dataBroker = dataBroker;
+        this.ops = ops;
         this.hwvtepTableReader = new HwvtepTableReader(this);
     }
 
@@ -409,5 +412,9 @@ public class HwvtepConnectionInstance {
 
     public TransactionInvoker getTxInvoker() {
         return txInvoker;
+    }
+
+    public Operations ops() {
+        return ops;
     }
 }

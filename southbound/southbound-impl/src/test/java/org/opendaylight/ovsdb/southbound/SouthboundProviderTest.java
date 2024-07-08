@@ -39,6 +39,7 @@ import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipStateChange;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.lib.operations.DefaultOperations;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
@@ -78,7 +79,7 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class),
                 new TestSystemReadyMonitor(IMMEDIATE),
-                diagStatusService)) {
+                diagStatusService, new DefaultOperations())) {
 
             // Verify that at least one listener was registered
             verify(entityOwnershipService, atLeastOnce()).registerListener(
@@ -102,7 +103,7 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class),
                 new TestSystemReadyMonitor(IMMEDIATE),
-                diagStatusService)) {
+                diagStatusService, new DefaultOperations())) {
 
             // Verify that at least one listener was registered
             verify(entityOwnershipService, atLeastOnce()).registerListener(
@@ -132,7 +133,7 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 Mockito.mock(DOMSchemaService.class),
                 Mockito.mock(BindingNormalizedNodeSerializer.class),
                 new TestSystemReadyMonitor(IMMEDIATE),
-                diagStatusService)) {
+                diagStatusService, new DefaultOperations())) {
 
             // At this point the OVSDB topology must not be present in either tree
             assertFalse(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION,

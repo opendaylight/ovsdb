@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,7 +68,9 @@ public final class LogicalSwitchUcastsRemoveCommand
         InstanceIdentifier<LogicalSwitches> lsKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
                 .child(LogicalSwitches.class, logicalSwitches.key());
         HwvtepDeviceInfo.DeviceData deviceData  = super.<LogicalSwitch>fetchDeviceData(LogicalSwitches.class, lsKey);
+
         if (deviceData != null && deviceData.getUuid() != null) {
+            final var op = ops();
 
             UUID logicalSwitchUuid = deviceData.getUuid();
 

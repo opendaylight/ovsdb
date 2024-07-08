@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.southbound;
 
 import static java.util.Objects.requireNonNull;
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.FluentFuture;
@@ -41,6 +40,7 @@ import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.Select;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
@@ -76,6 +76,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             new ConcurrentHashMap<>();
     private final ConcurrentMap<Entity, OvsdbConnectionInstance> entityConnectionMap = new ConcurrentHashMap<>();
     private final DataBroker db;
+    private final Operations ops;
     private final TransactionInvoker txInvoker;
     private final EntityOwnershipService entityOwnershipService;
     private final OvsdbDeviceEntityOwnershipListener ovsdbDeviceEntityOwnershipListener;
@@ -83,13 +84,14 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private final ReconciliationManager reconciliationManager;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
-    public OvsdbConnectionManager(final DataBroker db,final TransactionInvoker txInvoker,
+    public OvsdbConnectionManager(final DataBroker db, final Operations ops, final TransactionInvoker txInvoker,
                                   final EntityOwnershipService entityOwnershipService,
                                   final OvsdbConnection ovsdbConnection,
                                   final InstanceIdentifierCodec instanceIdentifierCodec,
                                   final List<String> reconcileBridgeInclusionList,
                                   final List<String> reconcileBridgeExclusionList) {
         this.db = db;
+        this.ops = ops;
         this.txInvoker = txInvoker;
         this.entityOwnershipService = entityOwnershipService;
         ovsdbDeviceEntityOwnershipListener = new OvsdbDeviceEntityOwnershipListener(this, entityOwnershipService);
@@ -164,7 +166,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             stopBridgeConfigReconciliationIfActive(ovsdbConnectionInstance.getInstanceIdentifier());
         }
 
-        ovsdbConnectionInstance = new OvsdbConnectionInstance(key, externalClient, txInvoker,
+        ovsdbConnectionInstance = new OvsdbConnectionInstance(key, externalClient, ops, txInvoker,
                 getInstanceIdentifier(key));
         ovsdbConnectionInstance.createTransactInvokers();
         return ovsdbConnectionInstance;
@@ -520,7 +522,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     }
 
-    private static OpenVSwitch getOpenVswitchTableEntry(final OvsdbConnectionInstance connectionInstance) {
+    private OpenVSwitch getOpenVswitchTableEntry(final OvsdbConnectionInstance connectionInstance) {
         final TypedDatabaseSchema dbSchema;
         try {
             dbSchema = connectionInstance.getSchema(OvsdbSchemaContants.DATABASE_NAME).get();
@@ -531,12 +533,12 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
 
         final GenericTableSchema openVSwitchSchema = dbSchema.getTableSchema(OpenVSwitch.class);
-        final Select<GenericTableSchema> selectOperation = op.select(openVSwitchSchema);
+        final Select<GenericTableSchema> selectOperation = ops.select(openVSwitchSchema);
         selectOperation.setColumns(openVSwitchSchema.getColumnList());
 
         List<Operation> operations = new ArrayList<>();
         operations.add(selectOperation);
-        operations.add(op.comment("Fetching Open_VSwitch table rows"));
+        operations.add(ops.comment("Fetching Open_VSwitch table rows"));
         final List<OperationResult> results;
         try {
             results = connectionInstance.transact(dbSchema, operations).get();

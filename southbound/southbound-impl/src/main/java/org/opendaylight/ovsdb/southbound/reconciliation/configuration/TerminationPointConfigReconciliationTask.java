@@ -91,7 +91,7 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
             }
         };
 
-        connectionInstance.transact(new TerminationPointCreateCommand(),
+        connectionInstance.transact(new TerminationPointCreateCommand(connectionInstance.ops()),
                         new BridgeOperationalState(reconciliationManager.getDb(), changeEvents),
                         changeEvents, instanceIdentifierCodec);
 
@@ -158,7 +158,7 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
             }
         };
 
-        connectionInstance.transact(new TerminationPointDeleteCommand(),
+        connectionInstance.transact(new TerminationPointDeleteCommand(connectionInstance.ops()),
                 new BridgeOperationalState(reconciliationManager.getDb(), deleteChangeEvents),
                 deleteChangeEvents, instanceIdentifierCodec);
 
@@ -166,7 +166,7 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
     }
 
     @Override
-    public void doRetry(boolean wasPreviousAttemptSuccessful) {
+    public void doRetry(final boolean wasPreviousAttemptSuccessful) {
     }
 
     @Override

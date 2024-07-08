@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Collections;
@@ -99,7 +97,7 @@ public class UcastMacsRemoteUpdateCommand
             setMac(ucastMacsRemote, remoteUcastMac);
             LOG.trace("DoDeviceTransaction: creating RemotUcastMac entry: {} txId: {}", macKey,
                     getOperationalState().getTransactionId());
-            transaction.add(op.insert(ucastMacsRemote));
+            transaction.add(ops().insert(ucastMacsRemote));
             updateCurrentTxData(RemoteUcastMacs.class, macKey, new UUID("uuid"), remoteUcastMac);
             LOG.info("CONTROLLER - {} {}", TransactionType.ADD, ucastMacsRemote);
             return;
@@ -121,7 +119,7 @@ public class UcastMacsRemoteUpdateCommand
             extraMac.getUuidColumn().setData(macEntryUUID);
             LOG.trace("doDeviceTransaction: updating RemotUcastMac entry: {} txId: {}", macKey,
                     getOperationalState().getTransactionId());
-            transaction.add(op.update(ucastMacsRemote)
+            transaction.add(ops().update(ucastMacsRemote)
                     .where(extraMac.getUuidColumn().getSchema().opEqual(macEntryUUID))
                     .build());
             LOG.info("CONTROLLER - {} {}", TransactionType.UPDATE, ucastMacsRemote);

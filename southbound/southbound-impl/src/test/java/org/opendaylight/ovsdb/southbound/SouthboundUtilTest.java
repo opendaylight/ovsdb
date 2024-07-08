@@ -5,8 +5,8 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Iterators;
 import com.google.common.util.concurrent.FluentFuture;
-import java.net.InetAddress;
+import java.net.Inet4Address;
 import java.net.NetworkInterface;
 import java.util.Optional;
 import org.junit.Before;
@@ -118,14 +118,9 @@ public class SouthboundUtilTest {
         when(NetworkInterface.getNetworkInterfaces()).thenReturn(null);
         assertNull(SouthboundUtil.getLocalControllerHostIpAddress());
 
-        InetAddress inetAddr = mock(InetAddress.class);
-        when(inetAddr.isLoopbackAddress()).thenReturn(false);
-        when(inetAddr.isSiteLocalAddress()).thenReturn(true);
-        when(inetAddr.getHostAddress()).thenReturn("HostAddress");
-
         NetworkInterface iface = PowerMockito.mock(NetworkInterface.class);
         when(iface.getInetAddresses()).thenReturn(Iterators.asEnumeration(
-            Iterators.singletonIterator(inetAddr)));
+            Iterators.singletonIterator(Inet4Address.getByAddress("HostAddress", new byte[] { 10, 0, 0, 1 }))));
 
         when(NetworkInterface.getNetworkInterfaces()).thenReturn(Iterators.asEnumeration(
             Iterators.singletonIterator(iface)));

@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import static java.util.Objects.requireNonNull;
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap.Builder;
@@ -268,7 +267,7 @@ public class HwvtepTableReader {
         final Class<? extends TypedBaseTable<?>> tableClass = TABLE_MAP.get(cls);
         final GenericTableSchema hwvtepSchema = dbSchema.getTableSchema(tableClass);
 
-        final Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
+        final Select<GenericTableSchema> selectOperation = connectionInstance.ops().select(hwvtepSchema);
         selectOperation.setColumns(hwvtepSchema.getColumnList());
 
         if (existingUUID == null) {
@@ -329,7 +328,7 @@ public class HwvtepTableReader {
 
         final Class<? extends TypedBaseTable<?>> tableClass = TABLE_MAP.get(cls);
         final GenericTableSchema hwvtepSchema = dbSchema.getTableSchema(tableClass);
-        final Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
+        final Select<GenericTableSchema> selectOperation = connectionInstance.ops().select(hwvtepSchema);
         selectOperation.setColumns(hwvtepSchema.getColumnList());
 
         final List<OperationResult> results;
@@ -364,7 +363,7 @@ public class HwvtepTableReader {
         TypedDatabaseSchema dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();
         List<Operation> operations = Arrays.stream(ALL_TABLES)
                 .map(tableClass -> dbSchema.getTableSchema(tableClass))
-                .map(HwvtepTableReader::buildSelectOperationFor)
+                .map(this::buildSelectOperationFor)
                 .collect(Collectors.toList());
         List<OperationResult> results = connectionInstance.transact(dbSchema, operations).get();
 
@@ -409,8 +408,8 @@ public class HwvtepTableReader {
         }
     }
 
-    private static Select<GenericTableSchema> buildSelectOperationFor(final GenericTableSchema tableSchema) {
-        Select<GenericTableSchema> selectOperation = op.select(tableSchema);
+    private Select<GenericTableSchema> buildSelectOperationFor(final GenericTableSchema tableSchema) {
+        Select<GenericTableSchema> selectOperation = connectionInstance.ops().select(tableSchema);
         selectOperation.setColumns(tableSchema.getColumnList());
         return selectOperation;
     }

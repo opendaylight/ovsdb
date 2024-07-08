@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.opendaylight.ovsdb.lib.operations.DefaultOperations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 
@@ -33,7 +34,7 @@ public class TransactCommandAggregatorTest {
 
     @Before
     public void setUp() throws Exception {
-        transactCommandAggregator = new TransactCommandAggregator();
+        transactCommandAggregator = new TransactCommandAggregator(new DefaultOperations());
 
         //mock commands field
         commands.add(mock(BridgeUpdateCommand.class));

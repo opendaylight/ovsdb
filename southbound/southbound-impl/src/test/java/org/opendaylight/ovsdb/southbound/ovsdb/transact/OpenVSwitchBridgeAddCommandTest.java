@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,7 +22,6 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -43,10 +43,12 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({TransactUtils.class, Operations.class})
 public class OpenVSwitchBridgeAddCommandTest {
     private OpenVSwitchBridgeAddCommand ovsBridgeAddCommand;
+    private Operations op;
 
     @Before
     public void setUp() {
-        ovsBridgeAddCommand = mock(OpenVSwitchBridgeAddCommand.class, Mockito.CALLS_REAL_METHODS);
+        op = mock(Operations.class);
+        ovsBridgeAddCommand = spy(new OpenVSwitchBridgeAddCommand(op));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -74,7 +76,6 @@ public class OpenVSwitchBridgeAddCommandTest {
         doNothing().when(ovs).setBridges(any(Set.class));
 
         Mutate<GenericTableSchema> mutate = mock(Mutate.class);
-        Operations op = OvsdbNodeUpdateCommandTest.setOpField();
         when(op.mutate(any(OpenVSwitch.class))).thenReturn(mutate);
         Column<GenericTableSchema, Set<UUID>> column = mock(Column.class);
         when(ovs.getBridgesColumn()).thenReturn(column);

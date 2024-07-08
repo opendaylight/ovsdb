@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,6 +57,8 @@ public class PhysicalSwitchRemoveCommand extends AbstractTransactCommand {
             UUID physicalSwitchUuid = new UUID(operationalPhysicalSwitchOptional.orElseThrow()
                     .getPhysicalSwitchUuid().getValue());
             Global global = transaction.getTypedRowSchema(Global.class);
+            final var op = ops();
+
             transaction.add(op.delete(physicalSwitch.getSchema())
                     .where(physicalSwitch.getUuidColumn().getSchema().opEqual(physicalSwitchUuid)).build());
             transaction.add(op.comment("Physical Switch: Deleting "

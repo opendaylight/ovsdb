@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,6 +18,7 @@ import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.AutoAttach;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
@@ -38,8 +37,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
-public class AutoAttachRemovedCommand implements TransactCommand {
+public class AutoAttachRemovedCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(AutoAttachRemovedCommand.class);
+
+    public AutoAttachRemovedCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
@@ -56,9 +59,9 @@ public class AutoAttachRemovedCommand implements TransactCommand {
                 TransactUtils.extractUpdated(events, OvsdbNodeAugmentation.class));
     }
 
-    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-                                final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> original,
-                                final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
+    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> original,
+            final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
         for (var originalEntry : original.entrySet()) {
             final InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = originalEntry.getKey();
             final OvsdbNodeAugmentation ovsdbNodeAugmentation = originalEntry.getValue();
@@ -89,9 +92,8 @@ public class AutoAttachRemovedCommand implements TransactCommand {
         }
     }
 
-    private static void deleteAutoAttach(final BridgeOperationalState state, final TransactionBuilder transaction,
-            final InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid,
-            final Uuid autoattachUuid) {
+    private void deleteAutoAttach(final BridgeOperationalState state, final TransactionBuilder transaction,
+            final InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid, final Uuid autoattachUuid) {
 
         LOG.debug("Received request to delete Autoattach entry {}", autoattachUuid);
         final OvsdbBridgeAugmentation bridgeAugmentation = getBridge(state, ovsdbNodeIid, autoattachUuid);

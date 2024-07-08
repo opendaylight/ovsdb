@@ -8,8 +8,9 @@
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import java.util.Collection;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -17,9 +18,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 /**
  * This transactional command aggregates all the Southbound commands.
  */
-public class TransactCommandAggregator implements TransactCommand {
+public class TransactCommandAggregator extends AbstractTransactCommand {
     // Type capture to allow using an array
-    private interface CommandSupplier extends Supplier<TransactCommand> {
+    private interface CommandSupplier extends Function<Operations, TransactCommand> {
 
     }
 
@@ -43,11 +44,15 @@ public class TransactCommandAggregator implements TransactCommand {
         TerminationPointUpdateCommand::new
     };
 
+    public TransactCommandAggregator(final Operations op) {
+        super(op);
+    }
+
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
         for (CommandSupplier supplier : COMMAND_SUPPLIERS) {
-            supplier.get().execute(transaction, state, events, instanceIdentifierCodec);
+            supplier.apply(op).execute(transaction, state, events, instanceIdentifierCodec);
         }
     }
 
@@ -56,7 +61,7 @@ public class TransactCommandAggregator implements TransactCommand {
             final Collection<DataTreeModification<Node>> modifications,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         for (CommandSupplier supplier : COMMAND_SUPPLIERS) {
-            supplier.get().execute(transaction, state, modifications, instanceIdentifierCodec);
+            supplier.apply(op).execute(transaction, state, modifications, instanceIdentifierCodec);
         }
     }
 }

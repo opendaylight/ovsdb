@@ -41,7 +41,9 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.notation.Version;
+import org.opendaylight.ovsdb.lib.operations.DefaultOperations;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
@@ -71,6 +73,8 @@ public abstract class LibraryIntegrationTestBase extends AbstractMdsalTestBase {
     private static Map<String, Map<UUID, Row>> tableCache = new HashMap<>();
     private static boolean monitorReady = false;
     public String schema;
+
+    protected final Operations op = new DefaultOperations();
 
     protected static Map<String, Map<UUID, Row>> getTableCache() {
         return tableCache;

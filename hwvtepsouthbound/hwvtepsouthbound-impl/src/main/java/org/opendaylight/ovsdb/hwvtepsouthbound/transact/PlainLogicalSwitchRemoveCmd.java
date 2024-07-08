@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -50,7 +48,7 @@ public final class PlainLogicalSwitchRemoveCmd
     public void execute(final TransactionBuilder transaction) {
         LogicalSwitch logicalSwitch = TyperUtils.getTypedRowWrapper(
                 transaction.getDatabaseSchema(), LogicalSwitch.class, null);
-        transaction.add(op.delete(logicalSwitch.getSchema())
+        transaction.add(ops().delete(logicalSwitch.getSchema())
                 .where(logicalSwitch.getNameColumn().getSchema().opEqual(
                         logicalSwitches.getHwvtepNodeName().getValue())).build());
     }

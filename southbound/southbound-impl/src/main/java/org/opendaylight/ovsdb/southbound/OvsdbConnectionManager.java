@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.southbound;
 
 import static java.util.Objects.requireNonNull;
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.FluentFuture;
@@ -41,6 +40,7 @@ import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.Select;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
@@ -76,6 +76,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             new ConcurrentHashMap<>();
     private final ConcurrentMap<Entity, OvsdbConnectionInstance> entityConnectionMap = new ConcurrentHashMap<>();
     private final DataBroker db;
+    private final Operations ops;
     private final TransactionInvoker txInvoker;
     private final EntityOwnershipService entityOwnershipService;
     private final OvsdbDeviceEntityOwnershipListener ovsdbDeviceEntityOwnershipListener;
@@ -83,13 +84,14 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     private final ReconciliationManager reconciliationManager;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
-    public OvsdbConnectionManager(final DataBroker db,final TransactionInvoker txInvoker,
+    public OvsdbConnectionManager(final DataBroker db, final Operations ops, final TransactionInvoker txInvoker,
                                   final EntityOwnershipService entityOwnershipService,
                                   final OvsdbConnection ovsdbConnection,
                                   final InstanceIdentifierCodec instanceIdentifierCodec,
                                   final List<String> reconcileBridgeInclusionList,
                                   final List<String> reconcileBridgeExclusionList) {
         this.db = db;
+        this.ops = ops;
         this.txInvoker = txInvoker;
         this.entityOwnershipService = entityOwnershipService;
         ovsdbDeviceEntityOwnershipListener = new OvsdbDeviceEntityOwnershipListener(this, entityOwnershipService);
@@ -135,39 +137,37 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                     + "Disconnecting from the device.", externalClient.getConnectionInfo().getRemoteAddress(), e);
             externalClient.disconnect();
         }
-
     }
 
     public OvsdbConnectionInstance connectedButCallBacksNotRegistered(final OvsdbClient externalClient) {
         LOG.info("OVSDB Connection from {}:{}",externalClient.getConnectionInfo().getRemoteAddress(),
                 externalClient.getConnectionInfo().getRemotePort());
-        ConnectionInfo key = SouthboundMapper.createConnectionInfo(externalClient);
-        OvsdbConnectionInstance ovsdbConnectionInstance = getConnectionInstance(key);
+        final var info = SouthboundMapper.createConnectionInfo(externalClient);
 
         // Check if existing ovsdbConnectionInstance for the OvsdbClient present.
         // In such cases, we will see if the ovsdbConnectionInstance has same externalClient.
-        if (ovsdbConnectionInstance != null) {
-            if (ovsdbConnectionInstance.hasOvsdbClient(externalClient)) {
-                LOG.warn("OVSDB Connection Instance {} already exists for client {}", key, externalClient);
-                return ovsdbConnectionInstance;
+        final var existing = getConnectionInstance(info);
+        if (existing != null) {
+            if (existing.hasOvsdbClient(externalClient)) {
+                LOG.warn("OVSDB Connection Instance {} already exists for client {}", info, externalClient);
+                return existing;
             }
-            LOG.warn("OVSDB Connection Instance {} being replaced with client {}", key, externalClient);
+
+            LOG.warn("OVSDB Connection Instance {} being replaced with client {}", info, externalClient);
 
             // Unregister Cluster Ownership for ConnectionInfo
             // Because the ovsdbConnectionInstance is about to be completely replaced!
-            unregisterEntityForOwnership(ovsdbConnectionInstance);
+            unregisterEntityForOwnership(existing);
 
-            ovsdbConnectionInstance.disconnect();
-
-            removeConnectionInstance(key);
-
-            stopBridgeConfigReconciliationIfActive(ovsdbConnectionInstance.getInstanceIdentifier());
+            // Disconnect and clean up
+            existing.disconnect();
+            removeConnectionInstance(info);
+            stopBridgeConfigReconciliationIfActive(existing.getInstanceIdentifier());
         }
 
-        ovsdbConnectionInstance = new OvsdbConnectionInstance(key, externalClient, txInvoker,
-                getInstanceIdentifier(key));
-        ovsdbConnectionInstance.createTransactInvokers();
-        return ovsdbConnectionInstance;
+        final var ret = new OvsdbConnectionInstance(info, externalClient, ops, txInvoker, getInstanceIdentifier(info));
+        ret.createTransactInvokers();
+        return ret;
     }
 
     @Override
@@ -520,7 +520,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     }
 
-    private static OpenVSwitch getOpenVswitchTableEntry(final OvsdbConnectionInstance connectionInstance) {
+    private OpenVSwitch getOpenVswitchTableEntry(final OvsdbConnectionInstance connectionInstance) {
         final TypedDatabaseSchema dbSchema;
         try {
             dbSchema = connectionInstance.getSchema(OvsdbSchemaContants.DATABASE_NAME).get();
@@ -531,12 +531,12 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
 
         final GenericTableSchema openVSwitchSchema = dbSchema.getTableSchema(OpenVSwitch.class);
-        final Select<GenericTableSchema> selectOperation = op.select(openVSwitchSchema);
+        final Select<GenericTableSchema> selectOperation = ops.select(openVSwitchSchema);
         selectOperation.setColumns(openVSwitchSchema.getColumnList());
 
         List<Operation> operations = new ArrayList<>();
         operations.add(selectOperation);
-        operations.add(op.comment("Fetching Open_VSwitch table rows"));
+        operations.add(ops.comment("Fetching Open_VSwitch table rows"));
         final List<OperationResult> results;
         try {
             results = connectionInstance.transact(dbSchema, operations).get();

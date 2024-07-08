@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -33,6 +31,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.Operation;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.ColumnSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
@@ -424,15 +423,15 @@ public class TransactUtils {
         return new UUID(uuidString);
     }
 
-    public static <T extends TableSchema<T>> void stampInstanceIdentifier(final TransactionBuilder transaction,
-            final InstanceIdentifier<?> iid, final TableSchema<T> tableSchema,
+    public static <T extends TableSchema<T>> void stampInstanceIdentifier(final Operations op,
+            final TransactionBuilder transaction, final InstanceIdentifier<?> iid, final TableSchema<T> tableSchema,
             final ColumnSchema<T, Map<String, String>> columnSchema,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         transaction.add(
-            stampInstanceIdentifierMutation(transaction, iid, tableSchema, columnSchema, instanceIdentifierCodec));
+            stampInstanceIdentifierMutation(op, transaction, iid, tableSchema, columnSchema, instanceIdentifierCodec));
     }
 
-    public static <T extends TableSchema<T>> Mutate<T> stampInstanceIdentifierMutation(
+    public static <T extends TableSchema<T>> Mutate<T> stampInstanceIdentifierMutation(final Operations op,
             final TransactionBuilder transaction, final InstanceIdentifier<?> iid, final TableSchema<T> tableSchema,
             final ColumnSchema<T, Map<String, String>> columnSchema,
             final InstanceIdentifierCodec instanceIdentifierCodec) {

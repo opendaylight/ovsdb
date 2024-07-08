@@ -22,6 +22,7 @@ import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractConcurrentDataBro
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.lib.operations.DefaultOperations;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.ovsdb.utils.southbound.utils.SouthboundUtils;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.IpAddress;
@@ -51,8 +52,9 @@ public class OvsdbDataTreeChangeListenerTest extends AbstractConcurrentDataBroke
         EntityOwnershipService entityOwnershipService = mock(EntityOwnershipService.class);
         InstanceIdentifierCodec instanceIdentifierCodec = mock(InstanceIdentifierCodec.class);
         listener = new OvsdbDataTreeChangeListener(dataBroker,
-                new OvsdbConnectionManager(dataBroker, new TransactionInvokerImpl(dataBroker), entityOwnershipService,
-                        ovsdbConnection, instanceIdentifierCodec, List.of(), List.of()), instanceIdentifierCodec);
+                new OvsdbConnectionManager(dataBroker, new DefaultOperations(), new TransactionInvokerImpl(dataBroker),
+                    entityOwnershipService, ovsdbConnection, instanceIdentifierCodec, List.of(), List.of()),
+                instanceIdentifierCodec);
     }
 
     @Test

@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,6 +15,7 @@ import java.util.Map.Entry;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
@@ -31,8 +30,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OvsdbNodeUpdateCommand implements TransactCommand {
+public class OvsdbNodeUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbNodeUpdateCommand.class);
+
+    public OvsdbNodeUpdateCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
@@ -50,7 +53,7 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
     }
 
     @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
-    private static void execute(final TransactionBuilder transaction,
+    private void execute(final TransactionBuilder transaction,
             final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry:
@@ -82,8 +85,6 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
                 LOG.warn("Incomplete OVSDB Node external IDs", e);
             }
 
-
-
             Map<OpenvswitchOtherConfigsKey, OpenvswitchOtherConfigs> otherConfigs =
                     ovsdbNode.getOpenvswitchOtherConfigs();
             if (otherConfigs != null) {
@@ -100,11 +101,11 @@ public class OvsdbNodeUpdateCommand implements TransactCommand {
         }
     }
 
-    private static void stampInstanceIdentifier(final TransactionBuilder transaction,
-            final InstanceIdentifier<Node> iid, final InstanceIdentifierCodec instanceIdentifierCodec) {
+    private void stampInstanceIdentifier(final TransactionBuilder transaction, final InstanceIdentifier<Node> iid,
+            final InstanceIdentifierCodec instanceIdentifierCodec) {
         OpenVSwitch ovs = transaction.getTypedRowWrapper(OpenVSwitch.class);
         ovs.setExternalIds(Collections.emptyMap());
-        TransactUtils.stampInstanceIdentifier(transaction, iid, ovs.getSchema(),
+        TransactUtils.stampInstanceIdentifier(op, transaction, iid, ovs.getSchema(),
                 ovs.getExternalIdsColumn().getSchema(), instanceIdentifierCodec);
     }
 }

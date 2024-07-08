@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -18,14 +19,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
@@ -78,18 +74,6 @@ import org.slf4j.LoggerFactory;
 public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     private static final Logger LOG = LoggerFactory.getLogger(DataChangeListenerTestBase.class);
 
-    // Hack to hack into Field.class for now
-    private static final VarHandle MODIFIERS;
-
-    static {
-        try {
-            var lookup = MethodHandles.privateLookupIn(Field.class, MethodHandles.lookup());
-            MODIFIERS = lookup.findVarHandle(Field.class, "modifiers", int.class);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
-
     EntityOwnershipService entityOwnershipService;
     OvsdbClient ovsdbClient;
     TypedDatabaseSchema dbSchema;
@@ -109,6 +93,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     InstanceIdentifier<LogicalSwitches> ls0Iid;
     InstanceIdentifier<LogicalSwitches> ls1Iid;
 
+    Operations mockOp;
+
     @Before
     public void setupTest() throws Exception {
         entityOwnershipService = mock(EntityOwnershipService.class);
@@ -120,8 +106,9 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
                 new LogicalSwitchesKey(new HwvtepNodeName("ls1")));
         loadSchema();
 
+        mockOp = mock(Operations.class);
         transactionInvoker = new TransactionInvokerImpl(getDataBroker());
-        hwvtepConnectionManager = spy(new HwvtepConnectionManager(getDataBroker(), transactionInvoker,
+        hwvtepConnectionManager = spy(new HwvtepConnectionManager(getDataBroker(), transactionInvoker, mockOp,
             entityOwnershipService, mock(OvsdbConnection.class)));
 
         connectionInfo = mock(OvsdbConnectionInfo.class);
@@ -133,7 +120,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(listenableDbSchema).when(ovsdbClient).getSchema(anyString());
 
         connectionInstance = new HwvtepConnectionInstance(hwvtepConnectionManager, null, ovsdbClient, nodeIid,
-            transactionInvoker, getDataBroker());
+            transactionInvoker, getDataBroker(), mockOp);
         connectionInstance.reconciliationFt.set(Boolean.TRUE);
         connectionInstance.firstUpdateTriggered.set(true);
         connectionInstance.setControllerTxHistory(new TransactionHistory(10000, 7500));
@@ -161,24 +148,6 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         deleteNode(LogicalDatastoreType.CONFIGURATION);
     }
 
-    protected static final void setFinalStatic(final Class<?> cls, final String fieldName, final Object newValue)
-            throws SecurityException, ReflectiveOperationException {
-        Field[] fields = FieldUtils.getAllFields(cls);
-        for (Field field : fields) {
-            if (fieldName.equals(field.getName())) {
-                field.setAccessible(true);
-
-                final int mods = field.getModifiers();
-                if (Modifier.isFinal(mods)) {
-                    MODIFIERS.set(field, mods & ~Modifier.FINAL);
-                }
-
-                field.set(null, newValue);
-                break;
-            }
-        }
-    }
-
     void loadSchema() {
         try (InputStream resourceAsStream = DataChangeListenerTestBase.class.getResourceAsStream(
                 "hwvtep_schema.json")) {
@@ -201,13 +170,15 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
      * Resets the captures so that we can validate the captors of the immediate next execution.
      */
     void resetOperations() {
+        reset(mockOp);
+
         insertOpCapture = ArgumentCaptor.forClass(TypedBaseTable.class);
         Delete delete = mock(Delete.class);
         Where where = mock(Where.class);
         doReturn(where).when(delete).where(any());
         Insert insert = mock(Insert.class);
         doReturn(insert).when(insert).withId(any(String.class));
-        Operations mockOp = mock(Operations.class);
+
         doReturn(insert).when(mockOp).insert(insertOpCapture.capture());
         Update update = mock(Update.class);
         doReturn(update).when(mockOp).update(insertOpCapture.capture());
@@ -215,14 +186,6 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(select).when(mockOp).select(any(GenericTableSchema.class));
         doReturn(where).when(update).where(any());
         doReturn(delete).when(mockOp).delete(any());
-
-
-
-        try {
-            setFinalStatic(Operations.class, "op", mockOp);
-        } catch (SecurityException | ReflectiveOperationException e) {
-            throw new AssertionError("Set of Operations.op field failed", e);
-        }
 
         ListenableFuture<List<OperationResult>> ft = mock(ListenableFuture.class);
         transactCaptor = ArgumentCaptor.forClass(List.class);

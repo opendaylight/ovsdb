@@ -70,32 +70,29 @@ public final class OvsdbOperGlobalListener implements DataTreeChangeListener<Nod
     public void onDataTreeChanged(final List<DataTreeModification<Node>> changes) {
         changes.forEach(change -> {
             try {
-                InstanceIdentifier<Node> key = change.getRootPath().path();
-                DataObjectModification<Node> mod = change.getRootNode();
-                Node addNode = getCreated(mod);
+                final var key = change.getRootPath().path();
+                final var mod = change.getRootNode();
+                final var addNode = getCreated(mod);
                 if (addNode != null) {
                     OPER_NODE_CACHE.put(key, addNode);
                     LOG.info("Node added to oper {}", SouthboundUtil.getOvsdbNodeId(key));
                 }
-                Node removedNode = getRemoved(mod);
+                final var removedNode = getRemoved(mod);
                 if (removedNode != null) {
                     OPER_NODE_CACHE.remove(key);
                     LOG.info("Node deleted from oper {}", SouthboundUtil.getOvsdbNodeId(key));
 
-                    OvsdbConnectionInstance connectionInstance = ovsdbConnectionManager.getConnectionInstance(key);
+                    final var connectionInstance = ovsdbConnectionManager.getConnectionInstance(key);
                     if (connectionInstance != null && connectionInstance.isActive()
-                            && connectionInstance.getHasDeviceOwnership() != null
                             && connectionInstance.getHasDeviceOwnership()) {
-                        //Oops some one deleted the node held by me This should never happen.
-                        //put the node back in oper
-                        txInvoker.invoke(transaction -> {
-                            transaction.put(LogicalDatastoreType.OPERATIONAL, key, removedNode);
-                        });
-
+                        // Oops some one deleted the node held by me.
+                        // This should never happen.
+                        // Put the node back in oper
+                        txInvoker.invoke(tx -> tx.put(LogicalDatastoreType.OPERATIONAL, key, removedNode));
                     }
                 }
 
-                Node modifiedNode = getUpdated(mod);
+                final var modifiedNode = getUpdated(mod);
                 if (modifiedNode != null) {
                     OPER_NODE_CACHE.put(key, modifiedNode);
                 }

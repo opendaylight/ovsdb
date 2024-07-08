@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.DefaultOperations;
 import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.Operation;
@@ -132,10 +133,11 @@ public class TerminationPointCreateCommandTest {
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));
 
         Mutate mutate = mock(Mutate.class);
+        // FIXME: rather than static mocking, insert a mock Operations
         PowerMockito.mockStatic(TransactUtils.class);
-        when(TransactUtils.stampInstanceIdentifierMutation(any(TransactionBuilder.class), any(InstanceIdentifier.class),
-                any(GenericTableSchema.class), any(ColumnSchema.class), any(InstanceIdentifierCodec.class))).thenReturn(
-                mutate);
+        when(TransactUtils.stampInstanceIdentifierMutation(any(Operations.class), any(TransactionBuilder.class),
+            any(InstanceIdentifier.class),     any(GenericTableSchema.class), any(ColumnSchema.class),
+            any(InstanceIdentifierCodec.class))).thenReturn(mutate);
 
         Column<GenericTableSchema, String> nameColumn = mock(Column.class);
         when(port.getNameColumn()).thenReturn(nameColumn);
@@ -153,7 +155,7 @@ public class TerminationPointCreateCommandTest {
             .child(Node.class, new NodeKey(new NodeId("testNode")))
             .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp")))
             .augmentation(OvsdbTerminationPointAugmentation.class);
-        TerminationPointCreateCommand.stampInstanceIdentifier(transaction, iid, interfaceName,
+        TerminationPointCreateCommand.stampInstanceIdentifier(new DefaultOperations(), transaction, iid, interfaceName,
                 mock(InstanceIdentifierCodec.class));
         verify(port).setName(anyString());
         verify(port).getExternalIdsColumn();

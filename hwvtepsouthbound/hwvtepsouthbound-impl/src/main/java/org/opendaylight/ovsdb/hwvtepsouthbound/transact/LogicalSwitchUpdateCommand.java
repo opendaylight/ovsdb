@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil.schemaMismatchLog;
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -84,6 +83,8 @@ public class LogicalSwitchUpdateCommand
         setDescription(logicalSwitch, lswitch);
         setTunnelKey(logicalSwitch, lswitch);
         setReplicationMode(logicalSwitch, lswitch);
+        final var op = ops();
+
         if (operationalSwitchOptional == null) {
             setName(logicalSwitch, lswitch);
             LOG.trace("execute: creating LogicalSwitch entry: {}", logicalSwitch);

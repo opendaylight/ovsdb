@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;

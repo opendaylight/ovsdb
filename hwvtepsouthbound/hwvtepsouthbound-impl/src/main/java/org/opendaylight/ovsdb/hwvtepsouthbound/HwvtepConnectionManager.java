@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import static java.util.Objects.requireNonNull;
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FluentFuture;

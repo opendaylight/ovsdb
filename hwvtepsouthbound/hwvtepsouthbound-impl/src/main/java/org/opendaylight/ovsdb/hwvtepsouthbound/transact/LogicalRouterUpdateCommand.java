@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +55,8 @@ public class LogicalRouterUpdateCommand
 
     private void updateLogicalRouter(final TransactionBuilder transaction,
             final InstanceIdentifier<Node> instanceIdentifier, final List<LogicalRouters> routerList) {
+        final var op = ops();
+
         for (LogicalRouters lrouter: routerList) {
             final InstanceIdentifier<LogicalRouters> routerKey = instanceIdentifier
                     .augmentation(HwvtepGlobalAugmentation.class).child(LogicalRouters.class, lrouter.key());

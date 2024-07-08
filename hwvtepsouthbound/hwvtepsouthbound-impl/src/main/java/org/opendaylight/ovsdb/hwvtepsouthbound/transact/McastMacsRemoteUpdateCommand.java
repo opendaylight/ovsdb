@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -107,7 +105,7 @@ public class McastMacsRemoteUpdateCommand
         HwvtepDeviceInfo.DeviceData deviceData = super.fetchDeviceData(RemoteMcastMacs.class, macIid);
         if (deviceData == null) {
             setLocatorSet(transaction, mcastMacsRemote, mac);
-            transaction.add(op.insert(mcastMacsRemote));
+            transaction.add(ops().insert(mcastMacsRemote));
             updateCurrentTxData(RemoteMcastMacs.class, macIid, new UUID("uuid"), mac);
             updateControllerTxHistory(TransactionType.ADD, mcastMacsRemote);
             LOG.info("CONTROLLER - {} {}", TransactionType.ADD, mcastMacsRemote);
@@ -116,7 +114,7 @@ public class McastMacsRemoteUpdateCommand
             UUID macEntryUUID = deviceData.getUuid();
             McastMacsRemote extraMac = transaction.getTypedRowSchema(McastMacsRemote.class);
             extraMac.getUuidColumn().setData(macEntryUUID);
-            transaction.add(op.update(mcastMacsRemote)
+            transaction.add(ops().update(mcastMacsRemote)
                     .where(extraMac.getUuidColumn().getSchema().opEqual(macEntryUUID))
                     .build());
             updateControllerTxHistory(TransactionType.UPDATE, mcastMacsRemote);

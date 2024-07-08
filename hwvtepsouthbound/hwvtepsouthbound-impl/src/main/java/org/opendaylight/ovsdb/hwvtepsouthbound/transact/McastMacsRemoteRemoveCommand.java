@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -104,7 +102,7 @@ public class McastMacsRemoteRemoveCommand
                 && ((McastMacsRemote)deviceData.getData()).getLogicalSwitchColumn() != null) {
             UUID logicalSwitchUid = ((McastMacsRemote)deviceData.getData()).getLogicalSwitchColumn().getData();
             if (logicalSwitchUid != null) {
-                transaction.add(op.delete(mcastMacsRemote.getSchema())
+                transaction.add(ops().delete(mcastMacsRemote.getSchema())
                         .where(mcastMacsRemote.getLogicalSwitchColumn().getSchema().opEqual(logicalSwitchUid)).build());
                 deleted = true;
                 updateCurrentTxDeleteData(RemoteMcastMacs.class, macIid, mac);
@@ -120,7 +118,7 @@ public class McastMacsRemoteRemoveCommand
             if (macEntryUUID != null) {
                 mcastMacsRemote.getUuidColumn().setData(macEntryUUID);
                 updateCurrentTxDeleteData(RemoteMcastMacs.class, macIid, mac);
-                transaction.add(op.delete(mcastMacsRemote.getSchema())
+                transaction.add(ops().delete(mcastMacsRemote.getSchema())
                         .where(mcastMacsRemote.getUuidColumn().getSchema().opEqual(macEntryUUID)).build());
                 updateControllerTxHistory(TransactionType.DELETE, new StringBuilder(mcastMacsRemote.toString())
                         .append(":  Mac : ").append(macEntryUUID));

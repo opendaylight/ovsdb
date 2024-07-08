@@ -8,9 +8,9 @@
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
+import com.google.common.annotations.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,6 +25,7 @@ import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Interface;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
@@ -60,8 +61,12 @@ import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TerminationPointUpdateCommand implements TransactCommand {
+public class TerminationPointUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointUpdateCommand.class);
+
+    public TerminationPointUpdateCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
@@ -91,6 +96,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
         }
     }
 
+    @VisibleForTesting
     public void updateTerminationPoint(final TransactionBuilder transaction, final BridgeOperationalState state,
             final InstanceIdentifier<OvsdbTerminationPointAugmentation> iid,
             final OvsdbTerminationPointAugmentation terminationPoint,
@@ -109,7 +115,7 @@ public class TerminationPointUpdateCommand implements TransactCommand {
                     .where(extraInterface.getNameColumn().getSchema().opEqual(terminationPoint.getName()))
                     .build());
 
-            TerminationPointCreateCommand.stampInstanceIdentifier(transaction,
+            TerminationPointCreateCommand.stampInstanceIdentifier(op, transaction,
                     iid.firstIdentifierOf(OvsdbTerminationPointAugmentation.class), terminationPoint.getName(),
                     instanceIdentifierCodec);
             final String opendaylightIid = instanceIdentifierCodec.serialize(iid);

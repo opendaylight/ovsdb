@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -17,6 +15,7 @@ import java.util.Set;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
@@ -27,8 +26,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BridgeRemovedCommand implements TransactCommand {
+public class BridgeRemovedCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(BridgeRemovedCommand.class);
+
+    public BridgeRemovedCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
@@ -45,7 +48,7 @@ public class BridgeRemovedCommand implements TransactCommand {
                 TransactUtils.extractOriginal(modifications, OvsdbBridgeAugmentation.class));
     }
 
-    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Set<InstanceIdentifier<OvsdbBridgeAugmentation>> removed,
             final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> originals) {
         for (InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbManagedNodeIid: removed) {
@@ -71,7 +74,6 @@ public class BridgeRemovedCommand implements TransactCommand {
                 LOG.warn("Unable to delete bridge {} because it was not found in the operational store, "
                         + "and thus we cannot retrieve its UUID", ovsdbManagedNodeIid);
             }
-
         }
     }
 }

@@ -24,7 +24,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.schema.hardwarevtep.LogicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.McastMacsRemote;
@@ -109,7 +108,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         addData(LogicalDatastoreType.OPERATIONAL, LogicalSwitches.class, logicalSwitches);
         resetOperations();
         deleteData(LogicalDatastoreType.CONFIGURATION, LogicalSwitches.class, logicalSwitches);
-        verify(Operations.op,  times(10)).delete(any());
+        verify(mockOp, times(10)).delete(any());
     }
 
     @Test
@@ -120,7 +119,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
         //4 ucast macs + 2 termination points
-        verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
+        verify(mockOp, times(4)).insert(any(UcastMacsRemote.class));
         //TODO add finer grained validation
     }
 
@@ -131,7 +130,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
         //4 ucast macs + 2 termination points
-        verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
+        verify(mockOp, times(4)).insert(any(UcastMacsRemote.class));
         //TODO add finer grained validation
     }
 
@@ -146,7 +145,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
         resetOperations();
         deleteData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
-        verify(Operations.op,  times(4)).delete(any());
+        verify(mockOp, times(4)).delete(any());
         //TODO add finer grained validation
     }
 
@@ -158,7 +157,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast macs + 2 locator sets + 3 termination points
-        verify(Operations.op,  times(7)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(mockOp, times(7)).insert(ArgumentMatchers.<McastMacsRemote>any());
     }
 
     @Test
@@ -168,7 +167,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast macs + 2 locator sets + 3 termination points
-        verify(Operations.op,  times(7)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(mockOp, times(7)).insert(ArgumentMatchers.<McastMacsRemote>any());
     }
 
     @Test
@@ -182,7 +181,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
         resetOperations();
         deleteData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
-        verify(Operations.op,  times(2)).delete(ArgumentMatchers.any());
+        verify(mockOp, times(2)).delete(ArgumentMatchers.any());
     }
 
     @Test
@@ -192,14 +191,14 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
-        verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
+        verify(mockOp, times(4)).insert(any(UcastMacsRemote.class));
 
         addData(LogicalDatastoreType.OPERATIONAL, TerminationPoint.class, terminationPoints);
         addData(LogicalDatastoreType.OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast mac + 2 locator sets ( termination point already added )
-        verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(mockOp, times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
     }
 
     @Test
@@ -209,20 +208,20 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
-        verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
+        verify(mockOp, times(4)).insert(any(UcastMacsRemote.class));
 
         addData(LogicalDatastoreType.OPERATIONAL, TerminationPoint.class, terminationPoints);
         addData(LogicalDatastoreType.OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
-        verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(mockOp, times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
         addData(LogicalDatastoreType.OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
 
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMac2);
-        verify(Operations.op,  times(2)).insert(ArgumentMatchers.<McastMacsRemote>any());
-        verify(Operations.op,  times(2)).update(ArgumentMatchers.<McastMacsRemote>any());
-        verify(Operations.op,  times(0)).delete(ArgumentMatchers.any());
+        verify(mockOp, times(2)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(mockOp, times(2)).update(ArgumentMatchers.<McastMacsRemote>any());
+        verify(mockOp, times(0)).delete(ArgumentMatchers.any());
     }
 
     @Test
@@ -232,13 +231,13 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
-        verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
+        verify(mockOp, times(4)).insert(any(UcastMacsRemote.class));
 
         addData(LogicalDatastoreType.OPERATIONAL, TerminationPoint.class, terminationPoints);
         addData(LogicalDatastoreType.OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
-        verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(mockOp, times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
         addData(LogicalDatastoreType.OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
 
         resetOperations();
@@ -252,7 +251,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
             augIid.child(RemoteMcastMacs.class,
                 new RemoteMcastMacsKey(TestBuilders.buildLogicalSwitchesRef(nodeIid, "ls1"), macAddr))
             .child(LocatorSet.class));
-        verify(Operations.op,  times(2)).delete(ArgumentMatchers.any());
+        verify(mockOp, times(2)).delete(ArgumentMatchers.any());
     }
 
     @Test
@@ -262,32 +261,32 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
-        verify(Operations.op, times(4)).insert(any(UcastMacsRemote.class));
+        verify(mockOp, times(4)).insert(any(UcastMacsRemote.class));
 
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast mac + 2 locator sets ( termination point already added )
-        verify(Operations.op, times(0)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(mockOp, times(0)).insert(ArgumentMatchers.<McastMacsRemote>any());
         resetOperations();
         addData(LogicalDatastoreType.OPERATIONAL, TerminationPoint.class, terminationPoints);
         addData(LogicalDatastoreType.OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         connectionInstance.getDeviceInfo().onOperDataAvailable();
         //2 mcast mac + 2 locator sets ( termination point already added )
-        verify(Operations.op, timeout(2000).times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(mockOp, timeout(2000).times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
 
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMac2);
-        verify(Operations.op, times(0)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(mockOp, times(0)).insert(ArgumentMatchers.<McastMacsRemote>any());
         addData(LogicalDatastoreType.OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
         connectionInstance.getDeviceInfo().onOperDataAvailable();
-        verify(Operations.op, timeout(2000).times(2)).insert(ArgumentMatchers.<McastMacsRemote>any());
-        verify(Operations.op, times(2)).update(ArgumentMatchers.<McastMacsRemote>any());
+        verify(mockOp, timeout(2000).times(2)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(mockOp, times(2)).update(ArgumentMatchers.<McastMacsRemote>any());
     }
 
     private void verifyThatLogicalSwitchCreated() {
         //The transactions could be firing in two different mdsal updates intermittently
         //verify(ovsdbClient, times(1)).transact(any(DatabaseSchema.class), any(List.class));
-        verify(Operations.op, times(2)).insert(any(LogicalSwitch.class));
+        verify(mockOp, times(2)).insert(any(LogicalSwitch.class));
 
         assertNotNull(insertOpCapture.getAllValues());
         assertTrue(insertOpCapture.getAllValues().size() == 2);

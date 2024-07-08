@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,6 +18,7 @@ import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.AutoAttach;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
@@ -47,8 +46,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
-public class AutoAttachUpdateCommand implements TransactCommand {
+public class AutoAttachUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(AutoAttachUpdateCommand.class);
+
+    public AutoAttachUpdateCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
@@ -60,19 +63,20 @@ public class AutoAttachUpdateCommand implements TransactCommand {
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Collection<DataTreeModification<Node>> modifications,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
-        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, OvsdbNodeAugmentation.class));
+        execute(transaction, state,
+            TransactUtils.extractCreatedOrUpdated(modifications, OvsdbNodeAugmentation.class));
     }
 
-    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+    private void execute(final TransactionBuilder transaction,
+            final BridgeOperationalState state,
             final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> createdOrUpdated) {
         for (var ovsdbNodeEntry : createdOrUpdated.entrySet()) {
             updateAutoAttach(transaction, state, ovsdbNodeEntry.getKey(), ovsdbNodeEntry.getValue());
         }
     }
 
-    private static void updateAutoAttach(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final InstanceIdentifier<OvsdbNodeAugmentation> iid,
-            final OvsdbNodeAugmentation ovsdbNode) {
+    private void updateAutoAttach(final TransactionBuilder transaction, final BridgeOperationalState state,
+            final InstanceIdentifier<OvsdbNodeAugmentation> iid, final OvsdbNodeAugmentation ovsdbNode) {
 
         if (!state.getBridgeNode(iid).isPresent()) {
             return;

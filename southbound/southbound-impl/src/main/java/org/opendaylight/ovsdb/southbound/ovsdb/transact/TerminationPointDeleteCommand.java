@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -17,6 +15,7 @@ import java.util.Set;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Port;
@@ -33,8 +32,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author avishnoi@brocade.com (Anil Vishnoi)
  */
-public class TerminationPointDeleteCommand implements TransactCommand {
+public class TerminationPointDeleteCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(TerminationPointDeleteCommand.class);
+
+    public TerminationPointDeleteCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
@@ -54,7 +57,7 @@ public class TerminationPointDeleteCommand implements TransactCommand {
                 TransactUtils.extractRemoved(modifications, OvsdbTerminationPointAugmentation.class));
     }
 
-    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
                 OvsdbTerminationPointAugmentation> originals,
             final Map<InstanceIdentifier<Node>, Node> originalNodes,

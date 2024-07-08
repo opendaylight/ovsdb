@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import static java.util.Objects.requireNonNull;
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
@@ -54,6 +53,7 @@ import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionListener;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.Select;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedDatabaseSchema;
@@ -84,6 +84,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
     private final DataBroker db;
     private final TransactionInvoker txInvoker;
+    private final Operations ops;
     private final Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers = new ConcurrentHashMap<>();
     private final Map<Entity, HwvtepConnectionInstance> entityConnectionMap = new ConcurrentHashMap<>();
     private final EntityOwnershipService entityOwnershipService;
@@ -98,10 +99,11 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private final Map<OvsdbClient, OvsdbClient> alreadyProcessedClients = new ConcurrentHashMap<>();
     private final ScheduledExecutorService dependencyExecutor;
 
-    public HwvtepConnectionManager(final DataBroker db, final TransactionInvoker txInvoker,
+    public HwvtepConnectionManager(final DataBroker db, final TransactionInvoker txInvoker, final Operations ops,
                     final EntityOwnershipService entityOwnershipService, final OvsdbConnection ovsdbConnectionService) {
         this.db = db;
         this.txInvoker = txInvoker;
+        this.ops = ops;
         this.entityOwnershipService = entityOwnershipService;
         this.ovsdbConnectionService = ovsdbConnectionService;
         dependencyExecutor = Executors.newSingleThreadScheduledExecutor(DEPENDENCY_THREAD_FACTORY);
@@ -277,7 +279,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
 
         hwvtepConnectionInstance = new HwvtepConnectionInstance(this, key,
-                externalClient, getInstanceIdentifier(key), txInvoker, db);
+                externalClient, getInstanceIdentifier(key), txInvoker, db, ops);
         hwvtepConnectionInstance.createTransactInvokers();
         return hwvtepConnectionInstance;
     }
@@ -465,6 +467,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
 
         GenericTableSchema hwvtepSchema = dbSchema.getTableSchema(Global.class);
+        final var op = connectionInstance.ops();
         Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
         selectOperation.setColumns(hwvtepSchema.getColumnList());
 

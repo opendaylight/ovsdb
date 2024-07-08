@@ -18,7 +18,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Maps;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +32,7 @@ import org.opendaylight.ovsdb.lib.notation.Mutation;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.OvsdbSet;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.DefaultOperations;
 import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.Operation;
@@ -209,13 +209,15 @@ public class TransactUtilsTest {
         TableSchema<GenericTableSchema> tableSchema = mock(TableSchema.class);
         ColumnSchema<GenericTableSchema, Map<String, String>> columnSchema = mock(ColumnSchema.class);
         InstanceIdentifierCodec instanceIdentifierCodec = mock(InstanceIdentifierCodec.class);
+        Operations ops = new DefaultOperations();
 
         PowerMockito.doReturn(mock(Mutate.class)).when(TransactUtils.class);
-        TransactUtils.stampInstanceIdentifierMutation(transaction, iid, tableSchema, columnSchema,
+        TransactUtils.stampInstanceIdentifierMutation(ops, transaction, iid, tableSchema, columnSchema,
             instanceIdentifierCodec);
 
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
-        TransactUtils.stampInstanceIdentifier(transaction, iid, tableSchema, columnSchema, instanceIdentifierCodec);
+        TransactUtils.stampInstanceIdentifier(ops, transaction, iid, tableSchema, columnSchema,
+            instanceIdentifierCodec);
         verify(transaction).add(any(Operation.class));
     }
 
@@ -226,7 +228,7 @@ public class TransactUtilsTest {
         when(instanceIdentifierCodec.serialize(any(InstanceIdentifier.class))).thenReturn(IID_STRING);
 
         Mutate<GenericTableSchema> mutate = mock(Mutate.class);
-        Operations op = (Operations) setField("op");
+        Operations op = mock(Operations.class);
         Mockito.<Mutate<GenericTableSchema>>when(op.mutate(any(TableSchema.class))).thenReturn(mutate);
         when(mutate.addMutation(any(ColumnSchema.class), any(Mutator.class), any(Map.class))).thenReturn(mutate);
 
@@ -244,14 +246,7 @@ public class TransactUtilsTest {
         InstanceIdentifier<?> iid = InstanceIdentifier.create(NetworkTopology.class);
         TransactionBuilder transaction = mock(TransactionBuilder.class);
         TableSchema<GenericTableSchema> tableSchema = mock(TableSchema.class);
-        assertEquals(mutate, TransactUtils.stampInstanceIdentifierMutation(transaction, iid, tableSchema, columnSchema,
-                instanceIdentifierCodec));
-    }
-
-    private static Object setField(final String fieldName) throws Exception {
-        Field field = Operations.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(field.get(Operations.class), mock(Operations.class));
-        return field.get(Operations.class);
+        assertEquals(mutate, TransactUtils.stampInstanceIdentifierMutation(op, transaction, iid, tableSchema,
+            columnSchema, instanceIdentifierCodec));
     }
 }

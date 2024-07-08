@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -109,6 +110,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     InstanceIdentifier<LogicalSwitches> ls0Iid;
     InstanceIdentifier<LogicalSwitches> ls1Iid;
 
+    Operations mockOp;
+
     @Before
     public void setupTest() throws Exception {
         entityOwnershipService = mock(EntityOwnershipService.class);
@@ -120,8 +123,9 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
                 new LogicalSwitchesKey(new HwvtepNodeName("ls1")));
         loadSchema();
 
+        mockOp = mock(Operations.class);
         transactionInvoker = new TransactionInvokerImpl(getDataBroker());
-        hwvtepConnectionManager = spy(new HwvtepConnectionManager(getDataBroker(), transactionInvoker,
+        hwvtepConnectionManager = spy(new HwvtepConnectionManager(getDataBroker(), transactionInvoker, mockOp,
             entityOwnershipService, mock(OvsdbConnection.class)));
 
         connectionInfo = mock(OvsdbConnectionInfo.class);
@@ -133,7 +137,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(listenableDbSchema).when(ovsdbClient).getSchema(anyString());
 
         connectionInstance = new HwvtepConnectionInstance(hwvtepConnectionManager, null, ovsdbClient, nodeIid,
-            transactionInvoker, getDataBroker());
+            transactionInvoker, getDataBroker(), mockOp);
         connectionInstance.reconciliationFt.set(Boolean.TRUE);
         connectionInstance.firstUpdateTriggered.set(true);
         connectionInstance.setControllerTxHistory(new TransactionHistory(10000, 7500));
@@ -201,13 +205,15 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
      * Resets the captures so that we can validate the captors of the immediate next execution.
      */
     void resetOperations() {
+        reset(mockOp);
+
         insertOpCapture = ArgumentCaptor.forClass(TypedBaseTable.class);
         Delete delete = mock(Delete.class);
         Where where = mock(Where.class);
         doReturn(where).when(delete).where(any());
         Insert insert = mock(Insert.class);
         doReturn(insert).when(insert).withId(any(String.class));
-        Operations mockOp = mock(Operations.class);
+
         doReturn(insert).when(mockOp).insert(insertOpCapture.capture());
         Update update = mock(Update.class);
         doReturn(update).when(mockOp).update(insertOpCapture.capture());
@@ -215,14 +221,6 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(select).when(mockOp).select(any(GenericTableSchema.class));
         doReturn(where).when(update).where(any());
         doReturn(delete).when(mockOp).delete(any());
-
-
-
-        try {
-            setFinalStatic(Operations.class, "op", mockOp);
-        } catch (SecurityException | ReflectiveOperationException e) {
-            throw new AssertionError("Set of Operations.op field failed", e);
-        }
 
         ListenableFuture<List<OperationResult>> ft = mock(ListenableFuture.class);
         transactCaptor = ArgumentCaptor.forClass(List.class);

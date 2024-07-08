@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,7 +23,6 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Condition;
 import org.opendaylight.ovsdb.lib.operations.Operation;
@@ -61,13 +61,15 @@ import org.powermock.modules.junit4.PowerMockRunner;
     Operations.class
 })
 public class TerminationPointUpdateCommandTest {
-
     private static final String TERMINATION_POINT_NAME = "termination point name";
+
+    private Operations op;
     private TerminationPointUpdateCommand terminationPointUpdateCommand;
 
     @Before
     public void setUp() {
-        terminationPointUpdateCommand = mock(TerminationPointUpdateCommand.class, Mockito.CALLS_REAL_METHODS);
+        op = mock(Operations.class);
+        terminationPointUpdateCommand = spy(new TerminationPointUpdateCommand(op));
     }
 
     @SuppressWarnings("unchecked")
@@ -126,7 +128,6 @@ public class TerminationPointUpdateCommandTest {
         when(transaction.getTypedRowWrapper(eq(Interface.class))).thenReturn(extraInterface);
         doNothing().when(extraInterface).setName(anyString());
 
-        Operations op = OvsdbNodeUpdateCommandTest.setOpField();
         Update update = mock(Update.class);
         when(op.update(any(Interface.class))).thenReturn(update);
 

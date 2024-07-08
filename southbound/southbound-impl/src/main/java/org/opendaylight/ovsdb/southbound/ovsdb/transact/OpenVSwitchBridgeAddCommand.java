@@ -7,21 +7,23 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.Insert;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 
-public class OpenVSwitchBridgeAddCommand implements TransactCommand {
+public class OpenVSwitchBridgeAddCommand extends AbstractTransactCommand {
+    public OpenVSwitchBridgeAddCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
@@ -36,7 +38,7 @@ public class OpenVSwitchBridgeAddCommand implements TransactCommand {
         execute(transaction);
     }
 
-    private static void execute(final TransactionBuilder transaction) {
+    private void execute(final TransactionBuilder transaction) {
         Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
         List<Insert> inserts = TransactUtils.extractInsert(transaction, bridge.getSchema());
         for (Insert insert : inserts) {

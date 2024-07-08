@@ -11,19 +11,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.Operation;
@@ -63,11 +62,12 @@ public class OvsdbNodeUpdateCommandTest {
     private static final String OTHER_CONFIG_VALUE = "other config value";
 
     @Mock private DataChangeEvent changes;
+    @Mock private Operations op;
     private OvsdbNodeUpdateCommand ovsdbNodeUpdateCommand;
 
     @Before
     public void setUp() {
-        ovsdbNodeUpdateCommand = mock(OvsdbNodeUpdateCommand.class, Mockito.CALLS_REAL_METHODS);
+        ovsdbNodeUpdateCommand = spy(new OvsdbNodeUpdateCommand(op));
     }
 
     @SuppressWarnings("unchecked")
@@ -106,7 +106,6 @@ public class OvsdbNodeUpdateCommandTest {
         doNothing().when(ovs).setExternalIds(any(ImmutableMap.class));
 
         Mutate<GenericTableSchema> mutate = mock(Mutate.class);
-        Operations op = setOpField();
         Column<GenericTableSchema, Map<String, String>> column = mock(Column.class);
         when(ovs.getExternalIdsColumn()).thenReturn(column);
         when(column.getSchema()).thenReturn(mock(ColumnSchema.class));
@@ -127,12 +126,5 @@ public class OvsdbNodeUpdateCommandTest {
                 mock(InstanceIdentifierCodec.class));
         verify(ovs, times(2)).getExternalIdsColumn();
         verify(transaction, times(2)).add(eq(null));
-    }
-
-    static Operations setOpField() throws Exception {
-        Field opField = PowerMockito.field(Operations.class, "op");
-        Operations mockOp = mock(Operations.class);
-        opField.set(Operations.class, mockOp);
-        return mockOp;
     }
 }

@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.integrationtest.schema;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeTrue;
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collections;
 import java.util.List;

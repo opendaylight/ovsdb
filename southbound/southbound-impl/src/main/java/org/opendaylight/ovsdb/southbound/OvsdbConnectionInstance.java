@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -41,6 +39,7 @@ import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
@@ -83,6 +82,7 @@ public class OvsdbConnectionInstance {
 
     private final OvsdbClient client;
     private ConnectionInfo connectionInfo;
+    private final Operations ops;
     private final TransactionInvoker txInvoker;
     private Map<TypedDatabaseSchema, TransactInvoker> transactInvokers = null;
     private MonitorCallBack callback = null;
@@ -94,12 +94,12 @@ public class OvsdbConnectionInstance {
     private final Map<UUID, InstanceIdentifier<Node>> ports = new ConcurrentHashMap<>();
     private final Map<String, InstanceIdentifier<Node>> portInterfaces = new ConcurrentHashMap<>();
 
-    OvsdbConnectionInstance(final ConnectionInfo key, final OvsdbClient client, final TransactionInvoker txInvoker,
-                            final InstanceIdentifier<Node> iid) {
-        connectionInfo = key;
+    OvsdbConnectionInstance(final ConnectionInfo connectionInfo, final OvsdbClient client, final Operations ops,
+            final TransactionInvoker txInvoker, final InstanceIdentifier<Node> iid) {
+        this.connectionInfo = connectionInfo;
         this.client = client;
+        this.ops = ops;
         this.txInvoker = txInvoker;
-        // this.key = key;
         instanceIdentifier = iid;
     }
 
@@ -166,7 +166,7 @@ public class OvsdbConnectionInstance {
     public void registerCallbacks(final InstanceIdentifierCodec instanceIdentifierCodec) {
         if (callback == null) {
             if (initialCreateData != null) {
-                this.updateConnectionAttributes(instanceIdentifierCodec);
+                updateConnectionAttributes(instanceIdentifierCodec);
             }
 
             try {
@@ -246,7 +246,7 @@ public class OvsdbConnectionInstance {
             ovs.setExternalIds(
                 YangUtils.convertYangKeyValueListToMap(externalIds, OpenvswitchExternalIds::requireExternalIdKey,
                     OpenvswitchExternalIds::requireExternalIdValue));
-            Mutate<GenericTableSchema> mutate = op.mutate(ovs)
+            Mutate<GenericTableSchema> mutate = ops.mutate(ovs)
                 .addMutation(ovs.getExternalIdsColumn().getSchema(),
                     Mutator.INSERT, ovs.getExternalIdsColumn().getData());
             transaction.add(mutate);
@@ -256,7 +256,7 @@ public class OvsdbConnectionInstance {
             if (otherConfigs != null) {
                 ovs.setOtherConfig(YangUtils.convertYangKeyValueListToMap(otherConfigs,
                     OpenvswitchOtherConfigs::requireOtherConfigKey, OpenvswitchOtherConfigs::requireOtherConfigValue));
-                transaction.add(op.mutate(ovs).addMutation(ovs.getOtherConfigColumn().getSchema(),
+                transaction.add(ops.mutate(ovs).addMutation(ovs.getOtherConfigColumn().getSchema(),
                     Mutator.INSERT, ovs.getOtherConfigColumn().getData()));
             }
 
@@ -264,12 +264,12 @@ public class OvsdbConnectionInstance {
         }
     }
 
-    private static void stampInstanceIdentifier(final TransactionBuilder transaction,final InstanceIdentifier<Node> iid,
+    private void stampInstanceIdentifier(final TransactionBuilder transaction,final InstanceIdentifier<Node> iid,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         OpenVSwitch ovs = transaction.getTypedRowWrapper(OpenVSwitch.class);
         ovs.setExternalIds(Collections.emptyMap());
-        TransactUtils.stampInstanceIdentifier(transaction, iid, ovs.getSchema(), ovs.getExternalIdsColumn().getSchema(),
-                instanceIdentifierCodec);
+        TransactUtils.stampInstanceIdentifier(ops, transaction, iid, ovs.getSchema(),
+            ovs.getExternalIdsColumn().getSchema(), instanceIdentifierCodec);
     }
 
     private static void invoke(final TransactionBuilder txBuilder) {
@@ -428,4 +428,7 @@ public class OvsdbConnectionInstance {
         return client;
     }
 
+    public Operations ops() {
+        return ops;
+    }
 }

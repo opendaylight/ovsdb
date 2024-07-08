@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
@@ -17,6 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -39,13 +39,17 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QosUpdateCommand implements TransactCommand {
+public class QosUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(QosUpdateCommand.class);
+
+    public QosUpdateCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
-        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, QosEntries.class),
+        execute(op, transaction, state, TransactUtils.extractCreatedOrUpdated(events, QosEntries.class),
                 instanceIdentifierCodec);
     }
 
@@ -53,13 +57,13 @@ public class QosUpdateCommand implements TransactCommand {
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Collection<DataTreeModification<Node>> modifications,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
-        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, QosEntries.class),
+        execute(op, transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, QosEntries.class),
                 instanceIdentifierCodec);
     }
 
     @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
-    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final Map<InstanceIdentifier<QosEntries>, QosEntries> createdOrUpdated,
+    private static void execute(final Operations op, final TransactionBuilder transaction,
+            final BridgeOperationalState state, final Map<InstanceIdentifier<QosEntries>, QosEntries> createdOrUpdated,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         for (Entry<InstanceIdentifier<QosEntries>, QosEntries> qosMapEntry: createdOrUpdated.entrySet()) {
             InstanceIdentifier<OvsdbNodeAugmentation> iid =

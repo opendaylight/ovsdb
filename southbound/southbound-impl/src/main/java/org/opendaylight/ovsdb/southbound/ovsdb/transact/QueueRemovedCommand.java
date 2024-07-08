@@ -7,12 +7,11 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.Map;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Queue;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -25,13 +24,17 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QueueRemovedCommand implements TransactCommand {
+public class QueueRemovedCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(QueueRemovedCommand.class);
+
+    public QueueRemovedCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
-        execute(transaction, state, TransactUtils.extractOriginal(events, OvsdbNodeAugmentation.class),
+        execute(op, transaction, state, TransactUtils.extractOriginal(events, OvsdbNodeAugmentation.class),
                 TransactUtils.extractUpdated(events, OvsdbNodeAugmentation.class));
     }
 
@@ -39,13 +42,14 @@ public class QueueRemovedCommand implements TransactCommand {
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Collection<DataTreeModification<Node>> modifications,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
-        execute(transaction, state, TransactUtils.extractOriginal(modifications, OvsdbNodeAugmentation.class),
+        execute(op, transaction, state, TransactUtils.extractOriginal(modifications, OvsdbNodeAugmentation.class),
                 TransactUtils.extractUpdated(modifications, OvsdbNodeAugmentation.class));
     }
 
-    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-                                final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originals,
-                                final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
+    private static void execute(final Operations op, final TransactionBuilder transaction,
+            final BridgeOperationalState state,
+            final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originals,
+            final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
         for (Map.Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originalEntry : originals
                 .entrySet()) {
             InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = originalEntry.getKey();

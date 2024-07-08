@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -149,6 +147,8 @@ public class PhysicalPortUpdateCommand
                     TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(), PhysicalPort.class);
             extraPhyscialPort.setName("");
             LOG.trace("execute: updating physical port: {} {}", nodeId, physicalPort);
+            final var op = ops();
+
             transaction.add(op.update(physicalPort)
                     .where(extraPhyscialPort.getNameColumn().getSchema().opEqual(existingPhysicalPortName))
                     .build());

@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -17,6 +15,7 @@ import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.schema.openvswitch.Controller;
@@ -29,13 +28,17 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ControllerUpdateCommand implements TransactCommand {
+public class ControllerUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(ControllerUpdateCommand.class);
+
+    public ControllerUpdateCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
-        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, ControllerEntry.class),
+        execute(op, transaction, state, TransactUtils.extractCreatedOrUpdated(events, ControllerEntry.class),
                 TransactUtils.extractCreatedOrUpdated(events, OvsdbBridgeAugmentation.class));
     }
 
@@ -43,11 +46,12 @@ public class ControllerUpdateCommand implements TransactCommand {
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Collection<DataTreeModification<Node>> modifications,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
-        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, ControllerEntry.class),
+        execute(op, transaction, state, TransactUtils.extractCreatedOrUpdated(modifications, ControllerEntry.class),
                 TransactUtils.extractCreatedOrUpdated(modifications, OvsdbBridgeAugmentation.class));
     }
 
-    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+    private static void execute(final Operations op, final TransactionBuilder transaction,
+            final BridgeOperationalState state,
             final Map<InstanceIdentifier<ControllerEntry>, ControllerEntry> controllers,
             final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> bridges) {
         LOG.info("Register ODL controllers : {}  bridges detail : {}",

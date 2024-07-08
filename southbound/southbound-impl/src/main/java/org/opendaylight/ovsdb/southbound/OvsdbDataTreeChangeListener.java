@@ -227,7 +227,7 @@ public final class OvsdbDataTreeChangeListener implements DataTreeChangeListener
                 changesPerConnectionInstance(changes).entrySet()) {
             OvsdbConnectionInstance connectionInstance = connectionInstanceEntry.getKey();
             Collection<DataTreeModification<Node>> clientChanges = connectionInstanceEntry.getValue();
-            connectionInstance.transact(new TransactCommandAggregator(),
+            connectionInstance.transact(new TransactCommandAggregator(connectionInstance.ops()),
                     new BridgeOperationalState(db, clientChanges), clientChanges, instanceIdentifierCodec);
         }
     }

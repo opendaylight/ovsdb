@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,6 +20,7 @@ import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
@@ -40,13 +39,17 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BridgeUpdateCommand implements TransactCommand {
+public class BridgeUpdateCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(BridgeUpdateCommand.class);
+
+    public BridgeUpdateCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
-        execute(transaction, state, TransactUtils.extractCreatedOrUpdated(events, OvsdbBridgeAugmentation.class),
+        execute(op, transaction, state, TransactUtils.extractCreatedOrUpdated(events, OvsdbBridgeAugmentation.class),
                 instanceIdentifierCodec);
     }
 
@@ -54,24 +57,25 @@ public class BridgeUpdateCommand implements TransactCommand {
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Collection<DataTreeModification<Node>> modifications,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
-        execute(transaction, state,
+        execute(op, transaction, state,
                 TransactUtils.extractCreatedOrUpdated(modifications, OvsdbBridgeAugmentation.class),
                 instanceIdentifierCodec);
     }
 
-    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+    private static void execute(final Operations op, final TransactionBuilder transaction,
+            final BridgeOperationalState state,
             final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> createdOrUpdated,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         for (Entry<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> ovsdbManagedNodeEntry :
                 createdOrUpdated.entrySet()) {
-            updateBridge(transaction, state, ovsdbManagedNodeEntry.getKey(), ovsdbManagedNodeEntry.getValue(),
+            updateBridge(op, transaction, state, ovsdbManagedNodeEntry.getKey(), ovsdbManagedNodeEntry.getValue(),
                     instanceIdentifierCodec);
         }
     }
 
-    private static void updateBridge(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final InstanceIdentifier<OvsdbBridgeAugmentation> iid, final OvsdbBridgeAugmentation ovsdbManagedNode,
-            final InstanceIdentifierCodec instanceIdentifierCodec) {
+    private static void updateBridge(final Operations op, final TransactionBuilder transaction,
+            final BridgeOperationalState state, final InstanceIdentifier<OvsdbBridgeAugmentation> iid,
+            final OvsdbBridgeAugmentation ovsdbManagedNode, final InstanceIdentifierCodec instanceIdentifierCodec) {
         LOG.debug("Received request to create ovsdb bridge name: {} uuid: {}",
                 ovsdbManagedNode.getBridgeName(),
                 ovsdbManagedNode.getBridgeUuid());
@@ -85,7 +89,7 @@ public class BridgeUpdateCommand implements TransactCommand {
                 state.getOvsdbBridgeAugmentation(iid);
         if (!operationalBridgeOptional.isPresent()) {
             setName(bridge, ovsdbManagedNode,operationalBridgeOptional);
-            setPort(transaction, bridge, ovsdbManagedNode);
+            setPort(op, transaction, bridge, ovsdbManagedNode);
             transaction.add(op.insert(bridge));
             LOG.info("Added ovsdb Bridge name: {} uuid: {}",
                     ovsdbManagedNode.getBridgeName(),
@@ -99,7 +103,7 @@ public class BridgeUpdateCommand implements TransactCommand {
             transaction.add(op.update(bridge)
                     .where(extraBridge.getNameColumn().getSchema().opEqual(existingBridgeName))
                     .build());
-            stampInstanceIdentifier(transaction, iid.firstIdentifierOf(Node.class), existingBridgeName,
+            stampInstanceIdentifier(op, transaction, iid.firstIdentifierOf(Node.class), existingBridgeName,
                     instanceIdentifierCodec);
         }
     }
@@ -154,10 +158,10 @@ public class BridgeUpdateCommand implements TransactCommand {
         }
     }
 
-    private static void setPort(final TransactionBuilder transaction, final Bridge bridge,
+    private static void setPort(final Operations op, final TransactionBuilder transaction, final Bridge bridge,
             final OvsdbBridgeAugmentation ovsdbManagedNode) {
 
-        Insert<GenericTableSchema> interfaceInsert = setInterface(transaction,ovsdbManagedNode);
+        Insert<GenericTableSchema> interfaceInsert = setInterface(op, transaction, ovsdbManagedNode);
         // Port part
         String portNamedUuid = "Port_" + SouthboundMapper.getRandomUuid();
         Port port = transaction.getTypedRowWrapper(Port.class);
@@ -167,7 +171,7 @@ public class BridgeUpdateCommand implements TransactCommand {
         bridge.setPorts(Set.of(new UUID(portNamedUuid)));
     }
 
-    private static Insert<GenericTableSchema> setInterface(final TransactionBuilder transaction,
+    private static Insert<GenericTableSchema> setInterface(final Operations op, final TransactionBuilder transaction,
             final OvsdbBridgeAugmentation ovsdbManagedNode) {
         // Interface part
         String interfaceNamedUuid = "Interface_" + SouthboundMapper.getRandomUuid();
@@ -188,13 +192,13 @@ public class BridgeUpdateCommand implements TransactCommand {
         }
     }
 
-    private static void stampInstanceIdentifier(final TransactionBuilder transaction,
+    private static void stampInstanceIdentifier(final Operations op, final TransactionBuilder transaction,
             final InstanceIdentifier<Node> iid, final String bridgeName,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
         bridge.setName(bridgeName);
         bridge.setExternalIds(Collections.emptyMap());
-        Mutate mutate = TransactUtils.stampInstanceIdentifierMutation(transaction, iid, bridge.getSchema(),
+        Mutate mutate = TransactUtils.stampInstanceIdentifierMutation(op, transaction, iid, bridge.getSchema(),
                 bridge.getExternalIdsColumn().getSchema(), instanceIdentifierCodec);
         transaction.add(mutate
                 .where(bridge.getNameColumn().getSchema().opEqual(bridgeName))

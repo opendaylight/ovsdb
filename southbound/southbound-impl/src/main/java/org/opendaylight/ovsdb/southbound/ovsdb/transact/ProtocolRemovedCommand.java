@@ -7,7 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import java.util.Collection;
@@ -18,6 +17,7 @@ import java.util.Set;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -29,14 +29,17 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ProtocolRemovedCommand implements TransactCommand {
-
+public class ProtocolRemovedCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(ProtocolRemovedCommand.class);
+
+    public ProtocolRemovedCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
-        execute(transaction, state, TransactUtils.extractRemoved(events, ProtocolEntry.class),
+        execute(op, transaction, state, TransactUtils.extractRemoved(events, ProtocolEntry.class),
                 TransactUtils.extractCreatedOrUpdatedOrRemoved(events, OvsdbBridgeAugmentation.class));
     }
 
@@ -44,12 +47,12 @@ public class ProtocolRemovedCommand implements TransactCommand {
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Collection<DataTreeModification<Node>> modifications,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
-        execute(transaction, state, TransactUtils.extractRemoved(modifications, ProtocolEntry.class),
+        execute(op, transaction, state, TransactUtils.extractRemoved(modifications, ProtocolEntry.class),
                 TransactUtils.extractCreatedOrUpdatedOrRemoved(modifications, OvsdbBridgeAugmentation.class));
     }
 
-    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final Set<InstanceIdentifier<ProtocolEntry>> removed,
+    private static void execute(final Operations op, final TransactionBuilder transaction,
+            final BridgeOperationalState state, final Set<InstanceIdentifier<ProtocolEntry>> removed,
             final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updatedBridges) {
         for (InstanceIdentifier<ProtocolEntry> protocolIid : removed) {
             InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid =
@@ -76,7 +79,5 @@ public class ProtocolRemovedCommand implements TransactCommand {
                 }
             }
         }
-
     }
-
 }

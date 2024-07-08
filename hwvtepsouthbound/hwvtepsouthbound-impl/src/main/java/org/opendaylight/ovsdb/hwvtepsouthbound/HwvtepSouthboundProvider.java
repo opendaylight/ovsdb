@@ -32,6 +32,7 @@ import org.opendaylight.mdsal.eos.common.api.EntityOwnershipStateChange;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration.HwvtepReconciliationManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.utils.mdsal.utils.Scheduler;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -74,7 +75,7 @@ public final class HwvtepSouthboundProvider
             @Reference final EntityOwnershipService entityOwnership,
             @Reference final OvsdbConnection ovsdbConnection, @Reference final DOMSchemaService schemaService,
             @Reference final BindingNormalizedNodeSerializer serializer,
-            @Reference final TransactionInvoker txInvoker) {
+            @Reference final TransactionInvoker txInvoker, @Reference final Operations ops) {
         this.dataBroker = dataBroker;
         entityOwnershipService = entityOwnership;
         registration = null;
@@ -82,7 +83,7 @@ public final class HwvtepSouthboundProvider
         // FIXME: eliminate this static wiring
         HwvtepSouthboundUtil.setInstanceIdentifierCodec(new InstanceIdentifierCodec(schemaService, serializer));
         LOG.info("HwvtepSouthboundProvider ovsdbConnectionService: {}", ovsdbConnection);
-        cm = new HwvtepConnectionManager(dataBroker, txInvoker, entityOwnershipService, ovsdbConnection);
+        cm = new HwvtepConnectionManager(dataBroker, txInvoker, ops, entityOwnershipService, ovsdbConnection);
         hwvtepDTListener = new HwvtepDataChangeListener(dataBroker, cm);
         hwvtepReconciliationManager = new HwvtepReconciliationManager(dataBroker, cm);
         //Register listener for entityOnwership changes

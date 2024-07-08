@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -17,6 +15,7 @@ import java.util.Set;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -27,13 +26,17 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ControllerRemovedCommand implements TransactCommand {
+public class ControllerRemovedCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(ControllerRemovedCommand.class);
+
+    public ControllerRemovedCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final DataChangeEvent events, final InstanceIdentifierCodec instanceIdentifierCodec) {
-        execute(transaction, state, TransactUtils.extractRemoved(events, ControllerEntry.class),
+        execute(op, transaction, state, TransactUtils.extractRemoved(events, ControllerEntry.class),
                 TransactUtils.extractCreatedOrUpdatedOrRemoved(events, OvsdbBridgeAugmentation.class));
     }
 
@@ -41,14 +44,14 @@ public class ControllerRemovedCommand implements TransactCommand {
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Collection<DataTreeModification<Node>> modifications,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
-        execute(transaction, state, TransactUtils.extractRemoved(modifications, ControllerEntry.class),
+        execute(op, transaction, state, TransactUtils.extractRemoved(modifications, ControllerEntry.class),
                 TransactUtils.extractCreatedOrUpdatedOrRemoved(modifications, OvsdbBridgeAugmentation.class));
     }
 
-    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-                         final Set<InstanceIdentifier<ControllerEntry>> removedControllers,
-                         final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation>
-                                 modifiedBridges) {
+    private static void execute(final Operations op, final TransactionBuilder transaction,
+            final BridgeOperationalState state,
+            final Set<InstanceIdentifier<ControllerEntry>> removedControllers,
+            final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> modifiedBridges) {
         for (InstanceIdentifier<ControllerEntry> controllerIid : removedControllers) {
             LOG.debug("Removing Registered...ODL controller : {} ", controllerIid);
             InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid =

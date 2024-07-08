@@ -29,7 +29,6 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
-import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.binding.dom.adapter.test.AbstractDataBrokerTest;
@@ -91,8 +90,6 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         }
     }
 
-    static DataBroker dataBroker;
-
     EntityOwnershipService entityOwnershipService;
     OvsdbClient ovsdbClient;
     TypedDatabaseSchema dbSchema;
@@ -114,14 +111,6 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
 
     @Before
     public void setupTest() throws Exception {
-        /**
-         *  Use the same databroker across tests ,otherwise the following exception is thrown
-         *  Caused by: java.lang.RuntimeException: org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.
-         *  topology.rev131021.node.attributes.SupportingNode$StreamWriter: frozen class (cannot edit)
-         */
-        if (dataBroker == null) {
-            dataBroker = super.getDataBroker();
-        }
         entityOwnershipService = mock(EntityOwnershipService.class);
         nodeUuid = java.util.UUID.randomUUID().toString();
         nodeIid = createInstanceIdentifier(nodeUuid);
@@ -136,7 +125,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
 
         addNode(LogicalDatastoreType.OPERATIONAL);
         addNode(LogicalDatastoreType.CONFIGURATION);
-        hwvtepDataChangeListener = new HwvtepDataChangeListener(dataBroker, hwvtepConnectionManager);
+        hwvtepDataChangeListener = new HwvtepDataChangeListener(getDataBroker(), hwvtepConnectionManager);
     }
 
     @After
@@ -179,7 +168,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     }
 
     private void mockConnectionManager() throws IllegalAccessException {
-        hwvtepConnectionManager = spy(new HwvtepConnectionManager(dataBroker, transactionInvoker,
+        hwvtepConnectionManager = spy(new HwvtepConnectionManager(getDataBroker(), transactionInvoker,
             entityOwnershipService, mock(OvsdbConnection.class)));
         doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstance(
             any(HwvtepPhysicalSwitchAttributes.class));
@@ -188,7 +177,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
             any(InstanceIdentifier.class));
     }
 
-    void mockConnectionInstance() throws IllegalAccessException {
+    void mockConnectionInstance() {
         connectionInfo = mock(OvsdbConnectionInfo.class);
         doReturn(mock(InetAddress.class)).when(connectionInfo).getRemoteAddress();
 
@@ -197,10 +186,10 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(connectionInfo).when(ovsdbClient).getConnectionInfo();
         doReturn(listenableDbSchema).when(ovsdbClient).getSchema(anyString());
 
-        transactionInvoker = new TransactionInvokerImpl(dataBroker);
+        transactionInvoker = new TransactionInvokerImpl(getDataBroker());
 
         connectionInstance = new HwvtepConnectionInstance(null, null, ovsdbClient, nodeIid, transactionInvoker,
-            dataBroker);
+            getDataBroker());
         connectionInstance.reconciliationFt.set(Boolean.TRUE);
         connectionInstance.firstUpdateTriggered.set(true);
         connectionInstance.setControllerTxHistory(new TransactionHistory(10000, 7500));
@@ -246,13 +235,13 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
 
     void addNode(final LogicalDatastoreType logicalDatastoreType) throws Exception {
         NodeBuilder nodeBuilder = prepareNode(nodeIid).addAugmentation(new HwvtepGlobalAugmentationBuilder().build());
-        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        WriteTransaction transaction = getDataBroker().newWriteOnlyTransaction();
         transaction.mergeParentStructurePut(logicalDatastoreType, nodeIid, nodeBuilder.build());
         transaction.commit();
     }
 
     void deleteNode(final LogicalDatastoreType logicalDatastoreType) {
-        ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+        ReadWriteTransaction tx = getDataBroker().newReadWriteTransaction();
         tx.delete(logicalDatastoreType, nodeIid);
         tx.commit();
     }
@@ -278,7 +267,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     }
 
     void deleteData(final LogicalDatastoreType datastoreType, final InstanceIdentifier<?>... iids) {
-        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        WriteTransaction transaction = getDataBroker().newWriteOnlyTransaction();
         for (InstanceIdentifier<?> id : iids) {
             transaction.delete(datastoreType, id);
         }
@@ -287,7 +276,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
 
     void deleteData(final LogicalDatastoreType logicalDatastoreType, final Class<? extends DataObject> dataObject,
             final String[]... data) {
-        ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+        ReadWriteTransaction tx = getDataBroker().newReadWriteTransaction();
         if (LogicalSwitches.class == dataObject) {
             for (LogicalSwitchesKey key : TestBuilders.logicalSwitches(data).keySet()) {
                 tx.delete(logicalDatastoreType,
@@ -321,7 +310,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     Node mergeNode(final LogicalDatastoreType datastoreType, final InstanceIdentifier<Node> id,
             final NodeBuilder nodeBuilder) {
         Node node = nodeBuilder.build();
-        WriteTransaction transaction = dataBroker.newWriteOnlyTransaction();
+        WriteTransaction transaction = getDataBroker().newWriteOnlyTransaction();
         transaction.mergeParentStructureMerge(datastoreType, id, node);
         transaction.commit();
         return node;

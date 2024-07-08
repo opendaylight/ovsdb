@@ -93,7 +93,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
     public void setupListener() throws Exception {
         setFinalStatic(DependencyQueue.class, "EXECUTOR_SERVICE", mock(SameThreadScheduledExecutor.class,
                 Mockito.CALLS_REAL_METHODS));
-        opDataChangeListener = new HwvtepOperationalDataChangeListener(dataBroker, hwvtepConnectionManager,
+        opDataChangeListener = new HwvtepOperationalDataChangeListener(getDataBroker(), hwvtepConnectionManager,
                 connectionInstance);
     }
 

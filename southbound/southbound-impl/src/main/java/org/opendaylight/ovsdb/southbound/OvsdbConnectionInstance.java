@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.southbound;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;

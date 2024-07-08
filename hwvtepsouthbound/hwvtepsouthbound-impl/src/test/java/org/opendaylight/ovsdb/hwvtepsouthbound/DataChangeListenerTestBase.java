@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -109,6 +110,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     InstanceIdentifier<LogicalSwitches> ls0Iid;
     InstanceIdentifier<LogicalSwitches> ls1Iid;
 
+    Operations mockOp;
+
     @Before
     public void setupTest() throws Exception {
         entityOwnershipService = mock(EntityOwnershipService.class);
@@ -167,7 +170,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         }
     }
 
-    private void mockConnectionManager() throws IllegalAccessException {
+    private void mockConnectionManager() {
         hwvtepConnectionManager = spy(new HwvtepConnectionManager(getDataBroker(), transactionInvoker,
             entityOwnershipService, mock(OvsdbConnection.class)));
         doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstance(
@@ -198,6 +201,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     }
 
     void mockOperations() {
+        mockOp = mock(Operations.class);
         resetOperations();
     }
 
@@ -211,7 +215,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(where).when(delete).where(any());
         Insert insert = mock(Insert.class);
         doReturn(insert).when(insert).withId(any(String.class));
-        Operations mockOp = mock(Operations.class);
+
+        reset(mockOp);
         doReturn(insert).when(mockOp).insert(insertOpCapture.capture());
         Update update = mock(Update.class);
         doReturn(update).when(mockOp).update(insertOpCapture.capture());
@@ -219,14 +224,6 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         doReturn(select).when(mockOp).select(any(GenericTableSchema.class));
         doReturn(where).when(update).where(any());
         doReturn(delete).when(mockOp).delete(any());
-
-
-
-        try {
-            setFinalStatic(Operations.class, "op", mockOp);
-        } catch (SecurityException | ReflectiveOperationException e) {
-            throw new AssertionError("Set of Operations.op field failed", e);
-        }
 
         ListenableFuture<List<OperationResult>> ft = mock(ListenableFuture.class);
         transactCaptor = ArgumentCaptor.forClass(List.class);

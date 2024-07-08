@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +53,8 @@ public class UcastMacsLocalUpdateCommand
 
     private void updateUcastMacsLocal(final TransactionBuilder transaction,
             final InstanceIdentifier<Node> instanceIdentifier, final List<LocalUcastMacs> localUcastMacs) {
+        final var op = ops();
+        
         for (LocalUcastMacs localUcastMac: localUcastMacs) {
             LOG.debug("Creating localUcastMacs, mac address: {}", localUcastMac.getMacEntryKey().getValue());
             final Optional<LocalUcastMacs> operationalMacOptional =

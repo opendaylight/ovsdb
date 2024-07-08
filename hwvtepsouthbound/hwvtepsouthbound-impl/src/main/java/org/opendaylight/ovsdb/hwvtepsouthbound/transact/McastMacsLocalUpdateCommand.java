@@ -5,10 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
-
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import java.util.Collection;
 import java.util.List;
@@ -53,6 +50,8 @@ public class McastMacsLocalUpdateCommand
 
     private void updateMcastMacsLocal(final TransactionBuilder transaction,
             final InstanceIdentifier<Node> instanceIdentifier, final List<LocalMcastMacs> localMcastMacs) {
+        final var op = ops();
+        
         for (LocalMcastMacs localMcastMac: localMcastMacs) {
             LOG.debug("Creating localMcastMac, mac address: {}", localMcastMac.getMacEntryKey().getValue());
             final Optional<LocalMcastMacs> operationalMacOptional =

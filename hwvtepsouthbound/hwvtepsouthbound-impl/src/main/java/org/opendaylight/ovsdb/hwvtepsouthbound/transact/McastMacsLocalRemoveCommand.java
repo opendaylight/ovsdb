@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +47,8 @@ public class McastMacsLocalRemoveCommand
 
     private void removeMcastMacLocal(final TransactionBuilder transaction,
             final InstanceIdentifier<Node> instanceIdentifier, final List<LocalMcastMacs> macList) {
+        final var op = ops();
+        
         for (LocalMcastMacs mac: macList) {
             LOG.debug("Removing localMcastMacs, mac address: {}", mac.getMacEntryKey().getValue());
             Optional<LocalMcastMacs> operationalMacOptional =

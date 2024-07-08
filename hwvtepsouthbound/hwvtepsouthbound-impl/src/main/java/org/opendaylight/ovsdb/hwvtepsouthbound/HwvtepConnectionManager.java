@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import static java.util.Objects.requireNonNull;
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FluentFuture;
@@ -454,6 +453,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
 
         GenericTableSchema hwvtepSchema = dbSchema.getTableSchema(Global.class);
+        final var op = connectionInstance.ops();
         Select<GenericTableSchema> selectOperation = op.select(hwvtepSchema);
         selectOperation.setColumns(hwvtepSchema.getColumnList());
 

@@ -45,6 +45,7 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.operations.Operation;
 import org.opendaylight.ovsdb.lib.operations.OperationResult;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.GenericTableSchema;
@@ -409,5 +410,10 @@ public class HwvtepConnectionInstance {
 
     public TransactionInvoker getTxInvoker() {
         return txInvoker;
+    }
+
+    public Operations ops() {
+        // FIXME: properly inject
+        return null;
     }
 }

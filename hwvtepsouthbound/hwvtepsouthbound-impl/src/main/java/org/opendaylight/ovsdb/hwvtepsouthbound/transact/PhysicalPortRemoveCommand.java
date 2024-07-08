@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -52,6 +50,8 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
     private void updatePhysicalPort(final TransactionBuilder transaction,
                                     final InstanceIdentifier<Node> psNodeiid,
                                     final List<HwvtepPhysicalPortAugmentation> listPort) {
+        final var op = ops();
+        
         for (HwvtepPhysicalPortAugmentation port : listPort) {
             LOG.debug("Updating a physical port named: {}", port.getHwvtepNodeName().getValue());
             Optional<HwvtepPhysicalPortAugmentation> operationalPhysicalPortOptional =

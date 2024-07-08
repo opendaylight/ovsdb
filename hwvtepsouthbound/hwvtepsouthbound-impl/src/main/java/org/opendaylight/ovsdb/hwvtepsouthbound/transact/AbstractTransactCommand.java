@@ -30,6 +30,7 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepTableReader;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
@@ -71,9 +72,13 @@ public abstract class AbstractTransactCommand<T extends KeyAware<I> & DataObject
     public DataBroker getDataBroker() {
         return getOperationalState().getDataBroker();
     }
-
+    
     public Collection<DataTreeModification<Node>> getChanges() {
         return changes;
+    }
+
+    public Operations ops() {
+        return getOperationalState().getConnectionInstance().ops();
     }
 
     void updateCurrentTxDeleteData(final Class<? extends KeyAware> cls, final InstanceIdentifier key,

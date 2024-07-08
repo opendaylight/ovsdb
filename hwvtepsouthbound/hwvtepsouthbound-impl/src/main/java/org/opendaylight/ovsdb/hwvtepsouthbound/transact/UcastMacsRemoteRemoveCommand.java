@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
@@ -85,6 +83,8 @@ public class UcastMacsRemoteRemoveCommand
                                       final InstanceIdentifier<Node> instanceIdentifier,
                                       final List<RemoteUcastMacs> macList) {
         String nodeId = instanceIdentifier.firstKeyOf(Node.class).getNodeId().getValue();
+        final var op = ops();
+        
         for (RemoteUcastMacs mac: macList) {
             final InstanceIdentifier<RemoteUcastMacs> macIid =
                     instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class)

@@ -5,11 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundUtil.schemaMismatchLog;
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
@@ -96,6 +94,8 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
             schemaMismatchLog("tunnels", "Physical_Switch", e);
         }
         if (!operationalPhysicalSwitchOptional.isPresent()) {
+            final var op = ops();
+
             //create a physical switch
             setName(physicalSwitch, physicalSwitchAugmentation, operationalPhysicalSwitchOptional);
             String pswitchUuid = "PhysicalSwitch_" + HwvtepSouthboundMapper.getRandomUUID();
@@ -128,6 +128,8 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
             PhysicalSwitch extraPhysicalSwitch = transaction.getTypedRowWrapper(PhysicalSwitch.class);
             extraPhysicalSwitch.setName("");
             LOG.trace("execute: updating physical switch: {}", physicalSwitch);
+            final var op = ops();
+
             transaction.add(op.update(physicalSwitch)
                     .where(extraPhysicalSwitch.getNameColumn().getSchema().opEqual(existingPhysicalSwitchName))
                     .build());
@@ -181,6 +183,8 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
     private void setTunnels(final TransactionBuilder transaction, final InstanceIdentifier<Node> iid,
             final PhysicalSwitch physicalSwitch, final PhysicalSwitchAugmentation physicalSwitchAugmentation,
             final boolean switchExists) {
+        final var op = ops();
+
         //TODO: revisit this code for optimizations
         //TODO: needs more testing
         for (Tunnels tunnel : physicalSwitchAugmentation.nonnullTunnels().values()) {

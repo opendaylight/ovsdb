@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -141,7 +139,8 @@ public final class TransactUtils {
         PhysicalLocatorSet physicalLocatorSet = transaction.getTypedRowWrapper(PhysicalLocatorSet.class);
         physicalLocatorSet.setLocators(locators);
         String locatorSetUuid = "PhysicalLocatorSet_" + HwvtepSouthboundMapper.getRandomUUID();
-        transaction.add(op.insert(physicalLocatorSet).withId(locatorSetUuid));
+        transaction.add(hwvtepOperationalState.getConnectionInstance().ops()
+            .insert(physicalLocatorSet).withId(locatorSetUuid));
         hwvtepOperationalState.getDeviceInfo().addToControllerTx(TransactionType.ADD,
                 new StringBuilder(physicalLocatorSet.toString()).append(" Uuid ").append(locatorSetUuid)
                         .append(" ").append(locatorsInfo.toString()));
@@ -183,7 +182,8 @@ public final class TransactUtils {
         setEncapsulationType(physicalLocator, inputLocator);
         setDstIp(physicalLocator, inputLocator);
         String locatorUuid = "PhysicalLocator_" + HwvtepSouthboundMapper.getRandomUUID();
-        transaction.add(op.insert(physicalLocator).withId(locatorUuid));
+        transaction.add(hwvtepOperationalState.getConnectionInstance().ops()
+            .insert(physicalLocator).withId(locatorUuid));
         hwvtepOperationalState.getDeviceInfo().addToControllerTx(TransactionType.ADD,
                 new StringBuilder(physicalLocator.toString()).append(" Uuid ").append(locatorUuid));
         LOG.info("CONTROLLER - {} {}", TransactionType.ADD,

@@ -7,13 +7,12 @@
  */
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.schema.openvswitch.Qos;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -26,8 +25,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QosRemovedCommand implements TransactCommand {
+public class QosRemovedCommand extends AbstractTransactCommand {
     private static final Logger LOG = LoggerFactory.getLogger(QosRemovedCommand.class);
+
+    public QosRemovedCommand(final Operations op) {
+        super(op);
+    }
 
     @Override
     public void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
@@ -46,11 +49,10 @@ public class QosRemovedCommand implements TransactCommand {
                 TransactUtils.extractUpdated(modifications, OvsdbNodeAugmentation.class));
     }
 
-    private static void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
+    private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
             final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originals,
             final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
-        for (Map.Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> originalEntry : originals
-                .entrySet()) {
+        for (var originalEntry : originals.entrySet()) {
             InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = originalEntry.getKey();
             OvsdbNodeAugmentation original = originalEntry.getValue();
             OvsdbNodeAugmentation update = updated.get(ovsdbNodeIid);

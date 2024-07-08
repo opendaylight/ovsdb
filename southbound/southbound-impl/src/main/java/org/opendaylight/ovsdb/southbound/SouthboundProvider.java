@@ -38,6 +38,7 @@ import org.opendaylight.mdsal.eos.binding.api.EntityOwnershipService;
 import org.opendaylight.mdsal.eos.common.api.CandidateAlreadyRegisteredException;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipStateChange;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
+import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvokerImpl;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
@@ -97,9 +98,10 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
                               final DOMSchemaService schemaService,
                               final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
                               final SystemReadyMonitor systemReadyMonitor,
-                              final DiagStatusService diagStatusService) {
+                              final DiagStatusService diagStatusService,
+                              final Operations ops) {
         this(dataBroker, entityOwnershipServiceDependency, ovsdbConnection, schemaService,
-            bindingNormalizedNodeSerializer, systemReadyMonitor, diagStatusService, false, List.of(), List.of());
+            bindingNormalizedNodeSerializer, systemReadyMonitor, diagStatusService, ops, false, List.of(), List.of());
     }
 
     @Activate
@@ -110,9 +112,10 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
                               @Reference final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
                               @Reference final SystemReadyMonitor systemReadyMonitor,
                               @Reference final DiagStatusService diagStatusService,
+                              @Reference final Operations ops,
                               final Configuration configuration) {
         this(dataBroker, entityOwnershipServiceDependency, ovsdbConnection, schemaService,
-            bindingNormalizedNodeSerializer, systemReadyMonitor, diagStatusService,
+            bindingNormalizedNodeSerializer, systemReadyMonitor, diagStatusService, ops,
             configuration.skip$_$monitoring$_$manager$_$status(),
             getBridgesList(configuration.bridge$_$reconciliation$_$inclusion$_$list()),
             getBridgesList(configuration.bridge$_$reconciliation$_$exclusion$_$list()));
@@ -127,6 +130,7 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
                               final BindingNormalizedNodeSerializer bindingNormalizedNodeSerializer,
                               final SystemReadyMonitor systemReadyMonitor,
                               final DiagStatusService diagStatusService,
+                              final Operations ops,
                               final boolean skipMonitoringManagerStatus,
                               final List<String> bridgeReconciliationInclusionList,
                               final List<String> bridgeReconciliationExclusionList) {
@@ -148,7 +152,7 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
 
         ovsdbStatusProvider.reportStatus(ServiceState.STARTING, "OVSDB initialization in progress");
         txInvoker = new TransactionInvokerImpl(dataBroker);
-        cm = new OvsdbConnectionManager(dataBroker, txInvoker, entityOwnershipService, ovsdbConnection,
+        cm = new OvsdbConnectionManager(dataBroker, ops, txInvoker, entityOwnershipService, ovsdbConnection,
                 instanceIdentifierCodec, bridgeReconciliationInclusionList, bridgeReconciliationExclusionList);
         ovsdbDataTreeChangeListener = new OvsdbDataTreeChangeListener(dataBroker, cm, instanceIdentifierCodec);
         ovsdbOperGlobalListener = new OvsdbOperGlobalListener(dataBroker, cm, txInvoker);

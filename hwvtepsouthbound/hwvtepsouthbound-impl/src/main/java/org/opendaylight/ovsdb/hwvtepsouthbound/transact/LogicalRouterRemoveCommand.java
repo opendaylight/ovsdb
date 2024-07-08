@@ -7,8 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import static org.opendaylight.ovsdb.lib.operations.Operations.op;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -75,6 +73,8 @@ public class LogicalRouterRemoveCommand
 
     private void removeLogicalRouter(final TransactionBuilder transaction,
             final InstanceIdentifier<Node> instanceIdentifier, final List<LogicalRouters> routerList) {
+        final var op = ops();
+
         for (LogicalRouters lrouter: routerList) {
             LOG.debug("Removing logical router named: {}", lrouter.getHwvtepNodeName().getValue());
             Optional<LogicalRouters> operationalRouterOptional =

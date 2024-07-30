@@ -37,15 +37,15 @@ import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yangtools.yang.binding.Augmentation;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.binding.Augmentation;
+import org.opendaylight.yangtools.binding.EntryObject;
+import org.opendaylight.yangtools.binding.Key;
+import org.opendaylight.yangtools.binding.KeyAware;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.Key;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractTransactCommand<T extends KeyAware<I> & DataObject, I extends Key<T>,
+public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I extends Key<T>,
         A extends Augmentation<Node>> implements TransactCommand<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTransactCommand.class);
@@ -61,7 +61,7 @@ public abstract class AbstractTransactCommand<T extends KeyAware<I> & DataObject
 
     public AbstractTransactCommand(final HwvtepOperationalState state,
             final Collection<DataTreeModification<Node>> changes) {
-        this.hwvtepOperationalState = state;
+        hwvtepOperationalState = state;
         this.changes = changes;
     }
 

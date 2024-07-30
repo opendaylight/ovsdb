@@ -10,16 +10,16 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
-import org.opendaylight.yangtools.yang.binding.Augmentation;
-import org.opendaylight.yangtools.yang.binding.ChildOf;
-import org.opendaylight.yangtools.yang.binding.ChoiceIn;
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.ExactDataObjectStep;
+import org.opendaylight.yangtools.binding.Augmentation;
+import org.opendaylight.yangtools.binding.ChildOf;
+import org.opendaylight.yangtools.binding.ChoiceIn;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.ExactDataObjectStep;
+import org.opendaylight.yangtools.binding.Key;
+import org.opendaylight.yangtools.binding.KeyAware;
+import org.opendaylight.yangtools.binding.KeyStep;
+import org.opendaylight.yangtools.binding.NodeStep;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.Key;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
-import org.opendaylight.yangtools.yang.binding.KeyStep;
-import org.opendaylight.yangtools.yang.binding.NodeStep;
 
 public class DataObjectModificationImpl<T extends DataObject> implements DataObjectModification<T> {
     private final Collection<DataObjectModification<? extends DataObject>> childNodesCache = new ArrayList<>();

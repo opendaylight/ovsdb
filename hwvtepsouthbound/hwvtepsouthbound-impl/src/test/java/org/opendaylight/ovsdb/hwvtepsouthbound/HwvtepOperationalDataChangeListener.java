@@ -24,11 +24,11 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.binding.ChildOf;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.ChildOf;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
 
 public class HwvtepOperationalDataChangeListener implements DataTreeChangeListener<Node>, AutoCloseable {
     private final Registration registration;
@@ -71,7 +71,7 @@ public class HwvtepOperationalDataChangeListener implements DataTreeChangeListen
     }
 
     private void updateDeviceOpData(InstanceIdentifier<Node> key, DataObjectModification<? extends DataObject> mod) {
-        Class<? extends KeyAware> childClass = (Class<? extends KeyAware>) mod.dataType();
+        Class<? extends EntryObject<?, ?>> childClass = (Class<? extends EntryObject<?, ?>>) mod.dataType();
         InstanceIdentifier instanceIdentifier = getKey(key, mod, mod.dataAfter());
         switch (mod.modificationType()) {
             case WRITE:

@@ -33,9 +33,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +85,7 @@ public final class HwvtepSouthboundUtil {
         return result;
     }
 
-    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNode(
+    public static <D extends DataObject> Optional<D> readNode(
             DataBroker db,
             LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> connectionIid) {
         if (logicalDatastoreType == LogicalDatastoreType.OPERATIONAL) {
@@ -104,7 +104,7 @@ public final class HwvtepSouthboundUtil {
         }
     }
 
-    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNode(
+    public static <D extends DataObject> Optional<D> readNode(
             ReadTransaction transaction,
             LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> connectionIid) {
         if (logicalDatastoreType == LogicalDatastoreType.OPERATIONAL) {
@@ -123,7 +123,7 @@ public final class HwvtepSouthboundUtil {
         }
     }
 
-    public static <D extends org.opendaylight.yangtools.yang.binding.DataObject> Optional<D> readNode(
+    public static <D extends DataObject> Optional<D> readNode(
             ReadWriteTransaction transaction, final InstanceIdentifier<D> connectionIid) {
         return readNode(transaction, LogicalDatastoreType.OPERATIONAL, connectionIid);
     }
@@ -206,8 +206,8 @@ public final class HwvtepSouthboundUtil {
         LOG.debug(SCHEMA_VERSION_MISMATCH, column, table, "hw_vtep", ex.getMessage());
     }
 
-    public static <K, D> void updateData(Map<Class<? extends KeyAware>, Map<K, D>> map,
-            Class<? extends KeyAware> cls, K key, D data) {
+    public static <K, D> void updateData(Map<Class<? extends EntryObject<?, ?>>, Map<K, D>> map,
+            Class<? extends EntryObject<?, ?>> cls, K key, D data) {
         LOG.debug("Updating data {} {} {}", cls, key, data);
         if (key == null) {
             return;
@@ -218,8 +218,8 @@ public final class HwvtepSouthboundUtil {
         map.get(cls).put(key, data);
     }
 
-    public static <K, D> D getData(Map<Class<? extends KeyAware>, Map<K, D>> map,
-            Class<? extends KeyAware> cls, K key) {
+    public static <K, D> D getData(Map<Class<? extends EntryObject<?, ?>>, Map<K, D>> map,
+            Class<? extends EntryObject<?, ?>> cls, K key) {
         if (key == null) {
             return null;
         }
@@ -229,8 +229,8 @@ public final class HwvtepSouthboundUtil {
         return null;
     }
 
-    public static <K, D> boolean containsKey(Map<Class<? extends KeyAware>, Map<K, D>> map,
-            Class<? extends KeyAware> cls, K key) {
+    public static <K, D> boolean containsKey(Map<Class<? extends EntryObject<?, ?>>, Map<K, D>> map,
+            Class<? extends EntryObject<?, ?>> cls, K key) {
         if (key == null) {
             return false;
         }
@@ -240,8 +240,8 @@ public final class HwvtepSouthboundUtil {
         return false;
     }
 
-    public static <K, D> void clearData(Map<Class<? extends KeyAware>, Map<K, D>> map,
-            Class<? extends KeyAware> cls, K key) {
+    public static <K, D> void clearData(Map<Class<? extends EntryObject<?, ?>>, Map<K, D>> map,
+            Class<? extends EntryObject<?, ?>> cls, K key) {
         LOG.debug("Clearing data {} {}", cls, key);
         if (key == null) {
             return;

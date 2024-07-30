@@ -29,8 +29,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class DependencyQueueTest extends DataChangeListenerTestBase {
@@ -45,7 +45,7 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
     RemoteMcastMacs mac;
     InstanceIdentifier<RemoteMcastMacs> macIid;
     InstanceIdentifier<LogicalSwitches> lsIid;
-    Map<Class<? extends KeyAware>, List<InstanceIdentifier>> unMetDependencies;
+    Map<Class<? extends EntryObject<?, ?>>, List<InstanceIdentifier>> unMetDependencies;
 
     void setupForTest() throws Exception {
         mcastMacDataValidator = McastMacsRemoteUpdateCommand.MCAST_MAC_DATA_VALIDATOR;

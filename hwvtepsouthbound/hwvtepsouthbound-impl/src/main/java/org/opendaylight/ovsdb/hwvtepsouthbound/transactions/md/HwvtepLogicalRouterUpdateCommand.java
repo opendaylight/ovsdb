@@ -49,8 +49,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.SwitchBindingsBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +139,7 @@ public final class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionC
                 if (acl != null) {
                     InstanceIdentifier<Acls> aclIid =
                             HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), acl);
-                    aclBindingBuiler.setAclRef(new HwvtepAclRef(aclIid));
+                    aclBindingBuiler.setAclRef(new HwvtepAclRef(aclIid.toIdentifier()));
                     aclBindingBuiler.setRouterInterface(new IpPrefix(new Ipv4Prefix(entry.getKey())));
                     bindings.add(aclBindingBuiler.build());
                 }
@@ -165,7 +165,7 @@ public final class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionC
                     switchBindingBuiler.setDestinationAddress(new IpPrefix(new Ipv4Prefix(entry.getKey())));
                     InstanceIdentifier<LogicalSwitches> switchIid =
                         HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
-                    switchBindingBuiler.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid));
+                    switchBindingBuiler.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid.toIdentifier()));
                     bindings.add(switchBindingBuiler.build());
                 }
             }

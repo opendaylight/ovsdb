@@ -28,8 +28,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,20 +55,20 @@ public class HwvtepDeviceInfo {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepDeviceInfo.class);
 
-    private Map<Class<? extends KeyAware>, Map<InstanceIdentifier, Boolean>> availableInOperDs =
+    private Map<Class<? extends EntryObject<?, ?>>, Map<InstanceIdentifier, Boolean>> availableInOperDs =
             new ConcurrentHashMap<>();
 
-    public void markAvailableInOperDs(Class<? extends KeyAware> cls, InstanceIdentifier key) {
+    public void markAvailableInOperDs(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key) {
         availableInOperDs.putIfAbsent(cls, new ConcurrentHashMap<>());
         availableInOperDs.get(cls).put(key, Boolean.TRUE);
     }
 
-    public Boolean isAvailableInOperDs(Class<? extends KeyAware> cls, InstanceIdentifier key) {
+    public Boolean isAvailableInOperDs(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key) {
         availableInOperDs.putIfAbsent(cls, new ConcurrentHashMap<>());
         return availableInOperDs.get(cls).getOrDefault(key, Boolean.FALSE);
     }
 
-    public Boolean clearOperDsAvailability(Class<? extends KeyAware> cls, InstanceIdentifier key) {
+    public Boolean clearOperDsAvailability(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key) {
         availableInOperDs.putIfAbsent(cls, new ConcurrentHashMap<>());
         return availableInOperDs.get(cls).remove(key);
     }
@@ -138,14 +138,14 @@ public class HwvtepDeviceInfo {
             logicalSwitchVsMcasts = new ConcurrentHashMap<>();
     private final Map<UUID, PhysicalSwitch> physicalSwitches = new ConcurrentHashMap<>();
     private final Map<UUID, UUID> mapTunnelToPhysicalSwitch = new ConcurrentHashMap<>();
-    private final Map<Class<? extends KeyAware>, Map<InstanceIdentifier, DeviceData>> opKeyVsData =
+    private final Map<Class<? extends EntryObject<?, ?>>, Map<InstanceIdentifier, DeviceData>> opKeyVsData =
         new ConcurrentHashMap<>();
-    private final Map<Class<? extends KeyAware>, Map<UUID, DeviceData>> uuidVsData = new ConcurrentHashMap<>();
+    private final Map<Class<? extends EntryObject<?, ?>>, Map<UUID, DeviceData>> uuidVsData = new ConcurrentHashMap<>();
     private final HwvtepConnectionInstance connectionInstance;
     private final DependencyQueue dependencyQueue;
 
     private Map<InstanceIdentifier, AtomicInteger> iidInQueueCount = new ConcurrentHashMap<>();
-    private Map<Class<? extends KeyAware>, Map<InstanceIdentifier, DeviceData>> configKeyVsData =
+    private Map<Class<? extends EntryObject<?, ?>>, Map<InstanceIdentifier, DeviceData>> configKeyVsData =
             new ConcurrentHashMap<>();
     private TransactionHistory controllerTxHistory = null;
     private TransactionHistory deviceUpdateHistory = null;
@@ -225,33 +225,33 @@ public class HwvtepDeviceInfo {
         return mapTunnelToPhysicalSwitch;
     }
 
-    public boolean isKeyInTransit(Class<? extends KeyAware> cls, InstanceIdentifier key) {
+    public boolean isKeyInTransit(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key) {
         DeviceData deviceData = HwvtepSouthboundUtil.getData(opKeyVsData, cls, key);
         return deviceData != null && DeviceDataStatus.IN_TRANSIT == deviceData.status;
     }
 
-    public boolean isConfigDataAvailable(Class<? extends KeyAware> cls, InstanceIdentifier key) {
+    public boolean isConfigDataAvailable(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key) {
         return HwvtepSouthboundUtil.getData(configKeyVsData, cls, key) != null;
     }
 
-    public void updateConfigData(Class<? extends KeyAware> cls, InstanceIdentifier key, Object data) {
+    public void updateConfigData(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key, Object data) {
         HwvtepSouthboundUtil.updateData(configKeyVsData, cls, key,
                 new DeviceData(key, null, data, DeviceDataStatus.AVAILABLE));
     }
 
-    public DeviceData getConfigData(Class<? extends KeyAware> cls, InstanceIdentifier key) {
+    public DeviceData getConfigData(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key) {
         return HwvtepSouthboundUtil.getData(configKeyVsData, cls, key);
     }
 
-    public Map<Class<? extends KeyAware>, Map<InstanceIdentifier, DeviceData>> getConfigData() {
+    public Map<Class<? extends EntryObject<?, ?>>, Map<InstanceIdentifier, DeviceData>> getConfigData() {
         return Collections.unmodifiableMap(configKeyVsData);
     }
 
-    public void clearConfigData(Class<? extends KeyAware> cls, InstanceIdentifier key) {
+    public void clearConfigData(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key) {
         HwvtepSouthboundUtil.clearData(configKeyVsData, cls, key);
     }
 
-    public void markKeyAsInTransit(Class<? extends KeyAware> cls, InstanceIdentifier key) {
+    public void markKeyAsInTransit(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key) {
         LOG.debug("Marking device data as intransit {}", key);
         DeviceData deviceData = getDeviceOperData(cls, key);
         UUID uuid = null;
@@ -265,7 +265,7 @@ public class HwvtepDeviceInfo {
                 new DeviceData(key, uuid, data, DeviceDataStatus.IN_TRANSIT));
     }
 
-    public void updateDeviceOperData(Class<? extends KeyAware> cls, InstanceIdentifier key,
+    public void updateDeviceOperData(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key,
             UUID uuid, Object data) {
         LOG.debug("Updating device data {}", key);
         DeviceData deviceData = new DeviceData(key, uuid, data, DeviceDataStatus.AVAILABLE);
@@ -273,7 +273,7 @@ public class HwvtepDeviceInfo {
         HwvtepSouthboundUtil.updateData(uuidVsData, cls, uuid, deviceData);
     }
 
-    public void clearDeviceOperData(Class<? extends KeyAware> cls, InstanceIdentifier key) {
+    public void clearDeviceOperData(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key) {
         DeviceData deviceData = HwvtepSouthboundUtil.getData(opKeyVsData, cls, key);
         if (deviceData != null && deviceData.uuid != null) {
             HwvtepSouthboundUtil.clearData(uuidVsData, cls, deviceData.uuid);
@@ -281,7 +281,7 @@ public class HwvtepDeviceInfo {
         HwvtepSouthboundUtil.clearData(opKeyVsData, cls, key);
     }
 
-    public void clearDeviceOperData(Class<? extends KeyAware> cls) {
+    public void clearDeviceOperData(Class<? extends EntryObject<?, ?>> cls) {
         Map<InstanceIdentifier, DeviceData> iids = opKeyVsData.get(cls);
         if (iids != null && !iids.isEmpty()) {
             Iterator<Map.Entry<InstanceIdentifier, DeviceData>> it = iids.entrySet().iterator();
@@ -295,7 +295,7 @@ public class HwvtepDeviceInfo {
         }
     }
 
-    public void clearDeviceOperUUID(Class<? extends KeyAware> cls, InstanceIdentifier key, UUID uuid) {
+    public void clearDeviceOperUUID(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key, UUID uuid) {
         LOG.debug("Clearing device data {}", key);
         if (uuidVsData.containsKey(cls) && uuidVsData.get(cls).containsKey(uuid)) {
             LOG.debug("Remove {} {} from device data.", connectionInstance.getNodeId().getValue(), cls.getSimpleName());
@@ -304,19 +304,19 @@ public class HwvtepDeviceInfo {
         HwvtepSouthboundUtil.clearData(opKeyVsData, cls, key);
     }
 
-    public DeviceData getDeviceOperData(Class<? extends KeyAware> cls, UUID uuid) {
+    public DeviceData getDeviceOperData(Class<? extends EntryObject<?, ?>> cls, UUID uuid) {
         return HwvtepSouthboundUtil.getData(uuidVsData, cls, uuid);
     }
 
-    public DeviceData getDeviceOperData(Class<? extends KeyAware> cls, InstanceIdentifier key) {
+    public DeviceData getDeviceOperData(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key) {
         return HwvtepSouthboundUtil.getData(opKeyVsData, cls, key);
     }
 
-    public Map<InstanceIdentifier, DeviceData> getDeviceOperData(Class<? extends KeyAware> cls) {
+    public Map<InstanceIdentifier, DeviceData> getDeviceOperData(Class<? extends EntryObject<?, ?>> cls) {
         return opKeyVsData.get(cls);
     }
 
-    public InstanceIdentifier getDeviceOperKey(final Class<? extends KeyAware> cls, final UUID uuid) {
+    public InstanceIdentifier getDeviceOperKey(final Class<? extends EntryObject<?, ?>> cls, final UUID uuid) {
         DeviceData deviceData = HwvtepSouthboundUtil.getData(uuidVsData, cls, uuid);
         if (deviceData != null) {
             return deviceData.getKey();
@@ -324,7 +324,7 @@ public class HwvtepDeviceInfo {
         return null;
     }
 
-    public UUID getUUID(Class<? extends KeyAware> cls, InstanceIdentifier key) {
+    public UUID getUUID(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key) {
         DeviceData data = HwvtepSouthboundUtil.getData(opKeyVsData, cls, key);
         if (data != null) {
             return data.uuid;
@@ -332,7 +332,7 @@ public class HwvtepDeviceInfo {
         return null;
     }
 
-    public <T extends KeyAware> void addJobToQueue(DependentJob<T> job) {
+    public <T extends EntryObject<?, ?>> void addJobToQueue(DependentJob<T> job) {
         dependencyQueue.addToQueue(job);
     }
 
@@ -348,7 +348,7 @@ public class HwvtepDeviceInfo {
         dependencyQueue.submit(() -> connectionInstance.transact(transactCommand));
     }
 
-    public void clearInTransit(Class<? extends KeyAware> cls, InstanceIdentifier key) {
+    public void clearInTransit(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier key) {
         DeviceData deviceData = getDeviceOperData(cls, key);
         if (deviceData != null && deviceData.isInTransitState()) {
             if (deviceData.getData() != null) {
@@ -448,7 +448,7 @@ public class HwvtepDeviceInfo {
         return connectionInstance;
     }
 
-    public void setConfigKeyVsData(Map<Class<? extends KeyAware>, Map<InstanceIdentifier,
+    public void setConfigKeyVsData(Map<Class<? extends EntryObject<?, ?>>, Map<InstanceIdentifier,
             DeviceData>> configKeyVsData) {
         this.configKeyVsData = configKeyVsData;
     }
@@ -469,11 +469,11 @@ public class HwvtepDeviceInfo {
         deviceUpdateHistory.addToHistory(transactionType, object);
     }
 
-    public Map<Class<? extends KeyAware>, Map<InstanceIdentifier, DeviceData>> getOperData() {
+    public Map<Class<? extends EntryObject<?, ?>>, Map<InstanceIdentifier, DeviceData>> getOperData() {
         return Collections.unmodifiableMap(opKeyVsData);
     }
 
-    public Map<Class<? extends KeyAware>, Map<UUID, DeviceData>> getUuidData() {
+    public Map<Class<? extends EntryObject<?, ?>>, Map<UUID, DeviceData>> getUuidData() {
         return Collections.unmodifiableMap(uuidVsData);
     }
 
@@ -489,5 +489,4 @@ public class HwvtepDeviceInfo {
     public boolean isKeyInDependencyQueue(InstanceIdentifier iid) {
         return iidInQueueCount.containsKey(iid);
     }
-
 }

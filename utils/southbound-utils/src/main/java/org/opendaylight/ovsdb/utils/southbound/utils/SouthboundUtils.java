@@ -114,12 +114,12 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.Key;
+import org.opendaylight.yangtools.binding.KeyStep;
+import org.opendaylight.yangtools.binding.NodeStep;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.Key;
-import org.opendaylight.yangtools.yang.binding.KeyStep;
-import org.opendaylight.yangtools.yang.binding.NodeStep;
-import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
@@ -670,7 +670,7 @@ public class SouthboundUtils {
             .setProtocolEntry(createMdsalProtocols())
             .setFailMode(OVSDB_FAIL_MODE_MAP.inverse().get("secure"))
             .setBridgeExternalIds(setBridgeExternalIds())
-            .setManagedBy(new OvsdbNodeRef(createInstanceIdentifier(ovsdbNode.key().getNodeId())))
+            .setManagedBy(new OvsdbNodeRef(createInstanceIdentifier(ovsdbNode.key().getNodeId()).toIdentifier()))
             // TODO: Currently netvirt relies on this function to set disabled-in-band=true. However,
             // TODO (cont): a better design would be to have netvirt pass that in. That way this function
             // TODO (cont): can take a null otherConfigs to erase other_configs.
@@ -767,7 +767,7 @@ public class SouthboundUtils {
     private static void setManagedBy(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                               final ConnectionInfo connectionInfo) {
         InstanceIdentifier<Node> connectionNodePath = createInstanceIdentifier(connectionInfo);
-        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
+        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath.toIdentifier()));
     }
 
     public boolean addTerminationPoint(

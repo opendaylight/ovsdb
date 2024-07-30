@@ -58,9 +58,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-    OvsdbManagersUpdateCommand.class, SouthboundMapper.class, SouthboundUtil.class, InstanceIdentifier.class
-})
+@PrepareForTest({ OvsdbManagersUpdateCommand.class, SouthboundMapper.class, SouthboundUtil.class })
 public class OvsdbManagersUpdateCommandTest {
 
     private static final String TARGET_COLUMN_DATA = "Manager Column";
@@ -163,13 +161,13 @@ public class OvsdbManagersUpdateCommandTest {
     public void testGetManagerEntryIid() throws Exception {
         OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class, Mockito.RETURNS_DEEP_STUBS);
         when(ovsdbManagersUpdateCommand.getOvsdbConnectionInstance()).thenReturn(client);
-        when(client.getNodeKey().getNodeId().getValue()).thenReturn(NODE_ID);
+        when(client.getNodeKey()).thenReturn(new NodeKey(new NodeId(NODE_ID)));
 
         ManagerEntry managerEntry = mock(ManagerEntry.class);
-        when(managerEntry.key()).thenReturn(mock(ManagerEntryKey.class));
+        when(managerEntry.key()).thenReturn(new ManagerEntryKey(new Uri("key")));
         InstanceIdentifier<ManagerEntry> iid = ovsdbManagersUpdateCommand.getManagerEntryIid(managerEntry);
         assertThat(iid, instanceOf(KeyedInstanceIdentifier.class));
-        assertSame(managerEntry.key(), ((KeyedInstanceIdentifier<?, ?>) iid).getKey());
+        assertSame(managerEntry.key(), ((KeyedInstanceIdentifier<?, ?>) iid).key());
     }
 
     @SuppressWarnings("unchecked")

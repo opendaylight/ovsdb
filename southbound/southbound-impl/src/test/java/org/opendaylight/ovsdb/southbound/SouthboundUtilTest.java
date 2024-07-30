@@ -25,7 +25,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
@@ -42,6 +41,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
@@ -66,12 +66,12 @@ public class SouthboundUtilTest {
         ReadTransaction transaction = mock(ReadTransaction.class);
         when(db.newReadOnlyTransaction()).thenReturn(transaction);
         when(mn.getManagedBy()).thenReturn(ref);
-        when(ref.getValue()).thenAnswer(
-            (Answer<InstanceIdentifier<Node>>) invocation -> InstanceIdentifier.create(NetworkTopology.class)
+        when(ref.getValue()).thenAnswer(invocation -> DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class, new NodeKey(new NodeId("testNode"))));
+                .child(Node.class, new NodeKey(new NodeId("testNode")))
+                .build());
         FluentFuture<Optional<Node>> nf = mock(FluentFuture.class);
-        when(transaction.read(eq(LogicalDatastoreType.OPERATIONAL), any(InstanceIdentifier.class))).thenReturn(nf);
+        when(transaction.read(eq(LogicalDatastoreType.OPERATIONAL), any(DataObjectIdentifier.class))).thenReturn(nf);
         doNothing().when(transaction).close();
 
         //node, ovsdbNode not null

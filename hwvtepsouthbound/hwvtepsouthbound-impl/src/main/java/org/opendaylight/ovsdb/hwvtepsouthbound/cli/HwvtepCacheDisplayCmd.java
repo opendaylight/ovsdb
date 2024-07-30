@@ -19,6 +19,7 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundProviderInfo;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalPort;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Uri;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
@@ -30,8 +31,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
 
 @Service
 @Command(scope = "hwvtep", name = "cache", description = "Disply hwvtep cache")
@@ -112,9 +114,9 @@ public class HwvtepCacheDisplayCmd implements Action {
 
     }
 
-    private static void printEntry(PrintStream console, Map.Entry<Class<? extends KeyAware>,
+    private static void printEntry(PrintStream console, Map.Entry<Class<? extends EntryObject<?, ?>>,
             Map<InstanceIdentifier, HwvtepDeviceInfo.DeviceData>> entry) {
-        Class<? extends KeyAware> cls = entry.getKey();
+        Class<? extends EntryObject<?, ?>> cls = entry.getKey();
         Map<InstanceIdentifier, HwvtepDeviceInfo.DeviceData> map = entry.getValue();
         String clsName = cls.getSimpleName();
         console.println(clsName + " - ");
@@ -156,8 +158,8 @@ public class HwvtepCacheDisplayCmd implements Action {
     private static void printRemoteMcasts(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
         InstanceIdentifier<RemoteMcastMacs> remoteMcastMacsIid = deviceData.getKey();
         String macAddress = remoteMcastMacsIid.firstKeyOf(RemoteMcastMacs.class).getMacEntryKey().getValue();
-        String logicalSwitchRef = remoteMcastMacsIid.firstKeyOf(RemoteMcastMacs.class).getLogicalSwitchRef().getValue()
-                .firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
+        String logicalSwitchRef =
+            getLogicalSwitchRef(remoteMcastMacsIid.firstKeyOf(RemoteMcastMacs.class).getLogicalSwitchRef());
         StringBuilder macEntryDetails = new StringBuilder(macAddress).append("   LogicalSwitchRef  ")
                 .append(logicalSwitchRef);
         console.print(macEntryDetails);
@@ -166,11 +168,16 @@ public class HwvtepCacheDisplayCmd implements Action {
     private static void printRemoteUcasts(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
         InstanceIdentifier<RemoteUcastMacs> remoteUcastMacsIid = deviceData.getKey();
         String macAddress = remoteUcastMacsIid.firstKeyOf(RemoteUcastMacs.class).getMacEntryKey().getValue();
-        String logicalSwitchRef = remoteUcastMacsIid.firstKeyOf(RemoteUcastMacs.class).getLogicalSwitchRef().getValue()
-                .firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
+        String logicalSwitchRef =
+            getLogicalSwitchRef(remoteUcastMacsIid.firstKeyOf(RemoteUcastMacs.class).getLogicalSwitchRef());
         StringBuilder macEntryDetails = new StringBuilder(macAddress).append("   LogicalSwitchRef  ")
                 .append(logicalSwitchRef);
         console.print(macEntryDetails);
+    }
+
+    private static String getLogicalSwitchRef(HwvtepLogicalSwitchRef hwvtepLogicalSwitchRef) {
+        return ((DataObjectIdentifier<?>) hwvtepLogicalSwitchRef.getValue())
+            .toLegacy().firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
     }
 
     private static void printTerminationPoint(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
@@ -200,9 +207,9 @@ public class HwvtepCacheDisplayCmd implements Action {
         console.println(deviceData.getUuid());
     }
 
-    private static void printEntryUUID(PrintStream console, Map.Entry<Class<? extends KeyAware>, Map<UUID,
+    private static void printEntryUUID(PrintStream console, Map.Entry<Class<? extends EntryObject<?, ?>>, Map<UUID,
             HwvtepDeviceInfo.DeviceData>> entry) {
-        Class<? extends KeyAware> cls = entry.getKey();
+        Class<? extends EntryObject<?, ?>> cls = entry.getKey();
         Map<UUID, HwvtepDeviceInfo.DeviceData> map = entry.getValue();
         String clsName = cls.getSimpleName();
         console.println(clsName + " - ");

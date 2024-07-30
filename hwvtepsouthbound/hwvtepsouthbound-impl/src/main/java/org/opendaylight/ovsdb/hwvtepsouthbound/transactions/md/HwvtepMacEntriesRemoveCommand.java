@@ -136,7 +136,7 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         if (logicalSwitch != null) {
             InstanceIdentifier<LogicalSwitches> switchIid =
                     HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
-            return new HwvtepLogicalSwitchRef(switchIid);
+            return new HwvtepLogicalSwitchRef(switchIid.toIdentifier());
         }
         LOG.debug("Failed to get LogicalSwitch {}", switchUUID);
         LOG.trace("Available LogicalSwitches: {}",

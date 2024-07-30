@@ -340,7 +340,7 @@ public class OvsdbPortUpdateCommandTest {
             .child(Node.class, new NodeKey(new NodeId("testNode")));
 
         ManagedNodeEntry managedNodeEntry = new ManagedNodeEntryBuilder()
-                .setBridgeRef(new OvsdbBridgeRef(iidNode))
+                .setBridgeRef(new OvsdbBridgeRef(iidNode.toIdentifier()))
                 .build();
         when(ovsdbNode.nonnullManagedNodeEntry()).thenCallRealMethod();
         when(ovsdbNode.getManagedNodeEntry()).thenReturn(Map.of(managedNodeEntry.key(), managedNodeEntry));

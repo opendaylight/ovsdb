@@ -181,7 +181,7 @@ public class OvsdbControllerUpdateCommandTest {
             .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
             .child(Node.class, new NodeKey(new NodeId("testBridge")));
         ManagedNodeEntry managedNodeEntry = new ManagedNodeEntryBuilder()
-                .setBridgeRef(new OvsdbBridgeRef(bridgeIid))
+                .setBridgeRef(new OvsdbBridgeRef(bridgeIid.toIdentifier()))
                 .build();
 
         when(ovsdbNodeAugmentation.getManagedNodeEntry()).thenReturn(Map.of(managedNodeEntry.key(), managedNodeEntry));

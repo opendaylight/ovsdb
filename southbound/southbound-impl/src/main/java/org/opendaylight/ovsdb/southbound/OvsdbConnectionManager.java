@@ -58,6 +58,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -507,8 +508,8 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                     Map<ManagedNodeEntryKey, ManagedNodeEntry> entries = nodeAugmentation.getManagedNodeEntry();
                     if (entries != null) {
                         for (ManagedNodeEntry managedNode : entries.values()) {
-                            transaction.delete(
-                                    LogicalDatastoreType.OPERATIONAL, managedNode.getBridgeRef().getValue());
+                            transaction.delete(LogicalDatastoreType.OPERATIONAL,
+                                (DataObjectIdentifier<?>) managedNode.getBridgeRef().getValue());
                         }
                     } else {
                         LOG.debug("{} had no managed nodes", ovsdbNode.getNodeId().getValue());

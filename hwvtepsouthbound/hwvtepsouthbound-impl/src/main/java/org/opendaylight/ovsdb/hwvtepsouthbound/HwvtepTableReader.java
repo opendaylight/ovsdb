@@ -62,9 +62,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,7 +99,7 @@ public class HwvtepTableReader {
         TerminationPoint.class, PhysicalLocator.class,
         VlanBindings.class, PhysicalPort.class);
 
-    private final ImmutableMap<Class<? extends KeyAware<?>>, WhereClauseGetter<?>> whereClauseGetters;
+    private final ImmutableMap<Class<? extends EntryObject<?, ?>>, WhereClauseGetter<?>> whereClauseGetters;
     private final ImmutableClassToInstanceMap<TypedBaseTable<?>> tables;
     private final HwvtepConnectionInstance connectionInstance;
 
@@ -113,7 +114,7 @@ public class HwvtepTableReader {
         }
 
         final Builder<TypedBaseTable<?>> tableBuilder = ImmutableClassToInstanceMap.<TypedBaseTable<?>>builder();
-        final ImmutableMap.Builder<Class<? extends KeyAware<?>>, WhereClauseGetter<?>> whereBuilder =
+        final ImmutableMap.Builder<Class<? extends EntryObject<?, ?>>, WhereClauseGetter<?>> whereBuilder =
                 ImmutableMap.builderWithExpectedSize(4);
 
         if (dbSchema != null) {
@@ -162,8 +163,8 @@ public class HwvtepTableReader {
         @Override
         public List<Condition> apply(final InstanceIdentifier<RemoteMcastMacs> iid) {
             RemoteMcastMacsKey key = iid.firstKeyOf(RemoteMcastMacs.class);
-            InstanceIdentifier<LogicalSwitches> lsIid = (InstanceIdentifier<LogicalSwitches>) key.getLogicalSwitchRef()
-                    .getValue();
+            InstanceIdentifier<LogicalSwitches> lsIid =
+                ((DataObjectIdentifier<LogicalSwitches>) key.getLogicalSwitchRef().getValue()).toLegacy();
             UUID lsUUID = getLsUuid(lsIid);
             if (lsUUID == null) {
                 LOG.warn("Could not find uuid for ls key {}", getNodeKeyStr(lsIid));
@@ -206,8 +207,8 @@ public class HwvtepTableReader {
         @Override
         public List<Condition> apply(final InstanceIdentifier<RemoteUcastMacs> iid) {
             RemoteUcastMacsKey key = iid.firstKeyOf(RemoteUcastMacs.class);
-            InstanceIdentifier<LogicalSwitches> lsIid = (InstanceIdentifier<LogicalSwitches>) key.getLogicalSwitchRef()
-                    .getValue();
+            InstanceIdentifier<LogicalSwitches> lsIid =
+                ((DataObjectIdentifier<LogicalSwitches>) key.getLogicalSwitchRef().getValue()).toLegacy();
             UUID lsUUID = connectionInstance.getDeviceInfo().getUUID(LogicalSwitches.class, lsIid);
             if (lsUUID == null) {
                 LOG.error("Could not find uuid for ls key {}", lsIid);
@@ -252,7 +253,7 @@ public class HwvtepTableReader {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public Optional<TypedBaseTable> getHwvtepTableEntryUUID(final Class<? extends KeyAware> cls,
+    public Optional<TypedBaseTable> getHwvtepTableEntryUUID(final Class<? extends EntryObject<?, ?>> cls,
                                                             final InstanceIdentifier iid,
                                                             final UUID existingUUID) {
         final TypedDatabaseSchema dbSchema;
@@ -316,7 +317,7 @@ public class HwvtepTableReader {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public List<TypedBaseTable> getHwvtepTableEntries(final Class<? extends KeyAware> cls) {
+    public List<TypedBaseTable> getHwvtepTableEntries(final Class<? extends EntryObject<?, ?>> cls) {
         final TypedDatabaseSchema dbSchema;
         try {
             dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();

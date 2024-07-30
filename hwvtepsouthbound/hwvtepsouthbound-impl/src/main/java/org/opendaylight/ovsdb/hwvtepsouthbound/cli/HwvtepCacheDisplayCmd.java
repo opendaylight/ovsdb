@@ -30,8 +30,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
 
 @Service
 @Command(scope = "hwvtep", name = "cache", description = "Disply hwvtep cache")
@@ -112,9 +112,9 @@ public class HwvtepCacheDisplayCmd implements Action {
 
     }
 
-    private static void printEntry(PrintStream console, Map.Entry<Class<? extends KeyAware>,
+    private static void printEntry(PrintStream console, Map.Entry<Class<? extends EntryObject<?, ?>>,
             Map<InstanceIdentifier, HwvtepDeviceInfo.DeviceData>> entry) {
-        Class<? extends KeyAware> cls = entry.getKey();
+        Class<? extends EntryObject<?, ?>> cls = entry.getKey();
         Map<InstanceIdentifier, HwvtepDeviceInfo.DeviceData> map = entry.getValue();
         String clsName = cls.getSimpleName();
         console.println(clsName + " - ");
@@ -200,9 +200,9 @@ public class HwvtepCacheDisplayCmd implements Action {
         console.println(deviceData.getUuid());
     }
 
-    private static void printEntryUUID(PrintStream console, Map.Entry<Class<? extends KeyAware>, Map<UUID,
+    private static void printEntryUUID(PrintStream console, Map.Entry<Class<? extends EntryObject<?, ?>>, Map<UUID,
             HwvtepDeviceInfo.DeviceData>> entry) {
-        Class<? extends KeyAware> cls = entry.getKey();
+        Class<? extends EntryObject<?, ?>> cls = entry.getKey();
         Map<UUID, HwvtepDeviceInfo.DeviceData> map = entry.getValue();
         String clsName = cls.getSimpleName();
         console.println(clsName + " - ");

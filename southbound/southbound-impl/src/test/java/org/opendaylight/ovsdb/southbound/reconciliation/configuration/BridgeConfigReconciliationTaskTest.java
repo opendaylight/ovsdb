@@ -49,11 +49,11 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BridgeConfigReconciliationTaskTest {
@@ -104,7 +104,7 @@ public class BridgeConfigReconciliationTaskTest {
         return new NodeBuilder()
                 .setNodeId(new NodeId(new Uri(bridgeName)))
                 .addAugmentation(new OvsdbBridgeAugmentationBuilder()
-                    .setManagedBy(new OvsdbNodeRef(iid))
+                    .setManagedBy(new OvsdbNodeRef(iid.toIdentifier()))
                     .setProtocolEntry(BindingMap.of(
                         new ProtocolEntryBuilder().setProtocol(OvsdbBridgeProtocolOpenflow10.VALUE).build()))
                     .setControllerEntry(BindingMap.of(

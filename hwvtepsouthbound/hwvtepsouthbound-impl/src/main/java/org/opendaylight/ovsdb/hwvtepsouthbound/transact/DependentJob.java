@@ -17,21 +17,20 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class DependentJob<T extends KeyAware> {
-
+public abstract class DependentJob<T extends EntryObject<?, ?>> {
     private static final Logger LOG = LoggerFactory.getLogger(DependentJob.class);
 
-    private static final Predicate<HwvtepDeviceInfo.DeviceData> DATA_INTRANSIT
-            = (controllerData) -> controllerData != null && controllerData.isInTransitState();
+    private static final Predicate<HwvtepDeviceInfo.DeviceData> DATA_INTRANSIT =
+        controllerData -> controllerData != null && controllerData.isInTransitState();
 
-    private static final Predicate<HwvtepDeviceInfo.DeviceData> DATA_INTRANSIT_EXPIRED
-            = (controllerData) -> controllerData != null && controllerData.isInTransitState()
+    private static final Predicate<HwvtepDeviceInfo.DeviceData> DATA_INTRANSIT_EXPIRED =
+        controllerData -> controllerData != null && controllerData.isInTransitState()
             && controllerData.isIntransitTimeExpired();
 
     //expecting the device to create the data
@@ -132,7 +131,7 @@ public abstract class DependentJob<T extends KeyAware> {
     public void onSuccess() {
     }
 
-    public abstract static class ConfigWaitingJob<T extends KeyAware> extends DependentJob<T> {
+    public abstract static class ConfigWaitingJob<T extends EntryObject<?, ?>> extends DependentJob<T> {
 
         public ConfigWaitingJob(InstanceIdentifier key, T data,
                 Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies) {
@@ -149,7 +148,7 @@ public abstract class DependentJob<T extends KeyAware> {
         }
     }
 
-    public abstract static class OpWaitingJob<T extends KeyAware> extends DependentJob<T> {
+    public abstract static class OpWaitingJob<T extends EntryObject<?, ?>> extends DependentJob<T> {
 
         public OpWaitingJob(InstanceIdentifier key, T data,
                 Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies,

@@ -159,12 +159,13 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.EntryObject;
+import org.opendaylight.yangtools.binding.Key;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.Key;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.opendaylight.yangtools.yang.common.Uint8;
@@ -252,7 +253,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                             if (obj instanceof ManagedNodeEntry managedNodeEntry) {
                                 LOG.info("{} DataChanged: created managed {}",
                                         managedNodeEntry.getBridgeRef().getValue());
-                                createdIids.add(managedNodeEntry.getBridgeRef().getValue());
+                                createdIids.add(((DataObjectIdentifier<?>) managedNodeEntry.getBridgeRef().getValue())
+                                    .toLegacy());
                             }
                         } else {
                             LOG.info("{} DataTreeChanged: updated {}", type, identifier);
@@ -782,7 +784,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static void setManagedBy(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                               final ConnectionInfo connectionInfo) {
         InstanceIdentifier<Node> connectionNodePath = SouthboundUtils.createInstanceIdentifier(connectionInfo);
-        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
+        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath.toIdentifier()));
     }
 
     private static Map<ProtocolEntryKey, ProtocolEntry> createMdsalProtocols() {
@@ -1444,7 +1446,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static <I extends Key<T>, T extends KeyAware<I>> void assertExpectedExist(
+    private static <I extends Key<T>, T extends EntryObject<T, I>> void assertExpectedExist(
             final Map<I, T> expected, final Map<I, T> test) {
         if (expected != null && test != null) {
             for (T exp : expected.values()) {
@@ -1453,7 +1455,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private interface SouthboundTerminationPointHelper<I extends Key<T>, T extends KeyAware<I>> {
+    private interface SouthboundTerminationPointHelper<I extends Key<T>, T extends EntryObject<T, I>> {
         void writeValues(OvsdbTerminationPointAugmentationBuilder builder, Map<I, T> values);
 
         Map<I, T> readValues(OvsdbTerminationPointAugmentation augmentation);
@@ -1464,7 +1466,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      *
      * @see <code>SouthboundIT.generatePortExternalIdsTestCases()</code> for specific test case information
      */
-    private static <I extends Key<T>, T extends KeyAware<I>> void testCRUDTerminationPoint(
+    private static <I extends Key<T>, T extends EntryObject<T, I>> void testCRUDTerminationPoint(
             final KeyValueBuilder<T> builder, final String prefix, final SouthboundTerminationPointHelper<I, T> helper)
             throws InterruptedException {
         final int terminationPointTestIndex = 0;
@@ -2015,13 +2017,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 new BridgeOtherConfigsSouthboundHelper());
     }
 
-    private interface SouthboundBridgeHelper<I extends Key<T>, T extends KeyAware<I>> {
+    private interface SouthboundBridgeHelper<I extends Key<T>, T extends EntryObject<T, I>> {
         void writeValues(OvsdbBridgeAugmentationBuilder builder, Map<I, T> values);
 
         Map<I, T> readValues(OvsdbBridgeAugmentation augmentation);
     }
 
-    private static <I extends Key<T>, T extends KeyAware<I>> void testCRUDBridge(final String prefix,
+    private static <I extends Key<T>, T extends EntryObject<T, I>> void testCRUDBridge(final String prefix,
             final KeyValueBuilder<T> builder, final SouthboundBridgeHelper<I, T> helper) throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         // updateFromTestCases represent the original test case value.  updateToTestCases represent the new value after
@@ -2171,7 +2173,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private interface SouthboundQueueHelper<I extends Key<T>, T extends KeyAware<I>> {
+    private interface SouthboundQueueHelper<I extends Key<T>, T extends EntryObject<T, I>> {
         void writeValues(QueuesBuilder builder, Map<I, T> values);
 
         Map<I, T> readValues(Queues queue);
@@ -2212,7 +2214,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private interface SouthboundQosHelper<I extends Key<T>, T extends KeyAware<I>> {
+    private interface SouthboundQosHelper<I extends Key<T>, T extends EntryObject<T, I>> {
         void writeValues(QosEntriesBuilder builder, Map<I, T> values);
 
         Map<I, T> readValues(QosEntries qos);
@@ -2227,7 +2229,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         return null;
     }
 
-    private static <I extends Key<T>, T extends KeyAware<I>> void testCRUDQueue(
+    private static <I extends Key<T>, T extends EntryObject<T, I>> void testCRUDQueue(
             final KeyValueBuilder<T> builder, final String prefix, final SouthboundQueueHelper<I, T> helper)
             throws InterruptedException {
 
@@ -2359,7 +2361,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     }
 
-    private static <I extends Key<T>, T extends KeyAware<I>> void testCRUDQos(
+    private static <I extends Key<T>, T extends EntryObject<T, I>> void testCRUDQos(
             final KeyValueBuilder<T> builder, final String prefix, final SouthboundQosHelper<I, T> helper)
             throws InterruptedException {
 
@@ -2485,12 +2487,12 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             assertNotNull(operQueue1);
 
             InstanceIdentifier<Queues> queue1Iid = testQueue1.getInstanceIdentifier();
-            OvsdbQueueRef queue1Ref = new OvsdbQueueRef(queue1Iid);
+            OvsdbQueueRef queue1Ref = new OvsdbQueueRef(queue1Iid.toIdentifier());
 
             Queues operQueue2 = getQueue(new Uri("queue2"), ovsdbNodeAugmentation);
             assertNotNull(operQueue2);
             InstanceIdentifier<Queues> queue2Iid = testQueue2.getInstanceIdentifier();
-            OvsdbQueueRef queue2Ref = new OvsdbQueueRef(queue2Iid);
+            OvsdbQueueRef queue2Ref = new OvsdbQueueRef(queue2Iid.toIdentifier());
 
             Map<QueueListKey, QueueList> queueList = BindingMap.of(
                 new QueueListBuilder().setQueueNumber(Uint32.ONE).setQueueRef(queue1Ref).build(),
@@ -2579,7 +2581,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      *
      * @param <T> The type of data used for the test case.
      */
-    private static final class SouthboundTestCase<I extends Key<T>, T extends KeyAware<I>> {
+    private static final class SouthboundTestCase<I extends Key<T>, T extends EntryObject<T, I>> {
         private final String name;
         private final Map<I, T> inputValues;
         private final Map<I, T> expectedValues;
@@ -2603,7 +2605,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      *
      * @param <T> The type of data used for the test case.
      */
-    private static final class SouthboundTestCaseBuilder<I extends Key<T>, T extends KeyAware<I>> {
+    private static final class SouthboundTestCaseBuilder<I extends Key<T>, T extends EntryObject<T, I>> {
         private String name;
         private List<T> inputValues;
         private List<T> expectedValues;
@@ -2872,7 +2874,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      * Generates the test cases involved in testing key-value-based data.  See inline comments for descriptions of
      * the particular cases considered.
      */
-    private static <I extends Key<T>, T extends KeyAware<I>> List<SouthboundTestCase<I, T>>
+    private static <I extends Key<T>, T extends EntryObject<T, I>> List<SouthboundTestCase<I, T>>
             generateKeyValueTestCases(final KeyValueBuilder<T> builder, final String testName) {
         List<SouthboundTestCase<I, T>> testCases = new ArrayList<>();
 

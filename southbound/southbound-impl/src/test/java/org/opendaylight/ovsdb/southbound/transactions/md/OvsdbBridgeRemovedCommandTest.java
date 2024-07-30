@@ -28,14 +28,13 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.openvswitch.Bridge;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionInstance;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-@PrepareForTest({OvsdbBridgeRemovedCommand.class, TyperUtils.class, SouthboundMapper.class, InstanceIdentifier.class})
+@PrepareForTest({ OvsdbBridgeRemovedCommand.class, TyperUtils.class, SouthboundMapper.class })
 @RunWith(PowerMockRunner.class)
 public class OvsdbBridgeRemovedCommandTest {
     @Mock private OvsdbBridgeRemovedCommand ovsdbBridgeRemovedCommand;

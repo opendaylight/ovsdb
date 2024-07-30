@@ -44,7 +44,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({InstanceIdentifier.class, TransactUtils.class })
+@PrepareForTest(TransactUtils.class)
 public class ProtocolRemovedCommandTest {
 
     private final Set<InstanceIdentifier<ProtocolEntry>> removed = new HashSet<>();

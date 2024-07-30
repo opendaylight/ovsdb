@@ -45,6 +45,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdRemoteConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -192,9 +193,9 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
             Tunnel newTunnel = transaction.getTypedRowWrapper(Tunnel.class);
 
             UUID localUUID = getLocatorUUID(transaction,
-                (InstanceIdentifier<TerminationPoint>) tunnel.getLocalLocatorRef().getValue());
+                ((DataObjectIdentifier<TerminationPoint>) tunnel.getLocalLocatorRef().getValue()).toLegacy());
             UUID remoteUUID = getLocatorUUID(transaction,
-                (InstanceIdentifier<TerminationPoint>) tunnel.getRemoteLocatorRef().getValue());
+                ((DataObjectIdentifier<TerminationPoint>) tunnel.getRemoteLocatorRef().getValue()).toLegacy());
             if (localUUID != null && remoteUUID != null) {
                 // local and remote must exist
                 newTunnel.setLocal(localUUID);

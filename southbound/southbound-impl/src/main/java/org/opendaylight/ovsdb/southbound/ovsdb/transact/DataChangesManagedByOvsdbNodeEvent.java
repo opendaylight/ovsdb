@@ -20,7 +20,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class DataChangesManagedByOvsdbNodeEvent implements DataChangeEvent {
@@ -123,8 +124,11 @@ public class DataChangesManagedByOvsdbNodeEvent implements DataChangeEvent {
         Optional<?> bridgeNode =  SouthboundUtil.readNode(db.newReadWriteTransaction(),nodeEntryIid);
         if (bridgeNode.isPresent() && bridgeNode.orElseThrow() instanceof Node node) {
             OvsdbBridgeAugmentation bridge = node.augmentation(OvsdbBridgeAugmentation.class);
-            if (bridge != null && bridge.getManagedBy() != null) {
-                return bridge.getManagedBy().getValue();
+            if (bridge != null) {
+                final var managedBy = bridge.getManagedBy();
+                if (managedBy != null && managedBy.getValue() instanceof DataObjectIdentifier<?> doi) {
+                    return doi.toLegacy();
+                }
             }
         }
         return null;
@@ -144,8 +148,12 @@ public class DataChangesManagedByOvsdbNodeEvent implements DataChangeEvent {
         if (dataObject != null && dataObject instanceof Node) {
             Node node = (Node)dataObject;
             OvsdbBridgeAugmentation bridge = node.augmentation(OvsdbBridgeAugmentation.class);
-            if (bridge != null && bridge.getManagedBy() != null && bridge.getManagedBy().getValue().equals(this.iid)) {
-                return bridge.getManagedBy().getValue();
+            if (bridge != null) {
+                final var managedBy = bridge.getManagedBy();
+                if (managedBy != null && managedBy.getValue() instanceof DataObjectIdentifier<?> doi
+                    && iid.equals(doi.toLegacy())) {
+                    return iid;
+                }
             }
         }
         return null;

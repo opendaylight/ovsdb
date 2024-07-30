@@ -26,6 +26,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>binding-data-codec-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-data-util</artifactId>
     </dependency>
     <dependency>
@@ -35,10 +39,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>mdsal-dom-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.mdsal</groupId>
-      <artifactId>mdsal-binding-dom-codec-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>

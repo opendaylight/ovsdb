@@ -105,7 +105,7 @@ public final class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactio
             if (logicalSwitch != null) {
                 InstanceIdentifier<LogicalSwitches> switchIid =
                         HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
-                macRemoteBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid));
+                macRemoteBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid.toIdentifier()));
             }
         }
     }
@@ -132,7 +132,7 @@ public final class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactio
                         InstanceIdentifier<TerminationPoint> tpIid = HwvtepSouthboundMapper.createInstanceIdentifier(
                                 getOvsdbConnectionInstance().getInstanceIdentifier(), locator);
                         plsList.add(new LocatorSetBuilder()
-                                .setLocatorRef(new HwvtepPhysicalLocatorRef(tpIid)).build());
+                                .setLocatorRef(new HwvtepPhysicalLocatorRef(tpIid.toIdentifier())).build());
                     }
                     macRemoteBuilder.setLocatorSet(plsList);
                 }

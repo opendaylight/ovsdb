@@ -33,6 +33,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,7 +133,7 @@ public class McastMacsRemoteUpdateCommand
         if (inputMac.getLogicalSwitchRef() != null) {
             @SuppressWarnings("unchecked")
             InstanceIdentifier<LogicalSwitches> lswitchIid =
-                    (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
+                    ((DataObjectIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue()).toLegacy();
             UUID logicalSwitchUUID = TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(), lswitchIid);
             if (logicalSwitchUUID != null) {
                 mcastMacsRemote.setLogicalSwitch(logicalSwitchUUID);
@@ -202,7 +203,7 @@ public class McastMacsRemoteUpdateCommand
             if (data == null) {
                 return Collections.emptyList();
             }
-            return Lists.newArrayList(data.getLogicalSwitchRef().getValue());
+            return Lists.newArrayList(((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue()).toLegacy());
         }
 
         @Override
@@ -212,7 +213,7 @@ public class McastMacsRemoteUpdateCommand
             }
             List<InstanceIdentifier<?>> locators = new ArrayList<>();
             for (LocatorSet locator: data.getLocatorSet()) {
-                locators.add(locator.getLocatorRef().getValue());
+                locators.add(((DataObjectIdentifier<?>) locator.getLocatorRef().getValue()).toLegacy());
             }
             return locators;
         }
@@ -244,7 +245,7 @@ public class McastMacsRemoteUpdateCommand
             RemoteMcastMacs mac = (RemoteMcastMacs) mdsalUpdate.getNewData();
             InstanceIdentifier<RemoteMcastMacs> macIid = mdsalUpdate.getKey();
             getDeviceInfo().updateRemoteMcast(
-                    (InstanceIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue(), macIid, mac);
+                ((DataObjectIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue()).toLegacy(), macIid, mac);
         }
     }
 

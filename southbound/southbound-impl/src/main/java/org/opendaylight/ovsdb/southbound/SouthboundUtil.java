@@ -31,7 +31,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIdsBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,11 +55,11 @@ public final class SouthboundUtil {
         try {
             OvsdbNodeRef ref = mn.getManagedBy();
             if (ref != null && ref.getValue() != null) {
-                FluentFuture<Optional<Node>> nf;
+                final FluentFuture<Optional<Node>> nf;
                 try (ReadTransaction transaction = db.newReadOnlyTransaction()) {
                     @SuppressWarnings("unchecked")
                     // Note: erasure makes this safe in combination with the typecheck below
-                    InstanceIdentifier<Node> path = (InstanceIdentifier<Node>) ref.getValue();
+                    final var path = ((DataObjectIdentifier<Node>) ref.getValue());
                     nf = transaction.read(LogicalDatastoreType.OPERATIONAL, path);
                 }
 

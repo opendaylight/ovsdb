@@ -37,6 +37,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,8 +150,9 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
                 final Map<ManagedNodeEntryKey, ManagedNodeEntry> managedNodeEntries =
                     ovsdbNodeAugmentation.getManagedNodeEntry();
                 for (ManagedNodeEntry managedNodeEntry : managedNodeEntries.values()) {
-                    final InstanceIdentifier<Node> bridgeIid =
-                            (InstanceIdentifier<Node>) managedNodeEntry.getBridgeRef().getValue();
+                    @SuppressWarnings("unchecked")
+                    final var bridgeIid = ((DataObjectIdentifier<Node>) managedNodeEntry.getBridgeRef().getValue())
+                        .toLegacy();
                     final Optional<Node> bridgeNode = SouthboundUtil.readNode(transaction, bridgeIid);
                     if (bridgeNode.isPresent()) {
                         bridgeNodes.put(bridgeIid, bridgeNode.orElseThrow());

@@ -29,6 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.StaticRoutes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.SwitchBindings;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,7 +120,7 @@ public class LogicalRouterUpdateCommand
             for (SwitchBindings switchBinding : switchBindings) {
                 @SuppressWarnings("unchecked")
                 InstanceIdentifier<LogicalSwitches> lswitchIid =
-                        (InstanceIdentifier<LogicalSwitches>)switchBinding.getLogicalSwitchRef().getValue();
+                    ((DataObjectIdentifier<LogicalSwitches>) switchBinding.getLogicalSwitchRef().getValue()).toLegacy();
                 Optional<LogicalSwitches> operationalSwitchOptional =
                         getOperationalState().getLogicalSwitches(lswitchIid);
                 if (operationalSwitchOptional.isPresent()) {
@@ -141,7 +142,7 @@ public class LogicalRouterUpdateCommand
             for (AclBindings aclBinding : aclBindings.values()) {
                 @SuppressWarnings("unchecked")
                 InstanceIdentifier<Acls> aclIid =
-                        (InstanceIdentifier<Acls>)aclBinding.getAclRef().getValue();
+                        ((DataObjectIdentifier<Acls>) aclBinding.getAclRef().getValue()).toLegacy();
                 Optional<Acls> operationalAclOptional =
                         getOperationalState().getAcls(aclIid);
                 if (operationalAclOptional.isPresent()) {

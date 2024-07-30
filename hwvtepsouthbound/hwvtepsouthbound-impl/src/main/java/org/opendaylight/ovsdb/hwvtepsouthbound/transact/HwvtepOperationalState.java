@@ -54,8 +54,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,9 +70,9 @@ public class HwvtepOperationalState {
     HashMap<InstanceIdentifier<TerminationPoint>, UUID> inflightLocators = new HashMap<>();
     private final HwvtepDeviceInfo deviceInfo;
     private final HwvtepConnectionInstance connectionInstance;
-    private final Map<Class<? extends KeyAware>, Map<InstanceIdentifier, UUID>> currentTxUUIDs =
+    private final Map<Class<? extends EntryObject<?, ?>>, Map<InstanceIdentifier, UUID>> currentTxUUIDs =
             new ConcurrentHashMap<>();
-    private final Map<Class<? extends KeyAware>, Map<InstanceIdentifier, Boolean>> currentTxDeletedKeys =
+    private final Map<Class<? extends EntryObject<?, ?>>, Map<InstanceIdentifier, Boolean>> currentTxDeletedKeys =
             new ConcurrentHashMap<>();
 
     /* stores the modified and deleted data for each child type of each node id
@@ -80,8 +81,8 @@ public class HwvtepOperationalState {
        child type is the child of hwvtep Global augmentation
      */
     private Map<InstanceIdentifier<Node>,
-            Pair<Map<Class<? extends KeyAware>, List<KeyAware>>,
-                    Map<Class<? extends KeyAware>, List<KeyAware>>>> modifiedData = new HashMap<>();
+            Pair<Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>,
+                    Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>>> modifiedData = new HashMap<>();
     private boolean inReconciliation = false;
     private final DataBroker db;
     private final Collection<DataTreeModification<Node>> changes;
@@ -119,8 +120,8 @@ public class HwvtepOperationalState {
         HwvtepGlobalAugmentation globalAugmentation = globalOperNode.augmentation(HwvtepGlobalAugmentation.class);
         if (globalAugmentation != null) {
             if (!HwvtepSouthboundUtil.isEmptyMap(globalAugmentation.getSwitches())) {
-                operationalNodes.put((InstanceIdentifier<Node>)
-                        globalAugmentation.getSwitches().values().iterator().next().getSwitchRef().getValue(), psNode);
+                operationalNodes.put(((DataObjectIdentifier<Node>) globalAugmentation.getSwitches().values().iterator().next()
+                    .getSwitchRef().getValue()).toLegacy(), psNode);
             }
         }
     }
@@ -153,7 +154,7 @@ public class HwvtepOperationalState {
                         for (Switches pswitch : hgAugmentation.nonnullSwitches().values()) {
                             @SuppressWarnings("unchecked")
                             InstanceIdentifier<Node> psNodeIid =
-                                    (InstanceIdentifier<Node>) pswitch.getSwitchRef().getValue();
+                                    ((DataObjectIdentifier<Node>) pswitch.getSwitchRef().getValue()).toLegacy();
                             Optional<Node> psNode =
                                 new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, psNodeIid);
                             if (psNode.isPresent()) {
@@ -164,7 +165,7 @@ public class HwvtepOperationalState {
                     if (psAugmentation != null) {
                         @SuppressWarnings("unchecked")
                         InstanceIdentifier<Node> hgNodeIid =
-                                (InstanceIdentifier<Node>) psAugmentation.getManagedBy().getValue();
+                                ((DataObjectIdentifier<Node>) psAugmentation.getManagedBy().getValue()).toLegacy();
                         Optional<Node> hgNode = new MdsalUtils(db).readOptional(
                                 LogicalDatastoreType.OPERATIONAL, hgNodeIid);
                         if (hgNode.isPresent()) {
@@ -307,33 +308,33 @@ public class HwvtepOperationalState {
         return deviceInfo;
     }
 
-    public void updateCurrentTxData(final Class<? extends KeyAware> cls, final InstanceIdentifier key,
+    public void updateCurrentTxData(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key,
             final UUID uuid) {
         HwvtepSouthboundUtil.updateData(currentTxUUIDs, cls, key, uuid);
     }
 
-    public void updateCurrentTxDeleteData(final Class<? extends KeyAware> cls, final InstanceIdentifier key) {
+    public void updateCurrentTxDeleteData(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key) {
         HwvtepSouthboundUtil.updateData(currentTxDeletedKeys, cls, key, Boolean.TRUE);
     }
 
-    public UUID getUUIDFromCurrentTx(final Class<? extends KeyAware> cls, final InstanceIdentifier key) {
+    public UUID getUUIDFromCurrentTx(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key) {
         return HwvtepSouthboundUtil.getData(currentTxUUIDs, cls, key);
     }
 
-    public boolean isKeyPartOfCurrentTx(final Class<? extends KeyAware> cls, final InstanceIdentifier key) {
+    public boolean isKeyPartOfCurrentTx(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key) {
         return HwvtepSouthboundUtil.containsKey(currentTxUUIDs, cls, key);
     }
 
-    public Set<InstanceIdentifier> getDeletedKeysInCurrentTx(final Class<? extends KeyAware> cls) {
+    public Set<InstanceIdentifier> getDeletedKeysInCurrentTx(final Class<? extends EntryObject<?, ?>> cls) {
         if (currentTxDeletedKeys.containsKey(cls)) {
             return currentTxDeletedKeys.get(cls).keySet();
         }
         return Collections.emptySet();
     }
 
-    public List<? extends KeyAware> getUpdatedData(final InstanceIdentifier<Node> key,
-                                                   final Class<? extends KeyAware> cls) {
-        List<KeyAware> result = null;
+    public List<? extends EntryObject<?, ?>> getUpdatedData(final InstanceIdentifier<Node> key,
+                                                            final Class<? extends EntryObject<?, ?>> cls) {
+        List<EntryObject<?, ?>> result = null;
         if (modifiedData.get(key) != null && modifiedData.get(key).getLeft() != null) {
             result = modifiedData.get(key).getLeft().get(cls);
         }
@@ -343,9 +344,9 @@ public class HwvtepOperationalState {
         return result;
     }
 
-    public List<? extends KeyAware> getDeletedData(final InstanceIdentifier<Node> key,
-                                                   final Class<? extends KeyAware> cls) {
-        List<KeyAware> result = null;
+    public List<? extends EntryObject<?, ?>> getDeletedData(final InstanceIdentifier<Node> key,
+                                                            final Class<? extends EntryObject<?, ?>> cls) {
+        List<EntryObject<?, ?>> result = null;
         if (modifiedData.get(key) != null && modifiedData.get(key).getRight() != null) {
             result = modifiedData.get(key).getRight().get(cls);
         }
@@ -356,8 +357,8 @@ public class HwvtepOperationalState {
     }
 
     public void setModifiedData(final Map<InstanceIdentifier<Node>,
-            Pair<Map<Class<? extends KeyAware>, List<KeyAware>>,
-                    Map<Class<? extends KeyAware>, List<KeyAware>>>> modifiedData) {
+            Pair<Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>,
+                    Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>>> modifiedData) {
         this.modifiedData = modifiedData;
     }
 

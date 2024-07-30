@@ -26,12 +26,13 @@ import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Uuid;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Autoattach;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.AutoattachKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.PropertyIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,9 +144,13 @@ public class AutoAttachRemovedCommand extends AbstractTransactCommand {
                 final var managedNodes = nodeOptional.orElseThrow()
                     .augmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
                 for (final ManagedNodeEntry managedNode : managedNodes.values()) {
-                    final OvsdbBridgeRef ovsdbBridgeRef = managedNode.getBridgeRef();
-                    final InstanceIdentifier<OvsdbBridgeAugmentation> brIid = ovsdbBridgeRef.getValue()
-                            .firstIdentifierOf(Node.class).augmentation(OvsdbBridgeAugmentation.class);
+                    final var doi = switch (managedNode.getBridgeRef().getValue()) {
+                        case DataObjectIdentifier<?> oi -> oi;
+                        case PropertyIdentifier<?, ?> pi -> pi.container();
+                    };
+
+                    final var brIid = doi.toLegacy().firstIdentifierOf(Node.class)
+                        .augmentation(OvsdbBridgeAugmentation.class);
                     final Optional<OvsdbBridgeAugmentation> optionalBridge =
                             transaction.read(LogicalDatastoreType.OPERATIONAL, brIid).get();
                     OvsdbBridgeAugmentation bridge = optionalBridge.orElseThrow();

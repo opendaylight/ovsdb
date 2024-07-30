@@ -59,16 +59,17 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCommand {
-
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepPhysicalPortUpdateCommand.class);
+
     private final Map<UUID, PhysicalPort> updatedPPRows;
     private final Map<UUID, PhysicalPort> oldPPRows;
     private final Map<UUID, PhysicalSwitch> switchUpdatedRows;
@@ -276,7 +277,7 @@ public final class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCo
         if (logicalSwitch != null) {
             InstanceIdentifier<LogicalSwitches> switchIid =
                     HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
-            return new HwvtepLogicalSwitchRef(switchIid);
+            return new HwvtepLogicalSwitchRef(switchIid.toIdentifier());
         }
         LOG.debug("Failed to get LogicalSwitch {}", switchUUID);
         LOG.trace("Available LogicalSwitches: {}",
@@ -302,11 +303,12 @@ public final class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCo
             for (Switches managedNodeEntry : switchNodes.values()) {
                 @SuppressWarnings("unchecked")
                 Node switchNode = HwvtepSouthboundUtil.readNode(transaction,
-                                (InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue()).orElseThrow();
+                    ((DataObjectIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue()).toLegacy()).orElseThrow();
                 TerminationPointKey tpKey = new TerminationPointKey(new TpId(tpName));
                 TerminationPoint terminationPoint = switchNode.nonnullTerminationPoint().get(tpKey);
                 if (terminationPoint != null) {
-                    return Optional.of((InstanceIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue());
+                    return Optional.of(
+                        ((DataObjectIdentifier<Node>) managedNodeEntry.getSwitchRef().getValue()).toLegacy());
                 }
             }
         } else {

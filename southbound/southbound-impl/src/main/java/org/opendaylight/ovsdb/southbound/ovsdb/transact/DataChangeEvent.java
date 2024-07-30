@@ -9,7 +9,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import java.util.Map;
 import java.util.Set;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public interface DataChangeEvent {

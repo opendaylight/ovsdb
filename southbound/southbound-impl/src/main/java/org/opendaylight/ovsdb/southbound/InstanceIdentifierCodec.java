@@ -8,8 +8,8 @@
 package org.opendaylight.ovsdb.southbound;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
@@ -75,12 +75,12 @@ public class InstanceIdentifierCodec extends AbstractStringInstanceIdentifierCod
     }
 
     public InstanceIdentifier<?> bindingDeserializer(final String iidString) throws DeserializationException {
-        YangInstanceIdentifier normalizedYangIid = deserialize(iidString);
-        return bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(normalizedYangIid);
+        return bindingDeserializer(deserialize(iidString));
     }
 
     public InstanceIdentifier<?> bindingDeserializer(final YangInstanceIdentifier yangIID) {
-        return bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(yangIID);
+        final var ref = bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(yangIID);
+        return ref != null ? ref.toLegacy() : null;
     }
 
     public InstanceIdentifier<?> bindingDeserializerOrNull(final String iidString) {

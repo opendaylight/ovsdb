@@ -57,7 +57,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
@@ -184,14 +183,6 @@ public class OvsdbPortUpdateCommandTest {
         PowerMockito.mockStatic(SouthboundMapper.class);
         PowerMockito.when(SouthboundMapper.createManagedNodeId(any(InstanceIdentifier.class))).thenReturn(bridgeId);
 
-        PowerMockito.whenNew(TpId.class).withAnyArguments().thenReturn(mock(TpId.class));
-        TerminationPointKey tpKey = mock(TerminationPointKey.class);
-        PowerMockito.whenNew(TerminationPointKey.class).withAnyArguments().thenReturn(tpKey);
-        TerminationPointBuilder tpBuilder = mock(TerminationPointBuilder.class);
-        PowerMockito.whenNew(TerminationPointBuilder.class).withNoArguments().thenReturn(tpBuilder);
-        when(tpBuilder.withKey(any(TerminationPointKey.class))).thenReturn(tpBuilder);
-        when(tpKey.getTpId()).thenReturn(mock(TpId.class));
-        when(tpBuilder.setTpId(any(TpId.class))).thenReturn(tpBuilder);
         InstanceIdentifier<TerminationPoint> tpPath = InstanceIdentifier.create(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
             .child(Node.class, new NodeKey(new NodeId("testNode")))
@@ -199,10 +190,6 @@ public class OvsdbPortUpdateCommandTest {
         PowerMockito.doReturn(tpPath).when(ovsdbPortUpdateCommand, "getInstanceIdentifier",
                 any(InstanceIdentifier.class), any(Port.class));
 
-        OvsdbTerminationPointAugmentationBuilder tpAugmentationBuilder = mock(
-                OvsdbTerminationPointAugmentationBuilder.class);
-        PowerMockito.whenNew(OvsdbTerminationPointAugmentationBuilder.class).withNoArguments()
-                .thenReturn(tpAugmentationBuilder);
         PowerMockito.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "buildTerminationPoint",
                 ReadWriteTransaction.class, InstanceIdentifier.class, OvsdbTerminationPointAugmentationBuilder.class,
                 Node.class, Entry.class));
@@ -226,9 +213,6 @@ public class OvsdbPortUpdateCommandTest {
         PowerMockito.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "buildTerminationPoint",
                 OvsdbTerminationPointAugmentationBuilder.class, Interface.class));
 
-        when(tpAugmentationBuilder.build()).thenReturn(mock(OvsdbTerminationPointAugmentation.class));
-        when(tpBuilder.addAugmentation(any(OvsdbTerminationPointAugmentation.class))).thenReturn(tpBuilder);
-        when(tpBuilder.build()).thenReturn(mock(TerminationPoint.class));
         portOldRows = new HashMap<>();
         portOldRows.put(uuid, port);
         MemberModifier.field(OvsdbPortUpdateCommand.class, "portOldRows").set(ovsdbPortUpdateCommand, portOldRows);
@@ -246,8 +230,6 @@ public class OvsdbPortUpdateCommandTest {
         PowerMockito.doReturn(bridgeIid).when(ovsdbPortUpdateCommand, "getTerminationPointBridge",
                 any(ReadWriteTransaction.class), any(Node.class), anyString());
         PowerMockito.when(SouthboundMapper.createManagedNodeId(any(InstanceIdentifier.class))).thenReturn(bridgeId);
-        PowerMockito.whenNew(TopologyKey.class).withAnyArguments().thenReturn(mock(TopologyKey.class));
-        PowerMockito.whenNew(NodeKey.class).withAnyArguments().thenReturn(mock(NodeKey.class));
 
         Node node = mock(Node.class);
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateTerminationPoints", transaction, node);
@@ -340,7 +322,7 @@ public class OvsdbPortUpdateCommandTest {
             .child(Node.class, new NodeKey(new NodeId("testNode")));
 
         ManagedNodeEntry managedNodeEntry = new ManagedNodeEntryBuilder()
-                .setBridgeRef(new OvsdbBridgeRef(iidNode))
+                .setBridgeRef(new OvsdbBridgeRef(iidNode.toIdentifier()))
                 .build();
         when(ovsdbNode.nonnullManagedNodeEntry()).thenCallRealMethod();
         when(ovsdbNode.getManagedNodeEntry()).thenReturn(Map.of(managedNodeEntry.key(), managedNodeEntry));

@@ -181,7 +181,7 @@ public class OvsdbControllerUpdateCommandTest {
             .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
             .child(Node.class, new NodeKey(new NodeId("testBridge")));
         ManagedNodeEntry managedNodeEntry = new ManagedNodeEntryBuilder()
-                .setBridgeRef(new OvsdbBridgeRef(bridgeIid))
+                .setBridgeRef(new OvsdbBridgeRef(bridgeIid.toIdentifier()))
                 .build();
 
         when(ovsdbNodeAugmentation.getManagedNodeEntry()).thenReturn(Map.of(managedNodeEntry.key(), managedNodeEntry));
@@ -201,17 +201,12 @@ public class OvsdbControllerUpdateCommandTest {
         ControllerEntry controllerEntry = mock(ControllerEntry.class);
         OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class);
         when(ovsdbControllerUpdateCommand.getOvsdbConnectionInstance()).thenReturn(client);
-        NodeKey nodeKey = mock(NodeKey.class);
+        NodeId nodeId = new NodeId(NODE_ID);
+        NodeKey nodeKey = new NodeKey(nodeId);
         when(client.getNodeKey()).thenReturn(nodeKey);
-        NodeId nodeId = mock(NodeId.class);
-        when(nodeKey.getNodeId()).thenReturn(nodeId);
-        when(nodeId.getValue()).thenReturn(NODE_ID);
-        PowerMockito.whenNew(Uri.class).withAnyArguments().thenReturn(mock(Uri.class));
         PowerMockito.whenNew(NodeId.class).withAnyArguments().thenReturn(nodeId);
         PowerMockito.whenNew(NodeKey.class).withAnyArguments().thenReturn(nodeKey);
-        PowerMockito.whenNew(TopologyKey.class).withAnyArguments().thenReturn(mock(TopologyKey.class));
-        //PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
-        when(controllerEntry.key()).thenReturn(mock(ControllerEntryKey.class));
+        when(controllerEntry.key()).thenReturn(new ControllerEntryKey(new Uri("key")));
         assertEquals(KeyedInstanceIdentifier.class, Whitebox
                 .invokeMethod(ovsdbControllerUpdateCommand, "getControllerEntryIid", controllerEntry, BRIDGE_NAME)
                 .getClass());

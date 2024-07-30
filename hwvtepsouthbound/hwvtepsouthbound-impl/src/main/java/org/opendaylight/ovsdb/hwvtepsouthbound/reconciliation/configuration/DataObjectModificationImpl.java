@@ -10,16 +10,16 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
-import org.opendaylight.yangtools.yang.binding.Augmentation;
-import org.opendaylight.yangtools.yang.binding.ChildOf;
-import org.opendaylight.yangtools.yang.binding.ChoiceIn;
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.ExactDataObjectStep;
+import org.opendaylight.yangtools.binding.Augmentation;
+import org.opendaylight.yangtools.binding.ChildOf;
+import org.opendaylight.yangtools.binding.ChoiceIn;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.EntryObject;
+import org.opendaylight.yangtools.binding.ExactDataObjectStep;
+import org.opendaylight.yangtools.binding.Key;
+import org.opendaylight.yangtools.binding.KeyStep;
+import org.opendaylight.yangtools.binding.NodeStep;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.Key;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
-import org.opendaylight.yangtools.yang.binding.KeyStep;
-import org.opendaylight.yangtools.yang.binding.NodeStep;
 
 public class DataObjectModificationImpl<T extends DataObject> implements DataObjectModification<T> {
     private final Collection<DataObjectModification<? extends DataObject>> childNodesCache = new ArrayList<>();
@@ -84,13 +84,13 @@ public class DataObjectModificationImpl<T extends DataObject> implements DataObj
 
     @Override
     @SuppressWarnings("unchecked")
-    public <C extends KeyAware<K> & ChildOf<? super T>, K extends Key<C>> DataObjectModification<C>
+    public <C extends EntryObject<C, K> & ChildOf<? super T>, K extends Key<C>> DataObjectModification<C>
         getModifiedChildListItem(final Class<C> listItem, final K listKey) {
         return (DataObjectModification<C>) getModifiedChild(new KeyStep<>(listItem, listKey));
     }
 
     @Override
-    public <H extends ChoiceIn<? super T> & DataObject, C extends KeyAware<K> & ChildOf<? super H>,
+    public <H extends ChoiceIn<? super T> & DataObject, C extends EntryObject<C, K> & ChildOf<? super H>,
             K extends Key<C>> DataObjectModification<C> getModifiedChildListItem(Class<H> caseType,
                     Class<C> listItem, K listKey) {
         return null;

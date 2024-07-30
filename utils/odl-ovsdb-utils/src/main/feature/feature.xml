@@ -8,6 +8,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
 <features name="odl-ovsdb-utils-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
     <feature name="odl-ovsdb-utils" version="${project.version}">
-        <feature version="[9,10)">odl-mdsal-broker</feature>
+        <feature version="[10,11)">odl-mdsal-broker</feature>
     </feature>
 </features>

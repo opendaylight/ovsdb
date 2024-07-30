@@ -89,8 +89,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
@@ -429,7 +429,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                 ovsdbTerminationPointBuilder.setQosEntry(
                     Map.of(SouthboundConstants.PORT_QOS_LIST_KEY, new QosEntryBuilder()
                         .withKey(SouthboundConstants.PORT_QOS_LIST_KEY)
-                        .setQosRef(new OvsdbQosRef(qosIid))
+                        .setQosRef(new OvsdbQosRef(qosIid.toIdentifier()))
                         .build()));
             }
         }

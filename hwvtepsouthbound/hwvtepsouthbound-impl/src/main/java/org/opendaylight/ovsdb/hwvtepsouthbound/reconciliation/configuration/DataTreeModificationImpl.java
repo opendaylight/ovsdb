@@ -8,14 +8,13 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class DataTreeModificationImpl<T extends DataObject> implements DataTreeModification {
-
+public class DataTreeModificationImpl<T extends DataObject> implements DataTreeModification<T> {
     InstanceIdentifier<T> nodeId;
     T newNode;
     T oldNode;
@@ -27,8 +26,13 @@ public class DataTreeModificationImpl<T extends DataObject> implements DataTreeM
     }
 
     @Override
-    public DataTreeIdentifier<T> getRootPath() {
-        return DataTreeIdentifier.create(LogicalDatastoreType.CONFIGURATION, nodeId);
+    public LogicalDatastoreType datastore() {
+        return LogicalDatastoreType.CONFIGURATION;
+    }
+
+    @Override
+    public DataObjectIdentifier<T> path() {
+        return nodeId.toIdentifier();
     }
 
     @Override

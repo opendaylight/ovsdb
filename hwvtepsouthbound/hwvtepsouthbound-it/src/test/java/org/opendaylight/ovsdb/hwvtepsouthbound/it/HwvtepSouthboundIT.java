@@ -423,7 +423,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
             }
             if (setManagedBy) {
                 InstanceIdentifier<Node> nodePath = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
-                psAugBuilder.setManagedBy(new HwvtepGlobalRef(nodePath));
+                psAugBuilder.setManagedBy(new HwvtepGlobalRef(nodePath.toIdentifier()));
             }
             psAugBuilder.setManagementIps(managementIps);
             psAugBuilder.setTunnelIps(tunnelIps);

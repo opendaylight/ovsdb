@@ -128,8 +128,8 @@ public final class HwvtepSouthboundMapper {
             final InstanceIdentifier<TerminationPoint> localTpIid,
             final InstanceIdentifier<TerminationPoint> remoteTpIid) {
 
-        TunnelsKey tunnelsKey = new TunnelsKey(new HwvtepPhysicalLocatorRef(localTpIid),
-                new HwvtepPhysicalLocatorRef(remoteTpIid));
+        TunnelsKey tunnelsKey = new TunnelsKey(new HwvtepPhysicalLocatorRef(localTpIid.toIdentifier()),
+                new HwvtepPhysicalLocatorRef(remoteTpIid.toIdentifier()));
         InstanceIdentifier<Tunnels> tunnelInstanceId = nodeIid.builder().augmentation(PhysicalSwitchAugmentation.class)
                 .child(Tunnels.class, tunnelsKey).build();
         return tunnelInstanceId;

@@ -37,7 +37,6 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbPortInterfaceAttributes.VlanMode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbQosRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesKey;
@@ -55,6 +54,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.PropertyIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -172,8 +173,12 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
         // First check if QosEntry is present and use that
         final var tpQosEntry = terminationPoint.getQosEntry();
         if (tpQosEntry != null && !tpQosEntry.isEmpty()) {
-            OvsdbQosRef qosRef = tpQosEntry.values().iterator().next().getQosRef();
-            Uri qosId = qosRef.getValue().firstKeyOf(QosEntries.class).getQosId();
+            final var doi = switch (tpQosEntry.values().iterator().next().getQosRef().getValue()) {
+                case DataObjectIdentifier<?> oi -> oi;
+                case PropertyIdentifier<?, ?> pi -> pi.container();
+            };
+
+            Uri qosId = doi.toLegacy().firstKeyOf(QosEntries.class).getQosId();
             OvsdbNodeAugmentation operNode = getOperNode(state, operBridge);
             if (operNode != null) {
                 Map<QosEntriesKey, QosEntries> entries = operNode.getQosEntries();
@@ -196,7 +201,7 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
     private static OvsdbNodeAugmentation getOperNode(final BridgeOperationalState state,
             final OvsdbBridgeAugmentation operBridge) {
         @SuppressWarnings("unchecked")
-        InstanceIdentifier<Node> iidNode = (InstanceIdentifier<Node>)operBridge.getManagedBy().getValue();
+        final var iidNode = ((DataObjectIdentifier<Node>) operBridge.getManagedBy().getValue()).toLegacy();
         OvsdbNodeAugmentation operNode = null;
         try (ReadTransaction transaction = state.dataBroker().newReadOnlyTransaction()) {
             Optional<Node> nodeOptional = SouthboundUtil.readNode(transaction, iidNode);

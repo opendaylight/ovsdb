@@ -65,9 +65,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -218,7 +218,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                 SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
                         bridge);
         ManagedNodeEntry managedBridge = new ManagedNodeEntryBuilder().setBridgeRef(
-                new OvsdbBridgeRef(bridgeIid)).build();
+                new OvsdbBridgeRef(bridgeIid.toIdentifier())).build();
         ovsdbConnectionAugmentationBuilder.setManagedNodeEntry(BindingMap.of(managedBridge));
 
         connectionNode.addAugmentation(ovsdbConnectionAugmentationBuilder.build());
@@ -269,7 +269,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
 
     private void setManagedBy(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder) {
         InstanceIdentifier<Node> connectionNodePath = getOvsdbConnectionInstance().getInstanceIdentifier();
-        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
+        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath.toIdentifier()));
     }
 
     private static void setDataPathType(OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder, Bridge bridge) {
@@ -382,7 +382,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
                             if (bridgeControllerIpAddress.getIpv4Address().getValue()
                                     .equals(networkInterfaceAddress.getHostAddress())) {
                                 ovsdbBridgeAugmentationBuilder.setBridgeOpenflowNodeRef(
-                                        getOvsdbConnectionInstance().getInstanceIdentifier());
+                                        getOvsdbConnectionInstance().getInstanceIdentifier().toIdentifier());
                                 break networkInterfacesLoop;
                             }
                         }

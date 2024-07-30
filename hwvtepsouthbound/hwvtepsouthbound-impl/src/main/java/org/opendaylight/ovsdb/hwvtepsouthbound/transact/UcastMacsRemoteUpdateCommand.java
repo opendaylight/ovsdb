@@ -27,6 +27,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,7 +137,7 @@ public class UcastMacsRemoteUpdateCommand
         if (inputMac.getLogicalSwitchRef() != null) {
             @SuppressWarnings("unchecked")
             InstanceIdentifier<LogicalSwitches> lswitchIid =
-                    (InstanceIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
+                    ((DataObjectIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue()).toLegacy();
             UUID logicalSwitchUUID = TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(), lswitchIid);
             if (logicalSwitchUUID != null) {
                 ucastMacsRemote.setLogicalSwitch(TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(),
@@ -151,7 +152,7 @@ public class UcastMacsRemoteUpdateCommand
         if (inputMac.getLocatorRef() != null) {
             @SuppressWarnings("unchecked")
             InstanceIdentifier<TerminationPoint> iid =
-                    (InstanceIdentifier<TerminationPoint>) inputMac.getLocatorRef().getValue();
+                    ((DataObjectIdentifier<TerminationPoint>) inputMac.getLocatorRef().getValue()).toLegacy();
             UUID locatorUuid = TransactUtils.createPhysicalLocator(transaction, getOperationalState(), iid);
             ucastMacsRemote.setLocator(locatorUuid);
             return locatorUuid;
@@ -183,7 +184,7 @@ public class UcastMacsRemoteUpdateCommand
             if (data == null) {
                 return Collections.emptyList();
             }
-            return Lists.newArrayList(data.getLogicalSwitchRef().getValue());
+            return Lists.newArrayList(((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue()).toLegacy());
         }
 
         @Override
@@ -191,7 +192,7 @@ public class UcastMacsRemoteUpdateCommand
             if (data == null) {
                 return Collections.emptyList();
             }
-            return Lists.newArrayList(data.getLocatorRef().getValue());
+            return Lists.newArrayList(((DataObjectIdentifier<?>) data.getLocatorRef().getValue()).toLegacy());
         }
     }
 
@@ -207,7 +208,7 @@ public class UcastMacsRemoteUpdateCommand
             RemoteUcastMacs mac = (RemoteUcastMacs) mdsalUpdate.getNewData();
             InstanceIdentifier<RemoteUcastMacs> macIid = mdsalUpdate.getKey();
             getDeviceInfo().updateRemoteUcast(
-                    (InstanceIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue(), macIid, mac);
+                ((DataObjectIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue()).toLegacy(), macIid, mac);
         }
     }
 

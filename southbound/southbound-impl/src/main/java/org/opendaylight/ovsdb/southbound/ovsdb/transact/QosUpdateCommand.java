@@ -35,6 +35,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueListKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.PropertyIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,7 +136,12 @@ public class QosUpdateCommand extends AbstractTransactCommand {
     }
 
     private static String getQueueUuid(final OvsdbQueueRef queueRef, final OvsdbNodeAugmentation operNode) {
-        QueuesKey queueKey = queueRef.getValue().firstKeyOf(Queues.class);
+        final var doi = switch (queueRef.getValue()) {
+            case DataObjectIdentifier<?> oi -> oi;
+            case PropertyIdentifier<?, ?> pi -> pi.container();
+        };
+
+        QueuesKey queueKey = doi.toLegacy().firstKeyOf(Queues.class);
         Map<QueuesKey, Queues> queues = operNode.getQueues();
         if (queues != null) {
             Queues queue = queues.get(queueKey);

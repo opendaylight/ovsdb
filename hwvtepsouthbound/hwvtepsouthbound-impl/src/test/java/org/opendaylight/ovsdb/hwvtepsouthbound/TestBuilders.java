@@ -36,8 +36,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 
 public final class TestBuilders {
 
@@ -75,7 +75,7 @@ public final class TestBuilders {
                                                                  String logicalSwitchName) {
         InstanceIdentifier<LogicalSwitches> switchIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
                 .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitchName)));
-        return new HwvtepLogicalSwitchRef(switchIid);
+        return new HwvtepLogicalSwitchRef(switchIid.toIdentifier());
     }
 
     public static RemoteUcastMacs buildRemoteUcastMacs(InstanceIdentifier<Node> nodeIid, String vmMac,
@@ -138,7 +138,7 @@ public final class TestBuilders {
 
     public static HwvtepPhysicalLocatorRef buildLocatorRef(InstanceIdentifier<Node> nodeIid,String tepIp) {
         InstanceIdentifier<TerminationPoint> tepId = buildTpId(nodeIid, tepIp);
-        return new HwvtepPhysicalLocatorRef(tepId);
+        return new HwvtepPhysicalLocatorRef(tepId.toIdentifier());
     }
 
     public static Uuid getUUid(String key) {

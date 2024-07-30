@@ -45,7 +45,7 @@ public class HwvtepPhysicalSwitchRemoveCommand extends AbstractTransactionComman
                     getOvsdbConnectionInstance(), phySwitch);
             InstanceIdentifier<Switches> switchIid = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(Switches.class, new SwitchesKey(new HwvtepPhysicalSwitchRef(nodeIid)));
+                    .child(Switches.class, new SwitchesKey(new HwvtepPhysicalSwitchRef(nodeIid.toIdentifier())));
             // TODO handle removal of reference to managed switch from model
             transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid);
             transaction.delete(LogicalDatastoreType.OPERATIONAL, switchIid);

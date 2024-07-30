@@ -25,7 +25,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
-
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
     public OvsdbBridgeRemovedCommand(InstanceIdentifierCodec instanceIdentifierCodec, OvsdbConnectionInstance key,
@@ -43,12 +42,11 @@ public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
                     SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
                             bridge);
             InstanceIdentifier<ManagedNodeEntry> mnIid = getOvsdbConnectionInstance().getInstanceIdentifier()
-                    .augmentation(OvsdbNodeAugmentation.class)
-                    .child(ManagedNodeEntry.class, new ManagedNodeEntryKey(new OvsdbBridgeRef(bridgeIid)));
+                .augmentation(OvsdbNodeAugmentation.class)
+                .child(ManagedNodeEntry.class, new ManagedNodeEntryKey(new OvsdbBridgeRef(bridgeIid.toIdentifier())));
             // TODO handle removal of reference to managed node from model
             transaction.delete(LogicalDatastoreType.OPERATIONAL, bridgeIid);
             transaction.delete(LogicalDatastoreType.OPERATIONAL, mnIid);
         }
     }
-
 }

@@ -74,6 +74,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.BindingInstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
@@ -250,9 +252,10 @@ public class OvsdbBridgeUpdateCommandTest {
                 .thenReturn(bridgeIid);
 
         ManagedNodeEntry managedBridge = new ManagedNodeEntryBuilder()
-                .setBridgeRef(new OvsdbBridgeRef(InstanceIdentifier.create(NetworkTopology.class)
+                .setBridgeRef(new OvsdbBridgeRef(DataObjectIdentifier.builder(NetworkTopology.class)
                     .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
-                    .child(Node.class, new NodeKey(new NodeId("testNode")))))
+                    .child(Node.class, new NodeKey(new NodeId("testNode")))
+                    .build()))
                 .build();
 
         ManagedNodeEntryBuilder managedNodeEntryBuilder = mock(ManagedNodeEntryBuilder.class);
@@ -478,11 +481,11 @@ public class OvsdbBridgeUpdateCommandTest {
                 .child(Node.class, new NodeKey(new NodeId("testNode"))));
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
         Bridge bridge = mock(Bridge.class);
-        when(ovsdbBridgeAugmentationBuilder.setBridgeOpenflowNodeRef(any(InstanceIdentifier.class)))
+        when(ovsdbBridgeAugmentationBuilder.setBridgeOpenflowNodeRef(any(BindingInstanceIdentifier.class)))
                 .thenReturn(ovsdbBridgeAugmentationBuilder);
 
         Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "setOpenFlowNodeRef", ovsdbBridgeAugmentationBuilder, bridge);
         verify(controllerEntry, times(2)).getIsConnected();
-        verify(ovsdbBridgeAugmentationBuilder).setBridgeOpenflowNodeRef(any(InstanceIdentifier.class));
+        verify(ovsdbBridgeAugmentationBuilder).setBridgeOpenflowNodeRef(any(BindingInstanceIdentifier.class));
     }
 }

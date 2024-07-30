@@ -5,11 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
 import java.util.ArrayList;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class TransactionHistory extends ArrayList<TransactionElement> {

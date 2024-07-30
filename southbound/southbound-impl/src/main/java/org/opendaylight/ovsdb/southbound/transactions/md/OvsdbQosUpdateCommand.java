@@ -46,9 +46,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.qos.entries.QueueListKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -320,7 +320,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
                 newQueueList.add(
                     new QueueListBuilder()
                     .setQueueNumber(Uint32.valueOf(queueEntry.getKey()))
-                    .setQueueRef(new OvsdbQueueRef(queueIid)).build());
+                    .setQueueRef(new OvsdbQueueRef(queueIid.toIdentifier())).build());
             }
 
         }

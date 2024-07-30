@@ -7,10 +7,10 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
+import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
 
-public class MdsalUpdate<T extends KeyAware> {
+public class MdsalUpdate<T extends EntryObject<?, ?>> {
 
     private InstanceIdentifier key;
     private T newData;

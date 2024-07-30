@@ -33,8 +33,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.util.BindingMap;
 
 public final class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
 
@@ -88,7 +88,7 @@ public final class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactio
                 InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
                 InstanceIdentifier<TerminationPoint> plIid = HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid,
                         physicalLocator);
-                rumBuilder.setLocatorRef(new HwvtepPhysicalLocatorRef(plIid));
+                rumBuilder.setLocatorRef(new HwvtepPhysicalLocatorRef(plIid.toIdentifier()));
             }
         }
         if (macRemote.getLogicalSwitchColumn() != null
@@ -98,7 +98,7 @@ public final class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactio
             if (logicalSwitch != null) {
                 InstanceIdentifier<LogicalSwitches> switchIid =
                         HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
-                rumBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid));
+                rumBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid.toIdentifier()));
             }
         }
         RemoteUcastMacs remoteUcastMacs = rumBuilder.build();

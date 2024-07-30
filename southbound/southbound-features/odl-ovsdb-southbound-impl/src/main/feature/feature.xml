@@ -8,9 +8,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
 <features name="odl-ovsdb-southbound-impl-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
     <feature name="odl-ovsdb-southbound-impl" version="${project.version}">
-        <feature version="[13,14)">odl-jackson-2</feature>
-        <feature version="[6,7)">odl-infrautils-diagstatus</feature>
-        <feature version="[6,7)">odl-infrautils-ready</feature>
+        <feature version="[14,15)">odl-jackson-2</feature>
+        <feature version="[7,8)">odl-infrautils-diagstatus</feature>
+        <feature version="[7,8)">odl-infrautils-ready</feature>
         <configfile finalname="etc/org.opendaylight.ovsdb.southbound.cfg">
             mvn:org.opendaylight.ovsdb/southbound-impl/${project.version}/cfg/config
         </configfile>

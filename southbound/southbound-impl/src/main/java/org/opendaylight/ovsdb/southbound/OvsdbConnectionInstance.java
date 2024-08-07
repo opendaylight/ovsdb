@@ -389,11 +389,11 @@ public class OvsdbConnectionInstance {
         connectedEntity = entity;
     }
 
-    public Boolean hasOvsdbClient(final OvsdbClient otherClient) {
+    public boolean hasOvsdbClient(final OvsdbClient otherClient) {
         return client.equals(otherClient);
     }
 
-    public Boolean getHasDeviceOwnership() {
+    public boolean getHasDeviceOwnership() {
         return hasDeviceOwnership;
     }
 

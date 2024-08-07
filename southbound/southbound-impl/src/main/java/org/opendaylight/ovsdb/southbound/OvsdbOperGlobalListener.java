@@ -84,7 +84,6 @@ public final class OvsdbOperGlobalListener implements DataTreeChangeListener<Nod
 
                     OvsdbConnectionInstance connectionInstance = ovsdbConnectionManager.getConnectionInstance(key);
                     if (connectionInstance != null && connectionInstance.isActive()
-                            && connectionInstance.getHasDeviceOwnership() != null
                             && connectionInstance.getHasDeviceOwnership()) {
                         //Oops some one deleted the node held by me This should never happen.
                         //put the node back in oper

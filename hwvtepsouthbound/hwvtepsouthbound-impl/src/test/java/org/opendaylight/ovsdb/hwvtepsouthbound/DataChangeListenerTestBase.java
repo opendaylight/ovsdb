@@ -98,7 +98,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     OvsdbConnectionInfo connectionInfo;
     Operations operations;
     HwvtepDataChangeListener hwvtepDataChangeListener;
-    HwvtepConnectionManager hwvtepConnectionManager;
+    protected HwvtepConnectionManager hwvtepConnectionManager;
     protected HwvtepConnectionInstance connectionInstance;
 
     ArgumentCaptor<TypedBaseTable> insertOpCapture;
@@ -119,8 +119,34 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         ls1Iid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class,
                 new LogicalSwitchesKey(new HwvtepNodeName("ls1")));
         loadSchema();
-        mockConnectionInstance();
-        mockConnectionManager();
+
+        transactionInvoker = new TransactionInvokerImpl(getDataBroker());
+        hwvtepConnectionManager = spy(new HwvtepConnectionManager(getDataBroker(), transactionInvoker,
+            entityOwnershipService, mock(OvsdbConnection.class)));
+
+        connectionInfo = mock(OvsdbConnectionInfo.class);
+        doReturn(mock(InetAddress.class)).when(connectionInfo).getRemoteAddress();
+
+        ovsdbClient = mock(OvsdbClient.class);
+        doReturn(true).when(ovsdbClient).isActive();
+        doReturn(connectionInfo).when(ovsdbClient).getConnectionInfo();
+        doReturn(listenableDbSchema).when(ovsdbClient).getSchema(anyString());
+
+        connectionInstance = new HwvtepConnectionInstance(hwvtepConnectionManager, null, ovsdbClient, nodeIid,
+            transactionInvoker, getDataBroker());
+        connectionInstance.reconciliationFt.set(Boolean.TRUE);
+        connectionInstance.firstUpdateTriggered.set(true);
+        connectionInstance.setControllerTxHistory(new TransactionHistory(10000, 7500));
+        connectionInstance.setDeviceUpdateHistory(new TransactionHistory(10000, 7500));
+        connectionInstance.createTransactInvokers();
+
+        doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstance(
+            any(HwvtepPhysicalSwitchAttributes.class));
+        doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstance(any(Node.class));
+        doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstanceFromNodeIid(
+            any(InstanceIdentifier.class));
+
+
         mockOperations();
 
         addNode(LogicalDatastoreType.OPERATIONAL);
@@ -165,36 +191,6 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         } catch (IOException | ExecutionException | InterruptedException e) {
             LOG.error("Failed to load schema", e);
         }
-    }
-
-    private void mockConnectionManager() throws IllegalAccessException {
-        hwvtepConnectionManager = spy(new HwvtepConnectionManager(getDataBroker(), transactionInvoker,
-            entityOwnershipService, mock(OvsdbConnection.class)));
-        doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstance(
-            any(HwvtepPhysicalSwitchAttributes.class));
-        doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstance(any(Node.class));
-        doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstanceFromNodeIid(
-            any(InstanceIdentifier.class));
-    }
-
-    void mockConnectionInstance() {
-        connectionInfo = mock(OvsdbConnectionInfo.class);
-        doReturn(mock(InetAddress.class)).when(connectionInfo).getRemoteAddress();
-
-        ovsdbClient = mock(OvsdbClient.class);
-        doReturn(true).when(ovsdbClient).isActive();
-        doReturn(connectionInfo).when(ovsdbClient).getConnectionInfo();
-        doReturn(listenableDbSchema).when(ovsdbClient).getSchema(anyString());
-
-        transactionInvoker = new TransactionInvokerImpl(getDataBroker());
-
-        connectionInstance = new HwvtepConnectionInstance(null, null, ovsdbClient, nodeIid, transactionInvoker,
-            getDataBroker());
-        connectionInstance.reconciliationFt.set(Boolean.TRUE);
-        connectionInstance.firstUpdateTriggered.set(true);
-        connectionInstance.setControllerTxHistory(new TransactionHistory(10000, 7500));
-        connectionInstance.setDeviceUpdateHistory(new TransactionHistory(10000, 7500));
-        connectionInstance.createTransactInvokers();
     }
 
     void mockOperations() {

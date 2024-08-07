@@ -14,11 +14,9 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.DataChangeListenerTestBase;
-import org.opendaylight.ovsdb.hwvtepsouthbound.SameThreadScheduledExecutor;
 import org.opendaylight.ovsdb.hwvtepsouthbound.TestBuilders;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
@@ -56,8 +54,6 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
                 .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
         macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
                 .child(RemoteMcastMacs.class, new RemoteMcastMacsKey(mac.key()));
-        setFinalStatic(DependencyQueue.class, "EXECUTOR_SERVICE", Mockito.mock(SameThreadScheduledExecutor.class,
-                Mockito.CALLS_REAL_METHODS));
     }
 
     @Test
@@ -69,8 +65,8 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
         final CountDownLatch latch = new CountDownLatch(1);
         opState.getDeviceInfo().addJobToQueue(new DependentJob.ConfigWaitingJob(macIid, mac, unMetDependencies) {
             @Override
-            protected void onDependencyResolved(HwvtepOperationalState operationalState,
-                    TransactionBuilder transactionBuilder) {
+            protected void onDependencyResolved(final HwvtepOperationalState operationalState,
+                    final TransactionBuilder transactionBuilder) {
                 latch.countDown();
             }
         });
@@ -90,8 +86,8 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
         opState.getDeviceInfo().addJobToQueue(new DependentJob.OpWaitingJob<RemoteMcastMacs>(
                 macIid, mac, (Map)unMetDependencies, 0) {
             @Override
-            protected void onDependencyResolved(HwvtepOperationalState operationalState,
-                    TransactionBuilder transactionBuilder) {
+            protected void onDependencyResolved(final HwvtepOperationalState operationalState,
+                    final TransactionBuilder transactionBuilder) {
                 latch.countDown();
             }
         });

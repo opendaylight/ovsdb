@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependentJob;
@@ -150,9 +151,9 @@ public class HwvtepDeviceInfo {
     private TransactionHistory controllerTxHistory = null;
     private TransactionHistory deviceUpdateHistory = null;
 
-    public HwvtepDeviceInfo(HwvtepConnectionInstance hwvtepConnectionInstance) {
-        this.connectionInstance = hwvtepConnectionInstance;
-        this.dependencyQueue = new DependencyQueue(this);
+    public HwvtepDeviceInfo(ScheduledExecutorService dependencyExecutor, HwvtepConnectionInstance connectionInstance) {
+        this.connectionInstance = connectionInstance;
+        this.dependencyQueue = new DependencyQueue(dependencyExecutor, this);
     }
 
     public LogicalSwitch getLogicalSwitch(UUID uuid) {

@@ -8,13 +8,15 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.mockito.Answers;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.DataChangeListenerTestBase;
@@ -48,6 +50,9 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
     Map<Class<? extends KeyAware>, List<InstanceIdentifier>> unMetDependencies;
 
     void setupForTest() throws Exception {
+        doReturn(mock(SameThreadScheduledExecutor.class, Answers.CALLS_REAL_METHODS)).when(hwvtepConnectionManager)
+            .dependencyExecutor();
+
         mcastMacDataValidator = McastMacsRemoteUpdateCommand.MCAST_MAC_DATA_VALIDATOR;
         opState = new HwvtepOperationalState(connectionInstance);
         mac = TestBuilders.buildRemoteMcastMacs(nodeIid,"FF:FF:FF:FF:FF:FF", "ls0",
@@ -56,8 +61,6 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
                 .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
         macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
                 .child(RemoteMcastMacs.class, new RemoteMcastMacsKey(mac.key()));
-        setFinalStatic(DependencyQueue.class, "EXECUTOR_SERVICE", Mockito.mock(SameThreadScheduledExecutor.class,
-                Mockito.CALLS_REAL_METHODS));
     }
 
     @Test
@@ -69,8 +72,8 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
         final CountDownLatch latch = new CountDownLatch(1);
         opState.getDeviceInfo().addJobToQueue(new DependentJob.ConfigWaitingJob(macIid, mac, unMetDependencies) {
             @Override
-            protected void onDependencyResolved(HwvtepOperationalState operationalState,
-                    TransactionBuilder transactionBuilder) {
+            protected void onDependencyResolved(final HwvtepOperationalState operationalState,
+                    final TransactionBuilder transactionBuilder) {
                 latch.countDown();
             }
         });
@@ -90,8 +93,8 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
         opState.getDeviceInfo().addJobToQueue(new DependentJob.OpWaitingJob<RemoteMcastMacs>(
                 macIid, mac, (Map)unMetDependencies, 0) {
             @Override
-            protected void onDependencyResolved(HwvtepOperationalState operationalState,
-                    TransactionBuilder transactionBuilder) {
+            protected void onDependencyResolved(final HwvtepOperationalState operationalState,
+                    final TransactionBuilder transactionBuilder) {
                 latch.countDown();
             }
         });

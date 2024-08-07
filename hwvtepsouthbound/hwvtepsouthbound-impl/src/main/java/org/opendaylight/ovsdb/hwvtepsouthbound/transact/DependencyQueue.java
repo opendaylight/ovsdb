@@ -7,12 +7,11 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -27,23 +26,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DependencyQueue {
-
     private static final Logger LOG = LoggerFactory.getLogger(DependencyQueue.class);
-    private static final ScheduledExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor(
-            new ThreadFactoryBuilder().setNameFormat("hwvtep-waiting-job-%d").build());
 
     private final LinkedBlockingQueue<DependentJob> configWaitQueue = new LinkedBlockingQueue<>(
             HwvtepSouthboundConstants.WAITING_QUEUE_CAPACITY);
     private final LinkedBlockingQueue<DependentJob> opWaitQueue = new LinkedBlockingQueue<>(
             HwvtepSouthboundConstants.WAITING_QUEUE_CAPACITY);
     private final HwvtepDeviceInfo deviceInfo;
+    private final Executor executor;
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public DependencyQueue(HwvtepDeviceInfo hwvtepDeviceInfo) {
+    public DependencyQueue(final ScheduledExecutorService executor, HwvtepDeviceInfo hwvtepDeviceInfo) {
+        this.executor = executor;
         this.deviceInfo = hwvtepDeviceInfo;
 
         final AtomicReference<ScheduledFuture<?>> expiredTasksMonitorJob = new AtomicReference<>();
-        expiredTasksMonitorJob.set(EXECUTOR_SERVICE.scheduleWithFixedDelay(() -> {
+        expiredTasksMonitorJob.set(executor.scheduleWithFixedDelay(() -> {
             try {
                 LOG.debug("Processing dependencies");
                 if (!deviceInfo.getConnectionInstance().getOvsdbClient().isActive()) {
@@ -101,41 +99,39 @@ public class DependencyQueue {
     @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
     private void processReadyJobs(final HwvtepConnectionInstance hwvtepConnectionInstance,
                                   LinkedBlockingQueue<DependentJob> queue) {
-        final List<DependentJob> readyJobs = getReadyJobs(queue);
-        readyJobs.forEach((job) -> {
-            EXECUTOR_SERVICE.execute(() ->
-                hwvtepConnectionInstance.transact(new TransactCommand() {
-                    HwvtepOperationalState operationalState = new HwvtepOperationalState(hwvtepConnectionInstance);
-                    AtomicInteger retryCount = new AtomicInteger(5);
+        final var readyJobs = getReadyJobs(queue);
+        readyJobs.forEach(job -> {
+            executor.execute(() -> hwvtepConnectionInstance.transact(new TransactCommand() {
+                final HwvtepOperationalState operationalState = new HwvtepOperationalState(hwvtepConnectionInstance);
+                final AtomicInteger retryCount = new AtomicInteger(5);
 
-                    @Override
-                    public boolean retry() {
-                        return retryCount.decrementAndGet() > 0;
+                @Override
+                public boolean retry() {
+                    return retryCount.decrementAndGet() > 0;
+                }
+
+                @Override
+                public void execute(TransactionBuilder transactionBuilder) {
+                    deviceInfo.clearKeyFromDependencyQueue(job.getKey());
+                    if (operationalState.getConnectionInstance() != null
+                        && operationalState.getConnectionInstance().isActive()) {
+                        job.onDependencyResolved(operationalState, transactionBuilder);
                     }
+                }
 
-                    @Override
-                    public void execute(TransactionBuilder transactionBuilder) {
-                        deviceInfo.clearKeyFromDependencyQueue(job.getKey());
-                        if (operationalState.getConnectionInstance() != null
-                                && operationalState.getConnectionInstance().isActive()) {
-                            job.onDependencyResolved(operationalState, transactionBuilder);
-                        }
-                    }
+                @Override
+                public void onFailure(TransactionBuilder tx) {
+                    job.onFailure();
+                    operationalState.clearIntransitKeys();
 
-                    @Override
-                    @SuppressFBWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
-                    public void onFailure(TransactionBuilder tx) {
-                        job.onFailure();
-                        operationalState.clearIntransitKeys();
+                }
 
-                    }
-
-                    @Override
-                    public void onSuccess(TransactionBuilder tx) {
-                        job.onSuccess();
-                        operationalState.getDeviceInfo().onOperDataAvailable();
-                    }
-                }));
+                @Override
+                public void onSuccess(TransactionBuilder tx) {
+                    job.onSuccess();
+                    operationalState.getDeviceInfo().onOperDataAvailable();
+                }
+            }));
         });
     }
 
@@ -159,11 +155,7 @@ public class DependencyQueue {
         return readyJobs;
     }
 
-    public static void close() {
-        EXECUTOR_SERVICE.shutdown();
-    }
-
     public void submit(Runnable runnable) {
-        EXECUTOR_SERVICE.execute(runnable);
+        executor.execute(runnable);
     }
 }

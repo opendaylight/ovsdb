@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -267,26 +268,26 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, TerminationPoint.class, terminationPoints);
         addData(LogicalDatastoreType.CONFIGURATION, RemoteUcastMacs.class, ucastMacs);
-        verify(Operations.op,  times(4)).insert(any(UcastMacsRemote.class));
+        verify(Operations.op, times(4)).insert(any(UcastMacsRemote.class));
 
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMacs);
         //2 mcast mac + 2 locator sets ( termination point already added )
-        verify(Operations.op,  times(0)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(Operations.op, times(0)).insert(ArgumentMatchers.<McastMacsRemote>any());
         resetOperations();
         addData(LogicalDatastoreType.OPERATIONAL, TerminationPoint.class, terminationPoints);
         addData(LogicalDatastoreType.OPERATIONAL, RemoteUcastMacs.class, ucastMacs);
         connectionInstance.getDeviceInfo().onOperDataAvailable();
         //2 mcast mac + 2 locator sets ( termination point already added )
-        verify(Operations.op,  times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(Operations.op, timeout(2000).times(4)).insert(ArgumentMatchers.<McastMacsRemote>any());
 
         resetOperations();
         addData(LogicalDatastoreType.CONFIGURATION, RemoteMcastMacs.class, mcastMac2);
-        verify(Operations.op,  times(0)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(Operations.op, times(0)).insert(ArgumentMatchers.<McastMacsRemote>any());
         addData(LogicalDatastoreType.OPERATIONAL, RemoteMcastMacs.class, mcastMacs);
         connectionInstance.getDeviceInfo().onOperDataAvailable();
-        verify(Operations.op,  times(2)).insert(ArgumentMatchers.<McastMacsRemote>any());
-        verify(Operations.op,  times(2)).update(ArgumentMatchers.<McastMacsRemote>any());
+        verify(Operations.op, timeout(2000).times(2)).insert(ArgumentMatchers.<McastMacsRemote>any());
+        verify(Operations.op, times(2)).update(ArgumentMatchers.<McastMacsRemote>any());
     }
 
     private void verifyThatLogicalSwitchCreated() {

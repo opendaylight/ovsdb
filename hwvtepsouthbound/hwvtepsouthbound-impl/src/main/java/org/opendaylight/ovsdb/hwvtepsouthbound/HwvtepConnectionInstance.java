@@ -96,7 +96,7 @@ public class HwvtepConnectionInstance {
         this.client = client;
         this.instanceIdentifier = iid;
         this.txInvoker = txInvoker;
-        this.deviceInfo = new HwvtepDeviceInfo(this);
+        this.deviceInfo = new HwvtepDeviceInfo(hwvtepConnectionManager.dependencyExecutor(), this);
         this.dataBroker = dataBroker;
         this.hwvtepTableReader = new HwvtepTableReader(this);
     }

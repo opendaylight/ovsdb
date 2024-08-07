@@ -10,10 +10,12 @@ package org.opendaylight.ovsdb.hwvtepsouthbound;
 import static java.util.Objects.requireNonNull;
 import static org.opendaylight.ovsdb.lib.operations.Operations.op;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.net.ConnectException;
 import java.net.InetAddress;
@@ -25,6 +27,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.eclipse.jdt.annotation.NonNull;
@@ -42,7 +47,6 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationMana
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.ReconciliationTask;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration.HwvtepReconciliationTask;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.connection.ConnectionReconciliationTask;
-import org.opendaylight.ovsdb.hwvtepsouthbound.transact.DependencyQueue;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.HwvtepGlobalRemoveCommand;
 import org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md.TransactionInvoker;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -74,6 +78,9 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private static final int DB_FETCH_TIMEOUT = 1000;
     private static final int TRANSACTION_HISTORY_CAPACITY = 10000;
     private static final int TRANSACTION_HISTORY_WATERMARK = 7500;
+    private static final ThreadFactory DEPENDENCY_THREAD_FACTORY = new ThreadFactoryBuilder()
+        .setNameFormat("hwvtep-waiting-job-%d")
+        .build();
 
     private final DataBroker db;
     private final TransactionInvoker txInvoker;
@@ -89,16 +96,19 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private final Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateHistory = new ConcurrentHashMap<>();
     private final OvsdbConnection ovsdbConnectionService;
     private final Map<OvsdbClient, OvsdbClient> alreadyProcessedClients = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService dependencyExecutor;
 
     public HwvtepConnectionManager(final DataBroker db, final TransactionInvoker txInvoker,
                     final EntityOwnershipService entityOwnershipService, final OvsdbConnection ovsdbConnectionService) {
         this.db = db;
         this.txInvoker = txInvoker;
         this.entityOwnershipService = entityOwnershipService;
-        hwvtepDeviceEntityOwnershipListener = new HwvtepDeviceEntityOwnershipListener(this,entityOwnershipService);
+        this.ovsdbConnectionService = ovsdbConnectionService;
+        dependencyExecutor = Executors.newSingleThreadScheduledExecutor(DEPENDENCY_THREAD_FACTORY);
+
+        hwvtepDeviceEntityOwnershipListener = new HwvtepDeviceEntityOwnershipListener(this, entityOwnershipService);
         reconciliationManager = new ReconciliationManager(db);
         hwvtepOperGlobalListener = new HwvtepOperGlobalListener(db, this);
-        this.ovsdbConnectionService = ovsdbConnectionService;
     }
 
     @Override
@@ -113,7 +123,8 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         for (HwvtepConnectionInstance client : clients.values()) {
             client.disconnect();
         }
-        DependencyQueue.close();
+
+        dependencyExecutor.shutdown();
     }
 
     @Override
@@ -718,5 +729,10 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         initiated connection disconnects.
         */
         ON_DISCONNECT
+    }
+
+    @VisibleForTesting
+    public ScheduledExecutorService dependencyExecutor() {
+        return dependencyExecutor;
     }
 }

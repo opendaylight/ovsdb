@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
@@ -25,11 +26,13 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.eclipse.jdt.annotation.NonNull;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
@@ -40,7 +43,6 @@ import org.opendaylight.mdsal.eos.common.api.EntityOwnershipStateChange;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.OvsdbConnection;
 import org.opendaylight.ovsdb.lib.OvsdbConnectionInfo;
-import org.opendaylight.ovsdb.lib.impl.OvsdbConnectionService;
 import org.opendaylight.ovsdb.lib.operations.DefaultOperations;
 import org.opendaylight.ovsdb.lib.operations.Operations;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
@@ -60,14 +62,10 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({
-    SouthboundMapper.class, OvsdbConnectionManager.class, OvsdbConnectionService.class, SouthboundUtil.class
-})
+//@RunWith(PowerMockRunner.class)
+//@PrepareForTest({ SouthboundMapper.class, OvsdbConnectionManager.class, OvsdbConnectionService.class })
 public class OvsdbConnectionManagerTest {
 
     @Mock private OvsdbConnectionManager ovsdbConnManager;
@@ -85,9 +83,12 @@ public class OvsdbConnectionManagerTest {
         .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
         .child(Node.class, new NodeKey(new NodeId("testNode")));
 
+    private MockedStatic<@NonNull SouthboundUtil> southboundUtil;
+    private MockedStatic<@NonNull SouthboundMapper> southboundMapper;
+
     @Before
     public void setUp() throws Exception {
-        ovsdbConnManager = PowerMockito.mock(OvsdbConnectionManager.class, Mockito.CALLS_REAL_METHODS);
+        ovsdbConnManager = mock(OvsdbConnectionManager.class, Mockito.CALLS_REAL_METHODS);
         setInternalState(ovsdbConnManager, "db", db);
         setInternalState(ovsdbConnManager, "txInvoker", txInvoker);
         setInternalState(ovsdbConnManager, "entityOwnershipService", entityOwnershipService);
@@ -107,15 +108,23 @@ public class OvsdbConnectionManagerTest {
         doReturn(info).when(externalClient).getConnectionInfo();
         doReturn(Futures.immediateFuture(List.of("Open_vSwitch"))).when(externalClient).getDatabases();
 
-        PowerMockito.mockStatic(SouthboundUtil.class);
-        when(SouthboundUtil.connectionInfoToString(any(ConnectionInfo.class))).thenReturn("192.18.120.31:8080");
+        southboundMapper = mockStatic(SouthboundMapper.class);
+
+        southboundUtil = mockStatic(SouthboundUtil.class);
+        southboundUtil.when(() -> SouthboundUtil.connectionInfoToString(any(ConnectionInfo.class)))
+            .thenReturn("192.18.120.31:8080");
+    }
+
+    @After
+    public void after() {
+        southboundUtil.close();
+        southboundMapper.close();
     }
 
     @Test
     public void testConnected() throws Exception {
         OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class);
-        suppress(method(OvsdbConnectionManager.class, "connectedButCallBacksNotRegistered",
-                OvsdbClient.class));
+        suppress(method(OvsdbConnectionManager.class, "connectedButCallBacksNotRegistered", OvsdbClient.class));
         when(ovsdbConnManager.connectedButCallBacksNotRegistered(any(OvsdbClient.class))).thenReturn(client);
         doNothing().when(client).registerCallbacks(any());
 
@@ -128,8 +137,7 @@ public class OvsdbConnectionManagerTest {
                 OvsdbConnectionInstance.class));
 
         //TODO: Write unit tests for entity ownership service related code.
-        suppress(method(OvsdbConnectionManager.class, "registerEntityForOwnership",
-                OvsdbConnectionInstance.class));
+        suppress(method(OvsdbConnectionManager.class, "registerEntityForOwnership", OvsdbConnectionInstance.class));
 
         ReadTransaction tx = mock(ReadTransaction.class);
         when(db.newReadOnlyTransaction()).thenReturn(tx);
@@ -146,8 +154,7 @@ public class OvsdbConnectionManagerTest {
     public void testConnectedButCallBacksNotRegistered() throws Exception {
         ConnectionInfo key = mock(ConnectionInfo.class);
 
-        PowerMockito.mockStatic(SouthboundMapper.class);
-        when(SouthboundMapper.createConnectionInfo(any(OvsdbClient.class))).thenReturn(key);
+        southboundMapper.when(() -> SouthboundMapper.createConnectionInfo(any(OvsdbClient.class))).thenReturn(key);
 
         suppress(method(OvsdbConnectionManager.class, "getInstanceIdentifier", ConnectionInfo.class));
         when(ovsdbConnManager.getInstanceIdentifier(key)).thenReturn(InstanceIdentifier.create(NetworkTopology.class)
@@ -172,8 +179,7 @@ public class OvsdbConnectionManagerTest {
     @Test
     public void testDisconnected() throws Exception {
         ConnectionInfo key = mock(ConnectionInfo.class);
-        PowerMockito.mockStatic(SouthboundMapper.class);
-        when(SouthboundMapper.createConnectionInfo(any(OvsdbClient.class))).thenReturn(key);
+        southboundMapper.when(() -> SouthboundMapper.createConnectionInfo(any(OvsdbClient.class))).thenReturn(key);
 
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         clients = new ConcurrentHashMap<>();
@@ -184,11 +190,10 @@ public class OvsdbConnectionManagerTest {
         when(ovsdbConnManager.getConnectionInstance(any(ConnectionInfo.class))).thenReturn(ovsdbConnectionInstance);
         doNothing().when(txInvoker).invoke(any(TransactionCommand.class));
 
-        when(SouthboundMapper.suppressLocalIpPort(any(ConnectionInfo.class))).thenReturn(key);
+        southboundMapper.when(() -> SouthboundMapper.suppressLocalIpPort(any(ConnectionInfo.class))).thenReturn(key);
 
         // TODO: Write unit tests for EntityOwnershipService
-        suppress(method(OvsdbConnectionManager.class, "unregisterEntityForOwnership",
-                OvsdbConnectionInstance.class));
+        suppress(method(OvsdbConnectionManager.class, "unregisterEntityForOwnership", OvsdbConnectionInstance.class));
         instanceIdentifiers = new ConcurrentHashMap<>();
         setInternalState(ovsdbConnManager, "instanceIdentifiers", instanceIdentifiers);
         setInternalState(ovsdbConnManager, "nodeIdVsConnectionInstance", new ConcurrentHashMap<>());
@@ -227,8 +232,7 @@ public class OvsdbConnectionManagerTest {
         suppress(method(OvsdbConnectionManager.class, "removeInstanceIdentifier", ConnectionInfo.class));
 
         // TODO: Write unit tests for entity ownership service related code.
-        suppress(method(OvsdbConnectionManager.class, "unregisterEntityForOwnership",
-                OvsdbConnectionInstance.class));
+        suppress(method(OvsdbConnectionManager.class, "unregisterEntityForOwnership", OvsdbConnectionInstance.class));
         ovsdbConnManager.disconnect(ovsdbNode);
         verify(ovsdbConnectionInstance).disconnect();
     }
@@ -265,8 +269,7 @@ public class OvsdbConnectionManagerTest {
     public void testPutAndGetConnectionInstance() throws Exception {
         ConnectionInfo key = mock(ConnectionInfo.class);
         ConnectionInfo connectionInfo = mock(ConnectionInfo.class);
-        PowerMockito.mockStatic(SouthboundMapper.class);
-        when(SouthboundMapper.suppressLocalIpPort(key)).thenReturn(connectionInfo);
+        southboundMapper.when(() -> SouthboundMapper.suppressLocalIpPort(key)).thenReturn(connectionInfo);
 
         clients = new ConcurrentHashMap<>();
         setInternalState(ovsdbConnManager, "clients", clients);
@@ -287,8 +290,7 @@ public class OvsdbConnectionManagerTest {
     public void testPutandGetInstanceIdentifier() throws Exception {
         ConnectionInfo key = mock(ConnectionInfo.class);
         ConnectionInfo connectionInfo = mock(ConnectionInfo.class);
-        PowerMockito.mockStatic(SouthboundMapper.class);
-        when(SouthboundMapper.suppressLocalIpPort(key)).thenReturn(connectionInfo);
+        southboundMapper.when(() -> SouthboundMapper.suppressLocalIpPort(key)).thenReturn(connectionInfo);
 
         instanceIdentifiers = new ConcurrentHashMap<>();
         setInternalState(ovsdbConnManager, "instanceIdentifiers", instanceIdentifiers);
@@ -325,8 +327,7 @@ public class OvsdbConnectionManagerTest {
 
         //Test getClient(OvsdbBridgeAttributes mn)
         OvsdbBridgeAttributes mn = mock(OvsdbBridgeAttributes.class);
-        suppress(method(OvsdbConnectionManager.class, "getConnectionInstance",
-                OvsdbBridgeAttributes.class));
+        suppress(method(OvsdbConnectionManager.class, "getConnectionInstance", OvsdbBridgeAttributes.class));
         when(ovsdbConnManager.getConnectionInstance(mn)).thenReturn(ovsdbClient);
         assertEquals("Error getting correct OvsdbClient object", ovsdbClient.getOvsdbClient(),
                 ovsdbConnManager.getClient(mn));
@@ -348,12 +349,9 @@ public class OvsdbConnectionManagerTest {
         IpAddress ipAddr = mock(IpAddress.class);
         when(connectionInfo.getRemoteIp()).thenReturn(ipAddr);
 
-        PowerMockito.mockStatic(SouthboundMapper.class);
         InetAddress ip = InetAddress.getByAddress(new byte[] { 1, 2, 3, 4 });
-        when(SouthboundMapper.createInetAddress(any(IpAddress.class))).thenReturn(ip);
+        southboundMapper.when(() -> SouthboundMapper.createInetAddress(any(IpAddress.class))).thenReturn(ip);
 
-        PowerMockito.mockStatic(OvsdbConnectionService.class);
-//        when(OvsdbConnectionService.getService()).thenReturn(ovsdbConnection);
         PortNumber port = mock(PortNumber.class);
         when(connectionInfo.getRemotePort()).thenReturn(port);
         when(port.getValue()).thenReturn(Uint16.valueOf(8080));
@@ -363,8 +361,7 @@ public class OvsdbConnectionManagerTest {
         //client not null case
         suppress(method(OvsdbConnectionManager.class, "putInstanceIdentifier", ConnectionInfo.class,
                 InstanceIdentifier.class));
-        suppress(method(OvsdbConnectionManager.class, "connectedButCallBacksNotRegistered",
-                OvsdbClient.class));
+        suppress(method(OvsdbConnectionManager.class, "connectedButCallBacksNotRegistered", OvsdbClient.class));
 
         doNothing().when(ovsdbConnManager).putInstanceIdentifier(any(ConnectionInfo.class),
             any(InstanceIdentifier.class));
@@ -381,8 +378,7 @@ public class OvsdbConnectionManagerTest {
         suppress(method(OvsdbConnectionManager.class, "getEntityFromConnectionInstance",
                 OvsdbConnectionInstance.class));
         //TODO: Write unit tests for entity ownership service related code.
-        suppress(method(OvsdbConnectionManager.class, "registerEntityForOwnership",
-                OvsdbConnectionInstance.class));
+        suppress(method(OvsdbConnectionManager.class, "registerEntityForOwnership", OvsdbConnectionInstance.class));
         assertEquals("ERROR", client, ovsdbConnManager.connect(InstanceIdentifier.create(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
             .child(Node.class, new NodeKey(new NodeId("testNode"))), ovsdbNode));

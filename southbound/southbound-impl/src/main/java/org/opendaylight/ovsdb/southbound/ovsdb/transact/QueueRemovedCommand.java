@@ -60,11 +60,11 @@ public class QueueRemovedCommand extends AbstractTransactCommand {
                 Map<QueuesKey, Queues> updatedQueues = update.getQueues();
                 if (origQueues != null && !origQueues.isEmpty()) {
                     for (Queues origQueue : origQueues.values()) {
-                        OvsdbNodeAugmentation operNode =
-                                state.getBridgeNode(ovsdbNodeIid).orElseThrow().augmentation(
-                                        OvsdbNodeAugmentation.class);
                         if (updatedQueues == null || !updatedQueues.containsKey(origQueue.key())) {
                             LOG.debug("Received request to delete Queue entry {}", origQueue.getQueueId());
+                            OvsdbNodeAugmentation operNode =
+                                state.getBridgeNode(ovsdbNodeIid).orElseThrow().augmentation(
+                                        OvsdbNodeAugmentation.class);
                             Uuid queueUuid = getQueueUuid(operNode.getQueues(), origQueue.key());
                             if (queueUuid != null) {
                                 Queue queue = transaction.getTypedRowSchema(Queue.class);

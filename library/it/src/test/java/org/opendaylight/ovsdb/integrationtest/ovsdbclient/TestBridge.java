@@ -18,10 +18,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TypedColumn;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedTable;
 
 /**
- * Statically Typed Bridge Table as defined in ovs-vswitchd.conf.db
- */
-
-/*
+ * Statically Typed Bridge Table as defined in ovs-vswitchd.conf.db.
  * Interface name was set to TestBridge on purpose to test the @TypeTable annotation
  * functionality of TyperHelper.java
  */

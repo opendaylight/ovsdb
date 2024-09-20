@@ -140,7 +140,7 @@ public final class NettyBootstrapFactoryImpl implements NettyBootstrapFactory, A
     public ServerBootstrap newServer() {
         return PROVIDER.createServerBootstrap()
                 .group(bossGroup, workerGroup)
-                .option(ChannelOption.TCP_NODELAY, true)
+                .childOption(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(65535, 65535, 65535))
                 .option(ChannelOption.SO_BACKLOG, 100);
     }

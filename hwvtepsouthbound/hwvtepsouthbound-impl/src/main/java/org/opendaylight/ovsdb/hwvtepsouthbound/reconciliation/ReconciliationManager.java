@@ -21,8 +21,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Copied from org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager.
  *
- * <p>
- * This class provides the implementation of ovsdb southbound plugins
+ * <p>This class provides the implementation of ovsdb southbound plugins
  * configuration reconciliation engine. This engine provide interfaces
  * to enqueue (one time retry)/ enqueueForRetry(periodic retry)/ dequeue
  * (remove from retry queue) reconciliation task. Reconciliation task can
@@ -35,8 +34,7 @@ import org.slf4j.LoggerFactory;
  * Ideally, addition of any type of reconciliation task should not require
  * any change in this reconciliation manager execution engine.
  *
- * <p>
- * 3-Node Cluster:
+ * <p>3-Node Cluster:
  * Reconciliation manager is agnostic of whether it's running in single
  * node cluster or 3-node cluster. It's a responsibility of the task
  * submitter to make sure that it submit the task for reconciliation only
@@ -45,8 +43,7 @@ import org.slf4j.LoggerFactory;
  * the 3-nodes in the cluster, because connection to individual controller
  * can be interrupted for various reason.
  *
- * <p>
- * Created by Anil Vishnoi (avishnoi@Brocade.com) on 3/9/16.
+ * <p>Created by Anil Vishnoi (avishnoi@Brocade.com) on 3/9/16.
  */
 public class ReconciliationManager implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(ReconciliationManager.class);

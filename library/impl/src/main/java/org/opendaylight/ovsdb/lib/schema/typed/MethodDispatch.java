@@ -37,9 +37,8 @@ import org.slf4j.LoggerFactory;
  * Table to Method runtime-constant support. The binding of Class methods to corresponding data operations is defined
  * by annotations, which means that such mapping is Class-invariant. This invariance is captured in this class.
  *
- * <p>
- * Data operations are always invoked in the context of a runtime {@link DatabaseSchema}, i.e. for a particular device
- * or a device function. This class exposes {@link #bindToSchema(TypedDatabaseSchema)}, which will construct an
+ * <p>Data operations are always invoked in the context of a runtime {@link DatabaseSchema}, i.e. for a particular
+ * device or a device function. This class exposes {@link #bindToSchema(TypedDatabaseSchema)}, which will construct an
  * immutable mapping between a Method and its invocation handler.
  */
 final class MethodDispatch {

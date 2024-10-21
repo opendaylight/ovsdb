@@ -15,23 +15,20 @@ import org.slf4j.LoggerFactory;
 /**
  * Copied from org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTaskManager
  *
- * <p>
- * This class is a task cache manager that provides a cache to store
+ * <p>This class is a task cache manager that provides a cache to store
  * the task that is queued for the reconciliation. Whenever new task
  * is submitted to the reconciliation manager, it will be cached in
  * the cache. If the reconciliation is successful or it's done with
  * all the attempt of reconciliation,
  *
- * <p>
- * Caching of the task is required, because reconciliation task might
+ * <p>Caching of the task is required, because reconciliation task might
  * require longer duration to reconcile and there is a possibility that
  * meanwhile user can change the configuration in config data store while
  * task is queued for the reconciliation. In that scenario, reconciliation
  * manager should not attempt any further reconciliation attempt for that
  * task. ReconciliationManager will call cancelTask() to cancel the task.
  *
- * <p>
- * Created by Anil Vishnoi (avishnoi@Brocade.com) on 3/15/16.
+ * <p>Created by Anil Vishnoi (avishnoi@Brocade.com) on 3/15/16.
  */
 class ReconciliationTaskManager {
     private static final Logger LOG = LoggerFactory.getLogger(ReconciliationTaskManager.class);

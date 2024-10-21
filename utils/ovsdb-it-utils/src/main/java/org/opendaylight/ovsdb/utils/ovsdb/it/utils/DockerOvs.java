@@ -68,8 +68,7 @@ import org.slf4j.LoggerFactory;
  * to accept OVSDB connections.
  * Any docker-compose file must have a port mapping.
  *
- * <p>
- * The following explains how system properties are used to configure DockerOvs
+ * <p>The following explains how system properties are used to configure DockerOvs
  * <pre>
  *  private static String ENV_USAGE =
  *  "-Ddocker.run - explicitly configure whether or not DockerOvs should run docker-compose\n" +

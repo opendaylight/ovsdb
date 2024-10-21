@@ -17,8 +17,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 /**
  * Copied from org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask
  *
- * <p>
- * Abstract implementation of a reconciliation task. Each new type of
+ * <p>Abstract implementation of a reconciliation task. Each new type of
  * resource configuration reconciliation task should extend this class
  * and implement the abstract methods.
  * Created by Anil Vishnoi (avishnoi@Brocade.com) on 3/9/16.

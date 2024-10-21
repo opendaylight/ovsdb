@@ -24,8 +24,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Copied from org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask.
  *
- * <p>
- * Created by Anil Vishnoi (avishnoi@Brocade.com) on 3/9/16.
+ * <p>Created by Anil Vishnoi (avishnoi@Brocade.com) on 3/9/16.
  */
 public class ConnectionReconciliationTask extends ReconciliationTask {
 

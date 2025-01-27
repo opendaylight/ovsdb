@@ -9,7 +9,7 @@ package org.opendaylight.ovsdb.utils.mdsal.utils;
 
 import java.util.ArrayList;
 import org.opendaylight.yangtools.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 
 public class TransactionHistory extends ArrayList<TransactionElement> {
     private static final long serialVersionUID = 1L;
@@ -17,22 +17,23 @@ public class TransactionHistory extends ArrayList<TransactionElement> {
     private final int capacity;
     private final int watermark;
 
-    public TransactionHistory(int initialCapacity, int watermark) {
+    public TransactionHistory(final int initialCapacity, final int watermark) {
         super(initialCapacity);
-        this.capacity = initialCapacity;
+        capacity = initialCapacity;
         this.watermark = watermark;
     }
 
-    public void addToHistory(TransactionType updateType, Object object) {
+    public void addToHistory(final TransactionType updateType, final Object object) {
         add(new TransactionElement(updateType, object));
     }
 
-    public void addToHistory(TransactionType updateType, InstanceIdentifier iid, DataObject dataObject) {
-        add(new TransactionElement(updateType, new MdsalObject(iid, dataObject)));
+    public <T extends DataObject> void addToHistory(final TransactionType updateType, final DataObjectIdentifier<T> iid,
+            final T dataObject) {
+        add(new TransactionElement(updateType, new MdsalObject<>(iid, dataObject)));
     }
 
     @Override
-    public boolean add(TransactionElement element) {
+    public boolean add(final TransactionElement element) {
         if (size() >= watermark) {
             removeRange(0, capacity - watermark);
         }
@@ -44,7 +45,7 @@ public class TransactionHistory extends ArrayList<TransactionElement> {
     }
 
     @Override
-    protected void removeRange(int fromIndex, int toIndex) {
+    protected void removeRange(final int fromIndex, final int toIndex) {
         super.removeRange(fromIndex, toIndex);
     }
 }

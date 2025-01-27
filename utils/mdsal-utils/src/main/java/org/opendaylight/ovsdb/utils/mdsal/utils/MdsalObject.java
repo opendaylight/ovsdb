@@ -8,13 +8,13 @@
 package org.opendaylight.ovsdb.utils.mdsal.utils;
 
 import org.opendaylight.yangtools.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 
-public class MdsalObject {
-    private final InstanceIdentifier iid;
-    private final DataObject dataObject;
+public final class MdsalObject<T extends DataObject> {
+    private final DataObjectIdentifier<T> iid;
+    private final T dataObject;
 
-    public MdsalObject(InstanceIdentifier iid, DataObject dataObject) {
+    public MdsalObject(final DataObjectIdentifier<T> iid, final T dataObject) {
         this.dataObject = dataObject;
         this.iid = iid;
     }

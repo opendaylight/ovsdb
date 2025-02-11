@@ -4,7 +4,7 @@ module hwvtep {
     prefix "hwvtepsb";
 
     import network-topology {prefix "topo"; revision-date "2013-10-21"; }
-    import yang-ext { prefix "ext"; }
+    import odl-codegen-extensions { prefix "oce"; }
     import ietf-inet-types { prefix inet; revision-date 2013-07-15; }
     import ietf-yang-types { prefix yang; revision-date "2013-07-15";}
     import opendaylight-l2-types { prefix ethertype; revision-date "2013-08-27";}
@@ -580,25 +580,25 @@ module hwvtep {
 
     augment "/topo:network-topology/topo:topology/topo:node" {
         description "Augmentation for physical switch nodes managed by hwvtep";
-        ext:augment-identifier "physical-switch-augmentation";
+        oce:augment-identifier "physical-switch-augmentation";
         uses hwvtep-physical-switch-attributes;
     }
 
     augment "/topo:network-topology/topo:topology/topo:node" {
         description "Augment topology node for a hwvtep node";
-        ext:augment-identifier "hwvtep-global-augmentation";
+        oce:augment-identifier "hwvtep-global-augmentation";
         uses hwvtep-global-attributes;
     }
 
     augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {
         description "Augment topology node termination-point for a hwvtep physical-locator";
-        ext:augment-identifier "hwvtep-physical-locator-augmentation";
+        oce:augment-identifier "hwvtep-physical-locator-augmentation";
         uses hwvtep-physical-locator-attributes;
     }
 
     augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {
         description "Augment topology node termination-point for a hwvtep physical-port";
-        ext:augment-identifier "hwvtep-physical-port-augmentation";
+        oce:augment-identifier "hwvtep-physical-port-augmentation";
         uses hwvtep-physical-port-attributes;
     }
 }

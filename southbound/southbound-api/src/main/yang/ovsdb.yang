@@ -4,7 +4,7 @@ module ovsdb {
     prefix "southbound";
 
     import network-topology {prefix "topo"; revision-date "2013-10-21"; }
-    import yang-ext { prefix "ext"; }
+    import odl-codegen-extensions { prefix "oce"; }
     import ietf-inet-types { prefix inet; revision-date 2013-07-15; }
     import overlay { prefix overlay; }
     import ietf-yang-types { prefix yang; revision-date "2013-07-15";}
@@ -1348,19 +1348,19 @@ module ovsdb {
 
     augment "/topo:network-topology/topo:topology/topo:node" {
         description "Augmentation for bridge nodes managed by ovsdb";
-        ext:augment-identifier "ovsdb-bridge-augmentation";
+        oce:augment-identifier "ovsdb-bridge-augmentation";
         uses ovsdb-bridge-attributes;
     }
 
     augment "/topo:network-topology/topo:topology/topo:node" {
         description "Augment topology node for an ovsdb node";
-        ext:augment-identifier "ovsdb-node-augmentation";
+        oce:augment-identifier "ovsdb-node-augmentation";
         uses ovsdb-node-attributes;
     }
 
     augment "/topo:network-topology/topo:topology/topo:node/topo:termination-point" {
         description "Augment topology node termination-point for an ovsdb port/interface";
-        ext:augment-identifier "ovsdb-termination-point-augmentation";
+        oce:augment-identifier "ovsdb-termination-point-augmentation";
         uses ovsdb-port-interface-attributes;
     }
 }

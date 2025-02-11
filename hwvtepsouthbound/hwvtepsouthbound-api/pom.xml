@@ -29,10 +29,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>ietf-topology</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.mdsal.model</groupId>
-      <artifactId>yang-ext</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.mdsal.binding.model.ietf</groupId>
       <artifactId>rfc6991-ietf-inet-types</artifactId>
     </dependency>
@@ -50,7 +46,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>concepts</artifactId>
+      <artifactId>codegen-extensions</artifactId>
     </dependency>
   </dependencies>
 

@@ -4,7 +4,7 @@ module overlay {
     prefix "southbound";
 
     import network-topology {prefix "topo"; revision-date "2013-10-21"; }
-    import yang-ext { prefix "ext"; }
+    import odl-codegen-extensions { prefix "oce"; }
     import ietf-inet-types { prefix inet; revision-date 2013-07-15; }
 
     revision "2015-01-05" {
@@ -55,7 +55,7 @@ module overlay {
 
     augment "/topo:network-topology/topo:topology/topo:node" {
         description "Augment topology node with a list of supported-tunnel-entries";
-        ext:augment-identifier "supported-tunnels";
+        oce:augment-identifier "supported-tunnels";
         list supported-tunnel-entry {
             uses tunnel-type-attributes;
         }
@@ -63,7 +63,7 @@ module overlay {
 
     augment "/topo:network-topology/topo:topology/topo:node/supported-tunnel-entry" {
         description "Augment additional tunnel-parameters into the supported-tunnel-entry list";
-        ext:augment-identifier "supported-tunnels-parameters";
+        oce:augment-identifier "supported-tunnels-parameters";
         when "./tunnel-type = 'tunnel-type-gre' or
             ./tunnel-type = 'tunnel-type-vxlan' or 
             ./tunnel-type = 'tunnel-type-vxlan-gre'" {
@@ -76,13 +76,13 @@ module overlay {
 
     augment "/topo:network-topology/topo:topology/topo:link" {
         description "Type of link tunnel";
-        ext:augment-identifier "tunnel";
+        oce:augment-identifier "tunnel";
         uses tunnel-type-attributes;
     }
  
     augment "/topo:network-topology/topo:topology/topo:link/topo:source" {
         description "ip-port-locator for the source end of a tunnel link";
-        ext:augment-identifier "tunnel-source-parameters";
+        oce:augment-identifier "tunnel-source-parameters";
         when "../tunnel-type = 'tunnel-type-gre' or
             ../tunnel-type = 'tunnel-type-vxlan' or 
             ../tunnel-type = 'tunnel-type-vxlan-gre'" {
@@ -93,7 +93,7 @@ module overlay {
 
     augment "/topo:network-topology/topo:topology/topo:link/topo:destination" {
         description "ip-port-locator for the source end of a tunnel link";
-        ext:augment-identifier "tunnel-dest-parameters";
+        oce:augment-identifier "tunnel-dest-parameters";
         when "../tunnel-type = 'tunnel-type-gre' or
             ../tunnel-type = 'tunnel-type-vxlan' or 
             ../tunnel-type = 'tunnel-type-vxlan-gre'" {
@@ -122,7 +122,7 @@ module overlay {
 
     augment "/topo:network-topology/topo:topology/" {
         description "Mark type of topology";
-        ext:augment-identifier "topology-type";
+        oce:augment-identifier "topology-type";
         uses topology-type-attributes; 
     }
 }

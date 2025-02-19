@@ -82,17 +82,15 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
     /**
      * Update the QosEntries values after finding the related
      * {@link org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch} list.
-     * <p>
-     * Qos and OpenVSwitch are independent tables in the Open_vSwitch schema
+     *
+     * <p>Qos and OpenVSwitch are independent tables in the Open_vSwitch schema
      * but the OVSDB yang model includes the Qos fields in the
      * OvsdbNode data. In some cases the OVSDB will send OpenVSwitch and Qos
      * updates together and in other cases independently. This method here
      * assumes the latter.
-     * </p>
      *
      * @param transaction the {@link ReadWriteTransaction}
      * @param newUpdatedQosRows updated {@link Qos} rows
-
      */
     private void updateQos(ReadWriteTransaction transaction, Map<UUID, Qos> newUpdatedQosRows) {
 

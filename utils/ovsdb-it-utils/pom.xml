@@ -22,6 +22,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
        build failure. Please do not modify this unless you have a good reason. -->
   <name>ODL :: ovsdb :: ${project.artifactId}</name>
 
+  <properties>
+    <odlparent.modernizer.enforce>false</odlparent.modernizer.enforce>
+  </properties>
+
   <dependencies>
       <dependency>
           <groupId>${project.groupId}</groupId>

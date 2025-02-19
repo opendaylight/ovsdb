@@ -58,8 +58,8 @@ import org.slf4j.LoggerFactory;
  * if task is ready for execution.
  * Ideally, addition of any type of reconciliation task should not require
  * any change in this reconciliation manager execution engine.
- * <p>
- * 3-Node Cluster:
+ *
+ * <p>3-Node Cluster:
  * Reconciliation manager is agnostic of whether it's running in single
  * node cluster or 3-node cluster. It's a responsibility of the task
  * submitter to make sure that it submit the task for reconciliation only
@@ -67,7 +67,6 @@ import org.slf4j.LoggerFactory;
  * Reconciliation of controller initiated connection should be done by all
  * the 3-nodes in the cluster, because connection to individual controller
  * can be interrupted for various reason.
- * </p>
  */
 public class ReconciliationManager implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(ReconciliationManager.class);

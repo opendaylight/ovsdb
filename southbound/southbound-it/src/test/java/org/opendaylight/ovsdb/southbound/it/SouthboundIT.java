@@ -2570,14 +2570,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     /**
-     * <p>
      * Representation of a southbound test case. Each test case has a name, a list of input values and a list of
      * expected values. The input values are provided to the augmentation builder, and the expected values are checked
      * against the output of the resulting augmentation.
-     * </p>
-     * <p>
-     * Instances of this class are immutable.
-     * </p>
+     *
+     * <p>Instances of this class are immutable.
      *
      * @param <T> The type of data used for the test case.
      */

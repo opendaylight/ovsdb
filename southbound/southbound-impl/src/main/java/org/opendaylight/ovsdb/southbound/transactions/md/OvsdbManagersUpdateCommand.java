@@ -66,13 +66,11 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
     /**
      * Update the Manager values for the given {@link OpenVSwitch} list.
      *
-     * <p>
-     * Manager and OpenVSwitch are independent tables in the Open_vSwitch schema
+     * <p>Manager and OpenVSwitch are independent tables in the Open_vSwitch schema
      * but the OVSDB yang model includes the Manager fields in the
      * OVSDB Node data. In some cases the OVSDB will send OpenVSwitch and Manager
      * updates together and in other cases independently. This method here
      * assumes the former.
-     * </p>
      *
      * @param transaction the {@link ReadWriteTransaction}
      * @param newUpdatedManagerRows updated {@link Manager} rows
@@ -98,13 +96,11 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
     /**
      * Update the ManagerEntry values after finding the related {@OpenVSwitch} list.
      *
-     * <p>
-     * Manager and OpenVSwitch are independent tables in the Open_vSwitch schema
+     * <p>Manager and OpenVSwitch are independent tables in the Open_vSwitch schema
      * but the OVSDB yang model includes the Manager fields in the
      * OvsdbNode data. In some cases the OVSDB will send OpenVSwitch and Manager
      * updates together and in other cases independently. This method here
      * assumes the latter.
-     * </p>
      *
      * @param transaction the {@link ReadWriteTransaction}
      * @param newUpdatedManagerRows updated {@link Manager} rows

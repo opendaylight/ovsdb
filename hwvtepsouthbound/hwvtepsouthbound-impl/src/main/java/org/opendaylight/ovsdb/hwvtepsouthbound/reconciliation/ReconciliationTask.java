@@ -55,10 +55,10 @@ public abstract class ReconciliationTask implements Runnable {
      * and specify the delay using {@link #retryDelayInMills()}.
      * If data store operation is required to decide if the task need retry, please implement
      * it as an async operation and submit the task on the callback of the future.
-     * <p>
-     * Note:Please do not write blocking data store operations
+     *
+     * <p>Note:Please do not write blocking data store operations
      * {@link ConnectionReconciliationTask#doRetry(boolean)}
-     * </p>
+     *
      * @param wasPreviousAttemptSuccessful Status of the previous attempt
      */
     public abstract void doRetry(boolean wasPreviousAttemptSuccessful);
@@ -71,10 +71,9 @@ public abstract class ReconciliationTask implements Runnable {
      * using {@link ReconciliationManager#enqueueForRetry(ReconciliationTask)}.
      * To check the readiness of the task, if the data store operation is required, please
      * implement it as an async operation and submit the task on the callback of the future.
-     * <p>
-     * Note:Please do not write blocking data store operations
+     *
+     * <p>Note:Please do not write blocking data store operations
      * {@link ConnectionReconciliationTask#doRetry(boolean)}
-     * </p>
      */
     public abstract void checkReadinessAndProcess();
 

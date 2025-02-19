@@ -70,13 +70,12 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
 
     /**
      * Update the Queues values after finding the related {@OpenVSwitch} list.
-     * <p>
-     * Queue and OpenVSwitch are independent tables in the Open_vSwitch schema
+     *
+     * <p>Queue and OpenVSwitch are independent tables in the Open_vSwitch schema
      * but the OVSDB yang model includes the Queue fields in the
      * OvsdbNode data. In some cases the OVSDB will send OpenVSwitch and Queue
      * updates together and in other cases independently. This method here
      * assumes the latter.
-     * </p>
      *
      * @param transaction the {@link ReadWriteTransaction}
      */

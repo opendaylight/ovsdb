@@ -454,8 +454,8 @@ public class TransactUtils {
     /**
      * This method builds a string by concatenating the 2 character
      * hexadecimal representation of each byte from the input byte array.
-     * <p>
-     * For example: an input byte array containing:
+     *
+     * <p>For example: an input byte array containing:
      *   bytes[0] = 'a'
      *   bytes[1] = 'b'
      *   bytes[2] = 'c'
@@ -464,7 +464,7 @@ public class TransactUtils {
      *   bytes[5] = '2'
      *   bytes[6] = '3'
      * returns the string "6162632d313233"
-     * </p>
+     *
      * @param bytes
      *            The byte array to convert to string
      * @return The hexadecimal representation of the byte array. If bytes is

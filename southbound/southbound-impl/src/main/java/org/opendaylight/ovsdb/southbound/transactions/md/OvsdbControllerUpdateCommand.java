@@ -71,13 +71,11 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
     /**
      * Update the ControllerEntry values for the given {@link Bridge} list.
      *
-     * <p>
-     * Controller and Bridge are independent tables in the Open_vSwitch schema
+     * <p>Controller and Bridge are independent tables in the Open_vSwitch schema
      * but the OVSDB yang model includes the Controller fields in the
      * Bridge data. In some cases the OVSDB will send Bridge and Controller
      * updates together and in other cases independently. This method here
      * assumes the former.
-     * </p>
      *
      * @param transaction the {@link ReadWriteTransaction}
      * @param newUpdatedControllerRows updated {@link Controller} rows
@@ -102,13 +100,11 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
     /**
      * Update the ControllerEntry values after finding the related {@Bridge} list.
      *
-     * <p>
-     * Controller and Bridge are independent tables in the Open_vSwitch schema
+     * <p>Controller and Bridge are independent tables in the Open_vSwitch schema
      * but the OVSDB yang model includes the Controller fields in the
      * Bridge data. In some cases the OVSDB will send Bridge and Controller
      * updates together and in other cases independently. This method here
      * assumes the latter.
-     * </p>
      *
      * @param transaction the {@link ReadWriteTransaction}
      * @param newUpdatedControllerRows updated {@link Controller} rows

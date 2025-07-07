@@ -65,7 +65,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
-      <artifactId>netty-codec</artifactId>
+      <artifactId>netty-codec-base</artifactId>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>

@@ -11,17 +11,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.propagateSystemProperties;
 
-import com.esotericsoftware.yamlbeans.YamlException;
 import com.esotericsoftware.yamlbeans.YamlReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -30,6 +23,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -418,17 +412,12 @@ public final class DockerOvs implements AutoCloseable {
     private List<String> parseDockerComposeYaml() {
         List<String> ports = new ArrayList<>();
 
-        YamlReader yamlReader = null;
         Map root = null;
         try {
-            yamlReader = new YamlReader(new InputStreamReader(new FileInputStream(tmpDockerComposeFile),
-                    StandardCharsets.UTF_8));
+            final var yamlReader = new YamlReader(Files.newBufferedReader(tmpDockerComposeFile.toPath()));
             root = (Map) yamlReader.read();
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             LOG.warn("DockerOvs.parseDockerComposeYaml error reading yaml file", e);
-            return ports;
-        } catch (YamlException e) {
-            LOG.warn("DockerOvs.parseDockerComposeYaml error parsing yaml file", e);
             return ports;
         }
 
@@ -610,8 +599,8 @@ public final class DockerOvs implements AutoCloseable {
         try {
             tmpFile = File.createTempFile("ovsdb-it-tmp-", null);
 
-            try (Reader in = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8);
-                    Writer out = new OutputStreamWriter(new FileOutputStream(tmpFile), StandardCharsets.UTF_8)) {
+            try (var in = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8);
+                 var out = Files.newBufferedWriter(tmpFile.toPath())) {
                 char[] buf = new char[1024];
                 int read;
                 while (-1 != (read = in.read(buf))) {

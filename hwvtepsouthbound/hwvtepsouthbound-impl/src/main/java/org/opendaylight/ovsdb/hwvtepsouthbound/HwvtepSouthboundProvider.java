@@ -39,6 +39,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -147,9 +148,9 @@ public final class HwvtepSouthboundProvider
     }
 
     private void initializeHwvtepTopology(final LogicalDatastoreType type) {
-        InstanceIdentifier<Topology> path = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID));
+        final var path = DataObjectIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+                .build();
         ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
         FluentFuture<Boolean> hwvtepTp = transaction.exists(type, path);
         try {
@@ -218,17 +219,17 @@ public final class HwvtepSouthboundProvider
     }
 
     @Override
-    public Map<InstanceIdentifier<Node>, HwvtepDeviceInfo> getAllConnectedInstances() {
+    public Map<DataObjectIdentifier<Node>, HwvtepDeviceInfo> getAllConnectedInstances() {
         return cm.allConnectedInstances();
     }
 
     @Override
-    public Map<InstanceIdentifier<Node>, TransactionHistory> getControllerTxHistory() {
+    public Map<DataObjectIdentifier<Node>, TransactionHistory> getControllerTxHistory() {
         return cm.controllerTxHistory();
     }
 
     @Override
-    public Map<InstanceIdentifier<Node>, TransactionHistory> getDeviceUpdateHistory() {
+    public Map<DataObjectIdentifier<Node>, TransactionHistory> getDeviceUpdateHistory() {
         return cm.deviceUpdateHistory();
     }
 }

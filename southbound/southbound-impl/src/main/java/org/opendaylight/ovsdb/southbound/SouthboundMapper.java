@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -95,6 +96,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier.WithKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -164,13 +167,14 @@ public final class SouthboundMapper {
         return new IpAddress(ipv6);
     }
 
-    public static InstanceIdentifier<Topology> createTopologyInstanceIdentifier() {
-        return InstanceIdentifier.create(NetworkTopology.class)
-            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
+    public static @NonNull WithKey<Topology, TopologyKey> createTopologyInstanceIdentifier() {
+        return DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+            .build();
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(final NodeId nodeId) {
-        return createTopologyInstanceIdentifier().child(Node.class, new NodeKey(nodeId));
+    public static @NonNull WithKey<Node, NodeKey> createInstanceIdentifier(final NodeId nodeId) {
+        return createTopologyInstanceIdentifier().toBuilder().child(Node.class, new NodeKey(nodeId)).build();
     }
 
     @SuppressWarnings("unchecked")
@@ -222,31 +226,29 @@ public final class SouthboundMapper {
     public static InetAddress createInetAddress(final IpAddress ip) throws UnknownHostException {
         if (ip.getIpv4Address() != null) {
             return InetAddresses.forString(ip.getIpv4Address().getValue());
-        } else if (ip.getIpv6Address() != null) {
-            return InetAddress.getByName(ip.getIpv6Address().getValue());
-        } else {
-            throw new UnknownHostException("IP Address has no value");
         }
+        if (ip.getIpv6Address() != null) {
+            return InetAddress.getByName(ip.getIpv6Address().getValue());
+        }
+        throw new UnknownHostException("IP Address has no value");
     }
 
     public static DatapathId createDatapathId(final Bridge bridge) {
         requireNonNull(bridge);
         if (bridge.getDatapathIdColumn() == null) {
             return null;
-        } else {
-            return createDatapathId(bridge.getDatapathIdColumn().getData());
         }
+        return createDatapathId(bridge.getDatapathIdColumn().getData());
     }
 
     public static DatapathId createDatapathId(final Set<String> dpids) {
         requireNonNull(dpids);
         if (dpids.isEmpty()) {
             return null;
-        } else {
-            String[] dpidArray = new String[dpids.size()];
-            dpids.toArray(dpidArray);
-            return createDatapathId(dpidArray[0]);
         }
+        String[] dpidArray = new String[dpids.size()];
+        dpids.toArray(dpidArray);
+        return createDatapathId(dpidArray[0]);
     }
 
     public static DatapathId createDatapathId(final String dpid) {
@@ -550,9 +552,8 @@ public final class SouthboundMapper {
         if (mapper.get(type) == null) {
             LOG.info("QoS type not found in model: {}", type);
             return QosTypeBase.VALUE;
-        } else {
-            return mapper.get(type);
         }
+        return mapper.get(type);
     }
 
     public static String createQosType(final QosTypeBase qosTypeClass) {
@@ -575,16 +576,15 @@ public final class SouthboundMapper {
                 && ovs.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
             String iidString = ovs.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
             return (InstanceIdentifier<Node>) instanceIdentifierCodec.bindingDeserializerOrNull(iidString);
-        } else {
-            String nodeString = SouthboundConstants.OVSDB_URI_PREFIX + "://" + SouthboundConstants.UUID + "/"
-                    + ovs.getUuid().toString();
-            NodeId nodeId = new NodeId(new Uri(nodeString));
-            NodeKey nodeKey = new NodeKey(nodeId);
-            return InstanceIdentifier.builder(NetworkTopology.class)
-                    .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                    .child(Node.class,nodeKey)
-                    .build();
         }
+        String nodeString = SouthboundConstants.OVSDB_URI_PREFIX + "://" + SouthboundConstants.UUID + "/"
+                + ovs.getUuid().toString();
+        NodeId nodeId = new NodeId(new Uri(nodeString));
+        NodeKey nodeKey = new NodeKey(nodeId);
+        return InstanceIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class,nodeKey)
+                .build();
     }
 
     public static Map<InstanceIdentifier<?>, DataObject> extractTerminationPointConfigurationChanges(

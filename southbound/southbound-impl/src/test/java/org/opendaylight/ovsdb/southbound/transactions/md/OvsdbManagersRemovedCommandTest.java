@@ -43,7 +43,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberModifier;
@@ -105,13 +105,15 @@ public class OvsdbManagersRemovedCommandTest {
     @Test
     public void testDeleteManagers() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        List<InstanceIdentifier<ManagerEntry>> managerEntryIids = new ArrayList<>();
+        List<DataObjectIdentifier<ManagerEntry>> managerEntryIids = new ArrayList<>();
         managerEntryIids.add(SouthboundMapper.createInstanceIdentifier(new NodeId("test"))
+            .toBuilder()
             .augmentation(OvsdbNodeAugmentation.class)
-            .child(ManagerEntry.class, new ManagerEntryKey(new Uri("testUri"))));
-        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+            .child(ManagerEntry.class, new ManagerEntryKey(new Uri("testUri")))
+            .build());
+        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
         ovsdbManagersRemovedCommand.deleteManagers(transaction, managerEntryIids);
-        verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
     }
 
     @Test
@@ -134,7 +136,7 @@ public class OvsdbManagersRemovedCommandTest {
         when(oldOvsdbNode.getManagerOptionsColumn()).thenReturn(column);
         when(column.getData()).thenReturn(set);
         when(openVSwitch.getManagerOptionsColumn()).thenReturn(column);
-        InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(new NodeId("test"));
+        final var bridgeIid = SouthboundMapper.createInstanceIdentifier(new NodeId("test"));
 
         List<InstanceIdentifier<ManagerEntry>> resultManagerEntries =
             ovsdbManagersRemovedCommand.managerEntriesToRemove(bridgeIid, openVSwitch);

@@ -29,7 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 
 public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
     private final Map<UUID, OpenVSwitch> oldOpenVSwitchRows;
@@ -57,20 +57,19 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
 
     @VisibleForTesting
     void deleteManagers(ReadWriteTransaction transaction,
-            List<InstanceIdentifier<ManagerEntry>> managerEntryIids) {
+            List<DataObjectIdentifier<ManagerEntry>> managerEntryIids) {
         for (var managerEntryIid : managerEntryIids) {
             transaction.delete(LogicalDatastoreType.OPERATIONAL, managerEntryIid);
         }
     }
 
     @VisibleForTesting
-    List<InstanceIdentifier<ManagerEntry>> managerEntriesToRemove(
-            InstanceIdentifier<Node> ovsdbNodeIid, OpenVSwitch openVSwitch) {
+    List<DataObjectIdentifier<ManagerEntry>> managerEntriesToRemove(
+            DataObjectIdentifier<Node> ovsdbNodeIid, OpenVSwitch openVSwitch) {
         requireNonNull(ovsdbNodeIid);
         requireNonNull(openVSwitch);
 
-        List<InstanceIdentifier<ManagerEntry>> result =
-                new ArrayList<>();
+        List<DataObjectIdentifier<ManagerEntry>> result = new ArrayList<>();
         OpenVSwitch oldOvsdbNode = oldOpenVSwitchRows.get(openVSwitch.getUuid());
 
         if (oldOvsdbNode != null && oldOvsdbNode.getManagerOptionsColumn() != null) {
@@ -80,14 +79,12 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
                     Manager manager = removedManagerRows.get(managerUuid);
                     if (!checkIfManagerPresentInUpdatedManagersList(manager)) {
                         if (manager != null && manager.getTargetColumn() != null) {
-                            InstanceIdentifier<ManagerEntry> iid = ovsdbNodeIid
-                                    .augmentation(OvsdbNodeAugmentation.class)
-                                    .child(ManagerEntry.class,
-                                            new ManagerEntryKey(
-                                                    new Uri(manager.getTargetColumn().getData())));
-                            result.add(iid);
-                        }
-
+                            result.add(ovsdbNodeIid.toBuilder()
+                                .augmentation(OvsdbNodeAugmentation.class)
+                                .child(ManagerEntry.class, new ManagerEntryKey(
+                                    new Uri(manager.getTargetColumn().getData())))
+                                .build());
+                       }
                     }
                 }
             }

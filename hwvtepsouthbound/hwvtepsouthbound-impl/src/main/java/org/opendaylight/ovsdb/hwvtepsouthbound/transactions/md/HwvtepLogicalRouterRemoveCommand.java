@@ -5,10 +5,8 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
-import java.util.Collection;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -20,33 +18,32 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRouters;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRoutersKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HwvtepLogicalRouterRemoveCommand extends AbstractTransactionCommand<LogicalRouters> {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepLogicalRouterRemoveCommand.class);
 
-    public HwvtepLogicalRouterRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public HwvtepLogicalRouterRemoveCommand(final HwvtepConnectionInstance key, final TableUpdates updates,
+            final DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 
     @Override
-    public void execute(ReadWriteTransaction transaction) {
-        Collection<LogicalRouter> deletedLRRows =
+    public void execute(final ReadWriteTransaction transaction) {
+        final var deletedLRRows =
                 TyperUtils.extractRowsRemoved(LogicalRouter.class, getUpdates(), getDbSchema()).values();
         if (deletedLRRows != null) {
             for (LogicalRouter router : deletedLRRows) {
                 HwvtepNodeName routerNode = new HwvtepNodeName(router.getName());
                 LOG.debug("Clearing device operational data for logical router {}", routerNode);
-                InstanceIdentifier<LogicalRouters> routerIid = getOvsdbConnectionInstance().getInstanceIdentifier()
+                final var routerIid = getOvsdbConnectionInstance().getInstanceIdentifier().toBuilder()
                         .augmentation(HwvtepGlobalAugmentation.class)
-                        .child(LogicalRouters.class, new LogicalRoutersKey(routerNode));
+                        .child(LogicalRouters.class, new LogicalRoutersKey(routerNode))
+                        .build();
                 transaction.delete(LogicalDatastoreType.OPERATIONAL, routerIid);
                 getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOperData(LogicalRouters.class, routerIid);
             }
         }
     }
-
 }

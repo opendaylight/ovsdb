@@ -44,7 +44,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,9 +150,8 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
             LOG.trace("Reconcile Bridge from InclusionList {} only", bridgeReconcileIncludeList);
             for (String bridgeNodeIid : bridgeReconcileIncludeList) {
                 try (ReadTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
-                    InstanceIdentifier<Node> nodeInstanceIdentifier =
-                        SouthboundMapper.createInstanceIdentifier(new NodeId(bridgeNodeIid));
-                    readNodeFuture = tx.read(LogicalDatastoreType.CONFIGURATION, nodeInstanceIdentifier);
+                    readNodeFuture = tx.read(LogicalDatastoreType.CONFIGURATION,
+                        SouthboundMapper.createInstanceIdentifier(new NodeId(bridgeNodeIid)));
                 }
                 readNodeFuture.addCallback(new FutureCallback<Optional<Node>>() {
                     @Override
@@ -208,34 +206,29 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
         return true;
     }
 
-    private static Map<InstanceIdentifier<?>, DataObject> extractBridgeConfigurationChanges(
+    private static Map<DataObjectIdentifier<?>, DataObject> extractBridgeConfigurationChanges(
             final Node bridgeNode, final OvsdbBridgeAugmentation ovsdbBridge) {
-        Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
-        final InstanceIdentifier<Node> bridgeNodeIid =
-                SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
-        final InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbBridgeIid =
-                bridgeNodeIid.builder().augmentation(OvsdbBridgeAugmentation.class).build();
+        Map<DataObjectIdentifier<?>, DataObject> changes = new HashMap<>();
+        final var bridgeNodeIid = SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
+        final var ovsdbBridgeIid = bridgeNodeIid.toBuilder().augmentation(OvsdbBridgeAugmentation.class).build();
         changes.put(bridgeNodeIid, bridgeNode);
         changes.put(ovsdbBridgeIid, ovsdbBridge);
 
         final Map<ProtocolEntryKey, ProtocolEntry> protocols = ovsdbBridge.getProtocolEntry();
         if (protocols != null) {
             for (ProtocolEntry protocol : protocols.values()) {
-                if (SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) != null) {
-                    KeyedInstanceIdentifier<ProtocolEntry, ProtocolEntryKey> protocolIid =
-                            ovsdbBridgeIid.child(ProtocolEntry.class, protocol.key());
-                    changes.put(protocolIid, protocol);
-                } else {
+                if (SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) == null) {
                     throw new IllegalArgumentException("Unknown protocol " + protocol.getProtocol());
                 }
+                final var protocolIid = ovsdbBridgeIid.toBuilder().child(ProtocolEntry.class, protocol.key()).build();
+                changes.put(protocolIid, protocol);
             }
         }
 
         final Map<ControllerEntryKey, ControllerEntry> controllers = ovsdbBridge.getControllerEntry();
         if (controllers != null) {
             for (ControllerEntry controller : controllers.values()) {
-                KeyedInstanceIdentifier<ControllerEntry, ControllerEntryKey> controllerIid =
-                        ovsdbBridgeIid.child(ControllerEntry.class, controller.key());
+                var controllerIid = ovsdbBridgeIid.toBuilder().child(ControllerEntry.class, controller.key()).build();
                 changes.put(controllerIid, controller);
             }
         }

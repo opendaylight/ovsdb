@@ -65,14 +65,14 @@ public class HwvtepOperationalState {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperationalState.class);
 
-    private final Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
+    private final Map<DataObjectIdentifier<Node>, Node> operationalNodes = new HashMap<>();
     private ReadWriteTransaction transaction;
-    HashMap<InstanceIdentifier<TerminationPoint>, UUID> inflightLocators = new HashMap<>();
+    private final HashMap<DataObjectIdentifier<TerminationPoint>, UUID> inflightLocators = new HashMap<>();
     private final HwvtepDeviceInfo deviceInfo;
     private final HwvtepConnectionInstance connectionInstance;
-    private final Map<Class<? extends EntryObject<?, ?>>, Map<InstanceIdentifier, UUID>> currentTxUUIDs =
+    private final Map<Class<? extends EntryObject<?, ?>>, Map<DataObjectIdentifier, UUID>> currentTxUUIDs =
             new ConcurrentHashMap<>();
-    private final Map<Class<? extends EntryObject<?, ?>>, Map<InstanceIdentifier, Boolean>> currentTxDeletedKeys =
+    private final Map<Class<? extends EntryObject<?, ?>>, Map<DataObjectIdentifier, Boolean>> currentTxDeletedKeys =
             new ConcurrentHashMap<>();
 
     /* stores the modified and deleted data for each child type of each node id
@@ -80,7 +80,7 @@ public class HwvtepOperationalState {
        each updated/ deleted contains Map < child type, List<ChildData>>
        child type is the child of hwvtep Global augmentation
      */
-    private Map<InstanceIdentifier<Node>,
+    private Map<DataObjectIdentifier<Node>,
             Pair<Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>,
                     Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>>> modifiedData = new HashMap<>();
     private boolean inReconciliation = false;
@@ -325,14 +325,14 @@ public class HwvtepOperationalState {
         return HwvtepSouthboundUtil.containsKey(currentTxUUIDs, cls, key);
     }
 
-    public Set<InstanceIdentifier> getDeletedKeysInCurrentTx(final Class<? extends EntryObject<?, ?>> cls) {
+    public Set<DataObjectIdentifier> getDeletedKeysInCurrentTx(final Class<? extends EntryObject<?, ?>> cls) {
         if (currentTxDeletedKeys.containsKey(cls)) {
             return currentTxDeletedKeys.get(cls).keySet();
         }
         return Collections.emptySet();
     }
 
-    public List<? extends EntryObject<?, ?>> getUpdatedData(final InstanceIdentifier<Node> key,
+    public List<? extends EntryObject<?, ?>> getUpdatedData(final DataObjectIdentifier<Node> key,
                                                             final Class<? extends EntryObject<?, ?>> cls) {
         List<EntryObject<?, ?>> result = null;
         if (modifiedData.get(key) != null && modifiedData.get(key).getLeft() != null) {
@@ -356,7 +356,7 @@ public class HwvtepOperationalState {
         return result;
     }
 
-    public void setModifiedData(final Map<InstanceIdentifier<Node>,
+    public void setModifiedData(final Map<DataObjectIdentifier<Node>,
             Pair<Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>,
                     Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>>> modifiedData) {
         this.modifiedData = modifiedData;

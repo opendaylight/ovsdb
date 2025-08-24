@@ -14,6 +14,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.schema.hardwarevtep.ACL;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
@@ -51,7 +52,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier.WithKey;
+import org.opendaylight.yangtools.binding.DataObjectReference;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,50 +63,51 @@ public final class HwvtepSouthboundMapper {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepSouthboundMapper.class);
 
     private HwvtepSouthboundMapper() {
+        // Hidden on purpose
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(final NodeId nodeId) {
-        return InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
-                .child(Node.class,new NodeKey(nodeId));
+    public static @NonNull WithKey<Node, NodeKey> createInstanceIdentifier(final NodeId nodeId) {
+        return DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+            .child(Node.class,new NodeKey(nodeId))
+            .build();
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(final OvsdbClient client) {
+    public static @NonNull WithKey<Node, NodeKey> createInstanceIdentifier(final OvsdbClient client) {
         return createInstanceIdentifier(createIpAddress(client.getConnectionInfo().getRemoteAddress()),
                         new PortNumber(Uint16.valueOf(client.getConnectionInfo().getRemotePort())));
     }
 
-    private static InstanceIdentifier<Node> createInstanceIdentifier(final IpAddress ip, final PortNumber port) {
+    private static @NonNull WithKey<Node, NodeKey> createInstanceIdentifier(final IpAddress ip, final PortNumber port) {
         String uriString = HwvtepSouthboundConstants.HWVTEP_URI_PREFIX + "://"
                 + ip.stringValue() + ":" + port.getValue();
         Uri uri = new Uri(uriString);
         NodeId nodeId = new NodeId(uri);
-        InstanceIdentifier<Node> path = InstanceIdentifier.create(NetworkTopology.class)
-                        .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
-                        .child(Node.class,new NodeKey(nodeId));
-        LOG.debug("Created ovsdb path: {}",path);
+        final var path = DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+            .child(Node.class,new NodeKey(nodeId))
+            .build();
+        LOG.debug("Created ovsdb path: {}", path);
         return path;
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(final HwvtepConnectionInstance client,
+    public static @NonNull WithKey<Node, NodeKey> createInstanceIdentifier(final HwvtepConnectionInstance client,
             final PhysicalSwitch physicalSwitch) {
         //TODO: Clean this up
         return createInstanceIdentifier(client, new HwvtepNodeName(physicalSwitch.getName()));
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(final HwvtepConnectionInstance client,
+    public static @NonNull WithKey<Node, NodeKey> createInstanceIdentifier(final HwvtepConnectionInstance client,
                     final HwvtepNodeName psName) {
-        NodeKey nodeKey = new NodeKey(createManagedNodeId(client, psName));
-        return InstanceIdentifier.builder(NetworkTopology.class)
-                        .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
-                        .child(Node.class, nodeKey).build();
+        return DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+            .child(Node.class, new NodeKey(createManagedNodeId(client, psName)))
+            .build();
     }
 
-    public static InstanceIdentifier<LogicalSwitches> createInstanceIdentifier(final HwvtepConnectionInstance client,
-            final LogicalSwitch logicalSwitch) {
-        InstanceIdentifier<LogicalSwitches> iid = null;
-        iid = InstanceIdentifier.builder(NetworkTopology.class)
+    public static @NonNull WithKey<LogicalSwitches, LogicalSwitchesKey> createInstanceIdentifier(
+            final HwvtepConnectionInstance client, final LogicalSwitch logicalSwitch) {
+        return DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                 .child(Node.class, client.getNodeKey()).augmentation(HwvtepGlobalAugmentation.class)
                 .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch.getName())))
@@ -112,69 +116,67 @@ public final class HwvtepSouthboundMapper {
         iid = client.getInstanceIdentifier().builder()
             .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(lSwitch.getName())))).build()
          */
-        return iid;
     }
 
-    public static InstanceIdentifier<Acls> createInstanceIdentifier(final HwvtepConnectionInstance client,
+    public static @NonNull WithKey<Acls, AclsKey> createInstanceIdentifier(final HwvtepConnectionInstance client,
             final ACL acl) {
-        return InstanceIdentifier.builder(NetworkTopology.class)
+        return DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                 .child(Node.class, client.getNodeKey()).augmentation(HwvtepGlobalAugmentation.class)
                 .child(Acls.class, new AclsKey(acl.getAclName()))
                 .build();
     }
 
-    public static InstanceIdentifier<Tunnels> createInstanceIdentifier(final InstanceIdentifier<Node> nodeIid,
-            final InstanceIdentifier<TerminationPoint> localTpIid,
-            final InstanceIdentifier<TerminationPoint> remoteTpIid) {
-
-        TunnelsKey tunnelsKey = new TunnelsKey(new HwvtepPhysicalLocatorRef(localTpIid.toIdentifier()),
-                new HwvtepPhysicalLocatorRef(remoteTpIid.toIdentifier()));
-        InstanceIdentifier<Tunnels> tunnelInstanceId = nodeIid.builder().augmentation(PhysicalSwitchAugmentation.class)
-                .child(Tunnels.class, tunnelsKey).build();
-        return tunnelInstanceId;
+    public static @NonNull WithKey<Tunnels, TunnelsKey> createInstanceIdentifier(
+            final DataObjectIdentifier<Node> nodeIid, final DataObjectIdentifier<TerminationPoint> localTpIid,
+            final DataObjectIdentifier<TerminationPoint> remoteTpIid) {
+        return nodeIid.toBuilder()
+            .augmentation(PhysicalSwitchAugmentation.class)
+            .child(Tunnels.class, new TunnelsKey(new HwvtepPhysicalLocatorRef(localTpIid),
+                new HwvtepPhysicalLocatorRef(remoteTpIid)))
+            .build();
     }
 
-    public static InstanceIdentifier<TerminationPoint> createInstanceIdentifier(final InstanceIdentifier<Node> nodeIid,
-            final PhysicalLocator physicalLocator) {
-        return nodeIid.child(TerminationPoint.class, getTerminationPointKey(physicalLocator));
+    public static @NonNull WithKey<TerminationPoint, TerminationPointKey> createInstanceIdentifier(
+            final DataObjectIdentifier<Node> nodeIid, final PhysicalLocator physicalLocator) {
+        return nodeIid.toBuilder().child(TerminationPoint.class, getTerminationPointKey(physicalLocator)).build();
     }
 
-    public static InstanceIdentifier<VlanBindings> createInstanceIdentifier(final HwvtepConnectionInstance client,
-            final InstanceIdentifier<TerminationPoint> tpPath, final VlanBindings vlanBindings) {
-        return tpPath.augmentation(HwvtepPhysicalPortAugmentation.class).child(VlanBindings.class,
-                new VlanBindingsKey(vlanBindings.key()));
-
+    public static @NonNull WithKey<VlanBindings, VlanBindingsKey> createInstanceIdentifier(
+            final HwvtepConnectionInstance client, final DataObjectIdentifier<TerminationPoint> tpPath,
+            final VlanBindings vlanBindings) {
+        return tpPath.toBuilder()
+            .augmentation(HwvtepPhysicalPortAugmentation.class)
+            .child(VlanBindings.class, new VlanBindingsKey(vlanBindings.key()))
+            .build();
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier() {
-        InstanceIdentifier<Node> path = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
-                .child(Node.class);
-        return path;
-    }
+    public static @NonNull DataObjectReference<Node> createInstanceIdentifier() {
+        return DataObjectReference.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+            .child(Node.class)
+            .build();
+   }
 
-    public static NodeId createManagedNodeId(final InstanceIdentifier<Node> iid) {
-        NodeKey nodeKey = iid.firstKeyOf(Node.class);
-        return nodeKey.getNodeId();
+    public static @NonNull NodeId createManagedNodeId(final DataObjectIdentifier<Node> iid) {
+        return iid.getFirstKeyOf(Node.class).getNodeId();
     }
 
     public static NodeId createManagedNodeId(final HwvtepConnectionInstance client, final HwvtepNodeName psName) {
         String nodeString = client.getNodeKey().getNodeId().getValue()
                         + "/" + HwvtepSouthboundConstants.PSWITCH_URI_PREFIX + "/" + psName.getValue();
-        NodeId nodeId = new NodeId(new Uri(nodeString));
-        return nodeId;
+        return new NodeId(new Uri(nodeString));
     }
 
+    // FIXME: IetfInetUtil.ipAddressFor() does this as well, but does something else for IPv6
     public static IpAddress createIpAddress(final InetAddress address) {
-        IpAddress ip = null;
-        if (address instanceof Inet4Address) {
-            ip = createIpAddress((Inet4Address)address);
-        } else if (address instanceof Inet6Address) {
-            ip = createIpAddress((Inet6Address)address);
+        if (address instanceof Inet4Address inet4) {
+            return createIpAddress(inet4);
         }
-        return ip;
+        if (address instanceof Inet6Address inet6) {
+            return createIpAddress(inet6);
+        }
+        return null;
     }
 
     public static IpAddress createIpAddress(final Inet4Address address) {
@@ -182,8 +184,7 @@ public final class HwvtepSouthboundMapper {
     }
 
     public static IpAddress createIpAddress(final Inet6Address address) {
-        Ipv6Address ipv6 = new Ipv6Address(address.getHostAddress());
-        return new IpAddress(ipv6);
+        return new IpAddress(new Ipv6Address(address.getHostAddress()));
     }
 
     public static ConnectionInfo createConnectionInfo(final OvsdbClient client) {
@@ -205,20 +206,20 @@ public final class HwvtepSouthboundMapper {
     public static InetAddress createInetAddress(final IpAddress ip) throws UnknownHostException {
         if (ip.getIpv4Address() != null) {
             return InetAddresses.forString(ip.getIpv4Address().getValue());
-        } else if (ip.getIpv6Address() != null) {
-            return InetAddress.getByName(ip.getIpv6Address().getValue());
-        } else {
-            throw new UnknownHostException("IP Address has no value");
         }
+        if (ip.getIpv6Address() != null) {
+            return InetAddress.getByName(ip.getIpv6Address().getValue());
+        }
+        throw new UnknownHostException("IP Address has no value");
     }
 
-    public static InstanceIdentifier<Node> getInstanceIdentifier(final Global global) {
+    public static @NonNull WithKey<Node, NodeKey> getInstanceIdentifier(final Global global) {
         String nodeString = HwvtepSouthboundConstants.HWVTEP_URI_PREFIX + "://"
                 + HwvtepSouthboundConstants.UUID + "/" + global.getUuid().toString();
         NodeId nodeId = new NodeId(new Uri(nodeString));
         NodeKey nodeKey = new NodeKey(nodeId);
         TopologyKey topoKey = new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID);
-        return InstanceIdentifier.builder(NetworkTopology.class)
+        return DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, topoKey)
                 .child(Node.class, nodeKey)
                 .build();

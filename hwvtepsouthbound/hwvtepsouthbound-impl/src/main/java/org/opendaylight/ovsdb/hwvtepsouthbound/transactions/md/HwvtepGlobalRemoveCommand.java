@@ -24,7 +24,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.SwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,14 +31,15 @@ public class HwvtepGlobalRemoveCommand extends AbstractTransactionCommand {
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepGlobalRemoveCommand.class);
     private static final long ONE_CONNECTED_MANAGER = 1;
     private static final long ONE_ACTIVE_CONNECTION_IN_PASSIVE_MODE = 1;
-    private final InstanceIdentifier<Node> nodeInstanceIdentifier;
+    
+    private final DataObjectIdentifier<Node> nodeInstanceIdentifier;
 
     public HwvtepGlobalRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
         this.nodeInstanceIdentifier = key.getInstanceIdentifier();
     }
 
-    public HwvtepGlobalRemoveCommand(InstanceIdentifier<Node> nodeInstanceIdentifier) {
+    public HwvtepGlobalRemoveCommand(DataObjectIdentifier<Node> nodeInstanceIdentifier) {
         super(null, null, null);
         this.nodeInstanceIdentifier = nodeInstanceIdentifier;
     }

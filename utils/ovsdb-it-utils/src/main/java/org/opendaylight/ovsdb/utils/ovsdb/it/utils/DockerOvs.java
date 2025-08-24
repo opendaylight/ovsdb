@@ -355,7 +355,7 @@ public final class DockerOvs implements AutoCloseable {
         return dockerComposeServices.size();
     }
 
-    private String getOvsNumString(int numOvs) {
+    private static String getOvsNumString(int numOvs) {
         if (numOvs == 0) {
             return "ovs1";
         } else {

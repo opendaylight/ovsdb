@@ -3,9 +3,17 @@
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
- */
+ * and is available at http://www.eclipse.org/legal/epl-v10.html    Bump upstreams
+    
+    Adopt:
+    - odlparent-14.1.1
+    - infrautils-7.1.5
+    - yangtools-14.0.15
+    - mdsal-14.0.15
+    - controller-11.0.1
+    - aaa-0.21.1
 
+ */
 package org.opendaylight.ovsdb.utils.southbound.utils;
 
 import static java.util.Objects.requireNonNull;
@@ -130,14 +138,14 @@ import org.slf4j.LoggerFactory;
 public class SouthboundUtils {
     private abstract static class UtilsProvider {
 
-        abstract <T extends DataObject> T read(LogicalDatastoreType store, InstanceIdentifier<T> path);
+        abstract <T extends DataObject> T read(LogicalDatastoreType store, DataObjectIdentifier<T> path);
 
-        abstract boolean delete(LogicalDatastoreType store, InstanceIdentifier<?> path);
+        abstract boolean delete(LogicalDatastoreType store, DataObjectIdentifier<?> path);
 
-        abstract <T extends DataObject> boolean put(LogicalDatastoreType store, InstanceIdentifier<T> path,
+        abstract <T extends DataObject> boolean put(LogicalDatastoreType store, DataObjectIdentifier<T> path,
                 T createNode);
 
-        abstract <T extends DataObject> boolean merge(LogicalDatastoreType store, InstanceIdentifier<T> path, T data);
+        abstract <T extends DataObject> boolean merge(LogicalDatastoreType store, DataObjectIdentifier<T> path, T data);
     }
 
     private static final class MdsalUtilsProvider extends UtilsProvider {
@@ -148,22 +156,22 @@ public class SouthboundUtils {
         }
 
         @Override
-        <T extends DataObject> T read(LogicalDatastoreType store, InstanceIdentifier<T> path) {
+        <T extends DataObject> T read(LogicalDatastoreType store, DataObjectIdentifier<T> path) {
             return mdsalUtils.read(store, path);
         }
 
         @Override
-        <T extends DataObject> boolean put(LogicalDatastoreType store, InstanceIdentifier<T> path, T data) {
+        <T extends DataObject> boolean put(LogicalDatastoreType store, DataObjectIdentifier<T> path, T data) {
             return mdsalUtils.put(store, path, data);
         }
 
         @Override
-        boolean delete(LogicalDatastoreType store, InstanceIdentifier<?> path) {
+        boolean delete(LogicalDatastoreType store, DataObjectIdentifier<?> path) {
             return mdsalUtils.delete(store, path);
         }
 
         @Override
-        <T extends DataObject> boolean merge(LogicalDatastoreType store, InstanceIdentifier<T> path, T data) {
+        <T extends DataObject> boolean merge(LogicalDatastoreType store, DataObjectIdentifier<T> path, T data) {
             return mdsalUtils.merge(store, path, data);
         }
     }
@@ -254,47 +262,46 @@ public class SouthboundUtils {
         return new OvsdbNodeAugmentationBuilder().setConnectionInfo(key).build();
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
-        return InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
-                .child(Node.class,new NodeKey(nodeId));
+    public static DataObjectIdentifier<Node> createInstanceIdentifier(NodeId nodeId) {
+        return DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
+            .child(Node.class, new NodeKey(nodeId))
+            .build();
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(NodeKey ovsdbNodeKey, String bridgeName) {
+    public static DataObjectIdentifier<Node> createInstanceIdentifier(NodeKey ovsdbNodeKey, String bridgeName) {
         return createInstanceIdentifier(createManagedNodeId(ovsdbNodeKey.getNodeId(), bridgeName));
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key) {
+    public static DataObjectIdentifier<Node> createInstanceIdentifier(ConnectionInfo key) {
         return createInstanceIdentifier(key.getRemoteIp(), key.getRemotePort());
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
-        InstanceIdentifier<Node> path = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
-                .child(Node.class,createNodeKey(ip,port));
-        LOG.debug("Created ovsdb path: {}",path);
+    public static DataObjectIdentifier<Node> createInstanceIdentifier(IpAddress ip, PortNumber port) {
+        final var path = DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
+            .child(Node.class, createNodeKey(ip,port))
+            .build();
+        LOG.debug("Created ovsdb path: {}", path);
         return path;
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key, OvsdbBridgeName bridgeName) {
+    public static DataObjectIdentifier<Node> createInstanceIdentifier(ConnectionInfo key, OvsdbBridgeName bridgeName) {
         return createInstanceIdentifier(createManagedNodeId(key, bridgeName));
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(ConnectionInfo key, String bridgeName) {
+    public static DataObjectIdentifier<Node> createInstanceIdentifier(ConnectionInfo key, String bridgeName) {
         return createInstanceIdentifier(key, new OvsdbBridgeName(bridgeName));
     }
 
-    public InstanceIdentifier<TerminationPoint> createTerminationPointInstanceIdentifier(Node node, String portName) {
+    public DataObjectIdentifier<TerminationPoint> createTerminationPointInstanceIdentifier(Node node, String portName) {
+        final var terminationPointPath = DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
+            .child(Node.class,node.key())
+            .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)))
+            .build();
 
-        InstanceIdentifier<TerminationPoint> terminationPointPath = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(OVSDB_TOPOLOGY_ID))
-                .child(Node.class,node.key())
-                .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
-
-        LOG.debug("Termination point InstanceIdentifier generated : {}",terminationPointPath);
+        LOG.debug("Termination point InstanceIdentifier generated : {}", terminationPointPath);
         return terminationPointPath;
     }
 
@@ -515,9 +522,7 @@ public class SouthboundUtils {
         Node bridgeNode = null;
         ConnectionInfo connectionInfo = getConnectionInfo(ovsdbNode);
         if (connectionInfo != null) {
-            InstanceIdentifier<Node> bridgeIid =
-                    createInstanceIdentifier(node.key(), name);
-            bridgeNode = provider.read(LogicalDatastoreType.OPERATIONAL, bridgeIid);
+            bridgeNode = provider.read(LogicalDatastoreType.OPERATIONAL, createInstanceIdentifier(node.key(), name));
         }
         return bridgeNode;
     }

@@ -58,6 +58,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -68,7 +69,7 @@ public class HwvtepConnectionInstance {
     private ConnectionInfo connectionInfo;
     private final OvsdbClient client;
     private final HwvtepTableReader hwvtepTableReader;
-    private InstanceIdentifier<Node> instanceIdentifier;
+    private DataObjectIdentifier<Node> instanceIdentifier;
     private final TransactionInvoker txInvoker;
     private Map<TypedDatabaseSchema, TransactInvoker> transactInvokers;
     private MonitorCallBack callback;
@@ -91,7 +92,7 @@ public class HwvtepConnectionInstance {
     private TransactionHistory deviceUpdateHistory;
 
     HwvtepConnectionInstance(final HwvtepConnectionManager hwvtepConnectionManager, final ConnectionInfo key,
-            final OvsdbClient client, final InstanceIdentifier<Node> iid, final TransactionInvoker txInvoker,
+            final OvsdbClient client, final DataObjectIdentifier<Node> iid, final TransactionInvoker txInvoker,
             final DataBroker dataBroker, final Operations ops) {
         this.hwvtepConnectionManager = hwvtepConnectionManager;
         this.connectionInfo = key;
@@ -304,7 +305,7 @@ public class HwvtepConnectionInstance {
         this.connectionInfo = key;
     }
 
-    public InstanceIdentifier<Node> getInstanceIdentifier() {
+    public DataObjectIdentifier<Node> getInstanceIdentifier() {
         return instanceIdentifier;
     }
 
@@ -317,7 +318,7 @@ public class HwvtepConnectionInstance {
         return getNodeKey().getNodeId();
     }
 
-    public void setInstanceIdentifier(final InstanceIdentifier<Node> iid) {
+    public void setInstanceIdentifier(final DataObjectIdentifier<Node> iid) {
         this.instanceIdentifier = iid;
         hwvtepConnectionManager.putConnectionInstance(instanceIdentifier, this);
     }

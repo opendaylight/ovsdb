@@ -313,8 +313,8 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
         DataObjectModification<Node> mod = change.getRootNode();
         Node updatedNode = TransactUtils.getUpdated(mod);
         List<T> updatedData = getData(updatedNode);
-        Set<InstanceIdentifier> deleted = getOperationalState().getDeletedKeysInCurrentTx(LogicalSwitches.class);
-        UnMetDependencyGetter dependencyGetter = getDependencyGetter();
+        final var deleted = getOperationalState().getDeletedKeysInCurrentTx(LogicalSwitches.class);
+        final var dependencyGetter = getDependencyGetter();
         if (!HwvtepSouthboundUtil.isEmpty(deleted) && !HwvtepSouthboundUtil.isEmpty(updatedData)
                 && dependencyGetter != null) {
             List<T> removed = new ArrayList<>();

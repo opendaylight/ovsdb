@@ -66,6 +66,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -85,16 +86,16 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private final DataBroker db;
     private final TransactionInvoker txInvoker;
     private final Operations ops;
-    private final Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers = new ConcurrentHashMap<>();
+    private final Map<ConnectionInfo, DataObjectIdentifier<Node>> instanceIdentifiers = new ConcurrentHashMap<>();
     private final Map<Entity, HwvtepConnectionInstance> entityConnectionMap = new ConcurrentHashMap<>();
     private final EntityOwnershipService entityOwnershipService;
     private final HwvtepDeviceEntityOwnershipListener hwvtepDeviceEntityOwnershipListener;
     private final ReconciliationManager reconciliationManager;
-    private final Map<InstanceIdentifier<Node>, HwvtepConnectionInstance> nodeIidVsConnectionInstance =
+    private final Map<DataObjectIdentifier<Node>, HwvtepConnectionInstance> nodeIidVsConnectionInstance =
             new ConcurrentHashMap<>();
     private final HwvtepOperGlobalListener hwvtepOperGlobalListener;
-    private final Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxHistory = new ConcurrentHashMap<>();
-    private final Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateHistory = new ConcurrentHashMap<>();
+    private final Map<DataObjectIdentifier<Node>, TransactionHistory> controllerTxHistory = new ConcurrentHashMap<>();
+    private final Map<DataObjectIdentifier<Node>, TransactionHistory> deviceUpdateHistory = new ConcurrentHashMap<>();
     private final OvsdbConnection ovsdbConnectionService;
     private final Map<OvsdbClient, OvsdbClient> alreadyProcessedClients = new ConcurrentHashMap<>();
     private final ScheduledExecutorService dependencyExecutor;
@@ -224,17 +225,18 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
     }
 
-    public OvsdbClient connect(final InstanceIdentifier<Node> iid, final HwvtepGlobalAugmentation hwvtepGlobal)
+    public OvsdbClient connect(final DataObjectIdentifier<Node> iid, final HwvtepGlobalAugmentation hwvtepGlobal)
             throws UnknownHostException, ConnectException {
         LOG.info("Connecting to {}", HwvtepSouthboundUtil.connectionInfoToString(hwvtepGlobal.getConnectionInfo()));
         InetAddress ip = HwvtepSouthboundMapper.createInetAddress(hwvtepGlobal.getConnectionInfo().getRemoteIp());
         OvsdbClient client = ovsdbConnectionService
                         .connect(ip, hwvtepGlobal.getConnectionInfo().getRemotePort().getValue().toJava());
         if (client != null) {
-            putInstanceIdentifier(hwvtepGlobal.getConnectionInfo(), iid.firstIdentifierOf(Node.class));
+            final var nodeId = iid.trimTo(Node.class);
+            putInstanceIdentifier(hwvtepGlobal.getConnectionInfo(), nodeId);
             HwvtepConnectionInstance hwvtepConnectionInstance = connectedButCallBacksNotRegistered(client);
             hwvtepConnectionInstance.setHwvtepGlobalAugmentation(hwvtepGlobal);
-            hwvtepConnectionInstance.setInstanceIdentifier(iid.firstIdentifierOf(Node.class));
+            hwvtepConnectionInstance.setInstanceIdentifier(nodeId);
 
             // Register Cluster Ownership for ConnectionInfo
             registerEntityForOwnership(hwvtepConnectionInstance);
@@ -369,18 +371,18 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         LOG.info("Clients after remove: {}", clients);
     }
 
-    private void removeConnectionInstance(final InstanceIdentifier<Node> nodeIid) {
+    private void removeConnectionInstance(final DataObjectIdentifier<Node> nodeIid) {
         if (nodeIid != null) {
             nodeIidVsConnectionInstance.remove(nodeIid);
         }
     }
 
-    private void putInstanceIdentifier(final ConnectionInfo key,final InstanceIdentifier<Node> iid) {
+    private void putInstanceIdentifier(final ConnectionInfo key, final DataObjectIdentifier<Node> iid) {
         ConnectionInfo connectionInfo = HwvtepSouthboundMapper.suppressLocalIpPort(key);
         instanceIdentifiers.put(connectionInfo, iid);
     }
 
-    public InstanceIdentifier<Node> getInstanceIdentifier(final ConnectionInfo key) {
+    public DataObjectIdentifier<Node> getInstanceIdentifier(final ConnectionInfo key) {
         ConnectionInfo connectionInfo = HwvtepSouthboundMapper.suppressLocalIpPort(key);
         return instanceIdentifiers.get(connectionInfo);
     }
@@ -584,7 +586,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
 
                         } else {
                             LOG.debug("Connection {} was switch initiated, no reconciliation is required",
-                                iid.firstKeyOf(Node.class).getNodeId());
+                                iid.getFirstKeyOf(Node.class).getNodeId());
                         }
                     }
 
@@ -703,20 +705,20 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         }
     }
 
-    final Map<InstanceIdentifier<Node>, HwvtepDeviceInfo> allConnectedInstances() {
+    final Map<DataObjectIdentifier<Node>, HwvtepDeviceInfo> allConnectedInstances() {
         return Maps.transformValues(Collections.unmodifiableMap(nodeIidVsConnectionInstance),
             HwvtepConnectionInstance::getDeviceInfo);
     }
 
-    final Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxHistory() {
+    final Map<DataObjectIdentifier<Node>, TransactionHistory> controllerTxHistory() {
         return Collections.unmodifiableMap(controllerTxHistory);
     }
 
-    final Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateHistory() {
+    final Map<DataObjectIdentifier<Node>, TransactionHistory> deviceUpdateHistory() {
         return Collections.unmodifiableMap(deviceUpdateHistory);
     }
 
-    public void cleanupOperationalNode(final InstanceIdentifier<Node> nodeIid) {
+    public void cleanupOperationalNode(final DataObjectIdentifier<Node> nodeIid) {
         txInvoker.invoke(new HwvtepGlobalRemoveCommand(nodeIid));
     }
 

@@ -351,7 +351,7 @@ public class HwvtepDeviceInfo {
         dependencyQueue.submit(() -> connectionInstance.transact(transactCommand));
     }
 
-    public void clearInTransit(Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier<?> key) {
+    public void clearInTransit(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier<?> key) {
         DeviceData deviceData = getDeviceOperData(cls, key);
         if (deviceData != null && deviceData.isInTransitState()) {
             if (deviceData.getData() != null) {

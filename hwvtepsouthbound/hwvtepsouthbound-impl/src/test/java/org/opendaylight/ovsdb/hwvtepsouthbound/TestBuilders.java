@@ -36,8 +36,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public final class TestBuilders {
 
@@ -50,35 +50,36 @@ public final class TestBuilders {
         return Arrays.stream(data).map(TestBuilders::buildLogicalSwitch).collect(BindingMap.toOrderedMap());
     }
 
-    public static Map<RemoteMcastMacsKey, RemoteMcastMacs> remoteMcastMacs(InstanceIdentifier<Node> iid,
+    public static Map<RemoteMcastMacsKey, RemoteMcastMacs> remoteMcastMacs(DataObjectIdentifier<Node> iid,
                                                                            String[]... data) {
         return Arrays.stream(data)
             .map(row -> TestBuilders.buildRemoteMcastMacs(iid, row[0], row[1], Arrays.copyOfRange(row, 2, row.length)))
             .collect(BindingMap.toOrderedMap());
     }
 
-    public static Map<RemoteUcastMacsKey, RemoteUcastMacs> remoteUcastMacs(InstanceIdentifier<Node> iid,
+    public static Map<RemoteUcastMacsKey, RemoteUcastMacs> remoteUcastMacs(DataObjectIdentifier<Node> iid,
                                                                            String[]... data) {
         return Arrays.stream(data)
             .map(row -> TestBuilders.buildRemoteUcastMacs(iid, row[0], row[1], row[2], row[3]))
             .collect(BindingMap.toOrderedMap());
     }
 
-    public static Map<TerminationPointKey, TerminationPoint> globalTerminationPoints(InstanceIdentifier<Node> nodeIid,
+    public static Map<TerminationPointKey, TerminationPoint> globalTerminationPoints(DataObjectIdentifier<Node> nodeIid,
                                                                                      String[]... data) {
         return Arrays.stream(data)
             .map(row -> TestBuilders.buildTerminationPoint(nodeIid, row[0]))
             .collect(BindingMap.toOrderedMap());
     }
 
-    public static HwvtepLogicalSwitchRef buildLogicalSwitchesRef(InstanceIdentifier<Node> nodeIid,
+    public static HwvtepLogicalSwitchRef buildLogicalSwitchesRef(DataObjectIdentifier<Node> nodeIid,
                                                                  String logicalSwitchName) {
-        InstanceIdentifier<LogicalSwitches> switchIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitchName)));
-        return new HwvtepLogicalSwitchRef(switchIid.toIdentifier());
+        return new HwvtepLogicalSwitchRef(nodeIid.toBuilder()
+            .augmentation(HwvtepGlobalAugmentation.class)
+            .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitchName)))
+            .build());
     }
 
-    public static RemoteUcastMacs buildRemoteUcastMacs(InstanceIdentifier<Node> nodeIid, String vmMac,
+    public static RemoteUcastMacs buildRemoteUcastMacs(DataObjectIdentifier<Node> nodeIid, String vmMac,
                                                        String vmip, String tepIp, String logicalSwitchName) {
         RemoteUcastMacsBuilder ucmlBuilder = new RemoteUcastMacsBuilder();
         ucmlBuilder.setIpaddr(TransactUtils.parseIpAddress(vmip));
@@ -89,7 +90,7 @@ public final class TestBuilders {
         return ucmlBuilder.build();
     }
 
-    public static TerminationPoint buildTerminationPoint(InstanceIdentifier<Node> nodeIid, String ip) {
+    public static TerminationPoint buildTerminationPoint(DataObjectIdentifier<Node> nodeIid, String ip) {
         TerminationPointKey tpKey = new TerminationPointKey(new TpId("vxlan_over_ipv4:" + ip));
         TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
         if (nodeIid != null) {
@@ -116,7 +117,7 @@ public final class TestBuilders {
         return logicalSwitchesBuilder.build();
     }
 
-    public static RemoteMcastMacs buildRemoteMcastMacs(InstanceIdentifier<Node> iid, String mac,
+    public static RemoteMcastMacs buildRemoteMcastMacs(DataObjectIdentifier<Node> iid, String mac,
                                                        String logicalSwitchName, String[] tepIps) {
 
         RemoteMcastMacsBuilder macLocalBuilder = new RemoteMcastMacsBuilder();
@@ -136,18 +137,16 @@ public final class TestBuilders {
         return macLocalBuilder.build();
     }
 
-    public static HwvtepPhysicalLocatorRef buildLocatorRef(InstanceIdentifier<Node> nodeIid,String tepIp) {
-        InstanceIdentifier<TerminationPoint> tepId = buildTpId(nodeIid, tepIp);
-        return new HwvtepPhysicalLocatorRef(tepId.toIdentifier());
+    public static HwvtepPhysicalLocatorRef buildLocatorRef(DataObjectIdentifier<Node> nodeIid,String tepIp) {
+        return new HwvtepPhysicalLocatorRef(buildTpId(nodeIid, tepIp));
     }
 
     public static Uuid getUUid(String key) {
         return new Uuid(UUID.nameUUIDFromBytes(key.getBytes()).toString());
     }
 
-    public static InstanceIdentifier<TerminationPoint> buildTpId(InstanceIdentifier<Node> nodeIid,String tepIp) {
+    public static DataObjectIdentifier<TerminationPoint> buildTpId(DataObjectIdentifier<Node> nodeIid, String tepIp) {
         String tpKeyStr = VXLAN_OVER_IPV4 + ':' + tepIp;
-        TerminationPointKey tpKey = new TerminationPointKey(new TpId(tpKeyStr));
-        return nodeIid.child(TerminationPoint.class, tpKey);
+        return nodeIid.toBuilder().child(TerminationPoint.class, new TerminationPointKey(new TpId(tpKeyStr))).build();
     }
 }

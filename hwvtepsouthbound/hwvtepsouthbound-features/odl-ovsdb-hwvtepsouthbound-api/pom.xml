@@ -22,7 +22,7 @@
             <dependency>
                 <groupId>org.opendaylight.mdsal</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>14.0.18</version>
+                <version>15.0.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

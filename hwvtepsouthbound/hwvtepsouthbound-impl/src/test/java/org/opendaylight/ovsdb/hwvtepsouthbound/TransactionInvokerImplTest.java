@@ -34,6 +34,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,9 +64,9 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
         throw new NullPointerException("Failed to execute command");
     };
 
-    private InstanceIdentifier<Node> nodeIid1;
-    private InstanceIdentifier<Node> nodeIid2;
-    private InstanceIdentifier<Node> nodeIid3;
+    private DataObjectIdentifier<Node> nodeIid1;
+    private DataObjectIdentifier<Node> nodeIid2;
+    private DataObjectIdentifier<Node> nodeIid3;
 
     private DataBroker dataBroker;
     private TransactionInvokerImpl invoker;
@@ -86,7 +87,7 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
         deleteNode(nodeIid3);
     }
 
-    private void deleteNode(final InstanceIdentifier<Node> iid) {
+    private void deleteNode(final DataObjectIdentifier<Node> iid) {
         ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
         tx.delete(LogicalDatastoreType.CONFIGURATION, iid);
         tx.commit();
@@ -105,9 +106,9 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
         sleepingPillStartedLatch.await(5, TimeUnit.SECONDS);
 
         //Now add the commands which will be picked up in one lot
-        invoker.invoke(new AddNodeCmd(nodeIid1, ft1));
+        invoker.invoke(new AddNodeCmd(nodeIid1.toLegacy(), ft1));
         invoker.invoke(nullPointerPill);
-        invoker.invoke(new AddNodeCmd(nodeIid2, ft2));
+        invoker.invoke(new AddNodeCmd(nodeIid2.toLegacy(), ft2));
 
         sleepingPillEndLatch.countDown();
 
@@ -119,16 +120,16 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
         nullPointerPillStart.await(5, TimeUnit.SECONDS);
 
         //make sure that any commands which are submitted after the previous failure run smoothly
-        invoker.invoke(new AddNodeCmd(nodeIid3, ft3));
+        invoker.invoke(new AddNodeCmd(nodeIid3.toLegacy(), ft3));
         ft3.get(5, TimeUnit.SECONDS);
     }
 
 
-    private static InstanceIdentifier<Node> createInstanceIdentifier(final String nodeIdString) {
+    private static DataObjectIdentifier<Node> createInstanceIdentifier(final String nodeIdString) {
         NodeId nodeId = new NodeId(new Uri(nodeIdString));
         NodeKey nodeKey = new NodeKey(nodeId);
         TopologyKey topoKey = new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID);
-        return InstanceIdentifier.builder(NetworkTopology.class)
+        return DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, topoKey)
                 .child(Node.class, nodeKey)
                 .build();
@@ -147,7 +148,8 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
             NodeBuilder nodeBuilder = new NodeBuilder();
             nodeBuilder.setNodeId(iid.firstKeyOf(Node.class).getNodeId());
             nodeBuilder.addAugmentation(new HwvtepGlobalAugmentationBuilder().build());
-            transaction.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, iid, nodeBuilder.build());
+            transaction.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, iid.toIdentifier(),
+                nodeBuilder.build());
         }
     }
 
@@ -161,7 +163,7 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
 
         @Override
         public void execute(final ReadWriteTransaction transaction) {
-            transaction.delete(LogicalDatastoreType.CONFIGURATION, iid);
+            transaction.delete(LogicalDatastoreType.CONFIGURATION, iid.toIdentifier());
         }
     }
 

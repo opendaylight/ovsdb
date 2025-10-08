@@ -19,7 +19,7 @@ public class DataTreeModificationImpl<T extends DataObject> implements DataTreeM
     T newNode;
     T oldNode;
 
-    public DataTreeModificationImpl(InstanceIdentifier<T> nodeId, T newNode, T oldNode) {
+    public DataTreeModificationImpl(final InstanceIdentifier<T> nodeId, final T newNode, final T oldNode) {
         this.nodeId = nodeId;
         this.newNode = newNode;
         this.oldNode = oldNode;

@@ -57,20 +57,20 @@ public class HwvtepOperationalDataChangeListener implements DataTreeChangeListen
         for (DataTreeModification<Node> change : changes) {
             final InstanceIdentifier<Node> key = change.getRootPath().path();
             final DataObjectModification<Node> mod = change.getRootNode();
-            for (DataObjectModification<? extends DataObject> child : mod.modifiedChildren()) {
+            for (DataObjectModification<?> child : mod.modifiedChildren()) {
                 updateDeviceOpData(key, child);
             }
             DataObjectModification<HwvtepGlobalAugmentation> aug =
                     mod.getModifiedAugmentation(HwvtepGlobalAugmentation.class);
             if (aug != null) {
-                for (DataObjectModification<? extends DataObject> child : aug.modifiedChildren()) {
+                for (DataObjectModification<?> child : aug.modifiedChildren()) {
                     updateDeviceOpData(key, child);
                 }
             }
         }
     }
 
-    private void updateDeviceOpData(InstanceIdentifier<Node> key, DataObjectModification<? extends DataObject> mod) {
+    private void updateDeviceOpData(InstanceIdentifier<Node> key, DataObjectModification<?> mod) {
         Class<? extends EntryObject<?, ?>> childClass = (Class<? extends EntryObject<?, ?>>) mod.dataType();
         InstanceIdentifier instanceIdentifier = getKey(key, mod, mod.dataAfter());
         switch (mod.modificationType()) {
@@ -89,7 +89,7 @@ public class HwvtepOperationalDataChangeListener implements DataTreeChangeListen
     }
 
     private static InstanceIdentifier getKey(InstanceIdentifier<Node> key,
-                                             DataObjectModification<? extends DataObject> child, DataObject data) {
+                                             DataObjectModification<?> child, DataObject data) {
         Class<? extends DataObject> childClass = child.dataType();
         InstanceIdentifier instanceIdentifier = null;
         if (LogicalSwitches.class == childClass) {

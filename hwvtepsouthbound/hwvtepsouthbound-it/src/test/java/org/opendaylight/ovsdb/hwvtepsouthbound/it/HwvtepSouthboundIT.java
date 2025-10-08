@@ -278,7 +278,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         final InstanceIdentifier<Node> iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
         final DataTreeIdentifier<Node> treeId = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, iid);
 
-        dataBroker.registerDataTreeChangeListener(treeId, OPERATIONAL_LISTENER);
+        dataBroker.registerTreeChangeListener(treeId, OPERATIONAL_LISTENER);
 
         hwvtepNode = connectHwvtepNode(connectionInfo);
         // Let's count the test methods (we need to use this instead of @AfterClass on teardown() since the latter is

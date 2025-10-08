@@ -7,32 +7,27 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.configuration;
 
+import com.google.common.base.MoreObjects.ToStringHelper;
 import java.util.ArrayList;
 import java.util.Collection;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
-import org.opendaylight.yangtools.binding.Augmentation;
-import org.opendaylight.yangtools.binding.ChildOf;
-import org.opendaylight.yangtools.binding.ChoiceIn;
+import org.opendaylight.mdsal.binding.api.DataObjectWritten;
 import org.opendaylight.yangtools.binding.DataObject;
-import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.binding.ExactDataObjectStep;
-import org.opendaylight.yangtools.binding.Key;
-import org.opendaylight.yangtools.binding.KeyStep;
-import org.opendaylight.yangtools.binding.NodeStep;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public class DataObjectModificationImpl<T extends DataObject> implements DataObjectModification<T> {
+public class DataObjectModificationImpl<T extends DataObject> extends DataObjectWritten<T> {
     private final Collection<DataObjectModification<? extends DataObject>> childNodesCache = new ArrayList<>();
     InstanceIdentifier<T> nodeId;
     T newNode;
     T oldNode;
 
-    public DataObjectModificationImpl(InstanceIdentifier<T> nodeId, T newData, T oldData) {
+    public DataObjectModificationImpl(final InstanceIdentifier<T> nodeId, final T newData, final T oldData) {
         this.nodeId = nodeId;
-        this.newNode = newData;
-        this.oldNode = oldData;
+        newNode = newData;
+        oldNode = oldData;
     }
-
 
     @Override
     public T dataBefore() {
@@ -45,19 +40,13 @@ public class DataObjectModificationImpl<T extends DataObject> implements DataObj
     }
 
     @Override
-    public Class<T> dataType() {
-        return (Class<T>) newNode.getClass();
-    }
-
-    @Override
     public ExactDataObjectStep<T> step() {
-        return (ExactDataObjectStep<T>) nodeId.getPathArguments().iterator().next();
+        return (ExactDataObjectStep<T>) nodeId.lastStep();
     }
 
     @Override
-    public ModificationType modificationType() {
-        return ModificationType.WRITE;
-
+    public <C extends DataObject> @Nullable DataObjectModification<C> modifiedChild(final ExactDataObjectStep<C> step) {
+        return null;
     }
 
     @Override
@@ -66,57 +55,7 @@ public class DataObjectModificationImpl<T extends DataObject> implements DataObj
     }
 
     @Override
-    public <H extends ChoiceIn<? super T> & DataObject, C extends ChildOf<? super H>>
-            Collection<DataObjectModification<C>> getModifiedChildren(Class<H> caseType, Class<C> childType) {
-        return null;
-    }
-
-    @Override
-    public <C extends ChildOf<? super T>> Collection<DataObjectModification<C>> getModifiedChildren(
-            Class<C> childType) {
-        return null;
-    }
-
-    @Override
-    public DataObjectModification<? extends DataObject> getModifiedChild(final ExactDataObjectStep<?> childArgument) {
-        return null;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <C extends EntryObject<C, K> & ChildOf<? super T>, K extends Key<C>> DataObjectModification<C>
-        getModifiedChildListItem(final Class<C> listItem, final K listKey) {
-        return (DataObjectModification<C>) getModifiedChild(new KeyStep<>(listItem, listKey));
-    }
-
-    @Override
-    public <H extends ChoiceIn<? super T> & DataObject, C extends EntryObject<C, K> & ChildOf<? super H>,
-            K extends Key<C>> DataObjectModification<C> getModifiedChildListItem(Class<H> caseType,
-                    Class<C> listItem, K listKey) {
-        return null;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <C extends ChildOf<? super T>> DataObjectModification<C> getModifiedChildContainer(final Class<C> arg) {
-        return (DataObjectModification<C>) getModifiedChild(new NodeStep<>(arg));
-    }
-
-    @Override
-    public <H extends ChoiceIn<? super T> & DataObject, C extends ChildOf<? super H>> DataObjectModification<C>
-            getModifiedChildContainer(Class<H> caseType, Class<C> child) {
-        return null;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <C extends Augmentation<T> & DataObject> DataObjectModification<C> getModifiedAugmentation(
-            final Class<C> augmentation) {
-        return (DataObjectModification<C>) getModifiedChild(new NodeStep<>(augmentation));
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "{identifier = " + nodeId + "}";
+    protected ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+        return helper.add("identifier", nodeId);
     }
 }

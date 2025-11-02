@@ -115,7 +115,8 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                 // TODO: this query is not efficient. It retrieves all the Nodes in the datastore, loop over them and
                 // look for the bridges of specific device. It is mre efficient if MDSAL allows query nodes using
                 // wildcard on node id (ie: ovsdb://uuid/<device uuid>/bridge/*) r attributes
-                readTopologyFuture = tx.read(LogicalDatastoreType.CONFIGURATION, topologyInstanceIdentifier);
+                readTopologyFuture = tx.read(LogicalDatastoreType.CONFIGURATION,
+                    topologyInstanceIdentifier.toIdentifier());
             }
             readTopologyFuture.addCallback(new FutureCallback<>() {
                 @Override
@@ -153,7 +154,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
                 try (ReadTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
                     InstanceIdentifier<Node> nodeInstanceIdentifier =
                         SouthboundMapper.createInstanceIdentifier(new NodeId(bridgeNodeIid));
-                    readNodeFuture = tx.read(LogicalDatastoreType.CONFIGURATION, nodeInstanceIdentifier);
+                    readNodeFuture = tx.read(LogicalDatastoreType.CONFIGURATION, nodeInstanceIdentifier.toIdentifier());
                 }
                 readNodeFuture.addCallback(new FutureCallback<Optional<Node>>() {
                     @Override

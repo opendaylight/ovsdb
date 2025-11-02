@@ -84,7 +84,7 @@ public class OvsdbNodeRemoveCommandTest {
             InstanceIdentifier.create(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class, new NodeKey(new NodeId("testConnection"))));
-        when(transaction.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
+        when(transaction.read(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class)))
                 .thenReturn(ovsdbNodeFuture);
 
         Node ovsdbNode = mock(Node.class);
@@ -104,13 +104,11 @@ public class OvsdbNodeRemoveCommandTest {
 
         when(ovsdbNodeAugmentation.getManagedNodeEntry()).thenReturn(Map.of(managedNode.key(), managedNode));
 
-        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
 
         ovsdbNodeRemoveCommand.execute(transaction);
         verify(ovsdbNodeAugmentation).getManagedNodeEntry();
-        verify(transaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        verify(transaction, times(1)).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
+        verify(transaction, times(2)).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
     }
 
     @Test

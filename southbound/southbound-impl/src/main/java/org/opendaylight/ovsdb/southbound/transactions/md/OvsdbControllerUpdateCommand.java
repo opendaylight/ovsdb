@@ -91,8 +91,8 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
 
             for (ControllerEntry controllerEntry : controllerEntries) {
                 transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                        getControllerEntryIid(controllerEntry, bridgeEntry.getValue().getNameColumn().getData()),
-                        controllerEntry);
+                    getControllerEntryIid(controllerEntry, bridgeEntry.getValue().getNameColumn().getData())
+                        .toIdentifier(), controllerEntry);
             }
         }
     }
@@ -123,8 +123,7 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
                 InstanceIdentifier<ControllerEntry> iid = bridgeIid
                         .augmentation(OvsdbBridgeAugmentation.class)
                         .child(ControllerEntry.class, controllerEntry.key());
-                transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                        iid, controllerEntry);
+                transaction.merge(LogicalDatastoreType.OPERATIONAL, iid.toIdentifier(), controllerEntry);
             }
         }
     }

@@ -50,6 +50,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -79,7 +80,7 @@ public class BridgeConfigReconciliationTaskTest {
         when(reconciliationManager.getBridgesReconciliationInclusionList()).thenReturn(List.of(BR_INT));
         ReadTransaction tx = mock(ReadTransaction.class);
         when(db.newReadOnlyTransaction()).thenReturn(tx);
-        when(tx.read(any(LogicalDatastoreType.class),any(InstanceIdentifier.class)))
+        when(tx.read(any(LogicalDatastoreType.class),any(DataObjectIdentifier.class)))
                 .thenReturn(FluentFutures.immediateFluentFuture(Optional.of(brIntNode)));
 
         when(topology.getNode()).thenReturn(Map.of(brIntNode.key(), brIntNode));

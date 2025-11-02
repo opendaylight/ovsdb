@@ -95,6 +95,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -174,7 +175,7 @@ public final class SouthboundMapper {
     }
 
     @SuppressWarnings("unchecked")
-    public static InstanceIdentifier<Node> createInstanceIdentifier(
+    public static DataObjectIdentifier<Node> createInstanceIdentifier(
             final InstanceIdentifierCodec instanceIdentifierCodec, final OvsdbConnectionInstance client,
             final Bridge bridge) {
         InstanceIdentifier<Node> iid;
@@ -186,7 +187,7 @@ public final class SouthboundMapper {
         } else {
             iid = createInstanceIdentifier(client, bridge.getName());
         }
-        return iid;
+        return iid.toIdentifier();
     }
 
     @SuppressWarnings("unchecked")

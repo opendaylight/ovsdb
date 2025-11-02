@@ -137,9 +137,9 @@ public final class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCo
                 setPortFaultStatus(tpAugmentationBuilder, portUpdate);
                 tpBuilder.addAugmentation(tpAugmentationBuilder.build());
                 if (oldPPRows.containsKey(portUpdateEntry.getKey())) {
-                    transaction.merge(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
+                    transaction.merge(LogicalDatastoreType.OPERATIONAL, tpPath.toIdentifier(), tpBuilder.build());
                 } else {
-                    transaction.put(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
+                    transaction.put(LogicalDatastoreType.OPERATIONAL, tpPath.toIdentifier(), tpBuilder.build());
                 }
                 NodeId psNodeId = tpPath.firstKeyOf(Node.class).getNodeId();
                 if (getDeviceInfo().getDeviceOperData(TerminationPoint.class, tpPath) == null) {
@@ -212,7 +212,7 @@ public final class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCo
     private static <T extends DataObject> void deleteEntries(final ReadWriteTransaction transaction,
             final List<InstanceIdentifier<T>> entryIids) {
         for (InstanceIdentifier<T> entryIid : entryIids) {
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid.toIdentifier());
         }
     }
 

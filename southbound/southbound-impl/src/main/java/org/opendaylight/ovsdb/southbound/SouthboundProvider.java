@@ -211,7 +211,7 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
         FluentFuture<Boolean> ovsdbTp = transaction.exists(type, path);
         try {
             if (!ovsdbTp.get().booleanValue()) {
-                transaction.mergeParentStructurePut(type, path,
+                transaction.mergeParentStructurePut(type, path.toIdentifier(),
                     new TopologyBuilder().setTopologyId(SouthboundConstants.OVSDB_TOPOLOGY_ID).build());
                 transaction.commit();
             } else {

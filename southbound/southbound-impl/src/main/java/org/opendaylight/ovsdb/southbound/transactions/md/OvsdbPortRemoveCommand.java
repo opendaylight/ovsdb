@@ -23,7 +23,6 @@ import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TpId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,9 +76,10 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
                 LOG.warn("Bridge not found for port {}", port);
                 continue;
             }
-            final InstanceIdentifier<TerminationPoint> nodePath = SouthboundMapper.createInstanceIdentifier(
-                instanceIdentifierCodec, getOvsdbConnectionInstance(), bridgeData)
-                    .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
+            final var nodePath = SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec,
+                getOvsdbConnectionInstance(), bridgeData).toBuilder()
+                    .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)))
+                    .build();
             transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
             // Remove from OvsdbConnection Instance cache
             getOvsdbConnectionInstance().removePort(portUuid);

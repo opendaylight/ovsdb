@@ -103,10 +103,10 @@ public class SouthboundMapperTest {
         when(bridge.getExternalIdsColumn()).thenReturn(null);
         when(client.getNodeKey()).thenReturn(new NodeKey(new NodeId("uri")));
         when(bridge.getName()).thenReturn("bridgeName");
-        InstanceIdentifier<Node> returnedIid = SouthboundMapper.createInstanceIdentifier(iidc, client, bridge);
-        assertEquals("Incorrect identifier type", Node.class, returnedIid.getTargetType());
+        final var returnedIid = SouthboundMapper.createInstanceIdentifier(iidc, client, bridge);
+        assertEquals("Incorrect identifier type", Node.class, returnedIid.lastStep().type());
         assertEquals("Incorrect node key", new NodeId(new Uri("uri/bridge/bridgeName")),
-                returnedIid.firstKeyOf(Node.class).getNodeId());
+                returnedIid.getFirstKeyOf(Node.class).getNodeId());
     }
 
     @SuppressWarnings("unchecked")

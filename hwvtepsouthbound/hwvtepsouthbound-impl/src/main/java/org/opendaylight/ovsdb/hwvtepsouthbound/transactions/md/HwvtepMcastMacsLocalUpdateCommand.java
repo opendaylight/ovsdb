@@ -65,7 +65,7 @@ public final class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransaction
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
 
         // Ensure the node exists
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId,
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(),
             new NodeBuilder().setNodeId(getOvsdbConnectionInstance().getNodeId()).build());
 
         final LocalMcastMacs mac = buildLocalMcastMacs(macLocal);
@@ -73,11 +73,11 @@ public final class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransaction
                 .child(LocalMcastMacs.class, mac.key());
 
         // Merge update, relying on automatic lifecycle...
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, macIid, mac);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, macIid.toIdentifier(), mac);
         if (mac.getLocatorSet() == null) {
             // ... but delete locator set if it is empty
             // FIXME: can we use .put() of instead of merge/delete?
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, macIid.child(LocatorSet.class));
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, macIid.child(LocatorSet.class).toIdentifier());
         }
     }
 

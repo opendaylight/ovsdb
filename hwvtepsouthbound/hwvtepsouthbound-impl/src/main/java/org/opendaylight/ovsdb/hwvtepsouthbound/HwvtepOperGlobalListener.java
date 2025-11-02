@@ -216,15 +216,15 @@ public final class HwvtepOperGlobalListener implements DataTreeChangeListener<No
     }
 
     private static Node getCreated(final DataObjectModification<Node> mod) {
-        if (mod.getModificationType() == ModificationType.WRITE && mod.getDataBefore() == null) {
-            return mod.getDataAfter();
+        if (mod.modificationType() == ModificationType.WRITE && mod.dataBefore() == null) {
+            return mod.dataAfter();
         }
         return null;
     }
 
     private static Node getRemoved(final DataObjectModification<Node> mod) {
-        if (mod.getModificationType() == ModificationType.DELETE) {
-            return mod.getDataBefore();
+        if (mod.modificationType() == ModificationType.DELETE) {
+            return mod.dataBefore();
         }
         return null;
     }
@@ -237,13 +237,13 @@ public final class HwvtepOperGlobalListener implements DataTreeChangeListener<No
 
     private static Node getUpdated(DataObjectModification<Node> mod) {
         Node node = null;
-        switch (mod.getModificationType()) {
+        switch (mod.modificationType()) {
             case SUBTREE_MODIFIED:
-                node = mod.getDataAfter();
+                node = mod.dataAfter();
                 break;
             case WRITE:
-                if (mod.getDataBefore() !=  null) {
-                    node = mod.getDataAfter();
+                if (mod.dataBefore() !=  null) {
+                    node = mod.dataAfter();
                 }
                 break;
             default:

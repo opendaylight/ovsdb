@@ -43,7 +43,7 @@ public class HwvtepLogicalRouterRemoveCommand extends AbstractTransactionCommand
                 InstanceIdentifier<LogicalRouters> routerIid = getOvsdbConnectionInstance().getInstanceIdentifier()
                         .augmentation(HwvtepGlobalAugmentation.class)
                         .child(LogicalRouters.class, new LogicalRoutersKey(routerNode));
-                transaction.delete(LogicalDatastoreType.OPERATIONAL, routerIid);
+                transaction.delete(LogicalDatastoreType.OPERATIONAL, routerIid.toIdentifier());
                 getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOperData(LogicalRouters.class, routerIid);
             }
         }

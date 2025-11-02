@@ -333,14 +333,14 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
 
         Node removed = TransactUtils.getRemoved(mod);
         Node updated = TransactUtils.getUpdated(mod);
-        Node before = mod.getDataBefore();
+        Node before = mod.dataBefore();
         return diffOf(removed, before, updated, true);
     }
 
     List<T> getUpdated(final DataTreeModification<Node> change) {
         DataObjectModification<Node> mod = change.getRootNode();
         Node updated = TransactUtils.getUpdated(mod);
-        Node before = mod.getDataBefore();
+        Node before = mod.dataBefore();
         return diffOf(updated, before, false);
     }
 

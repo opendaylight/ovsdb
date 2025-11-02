@@ -57,6 +57,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.powermock.api.mockito.PowerMockito;
@@ -133,7 +134,7 @@ public class OvsdbConnectionManagerTest {
 
         ReadTransaction tx = mock(ReadTransaction.class);
         when(db.newReadOnlyTransaction()).thenReturn(tx);
-        when(tx.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
+        when(tx.read(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class)))
                 .thenReturn(mock(FluentFuture.class));
         when(client.getInstanceIdentifier()).thenReturn(InstanceIdentifier.create(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
@@ -197,9 +198,9 @@ public class OvsdbConnectionManagerTest {
                 InstanceIdentifier.class, OvsdbNodeAugmentation.class));
         ReadTransaction tx = mock(ReadTransaction.class);
         when(db.newReadOnlyTransaction()).thenReturn(tx);
-        when(tx.read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
+        when(tx.read(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class)))
                 .thenReturn(mock(FluentFuture.class));
-        when(tx.exists(any(LogicalDatastoreType.class), any(InstanceIdentifier.class)))
+        when(tx.exists(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class)))
             .thenReturn(mock(FluentFuture.class));
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(
             InstanceIdentifier.create(NetworkTopology.class)

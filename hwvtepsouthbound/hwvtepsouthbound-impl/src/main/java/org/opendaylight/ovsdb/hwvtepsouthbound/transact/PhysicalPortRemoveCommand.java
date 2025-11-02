@@ -101,7 +101,7 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
                 //If the node which physical ports belong to is updated, and physical ports may
                 //be created or updated or deleted, we need to get deleted ones.
                 Node updated = TransactUtils.getUpdated(mod);
-                Node before = mod.getDataBefore();
+                Node before = mod.dataBefore();
                 if (updated != null && before != null) {
                     List<HwvtepPhysicalPortAugmentation> portListUpdated = new ArrayList<>();
                     for (TerminationPoint tp : updated.nonnullTerminationPoint().values()) {

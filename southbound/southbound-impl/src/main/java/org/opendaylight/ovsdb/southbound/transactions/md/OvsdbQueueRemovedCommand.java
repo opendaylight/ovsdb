@@ -87,7 +87,7 @@ public class OvsdbQueueRemovedCommand extends AbstractTransactionCommand {
     private static void deleteQueue(ReadWriteTransaction transaction,
             List<InstanceIdentifier<Queues>> queueIids) {
         for (InstanceIdentifier<Queues> queueIid: queueIids) {
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, queueIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, queueIid.toIdentifier());
         }
     }
 }

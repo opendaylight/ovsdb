@@ -113,7 +113,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
                 InstanceIdentifier<QosEntries> iid = nodeIId
                         .augmentation(OvsdbNodeAugmentation.class)
                         .child(QosEntries.class, qosEntry.key());
-                transaction.merge(LogicalDatastoreType.OPERATIONAL, iid, qosEntry);
+                transaction.merge(LogicalDatastoreType.OPERATIONAL, iid.toIdentifier(), qosEntry);
             }
         }
     }
@@ -208,7 +208,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
             KeyedInstanceIdentifier<QosOtherConfig, QosOtherConfigKey> otherIId =
                     qosIId
                     .child(QosOtherConfig.class, new QosOtherConfigKey(otherConfigKey));
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, otherIId);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, otherIId.toIdentifier());
         }
     }
 
@@ -257,7 +257,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
             KeyedInstanceIdentifier<QosExternalIds, QosExternalIdsKey> externalIId =
                     qosIId
                     .child(QosExternalIds.class, new QosExternalIdsKey(extIdKey));
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, externalIId);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, externalIId.toIdentifier());
         }
     }
 
@@ -305,7 +305,7 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         for (Long queueListKey : queueListKeys) {
             KeyedInstanceIdentifier<QueueList, QueueListKey> otherIId =
                     qosIId.child(QueueList.class, new QueueListKey(Uint32.valueOf(queueListKey)));
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, otherIId);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, otherIId.toIdentifier());
         }
     }
 

@@ -117,36 +117,36 @@ public class TransactCommandAggregator implements TransactCommand {
         final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> updatedData,
             final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> deletedData) {
 
-        extractDataChanged(mod.getModifiedChildren(), updatedData, deletedData);
+        extractDataChanged(mod.modifiedChildren(), updatedData, deletedData);
         DataObjectModification<HwvtepGlobalAugmentation> aug = mod.getModifiedAugmentation(
                 HwvtepGlobalAugmentation.class);
         if (aug != null) {
-            extractDataChanged(aug.getModifiedChildren(), updatedData, deletedData);
+            extractDataChanged(aug.modifiedChildren(), updatedData, deletedData);
         }
         DataObjectModification<PhysicalSwitchAugmentation> psAug = mod.getModifiedAugmentation(
                 PhysicalSwitchAugmentation.class);
         if (psAug != null) {
-            extractDataChanged(psAug.getModifiedChildren(), updatedData, deletedData);
+            extractDataChanged(psAug.modifiedChildren(), updatedData, deletedData);
         }
     }
 
     private static void extractDataChanged(
-            final Collection<? extends DataObjectModification<? extends DataObject>> children,
+            final Collection<? extends DataObjectModification<?>> children,
                     final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> updatedData,
                     final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> deletedData) {
         if (children == null) {
             return;
         }
-        for (DataObjectModification<? extends DataObject> child : children) {
-            Class<? extends EntryObject<?, ?>> childClass = (Class<? extends EntryObject<?, ?>>) child.getDataType();
-            switch (child.getModificationType()) {
+        for (DataObjectModification<?> child : children) {
+            Class<? extends EntryObject<?, ?>> childClass = (Class<? extends EntryObject<?, ?>>) child.dataType();
+            switch (child.modificationType()) {
                 case WRITE:
                 case SUBTREE_MODIFIED:
-                    DataObject dataAfter = child.getDataAfter();
+                    DataObject dataAfter = child.dataAfter();
                     if (!(dataAfter instanceof EntryObject<?, ?> identifiable)) {
                         continue;
                     }
-                    DataObject before = child.getDataBefore();
+                    DataObject before = child.dataBefore();
                     if (Objects.equals(dataAfter, before)) {
                         /*
                         in cluster reboot scenarios,
@@ -158,7 +158,7 @@ public class TransactCommandAggregator implements TransactCommand {
                     addToUpdatedData(updatedData, childClass, identifiable);
                     break;
                 case DELETE:
-                    DataObject dataBefore = child.getDataBefore();
+                    DataObject dataBefore = child.dataBefore();
                     if (!(dataBefore instanceof EntryObject<?, ?> identifiable)) {
                         continue;
                     }

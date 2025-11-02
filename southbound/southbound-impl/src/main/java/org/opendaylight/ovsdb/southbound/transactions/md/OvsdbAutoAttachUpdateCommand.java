@@ -89,7 +89,7 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
 //                                    .getExternalIdsColumn().getData()
 //                                    .get(SouthboundConstants.AUTOATTACH_ID_EXTERNAL_ID_KEY))));
                         final Optional<Autoattach> optionalAutoattach =
-                                transaction.read(LogicalDatastoreType.OPERATIONAL, currentIid).get();
+                                transaction.read(LogicalDatastoreType.OPERATIONAL, currentIid.toIdentifier()).get();
                         if (optionalAutoattach.isPresent()) {
                             currentAutoattach = optionalAutoattach.orElseThrow();
                         }
@@ -129,14 +129,12 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
                 final InstanceIdentifier<Autoattach> iid = nodeIId
                         .augmentation(OvsdbNodeAugmentation.class)
                         .child(Autoattach.class, autoAttachEntry.key());
-                transaction.put(LogicalDatastoreType.OPERATIONAL,
-                        iid, autoAttachEntry);
+                transaction.put(LogicalDatastoreType.OPERATIONAL, iid.toIdentifier(), autoAttachEntry);
             }
         }
     }
 
-    private static void setMappings(AutoattachBuilder autoAttachBuilder,
-            AutoAttach autoAttach) {
+    private static void setMappings(AutoattachBuilder autoAttachBuilder, AutoAttach autoAttach) {
         final Map<MappingsKey, Mappings> mappings = new LinkedHashMap<>();
         for (final Entry<Long, Long> entry : autoAttach.getMappingsColumn().getData().entrySet()) {
             final Long mappingsKey = entry.getKey();

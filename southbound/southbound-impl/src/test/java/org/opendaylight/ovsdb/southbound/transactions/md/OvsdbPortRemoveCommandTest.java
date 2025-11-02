@@ -44,6 +44,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberModifier;
@@ -112,9 +113,10 @@ public class OvsdbPortRemoveCommandTest {
         when(uuidColumn.getData()).thenReturn(uuid);
 
         when(port.getName()).thenReturn(PORT_NAME);
-        InstanceIdentifier<Node> nodeIID = InstanceIdentifier.create(NetworkTopology.class)
+        final var nodeIID = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
-            .child(Node.class, new NodeKey(new NodeId("testNode2")));
+            .child(Node.class, new NodeKey(new NodeId("testNode2")))
+            .build();
         doReturn(mock(OvsdbConnectionInstance.class)).when(ovsdbPortRemoveCommand).getOvsdbConnectionInstance();
 
         PowerMockito.mockStatic(SouthboundMapper.class);
@@ -124,9 +126,9 @@ public class OvsdbPortRemoveCommandTest {
 
         MemberModifier.suppress(MemberModifier.methodsDeclaredIn(InstanceIdentifier.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
 
         ovsdbPortRemoveCommand.execute(transaction);
-        verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
     }
 }

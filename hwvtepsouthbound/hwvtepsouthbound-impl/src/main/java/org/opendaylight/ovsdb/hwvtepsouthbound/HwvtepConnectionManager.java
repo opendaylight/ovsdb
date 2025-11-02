@@ -566,7 +566,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             case ON_DISCONNECT: {
                 ReadTransaction tx = db.newReadOnlyTransaction();
                 FluentFuture<Optional<Node>> readNodeFuture =
-                        tx.read(LogicalDatastoreType.CONFIGURATION, iid);
+                        tx.read(LogicalDatastoreType.CONFIGURATION, iid.toIdentifier());
 
                 readNodeFuture.addCallback(new FutureCallback<Optional<Node>>() {
                     @Override

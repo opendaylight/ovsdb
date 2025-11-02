@@ -40,7 +40,7 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
     @Override
     public void execute(ReadWriteTransaction transaction) {
         FluentFuture<Optional<Node>> ovsdbNodeFuture = transaction.read(
-                LogicalDatastoreType.OPERATIONAL, getOvsdbConnectionInstance().getInstanceIdentifier());
+                LogicalDatastoreType.OPERATIONAL, getOvsdbConnectionInstance().getInstanceIdentifier().toIdentifier());
         Optional<Node> ovsdbNodeOptional;
         try {
             ovsdbNodeOptional = ovsdbNodeFuture.get();
@@ -64,7 +64,7 @@ public class OvsdbNodeRemoveCommand extends AbstractTransactionCommand {
                     }
                     LOG.debug("Deleting node {} from oper", getOvsdbConnectionInstance().getInstanceIdentifier());
                     transaction.delete(LogicalDatastoreType.OPERATIONAL,
-                            getOvsdbConnectionInstance().getInstanceIdentifier());
+                            getOvsdbConnectionInstance().getInstanceIdentifier().toIdentifier());
                 } else {
                     LOG.debug("Other southbound plugin instances in cluster are connected to the device,"
                             + " not deleting OvsdbNode from operational data store.");

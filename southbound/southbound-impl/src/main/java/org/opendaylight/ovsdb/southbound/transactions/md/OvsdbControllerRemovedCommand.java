@@ -44,24 +44,22 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
         this.instanceIdentifierCodec = instanceIdentifierCodec;
         updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
         oldBridgeRows = TyperUtils.extractRowsOld(Bridge.class, getUpdates(), getDbSchema());
-        removedControllerRows = TyperUtils.extractRowsRemoved(Controller.class,
-                getUpdates(), getDbSchema());
+        removedControllerRows = TyperUtils.extractRowsRemoved(Controller.class, getUpdates(), getDbSchema());
     }
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
         for (Bridge bridge : updatedBridgeRows.values()) {
-            InstanceIdentifier<Node> bridgeIid =
-                    SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
-                            bridge);
-            deleteControllers(transaction, controllerEntriesToRemove(bridgeIid,bridge));
+            final var bridgeIid = SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec,
+                getOvsdbConnectionInstance(), bridge).toLegacy();
+            deleteControllers(transaction, controllerEntriesToRemove(bridgeIid, bridge));
         }
     }
 
     private static void deleteControllers(ReadWriteTransaction transaction,
             List<InstanceIdentifier<ControllerEntry>> controllerEntryIids) {
-        for (InstanceIdentifier<ControllerEntry> controllerEntryIid: controllerEntryIids) {
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, controllerEntryIid);
+        for (var controllerEntryIid: controllerEntryIids) {
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, controllerEntryIid.toIdentifier());
         }
     }
 
@@ -89,5 +87,4 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
         }
         return result;
     }
-
 }

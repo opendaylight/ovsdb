@@ -185,7 +185,7 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
     private Node readDS() {
         try {
             final Optional<Node> result = databroker.newReadOnlyTransaction().read(
-                    LogicalDatastoreType.CONFIGURATION, TEST_IID).get();
+                    LogicalDatastoreType.CONFIGURATION, TEST_IID.toIdentifier()).get();
             if (result.isPresent()) {
                 return result.orElseThrow();
             }

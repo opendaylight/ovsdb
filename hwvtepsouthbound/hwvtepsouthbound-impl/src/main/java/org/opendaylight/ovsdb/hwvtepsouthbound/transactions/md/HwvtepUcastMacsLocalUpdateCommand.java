@@ -64,7 +64,7 @@ public final class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransaction
         LOG.info("DEVICE - {} LocalUcastMacs for Node {} - {}", TransactionType.ADD,
             connectionIId.firstKeyOf(Node.class).getNodeId().getValue(), ucml);
         Node connectionNode = buildConnectionNode(ucml);
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(), connectionNode);
     }
 
     private Node buildConnectionNode(final Collection<UcastMacsLocal> ucml) {

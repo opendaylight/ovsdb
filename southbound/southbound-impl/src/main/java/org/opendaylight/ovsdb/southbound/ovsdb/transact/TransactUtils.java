@@ -308,11 +308,11 @@ public class TransactUtils {
             final Collection<InstanceIdentifier<? extends DataObject>> paths, final Class<T> clazz,
             final Predicate<DataObjectModification<T>> filter) {
         Map<InstanceIdentifier<T>, DataObjectModification<T>> result = new HashMap<>();
-        Queue<DataObjectModification<? extends DataObject>> remainingChanges = new LinkedList<>(changes);
-        Queue<InstanceIdentifier<? extends DataObject>> remainingPaths = new LinkedList<>(paths);
+        Queue<DataObjectModification<?>> remainingChanges = new LinkedList<>(changes);
+        Queue<InstanceIdentifier<?>> remainingPaths = new LinkedList<>(paths);
         while (!remainingChanges.isEmpty()) {
-            DataObjectModification<? extends DataObject> change = remainingChanges.remove();
-            InstanceIdentifier<? extends DataObject> path = remainingPaths.remove();
+            DataObjectModification<?> change = remainingChanges.remove();
+            InstanceIdentifier<?> path = remainingPaths.remove();
             // Is the change relevant?
             if (clazz.isAssignableFrom(change.dataType())) {
                 @SuppressWarnings("unchecked")
@@ -322,7 +322,7 @@ public class TransactUtils {
                 }
             }
             // Add any children to the queue
-            for (DataObjectModification<? extends DataObject> child : change.modifiedChildren()) {
+            for (DataObjectModification<?> child : change.modifiedChildren()) {
                 remainingChanges.add(child);
                 remainingPaths.add(extendPath(path, child));
             }

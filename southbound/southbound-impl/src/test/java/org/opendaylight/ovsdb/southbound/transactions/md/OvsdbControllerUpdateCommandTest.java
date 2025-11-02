@@ -52,6 +52,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
@@ -134,11 +135,11 @@ public class OvsdbControllerUpdateCommandTest {
             .augmentation(OvsdbBridgeAugmentation.class)
             .child(ControllerEntry.class, new ControllerEntryKey(new Uri("testEntry"))))
             .when(ovsdbControllerUpdateCommand).getControllerEntryIid(any(ControllerEntry.class), any(String.class));
-        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class),
                 any(ControllerEntry.class));
         Whitebox.invokeMethod(ovsdbControllerUpdateCommand, "updateController", transaction, updatedControllerRows,
                 updatedBridgeRows);
-        verify(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+        verify(transaction).merge(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class),
                 any(ControllerEntry.class));
         verify(bridge).getNameColumn();
     }

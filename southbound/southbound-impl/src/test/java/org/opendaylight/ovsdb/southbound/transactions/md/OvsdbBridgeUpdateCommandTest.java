@@ -150,7 +150,7 @@ public class OvsdbBridgeUpdateCommandTest {
         MemberModifier
                 .suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "buildConnectionNode", Bridge.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class),
                 any(Node.class));
 
         // suppress calls to private methods
@@ -160,11 +160,11 @@ public class OvsdbBridgeUpdateCommandTest {
         MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "deleteEntries",
                 ReadWriteTransaction.class, List.class));
         MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "protocolEntriesToRemove",
-                InstanceIdentifier.class, Bridge.class));
+                DataObjectIdentifier.class, Bridge.class));
         MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "externalIdsToRemove",
-                InstanceIdentifier.class, Bridge.class));
+                DataObjectIdentifier.class, Bridge.class));
         MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "bridgeOtherConfigsToRemove",
-                InstanceIdentifier.class, Bridge.class));
+                DataObjectIdentifier.class, Bridge.class));
         MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "getNodeId",
                 Bridge.class));
 
@@ -179,9 +179,9 @@ public class OvsdbBridgeUpdateCommandTest {
     @Test
     public void testDeleteEntries() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
         ovsdbBridgeUpdateCommand.deleteEntries(transaction, List.of(InstanceIdentifier.create(NetworkTopology.class)));
-        verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -202,9 +202,10 @@ public class OvsdbBridgeUpdateCommandTest {
         //test bridgeOtherConfigsToRemove()
         when(oldBridge.getOtherConfigColumn()).thenReturn(column);
         when(bridge.getOtherConfigColumn()).thenReturn(column);
-        InstanceIdentifier<Node> bridgeIid = InstanceIdentifier.create(NetworkTopology.class)
+        final var bridgeIid = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
-            .child(Node.class, new NodeKey(new NodeId("testNode")));
+            .child(Node.class, new NodeKey(new NodeId("testNode")))
+            .build();
         List<InstanceIdentifier<BridgeOtherConfigs>> resultBridgeOtherConfigs = Whitebox
                 .invokeMethod(ovsdbBridgeUpdateCommand, "bridgeOtherConfigsToRemove", bridgeIid, bridge);
         assertEquals(ArrayList.class, resultBridgeOtherConfigs.getClass());
@@ -243,9 +244,10 @@ public class OvsdbBridgeUpdateCommandTest {
         when(connectionNode.setNodeId(any(NodeId.class))).thenReturn(connectionNode);
 
         PowerMockito.mockStatic(SouthboundMapper.class);
-        InstanceIdentifier<Node> bridgeIid = InstanceIdentifier.create(NetworkTopology.class)
+        final var bridgeIid = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
-            .child(Node.class, new NodeKey(new NodeId("testNode")));
+            .child(Node.class, new NodeKey(new NodeId("testNode")))
+            .build();
         when(SouthboundMapper.createInstanceIdentifier(any(InstanceIdentifierCodec.class),
                 any(OvsdbConnectionInstance.class), any(Bridge.class)))
                 .thenReturn(bridgeIid);

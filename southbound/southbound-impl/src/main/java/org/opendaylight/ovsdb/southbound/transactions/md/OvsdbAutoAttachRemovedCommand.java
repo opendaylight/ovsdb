@@ -59,7 +59,7 @@ public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
                     final InstanceIdentifier<Autoattach> iid = ovsdbNodeIid
                             .augmentation(OvsdbNodeAugmentation.class)
                             .child(Autoattach.class, autoAttachKey);
-                    transaction.delete(LogicalDatastoreType.OPERATIONAL, iid);
+                    transaction.delete(LogicalDatastoreType.OPERATIONAL, iid.toIdentifier());
                     LOG.debug("AutoAttach table {} for Ovsdb Node {} is deleted", autoAttachUuid,
                             ovsdbNode.orElseThrow().getNodeId());
                 } else {

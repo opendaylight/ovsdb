@@ -93,12 +93,12 @@ public final class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransaction
             // Update the connection node to let it know it manages this
             // Physical Switch
             Node connectionNode = buildConnectionNode(phySwitch);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(), connectionNode);
 
             // Update the Physical Switch with whatever data we are getting
             InstanceIdentifier<Node> psIid = getInstanceIdentifier(phySwitch);
             Node psNode = buildPhysicalSwitchNode(connection.orElseThrow(), phySwitch);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, psIid, psNode);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, psIid.toIdentifier(), psNode);
             addToDeviceUpdate(TransactionType.ADD, phySwitch);
             LOG.info("DEVICE - {} {}", TransactionType.ADD, phySwitch);
 
@@ -135,14 +135,14 @@ public final class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransaction
         InstanceIdentifier<Node> psIid = getInstanceIdentifier(newPSwitch);
         for (String tunnelIp : removedTunnelIps) {
             InstanceIdentifier<TunnelIps> tunnelIpsInstanceIdentifier = getTunnelIpIid(tunnelIp, psIid);
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, tunnelIpsInstanceIdentifier);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, tunnelIpsInstanceIdentifier.toIdentifier());
         }
         for (String tunnelIp : addedTunnelIps) {
             IpAddress ip = TransactUtils.parseIpAddress(tunnelIp);
             InstanceIdentifier<TunnelIps> tunnelIpsInstanceIdentifier = getTunnelIpIid(tunnelIp, psIid);
             TunnelIps tunnelIps = new TunnelIpsBuilder().withKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build();
-            transaction.mergeParentStructurePut(LogicalDatastoreType.OPERATIONAL, tunnelIpsInstanceIdentifier,
-                tunnelIps);
+            transaction.mergeParentStructurePut(LogicalDatastoreType.OPERATIONAL,
+                tunnelIpsInstanceIdentifier.toIdentifier(), tunnelIps);
         }
     }
 
@@ -233,7 +233,7 @@ public final class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransaction
     private static <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
             List<InstanceIdentifier<T>> entryIids) {
         for (InstanceIdentifier<T> entryIid : entryIids) {
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid.toIdentifier());
         }
     }
 

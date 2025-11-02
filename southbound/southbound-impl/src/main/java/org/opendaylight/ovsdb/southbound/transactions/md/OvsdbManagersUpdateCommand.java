@@ -87,8 +87,7 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
                     ovsdbNodeEntry.getValue(), managerEntries);
             for (ManagerEntry managerEntry : managerEntries) {
                 transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                        getManagerEntryIid(managerEntry),
-                        managerEntry);
+                        getManagerEntryIid(managerEntry).toIdentifier(), managerEntry);
             }
         }
     }
@@ -120,8 +119,7 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
                 InstanceIdentifier<ManagerEntry> iid = connectionIId
                         .augmentation(OvsdbNodeAugmentation.class)
                         .child(ManagerEntry.class, managerEntry.key());
-                transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                        iid, managerEntry);
+                transaction.merge(LogicalDatastoreType.OPERATIONAL, iid.toIdentifier(), managerEntry);
             }
         }
     }

@@ -21,8 +21,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryKey;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
     private final InstanceIdentifierCodec instanceIdentifierCodec;
@@ -38,15 +36,14 @@ public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
         Collection<Bridge> removedRows = TyperUtils.extractRowsRemoved(Bridge.class,
                 getUpdates(), getDbSchema()).values();
         for (Bridge bridge : removedRows) {
-            InstanceIdentifier<Node> bridgeIid =
-                    SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(),
-                            bridge);
-            InstanceIdentifier<ManagedNodeEntry> mnIid = getOvsdbConnectionInstance().getInstanceIdentifier()
+            final var bridgeIid = SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec,
+                getOvsdbConnectionInstance(), bridge);
+            final var mnIid = getOvsdbConnectionInstance().getInstanceIdentifier()
                 .augmentation(OvsdbNodeAugmentation.class)
-                .child(ManagedNodeEntry.class, new ManagedNodeEntryKey(new OvsdbBridgeRef(bridgeIid.toIdentifier())));
+                .child(ManagedNodeEntry.class, new ManagedNodeEntryKey(new OvsdbBridgeRef(bridgeIid)));
             // TODO handle removal of reference to managed node from model
             transaction.delete(LogicalDatastoreType.OPERATIONAL, bridgeIid);
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, mnIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, mnIid.toIdentifier());
         }
     }
 }

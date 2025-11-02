@@ -316,7 +316,7 @@ public class PhysicalPortUpdateCommand
                 final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
                 final DataObjectModification<Node> mod = change.getRootNode();
                 Node updated = TransactUtils.getUpdated(mod);
-                Node before = mod.getDataBefore();
+                Node before = mod.dataBefore();
                 if (updated != null && before != null) {
                     List<TerminationPoint> portListUpdated = new ArrayList<>();
                     List<TerminationPoint> portListBefore = new ArrayList<>();

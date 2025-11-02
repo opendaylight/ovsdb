@@ -91,7 +91,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             setOtherConfig(transaction, ovsdbNodeBuilder, oldEntry, openVSwitch);
             ovsdbNodeBuilder.setConnectionInfo(getConnectionInfo());
 
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath, new NodeBuilder()
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath.toIdentifier(), new NodeBuilder()
                 .setNodeId(getNodeId(openVSwitch))
                 .addAugmentation(ovsdbNodeBuilder.build())
                 .build());
@@ -130,7 +130,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             KeyedInstanceIdentifier<OpenvswitchOtherConfigs, OpenvswitchOtherConfigsKey> externalIid =
                     nodeAugmentataionIid
                     .child(OpenvswitchOtherConfigs.class, new OpenvswitchOtherConfigsKey(otherConfigKey));
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, externalIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, externalIid.toIdentifier());
         }
     }
 
@@ -179,7 +179,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             KeyedInstanceIdentifier<OpenvswitchExternalIds, OpenvswitchExternalIdsKey> externalIid =
                     nodeAugmentataionIid
                     .child(OpenvswitchExternalIds.class, new OpenvswitchExternalIdsKey(externalIdKey));
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, externalIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, externalIid.toIdentifier());
         }
     }
 

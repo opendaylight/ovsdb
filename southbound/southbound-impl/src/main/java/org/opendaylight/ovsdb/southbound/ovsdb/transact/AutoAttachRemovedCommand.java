@@ -152,7 +152,7 @@ public class AutoAttachRemovedCommand extends AbstractTransactCommand {
                     final var brIid = doi.toLegacy().firstIdentifierOf(Node.class)
                         .augmentation(OvsdbBridgeAugmentation.class);
                     final Optional<OvsdbBridgeAugmentation> optionalBridge =
-                            transaction.read(LogicalDatastoreType.OPERATIONAL, brIid).get();
+                            transaction.read(LogicalDatastoreType.OPERATIONAL, brIid.toIdentifier()).get();
                     OvsdbBridgeAugmentation bridge = optionalBridge.orElseThrow();
                     if (bridge != null && bridge.getAutoAttach() != null
                             && bridge.getAutoAttach().equals(aaUuid)) {

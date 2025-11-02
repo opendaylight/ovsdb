@@ -59,7 +59,7 @@ public class OvsdbManagersRemovedCommand extends AbstractTransactionCommand {
     void deleteManagers(ReadWriteTransaction transaction,
             List<InstanceIdentifier<ManagerEntry>> managerEntryIids) {
         for (var managerEntryIid : managerEntryIids) {
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, managerEntryIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, managerEntryIid.toIdentifier());
         }
     }
 

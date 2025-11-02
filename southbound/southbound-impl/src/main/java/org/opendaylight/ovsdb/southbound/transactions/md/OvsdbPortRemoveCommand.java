@@ -80,7 +80,7 @@ public class OvsdbPortRemoveCommand extends AbstractTransactionCommand {
             final InstanceIdentifier<TerminationPoint> nodePath = SouthboundMapper.createInstanceIdentifier(
                 instanceIdentifierCodec, getOvsdbConnectionInstance(), bridgeData)
                     .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, nodePath.toIdentifier());
             // Remove from OvsdbConnection Instance cache
             getOvsdbConnectionInstance().removePort(portUuid);
             getOvsdbConnectionInstance().removePortInterface(portName);

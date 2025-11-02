@@ -88,7 +88,8 @@ public final class OvsdbOperGlobalListener implements DataTreeChangeListener<Nod
                         // Oops some one deleted the node held by me.
                         // This should never happen.
                         // Put the node back in oper
-                        txInvoker.invoke(tx -> tx.put(LogicalDatastoreType.OPERATIONAL, key, removedNode));
+                        txInvoker.invoke(
+                            tx -> tx.put(LogicalDatastoreType.OPERATIONAL, key.toIdentifier(), removedNode));
                     }
                 }
 

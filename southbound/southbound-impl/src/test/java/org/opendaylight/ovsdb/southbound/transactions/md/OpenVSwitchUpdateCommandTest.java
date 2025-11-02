@@ -59,8 +59,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
@@ -144,7 +144,7 @@ public class OpenVSwitchUpdateCommandTest {
         when(nodeBuilder.addAugmentation(any(OvsdbNodeAugmentation.class))).thenReturn(nodeBuilder);
         when(nodeBuilder.build()).thenReturn(mock(Node.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class),
                 any(Node.class));
 
         openVSwitchUpdateCommand.execute(transaction);
@@ -188,13 +188,13 @@ public class OpenVSwitchUpdateCommandTest {
     @Test
     public void testRemoveOldConfigs() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(KeyedInstanceIdentifier.class));
+        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
 
         doReturn(new NodeId("foo")).when(openVSwitchUpdateCommand).getNodeId(any());
         OpenVSwitch ovs = mock(OpenVSwitch.class);
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "removeOldConfigs",
                 transaction, ImmutableMap.of("OpenvswitchOtherConfigsKey", "OpenvswitchOtherConfigsValue"), ovs);
-        verify(transaction).delete(any(LogicalDatastoreType.class), any(KeyedInstanceIdentifier.class));
+        verify(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
     }
 
     @Test
@@ -239,14 +239,14 @@ public class OpenVSwitchUpdateCommandTest {
     @Test
     public void testRemoveExternalIds() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(KeyedInstanceIdentifier.class));
+        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
 
         //suppress getNodeId()
         OpenVSwitch ovs = mock(OpenVSwitch.class);
         doReturn(mock(NodeId.class)).when(openVSwitchUpdateCommand).getNodeId(any());
         Whitebox.invokeMethod(openVSwitchUpdateCommand, "removeExternalIds",
                 transaction, ImmutableMap.of("OpenvswitchExternalIdKey", "OpenvswitchExternalIdValue"), ovs);
-        verify(transaction).delete(any(LogicalDatastoreType.class), any(KeyedInstanceIdentifier.class));
+        verify(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
     }
 
     @Test

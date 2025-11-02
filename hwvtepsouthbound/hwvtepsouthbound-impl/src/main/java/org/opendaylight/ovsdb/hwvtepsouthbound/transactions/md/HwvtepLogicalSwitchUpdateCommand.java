@@ -59,7 +59,7 @@ public final class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionC
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
             Node connectionNode = buildConnectionNode(logicalSwitch);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(), connectionNode);
             InstanceIdentifier<LogicalSwitches> switchIid = getOvsdbConnectionInstance().getInstanceIdentifier()
                     .augmentation(HwvtepGlobalAugmentation.class)
                     .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch.getName())));

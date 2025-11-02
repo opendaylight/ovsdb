@@ -207,9 +207,9 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     protected void updateToDataStore(ReadWriteTransaction transaction, TerminationPointBuilder tpBuilder,
                                      InstanceIdentifier<TerminationPoint> tpPath, boolean merge) {
         if (merge) {
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, tpPath.toIdentifier(), tpBuilder.build());
         } else {
-            transaction.put(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
+            transaction.put(LogicalDatastoreType.OPERATIONAL, tpPath.toIdentifier(), tpBuilder.build());
         }
     }
 
@@ -419,7 +419,7 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
                             InstanceIdentifier<QosEntry> oldPortQosIid = tpPath
                                 .augmentation(OvsdbTerminationPointAugmentation.class)
                                 .child(QosEntry.class, SouthboundConstants.PORT_QOS_LIST_KEY);
-                            transaction.delete(LogicalDatastoreType.OPERATIONAL, oldPortQosIid);
+                            transaction.delete(LogicalDatastoreType.OPERATIONAL, oldPortQosIid.toIdentifier());
                         }
                     }
                 }

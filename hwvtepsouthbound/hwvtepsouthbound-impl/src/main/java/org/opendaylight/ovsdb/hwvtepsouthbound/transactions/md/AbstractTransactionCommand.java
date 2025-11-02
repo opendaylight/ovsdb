@@ -76,7 +76,7 @@ public abstract class AbstractTransactionCommand<T extends DataObject> implement
     public void addToDeleteTx(ReadWriteTransaction tx, Class<? extends EntryObject<?, ?>> cls, InstanceIdentifier iid,
                               UUID uuid) {
         if (deviceInfo.isAvailableInOperDs(cls, iid)) {
-            tx.delete(LogicalDatastoreType.OPERATIONAL, iid);
+            tx.delete(LogicalDatastoreType.OPERATIONAL, iid.toIdentifier());
         }
         deletedKeys.add(Pair.of(cls, iid));
         clearDeviceOpUUID(cls, iid, uuid);

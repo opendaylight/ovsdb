@@ -47,8 +47,8 @@ public class HwvtepPhysicalSwitchRemoveCommand extends AbstractTransactionComman
                     .augmentation(HwvtepGlobalAugmentation.class)
                     .child(Switches.class, new SwitchesKey(new HwvtepPhysicalSwitchRef(nodeIid.toIdentifier())));
             // TODO handle removal of reference to managed switch from model
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid);
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, switchIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid.toIdentifier());
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, switchIid.toIdentifier());
             getDeviceInfo().clearDeviceOperData(Node.class, switchIid);
             addToDeviceUpdate(TransactionType.DELETE, phySwitch);
             LOG.info("DEVICE - {} {}", TransactionType.DELETE, phySwitch);

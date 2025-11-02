@@ -41,6 +41,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberModifier;
@@ -57,8 +58,8 @@ public class OvsdbAutoAttachUpdateCommandTest {
     private static final String CONNECTED_NODE_ID = "10.0.0.2";
 //    private static final Map<String, String> AUTOATTACH_EXTERNAL_IDS =
 //            ImmutableMap.of("opendaylight-autoattach-id", "autoattach://798f35d8-f40a-449a-94d3-c860f5547f9a");
-    private Map<UUID, AutoAttach> updatedAutoAttachRows = new HashMap<>();
-    private Map<UUID, AutoAttach> oldAutoAttachRows = new HashMap<>();
+    private final Map<UUID, AutoAttach> updatedAutoAttachRows = new HashMap<>();
+    private final Map<UUID, AutoAttach> oldAutoAttachRows = new HashMap<>();
     private OvsdbAutoAttachUpdateCommand ovsdbAutoAttachUpdateCommand;
     private ReadWriteTransaction transaction;
     private InstanceIdentifier<Autoattach> aaIid;
@@ -96,9 +97,9 @@ public class OvsdbAutoAttachUpdateCommandTest {
         InstanceIdentifier<Node> connectionIid = aaIid.firstIdentifierOf(Node.class);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(connectionIid);
         transaction = mock(ReadWriteTransaction.class);
-        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class),
                 any(Autoattach.class));
-        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
 
         PowerMockito.mockStatic(SouthboundUtil.class);
         Node node = mock(Node.class);
@@ -116,6 +117,6 @@ public class OvsdbAutoAttachUpdateCommandTest {
     @Test
     public void testExecute() {
         ovsdbAutoAttachUpdateCommand.execute(transaction);
-        verify(transaction).put(eq(LogicalDatastoreType.OPERATIONAL), eq(aaIid), any(Autoattach.class));
+        verify(transaction).put(eq(LogicalDatastoreType.OPERATIONAL), eq(aaIid.toIdentifier()), any(Autoattach.class));
     }
 }

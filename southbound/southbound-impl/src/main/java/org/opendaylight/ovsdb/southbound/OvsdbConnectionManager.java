@@ -363,7 +363,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         try {
             ReadTransaction transaction = db.newReadOnlyTransaction();
             FluentFuture<Optional<Node>> nodeFuture = transaction.read(
-                    LogicalDatastoreType.OPERATIONAL, nodePath);
+                    LogicalDatastoreType.OPERATIONAL, nodePath.toIdentifier());
             transaction.close();
             Optional<Node> optional = nodeFuture.get();
             if (optional.isPresent()) {
@@ -515,7 +515,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                         LOG.debug("{} had no managed nodes", ovsdbNode.getNodeId().getValue());
                     }
                 }
-                transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid);
+                transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid.toIdentifier());
             }
         });
 

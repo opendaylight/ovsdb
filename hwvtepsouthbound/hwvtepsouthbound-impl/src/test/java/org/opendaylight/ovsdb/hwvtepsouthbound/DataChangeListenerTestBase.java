@@ -195,13 +195,13 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     void addNode(final LogicalDatastoreType logicalDatastoreType) throws Exception {
         NodeBuilder nodeBuilder = prepareNode(nodeIid).addAugmentation(new HwvtepGlobalAugmentationBuilder().build());
         WriteTransaction transaction = getDataBroker().newWriteOnlyTransaction();
-        transaction.mergeParentStructurePut(logicalDatastoreType, nodeIid, nodeBuilder.build());
+        transaction.mergeParentStructurePut(logicalDatastoreType, nodeIid.toIdentifier(), nodeBuilder.build());
         transaction.commit();
     }
 
     void deleteNode(final LogicalDatastoreType logicalDatastoreType) {
         ReadWriteTransaction tx = getDataBroker().newReadWriteTransaction();
-        tx.delete(logicalDatastoreType, nodeIid);
+        tx.delete(logicalDatastoreType, nodeIid.toIdentifier());
         tx.commit();
     }
 
@@ -228,7 +228,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     void deleteData(final LogicalDatastoreType datastoreType, final InstanceIdentifier<?>... iids) {
         WriteTransaction transaction = getDataBroker().newWriteOnlyTransaction();
         for (InstanceIdentifier<?> id : iids) {
-            transaction.delete(datastoreType, id);
+            transaction.delete(datastoreType, id.toIdentifier());
         }
         transaction.commit();
     }
@@ -239,7 +239,8 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         if (LogicalSwitches.class == dataObject) {
             for (LogicalSwitchesKey key : TestBuilders.logicalSwitches(data).keySet()) {
                 tx.delete(logicalDatastoreType,
-                    nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class, key));
+                    nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class, key)
+                        .toIdentifier());
             }
         }
         if (TerminationPoint.class == dataObject) {
@@ -250,13 +251,15 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         if (RemoteUcastMacs.class == dataObject) {
             for (RemoteUcastMacsKey key : TestBuilders.remoteUcastMacs(nodeIid, data).keySet()) {
                 tx.delete(logicalDatastoreType,
-                    nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(RemoteUcastMacs.class, key));
+                    nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(RemoteUcastMacs.class, key)
+                        .toIdentifier());
             }
         }
         if (RemoteMcastMacs.class == dataObject) {
             for (RemoteMcastMacsKey key : TestBuilders.remoteMcastMacs(nodeIid, data).keySet()) {
                 tx.delete(logicalDatastoreType,
-                    nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(RemoteMcastMacs.class, key));
+                    nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(RemoteMcastMacs.class, key)
+                        .toIdentifier());
             }
         }
         tx.commit();
@@ -270,7 +273,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
             final NodeBuilder nodeBuilder) {
         Node node = nodeBuilder.build();
         WriteTransaction transaction = getDataBroker().newWriteOnlyTransaction();
-        transaction.mergeParentStructureMerge(datastoreType, id, node);
+        transaction.mergeParentStructureMerge(datastoreType, id.toIdentifier(), node);
         transaction.commit();
         return node;
     }

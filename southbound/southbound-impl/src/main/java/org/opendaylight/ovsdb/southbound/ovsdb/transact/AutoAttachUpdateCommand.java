@@ -172,7 +172,8 @@ public class AutoAttachUpdateCommand extends AbstractTransactCommand {
                 .augmentation(OvsdbBridgeAugmentation.class);
 
         try (ReadTransaction transaction = state.dataBroker().newReadOnlyTransaction()) {
-            final var bridgeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, bridgeIid).get();
+            final var bridgeOptional = transaction.read(LogicalDatastoreType.OPERATIONAL, bridgeIid.toIdentifier())
+                .get();
             if (bridgeOptional.isPresent()) {
                 return bridgeOptional.orElseThrow();
             }

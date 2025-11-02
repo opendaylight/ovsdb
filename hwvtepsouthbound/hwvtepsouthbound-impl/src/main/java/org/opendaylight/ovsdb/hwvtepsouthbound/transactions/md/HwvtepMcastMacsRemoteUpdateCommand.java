@@ -65,7 +65,7 @@ public final class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactio
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
 
         // Ensure the node exists
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId,
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(),
             new NodeBuilder().setNodeId(getOvsdbConnectionInstance().getNodeId()).build());
 
         // Prepare the update in internal structures
@@ -75,11 +75,11 @@ public final class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactio
         addToUpdateTx(RemoteMcastMacs.class, macIid, macRemote.getUuid(), macRemote);
 
         // Merge update, relying on automatic lifecycle...
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, macIid, mac);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, macIid.toIdentifier(), mac);
         if (mac.getLocatorSet() == null) {
             // ... but delete locator set if it is empty
             // FIXME: can we use .put() of instead of merge/delete?
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, macIid.child(LocatorSet.class));
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, macIid.child(LocatorSet.class).toIdentifier());
         }
     }
 

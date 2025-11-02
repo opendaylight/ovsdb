@@ -137,9 +137,9 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
 
             // At this point the OVSDB topology must not be present in either tree
             assertFalse(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION,
-                    topologyIid).get().isPresent());
+                topologyIid.toIdentifier()).get().isPresent());
             assertFalse(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
-                    topologyIid).get().isPresent());
+                topologyIid.toIdentifier()).get().isPresent());
 
             // Become owner
             southboundProvider.handleOwnershipChange(EntityOwnershipStateChange.from(false, true, true));
@@ -153,18 +153,18 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
 
             // Now the OVSDB topology must be present in both trees
             assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION,
-                    topologyIid).get().isPresent());
+                topologyIid.toIdentifier()).get().isPresent());
             assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
-                    topologyIid).get().isPresent());
+                topologyIid.toIdentifier()).get().isPresent());
 
             // Verify idempotency
             southboundProvider.handleOwnershipChange(EntityOwnershipStateChange.from(false, true, true));
 
             // The OVSDB topology must be present in both trees
             assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION,
-                    topologyIid).get().isPresent());
+                topologyIid.toIdentifier()).get().isPresent());
             assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
-                    topologyIid).get().isPresent());
+                topologyIid.toIdentifier()).get().isPresent());
         }
     }
 }

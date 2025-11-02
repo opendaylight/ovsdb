@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Map;
@@ -60,7 +59,7 @@ public final class HwvtepManagerUpdateCommand extends AbstractTransactionCommand
         if (connection.isPresent()) {
             LOG.debug("Connection {} is present", connection.orElseThrow());
             Node connectionNode = buildConnectionNode(manager);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(), connectionNode);
             addToDeviceUpdate(TransactionType.ADD, manager);
             LOG.info("DEVICE - {} {}", TransactionType.ADD, manager);
             // TODO: Delete entries that are no longer needed
@@ -99,5 +98,3 @@ public final class HwvtepManagerUpdateCommand extends AbstractTransactionCommand
         // TODO Deletion of other config
     }
 }
-
-

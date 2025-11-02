@@ -58,7 +58,7 @@ public final class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactio
     private void updateUcastMacsRemote(ReadWriteTransaction transaction, Collection<UcastMacsRemote> ucastMacsRemote) {
         final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Node connectionNode = buildConnectionNode(ucastMacsRemote);
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(), connectionNode);
     }
 
     private Node buildConnectionNode(final Collection<UcastMacsRemote> macRemotes) {

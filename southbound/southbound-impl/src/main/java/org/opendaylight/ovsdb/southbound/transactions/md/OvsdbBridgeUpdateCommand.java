@@ -112,12 +112,12 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
             Bridge bridge, InstanceIdentifier<Node> connectionIId) {
         // Update the connection node to let it know it manages this bridge
         Node connectionNode = buildConnectionNode(bridge);
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(), connectionNode);
 
         // Update the bridge node with whatever data we are getting
         InstanceIdentifier<Node> bridgeIid = getInstanceIdentifier(bridge);
         Node bridgeNode = buildBridgeNode(bridge);
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNode);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid.toIdentifier(), bridgeNode);
         updatedBridges.add(bridgeIid);
         updatedBridgeNodes.put(getNodeId(bridge), bridgeNode);
         deleteEntries(transaction, protocolEntriesToRemove(bridgeIid, bridge));
@@ -129,7 +129,7 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
     <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
             List<InstanceIdentifier<T>> entryIids) {
         for (InstanceIdentifier<T> entryIid : entryIids) {
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid.toIdentifier());
         }
     }
 

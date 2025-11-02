@@ -48,7 +48,7 @@ public final class HwvtepTunnelRemoveCommand extends AbstractTransactionCommand 
             try {
                 InstanceIdentifier<Tunnels> tunnelIid = getInstanceIdentifier(getOvsdbConnectionInstance(), tunnel);
                 if (tunnelIid != null) {
-                    transaction.delete(LogicalDatastoreType.OPERATIONAL, tunnelIid);
+                    transaction.delete(LogicalDatastoreType.OPERATIONAL, tunnelIid.toIdentifier());
                     LOG.trace("Deleting tunnel {}", tunnelIid);
                 }
                 getOvsdbConnectionInstance().getDeviceInfo().removePhysicalSwitchForTunnel(tunnel.getUuid());

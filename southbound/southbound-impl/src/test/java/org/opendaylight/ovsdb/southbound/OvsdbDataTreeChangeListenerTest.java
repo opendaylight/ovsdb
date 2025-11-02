@@ -73,7 +73,7 @@ public class OvsdbDataTreeChangeListenerTest extends AbstractConcurrentDataBroke
                 .build();
         final InstanceIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
         WriteTransaction transaction = dataBroker.newReadWriteTransaction();
-        transaction.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, iid,
+        transaction.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, iid.toIdentifier(),
             SouthboundUtils.createNode(connectionInfo));
         transaction.commit().get();
 

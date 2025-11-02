@@ -47,7 +47,7 @@ public class HwvtepGlobalRemoveCommand extends AbstractTransactionCommand {
     @Override
     public void execute(ReadWriteTransaction transaction) {
         FluentFuture<Optional<Node>> hwvtepGlobalFuture = transaction.read(
-                LogicalDatastoreType.OPERATIONAL, nodeInstanceIdentifier);
+                LogicalDatastoreType.OPERATIONAL, nodeInstanceIdentifier.toIdentifier());
         try {
             Optional<Node> hwvtepGlobalOptional = hwvtepGlobalFuture.get();
             if (hwvtepGlobalOptional.isPresent()) {
@@ -68,7 +68,7 @@ public class HwvtepGlobalRemoveCommand extends AbstractTransactionCommand {
                     } else {
                         LOG.warn("{} had no HwvtepGlobalAugmentation", hwvtepNode.getNodeId().getValue());
                     }
-                    transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeInstanceIdentifier);
+                    transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeInstanceIdentifier.toIdentifier());
                 } else {
                     LOG.debug("Other southbound plugin instances in cluster are connected to the device,"
                             + " not deleting OvsdbNode form data store.");

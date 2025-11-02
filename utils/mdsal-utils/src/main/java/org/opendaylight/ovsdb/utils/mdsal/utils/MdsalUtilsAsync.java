@@ -32,7 +32,7 @@ public class MdsalUtilsAsync {
      * @param dataBroker the {@link DataBroker}
      */
     public MdsalUtilsAsync(final DataBroker dataBroker) {
-        this.databroker = dataBroker;
+        databroker = dataBroker;
     }
 
     /**
@@ -49,7 +49,7 @@ public class MdsalUtilsAsync {
                                     final LogicalDatastoreType store,
                                     final InstanceIdentifier<D> path)  {
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.delete(store, path);
+        transaction.delete(store, path.toIdentifier());
         return transaction.commit();
     }
 
@@ -87,7 +87,7 @@ public class MdsalUtilsAsync {
                                         final InstanceIdentifier<D> path,
                                         final D data)  {
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.mergeParentStructurePut(logicalDatastoreType, path, data);
+        transaction.mergeParentStructurePut(logicalDatastoreType, path.toIdentifier(), data);
         return transaction.commit();
     }
 
@@ -133,9 +133,9 @@ public class MdsalUtilsAsync {
                                         final boolean withParent)  {
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
         if (withParent) {
-            transaction.mergeParentStructureMerge(logicalDatastoreType, path, data);
+            transaction.mergeParentStructureMerge(logicalDatastoreType, path.toIdentifier(), data);
         } else {
-            transaction.merge(logicalDatastoreType, path, data);
+            transaction.merge(logicalDatastoreType, path.toIdentifier(), data);
         }
         return transaction.commit();
     }
@@ -181,8 +181,8 @@ public class MdsalUtilsAsync {
                                         final LogicalDatastoreType store,
                                         final InstanceIdentifier<D> path)  {
         final ReadTransaction transaction = databroker.newReadOnlyTransaction();
-        final FluentFuture<Optional<D>> future = transaction.read(store, path);
-        final FutureCallback<Optional<D>> closeTransactionCallback = new FutureCallback<Optional<D>>() {
+        final FluentFuture<Optional<D>> future = transaction.read(store, path.toIdentifier());
+        final FutureCallback<Optional<D>> closeTransactionCallback = new FutureCallback<>() {
             @Override
             public void onSuccess(final Optional<D> result) {
                 transaction.close();

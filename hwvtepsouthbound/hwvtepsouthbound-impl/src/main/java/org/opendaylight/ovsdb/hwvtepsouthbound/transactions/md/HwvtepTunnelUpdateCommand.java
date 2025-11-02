@@ -95,7 +95,7 @@ public final class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand 
             setBfdStatus(builder, tunnel);
             Tunnels updatedTunnel = builder.build();
             LOG.trace("Built with the intent to store tunnel data {}", updatedTunnel);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, tunnelIid, updatedTunnel);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, tunnelIid.toIdentifier(), updatedTunnel);
             // TODO: Deletion of Tunnel BFD config and params
         } else {
             LOG.warn("Insuficient information. Unable to update tunnel {}", tunnel.getUuid());

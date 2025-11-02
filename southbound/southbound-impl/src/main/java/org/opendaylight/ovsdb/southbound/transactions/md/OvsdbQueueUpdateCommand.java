@@ -102,8 +102,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
                 InstanceIdentifier<Queues> iid = nodeIId
                         .augmentation(OvsdbNodeAugmentation.class)
                         .child(Queues.class, queues.key());
-                transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                        iid, queues);
+                transaction.merge(LogicalDatastoreType.OPERATIONAL, iid.toIdentifier(), queues);
             }
         }
     }
@@ -161,7 +160,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
             KeyedInstanceIdentifier<QueuesOtherConfig, QueuesOtherConfigKey> otherIId =
                     queueIId
                     .child(QueuesOtherConfig.class, new QueuesOtherConfigKey(otherConfigKey));
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, otherIId);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, otherIId.toIdentifier());
         }
     }
 
@@ -209,7 +208,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
             KeyedInstanceIdentifier<QueuesExternalIds, QueuesExternalIdsKey> externalIId =
                     queueIId
                     .child(QueuesExternalIds.class, new QueuesExternalIdsKey(extIdKey));
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, externalIId);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, externalIId.toIdentifier());
         }
     }
 

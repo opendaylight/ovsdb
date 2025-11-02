@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
@@ -26,11 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HwvtepManagerRemoveCommand extends AbstractTransactionCommand {
-
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepManagerRemoveCommand.class);
 
-    public HwvtepManagerRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates,
-            DatabaseSchema dbSchema) {
+    public HwvtepManagerRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
 
@@ -43,7 +40,7 @@ public class HwvtepManagerRemoveCommand extends AbstractTransactionCommand {
                             .augmentation(HwvtepGlobalAugmentation.class)
                             .child(Managers.class, new ManagersKey(new Uri(manager.getTargetColumn().getData())));
             // TODO Delete any references
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, managerIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, managerIid.toIdentifier());
             addToDeviceUpdate(TransactionType.DELETE, manager);
             LOG.info("DEVICE - {} {}", TransactionType.DELETE, manager);
         }

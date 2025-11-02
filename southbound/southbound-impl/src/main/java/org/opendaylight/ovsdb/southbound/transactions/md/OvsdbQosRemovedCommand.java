@@ -88,7 +88,7 @@ public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
     private static void deleteQos(ReadWriteTransaction transaction,
             List<InstanceIdentifier<QosEntries>> qosEntryIids) {
         for (InstanceIdentifier<QosEntries> qosEntryIid: qosEntryIids) {
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, qosEntryIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, qosEntryIid.toIdentifier());
         }
     }
 }

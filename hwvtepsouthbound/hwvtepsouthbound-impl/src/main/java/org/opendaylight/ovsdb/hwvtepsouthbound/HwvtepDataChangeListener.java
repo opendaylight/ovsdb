@@ -54,9 +54,9 @@ public final class HwvtepDataChangeListener implements DataTreeChangeListener<No
         this.hcm = hcm;
         final var treeId = DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION,
             InstanceIdentifier.builder(NetworkTopology.class)
-            .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
-            .child(Node.class)
-            .build());
+                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+                .child(Node.class)
+                .build());
 
         LOG.trace("Registering on path: {}", treeId);
         registration = db.registerTreeChangeListener(treeId, this);
@@ -268,11 +268,11 @@ public final class HwvtepDataChangeListener implements DataTreeChangeListener<No
                 LOG.error("Disconnecting from controller {}", nodeId);
                 new Thread(() -> {
                     ReadWriteTransaction tx = db.newReadWriteTransaction();
-                    tx.delete(LogicalDatastoreType.CONFIGURATION, change.getRootPath().path());
+                    tx.delete(LogicalDatastoreType.CONFIGURATION, change.path());
                     try {
                         tx.commit().get();
                     } catch (ExecutionException | InterruptedException e) {
-                        LOG.error("Failed to delete the node {}", change.getRootPath().path());
+                        LOG.error("Failed to delete the node {}", change.path());
                     }
                 }).start();
                 try {

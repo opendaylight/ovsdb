@@ -16,6 +16,7 @@ import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +33,8 @@ public class MdsalUtils {
      *
      * @param dataBroker the {@link DataBroker}
      */
-    public MdsalUtils(DataBroker dataBroker) {
-        this.databroker = dataBroker;
+    public MdsalUtils(final DataBroker dataBroker) {
+        databroker = dataBroker;
     }
 
     /**
@@ -48,7 +49,7 @@ public class MdsalUtils {
             final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
         boolean result = false;
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.delete(store, path);
+        transaction.delete(store, path.toIdentifier());
         FluentFuture<? extends CommitInfo> future = transaction.commit();
         try {
             future.get();
@@ -68,10 +69,10 @@ public class MdsalUtils {
      * @return the result of the request
      */
     public <D extends DataObject> boolean merge(
-            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
+            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, final D data)  {
         boolean result = false;
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.mergeParentStructureMerge(logicalDatastoreType, path, data);
+        transaction.mergeParentStructureMerge(logicalDatastoreType, path.toIdentifier(), data);
         FluentFuture<? extends CommitInfo> future = transaction.commit();
         try {
             future.get();
@@ -91,10 +92,10 @@ public class MdsalUtils {
      * @return the result of the request
      */
     public <D extends DataObject> boolean put(
-            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, D data)  {
+            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, final D data)  {
         boolean result = false;
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.mergeParentStructurePut(logicalDatastoreType, path, data);
+        transaction.mergeParentStructurePut(logicalDatastoreType, path.toIdentifier(), data);
         FluentFuture<? extends CommitInfo> future = transaction.commit();
         try {
             future.get();
@@ -113,14 +114,12 @@ public class MdsalUtils {
      * @param <D> the data object type
      * @return the result as the data object requested
      */
-    public <D extends DataObject> D read(
-            final LogicalDatastoreType store, final InstanceIdentifier<? extends DataObject> path) {
+    public <D extends DataObject> D read(final LogicalDatastoreType store, final InstanceIdentifier<D> path) {
         Optional<D> optionalDataObject = readOptional(store, path);
         if (optionalDataObject.isPresent()) {
             return optionalDataObject.orElseThrow();
         }
-        LOG.debug("{}: Failed to read {}",
-                Thread.currentThread().getStackTrace()[1], path);
+        LOG.debug("{}: Failed to read {}", Thread.currentThread().getStackTrace()[1], path);
         return null;
     }
 
@@ -130,7 +129,7 @@ public class MdsalUtils {
         ReadTransaction transaction = databroker.newReadOnlyTransaction();
         do {
             try {
-                Optional<D> result = transaction.read(store, (InstanceIdentifier<D>)path).get();
+                Optional<D> result = transaction.read(store, (DataObjectIdentifier<D>) path.toIdentifier()).get();
                 transaction.close();
                 return result;
             } catch (InterruptedException | ExecutionException e) {
@@ -151,15 +150,14 @@ public class MdsalUtils {
     }
 
 
-    public boolean exists(
-        final LogicalDatastoreType store, final InstanceIdentifier<? extends DataObject> path) {
+    public boolean exists(final LogicalDatastoreType store, final InstanceIdentifier<?> path) {
         int trialNo = 0;
         ReadTransaction transaction = databroker.newReadOnlyTransaction();
         do {
             try {
                 FluentFuture<Boolean> result = transaction.exists(store, path);
                 transaction.close();
-                return result.get().booleanValue();
+                return result.get();
             } catch (InterruptedException | ExecutionException e) {
                 if (trialNo == 0) {
                     logReadFailureError(path, " mdsal Read failed exception retrying the read after sleep");
@@ -177,9 +175,7 @@ public class MdsalUtils {
         return false;
     }
 
-    private <D extends DataObject> void logReadFailureError(
-            InstanceIdentifier<D> path, String cause) {
+    private static void logReadFailureError(final InstanceIdentifier<?> path, final String cause) {
         LOG.error("{}: Failed to read {} Cause : {}", Thread.currentThread().getStackTrace()[2], path, cause);
-
     }
 }

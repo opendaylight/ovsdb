@@ -45,8 +45,8 @@ public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
                 .augmentation(OvsdbNodeAugmentation.class)
                 .child(ManagedNodeEntry.class, new ManagedNodeEntryKey(new OvsdbBridgeRef(bridgeIid.toIdentifier())));
             // TODO handle removal of reference to managed node from model
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, bridgeIid);
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, mnIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, bridgeIid.toIdentifier());
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, mnIid.toIdentifier());
         }
     }
 }

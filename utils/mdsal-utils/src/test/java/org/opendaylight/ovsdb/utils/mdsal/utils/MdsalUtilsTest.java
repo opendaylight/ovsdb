@@ -27,7 +27,9 @@ import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
@@ -48,9 +50,10 @@ public class MdsalUtilsTest {
         when(databroker.newWriteOnlyTransaction()).thenReturn(writeTransaction);
         doReturn(CommitInfo.emptyFluentFuture()).when(writeTransaction).commit();
 
-        boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, mock(InstanceIdentifier.class));
+        boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
+            InstanceIdentifier.create(NetworkTopology.class));
 
-        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
         verify(writeTransaction, times(1)).commit();
 
         assertTrue("Error, the delete transaction failed", result);
@@ -63,10 +66,10 @@ public class MdsalUtilsTest {
         doReturn(CommitInfo.emptyFluentFuture()).when(writeTransaction).commit();
 
         boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                mock(InstanceIdentifier.class), mock(DataObject.class));
+                InstanceIdentifier.create(NetworkTopology.class), mock(NetworkTopology.class));
 
         verify(writeTransaction, times(1)).mergeParentStructureMerge(any(LogicalDatastoreType.class),
-                any(InstanceIdentifier.class), any(DataObject.class));
+                any(DataObjectIdentifier.class), any(DataObject.class));
         verify(writeTransaction, times(1)).commit();
 
         assertTrue("Error, the merge transaction failed", result);
@@ -79,10 +82,10 @@ public class MdsalUtilsTest {
         doReturn(CommitInfo.emptyFluentFuture()).when(writeTransaction).commit();
 
         boolean result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION,
-                mock(InstanceIdentifier.class), mock(DataObject.class));
+                InstanceIdentifier.create(NetworkTopology.class), mock(NetworkTopology.class));
 
         verify(writeTransaction, times(1)).mergeParentStructurePut(any(LogicalDatastoreType.class),
-                any(InstanceIdentifier.class), any(DataObject.class));
+                any(DataObjectIdentifier.class), any(DataObject.class));
         verify(writeTransaction, times(1)).commit();
 
         assertTrue("Error, the put transaction failed", result);
@@ -92,12 +95,13 @@ public class MdsalUtilsTest {
     public void testRead() {
         ReadTransaction readTransaction = mock(ReadTransaction.class);
         doReturn(readTransaction).when(databroker).newReadOnlyTransaction();
-        DataObject obj = mock(DataObject.class);
+        NetworkTopology obj = mock(NetworkTopology.class);
         doReturn(FluentFutures.immediateFluentFuture(Optional.of(obj))).when(readTransaction).read(
-            any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
-        DataObject result = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, mock(InstanceIdentifier.class));
+            any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
+        NetworkTopology result = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION,
+            InstanceIdentifier.create(NetworkTopology.class));
 
-        verify(readTransaction, times(1)).read(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(readTransaction, times(1)).read(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
         verify(readTransaction, times(1)).close();
 
         assertEquals("Error, the read transaction failed", obj, result);

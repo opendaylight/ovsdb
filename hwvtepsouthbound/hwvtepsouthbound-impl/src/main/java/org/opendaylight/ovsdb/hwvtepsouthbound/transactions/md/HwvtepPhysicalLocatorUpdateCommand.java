@@ -71,10 +71,10 @@ public final class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactio
                 tpBuilder.addAugmentation(tpAugmentationBuilder.build());
                 if (oldPLocRows.containsKey(locUpdate.getKey())) {
                     transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                            tpPath, tpBuilder.build());
+                            tpPath.toIdentifier(), tpBuilder.build());
                 } else {
                     transaction.put(LogicalDatastoreType.OPERATIONAL,
-                            tpPath, tpBuilder.build());
+                            tpPath.toIdentifier(), tpBuilder.build());
                 }
                 addToUpdateTx(TerminationPoint.class, tpPath, locator.getUuid(), locator);
             }

@@ -84,7 +84,8 @@ public class OvsdbInitialPortUpdateCommand extends OvsdbPortUpdateCommand {
                 Node bridgeNodeWithTerminationPoints = new NodeBuilder(bridgeNode)
                     .setTerminationPoint(BindingMap.ordered(terminationPoints))
                     .build();
-                transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNodeWithTerminationPoints);
+                transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid.toIdentifier(),
+                    bridgeNodeWithTerminationPoints);
             }
             terminationPoints.forEach(terminationPoint -> {
                 terminationPointList.append(terminationPoint.key().getTpId().getValue() +  ",");

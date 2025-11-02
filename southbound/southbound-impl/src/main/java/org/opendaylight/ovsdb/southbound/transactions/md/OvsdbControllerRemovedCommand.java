@@ -44,8 +44,7 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
         this.instanceIdentifierCodec = instanceIdentifierCodec;
         updatedBridgeRows = TyperUtils.extractRowsUpdated(Bridge.class, getUpdates(), getDbSchema());
         oldBridgeRows = TyperUtils.extractRowsOld(Bridge.class, getUpdates(), getDbSchema());
-        removedControllerRows = TyperUtils.extractRowsRemoved(Controller.class,
-                getUpdates(), getDbSchema());
+        removedControllerRows = TyperUtils.extractRowsRemoved(Controller.class, getUpdates(), getDbSchema());
     }
 
     @Override
@@ -61,7 +60,7 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
     private static void deleteControllers(ReadWriteTransaction transaction,
             List<InstanceIdentifier<ControllerEntry>> controllerEntryIids) {
         for (InstanceIdentifier<ControllerEntry> controllerEntryIid: controllerEntryIids) {
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, controllerEntryIid);
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, controllerEntryIid.toIdentifier());
         }
     }
 
@@ -89,5 +88,4 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
         }
         return result;
     }
-
 }

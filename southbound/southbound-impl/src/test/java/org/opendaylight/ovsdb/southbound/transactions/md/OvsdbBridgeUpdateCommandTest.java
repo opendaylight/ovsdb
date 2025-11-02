@@ -150,7 +150,7 @@ public class OvsdbBridgeUpdateCommandTest {
         MemberModifier
                 .suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "buildConnectionNode", Bridge.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class),
+        doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class),
                 any(Node.class));
 
         // suppress calls to private methods
@@ -179,9 +179,9 @@ public class OvsdbBridgeUpdateCommandTest {
     @Test
     public void testDeleteEntries() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
         ovsdbBridgeUpdateCommand.deleteEntries(transaction, List.of(InstanceIdentifier.create(NetworkTopology.class)));
-        verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
     }
 
     @SuppressWarnings("unchecked")

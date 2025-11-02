@@ -14,10 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectReference;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -160,8 +160,7 @@ public final class NotifyingDataChangeListener implements AutoCloseable, DataTre
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void registerDataChangeListener(DataBroker dataBroker) {
-        listenerRegistration = dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.of(type,
-                (InstanceIdentifier)iid), this);
+        listenerRegistration = dataBroker.registerTreeChangeListener(type, (DataObjectReference)iid, this);
     }
 
     public void waitForCreation() throws InterruptedException {

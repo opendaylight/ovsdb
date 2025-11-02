@@ -44,6 +44,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberModifier;
@@ -124,9 +125,9 @@ public class OvsdbPortRemoveCommandTest {
 
         MemberModifier.suppress(MemberModifier.methodsDeclaredIn(InstanceIdentifier.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
 
         ovsdbPortRemoveCommand.execute(transaction);
-        verify(transaction).delete(any(LogicalDatastoreType.class), any(InstanceIdentifier.class));
+        verify(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
     }
 }

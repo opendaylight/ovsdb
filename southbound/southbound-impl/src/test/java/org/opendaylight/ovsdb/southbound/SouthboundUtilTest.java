@@ -106,7 +106,7 @@ public class SouthboundUtilTest {
             .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
             .child(Node.class, new NodeKey(new NodeId("testNode")));
         FluentFuture<Optional<Node>> value = FluentFutures.immediateFluentFuture(node);
-        when(transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid)).thenReturn(value);
+        when(transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid.toIdentifier())).thenReturn(value);
         assertEquals("Incorrect Optional object received", node, SouthboundUtil.readNode(transaction, connectionIid));
     }
 

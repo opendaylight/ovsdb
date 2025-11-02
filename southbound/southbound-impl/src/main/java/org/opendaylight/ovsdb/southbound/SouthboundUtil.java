@@ -101,7 +101,7 @@ public final class SouthboundUtil {
             if (cachedNode != null) {
                 node = Optional.of((D)cachedNode);
             } else {
-                node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid).get();
+                node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid.toIdentifier()).get();
             }
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Read Operational/DS for Node failed! {}", connectionIid, e);
@@ -118,7 +118,7 @@ public final class SouthboundUtil {
             if (cachedNode != null) {
                 node = Optional.of((D)cachedNode);
             } else {
-                node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid).get();
+                node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid.toIdentifier()).get();
             }
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Read Operational/DS for Node failed! {}", connectionIid, e);

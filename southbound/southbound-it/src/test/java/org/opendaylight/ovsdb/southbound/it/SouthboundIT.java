@@ -294,7 +294,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
 
         public void registerDataChangeListener() {
-            dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.of(type, (InstanceIdentifier)iid), this);
+            dataBroker.registerTreeChangeListener(type, (InstanceIdentifier)iid, this);
         }
 
         public void waitForCreation(final long timeout) throws InterruptedException {
@@ -455,9 +455,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         assertTrue("Did not find " + SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue(), getOvsdbTopology());
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
         final InstanceIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
-        dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION,
+        dataBroker.registerTreeChangeListener(DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION,
                 (InstanceIdentifier)iid), CONFIGURATION_LISTENER);
-        dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL,
+        dataBroker.registerTreeChangeListener(DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL,
                 (InstanceIdentifier)iid), OPERATIONAL_LISTENER);
 
         ovsdbNode = connectOvsdbNode(connectionInfo);

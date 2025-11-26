@@ -109,8 +109,8 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
 
     void processDependencies(final UnMetDependencyGetter<T> unMetDependencyGetter,
             final TransactionBuilder transaction,
-            final InstanceIdentifier<Node> nodeIid,
-            final InstanceIdentifier key,
+            final DataObjectIdentifier<Node> nodeIid,
+            final DataObjectIdentifier key,
             final T data, final Object... extraData) {
 
         HwvtepDeviceInfo deviceInfo = hwvtepOperationalState.getDeviceInfo();
@@ -221,14 +221,14 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
     }
 
     @Override
-    public void doDeviceTransaction(final TransactionBuilder transaction, final InstanceIdentifier<Node> nodeIid,
-            final T data, final InstanceIdentifier key, final Object... extraData) {
+    public void doDeviceTransaction(final TransactionBuilder transaction, final DataObjectIdentifier<Node> nodeIid,
+            final T data, final DataObjectIdentifier key, final Object... extraData) {
         //tobe removed as part of refactoring patch
     }
 
     @Override
-    public void onConfigUpdate(final TransactionBuilder transaction, final InstanceIdentifier<Node> nodeIid,
-            final T data, final InstanceIdentifier key, final Object... extraData) {
+    public void onConfigUpdate(final TransactionBuilder transaction, final DataObjectIdentifier<Node> nodeIid,
+            final T data, final DataObjectIdentifier key, final Object... extraData) {
         //tobe removed as part of refactoring patch
     }
 
@@ -446,8 +446,8 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
         getOperationalState().getDeviceInfo().addToControllerTx(transactionType, element);
     }
 
-    public <T> HwvtepDeviceInfo.DeviceData fetchDeviceData(final Class<? extends EntryObject<?, ?>> cls,
-            final InstanceIdentifier key) {
+    public HwvtepDeviceInfo.DeviceData fetchDeviceData(final Class<? extends EntryObject<?, ?>> cls,
+            final DataObjectIdentifier key) {
         HwvtepDeviceInfo.DeviceData deviceData  = getDeviceOpData(cls, key);
         if (deviceData == null) {
             LOG.debug("Could not find data for key {}", getNodeKeyStr(key));
@@ -469,25 +469,25 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
         hwvtepOperationalState.getDeviceInfo().addJobToQueue(job);
     }
 
-    public void markKeyAsInTransit(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key) {
+    public void markKeyAsInTransit(final Class<? extends EntryObject<?, ?>> cls, final DataObjectIdentifier key) {
         hwvtepOperationalState.getDeviceInfo().markKeyAsInTransit(cls, key);
     }
 
     public HwvtepDeviceInfo.DeviceData getDeviceOpData(final Class<? extends EntryObject<?, ?>> cls,
-            final InstanceIdentifier key) {
+            final DataObjectIdentifier key) {
         return getOperationalState().getDeviceInfo().getDeviceOperData(cls, key);
     }
 
-    public void clearConfigData(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key) {
+    public void clearConfigData(final Class<? extends EntryObject<?, ?>> cls, final DataObjectIdentifier key) {
         hwvtepOperationalState.getDeviceInfo().clearConfigData(cls, key);
     }
 
     public HwvtepDeviceInfo.DeviceData getConfigData(final Class<? extends EntryObject<?, ?>> cls,
-            final InstanceIdentifier key) {
+            final DataObjectIdentifier key) {
         return hwvtepOperationalState.getDeviceInfo().getConfigData(cls, key);
     }
 
-    public void updateConfigData(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key,
+    public void updateConfigData(final Class<? extends EntryObject<?, ?>> cls, final DataObjectIdentifier key,
             final Object data) {
         hwvtepOperationalState.getDeviceInfo().updateConfigData(cls, key, data);
     }
@@ -515,17 +515,17 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
         return new HwvtepOperationalState(getConnectionInstance());
     }
 
-    protected String getNodeKeyStr(final InstanceIdentifier<T> iid) {
+    protected String getNodeKeyStr(final DataObjectIdentifier<T> iid) {
         return getClassType().getTypeName() + "."
-            + iid.firstKeyOf(Node.class).getNodeId().getValue() + "." + getKeyStr(iid);
+            + iid.getFirstKeyOf(Node.class).getNodeId().getValue() + "." + getKeyStr(iid);
     }
 
-    protected String getKeyStr(final InstanceIdentifier<T> iid) {
+    protected String getKeyStr(final DataObjectIdentifier<T> iid) {
         return iid.toString();
     }
 
-    protected String getLsKeyStr(final InstanceIdentifier<?> iid) {
-        return iid.toLegacy().firstKeyOf(LogicalSwitches.class).getHwvtepNodeName() .getValue();
+    protected String getLsKeyStr(final DataObjectIdentifier<?> iid) {
+        return iid.getFirstKeyOf(LogicalSwitches.class).getHwvtepNodeName() .getValue();
     }
 
     protected String getLsKeyStr(final BindingInstanceIdentifier iid) {
@@ -533,6 +533,6 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
             case DataObjectIdentifier<?> oi -> oi;
             case PropertyIdentifier<?, ?> pi -> pi.container();
         };
-        return getLsKeyStr(doi.toLegacy());
+        return getLsKeyStr(doi);
     }
 }

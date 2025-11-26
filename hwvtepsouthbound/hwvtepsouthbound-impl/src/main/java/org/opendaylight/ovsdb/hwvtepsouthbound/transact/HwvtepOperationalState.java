@@ -205,7 +205,7 @@ public class HwvtepOperationalState {
     }
 
     public Optional<LogicalSwitches> getLogicalSwitches(final InstanceIdentifier<LogicalSwitches> iid) {
-        return new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
+        return new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid.toIdentifier());
     }
 
     public Optional<Tunnels> getTunnels(final InstanceIdentifier<?> iid, final TunnelsKey tunnelsKey) {

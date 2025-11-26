@@ -26,6 +26,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class HwvtepReconciliationTask extends ReconciliationTask {
@@ -35,7 +36,7 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
 
     public HwvtepReconciliationTask(ReconciliationManager reconciliationManager,
                                     HwvtepConnectionManager connectionManager,
-                                    InstanceIdentifier<?> nodeId,
+                                    DataObjectIdentifier<?> nodeId,
                                     Node psNode,
                                     HwvtepConnectionInstance connectionInstance,
                                     DataBroker db) {
@@ -57,8 +58,8 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
 
     @Override
     public boolean reconcileConfiguration(HwvtepConnectionManager connectionManagerOfDevice) {
-        InstanceIdentifier<Node> psNodeIid = HwvtepSouthboundMapper.createInstanceIdentifier(psNode.getNodeId());
-        InstanceIdentifier<Node> nodeId = (InstanceIdentifier<Node>)nodeIid;
+        var psNodeIid = HwvtepSouthboundMapper.createInstanceIdentifier(psNode.getNodeId());
+        var nodeId = (DataObjectIdentifier<Node>)nodeIid;
 
         ReadTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction();
         Node globalConfigNode = readNode(tx, LogicalDatastoreType.CONFIGURATION, nodeId);

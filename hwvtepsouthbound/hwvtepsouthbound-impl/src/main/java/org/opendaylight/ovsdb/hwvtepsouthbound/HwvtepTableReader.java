@@ -388,9 +388,8 @@ public class HwvtepTableReader {
                 .getHwvtepTableEntries(TerminationPoint.class);
         for (TypedBaseTable row : physicalLocators) {
             PhysicalLocator physicalLocator = (PhysicalLocator)row;
-            InstanceIdentifier<TerminationPoint> tpPath =
-                    HwvtepSouthboundMapper.createInstanceIdentifier(connectionInstance.getInstanceIdentifier(),
-                            physicalLocator);
+            final var tpPath = HwvtepSouthboundMapper.createInstanceIdentifier(
+                connectionInstance.getInstanceIdentifier(), physicalLocator);
             connectionInstance.getDeviceInfo().updateDeviceOperData(
                     TerminationPoint.class, tpPath, physicalLocator.getUuid(), physicalLocator);
         }
@@ -401,9 +400,10 @@ public class HwvtepTableReader {
                 .getHwvtepTableEntries(LogicalSwitches.class);
         for (TypedBaseTable row : logicalSwitches) {
             LogicalSwitch logicalSwitch = (LogicalSwitch)row;
-            InstanceIdentifier<LogicalSwitches> switchIid = connectionInstance.getInstanceIdentifier()
+            var switchIid = connectionInstance.getInstanceIdentifier().toBuilder()
                     .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch.getName())));
+                    .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch.getName())))
+                    .build();
             connectionInstance.getDeviceInfo().updateDeviceOperData(LogicalSwitches.class, switchIid,
                     logicalSwitch.getUuid(), logicalSwitch);
         }

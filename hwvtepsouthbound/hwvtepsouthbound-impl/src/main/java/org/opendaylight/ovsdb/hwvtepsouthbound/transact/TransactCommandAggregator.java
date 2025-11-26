@@ -24,6 +24,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -76,15 +77,15 @@ public class TransactCommandAggregator implements TransactCommand {
     }
 
     @Override
-    public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier nodeIid, EntryObject data,
-                               InstanceIdentifier key,
-                               Object... extraData) {
+    public void onConfigUpdate(TransactionBuilder transaction, DataObjectIdentifier nodeIid, EntryObject data,
+                               DataObjectIdentifier key, Object... extraData) {
+
     }
 
     @Override
-    public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier nodeIid, EntryObject data,
-                                    InstanceIdentifier key,
-                                    Object... extraData) {
+    public void doDeviceTransaction(TransactionBuilder transaction, DataObjectIdentifier nodeIid, EntryObject data,
+                                    DataObjectIdentifier key, Object... extraData) {
+
     }
 
     private void onDataTreeChanged(final Collection<DataTreeModification<Node>> changes) {

@@ -75,14 +75,15 @@ public final class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionC
     }
 
     private void updateLogicalRouter(ReadWriteTransaction transaction, final LogicalRouter router) {
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
             Node connectionNode = buildConnectionNode(router);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(), connectionNode);
-            InstanceIdentifier<LogicalRouters> routerIid = getOvsdbConnectionInstance().getInstanceIdentifier()
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+            var routerIid = getOvsdbConnectionInstance().getInstanceIdentifier().toBuilder()
                     .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(LogicalRouters.class, new LogicalRoutersKey(new HwvtepNodeName(router.getName())));
+                    .child(LogicalRouters.class, new LogicalRoutersKey(new HwvtepNodeName(router.getName())))
+                    .build();
             getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(LogicalRouters.class, routerIid,
                     router.getUuid(), router);
         }
@@ -137,9 +138,8 @@ public final class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionC
                 UUID aclUUID = entry.getValue();
                 ACL acl = (ACL)getOvsdbConnectionInstance().getDeviceInfo().getDeviceOperData(Acls.class, aclUUID);
                 if (acl != null) {
-                    InstanceIdentifier<Acls> aclIid =
-                            HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), acl);
-                    aclBindingBuiler.setAclRef(new HwvtepAclRef(aclIid.toIdentifier()));
+                    var aclIid = HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), acl);
+                    aclBindingBuiler.setAclRef(new HwvtepAclRef(aclIid));
                     aclBindingBuiler.setRouterInterface(new IpPrefix(new Ipv4Prefix(entry.getKey())));
                     bindings.add(aclBindingBuiler.build());
                 }

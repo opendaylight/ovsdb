@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
@@ -20,7 +19,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class HwvtepLogicalSwitchRemoveCommand extends AbstractTransactionCommand<LogicalSwitches> {
 
@@ -34,13 +32,13 @@ public class HwvtepLogicalSwitchRemoveCommand extends AbstractTransactionCommand
         Collection<LogicalSwitch> deletedLSRows =
                 TyperUtils.extractRowsRemoved(LogicalSwitch.class, getUpdates(), getDbSchema()).values();
         for (LogicalSwitch logicalSwitch : deletedLSRows) {
-            InstanceIdentifier<LogicalSwitches> switchIid = getOvsdbConnectionInstance().getInstanceIdentifier()
-                    .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch.getName())));
+            var switchIid = getOvsdbConnectionInstance().getInstanceIdentifier().toBuilder()
+                .augmentation(HwvtepGlobalAugmentation.class)
+                .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch.getName())))
+                .build();
             // TODO Delete any references
             addToDeleteTx(transaction, LogicalSwitches.class, switchIid, logicalSwitch.getUuid());
             addToDeviceUpdate(TransactionType.DELETE, logicalSwitch);
         }
     }
-
 }

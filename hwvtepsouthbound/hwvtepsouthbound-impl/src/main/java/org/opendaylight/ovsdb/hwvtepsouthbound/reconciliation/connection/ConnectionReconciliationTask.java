@@ -17,7 +17,7 @@ import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
     private final AtomicInteger connectionAttempt = new AtomicInteger(0);
 
     public ConnectionReconciliationTask(ReconciliationManager reconciliationManager, HwvtepConnectionManager
-            connectionManager, InstanceIdentifier<?> nodeIid, DataObject configData) {
+            connectionManager, DataObjectIdentifier<?> nodeIid, DataObject configData) {
         super(reconciliationManager, connectionManager, nodeIid, configData);
 
     }
@@ -45,7 +45,7 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
     public boolean reconcileConfiguration(HwvtepConnectionManager connectionManager) {
         boolean result = false;
         connectionAttempt.incrementAndGet();
-        InstanceIdentifier<Node> nodeId = (InstanceIdentifier<Node>) nodeIid;
+        DataObjectIdentifier<Node> nodeId = (DataObjectIdentifier<Node>) nodeIid;
         HwvtepGlobalAugmentation hwvtepNode = (HwvtepGlobalAugmentation) configData;
 
         LOG.info("Retry({}) connection to Ovsdb Node {} ", connectionAttempt.get(), hwvtepNode.getConnectionInfo());

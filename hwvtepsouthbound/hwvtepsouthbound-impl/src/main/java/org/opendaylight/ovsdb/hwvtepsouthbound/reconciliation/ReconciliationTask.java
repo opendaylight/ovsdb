@@ -12,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionManager;
 import org.opendaylight.ovsdb.hwvtepsouthbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.yangtools.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 
 /**
  * Copied from org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask
@@ -25,12 +25,11 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 public abstract class ReconciliationTask implements Runnable {
     protected final ReconciliationManager reconciliationManager;
     protected final HwvtepConnectionManager connectionManager;
-    protected final InstanceIdentifier<?> nodeIid;
+    protected final DataObjectIdentifier<?> nodeIid;
     protected final DataObject configData;
 
     protected ReconciliationTask(ReconciliationManager reconciliationManager, HwvtepConnectionManager connectionManager,
-                                 InstanceIdentifier<?> nodeIid,
-                                 DataObject configData) {
+                                 DataObjectIdentifier<?> nodeIid, DataObject configData) {
         this.reconciliationManager = requireNonNull(reconciliationManager, "Reconciliation manager must not be null");
         this.connectionManager = requireNonNull(connectionManager, "Connection manager must not be null");
         this.nodeIid = requireNonNull(nodeIid, "Node Iid must not be null");

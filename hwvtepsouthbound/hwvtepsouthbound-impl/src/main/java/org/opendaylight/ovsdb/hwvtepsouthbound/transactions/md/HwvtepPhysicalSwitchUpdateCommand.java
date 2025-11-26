@@ -53,6 +53,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier.WithKey;
 import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -85,7 +87,7 @@ public final class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransaction
     }
 
     private void updatePhysicalSwitch(ReadWriteTransaction transaction, UUID uuid, PhysicalSwitch phySwitch) {
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         //TODO remove this read
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
@@ -93,7 +95,7 @@ public final class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransaction
             // Update the connection node to let it know it manages this
             // Physical Switch
             Node connectionNode = buildConnectionNode(phySwitch);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(), connectionNode);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
 
             // Update the Physical Switch with whatever data we are getting
             InstanceIdentifier<Node> psIid = getInstanceIdentifier(phySwitch);
@@ -221,19 +223,18 @@ public final class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransaction
         return connectionNode.build();
     }
 
-    private InstanceIdentifier<Node> getInstanceIdentifier(PhysicalSwitch phySwitch) {
+    private WithKey<Node, NodeKey> getInstanceIdentifier(PhysicalSwitch phySwitch) {
         return HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), phySwitch);
     }
 
     private NodeId getNodeId(PhysicalSwitch phySwitch) {
-        NodeKey nodeKey = getInstanceIdentifier(phySwitch).firstKeyOf(Node.class);
-        return nodeKey.getNodeId();
+        return getInstanceIdentifier(phySwitch).key().getNodeId();
     }
 
     private static <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
-            List<InstanceIdentifier<T>> entryIids) {
-        for (InstanceIdentifier<T> entryIid : entryIids) {
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid.toIdentifier());
+            List<DataObjectIdentifier<T>> entryIids) {
+        for (var entryIid : entryIids) {
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
         }
     }
 

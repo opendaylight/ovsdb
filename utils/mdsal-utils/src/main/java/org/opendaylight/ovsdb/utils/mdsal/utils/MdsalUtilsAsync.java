@@ -17,7 +17,7 @@ import org.opendaylight.mdsal.binding.api.WriteTransaction;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,15 +41,15 @@ public class MdsalUtilsAsync {
      * @param store
      *            {@link LogicalDatastoreType} which should be modified
      * @param path
-     *            {@link InstanceIdentifier} to read from
+     *            {@link DataObjectIdentifier} to read from
      * @return The {@link FluentFuture} object to which you can assign a
      *         callback
      */
     public <D extends DataObject> FluentFuture<? extends CommitInfo> delete(
                                     final LogicalDatastoreType store,
-                                    final InstanceIdentifier<D> path)  {
+                                    final DataObjectIdentifier<D> path)  {
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.delete(store, path.toIdentifier());
+        transaction.delete(store, path);
         return transaction.commit();
     }
 
@@ -59,13 +59,13 @@ public class MdsalUtilsAsync {
      * @param store
      *            {@link LogicalDatastoreType} which should be modified
      * @param path
-     *            {@link InstanceIdentifier} to read from
+     *            {@link DataObjectIdentifier} to read from
      * @param operationDesc
      *            A brief description of the operation to perform
      */
     public <D extends DataObject> void delete(
                                     final LogicalDatastoreType store,
-                                    final InstanceIdentifier<D> path,
+                                    final DataObjectIdentifier<D> path,
                                     final String operationDesc)  {
         assignDefaultCallback(delete(store, path), operationDesc);
     }
@@ -76,7 +76,7 @@ public class MdsalUtilsAsync {
      * @param logicalDatastoreType
      *            {@link LogicalDatastoreType} which should be modified
      * @param path
-     *            {@link InstanceIdentifier} for path to read
+     *            {@link DataObjectIdentifier} for path to read
      * @param <D>
      *            The data object type
      * @return The {@link FluentFuture} object to which you can assign a
@@ -84,10 +84,10 @@ public class MdsalUtilsAsync {
      */
     public <D extends DataObject> FluentFuture<? extends CommitInfo> put(
                                         final LogicalDatastoreType logicalDatastoreType,
-                                        final InstanceIdentifier<D> path,
+                                        final DataObjectIdentifier<D> path,
                                         final D data)  {
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.mergeParentStructurePut(logicalDatastoreType, path.toIdentifier(), data);
+        transaction.mergeParentStructurePut(logicalDatastoreType, path, data);
         return transaction.commit();
     }
 
@@ -97,7 +97,7 @@ public class MdsalUtilsAsync {
      * @param logicalDatastoreType
      *            {@link LogicalDatastoreType} which should be modified
      * @param path
-     *            {@link InstanceIdentifier} for path to read
+     *            {@link DataObjectIdentifier} for path to read
      * @param <D>
      *            The data object type
      * @param operationDesc
@@ -105,7 +105,7 @@ public class MdsalUtilsAsync {
      */
     public <D extends DataObject> void put(
                                         final LogicalDatastoreType logicalDatastoreType,
-                                        final InstanceIdentifier<D> path,
+                                        final DataObjectIdentifier<D> path,
                                         final D data,
                                         final String operationDesc)  {
         assignDefaultCallback(put(logicalDatastoreType, path, data), operationDesc);
@@ -117,7 +117,7 @@ public class MdsalUtilsAsync {
      * @param logicalDatastoreType
      *            {@link LogicalDatastoreType} which should be modified
      * @param path
-     *            {@link InstanceIdentifier} for path to read
+     *            {@link DataObjectIdentifier} for path to read
      * @param <D>
      *            The data object type
      * @param withParent
@@ -128,14 +128,14 @@ public class MdsalUtilsAsync {
     // FIXME: eliminate the boolean flag here to separate out the distinct code paths
     public <D extends DataObject> FluentFuture<? extends CommitInfo> merge(
                                         final LogicalDatastoreType logicalDatastoreType,
-                                        final InstanceIdentifier<D> path,
+                                        final DataObjectIdentifier<D> path,
                                         final D data,
                                         final boolean withParent)  {
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
         if (withParent) {
-            transaction.mergeParentStructureMerge(logicalDatastoreType, path.toIdentifier(), data);
+            transaction.mergeParentStructureMerge(logicalDatastoreType, path, data);
         } else {
-            transaction.merge(logicalDatastoreType, path.toIdentifier(), data);
+            transaction.merge(logicalDatastoreType, path, data);
         }
         return transaction.commit();
     }
@@ -146,7 +146,7 @@ public class MdsalUtilsAsync {
      * @param logicalDatastoreType
      *            {@link LogicalDatastoreType} which should be modified
      * @param path
-     *            {@link InstanceIdentifier} for path to read
+     *            {@link DataObjectIdentifier} for path to read
      * @param <D>
      *            The data object type
      * @param operationDesc
@@ -157,7 +157,7 @@ public class MdsalUtilsAsync {
     // FIXME: eliminate the boolean flag here to separate out the distinct code paths
     public <D extends DataObject> void merge(
                                         final LogicalDatastoreType logicalDatastoreType,
-                                        final InstanceIdentifier<D> path,
+                                        final DataObjectIdentifier<D> path,
                                         final D data,
                                         final String operationDesc,
                                         final boolean withParent)  {
@@ -171,7 +171,7 @@ public class MdsalUtilsAsync {
      * @param store
      *            {@link LogicalDatastoreType} to read
      * @param path
-     *            {@link InstanceIdentifier} for path to read
+     *            {@link DataObjectIdentifier} for path to read
      * @param <D>
      *            The data object type
      * @return The {@link FluentFuture} object to which you can assign a
@@ -179,9 +179,9 @@ public class MdsalUtilsAsync {
      */
     public <D extends DataObject> FluentFuture<Optional<D>> read(
                                         final LogicalDatastoreType store,
-                                        final InstanceIdentifier<D> path)  {
+                                        final DataObjectIdentifier<D> path)  {
         final ReadTransaction transaction = databroker.newReadOnlyTransaction();
-        final FluentFuture<Optional<D>> future = transaction.read(store, path.toIdentifier());
+        final FluentFuture<Optional<D>> future = transaction.read(store, path);
         final FutureCallback<Optional<D>> closeTransactionCallback = new FutureCallback<>() {
             @Override
             public void onSuccess(final Optional<D> result) {

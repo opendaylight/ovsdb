@@ -64,18 +64,18 @@ public class UcastMacsRemoteRemoveCommand
 
     @Override
     public void onConfigUpdate(final TransactionBuilder transaction,
-                               final InstanceIdentifier<Node> nodeIid,
+                               final DataObjectIdentifier<Node> nodeIid,
                                final RemoteUcastMacs remoteMcastMac,
-                               final InstanceIdentifier macKey,
+                               final DataObjectIdentifier macKey,
                                final Object... extraData) {
         processDependencies(EmptyDependencyGetter.INSTANCE, transaction, nodeIid, macKey, remoteMcastMac);
     }
 
     @Override
     public void doDeviceTransaction(final TransactionBuilder transaction,
-                                    final InstanceIdentifier<Node> instanceIdentifier,
+                                    final DataObjectIdentifier<Node> instanceIdentifier,
                                     final RemoteUcastMacs mac,
-                                    final InstanceIdentifier macKey,
+                                    final DataObjectIdentifier macKey,
                                     final Object... extraData) {
         removeUcastMacRemote(transaction, instanceIdentifier, Lists.newArrayList(mac));
     }

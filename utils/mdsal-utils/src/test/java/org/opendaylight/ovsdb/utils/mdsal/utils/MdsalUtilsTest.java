@@ -31,7 +31,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
  * Unit test for class {@link MdsalUtils}.
@@ -51,7 +50,7 @@ public class MdsalUtilsTest {
         doReturn(CommitInfo.emptyFluentFuture()).when(writeTransaction).commit();
 
         boolean result = mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
-            InstanceIdentifier.create(NetworkTopology.class));
+            DataObjectIdentifier.builder(NetworkTopology.class).build());
 
         verify(writeTransaction, times(1)).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
         verify(writeTransaction, times(1)).commit();
@@ -66,7 +65,7 @@ public class MdsalUtilsTest {
         doReturn(CommitInfo.emptyFluentFuture()).when(writeTransaction).commit();
 
         boolean result = mdsalUtils.merge(LogicalDatastoreType.CONFIGURATION,
-                InstanceIdentifier.create(NetworkTopology.class), mock(NetworkTopology.class));
+            DataObjectIdentifier.builder(NetworkTopology.class).build(), mock(NetworkTopology.class));
 
         verify(writeTransaction, times(1)).mergeParentStructureMerge(any(LogicalDatastoreType.class),
                 any(DataObjectIdentifier.class), any(DataObject.class));
@@ -82,7 +81,7 @@ public class MdsalUtilsTest {
         doReturn(CommitInfo.emptyFluentFuture()).when(writeTransaction).commit();
 
         boolean result = mdsalUtils.put(LogicalDatastoreType.CONFIGURATION,
-                InstanceIdentifier.create(NetworkTopology.class), mock(NetworkTopology.class));
+            DataObjectIdentifier.builder(NetworkTopology.class).build(), mock(NetworkTopology.class));
 
         verify(writeTransaction, times(1)).mergeParentStructurePut(any(LogicalDatastoreType.class),
                 any(DataObjectIdentifier.class), any(DataObject.class));
@@ -99,7 +98,7 @@ public class MdsalUtilsTest {
         doReturn(FluentFutures.immediateFluentFuture(Optional.of(obj))).when(readTransaction).read(
             any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
         NetworkTopology result = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION,
-            InstanceIdentifier.create(NetworkTopology.class));
+            DataObjectIdentifier.builder(NetworkTopology.class).build());
 
         verify(readTransaction, times(1)).read(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
         verify(readTransaction, times(1)).close();

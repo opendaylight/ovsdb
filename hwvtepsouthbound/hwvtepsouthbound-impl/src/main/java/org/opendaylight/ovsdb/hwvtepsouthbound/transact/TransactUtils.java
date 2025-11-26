@@ -165,7 +165,7 @@ public final class TransactUtils {
         HwvtepPhysicalLocatorAugmentationBuilder builder = new HwvtepPhysicalLocatorAugmentationBuilder();
         HwvtepPhysicalLocatorAugmentation locatorAugmentation = null;
         builder.setEncapsulationType(EncapsulationTypeVxlanOverIpv4.VALUE);
-        String tepKey = iid.firstKeyOf(TerminationPoint.class).getTpId().getValue();
+        String tepKey = iid.getFirstKeyOf(TerminationPoint.class).getTpId().getValue();
         String ip = tepKey.substring(tepKey.indexOf(":") + 1);
         builder.setDstIp(parseIpAddress(ip));
         locatorAugmentation = builder.build();
@@ -230,14 +230,14 @@ public final class TransactUtils {
         return HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX + sanitizeUUID(lswitch.getHwvtepNodeName());
     }
 
-    public static UUID getLogicalSwitchUUID(final InstanceIdentifier<LogicalSwitches> lswitchIid) {
+    public static UUID getLogicalSwitchUUID(final DataObjectIdentifier<LogicalSwitches> lswitchIid) {
         return new UUID(HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX
-                + sanitizeUUID(lswitchIid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName()));
+                + sanitizeUUID(lswitchIid.getFirstKeyOf(LogicalSwitches.class).getHwvtepNodeName()));
     }
 
     public static UUID getLogicalSwitchUUID(final TransactionBuilder transaction,
                                             final HwvtepOperationalState operationalState,
-                                            final InstanceIdentifier<LogicalSwitches> lswitchIid) {
+                                            final DataObjectIdentifier<LogicalSwitches> lswitchIid) {
         HwvtepDeviceInfo hwvtepDeviceInfo = operationalState.getDeviceInfo();
         HwvtepDeviceInfo.DeviceData lsData = hwvtepDeviceInfo.getDeviceOperData(LogicalSwitches.class, lswitchIid);
         if (lsData != null) {
@@ -253,7 +253,7 @@ public final class TransactUtils {
         MdsalUtils mdsalUtils = new MdsalUtils(operationalState.getDataBroker());
         LogicalSwitches ls = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, lswitchIid);
         if (ls != null) {
-            cmd.updateLogicalSwitch(transaction, lswitchIid.firstIdentifierOf(Node.class), List.of(ls));
+            cmd.updateLogicalSwitch(transaction, lswitchIid.trimTo(Node.class), List.of(ls));
         } else {
             LOG.error("Could not find logical switch in config ds {}", lswitchIid);
             return null;

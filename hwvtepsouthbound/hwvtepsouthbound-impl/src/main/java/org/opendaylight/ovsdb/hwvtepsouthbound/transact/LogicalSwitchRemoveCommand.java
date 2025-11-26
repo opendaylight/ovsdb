@@ -18,13 +18,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LogicalSwitchRemoveCommand
         extends AbstractTransactCommand<LogicalSwitches, LogicalSwitchesKey, HwvtepGlobalAugmentation> {
-    private static final Logger LOG = LoggerFactory.getLogger(LogicalSwitchRemoveCommand.class);
     List<LogicalSwitches> deletedLs;
 
     public LogicalSwitchRemoveCommand(final HwvtepOperationalState state,
@@ -51,17 +49,17 @@ public class LogicalSwitchRemoveCommand
     }
 
     @Override
-    public void onConfigUpdate(final TransactionBuilder transaction, final InstanceIdentifier<Node> nodeIid,
-                               final LogicalSwitches logicalSwitches, final InstanceIdentifier lsKey,
+    public void onConfigUpdate(final TransactionBuilder transaction, final DataObjectIdentifier<Node> nodeIid,
+                               final LogicalSwitches logicalSwitches, final DataObjectIdentifier lsKey,
                                final Object... extraData) {
         processDependencies(EmptyDependencyGetter.INSTANCE, transaction, nodeIid, lsKey, logicalSwitches);
     }
 
     @Override
     public void doDeviceTransaction(final TransactionBuilder transaction,
-                                    final InstanceIdentifier<Node> instanceIdentifier,
+                                    final DataObjectIdentifier<Node> instanceIdentifier,
                                     final LogicalSwitches lswitch,
-                                    final InstanceIdentifier lsKey,
+                                    final DataObjectIdentifier lsKey,
                                     final Object... extraData) {
         LogicalSwitchUcastsRemoveCommand cmd = new LogicalSwitchUcastsRemoveCommand(
                 newOperState(), getChanges(), deletedLs, lswitch);
@@ -93,7 +91,7 @@ public class LogicalSwitchRemoveCommand
     }
 
     @Override
-    protected String getKeyStr(InstanceIdentifier<LogicalSwitches> iid) {
-        return iid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
+    protected String getKeyStr(final DataObjectIdentifier<LogicalSwitches> iid) {
+        return iid.getFirstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
     }
 }

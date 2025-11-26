@@ -28,6 +28,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,8 +70,8 @@ public final class GlobalUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private InstanceIdentifier<Node> getInstanceIdentifier(Global hwvtep) {
-        InstanceIdentifier<Node> iid = getOvsdbConnectionInstance().getInstanceIdentifier();
+    private DataObjectIdentifier<Node> getInstanceIdentifier(Global hwvtep) {
+        var iid = getOvsdbConnectionInstance().getInstanceIdentifier();
         if (iid == null) {
             LOG.warn("InstanceIdentifier was null when it shouldn't be");
             /* This can be case for switch initiated connection */

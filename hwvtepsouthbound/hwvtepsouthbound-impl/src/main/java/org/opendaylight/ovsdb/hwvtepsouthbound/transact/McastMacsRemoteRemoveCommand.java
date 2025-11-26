@@ -24,6 +24,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,18 +79,18 @@ public class McastMacsRemoteRemoveCommand
 
     @Override
     public void onConfigUpdate(final TransactionBuilder transaction,
-                               final InstanceIdentifier<Node> nodeIid,
+                               final DataObjectIdentifier<Node> nodeIid,
                                final RemoteMcastMacs remoteMcastMac,
-                               final InstanceIdentifier macKey,
+                               final DataObjectIdentifier macKey,
                                final Object... extraData) {
         processDependencies(EmptyDependencyGetter.INSTANCE, transaction, nodeIid, macKey, remoteMcastMac);
     }
 
     @Override
     public void doDeviceTransaction(final TransactionBuilder transaction,
-                                    final InstanceIdentifier<Node> instanceIdentifier,
+                                    final DataObjectIdentifier<Node> instanceIdentifier,
                                     final RemoteMcastMacs mac,
-                                    final InstanceIdentifier macIid,
+                                    final DataObjectIdentifier macIid,
                                     final Object... extraData) {
         String nodeId = instanceIdentifier.firstKeyOf(Node.class).getNodeId().getValue();
         clearConfigData(RemoteMcastMacs.class, macIid);

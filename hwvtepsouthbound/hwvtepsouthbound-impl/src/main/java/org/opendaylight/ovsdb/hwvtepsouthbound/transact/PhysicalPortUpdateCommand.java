@@ -83,17 +83,18 @@ public class PhysicalPortUpdateCommand
     }
 
     @Override
-    public void onConfigUpdate(final TransactionBuilder transaction, final InstanceIdentifier psNodeiid,
-                               final TerminationPoint port, final InstanceIdentifier tpIId, final Object... extraData) {
+    public void onConfigUpdate(final TransactionBuilder transaction, final DataObjectIdentifier psNodeiid,
+                               final TerminationPoint port, final DataObjectIdentifier tpIId,
+                               final Object... extraData) {
         doDeviceTransaction(transaction, psNodeiid, port, tpIId);
     }
 
     @Override
-    public void doDeviceTransaction(final TransactionBuilder transaction, final InstanceIdentifier nodeIid,
-                                    final TerminationPoint data, final InstanceIdentifier key,
+    public void doDeviceTransaction(final TransactionBuilder transaction, final DataObjectIdentifier nodeIid,
+                                    final TerminationPoint data, final DataObjectIdentifier key,
                                     final Object... extraData) {
         LOG.debug("Processing port doDeviceTransaction {}", data);
-        final InstanceIdentifier<Node> psNodeiid = nodeIid;
+        final var psNodeiid = nodeIid;
         HwvtepPhysicalPortAugmentation port = data.augmentation(HwvtepPhysicalPortAugmentation.class);
         if (port == null) {
             LOG.info("No port augmentation found for port {}", data);

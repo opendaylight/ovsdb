@@ -89,10 +89,10 @@ public class McastMacsRemoteUpdateCommand
 
     @Override
     public void doDeviceTransaction(final TransactionBuilder transaction,
-                                       final InstanceIdentifier<Node> instanceIdentifier,
-                                       final RemoteMcastMacs mac,
-                                       final InstanceIdentifier macKey,
-                                       final Object... extraData) {
+                                    final DataObjectIdentifier<Node> instanceIdentifier,
+                                    final RemoteMcastMacs mac,
+                                    final DataObjectIdentifier macKey,
+                                    final Object... extraData) {
 
         String nodeId = instanceIdentifier.firstKeyOf(Node.class).getNodeId().getValue();
         LOG.debug("Creating remoteMcastMacs, mac address: {} {}", nodeId, mac.getMacEntryKey().getValue());

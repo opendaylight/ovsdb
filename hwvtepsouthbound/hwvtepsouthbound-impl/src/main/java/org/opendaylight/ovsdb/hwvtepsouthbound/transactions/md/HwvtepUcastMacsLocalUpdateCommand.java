@@ -30,12 +30,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,11 +57,11 @@ public final class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransaction
     }
 
     private void updateData(ReadWriteTransaction transaction, Collection<UcastMacsLocal> ucml) {
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         LOG.info("DEVICE - {} LocalUcastMacs for Node {} - {}", TransactionType.ADD,
             connectionIId.firstKeyOf(Node.class).getNodeId().getValue(), ucml);
         Node connectionNode = buildConnectionNode(ucml);
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(), connectionNode);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
     }
 
     private Node buildConnectionNode(final Collection<UcastMacsLocal> ucml) {
@@ -91,24 +88,25 @@ public final class HwvtepUcastMacsLocalUpdateCommand extends AbstractTransaction
                         .getDeviceInfo().getPhysicalLocator(plocUUID);
             }
             if (physicalLocator != null) {
-                InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
-                InstanceIdentifier<TerminationPoint> plIid =
-                        HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, physicalLocator);
-                ucmlBuilder.setLocatorRef(new HwvtepPhysicalLocatorRef(plIid.toIdentifier()));
+                var nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
+                var plIid = HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, physicalLocator);
+                ucmlBuilder.setLocatorRef(new HwvtepPhysicalLocatorRef(plIid));
             }
         }
         if (ucml.getLogicalSwitchColumn() != null && ucml.getLogicalSwitchColumn().getData() != null) {
             UUID lsUUID = ucml.getLogicalSwitchColumn().getData();
             LogicalSwitch logicalSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(lsUUID);
             if (logicalSwitch != null) {
-                InstanceIdentifier<LogicalSwitches> switchIid =
+                var switchIid =
                         HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
-                ucmlBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid.toIdentifier()));
+                ucmlBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid));
             }
         }
         LocalUcastMacs ucastMacsLocal = ucmlBuilder.build();
-        InstanceIdentifier iid = key.getInstanceIdentifier().augmentation(HwvtepGlobalAugmentation.class)
-                .child(LocalUcastMacs.class, ucastMacsLocal.key());
+        var iid = key.getInstanceIdentifier().toBuilder()
+            .augmentation(HwvtepGlobalAugmentation.class)
+            .child(LocalUcastMacs.class, ucastMacsLocal.key())
+            .build();
         addToUpdateTx(LocalUcastMacs.class, iid, ucml.getUuid(), ucastMacsLocal);
         return ucastMacsLocal;
     }

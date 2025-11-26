@@ -37,8 +37,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.node.attributes.SupportingNode;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.node.attributes.SupportingNodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.node.attributes.SupportingNodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
@@ -52,10 +52,10 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
     private static final NodeKey NODE_KEY =  new NodeKey(NODE_ID);
     private static final Node DATA = new NodeBuilder().withKey(NODE_KEY).setNodeId(NODE_ID).build();
 
-    private static final InstanceIdentifier<Node> TEST_IID = InstanceIdentifier
-            .create(NetworkTopology.class)
+    private static final DataObjectIdentifier<Node> TEST_IID = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(TOPOLOGY_TEST))
-            .child(Node.class, NODE_KEY);
+            .child(Node.class, NODE_KEY)
+            .build();
 
     @Before
     public void setUp() {
@@ -184,8 +184,8 @@ public class MdsalUtilsAsyncTest extends AbstractDataBrokerTest {
 
     private Node readDS() {
         try {
-            final Optional<Node> result = databroker.newReadOnlyTransaction().read(
-                    LogicalDatastoreType.CONFIGURATION, TEST_IID.toIdentifier()).get();
+            final var result = databroker.newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION, TEST_IID)
+                .get();
             if (result.isPresent()) {
                 return result.orElseThrow();
             }

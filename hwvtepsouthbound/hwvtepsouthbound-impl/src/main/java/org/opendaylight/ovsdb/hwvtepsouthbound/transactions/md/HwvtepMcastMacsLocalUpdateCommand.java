@@ -32,13 +32,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSetBuilder;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public final class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransactionCommand {
 
@@ -62,22 +58,25 @@ public final class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransaction
     }
 
     private void updateData(ReadWriteTransaction transaction, McastMacsLocal macLocal) {
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
 
         // Ensure the node exists
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(),
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId,
             new NodeBuilder().setNodeId(getOvsdbConnectionInstance().getNodeId()).build());
 
         final LocalMcastMacs mac = buildLocalMcastMacs(macLocal);
-        final InstanceIdentifier<LocalMcastMacs> macIid = connectionIId.augmentation(HwvtepGlobalAugmentation.class)
-                .child(LocalMcastMacs.class, mac.key());
+        final var macIid = connectionIId.toBuilder()
+            .augmentation(HwvtepGlobalAugmentation.class)
+            .child(LocalMcastMacs.class, mac.key())
+            .build();
 
         // Merge update, relying on automatic lifecycle...
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, macIid.toIdentifier(), mac);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, macIid, mac);
         if (mac.getLocatorSet() == null) {
             // ... but delete locator set if it is empty
             // FIXME: can we use .put() of instead of merge/delete?
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, macIid.child(LocatorSet.class).toIdentifier());
+            transaction.delete(LogicalDatastoreType.OPERATIONAL,
+                macIid.toBuilder().child(LocatorSet.class).build());
         }
     }
 
@@ -101,9 +100,9 @@ public final class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransaction
             UUID lsUUID = macLocal.getLogicalSwitchColumn().getData();
             LogicalSwitch logicalSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(lsUUID);
             if (logicalSwitch != null) {
-                InstanceIdentifier<LogicalSwitches> switchIid =
+                var switchIid =
                         HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
-                macLocalBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid.toIdentifier()));
+                macLocalBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid));
             }
         }
     }
@@ -127,10 +126,10 @@ public final class HwvtepMcastMacsLocalUpdateCommand extends AbstractTransaction
                         if (locator == null) {
                             locator = getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocator(locUUID);
                         }
-                        InstanceIdentifier<TerminationPoint> tpIid = HwvtepSouthboundMapper.createInstanceIdentifier(
+                        var tpIid = HwvtepSouthboundMapper.createInstanceIdentifier(
                                 getOvsdbConnectionInstance().getInstanceIdentifier(), locator);
                         plsList.add(new LocatorSetBuilder()
-                                .setLocatorRef(new HwvtepPhysicalLocatorRef(tpIid.toIdentifier())).build());
+                                .setLocatorRef(new HwvtepPhysicalLocatorRef(tpIid)).build());
                     }
                     macLocalBuilder.setLocatorSet(plsList);
                 }

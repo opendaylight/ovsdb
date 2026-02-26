@@ -5,4 +5,3 @@ sudo chmod 600 ~/.ssh/authorized_keys
 #Modify the user prompt termination from "$" to ">"
 echo "PS1='\u@\h:\w\> '" >> ~/.bashrc
 source ~/.bashrc
-

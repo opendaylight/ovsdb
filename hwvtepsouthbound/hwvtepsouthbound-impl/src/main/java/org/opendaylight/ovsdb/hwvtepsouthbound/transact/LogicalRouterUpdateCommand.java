@@ -173,4 +173,3 @@ public class LogicalRouterUpdateCommand
         return augmentation.getLogicalRouters();
     }
 }
-

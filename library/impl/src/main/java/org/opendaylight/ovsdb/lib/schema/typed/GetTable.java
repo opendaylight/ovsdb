@@ -34,4 +34,3 @@ public final class GetTable extends MethodDispatch.TablePrototype {
         return new Invoker(findTableSchema(dbSchema));
     }
 }
-

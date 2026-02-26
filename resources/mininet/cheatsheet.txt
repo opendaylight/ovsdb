@@ -7,5 +7,3 @@ echo "this is host ${HOST}"
 
 # capture to a file
 tcpdump -w /vagrant/resources/mininet/${HOST}.pcap -s0 -vvv -e -n -c 100 -i ${HOST}-eth0
-
-

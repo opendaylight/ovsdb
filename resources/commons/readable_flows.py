@@ -75,10 +75,10 @@ def print_flow(indent, f):
     print indent + f
 # WIP
 #    flow = indent + f
-#    if len(flow) <= MAX_LINE: 
+#    if len(flow) <= MAX_LINE:
 #        print flow
 #        return
-#    
+#
 #    cut = flow.find('ACTIONS')
 #    match = flow[0:cut - 1]
 #    action = indent + indent + flow[cut:]
@@ -88,7 +88,7 @@ def print_flow(indent, f):
 #            print action
 #            break
 #        cut = action.rfind(',', 0, MAX_LINE)
-#        if cut < 2: 
+#        if cut < 2:
 #            print action
 #            break
 #        print action[0:cut + 1]
@@ -109,13 +109,13 @@ for line in port_list_out.split('\n')[2:]:
 table = ''
 rules_by_prio = defaultdict(list)
 for line in sys.stdin:
-    for (mac, ip) in addresses: 
+    for (mac, ip) in addresses:
         line = re.sub(mac, '%s(%s)' % (mac, ip), line)
         line = re.sub('=%s(\D)' % ip, '=%s(%s)\\1' % (ip, mac), line)
     line = re.sub('tun_id=0x(?P<num>[0-9a-fA-F]*)', tun_match_to_decimal, line)
     line = re.sub('0x(?P<num>[0-9a-fA-F]*)->tun_id', tun_set_to_decimal, line)
     match = re.match(LINE_PATTERN, line)
-    if not match: 
+    if not match:
         print '[Not a flow line?]:  ' + line,
         continue
 
@@ -131,4 +131,3 @@ for line in sys.stdin:
     rules_by_prio[prio].append(match.group('rule'))
 
 print_rules(table, rules_by_prio)
-

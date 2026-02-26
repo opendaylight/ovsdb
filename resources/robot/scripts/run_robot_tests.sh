@@ -64,7 +64,3 @@ mkdir /vagrant/scripts/results/$timestamp
 cp $PWD/output.xml /vagrant/scripts/results/$timestamp/output.xml
 cp $PWD/log.html /vagrant/scripts/results/$timestamp/log.html
 cp $PWD/report.html /vagrant/scripts/results/$timestamp/report.html
-
-
-
-

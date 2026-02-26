@@ -57,4 +57,3 @@ class L3TestTopo( Topo ):
         self.addLink( s1, h4 )
 
 topos = {'l3': ( lambda: L3TestTopo() )}
-

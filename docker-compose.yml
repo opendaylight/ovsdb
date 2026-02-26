@@ -1,6 +1,6 @@
 ovs:
- image: jhershbe/centos7-ovs:2.5.1
- ports:
-   - "6640:6640"
- command: "/usr/bin/supervisord -n"
- privileged: true
+  image: jhershbe/centos7-ovs:2.5.1
+  ports:
+    - "6640:6640"
+  command: "/usr/bin/supervisord -n"
+  privileged: true

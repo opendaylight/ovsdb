@@ -57,7 +57,7 @@ In order to handle reconciliation in a generic way, we will follow below steps
 
 In current implementation both reconciliation and publishing to Oper DS are
 two parallel tasks. Reconciliation will be done in datastore transact commands
-where we compare, switch configuration got from OVSDB monitor callback and what 
+where we compare, switch configuration got from OVSDB monitor callback and what
 is there in config datastore.
 
 The Scope of the reconciliation will be kept only to br-int bridge. Support for

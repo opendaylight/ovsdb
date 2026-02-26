@@ -16,4 +16,3 @@ Contents:
    ovsdb-user-guide
    ovsdb-developer-guide
    specs/index
-

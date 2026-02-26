@@ -32,3 +32,13 @@ target-ide/
 yang-gen-config
 yang-gen-sal
 maven-metadata-local.xml
+
+# pre-commit / linting
+.pre-commit-log*
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+.tox/
+*.egg-info/

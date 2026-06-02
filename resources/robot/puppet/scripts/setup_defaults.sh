@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # add a bridge
 sudo ovs-vsctl add-br ovs-br0
 

@@ -120,7 +120,7 @@ module overlay {
         }
     }
 
-    augment "/topo:network-topology/topo:topology/" {
+    augment "/topo:network-topology/topo:topology" {
         description "Mark type of topology";
         oce:augment-identifier "topology-type";
         uses topology-type-attributes; 

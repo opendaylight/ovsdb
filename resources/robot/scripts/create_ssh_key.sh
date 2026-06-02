@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # create the ssh key
 if [ ! -f ~/.ssh/id_rsa ]; then
     echo "creating ssh key..."
@@ -11,4 +13,5 @@ cp ~/.ssh/id_rsa.pub /vagrant/shared
 
 #Modify the user prompt termination from "$" to ">"
 echo "PS1='\u@\h:\w\> '" >> ~/.bashrc
+# shellcheck source=/dev/null
 source ~/.bashrc

@@ -1,5 +1,7 @@
+#!/bin/sh
+
 #ensure that CentOS5/EL5 repo is setup
-cd /tmp
+cd /tmp || exit
 sudo wget -r --no-parent -A 'epel-release-*.rpm' http://dl.fedoraproject.org/pub/epel/7/x86_64/e/
 sudo rpm -Uvh dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-*.rpm
 

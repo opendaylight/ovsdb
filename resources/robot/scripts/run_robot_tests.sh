@@ -1,12 +1,12 @@
+#!/bin/bash
+
 # clear OVS setup
 sh /vagrant/scripts/clear_ovs.sh
 
 # down the integration codes
 if [ -d integration/test/csit/suites ]; then
     echo "refreshing test scripts"
-    cd integration
-    sudo git pull
-    cd ~
+    (cd integration && sudo git pull)
 else
    echo "downloading integration..."
    sudo git clone https://git.opendaylight.org/gerrit/integration

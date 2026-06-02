@@ -1,3 +1,5 @@
+#!/bin/sh
+
 #Allow sudo access with no password
 echo "vagrant ALL=NOPASSWD: ALL" >>/etc/sudoers
 

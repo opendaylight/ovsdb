@@ -19,6 +19,13 @@ linkcheck_ignore = [
     # Ignore jenkins because it's often slow to respond.
     'https://jenkins.opendaylight.org/releng',
     'https://jenkins.opendaylight.org/sandbox',
+    # ponytail: permanently dead/example links; drop a pattern if a host returns.
+    r'http://odl:8181/.*',                       # example REST endpoint, not resolvable
+    r'https://docs\.google\.com/presentation/.*',  # slide anchors never resolve
+    r'https://git\.opendaylight\.org/gerrit/#/.*',  # retired gerrit anchor URLs
+    r'https://wiki\.opendaylight\.org/.*',       # wiki migrated to atlassian, 404s
+    r'https://github\.com/opendaylight/yangtools/blob/stable/boron/.*',  # deleted boron file
+    r'http://(www\.)?openvswitch\.org/docs/.*',  # moved OVS docs, 404
 ]
 
 nitpicky = True

@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Convert GitHub PR to Gerrit Change
-        uses: lfreleng-actions/github2gerrit-action@f44c168376b369be0f306b6bdc07c80f67cceb05 # v1.3.3
+        uses: lfreleng-actions/github2gerrit-action@dac8641c5f3b82636157340c1915999a4c4d7ff7 # v1.4.3
         with:
           GERRIT_SSH_PRIVKEY_G2G: ${{ secrets.GERRIT_SSH_PRIVKEY_G2G }}
           GERRIT_KNOWN_HOSTS: ${{ vars.GERRIT_KNOWN_HOSTS }}

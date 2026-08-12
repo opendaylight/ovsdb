@@ -8,17 +8,14 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Set;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
@@ -183,17 +180,15 @@ public class McastMacsRemoteUpdateCommand
 
     private static boolean compareLocatorSets(List<LocatorSet> locatorSet1, List<LocatorSet> locatorSet2) {
         if (locatorSet1 == null) {
-            locatorSet1 = Collections.emptyList();
+            locatorSet1 = List.of();
         }
         if (locatorSet2 == null) {
-            locatorSet2 = Collections.emptyList();
+            locatorSet2 = List.of();
         }
         if (locatorSet1.size() != locatorSet2.size()) {
             return false;
         }
-        Set<LocatorSet> set1 = Sets.newHashSet(locatorSet1);
-        Set<LocatorSet> set2 = Sets.newHashSet(locatorSet2);
-        return set1.containsAll(set2);
+        return new HashSet<>(locatorSet1).containsAll(locatorSet2);
     }
 
     static class McastMacUnMetDependencyGetter extends UnMetDependencyGetter<RemoteMcastMacs> {
@@ -201,15 +196,15 @@ public class McastMacsRemoteUpdateCommand
         @Override
         public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final RemoteMcastMacs data) {
             if (data == null) {
-                return Collections.emptyList();
+                return List.of();
             }
-            return Lists.newArrayList(((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue()).toLegacy());
+            return List.of(((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue()).toLegacy());
         }
 
         @Override
         public List<InstanceIdentifier<?>> getTerminationPointDependencies(final RemoteMcastMacs data) {
             if (data == null || HwvtepSouthboundUtil.isEmpty(data.getLocatorSet())) {
-                return Collections.emptyList();
+                return List.of();
             }
             List<InstanceIdentifier<?>> locators = new ArrayList<>();
             for (LocatorSet locator: data.getLocatorSet()) {

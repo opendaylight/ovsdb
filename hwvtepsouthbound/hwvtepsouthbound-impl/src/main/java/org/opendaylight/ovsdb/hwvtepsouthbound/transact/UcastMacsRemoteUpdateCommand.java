@@ -7,9 +7,7 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import com.google.common.collect.Lists;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -102,7 +100,8 @@ public class UcastMacsRemoteUpdateCommand
             updateCurrentTxData(RemoteUcastMacs.class, macKey, new UUID("uuid"), remoteUcastMac);
             LOG.info("CONTROLLER - {} {}", TransactionType.ADD, ucastMacsRemote);
             return;
-        } else if (deviceData.getUuid() != null) {
+        }
+        if (deviceData.getUuid() != null) {
             UUID newLocator = setLocator(transaction, ucastMacsRemote, remoteUcastMac);
             if (deviceData.getData() != null) {
                 UcastMacsRemote existing = (UcastMacsRemote) deviceData.getData();
@@ -182,17 +181,17 @@ public class UcastMacsRemoteUpdateCommand
         @Override
         public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final RemoteUcastMacs data) {
             if (data == null) {
-                return Collections.emptyList();
+                return List.of();
             }
-            return Lists.newArrayList(((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue()).toLegacy());
+            return List.of(((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue()).toLegacy());
         }
 
         @Override
         public List<InstanceIdentifier<?>> getTerminationPointDependencies(final RemoteUcastMacs data) {
             if (data == null) {
-                return Collections.emptyList();
+                return List.of();
             }
-            return Lists.newArrayList(((DataObjectIdentifier<?>) data.getLocatorRef().getValue()).toLegacy());
+            return List.of(((DataObjectIdentifier<?>) data.getLocatorRef().getValue()).toLegacy());
         }
     }
 

@@ -12,10 +12,8 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap.Builder;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -177,16 +175,16 @@ public class HwvtepTableReader {
         }
     }
 
-    protected <T extends DataObject> String getNodeKeyStr(InstanceIdentifier<T> iid) {
+    protected <T extends DataObject> String getNodeKeyStr(final InstanceIdentifier<T> iid) {
         return iid.firstKeyOf(Node.class).getNodeId().getValue() + "." + getLsKeyStr(iid);
     }
 
-    protected <T extends DataObject> String getLsKeyStr(InstanceIdentifier<T> iid) {
+    protected <T extends DataObject> String getLsKeyStr(final InstanceIdentifier<T> iid) {
         return ((InstanceIdentifier<LogicalSwitches>)iid).firstKeyOf(LogicalSwitches.class)
             .getHwvtepNodeName().getValue();
     }
 
-    public UUID getLsUuid(InstanceIdentifier lsIid) {
+    public UUID getLsUuid(final InstanceIdentifier lsIid) {
         UUID lsUUID = connectionInstance.getDeviceInfo().getUUID(LogicalSwitches.class, lsIid);
         if (lsUUID == null) {
             Optional<TypedBaseTable> optional = getHwvtepTableEntryUUID(LogicalSwitches.class, lsIid, null);
@@ -232,7 +230,7 @@ public class HwvtepTableReader {
         @Override
         public List<Condition> apply(final InstanceIdentifier<LogicalSwitches> iid) {
             String lsName = iid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
-            return Lists.newArrayList(logicalSwitch.getNameColumn().getSchema().opEqual(lsName));
+            return List.of(logicalSwitch.getNameColumn().getSchema().opEqual(lsName));
         }
     }
 
@@ -248,7 +246,7 @@ public class HwvtepTableReader {
             String locatorIp = iid.firstKeyOf(TerminationPoint.class).getTpId().getValue();
             locatorIp = locatorIp.substring(locatorIp.indexOf(":") + 1);
             LOG.info("Locator ip to look for {}", locatorIp);
-            return Lists.newArrayList(locatorTable.getDstIpColumn().getSchema().opEqual(locatorIp));
+            return List.of(locatorTable.getDstIpColumn().getSchema().opEqual(locatorIp));
         }
     }
 
@@ -296,7 +294,7 @@ public class HwvtepTableReader {
 
         final List<OperationResult> results;
         try {
-            results = connectionInstance.transact(dbSchema, Collections.singletonList(selectOperation)).get();
+            results = connectionInstance.transact(dbSchema, List.of(selectOperation)).get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Not able to fetch hardware_vtep table row from device {}",
                 connectionInstance.getConnectionInfo(), e);
@@ -334,14 +332,14 @@ public class HwvtepTableReader {
 
         final List<OperationResult> results;
         try {
-            results = connectionInstance.transact(dbSchema, Collections.singletonList(selectOperation)).get();
+            results = connectionInstance.transact(dbSchema, List.of(selectOperation)).get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Not able to fetch hardware_vtep table row from device {}",
                 connectionInstance.getConnectionInfo(), e);
-            return Collections.emptyList();
+            return List.of();
         }
         if (results == null || results.isEmpty()) {
-            return Collections.emptyList();
+            return List.of();
         }
 
         try {
@@ -356,7 +354,7 @@ public class HwvtepTableReader {
             return tableRows;
         } catch (RuntimeException e) {
             LOG.error("Failed to get the hwvtep ", e);
-            return Collections.emptyList();
+            return List.of();
         }
     }
 

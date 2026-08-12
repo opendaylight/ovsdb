@@ -14,7 +14,8 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import org.junit.After;
@@ -291,7 +292,7 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
         assertNotNull(insertOpCapture.getAllValues());
         assertTrue(insertOpCapture.getAllValues().size() == 2);
 
-        List<String> expected = Lists.newArrayList("ls0", "ls1");
+        List<String> expected = new ArrayList<>(Arrays.asList("ls0", "ls1"));
         Iterator<TypedBaseTable> it = insertOpCapture.getAllValues().iterator();
         while (it.hasNext()) {
             TypedBaseTable table = it.next();

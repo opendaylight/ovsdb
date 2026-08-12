@@ -5,11 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib.jsonrpc;
 
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class JsonRpc10Request {
@@ -18,7 +17,7 @@ public class JsonRpc10Request {
     String method;
     List<Object> params = new ArrayList<>();
 
-    public JsonRpc10Request(String id) {
+    public JsonRpc10Request(final String id) {
         setId(id);
     }
 
@@ -26,7 +25,7 @@ public class JsonRpc10Request {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -34,7 +33,7 @@ public class JsonRpc10Request {
         return method;
     }
 
-    public void setMethod(String method) {
+    public void setMethod(final String method) {
         this.method = method;
     }
 
@@ -42,17 +41,16 @@ public class JsonRpc10Request {
         return params;
     }
 
-    public void setParams(List<Object> params) {
+    public void setParams(final List<Object> params) {
         this.params = params;
     }
 
-    public void setParams(Object[] pararms) {
-        this.params = Lists.newArrayList(pararms);
+    public void setParams(final Object[] pararms) {
+        params = new ArrayList<>(Arrays.asList(pararms));
     }
 
     @Override
     public String toString() {
-        return "JsonRpc10Request [id=" + id + ", method=" + method
-                + ", params=" + params + "]";
+        return "JsonRpc10Request [id=" + id + ", method=" + method + ", params=" + params + "]";
     }
 }

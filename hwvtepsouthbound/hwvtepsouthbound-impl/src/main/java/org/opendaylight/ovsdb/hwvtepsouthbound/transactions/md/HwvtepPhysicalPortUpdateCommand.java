@@ -9,9 +9,7 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -199,11 +197,9 @@ public final class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCo
             getDeviceInfo().scheduleTransaction(transactionBuilder -> {
                 InstanceIdentifier psIid = tpPath.firstIdentifierOf(Node.class);
                 HwvtepOperationalState operState = new HwvtepOperationalState(getOvsdbConnectionInstance());
-                PhysicalPortUpdateCommand portUpdateCommand = new PhysicalPortUpdateCommand(
-                        operState, Collections.emptyList());
+                PhysicalPortUpdateCommand portUpdateCommand = new PhysicalPortUpdateCommand(operState, List.of());
                 TerminationPoint cfgPoint = (TerminationPoint) data.getData();
-                portUpdateCommand.updatePhysicalPort(transactionBuilder, psIid,
-                            Lists.newArrayList(cfgPoint));
+                portUpdateCommand.updatePhysicalPort(transactionBuilder, psIid, List.of(cfgPoint));
 
             });
         }
@@ -267,7 +263,7 @@ public final class HwvtepPhysicalPortUpdateCommand extends AbstractTransactionCo
         VlanBindingsKey vbKey = new VlanBindingsKey(new VlanId(Uint16.valueOf(key)));
         vbBuilder.withKey(vbKey);
         vbBuilder.setVlanIdKey(vbKey.getVlanIdKey());
-        HwvtepLogicalSwitchRef switchRef = this.getLogicalSwitchRef(value);
+        HwvtepLogicalSwitchRef switchRef = getLogicalSwitchRef(value);
         vbBuilder.setLogicalSwitchRef(switchRef);
         return vbBuilder.build();
     }

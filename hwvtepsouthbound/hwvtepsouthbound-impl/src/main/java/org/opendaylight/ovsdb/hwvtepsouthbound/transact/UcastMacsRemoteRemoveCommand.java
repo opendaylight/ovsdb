@@ -7,7 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +76,7 @@ public class UcastMacsRemoteRemoveCommand
                                     final RemoteUcastMacs mac,
                                     final InstanceIdentifier macKey,
                                     final Object... extraData) {
-        removeUcastMacRemote(transaction, instanceIdentifier, Lists.newArrayList(mac));
+        removeUcastMacRemote(transaction, instanceIdentifier, List.of(mac));
     }
 
     private void removeUcastMacRemote(final TransactionBuilder transaction,
@@ -156,7 +155,7 @@ public class UcastMacsRemoteRemoveCommand
     }
 
     @Override
-    protected String getKeyStr(InstanceIdentifier<RemoteUcastMacs> iid) {
+    protected String getKeyStr(final InstanceIdentifier<RemoteUcastMacs> iid) {
         return getLsKeyStr(iid.firstKeyOf(RemoteUcastMacs.class).getLogicalSwitchRef().getValue());
     }
 }

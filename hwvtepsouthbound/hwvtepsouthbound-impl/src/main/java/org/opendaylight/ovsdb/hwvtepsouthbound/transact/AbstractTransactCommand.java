@@ -7,12 +7,10 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
-import com.google.common.collect.Lists;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -116,13 +114,13 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
         HwvtepDeviceInfo deviceInfo = hwvtepOperationalState.getDeviceInfo();
         Type type = getClass().getGenericSuperclass();
         Type classType = ((ParameterizedType) type).getActualTypeArguments()[0];
-        Map inTransitDependencies = Collections.emptyMap();
-        Map confingDependencies = Collections.emptyMap();
+        Map inTransitDependencies = Map.of();
+        Map confingDependencies = Map.of();
 
         if (isDeleteCmd()) {
             if (deviceInfo.isKeyInTransit((Class<? extends EntryObject<?, ?>>) classType, key)) {
                 inTransitDependencies = new HashMap<>();
-                inTransitDependencies.put(classType, Lists.newArrayList(key));
+                inTransitDependencies.put(classType, List.of(key));
             }
         } else {
             inTransitDependencies = unMetDependencyGetter.getInTransitDependencies(hwvtepOperationalState, data);
@@ -133,7 +131,7 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
             //If this key itself is in transit wait for the response of this key itself
             if (deviceInfo.isKeyInTransit((Class<? extends EntryObject<?, ?>>) classType, key)
                     || deviceInfo.isKeyInDependencyQueue(key)) {
-                inTransitDependencies.put(classType, Lists.newArrayList(key));
+                inTransitDependencies.put(classType, List.of(key));
             }
         }
         LOG.info("Update received for key: {} txId: {}", getNodeKeyStr(key), getOperationalState().getTransactionId());
@@ -244,7 +242,7 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
     }
 
     protected Map<I, T> getData(final A augmentation) {
-        return Collections.emptyMap();
+        return Map.of();
     }
 
     protected List<T> getData(final Node node) {
@@ -256,7 +254,7 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
                 return new ArrayList<>(data.values());
             }
         }
-        return Collections.emptyList();
+        return List.of();
     }
 
     @NonNull
@@ -308,7 +306,7 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
 
     List<T> getCascadeDeleteData(final DataTreeModification<Node> change) {
         if (!cascadeDelete()) {
-            return Collections.emptyList();
+            return List.of();
         }
         DataObjectModification<Node> mod = change.getRootNode();
         Node updatedNode = TransactUtils.getUpdated(mod);
@@ -325,7 +323,7 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
             }
             return removed;
         }
-        return Collections.emptyList();
+        return List.of();
     }
 
     List<T> getRemoved(final DataTreeModification<Node> change) {
@@ -348,7 +346,7 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
         List<T> data1 = getData(include);
         List<T> data2 = diffOf(node1, node2, compareKeyOnly);
         if (HwvtepSouthboundUtil.isEmpty(data1) && HwvtepSouthboundUtil.isEmpty(data2)) {
-            return Collections.emptyList();
+            return List.of();
         }
         List<T> result = new ArrayList<>(data1);
         result.addAll(data2);
@@ -362,10 +360,10 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
         List<T> list2 = getData(node2);
 
         if (HwvtepSouthboundUtil.isEmpty(list1)) {
-            return Collections.emptyList();
+            return List.of();
         }
         if (HwvtepSouthboundUtil.isEmpty(list2)) {
-            return HwvtepSouthboundUtil.isEmpty(list1) ? Collections.emptyList() : list1;
+            return HwvtepSouthboundUtil.isEmpty(list1) ? List.of() : list1;
         }
 
         Map<Object, T> map1 = list1.stream().collect(Collectors.toMap(EntryObject::key, ele -> ele));
@@ -457,9 +455,8 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
                 LOG.debug("Found the data for key from device {} ", getNodeKeyStr(key));
                 getDeviceInfo().updateDeviceOperData(cls, key, table.getUuid(), table);
                 return getDeviceOpData(cls, key);
-            } else {
-                LOG.info("Could not Find the data for key from device {} ", getNodeKeyStr(key));
             }
+            LOG.info("Could not Find the data for key from device {} ", getNodeKeyStr(key));
         }
         return deviceData;
     }

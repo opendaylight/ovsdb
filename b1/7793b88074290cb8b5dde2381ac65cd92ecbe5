@@ -1,0 +1,8 @@
+Code-Review+2: Robert Varga <nite@hq.sk>
+Verified+1: ODL Required.GHA <releng+odl.required.gha@linuxfoundation.org>
+Verified+1: ODL GitHub Actions <releng+odl-github-actions@linuxfoundation.org>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Mon, 24 Aug 2026 14:19:14 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/ovsdb/+/125171
+Project: ovsdb
+Branch: refs/heads/master

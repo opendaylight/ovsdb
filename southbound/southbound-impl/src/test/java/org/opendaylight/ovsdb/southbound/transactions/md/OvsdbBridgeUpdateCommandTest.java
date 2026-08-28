@@ -456,9 +456,7 @@ public class OvsdbBridgeUpdateCommandTest {
         when(SouthboundMapper.createControllerEntries(any(Bridge.class), any(Map.class)))
                 .thenReturn(controllerEntryList);
         when(controllerEntry.getIsConnected()).thenReturn(true);
-        Uri uri = mock(Uri.class);
-        when(controllerEntry.getTarget()).thenReturn(uri);
-        when(uri.getValue()).thenReturn("tcp:192.168.12.56:6633");
+        when(controllerEntry.getTarget()).thenReturn(new Uri("tcp:192.168.12.56:6633"));
 
         PowerMockito.mockStatic(NetworkInterface.class);
         NetworkInterface networkInterface = PowerMockito.mock(NetworkInterface.class);

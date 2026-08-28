@@ -354,9 +354,7 @@ public class OvsdbConnectionManagerTest {
 
         PowerMockito.mockStatic(OvsdbConnectionService.class);
 //        when(OvsdbConnectionService.getService()).thenReturn(ovsdbConnection);
-        PortNumber port = mock(PortNumber.class);
-        when(connectionInfo.getRemotePort()).thenReturn(port);
-        when(port.getValue()).thenReturn(Uint16.valueOf(8080));
+        when(connectionInfo.getRemotePort()).thenReturn(new PortNumber(Uint16.valueOf(8080)));
         OvsdbClient client = mock(OvsdbClient.class);
         when(ovsdbConnection.connect(any(InetAddress.class), anyInt())).thenReturn(client);
 

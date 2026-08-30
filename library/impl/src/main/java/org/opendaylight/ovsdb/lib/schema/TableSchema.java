@@ -25,7 +25,6 @@ import org.opendaylight.ovsdb.lib.notation.Column;
 import org.opendaylight.ovsdb.lib.notation.Row;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Insert;
-import org.opendaylight.yangtools.util.CollectionWrappers;
 
 public abstract class TableSchema<E extends TableSchema<E>> {
     private static final AtomicColumnType UUID_COLUMN_TYPE = new AtomicColumnType(UuidBaseType.SINGLETON);

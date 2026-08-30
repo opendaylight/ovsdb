@@ -57,9 +57,13 @@ public abstract class TableSchema<E extends TableSchema<E>> {
     private synchronized List<String> populateColumnList() {
         List<String> local = columnList;
         if (local == null) {
-            columnList = local = CollectionWrappers.wrapAsList(columns.keySet());
+            columnList = local = wrapAsList(columns.keySet());
         }
         return local;
+    }
+
+    private static <E> List<E> wrapAsList(final Set<E> set) {
+        return set.isEmpty() ? List.of() : new ListWrapper<>(set);
     }
 
     public Map<String, ColumnSchema> getColumnSchemas() {

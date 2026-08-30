@@ -5,12 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.yangtools.util;
+package org.opendaylight.ovsdb.lib.schema;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -27,15 +26,13 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.Immutable;
+import org.opendaylight.yangtools.util.SingletonSet;
 
 /**
  * Utility class for adapting a {@link Collection}s to {@link Set}s and {@link List}s.
- *
- * @author Robert Varga
  */
-@Beta
 @NonNullByDefault
-public final class CollectionWrappers {
+final class CollectionWrappers {
     private static final class ListWrapper<E> extends AbstractList<E> implements Delegator<Collection<E>> {
         private final Collection<E> delegate;
 
@@ -118,7 +115,7 @@ public final class CollectionWrappers {
     }
 
     private CollectionWrappers() {
-
+        // hidden on purpose
     }
 
     /**
@@ -132,7 +129,7 @@ public final class CollectionWrappers {
      * @return An effectively-immutable wrapper of the collection.
      * @throws NullPointerException if collection is null
      */
-    public static <E> List<E> wrapAsList(final Collection<E> collection) {
+    static <E> List<E> wrapAsList(final Collection<E> collection) {
         if (collection.isEmpty()) {
             return ImmutableList.of();
         }
@@ -161,7 +158,7 @@ public final class CollectionWrappers {
      * @throws NullPointerException if collection is null or any of its elements is null
      * @throws IllegalArgumentException if the collection's contents do not conform to the Set contract
      */
-    public static <E> Set<E> wrapAsSet(final Collection<E> collection) {
+    static <E> Set<E> wrapAsSet(final Collection<E> collection) {
         if (collection.isEmpty()) {
             return ImmutableSet.of();
         }

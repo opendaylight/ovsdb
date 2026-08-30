@@ -7,15 +7,12 @@
  */
 package org.opendaylight.ovsdb.lib.schema;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import java.util.AbstractList;
-import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -26,7 +23,6 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.Immutable;
-import org.opendaylight.yangtools.util.SingletonSet;
 
 /**
  * Utility class for adapting a {@link Collection}s to {@link Set}s and {@link List}s.
@@ -76,44 +72,6 @@ final class CollectionWrappers {
         }
     }
 
-    private static final class SetWrapper<E> extends AbstractSet<E> implements Delegator<Collection<E>> {
-        private final Collection<E> delegate;
-
-        SetWrapper(final Collection<E> delegate) {
-            this.delegate = requireNonNull(delegate);
-        }
-
-        @Override
-        public Collection<E> getDelegate() {
-            return delegate;
-        }
-
-        @Override
-        public Iterator<E> iterator() {
-            return Iterators.unmodifiableIterator(delegate.iterator());
-        }
-
-        @Override
-        public int size() {
-            return delegate.size();
-        }
-
-        @Override
-        public Spliterator<E> spliterator() {
-            return delegate.spliterator();
-        }
-
-        @Override
-        public Stream<E> parallelStream() {
-            return delegate.parallelStream();
-        }
-
-        @Override
-        public Stream<E> stream() {
-            return delegate.stream();
-        }
-    }
-
     private CollectionWrappers() {
         // hidden on purpose
     }
@@ -133,46 +91,13 @@ final class CollectionWrappers {
         if (collection.isEmpty()) {
             return ImmutableList.of();
         }
-        if (collection instanceof SetWrapper) {
-            return wrapAsList(((SetWrapper<E>) collection).getDelegate());
-        }
-        if (collection instanceof List) {
-            final List<E> cast = (List<E>) collection;
-            return cast instanceof ListWrapper || cast instanceof Immutable || cast instanceof ImmutableList
-                    ? cast : Collections.unmodifiableList(cast);
+        if (collection instanceof List<?> list) {
+            @SuppressWarnings("unchecked")
+            final var cast = (List<E>) list;
+            return cast instanceof ListWrapper || cast instanceof Immutable || cast instanceof ImmutableList ? cast
+                : Collections.unmodifiableList(cast);
         }
 
         return new ListWrapper<>(collection);
-    }
-
-    /**
-     * Wrap the specified {@link Collection} as a {@link Set}. If the collection is already a Set, it is wrapped in
-     * a {@link Collections#unmodifiableSet(Set)} to prevent mutability leaking. If the collection is determined
-     * to be empty, an empty set is returned instead. If the collection is a known-immutable implementation of Set
-     * interface, it is returned unwrapped. The collection is checked for duplicates at instantiation time, such that
-     * it effectively implements the Set contract. Backing collection is required to be effectively immutable. If this
-     * requirement is violated, the returned object may behave in unpredictable ways.
-     *
-     * @param collection Collection to be wrapped
-     * @return An effectively-immutable wrapper of the collection.
-     * @throws NullPointerException if collection is null or any of its elements is null
-     * @throws IllegalArgumentException if the collection's contents do not conform to the Set contract
-     */
-    static <E> Set<E> wrapAsSet(final Collection<E> collection) {
-        if (collection.isEmpty()) {
-            return ImmutableSet.of();
-        }
-        if (collection instanceof ListWrapper) {
-            return wrapAsSet(((ListWrapper<E>) collection).getDelegate());
-        }
-        if (collection instanceof Set) {
-            final Set<E> cast = (Set<E>) collection;
-            return cast instanceof SetWrapper || cast instanceof Immutable || cast instanceof SingletonSet
-                    || cast instanceof ImmutableSet ? cast : Collections.unmodifiableSet(cast);
-        }
-
-        final Set<E> check = ImmutableSet.copyOf(collection);
-        checkArgument(collection.size() == check.size(), "Supplied collection %s has duplicate elements", collection);
-        return new SetWrapper<>(collection);
     }
 }

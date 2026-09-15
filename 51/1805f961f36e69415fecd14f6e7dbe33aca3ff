@@ -1,0 +1,9 @@
+Verified+1: jenkins-releng ODL
+Verified+1: ODL GitHub Actions <releng+odl-github-actions@linuxfoundation.org>
+Verified+1: ODL Required.GHA <releng+odl.required.gha@linuxfoundation.org>
+Code-Review+2: Robert Varga <nite@hq.sk>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Tue, 15 Sep 2026 07:34:02 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/ovsdb/+/126132
+Project: ovsdb
+Branch: refs/heads/master

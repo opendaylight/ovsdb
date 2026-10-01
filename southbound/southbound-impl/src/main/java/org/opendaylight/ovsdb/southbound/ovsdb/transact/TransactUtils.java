@@ -336,7 +336,7 @@ public class TransactUtils {
      * @param child The child modification to include.
      * @return The extended path.
      */
-    private static <N extends EntryObject<N, K> & ChildOf<? super T>, K extends Key<N>, T extends DataObject>
+    private static <N extends EntryObject<? super T, N, K>, K extends Key<N>, T extends DataObject>
             DataObjectIdentifier<? extends DataObject> extendPath(final DataObjectIdentifier<T> path,
                 final DataObjectModification<?> child) {
         @SuppressWarnings("unchecked")

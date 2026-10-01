@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -26,7 +25,7 @@ import org.opendaylight.yangtools.binding.EntryObject;
 /**
  * Utility class to retrieve the unmet dependencies (config/operational) of the given object.
  */
-public abstract class UnMetDependencyGetter<T extends EntryObject<?, ?>> {
+public abstract class UnMetDependencyGetter<T extends EntryObject<?, ?, ?>> {
 
     private final ConfigDependencyGetter configDependencyGetter = new ConfigDependencyGetter();
     private final InTransitDependencyGetter inTransitDependencyGetter = new InTransitDependencyGetter();
@@ -39,7 +38,7 @@ public abstract class UnMetDependencyGetter<T extends EntryObject<?, ?>> {
      * @param data The data object
      * @return The depenencies
      */
-    public Map<Class<? extends EntryObject<?, ?>>, List<DataObjectIdentifier>> getInTransitDependencies(
+    public Map<Class<? extends EntryObject<?, ?, ?>>, List<DataObjectIdentifier>> getInTransitDependencies(
             HwvtepOperationalState opState, T data) {
         return inTransitDependencyGetter.retrieveUnMetDependencies(opState, opState.getDeviceInfo(), data);
     }
@@ -52,23 +51,23 @@ public abstract class UnMetDependencyGetter<T extends EntryObject<?, ?>> {
      * @param data The data object
      * @return the      depenencies
      */
-    public Map<Class<? extends EntryObject<?, ?>>, List<DataObjectIdentifier>> getUnMetConfigDependencies(
+    public Map<Class<? extends EntryObject<?, ?, ?>>, List<DataObjectIdentifier>> getUnMetConfigDependencies(
             HwvtepOperationalState opState, T data) {
         return configDependencyGetter.retrieveUnMetDependencies(opState, opState.getDeviceInfo(), data);
     }
 
     abstract class DependencyGetter {
 
-        Map<Class<? extends EntryObject<?, ?>>, List<DataObjectIdentifier>> retrieveUnMetDependencies(
+        Map<Class<? extends EntryObject<?, ?, ?>>, List<DataObjectIdentifier>> retrieveUnMetDependencies(
                 HwvtepOperationalState opState, HwvtepDeviceInfo deviceInfo, T data) {
 
-            Map<Class<? extends EntryObject<?, ?>>, List<DataObjectIdentifier>> result = new HashMap<>();
-            Map<Class<? extends EntryObject<?, ?>>, List<DataObjectIdentifier<?>>> allKeys = new HashMap<>();
+            Map<Class<? extends EntryObject<?, ?, ?>>, List<DataObjectIdentifier>> result = new HashMap<>();
+            Map<Class<? extends EntryObject<?, ?, ?>>, List<DataObjectIdentifier<?>>> allKeys = new HashMap<>();
             allKeys.put(LogicalSwitches.class, getLogicalSwitchDependencies(data));
             allKeys.put(TerminationPoint.class, getTerminationPointDependencies(data));
 
-            for (Entry<Class<? extends EntryObject<?, ?>>, List<DataObjectIdentifier<?>>> entry : allKeys.entrySet()) {
-                Class<? extends EntryObject<?, ?>> cls = entry.getKey();
+            for (var entry : allKeys.entrySet()) {
+                Class<? extends EntryObject<?, ?, ?>> cls = entry.getKey();
                 List<DataObjectIdentifier<? extends DataObject>> keysToCheck = entry.getValue();
                 for (DataObjectIdentifier<? extends DataObject> key : keysToCheck) {
                     if (!isDependencyMet(opState, deviceInfo, cls, key)) {
@@ -79,9 +78,9 @@ public abstract class UnMetDependencyGetter<T extends EntryObject<?, ?>> {
             return result;
         }
 
-        Map<Class<? extends EntryObject<?, ?>>, List<DataObjectIdentifier>> addToResultMap(
-                Map<Class<? extends EntryObject<?, ?>>, List<DataObjectIdentifier>> result,
-                Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier<? extends DataObject> key) {
+        Map<Class<? extends EntryObject<?, ?, ?>>, List<DataObjectIdentifier>> addToResultMap(
+                Map<Class<? extends EntryObject<?, ?, ?>>, List<DataObjectIdentifier>> result,
+                Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier<? extends DataObject> key) {
             if (null == result) {
                 result = new HashMap<>();
             }
@@ -93,19 +92,19 @@ public abstract class UnMetDependencyGetter<T extends EntryObject<?, ?>> {
         }
 
         abstract boolean isDependencyMet(HwvtepOperationalState opState, HwvtepDeviceInfo deviceInfo,
-                Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier<? extends DataObject> key);
+                Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier<? extends DataObject> key);
     }
 
     class ConfigDependencyGetter extends DependencyGetter {
         @Override
         boolean isDependencyMet(HwvtepOperationalState opState, HwvtepDeviceInfo deviceInfo,
-                                Class<? extends EntryObject<?, ?>> cls,
+                                Class<? extends EntryObject<?, ?, ?>> cls,
                                 DataObjectIdentifier<? extends DataObject> key) {
             return deviceInfo.isConfigDataAvailable(cls, key) || isConfigDataAvailable(opState, cls, key);
         }
 
         boolean isConfigDataAvailable(HwvtepOperationalState opState,
-                                      Class<? extends EntryObject<?, ?>> cls,
+                                      Class<? extends EntryObject<?, ?, ?>> cls,
                                       DataObjectIdentifier<? extends DataObject> key) {
             DataBroker db = opState.getConnectionInstance().getDataBroker();
             Optional data = HwvtepSouthboundUtil.readNode(db, LogicalDatastoreType.CONFIGURATION, key);
@@ -120,7 +119,7 @@ public abstract class UnMetDependencyGetter<T extends EntryObject<?, ?>> {
     class InTransitDependencyGetter extends DependencyGetter {
         @Override
         boolean isDependencyMet(HwvtepOperationalState opState, HwvtepDeviceInfo deviceInfo,
-                Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier<? extends DataObject> key) {
+                Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier<? extends DataObject> key) {
             return opState.isKeyPartOfCurrentTx(cls, key) || !deviceInfo.isKeyInTransit(cls, key);
         }
     }

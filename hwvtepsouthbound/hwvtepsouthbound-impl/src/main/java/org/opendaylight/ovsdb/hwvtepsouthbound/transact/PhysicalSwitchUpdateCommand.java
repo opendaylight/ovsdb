@@ -46,7 +46,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,18 +59,18 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> created =
+        Map<DataObjectIdentifier<Node>, PhysicalSwitchAugmentation> created =
                 extractCreated(getChanges(),PhysicalSwitchAugmentation.class);
         if (!created.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> physicalSwitchEntry:
+            for (Entry<DataObjectIdentifier<Node>, PhysicalSwitchAugmentation> physicalSwitchEntry:
                 created.entrySet()) {
                 updatePhysicalSwitch(transaction,  physicalSwitchEntry.getKey(), physicalSwitchEntry.getValue());
             }
         }
-        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> updated =
+        Map<DataObjectIdentifier<Node>, PhysicalSwitchAugmentation> updated =
                 extractUpdatedSwitches(getChanges(),PhysicalSwitchAugmentation.class);
         if (!updated.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> physicalSwitchEntry:
+            for (Entry<DataObjectIdentifier<Node>, PhysicalSwitchAugmentation> physicalSwitchEntry:
                 updated.entrySet()) {
                 updatePhysicalSwitch(transaction,  physicalSwitchEntry.getKey(), physicalSwitchEntry.getValue());
             }
@@ -80,7 +79,7 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
 
 
     private void updatePhysicalSwitch(final TransactionBuilder transaction,
-            final InstanceIdentifier<Node> iid, final PhysicalSwitchAugmentation physicalSwitchAugmentation) {
+            final DataObjectIdentifier<Node> iid, final PhysicalSwitchAugmentation physicalSwitchAugmentation) {
         LOG.debug("Creating a physical switch named: {}", physicalSwitchAugmentation.getHwvtepNodeName());
         Optional<PhysicalSwitchAugmentation> operationalPhysicalSwitchOptional =
                 getOperationalState().getPhysicalSwitchAugmentation(iid);
@@ -181,7 +180,7 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
     }
 
     @SuppressWarnings("unchecked")
-    private void setTunnels(final TransactionBuilder transaction, final InstanceIdentifier<Node> iid,
+    private void setTunnels(final TransactionBuilder transaction, final DataObjectIdentifier<Node> iid,
             final PhysicalSwitch physicalSwitch, final PhysicalSwitchAugmentation physicalSwitchAugmentation,
             final boolean switchExists) {
         final var op = ops();
@@ -193,9 +192,9 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
             Tunnel newTunnel = transaction.getTypedRowWrapper(Tunnel.class);
 
             UUID localUUID = getLocatorUUID(transaction,
-                ((DataObjectIdentifier<TerminationPoint>) tunnel.getLocalLocatorRef().getValue()).toLegacy());
+                (DataObjectIdentifier<TerminationPoint>) tunnel.getLocalLocatorRef().getValue());
             UUID remoteUUID = getLocatorUUID(transaction,
-                ((DataObjectIdentifier<TerminationPoint>) tunnel.getRemoteLocatorRef().getValue()).toLegacy());
+                (DataObjectIdentifier<TerminationPoint>) tunnel.getRemoteLocatorRef().getValue());
             if (localUUID != null && remoteUUID != null) {
                 // local and remote must exist
                 newTunnel.setLocal(localUUID);
@@ -270,7 +269,8 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private UUID getLocatorUUID(final TransactionBuilder transaction, final InstanceIdentifier<TerminationPoint> iid) {
+    private UUID getLocatorUUID(final TransactionBuilder transaction,
+            final DataObjectIdentifier<TerminationPoint> iid) {
         UUID locatorUUID = null;
         Optional<HwvtepPhysicalLocatorAugmentation> opLocOptional =
                         getOperationalState().getPhysicalLocatorAugmentation(iid);
@@ -292,12 +292,12 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         return locatorUUID;
     }
 
-    private static Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractCreated(
+    private static Map<DataObjectIdentifier<Node>, PhysicalSwitchAugmentation> extractCreated(
             final Collection<DataTreeModification<Node>> changes, final Class<PhysicalSwitchAugmentation> class1) {
-        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result = new HashMap<>();
+        Map<DataObjectIdentifier<Node>, PhysicalSwitchAugmentation> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+                final DataObjectIdentifier<Node> key = change.path();
                 final DataObjectModification<Node> mod = change.getRootNode();
                 Node created = TransactUtils.getCreated(mod);
                 if (created != null) {
@@ -312,12 +312,12 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         return result;
     }
 
-    private static Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractUpdatedSwitches(
+    private static Map<DataObjectIdentifier<Node>, PhysicalSwitchAugmentation> extractUpdatedSwitches(
             final Collection<DataTreeModification<Node>> changes, final Class<PhysicalSwitchAugmentation> class1) {
-        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result = new HashMap<>();
+        Map<DataObjectIdentifier<Node>, PhysicalSwitchAugmentation> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+                final DataObjectIdentifier<Node> key = change.path();
                 final DataObjectModification<Node> mod = change.getRootNode();
                 Node updated = TransactUtils.getUpdated(mod);
                 if (updated != null) {
@@ -331,5 +331,4 @@ public final class PhysicalSwitchUpdateCommand extends AbstractTransactCommand {
         }
         return result;
     }
-
 }

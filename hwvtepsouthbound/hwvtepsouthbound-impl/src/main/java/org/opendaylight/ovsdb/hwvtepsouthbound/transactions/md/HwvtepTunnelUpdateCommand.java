@@ -33,8 +33,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.tunnel.attributes.BfdStatusBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,25 +69,24 @@ public final class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand 
     private void updateTunnel(ReadWriteTransaction transaction, Tunnel tunnel) {
         final UUID localData = requireNonNull(tunnel.getLocalColumn().getData());
         final UUID remoteData = requireNonNull(tunnel.getRemoteColumn().getData());
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         //TODO remove these reads
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         PhysicalSwitch phySwitch =
                         getOvsdbConnectionInstance().getDeviceInfo().getPhysicalSwitchForTunnel(tunnel.getUuid());
 
-        InstanceIdentifier<Tunnels> tunnelIid = null;
+        DataObjectIdentifier<Tunnels> tunnelIid = null;
         if (phySwitch != null) {
-            InstanceIdentifier<Node> psIid =
-                    HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), phySwitch);
+            var psIid = HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), phySwitch);
             tunnelIid = getInstanceIdentifier(psIid, tunnel);
         }
 
         if (connection.isPresent() && tunnelIid != null) {
             TunnelsBuilder builder = new TunnelsBuilder();
             builder.setLocalLocatorRef(new HwvtepPhysicalLocatorRef(getPhysicalLocatorRefFromUUID(
-                    getOvsdbConnectionInstance().getInstanceIdentifier().toLegacy(), localData).toIdentifier()));
+                    getOvsdbConnectionInstance().getInstanceIdentifier(), localData)));
             builder.setRemoteLocatorRef(new HwvtepPhysicalLocatorRef(getPhysicalLocatorRefFromUUID(
-                    getOvsdbConnectionInstance().getInstanceIdentifier().toLegacy(), remoteData).toIdentifier()));
+                    getOvsdbConnectionInstance().getInstanceIdentifier(), remoteData)));
             builder.setTunnelUuid(new Uuid(tunnel.getUuid().toString()));
             setBfdLocalConfigs(builder, tunnel);
             setBfdRemoteConfigs(builder, tunnel);
@@ -95,7 +94,7 @@ public final class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand 
             setBfdStatus(builder, tunnel);
             Tunnels updatedTunnel = builder.build();
             LOG.trace("Built with the intent to store tunnel data {}", updatedTunnel);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, tunnelIid.toIdentifier(), updatedTunnel);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, tunnelIid, updatedTunnel);
             // TODO: Deletion of Tunnel BFD config and params
         } else {
             LOG.warn("Insuficient information. Unable to update tunnel {}", tunnel.getUuid());
@@ -155,21 +154,18 @@ public final class HwvtepTunnelUpdateCommand extends AbstractTransactionCommand 
         }
     }
 
-    private InstanceIdentifier<Tunnels> getInstanceIdentifier(InstanceIdentifier<Node> psIid, Tunnel tunnel) {
-        InstanceIdentifier<Tunnels> result = null;
-        InstanceIdentifier<TerminationPoint> localTpPath =
-                        getPhysicalLocatorRefFromUUID(getOvsdbConnectionInstance().getInstanceIdentifier(),
+    private DataObjectIdentifier<Tunnels> getInstanceIdentifier(DataObjectIdentifier<Node> psIid, Tunnel tunnel) {
+        var localTpPath = getPhysicalLocatorRefFromUUID(getOvsdbConnectionInstance().getInstanceIdentifier(),
                                                         tunnel.getLocalColumn().getData());
-        InstanceIdentifier<TerminationPoint> remoteTpPath =
-                        getPhysicalLocatorRefFromUUID(getOvsdbConnectionInstance().getInstanceIdentifier(),
+        var remoteTpPath = getPhysicalLocatorRefFromUUID(getOvsdbConnectionInstance().getInstanceIdentifier(),
                                                         tunnel.getRemoteColumn().getData());
         if (remoteTpPath != null && localTpPath != null) {
-            result = HwvtepSouthboundMapper.createInstanceIdentifier(psIid, localTpPath, remoteTpPath);
+            return HwvtepSouthboundMapper.createInstanceIdentifier(psIid, localTpPath, remoteTpPath);
         }
-        return result;
+        return null;
     }
 
-    private InstanceIdentifier<TerminationPoint> getPhysicalLocatorRefFromUUID(InstanceIdentifier<Node> nodeIid,
+    private DataObjectIdentifier<TerminationPoint> getPhysicalLocatorRefFromUUID(DataObjectIdentifier<Node> nodeIid,
                                                                                UUID uuid) {
         PhysicalLocator locator = getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocator(uuid);
         if (locator == null) {

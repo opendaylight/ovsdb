@@ -54,6 +54,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
@@ -80,9 +81,9 @@ public class TerminationPointCreateCommandTest {
     public void testExecute() throws Exception {
         MemberModifier.suppress(MemberMatcher.method(TerminationPointCreateCommand.class, "getChanges"));
         DataChangeEvent asynEvent = mock(DataChangeEvent.class);
-        Map<InstanceIdentifier<?>, DataObject> map = new HashMap<>();
+        Map<DataObjectIdentifier<?>, DataObject> map = new HashMap<>();
         OvsdbTerminationPointAugmentation terminationPoint = mock(OvsdbTerminationPointAugmentation.class);
-        InstanceIdentifier terminationPointIid = mock(InstanceIdentifier.class);
+        DataObjectIdentifier terminationPointIid = mock(DataObjectIdentifier.class);
         map.put(terminationPointIid, terminationPoint);
         when(asynEvent.getCreatedData()).thenReturn(map);
         when(terminationPoint.getName()).thenReturn(TERMINATION_POINT_NAME);
@@ -136,7 +137,7 @@ public class TerminationPointCreateCommandTest {
         // FIXME: rather than static mocking, insert a mock Operations
         PowerMockito.mockStatic(TransactUtils.class);
         when(TransactUtils.stampInstanceIdentifierMutation(any(Operations.class), any(TransactionBuilder.class),
-            any(InstanceIdentifier.class),     any(GenericTableSchema.class), any(ColumnSchema.class),
+            any(DataObjectIdentifier.class), any(GenericTableSchema.class), any(ColumnSchema.class),
             any(InstanceIdentifierCodec.class))).thenReturn(mutate);
 
         Column<GenericTableSchema, String> nameColumn = mock(Column.class);
@@ -150,11 +151,12 @@ public class TerminationPointCreateCommandTest {
         when(transaction.add(any(Operation.class))).thenReturn(transaction);
 
         String interfaceName = INTERFACE_NAME;
-        InstanceIdentifier<OvsdbTerminationPointAugmentation> iid = InstanceIdentifier.create(NetworkTopology.class)
+        var iid = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
             .child(Node.class, new NodeKey(new NodeId("testNode")))
             .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp")))
-            .augmentation(OvsdbTerminationPointAugmentation.class);
+            .augmentation(OvsdbTerminationPointAugmentation.class)
+            .build();
         TerminationPointCreateCommand.stampInstanceIdentifier(new DefaultOperations(), transaction, iid, interfaceName,
                 mock(InstanceIdentifierCodec.class));
         verify(port).setName(anyString());

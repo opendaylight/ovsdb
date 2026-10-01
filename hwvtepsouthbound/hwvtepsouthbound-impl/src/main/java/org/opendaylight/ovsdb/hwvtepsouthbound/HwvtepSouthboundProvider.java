@@ -42,7 +42,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -99,10 +98,10 @@ public final class HwvtepSouthboundProvider
             LOG.warn("HWVTEP Southbound Provider instance entity {} was already "
                     + "registered for ownership", instanceEntity, e);
         }
-        InstanceIdentifier<Topology> path = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID));
-        DataTreeIdentifier<Topology> treeId = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, path);
+        DataTreeIdentifier<Topology> treeId = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL,
+            DataObjectIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+                .build());
 
         LOG.trace("Registering listener for path {}", treeId);
         operTopologyRegistration = dataBroker.registerTreeChangeListener(treeId, this);
@@ -219,17 +218,17 @@ public final class HwvtepSouthboundProvider
     }
 
     @Override
-    public Map<InstanceIdentifier<Node>, HwvtepDeviceInfo> getAllConnectedInstances() {
+    public Map<DataObjectIdentifier<Node>, HwvtepDeviceInfo> getAllConnectedInstances() {
         return cm.allConnectedInstances();
     }
 
     @Override
-    public Map<InstanceIdentifier<Node>, TransactionHistory> getControllerTxHistory() {
+    public Map<DataObjectIdentifier<Node>, TransactionHistory> getControllerTxHistory() {
         return cm.controllerTxHistory();
     }
 
     @Override
-    public Map<InstanceIdentifier<Node>, TransactionHistory> getDeviceUpdateHistory() {
+    public Map<DataObjectIdentifier<Node>, TransactionHistory> getDeviceUpdateHistory() {
         return cm.deviceUpdateHistory();
     }
 }

@@ -16,7 +16,7 @@ import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,7 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
     private final AtomicInteger connectionAttempt = new AtomicInteger(0);
 
     public ConnectionReconciliationTask(final ReconciliationManager reconciliationManager,
-            final OvsdbConnectionManager connectionManager, final InstanceIdentifier<Node> nodeIid,
+            final OvsdbConnectionManager connectionManager, final DataObjectIdentifier<Node> nodeIid,
             final OvsdbNodeAugmentation configData) {
         super(reconciliationManager, connectionManager, nodeIid, configData);
     }
@@ -39,7 +39,7 @@ public class ConnectionReconciliationTask extends ReconciliationTask {
     public boolean reconcileConfiguration(final OvsdbConnectionManager connectionManagerOfDevice) {
         boolean result = false;
         connectionAttempt.incrementAndGet();
-        InstanceIdentifier<Node> ndIid = (InstanceIdentifier<Node>) nodeIid;
+        var ndIid = (DataObjectIdentifier<Node>) nodeIid;
         OvsdbNodeAugmentation ovsdbNode = (OvsdbNodeAugmentation)configData;
 
         LOG.info("Retry({}) connection to Ovsdb Node {} ", connectionAttempt.get(), ovsdbNode.getConnectionInfo());

@@ -51,10 +51,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +84,7 @@ public final class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransaction
     }
 
     private void updatePhysicalSwitch(ReadWriteTransaction transaction, UUID uuid, PhysicalSwitch phySwitch) {
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         //TODO remove this read
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
@@ -93,12 +92,12 @@ public final class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransaction
             // Update the connection node to let it know it manages this
             // Physical Switch
             Node connectionNode = buildConnectionNode(phySwitch);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(), connectionNode);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
 
             // Update the Physical Switch with whatever data we are getting
-            InstanceIdentifier<Node> psIid = getInstanceIdentifier(phySwitch);
+            var psIid = getInstanceIdentifier(phySwitch);
             Node psNode = buildPhysicalSwitchNode(connection.orElseThrow(), phySwitch);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, psIid.toIdentifier(), psNode);
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, psIid, psNode);
             addToDeviceUpdate(TransactionType.ADD, phySwitch);
             LOG.info("DEVICE - {} {}", TransactionType.ADD, phySwitch);
 
@@ -115,11 +114,12 @@ public final class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransaction
         }
     }
 
-    private static InstanceIdentifier<TunnelIps> getTunnelIpIid(final String tunnelIp,
-            final InstanceIdentifier<Node> psIid) {
-        IpAddress ip = TransactUtils.parseIpAddress(tunnelIp);
-        TunnelIps tunnelIps = new TunnelIpsBuilder().withKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build();
-        return psIid.augmentation(PhysicalSwitchAugmentation.class).child(TunnelIps.class, tunnelIps.key());
+    private static DataObjectIdentifier<TunnelIps> getTunnelIpIid(final String tunnelIp,
+            final DataObjectIdentifier<Node> psIid) {
+        return psIid.toBuilder()
+            .augmentation(PhysicalSwitchAugmentation.class)
+            .child(TunnelIps.class, new TunnelIpsKey(TransactUtils.parseIpAddress(tunnelIp)))
+            .build();
     }
 
     private void updateTunnelIps(@NonNull final PhysicalSwitch newPSwitch, @Nullable final PhysicalSwitch oldPSwitch,
@@ -132,17 +132,16 @@ public final class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransaction
         Set<String> addedTunnelIps = Sets.difference(newTunelIps, oldTunnelIps);
         Set<String> removedTunnelIps = Sets.difference(oldTunnelIps, newTunelIps);
 
-        InstanceIdentifier<Node> psIid = getInstanceIdentifier(newPSwitch);
+        var psIid = getInstanceIdentifier(newPSwitch);
         for (String tunnelIp : removedTunnelIps) {
-            InstanceIdentifier<TunnelIps> tunnelIpsInstanceIdentifier = getTunnelIpIid(tunnelIp, psIid);
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, tunnelIpsInstanceIdentifier.toIdentifier());
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, getTunnelIpIid(tunnelIp, psIid));
         }
         for (String tunnelIp : addedTunnelIps) {
             IpAddress ip = TransactUtils.parseIpAddress(tunnelIp);
-            InstanceIdentifier<TunnelIps> tunnelIpsInstanceIdentifier = getTunnelIpIid(tunnelIp, psIid);
+            var tunnelIpsInstanceIdentifier = getTunnelIpIid(tunnelIp, psIid);
             TunnelIps tunnelIps = new TunnelIpsBuilder().withKey(new TunnelIpsKey(ip)).setTunnelIpsKey(ip).build();
             transaction.mergeParentStructurePut(LogicalDatastoreType.OPERATIONAL,
-                tunnelIpsInstanceIdentifier.toIdentifier(), tunnelIps);
+                tunnelIpsInstanceIdentifier, tunnelIps);
         }
     }
 
@@ -175,8 +174,7 @@ public final class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransaction
     }
 
     private void setManagedBy(PhysicalSwitchAugmentationBuilder psAugmentationBuilder) {
-        InstanceIdentifier<Node> connectionNodePath = getOvsdbConnectionInstance().getInstanceIdentifier();
-        psAugmentationBuilder.setManagedBy(new HwvtepGlobalRef(connectionNodePath.toIdentifier()));
+        psAugmentationBuilder.setManagedBy(new HwvtepGlobalRef(getOvsdbConnectionInstance().getInstanceIdentifier()));
     }
 
     private static void setPhysicalSwitchId(PhysicalSwitchAugmentationBuilder psAugmentationBuilder,
@@ -207,49 +205,46 @@ public final class HwvtepPhysicalSwitchUpdateCommand extends AbstractTransaction
         NodeBuilder connectionNode = new NodeBuilder();
         connectionNode.setNodeId(getOvsdbConnectionInstance().getNodeId());
 
-        InstanceIdentifier<Node> switchIid =
-                HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), phySwitch);
-        Switches physicalSwitch = new SwitchesBuilder()
-            .setSwitchRef(new HwvtepPhysicalSwitchRef(switchIid.toIdentifier()))
-            .build();
+        var switchIid = HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), phySwitch);
+        Switches physicalSwitch = new SwitchesBuilder().setSwitchRef(new HwvtepPhysicalSwitchRef(switchIid)).build();
 
         connectionNode.addAugmentation(new HwvtepGlobalAugmentationBuilder()
-            .setSwitches(Map.of(physicalSwitch.key(), physicalSwitch))
+            .setSwitches(BindingMap.of(physicalSwitch))
             .build());
 
         LOG.debug("Update node with physicalswitch ref {}", physicalSwitch);
         return connectionNode.build();
     }
 
-    private InstanceIdentifier<Node> getInstanceIdentifier(PhysicalSwitch phySwitch) {
+    private DataObjectIdentifier<Node> getInstanceIdentifier(PhysicalSwitch phySwitch) {
         return HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), phySwitch);
     }
 
     private NodeId getNodeId(PhysicalSwitch phySwitch) {
-        NodeKey nodeKey = getInstanceIdentifier(phySwitch).firstKeyOf(Node.class);
-        return nodeKey.getNodeId();
+        return getInstanceIdentifier(phySwitch).getFirstKeyOf(Node.class).getNodeId();
     }
 
     private static <T extends DataObject> void deleteEntries(ReadWriteTransaction transaction,
-            List<InstanceIdentifier<T>> entryIids) {
-        for (InstanceIdentifier<T> entryIid : entryIids) {
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid.toIdentifier());
+            List<DataObjectIdentifier<T>> entryIids) {
+        for (DataObjectIdentifier<T> entryIid : entryIids) {
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, entryIid);
         }
     }
 
-    private List<InstanceIdentifier<SwitchFaultStatus>> getSwitchFaultStatusToRemove(InstanceIdentifier<Node> psIid,
+    private List<DataObjectIdentifier<SwitchFaultStatus>> getSwitchFaultStatusToRemove(DataObjectIdentifier<Node> psIid,
             PhysicalSwitch phySwitch) {
         requireNonNull(psIid);
         requireNonNull(phySwitch);
-        List<InstanceIdentifier<SwitchFaultStatus>> result = new ArrayList<>();
+        List<DataObjectIdentifier<SwitchFaultStatus>> result = new ArrayList<>();
         PhysicalSwitch oldSwitch = oldPSRows.get(phySwitch.getUuid());
         if (oldSwitch != null && oldSwitch.getSwitchFaultStatusColumn() != null) {
             for (String switchFltStat : oldSwitch.getSwitchFaultStatusColumn().getData()) {
                 if (phySwitch.getSwitchFaultStatusColumn() == null
                         || !phySwitch.getSwitchFaultStatusColumn().getData().contains(switchFltStat)) {
-                    InstanceIdentifier<SwitchFaultStatus> iid = psIid.augmentation(PhysicalSwitchAugmentation.class)
-                            .child(SwitchFaultStatus.class, new SwitchFaultStatusKey(switchFltStat));
-                    result.add(iid);
+                    result.add(psIid.toBuilder()
+                        .augmentation(PhysicalSwitchAugmentation.class)
+                        .child(SwitchFaultStatus.class, new SwitchFaultStatusKey(switchFltStat))
+                        .build());
                 }
             }
         }

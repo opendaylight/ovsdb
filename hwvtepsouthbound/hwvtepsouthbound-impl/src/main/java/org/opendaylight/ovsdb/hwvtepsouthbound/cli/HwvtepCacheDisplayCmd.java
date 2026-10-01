@@ -33,7 +33,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.EntryObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 @Service
 @Command(scope = "hwvtep", name = "cache", description = "Disply hwvtep cache")
@@ -55,8 +54,7 @@ public class HwvtepCacheDisplayCmd implements Action {
     @Override
     @SuppressWarnings("checkstyle:RegexpSinglelineJava")
     public Object execute() throws Exception {
-        Map<InstanceIdentifier<Node>, HwvtepDeviceInfo> allConnectedInstances =
-                hwvtepSouthboundProvider.getAllConnectedInstances();
+        var allConnectedInstances = hwvtepSouthboundProvider.getAllConnectedInstances();
         if (nodeid == null) {
             allConnectedInstances.entrySet().forEach(entry -> {
                 System.out.println(SEPERATOR + " START " + SEPERATOR);
@@ -73,21 +71,18 @@ public class HwvtepCacheDisplayCmd implements Action {
         return null;
     }
 
-    private InstanceIdentifier<Node> getIid() {
-        NodeId nodeId = new NodeId(new Uri(nodeid));
-        NodeKey nodeKey = new NodeKey(nodeId);
-        TopologyKey topoKey = new TopologyKey(HWVTEP_TOPOLOGY_ID);
-        return InstanceIdentifier.builder(NetworkTopology.class)
-                .child(Topology.class, topoKey)
-                .child(Node.class, nodeKey)
-                .build();
+    private DataObjectIdentifier<Node> getIid() {
+        return DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(HWVTEP_TOPOLOGY_ID))
+            .child(Node.class, new NodeKey(new NodeId(new Uri(nodeid))))
+            .build();
     }
 
     @SuppressWarnings("checkstyle:RegexpSinglelineJava")
-    private static void print(InstanceIdentifier<Node> iid, HwvtepDeviceInfo deviceInfo) {
+    private static void print(DataObjectIdentifier<Node> iid, HwvtepDeviceInfo deviceInfo) {
         PrintStream printStream = System.out;
         printStream.print("Printing for Node :  ");
-        printStream.println(iid.firstKeyOf(Node.class).getNodeId().getValue());
+        printStream.println(iid.getFirstKeyOf(Node.class).getNodeId().getValue());
 
         printStream.println(SECTION_SEPERATOR);
         printStream.println("Config data");
@@ -111,13 +106,12 @@ public class HwvtepCacheDisplayCmd implements Action {
         });
         printStream.println(SECTION_SEPERATOR);
         printStream.println(SECTION_SEPERATOR);
-
     }
 
     private static void printEntry(PrintStream console, Map.Entry<Class<? extends EntryObject<?, ?>>,
-            Map<InstanceIdentifier, HwvtepDeviceInfo.DeviceData>> entry) {
+            Map<DataObjectIdentifier, HwvtepDeviceInfo.DeviceData>> entry) {
         Class<? extends EntryObject<?, ?>> cls = entry.getKey();
-        Map<InstanceIdentifier, HwvtepDeviceInfo.DeviceData> map = entry.getValue();
+        var map = entry.getValue();
         String clsName = cls.getSimpleName();
         console.println(clsName + " - ");
         map.values().forEach(deviceData -> {
@@ -151,12 +145,12 @@ public class HwvtepCacheDisplayCmd implements Action {
     }
 
     private static void printLogicalSwitches(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
-        InstanceIdentifier<LogicalSwitches> ls = deviceData.getKey();
+        var ls = deviceData.getKey();
         console.print(ls.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue());
     }
 
     private static void printRemoteMcasts(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
-        InstanceIdentifier<RemoteMcastMacs> remoteMcastMacsIid = deviceData.getKey();
+        var remoteMcastMacsIid = deviceData.getKey();
         String macAddress = remoteMcastMacsIid.firstKeyOf(RemoteMcastMacs.class).getMacEntryKey().getValue();
         String logicalSwitchRef =
             getLogicalSwitchRef(remoteMcastMacsIid.firstKeyOf(RemoteMcastMacs.class).getLogicalSwitchRef());
@@ -166,7 +160,7 @@ public class HwvtepCacheDisplayCmd implements Action {
     }
 
     private static void printRemoteUcasts(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
-        InstanceIdentifier<RemoteUcastMacs> remoteUcastMacsIid = deviceData.getKey();
+        var remoteUcastMacsIid = deviceData.getKey();
         String macAddress = remoteUcastMacsIid.firstKeyOf(RemoteUcastMacs.class).getMacEntryKey().getValue();
         String logicalSwitchRef =
             getLogicalSwitchRef(remoteUcastMacsIid.firstKeyOf(RemoteUcastMacs.class).getLogicalSwitchRef());
@@ -177,11 +171,11 @@ public class HwvtepCacheDisplayCmd implements Action {
 
     private static String getLogicalSwitchRef(HwvtepLogicalSwitchRef hwvtepLogicalSwitchRef) {
         return ((DataObjectIdentifier<?>) hwvtepLogicalSwitchRef.getValue())
-            .toLegacy().firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
+            .getFirstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
     }
 
     private static void printTerminationPoint(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
-        InstanceIdentifier<TerminationPoint> terminationPointIid = deviceData.getKey();
+        var terminationPointIid = deviceData.getKey();
         console.print(terminationPointIid.firstKeyOf(TerminationPoint.class).getTpId().getValue());
         try {
             PhysicalPort physicalPort = (PhysicalPort) deviceData.getData();
@@ -192,7 +186,7 @@ public class HwvtepCacheDisplayCmd implements Action {
     }
 
     private static void printNode(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
-        InstanceIdentifier<Node> ls = deviceData.getKey();
+        var ls = deviceData.getKey();
         console.print(ls.firstKeyOf(Node.class).getNodeId().getValue());
     }
 

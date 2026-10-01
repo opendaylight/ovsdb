@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
@@ -26,7 +25,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,26 +40,26 @@ public class UcastMacsRemoteUpdateCommand
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<RemoteUcastMacs>> updateds =
+        Map<DataObjectIdentifier<Node>, List<RemoteUcastMacs>> updateds =
                 extractUpdated(getChanges(),RemoteUcastMacs.class);
         if (!updateds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<RemoteUcastMacs>> updated:
-                updateds.entrySet()) {
+            for (var updated : updateds.entrySet()) {
                 updateUcastMacsRemote(transaction,  updated.getKey(), updated.getValue());
             }
         }
     }
 
     private void updateUcastMacsRemote(final TransactionBuilder transaction,
-                                       final InstanceIdentifier<Node> instanceIdentifier,
+                                       final DataObjectIdentifier<Node> instanceIdentifier,
                                        final List<RemoteUcastMacs> remoteUcastMacs) {
         if (remoteUcastMacs == null) {
             return;
         }
         for (RemoteUcastMacs remoteUcastMac : remoteUcastMacs) {
-            InstanceIdentifier<RemoteUcastMacs> macIid =
-                    instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class)
-                            .child(RemoteUcastMacs.class, remoteUcastMac.key());
+            var macIid = instanceIdentifier.toBuilder()
+                .augmentation(HwvtepGlobalAugmentation.class)
+                .child(RemoteUcastMacs.class, remoteUcastMac.key())
+                .build();
             getDeviceInfo().updateConfigData(RemoteUcastMacs.class, macIid, remoteUcastMac);
             onConfigUpdate(transaction, instanceIdentifier, remoteUcastMac, null);
         }
@@ -69,20 +67,21 @@ public class UcastMacsRemoteUpdateCommand
 
     @Override
     public void onConfigUpdate(final TransactionBuilder transaction,
-                               final InstanceIdentifier<Node> nodeIid,
+                               final DataObjectIdentifier<Node> nodeIid,
                                final RemoteUcastMacs remoteUcastMacs,
-                               final InstanceIdentifier macKey,
+                               final DataObjectIdentifier macKey,
                                final Object... extraData) {
-        InstanceIdentifier<RemoteUcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                .child(RemoteUcastMacs.class, remoteUcastMacs.key());
-        processDependencies(UCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteUcastMacs);
+        processDependencies(UCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, nodeIid.toBuilder()
+            .augmentation(HwvtepGlobalAugmentation.class)
+            .child(RemoteUcastMacs.class, remoteUcastMacs.key())
+            .build(), remoteUcastMacs);
     }
 
     @Override
     public void doDeviceTransaction(final TransactionBuilder transaction,
-                                    final InstanceIdentifier<Node> instanceIdentifier,
+                                    final DataObjectIdentifier<Node> instanceIdentifier,
                                     final RemoteUcastMacs remoteUcastMac,
-                                    final InstanceIdentifier macKey,
+                                    final DataObjectIdentifier macKey,
                                     final Object... extraData) {
         LOG.debug("DoDeviceTransaction remoteUcastMacs, mac address: {}", remoteUcastMac.getMacEntryKey().getValue());
         updateConfigData(RemoteUcastMacs.class, macKey, remoteUcastMac);
@@ -135,8 +134,8 @@ public class UcastMacsRemoteUpdateCommand
             final RemoteUcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
             @SuppressWarnings("unchecked")
-            InstanceIdentifier<LogicalSwitches> lswitchIid =
-                    ((DataObjectIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue()).toLegacy();
+            DataObjectIdentifier<LogicalSwitches> lswitchIid =
+                    (DataObjectIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
             UUID logicalSwitchUUID = TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(), lswitchIid);
             if (logicalSwitchUUID != null) {
                 ucastMacsRemote.setLogicalSwitch(TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(),
@@ -150,8 +149,8 @@ public class UcastMacsRemoteUpdateCommand
         //get UUID by locatorRef
         if (inputMac.getLocatorRef() != null) {
             @SuppressWarnings("unchecked")
-            InstanceIdentifier<TerminationPoint> iid =
-                    ((DataObjectIdentifier<TerminationPoint>) inputMac.getLocatorRef().getValue()).toLegacy();
+            DataObjectIdentifier<TerminationPoint> iid =
+                    (DataObjectIdentifier<TerminationPoint>) inputMac.getLocatorRef().getValue();
             UUID locatorUuid = TransactUtils.createPhysicalLocator(transaction, getOperationalState(), iid);
             ucastMacsRemote.setLocator(locatorUuid);
             return locatorUuid;
@@ -179,19 +178,19 @@ public class UcastMacsRemoteUpdateCommand
     static class UcastMacUnMetDependencyGetter extends UnMetDependencyGetter<RemoteUcastMacs> {
 
         @Override
-        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final RemoteUcastMacs data) {
+        public List<DataObjectIdentifier<?>> getLogicalSwitchDependencies(final RemoteUcastMacs data) {
             if (data == null) {
                 return List.of();
             }
-            return List.of(((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue()).toLegacy());
+            return List.of((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue());
         }
 
         @Override
-        public List<InstanceIdentifier<?>> getTerminationPointDependencies(final RemoteUcastMacs data) {
+        public List<DataObjectIdentifier<?>> getTerminationPointDependencies(final RemoteUcastMacs data) {
             if (data == null) {
                 return List.of();
             }
-            return List.of(((DataObjectIdentifier<?>) data.getLocatorRef().getValue()).toLegacy());
+            return List.of((DataObjectIdentifier<?>) data.getLocatorRef().getValue());
         }
     }
 
@@ -203,16 +202,16 @@ public class UcastMacsRemoteUpdateCommand
 
     @Override
     public void onSuccess(final TransactionBuilder tx) {
-        for (MdsalUpdate mdsalUpdate : updates) {
+        for (var mdsalUpdate : updates) {
             RemoteUcastMacs mac = (RemoteUcastMacs) mdsalUpdate.getNewData();
-            InstanceIdentifier<RemoteUcastMacs> macIid = mdsalUpdate.getKey();
+            var macIid = mdsalUpdate.getKey();
             getDeviceInfo().updateRemoteUcast(
-                ((DataObjectIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue()).toLegacy(), macIid, mac);
+                (DataObjectIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue(), macIid, mac);
         }
     }
 
     @Override
-    protected String getKeyStr(final InstanceIdentifier<RemoteUcastMacs> iid) {
-        return getLsKeyStr(iid.firstKeyOf(RemoteUcastMacs.class).getLogicalSwitchRef().getValue());
+    protected String getKeyStr(final DataObjectIdentifier<RemoteUcastMacs> iid) {
+        return getLsKeyStr(iid.getFirstKeyOf(RemoteUcastMacs.class).getLogicalSwitchRef().getValue());
     }
 }

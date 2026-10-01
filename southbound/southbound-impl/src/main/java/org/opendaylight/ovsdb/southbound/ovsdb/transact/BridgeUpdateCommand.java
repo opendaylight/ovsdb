@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
@@ -35,7 +34,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.BridgeOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,17 +61,16 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
     }
 
     private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> createdOrUpdated,
+            final Map<DataObjectIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> createdOrUpdated,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
-        for (Entry<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> ovsdbManagedNodeEntry :
-                createdOrUpdated.entrySet()) {
+        for (var ovsdbManagedNodeEntry : createdOrUpdated.entrySet()) {
             updateBridge(transaction, state, ovsdbManagedNodeEntry.getKey(), ovsdbManagedNodeEntry.getValue(),
                     instanceIdentifierCodec);
         }
     }
 
     private void updateBridge(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final InstanceIdentifier<OvsdbBridgeAugmentation> iid, final OvsdbBridgeAugmentation ovsdbManagedNode,
+            final DataObjectIdentifier<OvsdbBridgeAugmentation> iid, final OvsdbBridgeAugmentation ovsdbManagedNode,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         LOG.debug("Received request to create ovsdb bridge name: {} uuid: {}",
                 ovsdbManagedNode.getBridgeName(),
@@ -101,8 +99,7 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
             transaction.add(op.update(bridge)
                     .where(extraBridge.getNameColumn().getSchema().opEqual(existingBridgeName))
                     .build());
-            stampInstanceIdentifier(transaction, iid.firstIdentifierOf(Node.class), existingBridgeName,
-                    instanceIdentifierCodec);
+            stampInstanceIdentifier(transaction, iid.trimTo(Node.class), existingBridgeName, instanceIdentifierCodec);
         }
     }
 
@@ -130,7 +127,7 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
 
     @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private static void setOpenDaylightExternalIds(final Bridge bridge,
-            final InstanceIdentifier<OvsdbBridgeAugmentation> iid, final OvsdbBridgeAugmentation ovsdbManagedNode,
+            final DataObjectIdentifier<OvsdbBridgeAugmentation> iid, final OvsdbBridgeAugmentation ovsdbManagedNode,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         // Set the iid external_id
         Map<String, String> externalIdMap = new HashMap<>();
@@ -190,7 +187,7 @@ public class BridgeUpdateCommand extends AbstractTransactCommand {
     }
 
     private void stampInstanceIdentifier(final TransactionBuilder transaction,
-            final InstanceIdentifier<Node> iid, final String bridgeName,
+            final DataObjectIdentifier<Node> iid, final String bridgeName,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
         bridge.setName(bridgeName);

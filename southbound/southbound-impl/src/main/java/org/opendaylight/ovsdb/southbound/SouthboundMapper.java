@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -96,7 +97,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier.WithKey;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
@@ -165,48 +166,43 @@ public final class SouthboundMapper {
         return new IpAddress(ipv6);
     }
 
-    public static InstanceIdentifier<Topology> createTopologyInstanceIdentifier() {
-        return InstanceIdentifier.create(NetworkTopology.class)
-            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
+    public static @NonNull WithKey<Topology, TopologyKey> createTopologyInstanceIdentifier() {
+        return DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+            .build();
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(final NodeId nodeId) {
-        return createTopologyInstanceIdentifier().child(Node.class, new NodeKey(nodeId));
+    public static @NonNull WithKey<Node, NodeKey> createInstanceIdentifier(final NodeId nodeId) {
+        return createTopologyInstanceIdentifier().toBuilder().child(Node.class, new NodeKey(nodeId)).build();
     }
 
     @SuppressWarnings("unchecked")
     public static DataObjectIdentifier<Node> createInstanceIdentifier(
             final InstanceIdentifierCodec instanceIdentifierCodec, final OvsdbConnectionInstance client,
             final Bridge bridge) {
-        InstanceIdentifier<Node> iid;
         if (bridge.getExternalIdsColumn() != null
                 && bridge.getExternalIdsColumn().getData() != null
                 && bridge.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
             String iidString = bridge.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
-            iid = (InstanceIdentifier<Node>) instanceIdentifierCodec.bindingDeserializerOrNull(iidString);
-        } else {
-            iid = createInstanceIdentifier(client, bridge.getName());
+            return (DataObjectIdentifier<Node>) instanceIdentifierCodec.bindingDeserializerOrNull(iidString);
         }
-        return iid.toIdentifier();
+        return createInstanceIdentifier(client, bridge.getName());
     }
 
     @SuppressWarnings("unchecked")
-    public static InstanceIdentifier<Node> createInstanceIdentifier(
+    public static DataObjectIdentifier<Node> createInstanceIdentifier(
             final InstanceIdentifierCodec instanceIdentifierCodec, final OvsdbConnectionInstance client,
             final Controller controller, final String bridgeName) {
-        InstanceIdentifier<Node> iid;
         if (controller.getExternalIdsColumn() != null
                 && controller.getExternalIdsColumn().getData() != null
                 && controller.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
             String iidString = controller.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
-            iid = (InstanceIdentifier<Node>) instanceIdentifierCodec.bindingDeserializerOrNull(iidString);
-        } else {
-            iid = createInstanceIdentifier(client, bridgeName);
+            return (DataObjectIdentifier<Node>) instanceIdentifierCodec.bindingDeserializerOrNull(iidString);
         }
-        return iid;
+        return createInstanceIdentifier(client, bridgeName);
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(
+    public static DataObjectIdentifier<Node> createInstanceIdentifier(
             final OvsdbConnectionInstance client, final String bridgeName) {
         String nodeString = client.getNodeKey().getNodeId().getValue()
                 + "/bridge/" + bridgeName;
@@ -215,9 +211,8 @@ public final class SouthboundMapper {
 
     }
 
-    public static NodeId createManagedNodeId(final InstanceIdentifier<Node> iid) {
-        NodeKey nodeKey = iid.firstKeyOf(Node.class);
-        return nodeKey.getNodeId();
+    public static NodeId createManagedNodeId(final DataObjectIdentifier<Node> iid) {
+        return iid.getFirstKeyOf(Node.class).getNodeId();
     }
 
     public static InetAddress createInetAddress(final IpAddress ip) throws UnknownHostException {
@@ -569,30 +564,30 @@ public final class SouthboundMapper {
     }
 
 
-    public static InstanceIdentifier<Node> getInstanceIdentifier(final InstanceIdentifierCodec instanceIdentifierCodec,
-            final OpenVSwitch ovs) {
+    public static DataObjectIdentifier<Node> getInstanceIdentifier(
+            final InstanceIdentifierCodec instanceIdentifierCodec, final OpenVSwitch ovs) {
         if (ovs.getExternalIdsColumn() != null
                 && ovs.getExternalIdsColumn().getData() != null
                 && ovs.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
             String iidString = ovs.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
-            return (InstanceIdentifier<Node>) instanceIdentifierCodec.bindingDeserializerOrNull(iidString);
+            return (DataObjectIdentifier<Node>)
+                instanceIdentifierCodec.bindingDeserializerOrNull(iidString).toIdentifier();
         } else {
             String nodeString = SouthboundConstants.OVSDB_URI_PREFIX + "://" + SouthboundConstants.UUID + "/"
                     + ovs.getUuid().toString();
             NodeId nodeId = new NodeId(new Uri(nodeString));
             NodeKey nodeKey = new NodeKey(nodeId);
-            return InstanceIdentifier.builder(NetworkTopology.class)
+            return DataObjectIdentifier.builder(NetworkTopology.class)
                     .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                     .child(Node.class,nodeKey)
                     .build();
         }
     }
 
-    public static Map<InstanceIdentifier<?>, DataObject> extractTerminationPointConfigurationChanges(
+    public static Map<DataObjectIdentifier<?>, DataObject> extractTerminationPointConfigurationChanges(
             final Node bridgeNode) {
-        Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
-        final InstanceIdentifier<Node> bridgeNodeIid =
-                SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
+        Map<DataObjectIdentifier<?>, DataObject> changes = new HashMap<>();
+        final var bridgeNodeIid = SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
         changes.put(bridgeNodeIid, bridgeNode);
 
         Map<TerminationPointKey, TerminationPoint> terminationPoints = bridgeNode.getTerminationPoint();
@@ -601,12 +596,10 @@ public final class SouthboundMapper {
                 OvsdbTerminationPointAugmentation ovsdbTerminationPointAugmentation =
                         tp.augmentation(OvsdbTerminationPointAugmentation.class);
                 if (ovsdbTerminationPointAugmentation != null) {
-                    final InstanceIdentifier<OvsdbTerminationPointAugmentation> tpIid =
-                            bridgeNodeIid
-                                    .child(TerminationPoint.class, new TerminationPointKey(tp.getTpId()))
-                                    .builder()
-                                    .augmentation(OvsdbTerminationPointAugmentation.class)
-                                    .build();
+                    final var tpIid = bridgeNodeIid.toBuilder()
+                        .child(TerminationPoint.class, new TerminationPointKey(tp.getTpId()))
+                        .augmentation(OvsdbTerminationPointAugmentation.class)
+                        .build();
                     changes.put(tpIid, ovsdbTerminationPointAugmentation);
                 }
             }

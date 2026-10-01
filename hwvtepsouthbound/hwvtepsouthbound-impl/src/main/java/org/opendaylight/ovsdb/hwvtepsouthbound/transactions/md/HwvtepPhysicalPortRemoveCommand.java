@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
@@ -26,12 +25,10 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HwvtepPhysicalPortRemoveCommand extends AbstractTransactionCommand {
-
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepPhysicalPortRemoveCommand.class);
 
     public HwvtepPhysicalPortRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates,
@@ -63,10 +60,10 @@ public class HwvtepPhysicalPortRemoveCommand extends AbstractTransactionCommand 
                 LOG.warn("PhysicalSwitch not found for port {}", port);
             } else {
                 String portName = port.getName();
-                final InstanceIdentifier<TerminationPoint> nodePath =
-                        HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(),
-                                updatedPSwitchData).child(TerminationPoint.class,
-                                        new TerminationPointKey(new TpId(portName)));
+                final var nodePath = HwvtepSouthboundMapper.createInstanceIdentifier(
+                    getOvsdbConnectionInstance(), updatedPSwitchData).toBuilder()
+                    .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)))
+                    .build();
                 addToDeleteTx(transaction, VlanBindings.class, nodePath, port.getUuid());
                 addToDeviceUpdate(TransactionType.DELETE,
                         new PortEvent(port, nodePath.firstKeyOf(Node.class).getNodeId()));

@@ -20,7 +20,6 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.Managers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ManagersKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +35,12 @@ public class HwvtepManagerRemoveCommand extends AbstractTransactionCommand {
         Collection<Manager> deletedManagerRows =
                 TyperUtils.extractRowsRemoved(Manager.class, getUpdates(),getDbSchema()).values();
         for (Manager manager : deletedManagerRows) {
-            InstanceIdentifier<Managers> managerIid = getOvsdbConnectionInstance().getInstanceIdentifier()
-                            .augmentation(HwvtepGlobalAugmentation.class)
-                            .child(Managers.class, new ManagersKey(new Uri(manager.getTargetColumn().getData())));
+            var managerIid = getOvsdbConnectionInstance().getInstanceIdentifier().toBuilder()
+                .augmentation(HwvtepGlobalAugmentation.class)
+                .child(Managers.class, new ManagersKey(new Uri(manager.getTargetColumn().getData())))
+                .build();
             // TODO Delete any references
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, managerIid.toIdentifier());
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, managerIid);
             addToDeviceUpdate(TransactionType.DELETE, manager);
             LOG.info("DEVICE - {} {}", TransactionType.DELETE, manager);
         }

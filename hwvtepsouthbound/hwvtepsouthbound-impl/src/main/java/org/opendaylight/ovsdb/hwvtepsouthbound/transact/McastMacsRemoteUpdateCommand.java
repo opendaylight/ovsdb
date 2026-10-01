@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
@@ -31,7 +30,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,23 +47,22 @@ public class McastMacsRemoteUpdateCommand
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<RemoteMcastMacs>> updateds =
-                extractUpdated(getChanges(),RemoteMcastMacs.class);
+        var updateds = extractUpdated(getChanges(),RemoteMcastMacs.class);
         if (!updateds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<RemoteMcastMacs>> updated:
-                updateds.entrySet()) {
+            for (var updated : updateds.entrySet()) {
                 updateMcastMacRemote(transaction,  updated.getKey(), updated.getValue());
             }
         }
     }
 
     private void updateMcastMacRemote(final TransactionBuilder transaction,
-            final InstanceIdentifier<Node> instanceIdentifier, final List<RemoteMcastMacs> macList) {
+            final DataObjectIdentifier<Node> instanceIdentifier, final List<RemoteMcastMacs> macList) {
         for (RemoteMcastMacs mac: macList) {
             //add / update only if locator set got changed
-            InstanceIdentifier<RemoteMcastMacs> macIid = instanceIdentifier
-                    .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(RemoteMcastMacs.class, mac.key());
+            var macIid = instanceIdentifier.toBuilder()
+                .augmentation(HwvtepGlobalAugmentation.class)
+                .child(RemoteMcastMacs.class, mac.key())
+                .build();
             updateConfigData(RemoteMcastMacs.class, macIid, mac);
             if (!HwvtepSouthboundUtil.isEmpty(mac.getLocatorSet())) {
                 onConfigUpdate(transaction, instanceIdentifier, mac, null);
@@ -75,31 +72,32 @@ public class McastMacsRemoteUpdateCommand
 
     @Override
     public void onConfigUpdate(final TransactionBuilder transaction,
-                               final InstanceIdentifier<Node> nodeIid,
+                               final DataObjectIdentifier<Node> nodeIid,
                                final RemoteMcastMacs remoteMcastMac,
-                               final InstanceIdentifier macKey,
+                               final DataObjectIdentifier macKey,
                                final Object... extraData) {
-        InstanceIdentifier<RemoteMcastMacs> macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                .child(RemoteMcastMacs.class, remoteMcastMac.key());
-        processDependencies(MCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, macIid, remoteMcastMac);
+        processDependencies(MCAST_MAC_DATA_VALIDATOR, transaction, nodeIid, nodeIid.toBuilder()
+            .augmentation(HwvtepGlobalAugmentation.class)
+            .child(RemoteMcastMacs.class, remoteMcastMac.key())
+            .build(), remoteMcastMac);
     }
 
     @Override
     public void doDeviceTransaction(final TransactionBuilder transaction,
-                                       final InstanceIdentifier<Node> instanceIdentifier,
-                                       final RemoteMcastMacs mac,
-                                       final InstanceIdentifier macKey,
-                                       final Object... extraData) {
+                                    final DataObjectIdentifier<Node> instanceIdentifier,    final RemoteMcastMacs mac,
+                                    final DataObjectIdentifier macKey, final Object... extraData) {
 
-        String nodeId = instanceIdentifier.firstKeyOf(Node.class).getNodeId().getValue();
+        String nodeId = instanceIdentifier.getFirstKeyOf(Node.class).getNodeId().getValue();
         LOG.debug("Creating remoteMcastMacs, mac address: {} {}", nodeId, mac.getMacEntryKey().getValue());
 
         McastMacsRemote mcastMacsRemote = transaction.getTypedRowWrapper(McastMacsRemote.class);
         setIpAddress(mcastMacsRemote, mac);
         setLogicalSwitch(transaction, mcastMacsRemote, mac);
         setMac(mcastMacsRemote, mac);
-        InstanceIdentifier<RemoteMcastMacs> macIid = instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class)
-                .child(RemoteMcastMacs.class, mac.key());
+        var macIid = instanceIdentifier.toBuilder()
+            .augmentation(HwvtepGlobalAugmentation.class)
+            .child(RemoteMcastMacs.class, mac.key())
+            .build();
         HwvtepDeviceInfo.DeviceData deviceData = super.fetchDeviceData(RemoteMcastMacs.class, macIid);
         if (deviceData == null) {
             setLocatorSet(transaction, mcastMacsRemote, mac);
@@ -129,8 +127,8 @@ public class McastMacsRemoteUpdateCommand
             final RemoteMcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
             @SuppressWarnings("unchecked")
-            InstanceIdentifier<LogicalSwitches> lswitchIid =
-                    ((DataObjectIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue()).toLegacy();
+            DataObjectIdentifier<LogicalSwitches> lswitchIid =
+                    (DataObjectIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
             UUID logicalSwitchUUID = TransactUtils.getLogicalSwitchUUID(transaction, getOperationalState(), lswitchIid);
             if (logicalSwitchUUID != null) {
                 mcastMacsRemote.setLogicalSwitch(logicalSwitchUUID);
@@ -194,21 +192,21 @@ public class McastMacsRemoteUpdateCommand
     static class McastMacUnMetDependencyGetter extends UnMetDependencyGetter<RemoteMcastMacs> {
 
         @Override
-        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final RemoteMcastMacs data) {
+        public List<DataObjectIdentifier<?>> getLogicalSwitchDependencies(final RemoteMcastMacs data) {
             if (data == null) {
                 return List.of();
             }
-            return List.of(((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue()).toLegacy());
+            return List.of(((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue()));
         }
 
         @Override
-        public List<InstanceIdentifier<?>> getTerminationPointDependencies(final RemoteMcastMacs data) {
+        public List<DataObjectIdentifier<?>> getTerminationPointDependencies(final RemoteMcastMacs data) {
             if (data == null || HwvtepSouthboundUtil.isEmpty(data.getLocatorSet())) {
                 return List.of();
             }
-            List<InstanceIdentifier<?>> locators = new ArrayList<>();
+            List<DataObjectIdentifier<?>> locators = new ArrayList<>();
             for (LocatorSet locator: data.getLocatorSet()) {
-                locators.add(((DataObjectIdentifier<?>) locator.getLocatorRef().getValue()).toLegacy());
+                locators.add(((DataObjectIdentifier<?>) locator.getLocatorRef().getValue()));
             }
             return locators;
         }
@@ -220,7 +218,7 @@ public class McastMacsRemoteUpdateCommand
         //increment the refcounts for new mcast mac
         RemoteMcastMacs newMac = (RemoteMcastMacs) mdsalUpdate.getNewData();
         RemoteMcastMacs oldMac = (RemoteMcastMacs) mdsalUpdate.getOldData();
-        InstanceIdentifier<RemoteMcastMacs> macIid = mdsalUpdate.getKey();
+        DataObjectIdentifier<RemoteMcastMacs> macIid = mdsalUpdate.getKey();
 
         if (oldMac != null && !oldMac.equals(newMac)) {
             if (oldMac.getLocatorSet() != null) {
@@ -238,14 +236,14 @@ public class McastMacsRemoteUpdateCommand
         for (MdsalUpdate mdsalUpdate : updates) {
             updateLocatorRefCounts(mdsalUpdate);
             RemoteMcastMacs mac = (RemoteMcastMacs) mdsalUpdate.getNewData();
-            InstanceIdentifier<RemoteMcastMacs> macIid = mdsalUpdate.getKey();
+            DataObjectIdentifier<RemoteMcastMacs> macIid = mdsalUpdate.getKey();
             getDeviceInfo().updateRemoteMcast(
-                ((DataObjectIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue()).toLegacy(), macIid, mac);
+                (DataObjectIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue(), macIid, mac);
         }
     }
 
     @Override
-    protected String getKeyStr(final InstanceIdentifier<RemoteMcastMacs> iid) {
-        return getLsKeyStr(iid.firstKeyOf(RemoteMcastMacs.class).getLogicalSwitchRef().getValue());
+    protected String getKeyStr(final DataObjectIdentifier<RemoteMcastMacs> iid) {
+        return getLsKeyStr(iid.getFirstKeyOf(RemoteMcastMacs.class).getLogicalSwitchRef().getValue());
     }
 }

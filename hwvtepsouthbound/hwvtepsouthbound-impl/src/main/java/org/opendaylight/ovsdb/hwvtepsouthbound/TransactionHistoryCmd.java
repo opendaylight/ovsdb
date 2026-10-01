@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.karaf.shell.api.action.Action;
@@ -23,7 +22,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionHistory;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 
 @Service
 @Command(scope = "hwvtep", name = "txlog", description = "prints hwvtep tx log")
@@ -41,13 +40,13 @@ public class TransactionHistoryCmd implements Action {
     public Object execute() {
         final PrintStream out = System.out;
 
-        Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxLogs = hwvtepProvider.getControllerTxHistory();
-        Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateLogs = hwvtepProvider.getDeviceUpdateHistory();
+        Map<DataObjectIdentifier<Node>, TransactionHistory> controllerTxLogs = hwvtepProvider.getControllerTxHistory();
+        Map<DataObjectIdentifier<Node>, TransactionHistory> deviceUpdateLogs = hwvtepProvider.getDeviceUpdateHistory();
         if (nodeid != null) {
             printLogs(out, controllerTxLogs, deviceUpdateLogs,
                 HwvtepSouthboundMapper.createInstanceIdentifier(new NodeId(nodeid)));
         } else {
-            Map<InstanceIdentifier<Node>, TransactionHistory> txlogs
+            Map<DataObjectIdentifier<Node>, TransactionHistory> txlogs
                     = controllerTxLogs.isEmpty() ? deviceUpdateLogs : controllerTxLogs;
             txlogs.keySet().forEach(iid -> printLogs(out, controllerTxLogs, deviceUpdateLogs, iid));
             out.println("Device tx logs size " + deviceUpdateLogs.size());
@@ -56,17 +55,17 @@ public class TransactionHistoryCmd implements Action {
     }
 
     private static void printLogs(final PrintStream out,
-                                  final Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxLogs,
-                                  final Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateLogs,
-                                  final InstanceIdentifier<Node> iid) {
+                                  final Map<DataObjectIdentifier<Node>, TransactionHistory> controllerTxLogs,
+                                  final Map<DataObjectIdentifier<Node>, TransactionHistory> deviceUpdateLogs,
+                                  final DataObjectIdentifier<Node> iid) {
         out.println(SEPERATOR + " START " + SEPERATOR);
         List<HwvtepTransactionLogElement> controllerTxLog = controllerTxLogs.get(iid).getElements()
-                .stream().map(ele -> new HwvtepTransactionLogElement(ele, false)).collect(Collectors.toList());
+                .stream().map(ele -> new HwvtepTransactionLogElement(ele, false)).toList();
         List<HwvtepTransactionLogElement> deviceUpdateLog = deviceUpdateLogs.get(iid).getElements()
-                .stream().map(ele -> new HwvtepTransactionLogElement(ele, true)).collect(Collectors.toList());
+                .stream().map(ele -> new HwvtepTransactionLogElement(ele, true)).toList();
         List<Pair<HwvtepTransactionLogElement, Boolean>> allLogs = mergeLogsByDate(controllerTxLog, deviceUpdateLog);
         out.print("Printing for Node :  ");
-        out.println(iid.firstKeyOf(Node.class).getNodeId().getValue());
+        out.println(iid.getFirstKeyOf(Node.class).getNodeId().getValue());
         printLogs(out, allLogs);
         out.println(SEPERATOR + " END " + SEPERATOR);
         out.println();
@@ -89,7 +88,7 @@ public class TransactionHistoryCmd implements Action {
             final List<HwvtepTransactionLogElement> logs1,
             final List<HwvtepTransactionLogElement> logs2) {
 
-        ArrayList<Pair<HwvtepTransactionLogElement, Boolean>> result = new ArrayList();
+        ArrayList<Pair<HwvtepTransactionLogElement, Boolean>> result = new ArrayList<>();
         int firstIdx = 0;
         int secondIdx = 0;
         int firstSize = logs1.size();

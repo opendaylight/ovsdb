@@ -61,6 +61,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectReference;
 import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -77,8 +79,8 @@ public class SouthboundMapperTest {
     @Test
     public void testCreateInstanceIdentifier() throws Exception {
         NodeId nodeId = NodeId.getDefaultInstance("test");
-        InstanceIdentifier<Node> iid = SouthboundMapper.createInstanceIdentifier(nodeId);
-        assertEquals(nodeId, iid.firstKeyOf(Node.class).getNodeId());
+        DataObjectIdentifier<Node> iid = SouthboundMapper.createInstanceIdentifier(nodeId);
+        assertEquals(nodeId, iid.getFirstKeyOf(Node.class).getNodeId());
     }
 
     @SuppressWarnings("unchecked")
@@ -93,7 +95,7 @@ public class SouthboundMapperTest {
         map.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "IID_EXTERNAL_ID_KEY");
         when(column.getData()).thenReturn(map);
         InstanceIdentifierCodec iidc = mock(InstanceIdentifierCodec.class);
-        InstanceIdentifier deserializedIid = InstanceIdentifier.create(NetworkTopology.class);
+        DataObjectReference deserializedIid = DataObjectIdentifier.builder(NetworkTopology.class).build();
         when(iidc.bindingDeserializerOrNull("IID_EXTERNAL_ID_KEY")).thenReturn(deserializedIid);
         OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class, Mockito.RETURNS_DEEP_STUBS);
         assertEquals("Incorrect Instance Identifier received", deserializedIid,
@@ -121,7 +123,7 @@ public class SouthboundMapperTest {
         map.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "IID_EXTERNAL_ID_KEY");
         when(column.getData()).thenReturn(map);
         InstanceIdentifierCodec iidc = mock(InstanceIdentifierCodec.class);
-        InstanceIdentifier deserializedIid = InstanceIdentifier.create(NetworkTopology.class);
+        DataObjectReference deserializedIid = DataObjectIdentifier.builder(NetworkTopology.class).build();
         when(iidc.bindingDeserializerOrNull("IID_EXTERNAL_ID_KEY")).thenReturn(deserializedIid);
         OvsdbConnectionInstance client = mock(OvsdbConnectionInstance.class, Mockito.RETURNS_DEEP_STUBS);
         assertEquals("Incorrect Instance Identifier received", deserializedIid,
@@ -130,11 +132,11 @@ public class SouthboundMapperTest {
         // When controller is empty, we expect a new identifier pointing to the bridge
         when(controller.getExternalIdsColumn()).thenReturn(null);
         when(client.getNodeKey()).thenReturn(new NodeKey(new NodeId("uri")));
-        InstanceIdentifier<Node> returnedIid =
+        DataObjectIdentifier<Node> returnedIid =
                 SouthboundMapper.createInstanceIdentifier(iidc, client, controller, "bridgeName");
-        assertEquals("Incorrect identifier type", Node.class, returnedIid.getTargetType());
+        assertEquals("Incorrect identifier type", Node.class, returnedIid.lastStep().type());
         assertEquals("Incorrect node key", new NodeId(new Uri("uri/bridge/bridgeName")),
-                returnedIid.firstKeyOf(Node.class).getNodeId());
+                returnedIid.getFirstKeyOf(Node.class).getNodeId());
     }
 
     @Test

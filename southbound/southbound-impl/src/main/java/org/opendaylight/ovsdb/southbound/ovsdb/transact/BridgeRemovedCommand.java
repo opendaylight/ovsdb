@@ -22,7 +22,7 @@ import org.opendaylight.ovsdb.schema.openvswitch.OpenVSwitch;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,9 +49,9 @@ public class BridgeRemovedCommand extends AbstractTransactCommand {
     }
 
     private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final Set<InstanceIdentifier<OvsdbBridgeAugmentation>> removed,
-            final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> originals) {
-        for (InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbManagedNodeIid: removed) {
+            final Set<DataObjectIdentifier<OvsdbBridgeAugmentation>> removed,
+            final Map<DataObjectIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> originals) {
+        for (var ovsdbManagedNodeIid : removed) {
             LOG.debug("Received request to delete ovsdb node : {}",
                     ovsdbManagedNodeIid);
             OvsdbBridgeAugmentation original = originals.get(ovsdbManagedNodeIid);

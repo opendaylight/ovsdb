@@ -27,8 +27,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.EntryObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class DependencyQueueTest extends DataChangeListenerTestBase {
@@ -41,19 +41,21 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
     UnMetDependencyGetter<RemoteMcastMacs> mcastMacDataValidator;
     HwvtepOperationalState opState;
     RemoteMcastMacs mac;
-    InstanceIdentifier<RemoteMcastMacs> macIid;
-    InstanceIdentifier<LogicalSwitches> lsIid;
-    Map<Class<? extends EntryObject<?, ?>>, List<InstanceIdentifier>> unMetDependencies;
+    DataObjectIdentifier<RemoteMcastMacs> macIid;
+    DataObjectIdentifier<LogicalSwitches> lsIid;
+    Map<Class<? extends EntryObject<?, ?>>, List<DataObjectIdentifier>> unMetDependencies;
 
     void setupForTest() throws Exception {
         mcastMacDataValidator = McastMacsRemoteUpdateCommand.MCAST_MAC_DATA_VALIDATOR;
         opState = new HwvtepOperationalState(connectionInstance);
         mac = TestBuilders.buildRemoteMcastMacs(nodeIid,"FF:FF:FF:FF:FF:FF", "ls0",
                 new String[]{"192.168.122.20", "192.168.122.30"});
-        lsIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
-        macIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                .child(RemoteMcastMacs.class, new RemoteMcastMacsKey(mac.key()));
+        lsIid = nodeIid.toBuilder().augmentation(HwvtepGlobalAugmentation.class)
+                .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")))
+                .build();
+        macIid = nodeIid.toBuilder().augmentation(HwvtepGlobalAugmentation.class)
+                .child(RemoteMcastMacs.class, new RemoteMcastMacsKey(mac.key()))
+                .build();
     }
 
     @Test

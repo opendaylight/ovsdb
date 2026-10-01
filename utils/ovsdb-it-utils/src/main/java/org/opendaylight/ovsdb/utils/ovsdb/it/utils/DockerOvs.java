@@ -295,7 +295,7 @@ public final class DockerOvs implements AutoCloseable {
         }
     }
 
-    private String[] removeFirstEl(String[] arr) {
+    private static String[] removeFirstEl(String[] arr) {
         return Arrays.copyOfRange(arr, 1, arr.length);
     }
 
@@ -362,7 +362,7 @@ public final class DockerOvs implements AutoCloseable {
         return dockerComposeServices.size();
     }
 
-    private String getOvsNumString(int numOvs) {
+    private static String getOvsNumString(int numOvs) {
         if (numOvs == 0) {
             return "ovs1";
         } else {

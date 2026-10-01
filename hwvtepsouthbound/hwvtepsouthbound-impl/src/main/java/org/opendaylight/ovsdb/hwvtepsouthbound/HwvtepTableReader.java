@@ -63,7 +63,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.EntryObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,7 +146,8 @@ public class HwvtepTableReader {
     }
 
     @FunctionalInterface
-    private interface WhereClauseGetter<T extends DataObject> extends Function<InstanceIdentifier<T>, List<Condition>> {
+    private interface WhereClauseGetter<T extends DataObject>
+        extends Function<DataObjectIdentifier<T>, List<Condition>> {
 
     }
 
@@ -159,10 +159,10 @@ public class HwvtepTableReader {
         }
 
         @Override
-        public List<Condition> apply(final InstanceIdentifier<RemoteMcastMacs> iid) {
+        public List<Condition> apply(final DataObjectIdentifier<RemoteMcastMacs> iid) {
             RemoteMcastMacsKey key = iid.firstKeyOf(RemoteMcastMacs.class);
-            InstanceIdentifier<LogicalSwitches> lsIid =
-                ((DataObjectIdentifier<LogicalSwitches>) key.getLogicalSwitchRef().getValue()).toLegacy();
+            DataObjectIdentifier<LogicalSwitches> lsIid =
+                ((DataObjectIdentifier<LogicalSwitches>) key.getLogicalSwitchRef().getValue());
             UUID lsUUID = getLsUuid(lsIid);
             if (lsUUID == null) {
                 LOG.warn("Could not find uuid for ls key {}", getNodeKeyStr(lsIid));
@@ -175,16 +175,15 @@ public class HwvtepTableReader {
         }
     }
 
-    protected <T extends DataObject> String getNodeKeyStr(final InstanceIdentifier<T> iid) {
-        return iid.firstKeyOf(Node.class).getNodeId().getValue() + "." + getLsKeyStr(iid);
+    protected <T extends DataObject> String getNodeKeyStr(final DataObjectIdentifier<T> iid) {
+        return iid.getFirstKeyOf(Node.class).getNodeId().getValue() + "." + getLsKeyStr(iid);
     }
 
-    protected <T extends DataObject> String getLsKeyStr(final InstanceIdentifier<T> iid) {
-        return ((InstanceIdentifier<LogicalSwitches>)iid).firstKeyOf(LogicalSwitches.class)
-            .getHwvtepNodeName().getValue();
+    protected <T extends DataObject> String getLsKeyStr(final DataObjectIdentifier<T> iid) {
+        return iid.getFirstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
     }
 
-    public UUID getLsUuid(final InstanceIdentifier lsIid) {
+    public UUID getLsUuid(final DataObjectIdentifier lsIid) {
         UUID lsUUID = connectionInstance.getDeviceInfo().getUUID(LogicalSwitches.class, lsIid);
         if (lsUUID == null) {
             Optional<TypedBaseTable> optional = getHwvtepTableEntryUUID(LogicalSwitches.class, lsIid, null);
@@ -203,10 +202,10 @@ public class HwvtepTableReader {
         }
 
         @Override
-        public List<Condition> apply(final InstanceIdentifier<RemoteUcastMacs> iid) {
+        public List<Condition> apply(final DataObjectIdentifier<RemoteUcastMacs> iid) {
             RemoteUcastMacsKey key = iid.firstKeyOf(RemoteUcastMacs.class);
-            InstanceIdentifier<LogicalSwitches> lsIid =
-                ((DataObjectIdentifier<LogicalSwitches>) key.getLogicalSwitchRef().getValue()).toLegacy();
+            DataObjectIdentifier<LogicalSwitches> lsIid =
+                ((DataObjectIdentifier<LogicalSwitches>) key.getLogicalSwitchRef().getValue());
             UUID lsUUID = connectionInstance.getDeviceInfo().getUUID(LogicalSwitches.class, lsIid);
             if (lsUUID == null) {
                 LOG.error("Could not find uuid for ls key {}", lsIid);
@@ -228,8 +227,8 @@ public class HwvtepTableReader {
         }
 
         @Override
-        public List<Condition> apply(final InstanceIdentifier<LogicalSwitches> iid) {
-            String lsName = iid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
+        public List<Condition> apply(final DataObjectIdentifier<LogicalSwitches> iid) {
+            String lsName = iid.getFirstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
             return List.of(logicalSwitch.getNameColumn().getSchema().opEqual(lsName));
         }
     }
@@ -242,8 +241,8 @@ public class HwvtepTableReader {
         }
 
         @Override
-        public List<Condition> apply(final InstanceIdentifier<TerminationPoint> iid) {
-            String locatorIp = iid.firstKeyOf(TerminationPoint.class).getTpId().getValue();
+        public List<Condition> apply(final DataObjectIdentifier<TerminationPoint> iid) {
+            String locatorIp = iid.getFirstKeyOf(TerminationPoint.class).getTpId().getValue();
             locatorIp = locatorIp.substring(locatorIp.indexOf(":") + 1);
             LOG.info("Locator ip to look for {}", locatorIp);
             return List.of(locatorTable.getDstIpColumn().getSchema().opEqual(locatorIp));
@@ -252,7 +251,7 @@ public class HwvtepTableReader {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     public Optional<TypedBaseTable> getHwvtepTableEntryUUID(final Class<? extends EntryObject<?, ?>> cls,
-                                                            final InstanceIdentifier iid,
+                                                            final DataObjectIdentifier iid,
                                                             final UUID existingUUID) {
         final TypedDatabaseSchema dbSchema;
         try {
@@ -386,7 +385,7 @@ public class HwvtepTableReader {
                 .getHwvtepTableEntries(TerminationPoint.class);
         for (TypedBaseTable row : physicalLocators) {
             PhysicalLocator physicalLocator = (PhysicalLocator)row;
-            InstanceIdentifier<TerminationPoint> tpPath =
+            DataObjectIdentifier<TerminationPoint> tpPath =
                     HwvtepSouthboundMapper.createInstanceIdentifier(connectionInstance.getInstanceIdentifier(),
                             physicalLocator);
             connectionInstance.getDeviceInfo().updateDeviceOperData(
@@ -399,9 +398,10 @@ public class HwvtepTableReader {
                 .getHwvtepTableEntries(LogicalSwitches.class);
         for (TypedBaseTable row : logicalSwitches) {
             LogicalSwitch logicalSwitch = (LogicalSwitch)row;
-            InstanceIdentifier<LogicalSwitches> switchIid = connectionInstance.getInstanceIdentifier()
+            var switchIid = connectionInstance.getInstanceIdentifier().toBuilder()
                     .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch.getName())));
+                    .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch.getName())))
+                    .build();
             connectionInstance.getDeviceInfo().updateDeviceOperData(LogicalSwitches.class, switchIid,
                     logicalSwitch.getUuid(), logicalSwitch);
         }

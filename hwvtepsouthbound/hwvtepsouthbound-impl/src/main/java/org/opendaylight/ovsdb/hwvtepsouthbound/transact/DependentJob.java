@@ -18,8 +18,8 @@ import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
 import org.opendaylight.ovsdb.lib.operations.TransactionBuilder;
 import org.opendaylight.ovsdb.lib.schema.typed.TypedBaseTable;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.EntryObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,13 +48,13 @@ public abstract class DependentJob<T extends EntryObject<?, ?>> {
             = (controllerData, deviceData) -> controllerData.getUuid() != null && deviceData.isPresent();
 
     private final long expiryTime;
-    private final InstanceIdentifier key;
+    private final DataObjectIdentifier key;
     private final T data;
-    private final Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies;
+    private final Map<Class<? extends DataObject>, List<DataObjectIdentifier>> dependencies;
     private final long transactionId;
 
-    DependentJob(InstanceIdentifier key,
-                           T data, Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies,
+    DependentJob(DataObjectIdentifier key,
+                           T data, Map<Class<? extends DataObject>, List<DataObjectIdentifier>> dependencies,
                  long transactionId) {
         this.expiryTime = System.currentTimeMillis() + HwvtepSouthboundConstants.WAITING_JOB_EXPIRY_TIME_MILLIS;
         this.key = key;
@@ -81,7 +81,7 @@ public abstract class DependentJob<T extends EntryObject<?, ?>> {
      * @return true if the dependency is met
      */
     protected abstract boolean isDependencyMet(HwvtepDeviceInfo deviceInfo, Class<? extends DataObject> cls,
-                                               InstanceIdentifier iid);
+                                               DataObjectIdentifier iid);
 
     boolean isExpired(long currentTime) {
         return currentTime > expiryTime;
@@ -94,9 +94,9 @@ public abstract class DependentJob<T extends EntryObject<?, ?>> {
      * @return true if all the dependencies are met
      */
     boolean areDependenciesMet(HwvtepDeviceInfo deviceInfo) {
-        for (Entry<Class<? extends DataObject>, List<InstanceIdentifier>> entry : dependencies.entrySet()) {
+        for (Entry<Class<? extends DataObject>, List<DataObjectIdentifier>> entry : dependencies.entrySet()) {
             Class<? extends DataObject> cls = entry.getKey();
-            for (InstanceIdentifier<?> iid : entry.getValue()) {
+            for (DataObjectIdentifier<?> iid : entry.getValue()) {
                 if (!isDependencyMet(deviceInfo, cls, iid)) {
                     return false;
                 }
@@ -105,7 +105,7 @@ public abstract class DependentJob<T extends EntryObject<?, ?>> {
         return true;
     }
 
-    public InstanceIdentifier getKey() {
+    public DataObjectIdentifier getKey() {
         return key;
     }
 
@@ -113,7 +113,7 @@ public abstract class DependentJob<T extends EntryObject<?, ?>> {
         return transactionId;
     }
 
-    public Map<Class<? extends DataObject>, List<InstanceIdentifier>> getDependencies() {
+    public Map<Class<? extends DataObject>, List<DataObjectIdentifier>> getDependencies() {
         return dependencies;
     }
 
@@ -133,13 +133,13 @@ public abstract class DependentJob<T extends EntryObject<?, ?>> {
 
     public abstract static class ConfigWaitingJob<T extends EntryObject<?, ?>> extends DependentJob<T> {
 
-        public ConfigWaitingJob(InstanceIdentifier key, T data,
-                Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies) {
+        public ConfigWaitingJob(DataObjectIdentifier key, T data,
+                Map<Class<? extends DataObject>, List<DataObjectIdentifier>> dependencies) {
             super(key, data, dependencies, 0);
         }
 
         @Override
-        protected boolean isDependencyMet(HwvtepDeviceInfo deviceInfo, Class cls, InstanceIdentifier iid) {
+        protected boolean isDependencyMet(HwvtepDeviceInfo deviceInfo, Class cls, DataObjectIdentifier iid) {
             return deviceInfo.isConfigDataAvailable(cls, iid);
         }
 
@@ -150,14 +150,14 @@ public abstract class DependentJob<T extends EntryObject<?, ?>> {
 
     public abstract static class OpWaitingJob<T extends EntryObject<?, ?>> extends DependentJob<T> {
 
-        public OpWaitingJob(InstanceIdentifier key, T data,
-                Map<Class<? extends DataObject>, List<InstanceIdentifier>> dependencies,
+        public OpWaitingJob(DataObjectIdentifier key, T data,
+                Map<Class<? extends DataObject>, List<DataObjectIdentifier>> dependencies,
                             long transactionId) {
             super(key, data, dependencies, transactionId);
         }
 
         @Override
-        protected boolean isDependencyMet(HwvtepDeviceInfo deviceInfo, Class cls, InstanceIdentifier iid) {
+        protected boolean isDependencyMet(HwvtepDeviceInfo deviceInfo, Class cls, DataObjectIdentifier iid) {
             boolean depenencyMet = true;
             HwvtepDeviceInfo.DeviceData controllerData = deviceInfo.getDeviceOperData(cls, iid);
 

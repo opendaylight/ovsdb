@@ -36,7 +36,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.port.attributes.VlanBindings;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ public final class LogicalSwitchUcastsRemoveCommand
 
     private final AtomicInteger retryCount = new AtomicInteger(5);
     private final LogicalSwitches logicalSwitches;
-    private final InstanceIdentifier<Node> nodeIid;
+    private final DataObjectIdentifier<Node> nodeIid;
     private final List<LogicalSwitches> deletedLs;
 
     volatile Map<String, Map<Long, UUID>> updatedPortBindings = new HashMap<>();
@@ -65,8 +65,10 @@ public final class LogicalSwitchUcastsRemoveCommand
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        InstanceIdentifier<LogicalSwitches> lsKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                .child(LogicalSwitches.class, logicalSwitches.key());
+        var lsKey = nodeIid.toBuilder()
+            .augmentation(HwvtepGlobalAugmentation.class)
+            .child(LogicalSwitches.class, logicalSwitches.key())
+            .build();
         HwvtepDeviceInfo.DeviceData deviceData  = super.<LogicalSwitch>fetchDeviceData(LogicalSwitches.class, lsKey);
 
         if (deviceData != null && deviceData.getUuid() != null) {
@@ -160,9 +162,10 @@ public final class LogicalSwitchUcastsRemoveCommand
     private void getFreshPortBindingsExcludingDeleted() {
         Set<UUID> deletedLsUuids = new HashSet<>();
         for (LogicalSwitches ls : deletedLs) {
-            InstanceIdentifier<LogicalSwitches> lsKey = nodeIid
+            var lsKey = nodeIid.toBuilder()
                     .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(LogicalSwitches.class, ls.key());
+                    .child(LogicalSwitches.class, ls.key())
+                    .build();
             HwvtepDeviceInfo.DeviceData deviceData  =
                     super.<LogicalSwitch>fetchDeviceData(LogicalSwitches.class, lsKey);
             if (deviceData.getUuid() != null) {
@@ -212,7 +215,7 @@ public final class LogicalSwitchUcastsRemoveCommand
     }
 
     @Override
-    protected String getKeyStr(InstanceIdentifier<LogicalSwitches> iid) {
-        return iid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
+    protected String getKeyStr(DataObjectIdentifier<LogicalSwitches> iid) {
+        return iid.getFirstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
     }
 }

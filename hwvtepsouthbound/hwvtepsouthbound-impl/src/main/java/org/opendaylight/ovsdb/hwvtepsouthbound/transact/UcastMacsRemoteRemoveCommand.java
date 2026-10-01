@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepDeviceInfo;
@@ -25,7 +24,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,22 +38,23 @@ public class UcastMacsRemoteRemoveCommand
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<RemoteUcastMacs>> removeds =
+        Map<DataObjectIdentifier<Node>, List<RemoteUcastMacs>> removeds =
                 extractRemoved(getChanges(),RemoteUcastMacs.class);
         if (!removeds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<RemoteUcastMacs>> removed:
-                    removeds.entrySet()) {
+            for (var removed : removeds.entrySet()) {
                 onConfigUpdate(transaction, removed.getKey(), removed.getValue());
             }
         }
     }
 
     public void onConfigUpdate(final TransactionBuilder transaction,
-                               final InstanceIdentifier<Node> nodeIid,
+                               final DataObjectIdentifier<Node> nodeIid,
                                final List<RemoteUcastMacs> macs) {
         for (RemoteUcastMacs mac : macs) {
-            InstanceIdentifier<RemoteUcastMacs> macKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                    .child(RemoteUcastMacs.class, mac.key());
+            var macKey = nodeIid.toBuilder()
+                .augmentation(HwvtepGlobalAugmentation.class)
+                .child(RemoteUcastMacs.class, mac.key())
+                .build();
             getDeviceInfo().clearConfigData(RemoteUcastMacs.class, macKey);
             onConfigUpdate(transaction, nodeIid, mac, macKey);
         }
@@ -63,32 +62,33 @@ public class UcastMacsRemoteRemoveCommand
 
     @Override
     public void onConfigUpdate(final TransactionBuilder transaction,
-                               final InstanceIdentifier<Node> nodeIid,
+                               final DataObjectIdentifier<Node> nodeIid,
                                final RemoteUcastMacs remoteMcastMac,
-                               final InstanceIdentifier macKey,
+                               final DataObjectIdentifier macKey,
                                final Object... extraData) {
         processDependencies(EmptyDependencyGetter.INSTANCE, transaction, nodeIid, macKey, remoteMcastMac);
     }
 
     @Override
     public void doDeviceTransaction(final TransactionBuilder transaction,
-                                    final InstanceIdentifier<Node> instanceIdentifier,
+                                    final DataObjectIdentifier<Node> instanceIdentifier,
                                     final RemoteUcastMacs mac,
-                                    final InstanceIdentifier macKey,
+                                    final DataObjectIdentifier macKey,
                                     final Object... extraData) {
         removeUcastMacRemote(transaction, instanceIdentifier, List.of(mac));
     }
 
     private void removeUcastMacRemote(final TransactionBuilder transaction,
-                                      final InstanceIdentifier<Node> instanceIdentifier,
+                                      final DataObjectIdentifier<Node> instanceIdentifier,
                                       final List<RemoteUcastMacs> macList) {
-        String nodeId = instanceIdentifier.firstKeyOf(Node.class).getNodeId().getValue();
+        String nodeId = instanceIdentifier.getFirstKeyOf(Node.class).getNodeId().getValue();
         final var op = ops();
 
         for (RemoteUcastMacs mac: macList) {
-            final InstanceIdentifier<RemoteUcastMacs> macIid =
-                    instanceIdentifier.augmentation(HwvtepGlobalAugmentation.class)
-                            .child(RemoteUcastMacs.class, mac.key());
+            final var macIid = instanceIdentifier.toBuilder()
+                .augmentation(HwvtepGlobalAugmentation.class)
+                .child(RemoteUcastMacs.class, mac.key())
+                .build();
             HwvtepDeviceInfo.DeviceData deviceData = getDeviceOpData(RemoteUcastMacs.class, macIid);
             UcastMacsRemote ucastMacsRemote = TyperUtils.getTypedRowWrapper(transaction.getDatabaseSchema(),
                     UcastMacsRemote.class, null);
@@ -142,9 +142,9 @@ public class UcastMacsRemoteRemoveCommand
     public void onSuccess(final TransactionBuilder tx) {
         for (MdsalUpdate mdsalUpdate : updates) {
             RemoteUcastMacs mac = (RemoteUcastMacs) mdsalUpdate.getNewData();
-            InstanceIdentifier<RemoteUcastMacs> macIid = mdsalUpdate.getKey();
+            DataObjectIdentifier<RemoteUcastMacs> macIid = mdsalUpdate.getKey();
             getDeviceInfo().removeRemoteUcast(
-                    ((DataObjectIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue()).toLegacy(), macIid);
+                    ((DataObjectIdentifier<LogicalSwitches>) mac.getLogicalSwitchRef().getValue()), macIid);
         }
         getDeviceInfo().onOperDataAvailable();
     }
@@ -155,7 +155,7 @@ public class UcastMacsRemoteRemoveCommand
     }
 
     @Override
-    protected String getKeyStr(final InstanceIdentifier<RemoteUcastMacs> iid) {
-        return getLsKeyStr(iid.firstKeyOf(RemoteUcastMacs.class).getLogicalSwitchRef().getValue());
+    protected String getKeyStr(final DataObjectIdentifier<RemoteUcastMacs> iid) {
+        return getLsKeyStr(iid.getFirstKeyOf(RemoteUcastMacs.class).getLogicalSwitchRef().getValue());
     }
 }

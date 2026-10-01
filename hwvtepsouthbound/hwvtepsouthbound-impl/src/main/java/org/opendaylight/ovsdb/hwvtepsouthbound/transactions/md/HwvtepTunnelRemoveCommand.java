@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
@@ -21,9 +20,7 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.ovsdb.schema.hardwarevtep.Tunnel;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical._switch.attributes.Tunnels;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,9 +43,9 @@ public final class HwvtepTunnelRemoveCommand extends AbstractTransactionCommand 
     public void execute(ReadWriteTransaction transaction) {
         for (Tunnel tunnel : deletedTunnelRows) {
             try {
-                InstanceIdentifier<Tunnels> tunnelIid = getInstanceIdentifier(getOvsdbConnectionInstance(), tunnel);
+                var tunnelIid = getInstanceIdentifier(getOvsdbConnectionInstance(), tunnel);
                 if (tunnelIid != null) {
-                    transaction.delete(LogicalDatastoreType.OPERATIONAL, tunnelIid.toIdentifier());
+                    transaction.delete(LogicalDatastoreType.OPERATIONAL, tunnelIid);
                     LOG.trace("Deleting tunnel {}", tunnelIid);
                 }
                 getOvsdbConnectionInstance().getDeviceInfo().removePhysicalSwitchForTunnel(tunnel.getUuid());
@@ -58,25 +55,23 @@ public final class HwvtepTunnelRemoveCommand extends AbstractTransactionCommand 
         }
     }
 
-    private InstanceIdentifier<Tunnels> getInstanceIdentifier(HwvtepConnectionInstance client, Tunnel tunnel) {
-        InstanceIdentifier<Tunnels> result = null;
-
+    private DataObjectIdentifier<Tunnels> getInstanceIdentifier(HwvtepConnectionInstance client, Tunnel tunnel) {
         PhysicalSwitch phySwitch = client.getDeviceInfo().getPhysicalSwitchForTunnel(tunnel.getUuid());
         if (phySwitch == null) {
             //PhysicalSwitch has already been removed, nothing to do here
             return null;
         }
-        InstanceIdentifier<Node> psIid = HwvtepSouthboundMapper.createInstanceIdentifier(client, phySwitch);
+        var psIid = HwvtepSouthboundMapper.createInstanceIdentifier(client, phySwitch);
         PhysicalLocator plLocal = getPhysicalLocatorFromUUID(tunnel.getLocalColumn().getData());
         PhysicalLocator plRemote = getPhysicalLocatorFromUUID(tunnel.getRemoteColumn().getData());
         if (plLocal != null && plRemote != null) {
-            InstanceIdentifier<TerminationPoint> localTpPath = HwvtepSouthboundMapper.createInstanceIdentifier(
+            var localTpPath = HwvtepSouthboundMapper.createInstanceIdentifier(
                                                                 client.getInstanceIdentifier(), plLocal);
-            InstanceIdentifier<TerminationPoint> remoteTpPath = HwvtepSouthboundMapper.createInstanceIdentifier(
+            var remoteTpPath = HwvtepSouthboundMapper.createInstanceIdentifier(
                                                                 client.getInstanceIdentifier(), plRemote);
-            result = HwvtepSouthboundMapper.createInstanceIdentifier(psIid, localTpPath, remoteTpPath);
+            return HwvtepSouthboundMapper.createInstanceIdentifier(psIid, localTpPath, remoteTpPath);
         }
-        return result;
+        return null;
     }
 
     private PhysicalLocator getPhysicalLocatorFromUUID(UUID uuid) {

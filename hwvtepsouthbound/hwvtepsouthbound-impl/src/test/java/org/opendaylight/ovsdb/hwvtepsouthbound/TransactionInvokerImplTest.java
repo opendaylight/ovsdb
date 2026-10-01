@@ -35,7 +35,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,9 +105,9 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
         sleepingPillStartedLatch.await(5, TimeUnit.SECONDS);
 
         //Now add the commands which will be picked up in one lot
-        invoker.invoke(new AddNodeCmd(nodeIid1.toLegacy(), ft1));
+        invoker.invoke(new AddNodeCmd(nodeIid1, ft1));
         invoker.invoke(nullPointerPill);
-        invoker.invoke(new AddNodeCmd(nodeIid2.toLegacy(), ft2));
+        invoker.invoke(new AddNodeCmd(nodeIid2, ft2));
 
         sleepingPillEndLatch.countDown();
 
@@ -120,7 +119,7 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
         nullPointerPillStart.await(5, TimeUnit.SECONDS);
 
         //make sure that any commands which are submitted after the previous failure run smoothly
-        invoker.invoke(new AddNodeCmd(nodeIid3.toLegacy(), ft3));
+        invoker.invoke(new AddNodeCmd(nodeIid3, ft3));
         ft3.get(5, TimeUnit.SECONDS);
     }
 
@@ -136,9 +135,9 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
     }
 
     private static class AddNodeCmd extends DefaultTransactionComamndImpl {
-        InstanceIdentifier<Node> iid;
+        DataObjectIdentifier<Node> iid;
 
-        AddNodeCmd(final InstanceIdentifier<Node> iid, final SettableFuture ft) {
+        AddNodeCmd(final DataObjectIdentifier<Node> iid, final SettableFuture ft) {
             super(ft);
             this.iid = iid;
         }
@@ -146,24 +145,23 @@ public class TransactionInvokerImplTest extends AbstractConcurrentDataBrokerTest
         @Override
         public void execute(final ReadWriteTransaction transaction) {
             NodeBuilder nodeBuilder = new NodeBuilder();
-            nodeBuilder.setNodeId(iid.firstKeyOf(Node.class).getNodeId());
+            nodeBuilder.setNodeId(iid.getFirstKeyOf(Node.class).getNodeId());
             nodeBuilder.addAugmentation(new HwvtepGlobalAugmentationBuilder().build());
-            transaction.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, iid.toIdentifier(),
-                nodeBuilder.build());
+            transaction.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, iid, nodeBuilder.build());
         }
     }
 
     private static class DeleteNodeCmd extends DefaultTransactionComamndImpl {
-        InstanceIdentifier<Node> iid;
+        DataObjectIdentifier<Node> iid;
 
-        DeleteNodeCmd(final InstanceIdentifier<Node> iid, final SettableFuture ft) {
+        DeleteNodeCmd(final DataObjectIdentifier<Node> iid, final SettableFuture ft) {
             super(ft);
             this.iid = iid;
         }
 
         @Override
         public void execute(final ReadWriteTransaction transaction) {
-            transaction.delete(LogicalDatastoreType.CONFIGURATION, iid.toIdentifier());
+            transaction.delete(LogicalDatastoreType.CONFIGURATION, iid);
         }
     }
 

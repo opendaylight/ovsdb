@@ -21,6 +21,7 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.jdt.annotation.NonNull;
+import org.gaul.modernizer_maven_annotations.SuppressModernizer;
 import org.opendaylight.infrautils.diagstatus.DiagStatusService;
 import org.opendaylight.infrautils.diagstatus.ServiceState;
 import org.opendaylight.infrautils.ready.SystemReadyMonitor;
@@ -275,6 +276,7 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
         return registered.get();
     }
 
+    @SuppressModernizer
     private static List<String> getBridgesList(final String bridgeListStr) {
         if (bridgeListStr == null || bridgeListStr.isEmpty()) {
             return List.of();

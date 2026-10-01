@@ -9,8 +9,8 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 
 import java.util.Collections;
 import java.util.List;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.EntryObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public final class EmptyDependencyGetter extends UnMetDependencyGetter {
 
@@ -20,12 +20,12 @@ public final class EmptyDependencyGetter extends UnMetDependencyGetter {
     }
 
     @Override
-    public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(EntryObject data) {
+    public List<DataObjectIdentifier<?>> getLogicalSwitchDependencies(EntryObject data) {
         return Collections.emptyList();
     }
 
     @Override
-    public List<InstanceIdentifier<?>> getTerminationPointDependencies(EntryObject data) {
+    public List<DataObjectIdentifier<?>> getTerminationPointDependencies(EntryObject data) {
         return Collections.emptyList();
     }
 }

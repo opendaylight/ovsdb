@@ -56,20 +56,20 @@ public class HwvtepDeviceInfo {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepDeviceInfo.class);
 
-    private Map<Class<? extends EntryObject<?, ?>>, Map<DataObjectIdentifier, Boolean>> availableInOperDs =
+    private Map<Class<? extends EntryObject<?, ?, ?>>, Map<DataObjectIdentifier, Boolean>> availableInOperDs =
             new ConcurrentHashMap<>();
 
-    public void markAvailableInOperDs(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier key) {
+    public void markAvailableInOperDs(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier key) {
         availableInOperDs.putIfAbsent(cls, new ConcurrentHashMap<>());
         availableInOperDs.get(cls).put(key, Boolean.TRUE);
     }
 
-    public Boolean isAvailableInOperDs(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier key) {
+    public Boolean isAvailableInOperDs(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier key) {
         availableInOperDs.putIfAbsent(cls, new ConcurrentHashMap<>());
         return availableInOperDs.get(cls).getOrDefault(key, Boolean.FALSE);
     }
 
-    public Boolean clearOperDsAvailability(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier key) {
+    public Boolean clearOperDsAvailability(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier key) {
         availableInOperDs.putIfAbsent(cls, new ConcurrentHashMap<>());
         return availableInOperDs.get(cls).remove(key);
     }
@@ -139,14 +139,15 @@ public class HwvtepDeviceInfo {
         Map<DataObjectIdentifier<RemoteMcastMacs>, RemoteMcastMacs>> logicalSwitchVsMcasts = new ConcurrentHashMap<>();
     private final Map<UUID, PhysicalSwitch> physicalSwitches = new ConcurrentHashMap<>();
     private final Map<UUID, UUID> mapTunnelToPhysicalSwitch = new ConcurrentHashMap<>();
-    private final Map<Class<? extends EntryObject<?, ?>>, Map<DataObjectIdentifier, DeviceData>> opKeyVsData =
+    private final Map<Class<? extends EntryObject<?, ?, ?>>, Map<DataObjectIdentifier, DeviceData>> opKeyVsData =
         new ConcurrentHashMap<>();
-    private final Map<Class<? extends EntryObject<?, ?>>, Map<UUID, DeviceData>> uuidVsData = new ConcurrentHashMap<>();
+    private final Map<Class<? extends EntryObject<?, ?, ?>>, Map<UUID, DeviceData>> uuidVsData =
+        new ConcurrentHashMap<>();
     private final HwvtepConnectionInstance connectionInstance;
     private final DependencyQueue dependencyQueue;
 
     private Map<DataObjectIdentifier, AtomicInteger> iidInQueueCount = new ConcurrentHashMap<>();
-    private Map<Class<? extends EntryObject<?, ?>>, Map<DataObjectIdentifier, DeviceData>> configKeyVsData =
+    private Map<Class<? extends EntryObject<?, ?, ?>>, Map<DataObjectIdentifier, DeviceData>> configKeyVsData =
             new ConcurrentHashMap<>();
     private TransactionHistory controllerTxHistory = null;
     private TransactionHistory deviceUpdateHistory = null;
@@ -226,33 +227,33 @@ public class HwvtepDeviceInfo {
         return mapTunnelToPhysicalSwitch;
     }
 
-    public boolean isKeyInTransit(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier key) {
+    public boolean isKeyInTransit(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier key) {
         DeviceData deviceData = HwvtepSouthboundUtil.getData(opKeyVsData, cls, key);
         return deviceData != null && DeviceDataStatus.IN_TRANSIT == deviceData.status;
     }
 
-    public boolean isConfigDataAvailable(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier key) {
+    public boolean isConfigDataAvailable(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier key) {
         return HwvtepSouthboundUtil.getData(configKeyVsData, cls, key) != null;
     }
 
-    public void updateConfigData(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier key, Object data) {
+    public void updateConfigData(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier key, Object data) {
         HwvtepSouthboundUtil.updateData(configKeyVsData, cls, key,
                 new DeviceData(key, null, data, DeviceDataStatus.AVAILABLE));
     }
 
-    public DeviceData getConfigData(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier key) {
+    public DeviceData getConfigData(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier key) {
         return HwvtepSouthboundUtil.getData(configKeyVsData, cls, key);
     }
 
-    public Map<Class<? extends EntryObject<?, ?>>, Map<DataObjectIdentifier, DeviceData>> getConfigData() {
+    public Map<Class<? extends EntryObject<?, ?, ?>>, Map<DataObjectIdentifier, DeviceData>> getConfigData() {
         return Collections.unmodifiableMap(configKeyVsData);
     }
 
-    public void clearConfigData(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier key) {
+    public void clearConfigData(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier key) {
         HwvtepSouthboundUtil.clearData(configKeyVsData, cls, key);
     }
 
-    public void markKeyAsInTransit(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier key) {
+    public void markKeyAsInTransit(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier key) {
         LOG.debug("Marking device data as intransit {}", key);
         DeviceData deviceData = getDeviceOperData(cls, key);
         UUID uuid = null;
@@ -266,7 +267,7 @@ public class HwvtepDeviceInfo {
                 new DeviceData(key, uuid, data, DeviceDataStatus.IN_TRANSIT));
     }
 
-    public void updateDeviceOperData(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier key,
+    public void updateDeviceOperData(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier key,
             UUID uuid, Object data) {
         LOG.debug("Updating device data {}", key);
         DeviceData deviceData = new DeviceData(key, uuid, data, DeviceDataStatus.AVAILABLE);
@@ -274,7 +275,7 @@ public class HwvtepDeviceInfo {
         HwvtepSouthboundUtil.updateData(uuidVsData, cls, uuid, deviceData);
     }
 
-    public void clearDeviceOperData(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier key) {
+    public void clearDeviceOperData(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier key) {
         DeviceData deviceData = HwvtepSouthboundUtil.getData(opKeyVsData, cls, key);
         if (deviceData != null && deviceData.uuid != null) {
             HwvtepSouthboundUtil.clearData(uuidVsData, cls, deviceData.uuid);
@@ -282,7 +283,7 @@ public class HwvtepDeviceInfo {
         HwvtepSouthboundUtil.clearData(opKeyVsData, cls, key);
     }
 
-    public void clearDeviceOperData(Class<? extends EntryObject<?, ?>> cls) {
+    public void clearDeviceOperData(Class<? extends EntryObject<?, ?, ?>> cls) {
         Map<DataObjectIdentifier, DeviceData> iids = opKeyVsData.get(cls);
         if (iids != null && !iids.isEmpty()) {
             Iterator<Map.Entry<DataObjectIdentifier, DeviceData>> it = iids.entrySet().iterator();
@@ -296,7 +297,7 @@ public class HwvtepDeviceInfo {
         }
     }
 
-    public void clearDeviceOperUUID(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier key, UUID uuid) {
+    public void clearDeviceOperUUID(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier key, UUID uuid) {
         LOG.debug("Clearing device data {}", key);
         if (uuidVsData.containsKey(cls) && uuidVsData.get(cls).containsKey(uuid)) {
             LOG.debug("Remove {} {} from device data.", connectionInstance.getNodeId().getValue(), cls.getSimpleName());
@@ -305,19 +306,19 @@ public class HwvtepDeviceInfo {
         HwvtepSouthboundUtil.clearData(opKeyVsData, cls, key);
     }
 
-    public DeviceData getDeviceOperData(Class<? extends EntryObject<?, ?>> cls, UUID uuid) {
+    public DeviceData getDeviceOperData(Class<? extends EntryObject<?, ?, ?>> cls, UUID uuid) {
         return HwvtepSouthboundUtil.getData(uuidVsData, cls, uuid);
     }
 
-    public DeviceData getDeviceOperData(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier key) {
+    public DeviceData getDeviceOperData(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier key) {
         return HwvtepSouthboundUtil.getData(opKeyVsData, cls, key);
     }
 
-    public Map<DataObjectIdentifier, DeviceData> getDeviceOperData(Class<? extends EntryObject<?, ?>> cls) {
+    public Map<DataObjectIdentifier, DeviceData> getDeviceOperData(Class<? extends EntryObject<?, ?, ?>> cls) {
         return opKeyVsData.get(cls);
     }
 
-    public DataObjectIdentifier getDeviceOperKey(final Class<? extends EntryObject<?, ?>> cls, final UUID uuid) {
+    public DataObjectIdentifier getDeviceOperKey(final Class<? extends EntryObject<?, ?, ?>> cls, final UUID uuid) {
         DeviceData deviceData = HwvtepSouthboundUtil.getData(uuidVsData, cls, uuid);
         if (deviceData != null) {
             return deviceData.getKey();
@@ -325,7 +326,7 @@ public class HwvtepDeviceInfo {
         return null;
     }
 
-    public UUID getUUID(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier key) {
+    public UUID getUUID(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier key) {
         DeviceData data = HwvtepSouthboundUtil.getData(opKeyVsData, cls, key);
         if (data != null) {
             return data.uuid;
@@ -333,7 +334,7 @@ public class HwvtepDeviceInfo {
         return null;
     }
 
-    public <T extends EntryObject<?, ?>> void addJobToQueue(DependentJob<T> job) {
+    public <T extends EntryObject<?, ?, ?>> void addJobToQueue(DependentJob<T> job) {
         dependencyQueue.addToQueue(job);
     }
 
@@ -349,7 +350,7 @@ public class HwvtepDeviceInfo {
         dependencyQueue.submit(() -> connectionInstance.transact(transactCommand));
     }
 
-    public void clearInTransit(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier<?> key) {
+    public void clearInTransit(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier<?> key) {
         DeviceData deviceData = getDeviceOperData(cls, key);
         if (deviceData != null && deviceData.isInTransitState()) {
             if (deviceData.getData() != null) {
@@ -452,7 +453,7 @@ public class HwvtepDeviceInfo {
         return connectionInstance;
     }
 
-    public void setConfigKeyVsData(Map<Class<? extends EntryObject<?, ?>>, Map<DataObjectIdentifier,
+    public void setConfigKeyVsData(Map<Class<? extends EntryObject<?, ?, ?>>, Map<DataObjectIdentifier,
             DeviceData>> configKeyVsData) {
         this.configKeyVsData = configKeyVsData;
     }
@@ -473,11 +474,11 @@ public class HwvtepDeviceInfo {
         deviceUpdateHistory.addToHistory(transactionType, object);
     }
 
-    public Map<Class<? extends EntryObject<?, ?>>, Map<DataObjectIdentifier, DeviceData>> getOperData() {
+    public Map<Class<? extends EntryObject<?, ?, ?>>, Map<DataObjectIdentifier, DeviceData>> getOperData() {
         return Collections.unmodifiableMap(opKeyVsData);
     }
 
-    public Map<Class<? extends EntryObject<?, ?>>, Map<UUID, DeviceData>> getUuidData() {
+    public Map<Class<? extends EntryObject<?, ?, ?>>, Map<UUID, DeviceData>> getUuidData() {
         return Collections.unmodifiableMap(uuidVsData);
     }
 

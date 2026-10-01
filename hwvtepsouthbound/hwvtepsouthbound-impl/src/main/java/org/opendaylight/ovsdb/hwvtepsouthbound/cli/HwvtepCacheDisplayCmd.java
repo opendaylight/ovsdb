@@ -108,9 +108,9 @@ public class HwvtepCacheDisplayCmd implements Action {
         printStream.println(SECTION_SEPERATOR);
     }
 
-    private static void printEntry(PrintStream console, Map.Entry<Class<? extends EntryObject<?, ?>>,
+    private static void printEntry(PrintStream console, Map.Entry<Class<? extends EntryObject<?, ?, ?>>,
             Map<DataObjectIdentifier, HwvtepDeviceInfo.DeviceData>> entry) {
-        Class<? extends EntryObject<?, ?>> cls = entry.getKey();
+        Class<? extends EntryObject<?, ?, ?>> cls = entry.getKey();
         var map = entry.getValue();
         String clsName = cls.getSimpleName();
         console.println(clsName + " - ");
@@ -146,14 +146,14 @@ public class HwvtepCacheDisplayCmd implements Action {
 
     private static void printLogicalSwitches(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
         var ls = deviceData.getKey();
-        console.print(ls.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue());
+        console.print(ls.getFirstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue());
     }
 
     private static void printRemoteMcasts(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
         var remoteMcastMacsIid = deviceData.getKey();
-        String macAddress = remoteMcastMacsIid.firstKeyOf(RemoteMcastMacs.class).getMacEntryKey().getValue();
+        String macAddress = remoteMcastMacsIid.getFirstKeyOf(RemoteMcastMacs.class).getMacEntryKey().getValue();
         String logicalSwitchRef =
-            getLogicalSwitchRef(remoteMcastMacsIid.firstKeyOf(RemoteMcastMacs.class).getLogicalSwitchRef());
+            getLogicalSwitchRef(remoteMcastMacsIid.getFirstKeyOf(RemoteMcastMacs.class).getLogicalSwitchRef());
         StringBuilder macEntryDetails = new StringBuilder(macAddress).append("   LogicalSwitchRef  ")
                 .append(logicalSwitchRef);
         console.print(macEntryDetails);
@@ -161,9 +161,9 @@ public class HwvtepCacheDisplayCmd implements Action {
 
     private static void printRemoteUcasts(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
         var remoteUcastMacsIid = deviceData.getKey();
-        String macAddress = remoteUcastMacsIid.firstKeyOf(RemoteUcastMacs.class).getMacEntryKey().getValue();
+        String macAddress = remoteUcastMacsIid.getFirstKeyOf(RemoteUcastMacs.class).getMacEntryKey().getValue();
         String logicalSwitchRef =
-            getLogicalSwitchRef(remoteUcastMacsIid.firstKeyOf(RemoteUcastMacs.class).getLogicalSwitchRef());
+            getLogicalSwitchRef(remoteUcastMacsIid.getFirstKeyOf(RemoteUcastMacs.class).getLogicalSwitchRef());
         StringBuilder macEntryDetails = new StringBuilder(macAddress).append("   LogicalSwitchRef  ")
                 .append(logicalSwitchRef);
         console.print(macEntryDetails);
@@ -176,7 +176,7 @@ public class HwvtepCacheDisplayCmd implements Action {
 
     private static void printTerminationPoint(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
         var terminationPointIid = deviceData.getKey();
-        console.print(terminationPointIid.firstKeyOf(TerminationPoint.class).getTpId().getValue());
+        console.print(terminationPointIid.getFirstKeyOf(TerminationPoint.class).getTpId().getValue());
         try {
             PhysicalPort physicalPort = (PhysicalPort) deviceData.getData();
             console.print("    " + physicalPort.getVlanBindingsColumn().getData().keySet());
@@ -187,7 +187,7 @@ public class HwvtepCacheDisplayCmd implements Action {
 
     private static void printNode(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
         var ls = deviceData.getKey();
-        console.print(ls.firstKeyOf(Node.class).getNodeId().getValue());
+        console.print(ls.getFirstKeyOf(Node.class).getNodeId().getValue());
     }
 
     private static void printCommon(PrintStream console, HwvtepDeviceInfo.DeviceData deviceData) {
@@ -201,9 +201,9 @@ public class HwvtepCacheDisplayCmd implements Action {
         console.println(deviceData.getUuid());
     }
 
-    private static void printEntryUUID(PrintStream console, Map.Entry<Class<? extends EntryObject<?, ?>>, Map<UUID,
+    private static void printEntryUUID(PrintStream console, Map.Entry<Class<? extends EntryObject<?, ?, ?>>, Map<UUID,
             HwvtepDeviceInfo.DeviceData>> entry) {
-        Class<? extends EntryObject<?, ?>> cls = entry.getKey();
+        Class<? extends EntryObject<?, ?, ?>> cls = entry.getKey();
         Map<UUID, HwvtepDeviceInfo.DeviceData> map = entry.getValue();
         String clsName = cls.getSimpleName();
         console.println(clsName + " - ");

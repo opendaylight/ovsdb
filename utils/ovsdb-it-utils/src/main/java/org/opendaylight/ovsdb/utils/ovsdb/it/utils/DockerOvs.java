@@ -609,7 +609,7 @@ public final class DockerOvs implements AutoCloseable {
 
         File tmpFile = null;
         try {
-            tmpFile = File.createTempFile("ovsdb-it-tmp-", null);
+            tmpFile = Files.createTempFile("ovsdb-it-tmp-", null).toFile();
 
             try (var in = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8);
                  var out = Files.newBufferedWriter(tmpFile.toPath())) {

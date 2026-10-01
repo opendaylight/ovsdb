@@ -65,7 +65,7 @@ public final class YangUtils {
      * @param <V> The value type.
      * @return The map.
      */
-    public static <I extends Key<T>, T extends EntryObject<T, I>, K, V>
+    public static <I extends Key<T>, T extends EntryObject<?, T, I>, K, V>
             @NonNull Map<K, V> copyYangKeyValueListToMap(@NonNull Map<K, V> map,
             @Nullable Map<I, T> yangList, @NonNull Function<T, K> keyExtractor,
             @NonNull Function<T, V> valueExtractor) {
@@ -102,7 +102,7 @@ public final class YangUtils {
      * @param <V> The value type.
      * @return The map.
      */
-    public static <I extends Key<T>, T extends EntryObject<T, I>, K, V> @NonNull Map<K, V>
+    public static <I extends Key<T>, T extends EntryObject<?, T, I>, K, V> @NonNull Map<K, V>
             convertYangKeyValueListToMap(@Nullable Map<I, T> yangList,
             @NonNull Function<T, K> keyExtractor, @NonNull Function<T, V> valueExtractor) {
         return copyYangKeyValueListToMap(new HashMap<>(), yangList, keyExtractor, valueExtractor);

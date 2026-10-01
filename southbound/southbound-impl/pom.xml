@@ -53,6 +53,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>org.gaul</groupId>
+      <artifactId>modernizer-maven-annotations</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.infrautils</groupId>
       <artifactId>diagstatus-api</artifactId>
     </dependency>

@@ -34,7 +34,7 @@ public class UnMetDependencyGetterTest extends DataChangeListenerTestBase {
     HwvtepOperationalState opState;
     RemoteMcastMacs mac;
     DataObjectIdentifier<LogicalSwitches> lsIid;
-    Map<Class<? extends EntryObject<?, ?>>, List<DataObjectIdentifier>> unMetDependencies;
+    Map<Class<? extends EntryObject<?, ?, ?>>, List<DataObjectIdentifier>> unMetDependencies;
 
     void setupForTest() {
         mcastMacDataValidator = McastMacsRemoteUpdateCommand.MCAST_MAC_DATA_VALIDATOR;

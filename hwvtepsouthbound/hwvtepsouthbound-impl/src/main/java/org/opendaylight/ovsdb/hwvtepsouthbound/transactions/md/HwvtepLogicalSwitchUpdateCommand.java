@@ -32,7 +32,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,14 +54,15 @@ public final class HwvtepLogicalSwitchUpdateCommand extends AbstractTransactionC
     }
 
     private void updateLogicalSwitch(ReadWriteTransaction transaction, LogicalSwitch logicalSwitch) {
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
             Node connectionNode = buildConnectionNode(logicalSwitch);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(), connectionNode);
-            InstanceIdentifier<LogicalSwitches> switchIid = getOvsdbConnectionInstance().getInstanceIdentifier()
-                    .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch.getName())));
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+            var switchIid = getOvsdbConnectionInstance().getInstanceIdentifier().toBuilder()
+                .augmentation(HwvtepGlobalAugmentation.class)
+                .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName(logicalSwitch.getName())))
+                .build();
             addToUpdateTx(LogicalSwitches.class, switchIid, logicalSwitch.getUuid(), logicalSwitch);
             addToDeviceUpdate(TransactionType.ADD, logicalSwitch);
             // TODO: Delete entries that are no longer needed

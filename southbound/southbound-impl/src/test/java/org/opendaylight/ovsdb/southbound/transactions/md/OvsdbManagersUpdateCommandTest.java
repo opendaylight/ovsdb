@@ -7,10 +7,9 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -50,8 +49,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -124,10 +121,11 @@ public class OvsdbManagersUpdateCommandTest {
         // mock getManagerEntryIid()
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         Map<UUID, Manager> updatedManagerRows = new HashMap<>();
-        PowerMockito.doReturn(InstanceIdentifier.create(NetworkTopology.class)
+        PowerMockito.doReturn(DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
             .child(Node.class, new NodeKey(new NodeId("testNode"))).augmentation(OvsdbNodeAugmentation.class)
-            .child(ManagerEntry.class, new ManagerEntryKey(new Uri("testUri"))))
+            .child(ManagerEntry.class, new ManagerEntryKey(new Uri("testUri")))
+            .build())
             .when(ovsdbManagersUpdateCommand, "getManagerEntryIid", any(ManagerEntry.class));
         doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class),
                 any(ManagerEntry.class));
@@ -143,13 +141,14 @@ public class OvsdbManagersUpdateCommandTest {
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbManagersUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(
-            InstanceIdentifier.create(NetworkTopology.class)
+            DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class, new NodeKey(new NodeId("testNode"))));
+                .child(Node.class, new NodeKey(new NodeId("testNode")))
+                .build());
 
         Optional<Node> ovsdbNode = Optional.of(mock(Node.class));
         PowerMockito.mockStatic(SouthboundUtil.class);
-        when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(InstanceIdentifier.class)))
+        when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(DataObjectIdentifier.class)))
                 .thenReturn(ovsdbNode);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         Map<Uri, Manager> updatedManagerRows = new HashMap<>();
@@ -166,9 +165,8 @@ public class OvsdbManagersUpdateCommandTest {
 
         ManagerEntry managerEntry = mock(ManagerEntry.class);
         when(managerEntry.key()).thenReturn(new ManagerEntryKey(new Uri("key")));
-        InstanceIdentifier<ManagerEntry> iid = ovsdbManagersUpdateCommand.getManagerEntryIid(managerEntry);
-        assertThat(iid, instanceOf(KeyedInstanceIdentifier.class));
-        assertSame(managerEntry.key(), ((KeyedInstanceIdentifier<?, ?>) iid).key());
+        var iid = ovsdbManagersUpdateCommand.getManagerEntryIid(managerEntry);
+        assertSame(managerEntry.key(), assertInstanceOf(DataObjectIdentifier.WithKey.class, iid).key());
     }
 
     @SuppressWarnings("unchecked")

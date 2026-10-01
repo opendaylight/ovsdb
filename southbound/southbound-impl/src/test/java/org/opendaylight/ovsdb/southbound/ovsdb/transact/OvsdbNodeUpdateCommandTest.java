@@ -47,6 +47,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
@@ -73,11 +74,12 @@ public class OvsdbNodeUpdateCommandTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testExecute() throws Exception {
-        Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated = new HashMap<>();
-        InstanceIdentifier<OvsdbNodeAugmentation> iid = InstanceIdentifier.create(NetworkTopology.class)
+        Map<DataObjectIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated = new HashMap<>();
+        DataObjectIdentifier<OvsdbNodeAugmentation> iid = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
             .child(Node.class, new NodeKey(new NodeId("testNode")))
-            .augmentation(OvsdbNodeAugmentation.class);
+            .augmentation(OvsdbNodeAugmentation.class)
+            .build();
         OvsdbNodeAugmentation ovsdbNode = mock(OvsdbNodeAugmentation.class);
         updated.put(iid, ovsdbNode);
         PowerMockito.mockStatic(TransactUtils.class);
@@ -101,7 +103,7 @@ public class OvsdbNodeUpdateCommandTest {
                 .build();
         when(ovsdbNode.getOpenvswitchExternalIds()).thenReturn(Map.of(externalId.key(), externalId));
         PowerMockito.suppress(MemberMatcher.method(OvsdbNodeUpdateCommand.class, "stampInstanceIdentifier",
-                TransactionBuilder.class, InstanceIdentifier.class, InstanceIdentifierCodec.class));
+                TransactionBuilder.class, DataObjectIdentifier.class, InstanceIdentifierCodec.class));
         PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
         doNothing().when(ovs).setExternalIds(any(ImmutableMap.class));
 

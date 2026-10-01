@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.ArrayList;
@@ -39,7 +38,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRouters;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRoutersBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRoutersKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.AclBindings;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.AclBindingsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.AclBindingsKey;
@@ -50,7 +48,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,14 +72,15 @@ public final class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionC
     }
 
     private void updateLogicalRouter(ReadWriteTransaction transaction, final LogicalRouter router) {
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
             Node connectionNode = buildConnectionNode(router);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(), connectionNode);
-            InstanceIdentifier<LogicalRouters> routerIid = getOvsdbConnectionInstance().getInstanceIdentifier()
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+            var routerIid = getOvsdbConnectionInstance().getInstanceIdentifier().toBuilder()
                     .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(LogicalRouters.class, new LogicalRoutersKey(new HwvtepNodeName(router.getName())));
+                    .child(LogicalRouters.class, new LogicalRoutersKey(new HwvtepNodeName(router.getName())))
+                    .build();
             getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(LogicalRouters.class, routerIid,
                     router.getUuid(), router);
         }
@@ -137,9 +135,8 @@ public final class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionC
                 UUID aclUUID = entry.getValue();
                 ACL acl = (ACL)getOvsdbConnectionInstance().getDeviceInfo().getDeviceOperData(Acls.class, aclUUID);
                 if (acl != null) {
-                    InstanceIdentifier<Acls> aclIid =
-                            HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), acl);
-                    aclBindingBuiler.setAclRef(new HwvtepAclRef(aclIid.toIdentifier()));
+                    var aclIid = HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), acl);
+                    aclBindingBuiler.setAclRef(new HwvtepAclRef(aclIid));
                     aclBindingBuiler.setRouterInterface(new IpPrefix(new Ipv4Prefix(entry.getKey())));
                     bindings.add(aclBindingBuiler.build());
                 }
@@ -163,9 +160,9 @@ public final class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionC
                 LogicalSwitch logicalSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(lsUUID);
                 if (logicalSwitch != null) {
                     switchBindingBuiler.setDestinationAddress(new IpPrefix(new Ipv4Prefix(entry.getKey())));
-                    InstanceIdentifier<LogicalSwitches> switchIid =
+                    var switchIid =
                         HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
-                    switchBindingBuiler.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid.toIdentifier()));
+                    switchBindingBuiler.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid));
                     bindings.add(switchBindingBuiler.build());
                 }
             }

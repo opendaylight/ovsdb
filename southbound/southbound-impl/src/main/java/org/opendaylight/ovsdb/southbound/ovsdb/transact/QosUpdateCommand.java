@@ -13,7 +13,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
 import org.opendaylight.ovsdb.lib.operations.Operations;
@@ -37,7 +36,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.PropertyIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,11 +63,10 @@ public class QosUpdateCommand extends AbstractTransactCommand {
 
     @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final Map<InstanceIdentifier<QosEntries>, QosEntries> createdOrUpdated,
+            final Map<DataObjectIdentifier<QosEntries>, QosEntries> createdOrUpdated,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
-        for (Entry<InstanceIdentifier<QosEntries>, QosEntries> qosMapEntry: createdOrUpdated.entrySet()) {
-            InstanceIdentifier<OvsdbNodeAugmentation> iid =
-                    qosMapEntry.getKey().firstIdentifierOf(OvsdbNodeAugmentation.class);
+        for (var qosMapEntry : createdOrUpdated.entrySet()) {
+            var iid = qosMapEntry.getKey().trimTo(OvsdbNodeAugmentation.class);
             final var optBridgeNode = state.getBridgeNode(iid);
             if (optBridgeNode.isEmpty()) {
                 return;
@@ -103,12 +100,11 @@ public class QosUpdateCommand extends AbstractTransactCommand {
             } catch (NullPointerException e) {
                 LOG.warn("Incomplete Qos external IDs", e);
             }
-            externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
-
-                    instanceIdentifierCodec.serialize(
-                    SouthboundMapper.createInstanceIdentifier(iid.firstKeyOf(Node.class).getNodeId())
+            externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, instanceIdentifierCodec.serialize(
+                    SouthboundMapper.createInstanceIdentifier(iid.getFirstKeyOf(Node.class).getNodeId()).toBuilder()
                     .augmentation(OvsdbNodeAugmentation.class)
-                    .child(QosEntries.class, new QosEntriesKey(qosEntry.getQosId()))));
+                    .child(QosEntries.class, new QosEntriesKey(qosEntry.getQosId()))
+                    .build()));
             qos.setExternalIds(externalIdsMap);
 
             try {
@@ -141,7 +137,7 @@ public class QosUpdateCommand extends AbstractTransactCommand {
             case PropertyIdentifier<?, ?> pi -> pi.container();
         };
 
-        QueuesKey queueKey = doi.toLegacy().firstKeyOf(Queues.class);
+        QueuesKey queueKey = doi.getFirstKeyOf(Queues.class);
         Map<QueuesKey, Queues> queues = operNode.getQueues();
         if (queues != null) {
             Queues queue = queues.get(queueKey);

@@ -37,9 +37,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfigBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfigKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +81,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
      */
     private void updateQueue(ReadWriteTransaction transaction) {
 
-        final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
         if (ovsdbNode.isPresent()) {
             for (Entry<UUID, Queue> entry : updatedQueueRows.entrySet()) {
@@ -99,10 +99,10 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
 
                 Queues queues = queuesBuilder.build();
                 LOG.debug("Update Ovsdb Node {} with queue entries {}",ovsdbNode.orElseThrow(), queues);
-                InstanceIdentifier<Queues> iid = nodeIId
-                        .augmentation(OvsdbNodeAugmentation.class)
-                        .child(Queues.class, queues.key());
-                transaction.merge(LogicalDatastoreType.OPERATIONAL, iid.toIdentifier(), queues);
+                transaction.merge(LogicalDatastoreType.OPERATIONAL, nodeIId.toBuilder()
+                    .augmentation(OvsdbNodeAugmentation.class)
+                    .child(Queues.class, queues.key())
+                    .build(), queues);
             }
         }
     }
@@ -131,7 +131,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
 
     private static void setOtherConfig(ReadWriteTransaction transaction,
             QueuesBuilder queuesBuilder, Queue oldQueue, Queue queue,
-            InstanceIdentifier<Node> nodeIId) {
+            DataObjectIdentifier<Node> nodeIId) {
         Map<String, String> oldOtherConfigs = null;
         Map<String, String> otherConfigs = null;
 
@@ -151,16 +151,16 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
 
     private static void removeOldConfigs(ReadWriteTransaction transaction,
             QueuesBuilder queuesBuilder, Map<String, String> oldOtherConfigs,
-            Queue queue, InstanceIdentifier<Node> nodeIId) {
-        InstanceIdentifier<Queues> queueIId = nodeIId
+            Queue queue, DataObjectIdentifier<Node> nodeIId) {
+        var queueIId = nodeIId.toBuilder()
                 .augmentation(OvsdbNodeAugmentation.class)
-                .child(Queues.class, queuesBuilder.build().key());
+                .child(Queues.class, queuesBuilder.build().key())
+                .build();
         Set<String> otherConfigKeys = oldOtherConfigs.keySet();
         for (String otherConfigKey : otherConfigKeys) {
-            KeyedInstanceIdentifier<QueuesOtherConfig, QueuesOtherConfigKey> otherIId =
-                    queueIId
-                    .child(QueuesOtherConfig.class, new QueuesOtherConfigKey(otherConfigKey));
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, otherIId.toIdentifier());
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, queueIId.toBuilder()
+                .child(QueuesOtherConfig.class, new QueuesOtherConfigKey(otherConfigKey))
+                .build());
         }
     }
 
@@ -179,7 +179,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
 
     private static void setExternalIds(ReadWriteTransaction transaction,
             QueuesBuilder queuesBuilder, Queue oldQueue, Queue queue,
-            InstanceIdentifier<Node> nodeIId) {
+            DataObjectIdentifier<Node> nodeIId) {
         Map<String, String> oldExternalIds = null;
         Map<String, String> externalIds = null;
 
@@ -199,16 +199,16 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
 
     private static void removeOldExternalIds(ReadWriteTransaction transaction,
             QueuesBuilder queuesBuilder, Map<String, String> oldExternalIds,
-            Queue queue, InstanceIdentifier<Node> nodeIId) {
-        InstanceIdentifier<Queues> queueIId = nodeIId
+            Queue queue, DataObjectIdentifier<Node> nodeIId) {
+        var queueIId = nodeIId.toBuilder()
                 .augmentation(OvsdbNodeAugmentation.class)
-                .child(Queues.class, queuesBuilder.build().key());
+                .child(Queues.class, queuesBuilder.build().key())
+                .build();
         Set<String> externalIdsKeys = oldExternalIds.keySet();
         for (String extIdKey : externalIdsKeys) {
-            KeyedInstanceIdentifier<QueuesExternalIds, QueuesExternalIdsKey> externalIId =
-                    queueIId
-                    .child(QueuesExternalIds.class, new QueuesExternalIdsKey(extIdKey));
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, externalIId.toIdentifier());
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, queueIId.toBuilder()
+                .child(QueuesExternalIds.class, new QueuesExternalIdsKey(extIdKey))
+                .build());
         }
     }
 

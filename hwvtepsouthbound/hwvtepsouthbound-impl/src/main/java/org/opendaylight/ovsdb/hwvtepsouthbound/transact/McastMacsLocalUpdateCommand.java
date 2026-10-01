@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
@@ -24,7 +23,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,18 +37,16 @@ public class McastMacsLocalUpdateCommand
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<LocalMcastMacs>> updateds =
-                extractUpdated(getChanges(),LocalMcastMacs.class);
+        var updateds = extractUpdated(getChanges(),LocalMcastMacs.class);
         if (!updateds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<LocalMcastMacs>> updated:
-                updateds.entrySet()) {
+            for (var updated : updateds.entrySet()) {
                 updateMcastMacsLocal(transaction,  updated.getKey(), updated.getValue());
             }
         }
     }
 
     private void updateMcastMacsLocal(final TransactionBuilder transaction,
-            final InstanceIdentifier<Node> instanceIdentifier, final List<LocalMcastMacs> localMcastMacs) {
+            final DataObjectIdentifier<Node> instanceIdentifier, final List<LocalMcastMacs> localMcastMacs) {
         final var op = ops();
 
         for (LocalMcastMacs localMcastMac: localMcastMacs) {
@@ -85,8 +81,8 @@ public class McastMacsLocalUpdateCommand
     private void setLogicalSwitch(final McastMacsLocal mcastMacsLocal, final LocalMcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
             @SuppressWarnings("unchecked")
-            InstanceIdentifier<LogicalSwitches> lswitchIid =
-                   ((DataObjectIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue()).toLegacy();
+            DataObjectIdentifier<LogicalSwitches> lswitchIid =
+                   (DataObjectIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
             Optional<LogicalSwitches> operationalSwitchOptional =
                     getOperationalState().getLogicalSwitches(lswitchIid);
             if (operationalSwitchOptional.isPresent()) {
@@ -135,7 +131,7 @@ public class McastMacsLocalUpdateCommand
     }
 
     @Override
-    protected String getKeyStr(InstanceIdentifier<LocalMcastMacs> iid) {
-        return getLsKeyStr(iid.firstKeyOf(LocalMcastMacs.class).getLogicalSwitchRef().getValue());
+    protected String getKeyStr(DataObjectIdentifier<LocalMcastMacs> iid) {
+        return getLsKeyStr(iid.getFirstKeyOf(LocalMcastMacs.class).getLogicalSwitchRef().getValue());
     }
 }

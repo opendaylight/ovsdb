@@ -30,24 +30,20 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacsKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
-
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepMacEntriesRemoveCommand.class);
 
     public HwvtepMacEntriesRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates, DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
     }
-
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
@@ -66,10 +62,12 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
                 LOG.info("DEVICE - {} LocalUcastMacs for Node {} - {}", TransactionType.DELETE,
                     getOvsdbConnectionInstance().getInstanceIdentifier().firstKeyOf(Node.class)
                         .getNodeId().getValue(), lum.getMac());
-                InstanceIdentifier<LocalUcastMacs> lumId = getOvsdbConnectionInstance().getInstanceIdentifier()
-                    .augmentation(HwvtepGlobalAugmentation.class).child(LocalUcastMacs.class,
-                                    new LocalUcastMacsKey(getLogicalSwitchRef(lum.getLogicalSwitchColumn().getData()),
-                                                    getMacAddress(lum.getMac())));
+                var lumId = getOvsdbConnectionInstance().getInstanceIdentifier().toBuilder()
+                    .augmentation(HwvtepGlobalAugmentation.class)
+                    .child(LocalUcastMacs.class,
+                        new LocalUcastMacsKey(getLogicalSwitchRef(lum.getLogicalSwitchColumn().getData()),
+                            getMacAddress(lum.getMac())))
+                    .build();
                 addToDeleteTx(transaction, LocalUcastMacs.class, lumId, lum.getUuid());
             } else {
                 LOG.debug("Failed to delete UcastMacLocal entry {}", lum.getUuid());
@@ -83,10 +81,12 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         for (UcastMacsRemote rum : deletedUMRRows) {
             if (rum.getMac() != null && rum.getLogicalSwitchColumn() != null
                     && rum.getLogicalSwitchColumn().getData() != null) {
-                InstanceIdentifier<RemoteUcastMacs> rumId = getOvsdbConnectionInstance().getInstanceIdentifier()
-                    .augmentation(HwvtepGlobalAugmentation.class).child(RemoteUcastMacs.class,
-                                    new RemoteUcastMacsKey(getLogicalSwitchRef(rum.getLogicalSwitchColumn().getData()),
-                                                    getMacAddress(rum.getMac())));
+                var rumId = getOvsdbConnectionInstance().getInstanceIdentifier().toBuilder()
+                    .augmentation(HwvtepGlobalAugmentation.class)
+                    .child(RemoteUcastMacs.class,
+                        new RemoteUcastMacsKey(getLogicalSwitchRef(rum.getLogicalSwitchColumn().getData()),
+                            getMacAddress(rum.getMac())))
+                    .build();
                 addToDeleteTx(transaction, RemoteUcastMacs.class, rumId, rum.getUuid());
             } else {
                 LOG.debug("Failed to delete UcastMacRemote entry {}", rum.getUuid());
@@ -100,11 +100,12 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         for (McastMacsLocal lmm : deletedLMMRows) {
             if (lmm.getMac() != null && lmm.getLogicalSwitchColumn() != null
                     && lmm.getLogicalSwitchColumn().getData() != null) {
-                InstanceIdentifier<LocalMcastMacs> lumId = getOvsdbConnectionInstance().getInstanceIdentifier()
+                var lumId = getOvsdbConnectionInstance().getInstanceIdentifier().toBuilder()
                     .augmentation(HwvtepGlobalAugmentation.class)
                     .child(LocalMcastMacs.class,
-                                    new LocalMcastMacsKey(getLogicalSwitchRef(lmm.getLogicalSwitchColumn().getData()),
-                                                    getMacAddress(lmm.getMac())));
+                        new LocalMcastMacsKey(getLogicalSwitchRef(lmm.getLogicalSwitchColumn().getData()),
+                            getMacAddress(lmm.getMac())))
+                    .build();
                 addToDeleteTx(transaction, LocalMcastMacs.class, lumId, lmm.getUuid());
             } else {
                 LOG.debug("Failed to delete McastMacLocal entry {}", lmm.getUuid());
@@ -118,11 +119,12 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
         for (McastMacsRemote rmm : deletedMMRRows) {
             if (rmm.getMac() != null && rmm.getLogicalSwitchColumn() != null
                     && rmm.getLogicalSwitchColumn().getData() != null) {
-                InstanceIdentifier<RemoteMcastMacs> lumId = getOvsdbConnectionInstance().getInstanceIdentifier()
+                var lumId = getOvsdbConnectionInstance().getInstanceIdentifier().toBuilder()
                     .augmentation(HwvtepGlobalAugmentation.class)
                     .child(RemoteMcastMacs.class,
-                                    new RemoteMcastMacsKey(getLogicalSwitchRef(rmm.getLogicalSwitchColumn().getData()),
-                                                    getMacAddress(rmm.getMac())));
+                        new RemoteMcastMacsKey(getLogicalSwitchRef(rmm.getLogicalSwitchColumn().getData()),
+                            getMacAddress(rmm.getMac())))
+                    .build();
                 addToDeleteTx(transaction, RemoteMcastMacs.class, lumId, rmm.getUuid());
                 getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOperData(RemoteMcastMacs.class, lumId);
             } else {
@@ -134,9 +136,8 @@ public class HwvtepMacEntriesRemoveCommand extends AbstractTransactionCommand {
     private HwvtepLogicalSwitchRef getLogicalSwitchRef(UUID switchUUID) {
         LogicalSwitch logicalSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(switchUUID);
         if (logicalSwitch != null) {
-            InstanceIdentifier<LogicalSwitches> switchIid =
-                    HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
-            return new HwvtepLogicalSwitchRef(switchIid.toIdentifier());
+            return new HwvtepLogicalSwitchRef(HwvtepSouthboundMapper.createInstanceIdentifier(
+                getOvsdbConnectionInstance(), logicalSwitch));
         }
         LOG.debug("Failed to get LogicalSwitch {}", switchUUID);
         LOG.trace("Available LogicalSwitches: {}",

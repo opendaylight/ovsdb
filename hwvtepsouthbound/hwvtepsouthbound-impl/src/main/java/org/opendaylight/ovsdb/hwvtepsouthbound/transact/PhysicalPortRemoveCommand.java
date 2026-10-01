@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
@@ -22,7 +21,7 @@ import org.opendaylight.ovsdb.utils.mdsal.utils.TransactionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalPortAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,18 +36,17 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
     @Override
     public void execute(final TransactionBuilder transaction) {
         //TODO reuse from base class instead of extractRemovedPorts
-        Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> removeds =
+        Map<DataObjectIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> removeds =
                 extractRemovedPorts(getChanges(), HwvtepPhysicalPortAugmentation.class);
         if (!removeds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> removed:
-                removeds.entrySet()) {
+            for (var removed : removeds.entrySet()) {
                 updatePhysicalPort(transaction, removed.getKey(), removed.getValue());
             }
         }
     }
 
     private void updatePhysicalPort(final TransactionBuilder transaction,
-                                    final InstanceIdentifier<Node> psNodeiid,
+                                    final DataObjectIdentifier<Node> psNodeiid,
                                     final List<HwvtepPhysicalPortAugmentation> listPort) {
         final var op = ops();
 
@@ -75,12 +73,12 @@ public class PhysicalPortRemoveCommand extends AbstractTransactCommand {
         }
     }
 
-    protected Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> extractRemovedPorts(
+    protected Map<DataObjectIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> extractRemovedPorts(
             final Collection<DataTreeModification<Node>> changes, final Class<HwvtepPhysicalPortAugmentation> class1) {
-        Map<InstanceIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> result = new HashMap<>();
+        Map<DataObjectIdentifier<Node>, List<HwvtepPhysicalPortAugmentation>> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+                final DataObjectIdentifier<Node> key = change.path();
                 final DataObjectModification<Node> mod = change.getRootNode();
                 //If the node which physical ports belong to is removed, all physical ports
                 //should be removed too.

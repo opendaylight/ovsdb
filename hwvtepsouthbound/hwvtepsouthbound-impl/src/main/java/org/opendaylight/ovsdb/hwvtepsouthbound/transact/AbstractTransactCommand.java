@@ -41,7 +41,6 @@ import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.binding.Key;
 import org.opendaylight.yangtools.binding.PropertyIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,21 +80,21 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
         return getOperationalState().getConnectionInstance().ops();
     }
 
-    void updateCurrentTxDeleteData(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key,
+    void updateCurrentTxDeleteData(final Class<? extends EntryObject<?, ?>> cls, final DataObjectIdentifier key,
             final T data) {
         hwvtepOperationalState.updateCurrentTxDeleteData(cls, key);
         markKeyAsInTransit(cls, key);
         addToUpdates(key, data);
     }
 
-    void updateCurrentTxData(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key,
+    void updateCurrentTxData(final Class<? extends EntryObject<?, ?>> cls, final DataObjectIdentifier key,
             final UUID uuid, final T data) {
         hwvtepOperationalState.updateCurrentTxData(cls, key, uuid);
         markKeyAsInTransit(cls, key);
         addToUpdates(key, data);
     }
 
-    void addToUpdates(final InstanceIdentifier key, final T data) {
+    void addToUpdates(final DataObjectIdentifier key, final T data) {
         T oldData = null;
         Type type = getClass().getGenericSuperclass();
         Type classType = ((ParameterizedType) type).getActualTypeArguments()[0];
@@ -107,8 +106,8 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
 
     void processDependencies(final UnMetDependencyGetter<T> unMetDependencyGetter,
             final TransactionBuilder transaction,
-            final InstanceIdentifier<Node> nodeIid,
-            final InstanceIdentifier key,
+            final DataObjectIdentifier<Node> nodeIid,
+            final DataObjectIdentifier key,
             final T data, final Object... extraData) {
 
         HwvtepDeviceInfo deviceInfo = hwvtepOperationalState.getDeviceInfo();
@@ -219,14 +218,14 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
     }
 
     @Override
-    public void doDeviceTransaction(final TransactionBuilder transaction, final InstanceIdentifier<Node> nodeIid,
-            final T data, final InstanceIdentifier key, final Object... extraData) {
+    public void doDeviceTransaction(final TransactionBuilder transaction, final DataObjectIdentifier<Node> nodeIid,
+            final T data, final DataObjectIdentifier key, final Object... extraData) {
         //tobe removed as part of refactoring patch
     }
 
     @Override
-    public void onConfigUpdate(final TransactionBuilder transaction, final InstanceIdentifier<Node> nodeIid,
-            final T data, final InstanceIdentifier key, final Object... extraData) {
+    public void onConfigUpdate(final TransactionBuilder transaction, final DataObjectIdentifier<Node> nodeIid,
+            final T data, final DataObjectIdentifier key, final Object... extraData) {
         //tobe removed as part of refactoring patch
     }
 
@@ -258,12 +257,12 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
     }
 
     @NonNull
-    protected Map<InstanceIdentifier<Node>, List<T>> extractRemoved(
+    protected Map<DataObjectIdentifier<Node>, List<T>> extractRemoved(
             final Collection<DataTreeModification<Node>> modification, final Class<T> class1) {
-        Map<InstanceIdentifier<Node>, List<T>> result = new HashMap<>();
+        Map<DataObjectIdentifier<Node>, List<T>> result = new HashMap<>();
         if (modification != null && !modification.isEmpty()) {
             for (DataTreeModification<Node> change : modification) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+                final DataObjectIdentifier<Node> key = change.path();
                 if (!Objects.equals(hwvtepOperationalState.getConnectionInstance().getInstanceIdentifier(), key)) {
                     continue;
                 }
@@ -282,12 +281,12 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
     }
 
     @NonNull
-    protected Map<InstanceIdentifier<Node>, List<T>> extractUpdated(
+    protected Map<DataObjectIdentifier<Node>, List<T>> extractUpdated(
             final Collection<DataTreeModification<Node>> modification, final Class<T> class1) {
-        Map<InstanceIdentifier<Node>, List<T>> result = new HashMap<>();
+        Map<DataObjectIdentifier<Node>, List<T>> result = new HashMap<>();
         if (modification != null && !modification.isEmpty()) {
             for (DataTreeModification<Node> change : modification) {
-                InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+                DataObjectIdentifier<Node> key = change.path();
                 if (!Objects.equals(hwvtepOperationalState.getConnectionInstance().getInstanceIdentifier(), key)) {
                     continue;
                 }
@@ -311,7 +310,7 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
         DataObjectModification<Node> mod = change.getRootNode();
         Node updatedNode = TransactUtils.getUpdated(mod);
         List<T> updatedData = getData(updatedNode);
-        Set<InstanceIdentifier> deleted = getOperationalState().getDeletedKeysInCurrentTx(LogicalSwitches.class);
+        Set<DataObjectIdentifier> deleted = getOperationalState().getDeletedKeysInCurrentTx(LogicalSwitches.class);
         UnMetDependencyGetter dependencyGetter = getDependencyGetter();
         if (!HwvtepSouthboundUtil.isEmpty(deleted) && !HwvtepSouthboundUtil.isEmpty(updatedData)
                 && dependencyGetter != null) {
@@ -445,7 +444,7 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
     }
 
     public <T> HwvtepDeviceInfo.DeviceData fetchDeviceData(final Class<? extends EntryObject<?, ?>> cls,
-            final InstanceIdentifier key) {
+            final DataObjectIdentifier key) {
         HwvtepDeviceInfo.DeviceData deviceData  = getDeviceOpData(cls, key);
         if (deviceData == null) {
             LOG.debug("Could not find data for key {}", getNodeKeyStr(key));
@@ -466,25 +465,25 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
         hwvtepOperationalState.getDeviceInfo().addJobToQueue(job);
     }
 
-    public void markKeyAsInTransit(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key) {
+    public void markKeyAsInTransit(final Class<? extends EntryObject<?, ?>> cls, final DataObjectIdentifier key) {
         hwvtepOperationalState.getDeviceInfo().markKeyAsInTransit(cls, key);
     }
 
     public HwvtepDeviceInfo.DeviceData getDeviceOpData(final Class<? extends EntryObject<?, ?>> cls,
-            final InstanceIdentifier key) {
+            final DataObjectIdentifier key) {
         return getOperationalState().getDeviceInfo().getDeviceOperData(cls, key);
     }
 
-    public void clearConfigData(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key) {
+    public void clearConfigData(final Class<? extends EntryObject<?, ?>> cls, final DataObjectIdentifier key) {
         hwvtepOperationalState.getDeviceInfo().clearConfigData(cls, key);
     }
 
     public HwvtepDeviceInfo.DeviceData getConfigData(final Class<? extends EntryObject<?, ?>> cls,
-            final InstanceIdentifier key) {
+            final DataObjectIdentifier key) {
         return hwvtepOperationalState.getDeviceInfo().getConfigData(cls, key);
     }
 
-    public void updateConfigData(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key,
+    public void updateConfigData(final Class<? extends EntryObject<?, ?>> cls, final DataObjectIdentifier key,
             final Object data) {
         hwvtepOperationalState.getDeviceInfo().updateConfigData(cls, key, data);
     }
@@ -512,24 +511,23 @@ public abstract class AbstractTransactCommand<T extends EntryObject<T, I>, I ext
         return new HwvtepOperationalState(getConnectionInstance());
     }
 
-    protected String getNodeKeyStr(final InstanceIdentifier<T> iid) {
+    protected String getNodeKeyStr(final DataObjectIdentifier<T> iid) {
         return getClassType().getTypeName() + "."
-            + iid.firstKeyOf(Node.class).getNodeId().getValue() + "." + getKeyStr(iid);
+            + iid.getFirstKeyOf(Node.class).getNodeId().getValue() + "." + getKeyStr(iid);
     }
 
-    protected String getKeyStr(final InstanceIdentifier<T> iid) {
+    protected String getKeyStr(final DataObjectIdentifier<T> iid) {
         return iid.toString();
     }
 
-    protected String getLsKeyStr(final InstanceIdentifier<?> iid) {
-        return iid.toLegacy().firstKeyOf(LogicalSwitches.class).getHwvtepNodeName() .getValue();
+    protected String getLsKeyStr(final DataObjectIdentifier<?> iid) {
+        return iid.getFirstKeyOf(LogicalSwitches.class).getHwvtepNodeName() .getValue();
     }
 
     protected String getLsKeyStr(final BindingInstanceIdentifier iid) {
-        final var doi = switch (iid) {
+        return getLsKeyStr(switch (iid) {
             case DataObjectIdentifier<?> oi -> oi;
             case PropertyIdentifier<?, ?> pi -> pi.container();
-        };
-        return getLsKeyStr(doi.toLegacy());
+        });
     }
 }

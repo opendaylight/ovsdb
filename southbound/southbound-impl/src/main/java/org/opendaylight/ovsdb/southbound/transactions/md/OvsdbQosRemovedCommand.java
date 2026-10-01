@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -28,7 +27,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntries;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.QosEntriesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,19 +49,18 @@ public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
             return;
         }
 
-        final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
         if (ovsdbNode.isPresent()) {
-            List<InstanceIdentifier<QosEntries>> result = new ArrayList<>();
-            InstanceIdentifier<Node> ovsdbNodeIid =
-                    SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
+            List<DataObjectIdentifier<QosEntries>> result = new ArrayList<>();
+            var ovsdbNodeIid = SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
             for (UUID qosUuid : removedQosRows.keySet()) {
                 QosEntriesKey qosKey = getQosEntriesKey(ovsdbNode.orElseThrow(), qosUuid);
                 if (qosKey != null) {
-                    InstanceIdentifier<QosEntries> iid = ovsdbNodeIid
+                    result.add(ovsdbNodeIid.toBuilder()
                         .augmentation(OvsdbNodeAugmentation.class)
-                        .child(QosEntries.class, qosKey);
-                    result.add(iid);
+                        .child(QosEntries.class, qosKey)
+                        .build());
                 }
             }
             deleteQos(transaction, result);
@@ -86,9 +84,9 @@ public class OvsdbQosRemovedCommand extends AbstractTransactionCommand {
     }
 
     private static void deleteQos(ReadWriteTransaction transaction,
-            List<InstanceIdentifier<QosEntries>> qosEntryIids) {
-        for (InstanceIdentifier<QosEntries> qosEntryIid: qosEntryIids) {
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, qosEntryIid.toIdentifier());
+            List<DataObjectIdentifier<QosEntries>> qosEntryIids) {
+        for (var qosEntryIid: qosEntryIids) {
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, qosEntryIid);
         }
     }
 }

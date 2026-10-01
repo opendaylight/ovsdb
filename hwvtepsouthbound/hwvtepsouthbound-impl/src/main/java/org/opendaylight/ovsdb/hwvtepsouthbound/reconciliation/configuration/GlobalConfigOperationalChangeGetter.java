@@ -25,14 +25,13 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public final class GlobalConfigOperationalChangeGetter {
 
     private GlobalConfigOperationalChangeGetter() {
     }
 
-    public static DataTreeModification<Node> getModification(final InstanceIdentifier<Node> nodeId,
+    public static DataTreeModification<Node> getModification(final DataObjectIdentifier<Node> nodeId,
                                                              final Node configNode, final Node opNode) {
 
         NodeBuilder newNodeBuilder = getNodeBuilderFromNode(configNode);
@@ -91,8 +90,8 @@ public final class GlobalConfigOperationalChangeGetter {
     }
 
     private static String extractHwvtepNodeName(HwvtepLogicalSwitchRef hwvtepLogicalSwitchRef) {
-        return ((DataObjectIdentifier<?>) hwvtepLogicalSwitchRef.getValue()).toLegacy()
-            .firstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
+        return ((DataObjectIdentifier<?>) hwvtepLogicalSwitchRef.getValue())
+            .getFirstKeyOf(LogicalSwitches.class).getHwvtepNodeName().getValue();
     }
 
     static Set<String> getLogicalSwitchesToBeRemoved(final Node configNode, final Node opNode) {

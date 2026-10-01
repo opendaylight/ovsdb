@@ -8,7 +8,6 @@
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -27,7 +26,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public final class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactionCommand {
     private final Map<UUID, PhysicalLocator> updatedPLocRows;
@@ -42,7 +40,7 @@ public final class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactio
 
     @Override
     public void execute(ReadWriteTransaction transaction) {
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         if (updatedPLocRows.isEmpty()) {
             return;
         }
@@ -53,16 +51,15 @@ public final class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactio
     }
 
     private void updateTerminationPoints(ReadWriteTransaction transaction, Node node) {
-        for (Entry<UUID, PhysicalLocator> locUpdate : updatedPLocRows.entrySet()) {
+        for (var locUpdate : updatedPLocRows.entrySet()) {
             PhysicalLocator locator = locUpdate.getValue();
-            InstanceIdentifier<Node> nodeIid = HwvtepSouthboundMapper.createInstanceIdentifier(node.getNodeId());
+            var nodeIid = HwvtepSouthboundMapper.createInstanceIdentifier(node.getNodeId());
             TerminationPointKey tpKey = HwvtepSouthboundMapper.getTerminationPointKey(locator);
             if (nodeIid != null && tpKey != null) {
                 TerminationPointBuilder tpBuilder = new TerminationPointBuilder();
                 tpBuilder.withKey(tpKey);
                 tpBuilder.setTpId(tpKey.getTpId());
-                final InstanceIdentifier<TerminationPoint> tpPath =
-                        HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, locator);
+                final var tpPath = HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, locator);
                 HwvtepPhysicalLocatorAugmentationBuilder tpAugmentationBuilder =
                         new HwvtepPhysicalLocatorAugmentationBuilder();
                 tpAugmentationBuilder.setPhysicalLocatorUuid(new Uuid(locator.getUuid().toString()));
@@ -70,11 +67,9 @@ public final class HwvtepPhysicalLocatorUpdateCommand extends AbstractTransactio
                 setDstIp(tpAugmentationBuilder, locator);
                 tpBuilder.addAugmentation(tpAugmentationBuilder.build());
                 if (oldPLocRows.containsKey(locUpdate.getKey())) {
-                    transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                            tpPath.toIdentifier(), tpBuilder.build());
+                    transaction.merge(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
                 } else {
-                    transaction.put(LogicalDatastoreType.OPERATIONAL,
-                            tpPath.toIdentifier(), tpBuilder.build());
+                    transaction.put(LogicalDatastoreType.OPERATIONAL, tpPath, tpBuilder.build());
                 }
                 addToUpdateTx(TerminationPoint.class, tpPath, locator.getUuid(), locator);
             }

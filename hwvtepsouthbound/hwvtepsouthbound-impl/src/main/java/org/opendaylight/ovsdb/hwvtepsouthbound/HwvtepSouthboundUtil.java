@@ -87,9 +87,9 @@ public final class HwvtepSouthboundUtil {
 
     public static <D extends DataObject> Optional<D> readNode(
             DataBroker db,
-            LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> connectionIid) {
+            LogicalDatastoreType logicalDatastoreType, final DataObjectIdentifier<D> connectionIid) {
         if (logicalDatastoreType == LogicalDatastoreType.OPERATIONAL) {
-            Node node = HwvtepOperGlobalListener.getNode((InstanceIdentifier<Node>) connectionIid);
+            Node node = HwvtepOperGlobalListener.getNode((DataObjectIdentifier<Node>) connectionIid);
             if (node != null) {
                 return Optional.of((D)node);
             } else {
@@ -97,7 +97,7 @@ public final class HwvtepSouthboundUtil {
             }
         }
         try (ReadTransaction transaction = db.newReadOnlyTransaction()) {
-            return transaction.read(logicalDatastoreType, connectionIid.toIdentifier()).get();
+            return transaction.read(logicalDatastoreType, connectionIid).get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Read failed from datastore for Node : {}",connectionIid,e);
             throw new IllegalStateException(e);
@@ -106,9 +106,9 @@ public final class HwvtepSouthboundUtil {
 
     public static <D extends DataObject> Optional<D> readNode(
             ReadTransaction transaction,
-            LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> connectionIid) {
+            LogicalDatastoreType logicalDatastoreType, final DataObjectIdentifier<D> connectionIid) {
         if (logicalDatastoreType == LogicalDatastoreType.OPERATIONAL) {
-            Node node = HwvtepOperGlobalListener.getNode((InstanceIdentifier<Node>) connectionIid);
+            Node node = HwvtepOperGlobalListener.getNode((DataObjectIdentifier<Node>) connectionIid);
             if (node != null) {
                 return Optional.of((D)node);
             } else {
@@ -116,7 +116,7 @@ public final class HwvtepSouthboundUtil {
             }
         }
         try {
-            return transaction.read(logicalDatastoreType, connectionIid.toIdentifier()).get();
+            return transaction.read(logicalDatastoreType, connectionIid).get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Read failed from datastore for Node : {}",connectionIid,e);
             throw new IllegalStateException(e);
@@ -124,15 +124,15 @@ public final class HwvtepSouthboundUtil {
     }
 
     public static <D extends DataObject> Optional<D> readNode(
-            ReadWriteTransaction transaction, final InstanceIdentifier<D> connectionIid) {
+            ReadWriteTransaction transaction, final DataObjectIdentifier<D> connectionIid) {
         return readNode(transaction, LogicalDatastoreType.OPERATIONAL, connectionIid);
     }
 
     public static <D extends DataObject> Optional<D> readNode(ReadWriteTransaction transaction,
                                                               LogicalDatastoreType logicalDatastoreType,
-                                                              InstanceIdentifier<D> connectionIid) {
+                                                              DataObjectIdentifier<D> connectionIid) {
         if (logicalDatastoreType == LogicalDatastoreType.OPERATIONAL) {
-            Node node = HwvtepOperGlobalListener.getNode((InstanceIdentifier<Node>) connectionIid);
+            Node node = HwvtepOperGlobalListener.getNode((DataObjectIdentifier<Node>) connectionIid);
             if (node != null) {
                 return Optional.of((D)node);
             } else {
@@ -140,7 +140,7 @@ public final class HwvtepSouthboundUtil {
             }
         }
         try {
-            return transaction.read(logicalDatastoreType, connectionIid.toIdentifier()).get();
+            return transaction.read(logicalDatastoreType, connectionIid).get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Read failed from datastore for Node : {}",connectionIid,e);
             throw new IllegalStateException(e);
@@ -167,9 +167,8 @@ public final class HwvtepSouthboundUtil {
     public static Optional<HwvtepGlobalAugmentation> getManagingNode(DataBroker db, HwvtepGlobalRef ref) {
         try {
             @SuppressWarnings("unchecked")
-            // Note: erasure makes this safe in combination with the typecheck
-            // below
-            InstanceIdentifier<Node> path = ((DataObjectIdentifier<Node>) ref.getValue()).toLegacy();
+            // Note: erasure makes this safe in combination with the typecheck below
+            DataObjectIdentifier<Node> path = (DataObjectIdentifier<Node>) ref.getValue();
 
             Optional<Node> optional = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, path);
             if (optional != null && optional.isPresent()) {
@@ -259,15 +258,17 @@ public final class HwvtepSouthboundUtil {
         return map == null || map.isEmpty();
     }
 
-    public static InstanceIdentifier<Node> getGlobalNodeIid(final InstanceIdentifier<Node> physicalNodeIid) {
-        String nodeId = physicalNodeIid.firstKeyOf(Node.class).getNodeId().getValue();
+    public static DataObjectIdentifier<Node> getGlobalNodeIid(final DataObjectIdentifier<Node> physicalNodeIid) {
+        String nodeId = physicalNodeIid.getFirstKeyOf(Node.class).getNodeId().getValue();
         int physicalSwitchIndex = nodeId.indexOf(HwvtepSouthboundConstants.PSWITCH_URI_PREFIX);
         if (physicalSwitchIndex > 0) {
             nodeId = nodeId.substring(0, physicalSwitchIndex - 1);
         } else {
             return null;
         }
-        return physicalNodeIid.firstIdentifierOf(Topology.class).child(Node.class , new NodeKey(new NodeId(nodeId)));
+        return physicalNodeIid.trimTo(Topology.class).toBuilder()
+            .child(Node.class , new NodeKey(new NodeId(nodeId)))
+            .build();
     }
 
     public static Integer getRemotePort(Node node) {

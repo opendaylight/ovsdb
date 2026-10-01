@@ -32,7 +32,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,18 +47,18 @@ public class PhysicalPortUpdateCommand
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<TerminationPoint>> createds =
+        Map<DataObjectIdentifier<Node>, List<TerminationPoint>> createds =
                 extractCreated(getChanges(),TerminationPoint.class);
         if (!createds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<TerminationPoint>> created:
+            for (Entry<DataObjectIdentifier<Node>, List<TerminationPoint>> created:
                 createds.entrySet()) {
                 updatePhysicalPort(transaction,  created.getKey(), created.getValue());
             }
         }
-        Map<InstanceIdentifier<Node>, List<TerminationPoint>> updateds =
+        Map<DataObjectIdentifier<Node>, List<TerminationPoint>> updateds =
                 extractUpdatedPorts(getChanges(), TerminationPoint.class);
         if (!updateds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<TerminationPoint>> updated:
+            for (Entry<DataObjectIdentifier<Node>, List<TerminationPoint>> updated:
                 updateds.entrySet()) {
                 updatePhysicalPort(transaction,  updated.getKey(), updated.getValue());
             }
@@ -67,12 +66,14 @@ public class PhysicalPortUpdateCommand
     }
 
     public void updatePhysicalPort(final TransactionBuilder transaction,
-                                   final InstanceIdentifier<Node> psNodeiid,
+                                   final DataObjectIdentifier<Node> psNodeiid,
                                    final List<TerminationPoint> listPort) {
         if (listPort != null) {
             for (TerminationPoint port : listPort) {
                 LOG.debug("Processing port {}", port);
-                InstanceIdentifier<TerminationPoint> tpIId = psNodeiid.child(TerminationPoint.class, port.key());
+                DataObjectIdentifier<TerminationPoint> tpIId = psNodeiid.toBuilder()
+                    .child(TerminationPoint.class, port.key())
+                    .build();
                 HwvtepPhysicalPortAugmentation hwvtepPhysicalPortAugmentation =
                         port.augmentation(HwvtepPhysicalPortAugmentation.class);
                 if (hwvtepPhysicalPortAugmentation != null) {
@@ -83,17 +84,18 @@ public class PhysicalPortUpdateCommand
     }
 
     @Override
-    public void onConfigUpdate(final TransactionBuilder transaction, final InstanceIdentifier psNodeiid,
-                               final TerminationPoint port, final InstanceIdentifier tpIId, final Object... extraData) {
+    public void onConfigUpdate(final TransactionBuilder transaction, final DataObjectIdentifier psNodeiid,
+                               final TerminationPoint port, final DataObjectIdentifier tpIId,
+                               final Object... extraData) {
         doDeviceTransaction(transaction, psNodeiid, port, tpIId);
     }
 
     @Override
-    public void doDeviceTransaction(final TransactionBuilder transaction, final InstanceIdentifier nodeIid,
-                                    final TerminationPoint data, final InstanceIdentifier key,
+    public void doDeviceTransaction(final TransactionBuilder transaction, final DataObjectIdentifier nodeIid,
+                                    final TerminationPoint data, final DataObjectIdentifier key,
                                     final Object... extraData) {
         LOG.debug("Processing port doDeviceTransaction {}", data);
-        final InstanceIdentifier<Node> psNodeiid = nodeIid;
+        final DataObjectIdentifier<Node> psNodeiid = nodeIid;
         HwvtepPhysicalPortAugmentation port = data.augmentation(HwvtepPhysicalPortAugmentation.class);
         if (port == null) {
             LOG.info("No port augmentation found for port {}", data);
@@ -174,10 +176,10 @@ public class PhysicalPortUpdateCommand
         }
     }
 
-    private Map<Long, UUID> setVlanBindings(final InstanceIdentifier<Node> psNodeiid,
+    private Map<Long, UUID> setVlanBindings(final DataObjectIdentifier<Node> psNodeiid,
                                             final PhysicalPort physicalPort,
                                             final TerminationPoint inputPhysicalPort,
-                                            final InstanceIdentifier key,
+                                            final DataObjectIdentifier key,
                                             final TransactionBuilder transaction) {
         HwvtepPhysicalPortAugmentation portAugmentation = inputPhysicalPort.augmentation(
                 HwvtepPhysicalPortAugmentation.class);
@@ -185,8 +187,8 @@ public class PhysicalPortUpdateCommand
         //get UUID by LogicalSwitchRef
         for (VlanBindings vlanBinding : portAugmentation.nonnullVlanBindings().values()) {
             @SuppressWarnings("unchecked")
-            InstanceIdentifier<LogicalSwitches> lswitchIid =
-                ((DataObjectIdentifier<LogicalSwitches>) vlanBinding.getLogicalSwitchRef().getValue()).toLegacy();
+            DataObjectIdentifier<LogicalSwitches> lswitchIid =
+                ((DataObjectIdentifier<LogicalSwitches>) vlanBinding.getLogicalSwitchRef().getValue());
 
             Map inTransitDependencies = DEPENDENCY_GETTER.getInTransitDependencies(
                 getOperationalState(), vlanBinding);
@@ -213,9 +215,9 @@ public class PhysicalPortUpdateCommand
         return bindingMap;
     }
 
-    private void createOperWaitingJob(final InstanceIdentifier<Node> psNodeiid,
+    private void createOperWaitingJob(final DataObjectIdentifier<Node> psNodeiid,
                                       final TerminationPoint inputPhysicalPort,
-                                      final InstanceIdentifier<TerminationPoint> key,
+                                      final DataObjectIdentifier<TerminationPoint> key,
                                       final Map inTransitDependencies) {
         if (getDeviceInfo().isKeyInDependencyQueue(key)) {
             return;
@@ -240,9 +242,9 @@ public class PhysicalPortUpdateCommand
         getDeviceInfo().addJobToQueue(opWaitingJob);
     }
 
-    private void createConfigWaitJob(final InstanceIdentifier<Node> psNodeiid,
+    private void createConfigWaitJob(final DataObjectIdentifier<Node> psNodeiid,
                                      final TerminationPoint inputPhysicalPort,
-                                     final InstanceIdentifier<TerminationPoint> key,
+                                     final DataObjectIdentifier<TerminationPoint> key,
                                      final Map configDependencies) {
         if (getDeviceInfo().isKeyInDependencyQueue(key)) {
             return;
@@ -270,26 +272,26 @@ public class PhysicalPortUpdateCommand
     static class VlanBindingsUnMetDependencyGetter extends UnMetDependencyGetter<VlanBindings> {
 
         @Override
-        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final VlanBindings data) {
+        public List<DataObjectIdentifier<?>> getLogicalSwitchDependencies(final VlanBindings data) {
             if (data == null) {
                 return Collections.emptyList();
             }
             return Collections.singletonList(
-                ((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue()).toLegacy());
+                ((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue()));
         }
 
         @Override
-        public List<InstanceIdentifier<?>> getTerminationPointDependencies(final VlanBindings data) {
+        public List<DataObjectIdentifier<?>> getTerminationPointDependencies(final VlanBindings data) {
             return Collections.emptyList();
         }
     }
 
-    private static Map<InstanceIdentifier<Node>, List<TerminationPoint>> extractCreated(
+    private static Map<DataObjectIdentifier<Node>, List<TerminationPoint>> extractCreated(
             final Collection<DataTreeModification<Node>> changes, final Class<TerminationPoint> class1) {
-        Map<InstanceIdentifier<Node>, List<TerminationPoint>> result = new HashMap<>();
+        Map<DataObjectIdentifier<Node>, List<TerminationPoint>> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+                final DataObjectIdentifier<Node> key = change.path();
                 final DataObjectModification<Node> mod = change.getRootNode();
                 Node created = TransactUtils.getCreated(mod);
                 if (created != null) {
@@ -308,12 +310,12 @@ public class PhysicalPortUpdateCommand
         return result;
     }
 
-    private static Map<InstanceIdentifier<Node>, List<TerminationPoint>> extractUpdatedPorts(
+    private static Map<DataObjectIdentifier<Node>, List<TerminationPoint>> extractUpdatedPorts(
             final Collection<DataTreeModification<Node>> changes, final Class<TerminationPoint> class1) {
-        Map<InstanceIdentifier<Node>, List<TerminationPoint>> result = new HashMap<>();
+        Map<DataObjectIdentifier<Node>, List<TerminationPoint>> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+                final DataObjectIdentifier<Node> key = change.path();
                 final DataObjectModification<Node> mod = change.getRootNode();
                 Node updated = TransactUtils.getUpdated(mod);
                 Node before = mod.dataBefore();
@@ -343,13 +345,12 @@ public class PhysicalPortUpdateCommand
     }
 
     @Override
-    protected String getKeyStr(final InstanceIdentifier iid) {
+    protected String getKeyStr(final DataObjectIdentifier iid) {
         try {
-            return ((TerminationPoint)iid.firstKeyOf(TerminationPoint.class)).getTpId().getValue();
+            return iid.getFirstKeyOf(TerminationPoint.class).getTpId().getValue();
         } catch (ClassCastException exp) {
             LOG.error("Error in getting the TerminationPoint id ", exp);
         }
         return super.getKeyStr(iid);
     }
-
 }

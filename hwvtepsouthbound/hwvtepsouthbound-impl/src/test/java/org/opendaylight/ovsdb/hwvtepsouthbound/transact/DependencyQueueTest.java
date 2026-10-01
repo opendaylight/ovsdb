@@ -25,7 +25,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.EntryObject;
@@ -43,7 +42,7 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
     RemoteMcastMacs mac;
     DataObjectIdentifier<RemoteMcastMacs> macIid;
     DataObjectIdentifier<LogicalSwitches> lsIid;
-    Map<Class<? extends EntryObject<?, ?>>, List<DataObjectIdentifier>> unMetDependencies;
+    Map<Class<? extends EntryObject<?, ?, ?>>, List<DataObjectIdentifier>> unMetDependencies;
 
     void setupForTest() throws Exception {
         mcastMacDataValidator = McastMacsRemoteUpdateCommand.MCAST_MAC_DATA_VALIDATOR;
@@ -54,7 +53,7 @@ public class DependencyQueueTest extends DataChangeListenerTestBase {
                 .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")))
                 .build();
         macIid = nodeIid.toBuilder().augmentation(HwvtepGlobalAugmentation.class)
-                .child(RemoteMcastMacs.class, new RemoteMcastMacsKey(mac.key()))
+                .child(RemoteMcastMacs.class, mac.key())
                 .build();
     }
 

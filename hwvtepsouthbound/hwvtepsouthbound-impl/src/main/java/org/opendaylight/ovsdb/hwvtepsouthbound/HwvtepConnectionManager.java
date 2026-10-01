@@ -512,7 +512,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
             hwvtepConnectionInstance.setControllerTxHistory(controllerLog);
             hwvtepConnectionInstance.setDeviceUpdateHistory(deviceLog);
         }
-        Entity deviceEntity = new Entity(ENTITY_TYPE, iid.toLegacy());
+        Entity deviceEntity = new Entity(ENTITY_TYPE, iid);
         LOG.debug("Entity {} created for device connection {}",
                 deviceEntity, hwvtepConnectionInstance.getConnectionInfo());
         return deviceEntity;
@@ -524,8 +524,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     }
 
     public void reconcileConnection(final DataObjectIdentifier<Node> iid, final HwvtepGlobalAugmentation hwvtepNode) {
-        retryConnection(iid, hwvtepNode,
-                ConnectionReconciliationTriggers.ON_CONTROLLER_INITIATED_CONNECTION_FAILURE);
+        retryConnection(iid, hwvtepNode, ConnectionReconciliationTriggers.ON_CONTROLLER_INITIATED_CONNECTION_FAILURE);
     }
 
     public void stopConnectionReconciliationIfActive(final DataObjectIdentifier<?> iid,

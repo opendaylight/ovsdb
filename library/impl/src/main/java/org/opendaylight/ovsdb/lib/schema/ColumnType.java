@@ -52,8 +52,7 @@ public abstract class ColumnType {
             }
         }
         //todo move to speicfic typed exception
-        throw new TyperException(String.format("could not find the right column type %s",
-                JsonUtils.prettyString(json)));
+        throw new TyperException("could not find the right column type " + JsonUtils.prettyString(json));
     }
 
     public BaseType getBaseType() {

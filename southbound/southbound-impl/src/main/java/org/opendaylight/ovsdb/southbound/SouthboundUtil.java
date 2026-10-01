@@ -33,7 +33,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,14 +93,14 @@ public final class SouthboundUtil {
     }
 
     public static <D extends DataObject> Optional<D> readNode(ReadWriteTransaction transaction,
-        InstanceIdentifier<D> connectionIid) {
+            DataObjectIdentifier<D> connectionIid) {
         Optional<D> node;
         try {
             Node cachedNode = OvsdbOperGlobalListener.OPER_NODE_CACHE.get(connectionIid);
             if (cachedNode != null) {
                 node = Optional.of((D)cachedNode);
             } else {
-                node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid.toIdentifier()).get();
+                node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid).get();
             }
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Read Operational/DS for Node failed! {}", connectionIid, e);
@@ -111,14 +110,14 @@ public final class SouthboundUtil {
     }
 
     public static <D extends DataObject> Optional<D> readNode(ReadTransaction transaction,
-                                                              InstanceIdentifier<D> connectionIid) {
+                                                              DataObjectIdentifier<D> connectionIid) {
         Optional<D> node;
         try {
             Node cachedNode = OvsdbOperGlobalListener.OPER_NODE_CACHE.get(connectionIid);
             if (cachedNode != null) {
                 node = Optional.of((D)cachedNode);
             } else {
-                node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid.toIdentifier()).get();
+                node = transaction.read(LogicalDatastoreType.OPERATIONAL, connectionIid).get();
             }
         } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Read Operational/DS for Node failed! {}", connectionIid, e);
@@ -202,12 +201,12 @@ public final class SouthboundUtil {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public static String getOvsdbNodeId(InstanceIdentifier<Node> nodeIid) {
+    public static String getOvsdbNodeId(DataObjectIdentifier<Node> nodeIid) {
         String nodeId = "";
         if (nodeIid != null) {
             try {
                 nodeId = nodeIid.toString();
-                nodeId = nodeIid.firstKeyOf(Node.class).getNodeId().getValue();
+                nodeId = nodeIid.getFirstKeyOf(Node.class).getNodeId().getValue();
             } catch (Exception exp) {
                 LOG.debug("Exception in getting the value from {} ", nodeIid);
             }
@@ -215,7 +214,7 @@ public final class SouthboundUtil {
         return nodeId;
     }
 
-    public static String getBridgeNameFromOvsdbNodeId(InstanceIdentifier<Node> nodeIid) {
+    public static String getBridgeNameFromOvsdbNodeId(DataObjectIdentifier<Node> nodeIid) {
         String nodeId = getOvsdbNodeId(nodeIid);
         if (nodeId != null && !nodeId.isEmpty() && nodeId.contains("bridge")
                 && nodeId.lastIndexOf("bridge") + 7 < nodeId.length()) {

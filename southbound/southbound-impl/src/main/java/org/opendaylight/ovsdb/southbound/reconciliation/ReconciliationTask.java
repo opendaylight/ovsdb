@@ -12,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 import org.opendaylight.ovsdb.southbound.OvsdbConnectionManager;
 import org.opendaylight.ovsdb.southbound.reconciliation.connection.ConnectionReconciliationTask;
 import org.opendaylight.yangtools.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 
 /**
  * Abstract implementation of a reconciliation task. Each new type of
@@ -22,12 +22,12 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 public abstract class ReconciliationTask implements Runnable {
     protected final ReconciliationManager reconciliationManager;
     protected final OvsdbConnectionManager connectionManager;
-    protected final InstanceIdentifier<?> nodeIid;
+    protected final DataObjectIdentifier<?> nodeIid;
     protected final DataObject configData;
 
     protected ReconciliationTask(final ReconciliationManager reconciliationManager,
                                  final OvsdbConnectionManager connectionManager,
-                                 final InstanceIdentifier<?> nodeIid, final DataObject configData) {
+                                 final DataObjectIdentifier<?> nodeIid, final DataObject configData) {
         this.reconciliationManager = requireNonNull(reconciliationManager, "Reconciliation manager must not be null");
         this.connectionManager = requireNonNull(connectionManager, "Connection manager must not be null");
         this.nodeIid = requireNonNull(nodeIid, "Node Iid must not be null");

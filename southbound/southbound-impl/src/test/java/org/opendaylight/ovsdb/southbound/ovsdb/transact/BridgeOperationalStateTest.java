@@ -29,9 +29,11 @@ import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.ovsdb.southbound.OvsdbOperGlobalListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow10;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
@@ -43,13 +45,11 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BridgeOperationalStateTest {
     private final Node nd = new NodeBuilder().setNodeId(new NodeId("foo")).build();
-    private final InstanceIdentifier<Node> nodeIid = InstanceIdentifier.create(NetworkTopology.class)
-            .child(Topology.class).child(Node.class);
     private final Node brNode = new NodeBuilder().setNodeId(new NodeId("bar")).build();
 
     @Mock
@@ -58,49 +58,52 @@ public class BridgeOperationalStateTest {
     private DataBroker db;
     @Mock
     private ReadTransaction mockReadTx;
-    private InstanceIdentifier<ProtocolEntry> protocolEntry;
-    private InstanceIdentifier<Node> iidNode;
+    private DataObjectIdentifier<ProtocolEntry> protocolEntry;
+    private DataObjectIdentifier<Node> iidNode;
 
     @Before
     public void setUp() throws Exception {
-        iidNode = InstanceIdentifier.create(NetworkTopology.class)
+        iidNode = DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(new TopologyId("foo")))
-                .child(Node.class, new NodeKey(nd.getNodeId()));
-        protocolEntry = InstanceIdentifier.create(NetworkTopology.class).child(Topology.class).child(Node.class)
-                .augmentation(OvsdbBridgeAugmentation.class).child(ProtocolEntry.class);
+                .child(Node.class, new NodeKey(nd.getNodeId()))
+                .build();
+        protocolEntry = iidNode.toBuilder()
+            .augmentation(OvsdbBridgeAugmentation.class)
+            .child(ProtocolEntry.class, new ProtocolEntryKey(OvsdbBridgeProtocolOpenflow10.VALUE))
+            .build();
         doReturn(mockReadTx).when(db).newReadOnlyTransaction();
-        OvsdbOperGlobalListener.OPER_NODE_CACHE.put(nodeIid, brNode);
+        OvsdbOperGlobalListener.OPER_NODE_CACHE.put(iidNode, brNode);
 
         briOperationState = spy(new BridgeOperationalState(db));
     }
 
     @Test
     public void testGetBridgeNode() {
-        assertEquals(Optional.of(brNode), briOperationState.getBridgeNode(nodeIid));
+        assertEquals(Optional.of(brNode), briOperationState.getBridgeNode(iidNode));
     }
 
     @Test
     public void testGetOvsdbBridgeAugmentation() throws Exception {
-        Optional<OvsdbBridgeAugmentation> optOvsdbBri = briOperationState.getOvsdbBridgeAugmentation(nodeIid);
-        verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
+        Optional<OvsdbBridgeAugmentation> optOvsdbBri = briOperationState.getOvsdbBridgeAugmentation(iidNode);
+        verify(briOperationState, times(1)).getBridgeNode(any(DataObjectIdentifier.class));
         assertNotNull(optOvsdbBri);
         assertTrue(optOvsdbBri.equals(Optional.empty()));
 
         Node node = mock(Node.class);
         Optional<Node> optNode = Optional.of(node);
-        doReturn(optNode).when(briOperationState).getBridgeNode(any(InstanceIdentifier.class));
+        doReturn(optNode).when(briOperationState).getBridgeNode(any(DataObjectIdentifier.class));
         OvsdbBridgeAugmentation ovsdbBriAug = mock(OvsdbBridgeAugmentation.class);
         doReturn(ovsdbBriAug).when(node).augmentation(OvsdbBridgeAugmentation.class);
         Optional<OvsdbBridgeAugmentation> ovsdbBriAugOptional = briOperationState.getOvsdbBridgeAugmentation(
-            InstanceIdentifier.create(NetworkTopology.class));
+            DataObjectIdentifier.builder(NetworkTopology.class).build());
         assertNotNull(ovsdbBriAugOptional);
         assertTrue(ovsdbBriAugOptional.orElseThrow() instanceof OvsdbBridgeAugmentation);
     }
 
     @Test
     public void testGetBridgeTerminationPoint() throws Exception {
-        Optional<TerminationPoint> optTerm = briOperationState.getBridgeTerminationPoint(nodeIid);
-        verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
+        Optional<TerminationPoint> optTerm = briOperationState.getBridgeTerminationPoint(iidNode);
+        verify(briOperationState, times(1)).getBridgeNode(any(DataObjectIdentifier.class));
         assertNotNull(optTerm);
         assertTrue(optTerm.equals(Optional.empty()));
 
@@ -108,40 +111,40 @@ public class BridgeOperationalStateTest {
 
         Node node = mock(Node.class);
         Optional<Node> optNode = Optional.of(node);
-        doReturn(optNode).when(briOperationState).getBridgeNode(any(InstanceIdentifier.class));
+        doReturn(optNode).when(briOperationState).getBridgeNode(any(DataObjectIdentifier.class));
         when(node.nonnullTerminationPoint()).thenCallRealMethod();
         when(node.getTerminationPoint()).thenReturn(Map.of(termPnt.key(), termPnt));
 
         Optional<TerminationPoint> optTermPnt = briOperationState.getBridgeTerminationPoint(
-            iidNode.child(TerminationPoint.class, termPnt.key()));
+            iidNode.toBuilder().child(TerminationPoint.class, termPnt.key()).build());
         assertTrue(optTermPnt.isPresent());
     }
 
     @Test
     public void testGetOvsdbTerminationPointAugmentation() {
         Optional<OvsdbTerminationPointAugmentation> optOvsdbTermPoint = briOperationState
-                .getOvsdbTerminationPointAugmentation(nodeIid);
+                .getOvsdbTerminationPointAugmentation(iidNode);
         assertNotNull(optOvsdbTermPoint);
-        verify(briOperationState, times(1)).getBridgeTerminationPoint(any(InstanceIdentifier.class));
-        verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
+        verify(briOperationState, times(1)).getBridgeTerminationPoint(any(DataObjectIdentifier.class));
+        verify(briOperationState, times(1)).getBridgeNode(any(DataObjectIdentifier.class));
         assertTrue(optOvsdbTermPoint.equals(Optional.empty()));
 
         TerminationPoint termPoint = mock(TerminationPoint.class);
         Optional<TerminationPoint> termPntOptional = Optional.of(termPoint);
-        doReturn(termPntOptional).when(briOperationState).getBridgeTerminationPoint(any(InstanceIdentifier.class));
+        doReturn(termPntOptional).when(briOperationState).getBridgeTerminationPoint(any(DataObjectIdentifier.class));
         OvsdbTerminationPointAugmentation ovsdbTermPntAug = mock(OvsdbTerminationPointAugmentation.class);
         doReturn(ovsdbTermPntAug).when(termPoint).augmentation(OvsdbTerminationPointAugmentation.class);
         Optional<OvsdbTerminationPointAugmentation> ovsdbTermPointOpt = briOperationState
-                .getOvsdbTerminationPointAugmentation(InstanceIdentifier.create(NetworkTopology.class));
+                .getOvsdbTerminationPointAugmentation(DataObjectIdentifier.builder(NetworkTopology.class).build());
         assertNotNull(ovsdbTermPointOpt);
         assertTrue(ovsdbTermPointOpt.orElseThrow() instanceof OvsdbTerminationPointAugmentation);
     }
 
     @Test
     public void testGetControllerEntry() {
-        Optional<ControllerEntry> optController = briOperationState.getControllerEntry(nodeIid);
-        verify(briOperationState, times(1)).getOvsdbBridgeAugmentation(any(InstanceIdentifier.class));
-        verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
+        Optional<ControllerEntry> optController = briOperationState.getControllerEntry(iidNode);
+        verify(briOperationState, times(1)).getOvsdbBridgeAugmentation(any(DataObjectIdentifier.class));
+        verify(briOperationState, times(1)).getBridgeNode(any(DataObjectIdentifier.class));
         assertNotNull(optController);
         assertTrue(optController.equals(Optional.empty()));
     }
@@ -149,8 +152,8 @@ public class BridgeOperationalStateTest {
     @Test
     public void testGetProtocolEntry() throws Exception {
         Optional<ProtocolEntry> optProtocolEntry = briOperationState.getProtocolEntry(protocolEntry);
-        verify(briOperationState, times(1)).getOvsdbBridgeAugmentation(any(InstanceIdentifier.class));
-        verify(briOperationState, times(1)).getBridgeNode(any(InstanceIdentifier.class));
+        verify(briOperationState, times(1)).getOvsdbBridgeAugmentation(any(DataObjectIdentifier.class));
+        verify(briOperationState, times(1)).getBridgeNode(any(DataObjectIdentifier.class));
         assertNotNull(optProtocolEntry);
         assertTrue(optProtocolEntry.equals(Optional.empty()));
     }

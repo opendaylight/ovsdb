@@ -30,7 +30,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.PortExternalIdsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,13 +48,13 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
 
     private final OvsdbConnectionInstance connectionInstance;
     private final InstanceIdentifierCodec instanceIdentifierCodec;
-    private final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+    private final Map<DataObjectIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
         operTerminationPoints;
 
     public TerminationPointConfigReconciliationTask(final ReconciliationManager reconciliationManager,
             final OvsdbConnectionManager connectionManager, final Node bridgeNode,
-            final InstanceIdentifier<?> bridgeIid, final OvsdbConnectionInstance connectionInstance,
-            final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+            final DataObjectIdentifier<?> bridgeIid, final OvsdbConnectionInstance connectionInstance,
+            final Map<DataObjectIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
                 operTerminationPoints,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         super(reconciliationManager, connectionManager, bridgeIid, bridgeNode);
@@ -65,28 +65,28 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
 
     @Override
     public boolean reconcileConfiguration(final OvsdbConnectionManager connectionManager) {
-        final Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
+        final Map<DataObjectIdentifier<?>, DataObject> changes = new HashMap<>();
         final Node configNodeData = (Node) configData;
         LOG.debug("Reconcile Termination Point Configuration for node {}", configNodeData.getNodeId());
         changes.putAll(SouthboundMapper.extractTerminationPointConfigurationChanges(configNodeData));
         DataChangeEvent changeEvents = new DataChangeEvent() {
             @Override
-            public Map<InstanceIdentifier<?>, DataObject> getCreatedData() {
+            public Map<DataObjectIdentifier<?>, DataObject> getCreatedData() {
                 return changes;
             }
 
             @Override
-            public Map<InstanceIdentifier<?>, DataObject> getUpdatedData() {
+            public Map<DataObjectIdentifier<?>, DataObject> getUpdatedData() {
                 return Collections.emptyMap();
             }
 
             @Override
-            public Map<InstanceIdentifier<?>, DataObject> getOriginalData() {
+            public Map<DataObjectIdentifier<?>, DataObject> getOriginalData() {
                 return Collections.emptyMap();
             }
 
             @Override
-            public Set<InstanceIdentifier<?>> getRemovedPaths() {
+            public Set<DataObjectIdentifier<?>> getRemovedPaths() {
                 return Collections.emptySet();
             }
         };
@@ -102,17 +102,15 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
             });
         }
 
-        final Set<InstanceIdentifier<?>> removeTerminationPoints = new HashSet<>();
-        final Map<InstanceIdentifier<?>, DataObject> original = new HashMap<>();
-        final InstanceIdentifier<Node> bridgeNodeIid =
-                SouthboundMapper.createInstanceIdentifier(configNodeData.getNodeId());
+        final Set<DataObjectIdentifier<?>> removeTerminationPoints = new HashSet<>();
+        final Map<DataObjectIdentifier<?>, DataObject> original = new HashMap<>();
+        final var bridgeNodeIid = SouthboundMapper.createInstanceIdentifier(configNodeData.getNodeId());
         original.put(bridgeNodeIid, configNodeData);
         LOG.trace("Config Topology Termination Points during Reconciliation {} for bridge {}",
             configTerminationPoints, bridgeNodeIid);
         LOG.trace("Oper Topology Termination Points during Reconciliation {} for bridge {}",
             operTerminationPoints, bridgeNodeIid);
-        for (Map.Entry<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> entry :
-                operTerminationPoints.entrySet()) {
+        for (var entry : operTerminationPoints.entrySet()) {
             OvsdbTerminationPointAugmentation terminationPoint = entry.getValue();
             if (configTerminationPoints.contains(terminationPoint.getName())) {
                 LOG.trace("Termination Point {} from Oper Topology also present in config topology During Reconcile",
@@ -138,22 +136,22 @@ public class TerminationPointConfigReconciliationTask extends ReconciliationTask
 
         DataChangeEvent deleteChangeEvents = new DataChangeEvent() {
             @Override
-            public Map<InstanceIdentifier<?>, DataObject> getCreatedData() {
+            public Map<DataObjectIdentifier<?>, DataObject> getCreatedData() {
                 return Collections.emptyMap();
             }
 
             @Override
-            public Map<InstanceIdentifier<?>, DataObject> getUpdatedData() {
+            public Map<DataObjectIdentifier<?>, DataObject> getUpdatedData() {
                 return original;
             }
 
             @Override
-            public Map<InstanceIdentifier<?>, DataObject> getOriginalData() {
+            public Map<DataObjectIdentifier<?>, DataObject> getOriginalData() {
                 return original;
             }
 
             @Override
-            public Set<InstanceIdentifier<?>> getRemovedPaths() {
+            public Set<DataObjectIdentifier<?>> getRemovedPaths() {
                 return removeTerminationPoints;
             }
         };

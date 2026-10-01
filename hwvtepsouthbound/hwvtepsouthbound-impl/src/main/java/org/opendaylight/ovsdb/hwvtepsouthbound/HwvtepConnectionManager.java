@@ -66,6 +66,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.ConnectionInfo;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
@@ -85,16 +86,16 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
     private final DataBroker db;
     private final TransactionInvoker txInvoker;
     private final Operations ops;
-    private final Map<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers = new ConcurrentHashMap<>();
+    private final Map<ConnectionInfo, DataObjectIdentifier<Node>> instanceIdentifiers = new ConcurrentHashMap<>();
     private final Map<Entity, HwvtepConnectionInstance> entityConnectionMap = new ConcurrentHashMap<>();
     private final EntityOwnershipService entityOwnershipService;
     private final HwvtepDeviceEntityOwnershipListener hwvtepDeviceEntityOwnershipListener;
     private final ReconciliationManager reconciliationManager;
-    private final Map<InstanceIdentifier<Node>, HwvtepConnectionInstance> nodeIidVsConnectionInstance =
+    private final Map<DataObjectIdentifier<Node>, HwvtepConnectionInstance> nodeIidVsConnectionInstance =
             new ConcurrentHashMap<>();
     private final HwvtepOperGlobalListener hwvtepOperGlobalListener;
-    private final Map<InstanceIdentifier<Node>, TransactionHistory> controllerTxHistory = new ConcurrentHashMap<>();
-    private final Map<InstanceIdentifier<Node>, TransactionHistory> deviceUpdateHistory = new ConcurrentHashMap<>();
+    private final Map<DataObjectIdentifier<Node>, TransactionHistory> controllerTxHistory = new ConcurrentHashMap<>();
+    private final Map<DataObjectIdentifier<Node>, TransactionHistory> deviceUpdateHistory = new ConcurrentHashMap<>();
     private final OvsdbConnection ovsdbConnectionService;
     private final Map<OvsdbClient, OvsdbClient> alreadyProcessedClients = new ConcurrentHashMap<>();
     private final ScheduledExecutorService dependencyExecutor;
@@ -290,7 +291,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         LOG.info("Clients after put: {}", clients);
     }
 
-    void putConnectionInstance(final InstanceIdentifier<Node> nodeIid,
+    void putConnectionInstance(final DataObjectIdentifier<Node> nodeIid,
                                        final HwvtepConnectionInstance connectionInstance) {
         nodeIidVsConnectionInstance.put(nodeIid, connectionInstance);
     }
@@ -380,7 +381,7 @@ public class HwvtepConnectionManager implements OvsdbConnectionListener, AutoClo
         instanceIdentifiers.put(connectionInfo, iid);
     }
 
-    public InstanceIdentifier<Node> getInstanceIdentifier(final ConnectionInfo key) {
+    public DataObjectIdentifier<Node> getInstanceIdentifier(final ConnectionInfo key) {
         ConnectionInfo connectionInfo = HwvtepSouthboundMapper.suppressLocalIpPort(key);
         return instanceIdentifiers.get(connectionInfo);
     }

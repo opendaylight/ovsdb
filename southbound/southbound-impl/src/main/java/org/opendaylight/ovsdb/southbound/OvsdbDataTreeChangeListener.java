@@ -19,7 +19,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
@@ -34,8 +33,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectReference;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,12 +69,11 @@ public final class OvsdbDataTreeChangeListener implements DataTreeChangeListener
         this.cm = cm;
         this.db = db;
         this.instanceIdentifierCodec = instanceIdentifierCodec;
-        InstanceIdentifier<Node> path = InstanceIdentifier
-                .create(NetworkTopology.class)
+        registration = db.registerTreeChangeListener(LogicalDatastoreType.CONFIGURATION,
+            DataObjectReference.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class);
-        DataTreeIdentifier<Node> dataTreeIdentifier = DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION, path);
-        registration = db.registerTreeChangeListener(dataTreeIdentifier, this);
+                .child(Node.class)
+                .build(), this);
         LOG.info("OVSDB topology listener has been registered.");
     }
 
@@ -115,13 +113,13 @@ public final class OvsdbDataTreeChangeListener implements DataTreeChangeListener
                     if (ovsdbNode != null) {
                         ConnectionInfo key = ovsdbNode.getConnectionInfo();
                         if (key != null) {
-                            InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
+                            var iid = cm.getInstanceIdentifier(key);
                             if (iid != null) {
                                 LOG.warn("Connection to device {} already exists. Plugin does not allow multiple "
                                         + "connections to same device, hence dropping the request {}", key, ovsdbNode);
                             } else {
                                 try {
-                                    cm.connect(change.getRootPath().path(), ovsdbNode);
+                                    cm.connect(change.path(), ovsdbNode);
                                     LOG.info("OVSDB node has been connected: {}",ovsdbNode);
                                 } catch (UnknownHostException | ConnectException e) {
                                     LOG.warn("Failed to connect to ovsdbNode", e);
@@ -143,12 +141,12 @@ public final class OvsdbDataTreeChangeListener implements DataTreeChangeListener
                     OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.dataBefore();
                     if (ovsdbNode != null) {
                         ConnectionInfo key = ovsdbNode.getConnectionInfo();
-                        InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
+                        var iid = cm.getInstanceIdentifier(key);
                         try {
                             cm.disconnect(ovsdbNode);
                             LOG.info("OVSDB node has been disconnected:{}", ovsdbNode);
                             if (iid != null) {
-                                cm.stopConnectionReconciliationIfActive(iid.firstIdentifierOf(Node.class), ovsdbNode);
+                                cm.stopConnectionReconciliationIfActive(iid.trimTo(Node.class), ovsdbNode);
                             }
                         } catch (UnknownHostException e) {
                             LOG.warn("Failed to disconnect ovsdbNode", e);
@@ -167,14 +165,13 @@ public final class OvsdbDataTreeChangeListener implements DataTreeChangeListener
                         if (connectionInfoDOM.modificationType() == DataObjectModification.ModificationType.DELETE) {
                             ConnectionInfo key = connectionInfoDOM.dataBefore();
                             if (key != null) {
-                                InstanceIdentifier<Node> iid = cm.getInstanceIdentifier(key);
+                                var iid = cm.getInstanceIdentifier(key);
                                 try {
                                     OvsdbNodeAugmentation ovsdbNode = ovsdbNodeModification.dataBefore();
                                     cm.disconnect(ovsdbNode);
                                     LOG.warn("OVSDB node {} has been disconnected, because connection-info related to "
                                             + "the node is removed by user, but node still exist.", ovsdbNode);
-                                    cm.stopConnectionReconciliationIfActive(iid.firstIdentifierOf(Node.class),
-                                        ovsdbNode);
+                                    cm.stopConnectionReconciliationIfActive(iid.trimTo(Node.class), ovsdbNode);
                                 } catch (UnknownHostException e) {
                                     LOG.warn("Failed to disconnect ovsdbNode", e);
                                 }
@@ -205,7 +202,7 @@ public final class OvsdbDataTreeChangeListener implements DataTreeChangeListener
                                         if (dataBefore != null) {
                                             try {
                                                 cm.disconnect(dataBefore);
-                                                cm.connect(change.getRootPath().path(), dataAfter);
+                                                cm.connect(change.path(), dataAfter);
                                             } catch (UnknownHostException | ConnectException e) {
                                                 LOG.warn("Error disconnecting from or connecting to ovsdbNode", e);
                                             }
@@ -253,15 +250,14 @@ public final class OvsdbDataTreeChangeListener implements DataTreeChangeListener
                     if (bridgeAugmentation != null) {
                         OvsdbNodeRef managedBy = bridgeAugmentation.getManagedBy();
                         if (managedBy != null) {
-                            client = cm.getConnectionInstance(
-                                ((DataObjectIdentifier<Node>) managedBy.getValue()).toLegacy());
+                            client = cm.getConnectionInstance(((DataObjectIdentifier<Node>) managedBy.getValue()));
                         }
                     }
                 }
 
                 if (client == null) {
                     //Try getting from change root identifier
-                    client = cm.getConnectionInstance(change.getRootPath().path());
+                    client = cm.getConnectionInstance(change.path());
                 }
             } else {
                 LOG.warn("Following change don't have after/before data {}", change);

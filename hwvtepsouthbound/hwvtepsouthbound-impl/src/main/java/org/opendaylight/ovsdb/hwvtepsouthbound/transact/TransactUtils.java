@@ -150,7 +150,7 @@ public final class TransactUtils {
 
     public static UUID createPhysicalLocator(final TransactionBuilder transaction,
                                              final HwvtepOperationalState operationalState,
-                                             final InstanceIdentifier<TerminationPoint> iid) {
+                                             final DataObjectIdentifier<TerminationPoint> iid) {
         UUID locatorUuid = null;
         HwvtepDeviceInfo.DeviceData deviceData = operationalState.getDeviceInfo().getDeviceOperData(
                 TerminationPoint.class, iid);
@@ -230,14 +230,14 @@ public final class TransactUtils {
         return HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX + sanitizeUUID(lswitch.getHwvtepNodeName());
     }
 
-    public static UUID getLogicalSwitchUUID(final InstanceIdentifier<LogicalSwitches> lswitchIid) {
+    public static UUID getLogicalSwitchUUID(final DataObjectIdentifier<LogicalSwitches> lswitchIid) {
         return new UUID(HwvtepSouthboundConstants.LOGICALSWITCH_UUID_PREFIX
-                + sanitizeUUID(lswitchIid.firstKeyOf(LogicalSwitches.class).getHwvtepNodeName()));
+                + sanitizeUUID(lswitchIid.getFirstKeyOf(LogicalSwitches.class).getHwvtepNodeName()));
     }
 
     public static UUID getLogicalSwitchUUID(final TransactionBuilder transaction,
                                             final HwvtepOperationalState operationalState,
-                                            final InstanceIdentifier<LogicalSwitches> lswitchIid) {
+                                            final DataObjectIdentifier<LogicalSwitches> lswitchIid) {
         HwvtepDeviceInfo hwvtepDeviceInfo = operationalState.getDeviceInfo();
         HwvtepDeviceInfo.DeviceData lsData = hwvtepDeviceInfo.getDeviceOperData(LogicalSwitches.class, lswitchIid);
         if (lsData != null) {
@@ -253,7 +253,7 @@ public final class TransactUtils {
         MdsalUtils mdsalUtils = new MdsalUtils(operationalState.getDataBroker());
         LogicalSwitches ls = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, lswitchIid);
         if (ls != null) {
-            cmd.updateLogicalSwitch(transaction, lswitchIid.firstIdentifierOf(Node.class), List.of(ls));
+            cmd.updateLogicalSwitch(transaction, lswitchIid.trimTo(Node.class), List.of(ls));
         } else {
             LOG.error("Could not find logical switch in config ds {}", lswitchIid);
             return null;
@@ -265,14 +265,14 @@ public final class TransactUtils {
         return HwvtepSouthboundConstants.LOGICALROUTER_UUID_PREFIX + sanitizeUUID(lrouter.getHwvtepNodeName());
     }
 
-    public static UUID getAclUUID(final InstanceIdentifier<Acls> aclIid) {
+    public static UUID getAclUUID(final DataObjectIdentifier<Acls> aclIid) {
         return new UUID(HwvtepSouthboundConstants.ACL_UUID_PREFIX
-                + sanitizeUUID(aclIid.firstKeyOf(Acls.class).getAclName()));
+                + sanitizeUUID(aclIid.getFirstKeyOf(Acls.class).getAclName()));
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private static void addLocatorToTransactionHistory(final HwvtepOperationalState hwvtepOperationalState,
-            final Set<String> locatorsInfo, final InstanceIdentifier<TerminationPoint> iid) {
+            final Set<String> locatorsInfo, final DataObjectIdentifier<TerminationPoint> iid) {
         try {
             HwvtepDeviceInfo.DeviceData deviceData = hwvtepOperationalState.getDeviceInfo().getDeviceOperData(
                     TerminationPoint.class, iid);

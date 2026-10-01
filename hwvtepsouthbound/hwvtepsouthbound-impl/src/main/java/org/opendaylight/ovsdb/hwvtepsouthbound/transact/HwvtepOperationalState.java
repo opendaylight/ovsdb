@@ -65,14 +65,14 @@ public class HwvtepOperationalState {
 
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperationalState.class);
 
-    private final Map<InstanceIdentifier<Node>, Node> operationalNodes = new HashMap<>();
+    private final Map<DataObjectIdentifier<Node>, Node> operationalNodes = new HashMap<>();
     private ReadWriteTransaction transaction;
-    HashMap<InstanceIdentifier<TerminationPoint>, UUID> inflightLocators = new HashMap<>();
+    HashMap<DataObjectIdentifier<TerminationPoint>, UUID> inflightLocators = new HashMap<>();
     private final HwvtepDeviceInfo deviceInfo;
     private final HwvtepConnectionInstance connectionInstance;
-    private final Map<Class<? extends EntryObject<?, ?>>, Map<InstanceIdentifier, UUID>> currentTxUUIDs =
+    private final Map<Class<? extends EntryObject<?, ?>>, Map<DataObjectIdentifier, UUID>> currentTxUUIDs =
             new ConcurrentHashMap<>();
-    private final Map<Class<? extends EntryObject<?, ?>>, Map<InstanceIdentifier, Boolean>> currentTxDeletedKeys =
+    private final Map<Class<? extends EntryObject<?, ?>>, Map<DataObjectIdentifier, Boolean>> currentTxDeletedKeys =
             new ConcurrentHashMap<>();
 
     /* stores the modified and deleted data for each child type of each node id
@@ -80,7 +80,7 @@ public class HwvtepOperationalState {
        each updated/ deleted contains Map < child type, List<ChildData>>
        child type is the child of hwvtep Global augmentation
      */
-    private Map<InstanceIdentifier<Node>,
+    private Map<DataObjectIdentifier<Node>,
             Pair<Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>,
                     Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>>> modifiedData = new HashMap<>();
     private boolean inReconciliation = false;
@@ -177,48 +177,48 @@ public class HwvtepOperationalState {
         }
     }
 
-    public Optional<Node> getGlobalNode(final InstanceIdentifier<?> iid) {
-        InstanceIdentifier<Node> nodeIid = iid.firstIdentifierOf(Node.class);
+    public Optional<Node> getGlobalNode(final DataObjectIdentifier<?> iid) {
+        DataObjectIdentifier<Node> nodeIid = iid.trimTo(Node.class);
         return Optional.ofNullable(operationalNodes.get(nodeIid));
     }
 
-    public Optional<HwvtepGlobalAugmentation> getHwvtepGlobalAugmentation(final InstanceIdentifier<?> iid) {
+    public Optional<HwvtepGlobalAugmentation> getHwvtepGlobalAugmentation(final DataObjectIdentifier<?> iid) {
         return getGlobalNode(requireNonNull(iid))
             .flatMap(node -> Optional.ofNullable(node.augmentation(HwvtepGlobalAugmentation.class)));
     }
 
-    public Optional<PhysicalSwitchAugmentation> getPhysicalSwitchAugmentation(final InstanceIdentifier<?> iid) {
+    public Optional<PhysicalSwitchAugmentation> getPhysicalSwitchAugmentation(final DataObjectIdentifier<?> iid) {
         return getGlobalNode(requireNonNull(iid))
             .flatMap(node -> Optional.ofNullable(node.augmentation(PhysicalSwitchAugmentation.class)));
     }
 
     public Optional<Map<TerminationPointKey, TerminationPoint>> getTerminationPointList(
-            final InstanceIdentifier<?> iid) {
+            final DataObjectIdentifier<?> iid) {
         return getGlobalNode(requireNonNull(iid))
             .flatMap(node -> Optional.ofNullable(node.getTerminationPoint()));
     }
 
-    public Optional<LogicalSwitches> getLogicalSwitches(final InstanceIdentifier<?> iid,
+    public Optional<LogicalSwitches> getLogicalSwitches(final DataObjectIdentifier<?> iid,
             final LogicalSwitchesKey logicalSwitchesKey) {
         return getHwvtepGlobalAugmentation(requireNonNull(iid))
             .flatMap(node -> Optional.ofNullable(node.nonnullLogicalSwitches().get(logicalSwitchesKey)));
     }
 
-    public Optional<LogicalSwitches> getLogicalSwitches(final InstanceIdentifier<LogicalSwitches> iid) {
+    public Optional<LogicalSwitches> getLogicalSwitches(final DataObjectIdentifier<LogicalSwitches> iid) {
         return new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
     }
 
-    public Optional<Tunnels> getTunnels(final InstanceIdentifier<?> iid, final TunnelsKey tunnelsKey) {
+    public Optional<Tunnels> getTunnels(final DataObjectIdentifier<?> iid, final TunnelsKey tunnelsKey) {
         return getPhysicalSwitchAugmentation(requireNonNull(iid))
             .flatMap(ps -> Optional.ofNullable(ps.nonnullTunnels().get(tunnelsKey)));
     }
 
-    public Optional<Tunnels> getTunnels(final InstanceIdentifier<Tunnels> iid) {
+    public Optional<Tunnels> getTunnels(final DataObjectIdentifier<Tunnels> iid) {
         Optional<Tunnels> tunnels = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
         return tunnels;
     }
 
-    public Optional<HwvtepPhysicalPortAugmentation> getPhysicalPortAugmentation(final InstanceIdentifier<?> iid,
+    public Optional<HwvtepPhysicalPortAugmentation> getPhysicalPortAugmentation(final DataObjectIdentifier<?> iid,
             final HwvtepNodeName hwvtepNodeName) {
         Optional<Map<TerminationPointKey, TerminationPoint>> nodeOptional =
                 getTerminationPointList(requireNonNull(iid));
@@ -234,7 +234,7 @@ public class HwvtepOperationalState {
         return Optional.empty();
     }
 
-    public Optional<HwvtepPhysicalLocatorAugmentation> getPhysicalLocatorAugmentation(final InstanceIdentifier<?> iid,
+    public Optional<HwvtepPhysicalLocatorAugmentation> getPhysicalLocatorAugmentation(final DataObjectIdentifier<?> iid,
             final IpAddress dstIp, final EncapsulationTypeBase encapType) {
         Optional<Map<TerminationPointKey, TerminationPoint>> nodeOptional =
                 getTerminationPointList(requireNonNull(iid));
@@ -252,38 +252,40 @@ public class HwvtepOperationalState {
     }
 
     public Optional<HwvtepPhysicalLocatorAugmentation>
-            getPhysicalLocatorAugmentation(final InstanceIdentifier<TerminationPoint> iid) {
+            getPhysicalLocatorAugmentation(final DataObjectIdentifier<TerminationPoint> iid) {
         Optional<TerminationPoint> optTp = new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
         return optTp.flatMap(tp -> Optional.ofNullable(tp.augmentation(HwvtepPhysicalLocatorAugmentation.class)));
     }
 
-    public Optional<LocalMcastMacs> getLocalMcastMacs(final InstanceIdentifier<?> iid, final LocalMcastMacsKey key) {
+    public Optional<LocalMcastMacs> getLocalMcastMacs(final DataObjectIdentifier<?> iid, final LocalMcastMacsKey key) {
         return getHwvtepGlobalAugmentation(requireNonNull(iid))
             .flatMap(node -> Optional.ofNullable(node.nonnullLocalMcastMacs().get(key)));
     }
 
-    public Optional<RemoteMcastMacs> getRemoteMcastMacs(final InstanceIdentifier<?> iid, final RemoteMcastMacsKey key) {
+    public Optional<RemoteMcastMacs> getRemoteMcastMacs(final DataObjectIdentifier<?> iid,
+            final RemoteMcastMacsKey key) {
         return getHwvtepGlobalAugmentation(requireNonNull(iid))
             .flatMap(node -> Optional.ofNullable(node.nonnullRemoteMcastMacs().get(key)));
     }
 
-    public Optional<LocalUcastMacs> getLocalUcastMacs(final InstanceIdentifier<?> iid, final LocalUcastMacsKey key) {
+    public Optional<LocalUcastMacs> getLocalUcastMacs(final DataObjectIdentifier<?> iid, final LocalUcastMacsKey key) {
         return getHwvtepGlobalAugmentation(requireNonNull(iid))
             .flatMap(node -> Optional.ofNullable(node.nonnullLocalUcastMacs().get(key)));
     }
 
-    public Optional<RemoteUcastMacs> getRemoteUcastMacs(final InstanceIdentifier<?> iid, final RemoteUcastMacsKey key) {
+    public Optional<RemoteUcastMacs> getRemoteUcastMacs(final DataObjectIdentifier<?> iid,
+            final RemoteUcastMacsKey key) {
         return getHwvtepGlobalAugmentation(requireNonNull(iid))
             .flatMap(node -> Optional.ofNullable(node.nonnullRemoteUcastMacs().get(key)));
     }
 
-    public Optional<LogicalRouters> getLogicalRouters(final InstanceIdentifier<?> iid,
+    public Optional<LogicalRouters> getLogicalRouters(final DataObjectIdentifier<?> iid,
             final LogicalRoutersKey logicalRoutersKey) {
         return getHwvtepGlobalAugmentation(requireNonNull(iid))
             .flatMap(node -> Optional.ofNullable(node.nonnullLogicalRouters().get(logicalRoutersKey)));
     }
 
-    public Optional<Acls> getAcls(final InstanceIdentifier<Acls> iid) {
+    public Optional<Acls> getAcls(final DataObjectIdentifier<Acls> iid) {
         return new MdsalUtils(db).readOptional(LogicalDatastoreType.OPERATIONAL, iid);
     }
 
@@ -291,12 +293,12 @@ public class HwvtepOperationalState {
         return transaction;
     }
 
-    public void setPhysicalLocatorInFlight(final InstanceIdentifier<TerminationPoint> iid,
+    public void setPhysicalLocatorInFlight(final DataObjectIdentifier<TerminationPoint> iid,
                                            final UUID uuid) {
         inflightLocators.put(iid, uuid);
     }
 
-    public UUID getPhysicalLocatorInFlight(final InstanceIdentifier<TerminationPoint> iid) {
+    public UUID getPhysicalLocatorInFlight(final DataObjectIdentifier<TerminationPoint> iid) {
         return inflightLocators.get(iid);
     }
 
@@ -308,24 +310,25 @@ public class HwvtepOperationalState {
         return deviceInfo;
     }
 
-    public void updateCurrentTxData(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key,
+    public void updateCurrentTxData(final Class<? extends EntryObject<?, ?>> cls, final DataObjectIdentifier key,
             final UUID uuid) {
         HwvtepSouthboundUtil.updateData(currentTxUUIDs, cls, key, uuid);
     }
 
-    public void updateCurrentTxDeleteData(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key) {
+    public void updateCurrentTxDeleteData(final Class<? extends EntryObject<?, ?>> cls,
+            final DataObjectIdentifier key) {
         HwvtepSouthboundUtil.updateData(currentTxDeletedKeys, cls, key, Boolean.TRUE);
     }
 
-    public UUID getUUIDFromCurrentTx(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key) {
+    public UUID getUUIDFromCurrentTx(final Class<? extends EntryObject<?, ?>> cls, final DataObjectIdentifier key) {
         return HwvtepSouthboundUtil.getData(currentTxUUIDs, cls, key);
     }
 
-    public boolean isKeyPartOfCurrentTx(final Class<? extends EntryObject<?, ?>> cls, final InstanceIdentifier key) {
+    public boolean isKeyPartOfCurrentTx(final Class<? extends EntryObject<?, ?>> cls, final DataObjectIdentifier key) {
         return HwvtepSouthboundUtil.containsKey(currentTxUUIDs, cls, key);
     }
 
-    public Set<InstanceIdentifier> getDeletedKeysInCurrentTx(final Class<? extends EntryObject<?, ?>> cls) {
+    public Set<DataObjectIdentifier> getDeletedKeysInCurrentTx(final Class<? extends EntryObject<?, ?>> cls) {
         if (currentTxDeletedKeys.containsKey(cls)) {
             return currentTxDeletedKeys.get(cls).keySet();
         }
@@ -344,7 +347,7 @@ public class HwvtepOperationalState {
         return result;
     }
 
-    public List<? extends EntryObject<?, ?>> getDeletedData(final InstanceIdentifier<Node> key,
+    public List<? extends EntryObject<?, ?>> getDeletedData(final DataObjectIdentifier<Node> key,
                                                             final Class<? extends EntryObject<?, ?>> cls) {
         List<EntryObject<?, ?>> result = null;
         if (modifiedData.get(key) != null && modifiedData.get(key).getRight() != null) {
@@ -356,7 +359,7 @@ public class HwvtepOperationalState {
         return result;
     }
 
-    public void setModifiedData(final Map<InstanceIdentifier<Node>,
+    public void setModifiedData(final Map<DataObjectIdentifier<Node>,
             Pair<Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>,
                     Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>>> modifiedData) {
         this.modifiedData = modifiedData;

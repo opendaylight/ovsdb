@@ -30,6 +30,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>com.google.errorprone</groupId>
+      <artifactId>error_prone_annotations</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.guicedee.services</groupId>
       <artifactId>javax.inject</artifactId>
       <optional>true</optional>
@@ -43,12 +47,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.apache.karaf.shell</groupId>
       <artifactId>org.apache.karaf.shell.core</artifactId>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.checkerframework</groupId>
-      <artifactId>checker-qual</artifactId>
-      <scope>provided</scope>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>

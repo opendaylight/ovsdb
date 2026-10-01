@@ -12,7 +12,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-public interface TransactCommand<T extends EntryObject<?, ?>> {
+public interface TransactCommand<T extends EntryObject<?, ?, ?>> {
 
     void execute(TransactionBuilder transaction);
 

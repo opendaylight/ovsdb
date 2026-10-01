@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -42,10 +41,10 @@ import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.ChildOf;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.binding.Key;
 import org.opendaylight.yangtools.binding.KeyStep;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 // This class needs to be mocked
 @SuppressWarnings("checkstyle:FinalClass")
@@ -85,18 +84,18 @@ public class TransactUtils {
             && input.dataBefore() != null;
     }
 
-    public static Map<InstanceIdentifier<Node>,Node> extractNode(final Map<InstanceIdentifier<?>, DataObject> changes) {
-        Map<InstanceIdentifier<Node>,Node> result
-            = new HashMap<>();
+    public static Map<DataObjectIdentifier<Node>, Node> extractNode(
+            final Map<DataObjectIdentifier<?>, DataObject> changes) {
+        Map<DataObjectIdentifier<Node>,Node> result = new HashMap<>();
         if (changes != null) {
-            for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
+            for (var created : changes.entrySet()) {
                 if (created.getValue() instanceof Node) {
                     Node value = (Node) created.getValue();
-                    Class<?> type = created.getKey().getTargetType();
+                    Class<?> type = created.getKey().lastStep().type();
                     if (type.equals(Node.class)) {
                         // Actually checked above
                         @SuppressWarnings("unchecked")
-                        InstanceIdentifier<Node> iid = (InstanceIdentifier<Node>) created.getKey();
+                        DataObjectIdentifier<Node> iid = (DataObjectIdentifier<Node>) created.getKey();
                         result.put(iid, value);
                     }
                 }
@@ -105,7 +104,7 @@ public class TransactUtils {
         return result;
     }
 
-    public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractCreated(
+    public static <T extends DataObject> Map<DataObjectIdentifier<T>,T> extractCreated(
             final DataChangeEvent changes, final Class<T> klazz) {
         return extract(changes.getCreatedData(),klazz);
     }
@@ -119,12 +118,12 @@ public class TransactUtils {
      * @param <U> The type of changes to process.
      * @return The created instances, mapped by instance identifier.
      */
-    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractCreated(
+    public static <T extends DataObject, U extends DataObject> Map<DataObjectIdentifier<T>, T> extractCreated(
             final Collection<DataTreeModification<U>> changes, final Class<T> clazz) {
         return extractCreatedOrUpdated(changes, clazz, hasNoDataBefore());
     }
 
-    public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractUpdated(
+    public static <T extends DataObject> Map<DataObjectIdentifier<T>,T> extractUpdated(
             final DataChangeEvent changes, final Class<T> klazz) {
         return extract(changes.getUpdatedData(),klazz);
     }
@@ -138,7 +137,7 @@ public class TransactUtils {
      * @param <U> The type of changes to process.
      * @return The updated instances, mapped by instance identifier.
      */
-    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractUpdated(
+    public static <T extends DataObject, U extends DataObject> Map<DataObjectIdentifier<T>, T> extractUpdated(
             final Collection<DataTreeModification<U>> changes, final Class<T> clazz) {
         return extractCreatedOrUpdated(changes, clazz, hasDataBeforeAndDataAfter());
     }
@@ -154,20 +153,20 @@ public class TransactUtils {
      * @param <U> The type of changes to process.
      * @return The created or updated instances which satisfy the filter, mapped by instance identifier.
      */
-    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdated(
+    public static <T extends DataObject, U extends DataObject> Map<DataObjectIdentifier<T>, T> extractCreatedOrUpdated(
             final Collection<DataTreeModification<U>> changes, final Class<T> clazz,
             final Predicate<DataObjectModification<T>> filter) {
-        Map<InstanceIdentifier<T>, T> result = new HashMap<>();
-        for (Map.Entry<InstanceIdentifier<T>, DataObjectModification<T>> entry : extractDataObjectModifications(changes,
+        Map<DataObjectIdentifier<T>, T> result = new HashMap<>();
+        for (var entry : extractDataObjectModifications(changes,
                 clazz, hasDataAfterAndMatchesFilter(filter)).entrySet()) {
             result.put(entry.getKey(), entry.getValue().dataAfter());
         }
         return result;
     }
 
-    public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractCreatedOrUpdated(
-            final DataChangeEvent changes,final Class<T> klazz) {
-        Map<InstanceIdentifier<T>,T> result = extractUpdated(changes,klazz);
+    public static <T extends DataObject> Map<DataObjectIdentifier<T>,T> extractCreatedOrUpdated(
+            final DataChangeEvent changes, final Class<T> klazz) {
+        var result = extractUpdated(changes,klazz);
         result.putAll(extractCreated(changes,klazz));
         return result;
     }
@@ -181,14 +180,14 @@ public class TransactUtils {
      * @param <U> The type of changes to process.
      * @return The created or updated instances, mapped by instance identifier.
      */
-    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdated(
+    public static <T extends DataObject, U extends DataObject> Map<DataObjectIdentifier<T>, T> extractCreatedOrUpdated(
             final Collection<DataTreeModification<U>> changes, final Class<T> clazz) {
         return extractCreatedOrUpdated(changes, clazz, matchesEverything());
     }
 
-    public static <T extends DataObject> Map<InstanceIdentifier<T>, T> extractCreatedOrUpdatedOrRemoved(
+    public static <T extends DataObject> Map<DataObjectIdentifier<T>, T> extractCreatedOrUpdatedOrRemoved(
             final DataChangeEvent changes, final Class<T> klazz) {
-        Map<InstanceIdentifier<T>,T> result = extractCreatedOrUpdated(changes,klazz);
+        var result = extractCreatedOrUpdated(changes,klazz);
         result.putAll(extractRemovedObjects(changes, klazz));
         return result;
     }
@@ -204,17 +203,17 @@ public class TransactUtils {
      * @param <U> The type of changes to process.
      * @return The created, updated or removed instances, mapped by instance identifier.
      */
-    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T>
+    public static <T extends DataObject, U extends DataObject> Map<DataObjectIdentifier<T>, T>
         extractCreatedOrUpdatedOrRemoved(
             final Collection<DataTreeModification<U>> changes, final Class<T> clazz) {
-        Map<InstanceIdentifier<T>, T> result = extractCreatedOrUpdated(changes, clazz);
+        var result = extractCreatedOrUpdated(changes, clazz);
         result.putAll(extractRemovedObjects(changes, clazz));
         return result;
     }
 
-    public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extractOriginal(
+    public static <T extends DataObject> Map<DataObjectIdentifier<T>,T> extractOriginal(
             final DataChangeEvent changes, final Class<T> klazz) {
-        return extract(changes.getOriginalData(),klazz);
+        return extract(changes.getOriginalData(), klazz);
     }
 
     /**
@@ -226,25 +225,24 @@ public class TransactUtils {
      * @param <U> The type of changes to process.
      * @return The original instances, mapped by instance identifier.
      */
-    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractOriginal(
+    public static <T extends DataObject, U extends DataObject> Map<DataObjectIdentifier<T>, T> extractOriginal(
             final Collection<DataTreeModification<U>> changes, final Class<T> clazz) {
-        Map<InstanceIdentifier<T>, T> result = new HashMap<>();
-        for (Map.Entry<InstanceIdentifier<T>, DataObjectModification<T>> entry :
-                extractDataObjectModifications(changes, clazz, hasDataBefore()).entrySet()) {
+        Map<DataObjectIdentifier<T>, T> result = new HashMap<>();
+        for (var entry : extractDataObjectModifications(changes, clazz, hasDataBefore()).entrySet()) {
             result.put(entry.getKey(), entry.getValue().dataBefore());
         }
         return result;
     }
 
-    public static <T extends DataObject> Set<InstanceIdentifier<T>> extractRemoved(
+    public static <T extends DataObject> Set<DataObjectIdentifier<T>> extractRemoved(
             final DataChangeEvent changes, final Class<T> klazz) {
-        Set<InstanceIdentifier<T>> result = new HashSet<>();
+        Set<DataObjectIdentifier<T>> result = new HashSet<>();
         if (changes != null && changes.getRemovedPaths() != null) {
-            for (InstanceIdentifier<?> iid : changes.getRemovedPaths()) {
-                if (iid.getTargetType().equals(klazz)) {
+            for (var iid : changes.getRemovedPaths()) {
+                if (iid.lastStep().type().equals(klazz)) {
                     // Actually checked above
                     @SuppressWarnings("unchecked")
-                    InstanceIdentifier<T> iidn = (InstanceIdentifier<T>)iid;
+                    DataObjectIdentifier<T> iidn = (DataObjectIdentifier<T>)iid;
                     result.add(iidn);
                 }
             }
@@ -261,7 +259,7 @@ public class TransactUtils {
      * @param <U> The type of changes to process.
      * @return The instance identifiers of removed instances.
      */
-    public static <T extends DataObject, U extends DataObject> Set<InstanceIdentifier<T>> extractRemoved(
+    public static <T extends DataObject, U extends DataObject> Set<DataObjectIdentifier<T>> extractRemoved(
             final Collection<DataTreeModification<U>> changes, final Class<T> clazz) {
         return extractDataObjectModifications(changes, clazz, modificationIsDeletion()).keySet();
     }
@@ -277,15 +275,15 @@ public class TransactUtils {
      * @param <U> The type of changes to process.
      * @return The modifications, mapped by instance identifier.
      */
-    private static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, DataObjectModification<T>>
+    private static <T extends DataObject, U extends DataObject> Map<DataObjectIdentifier<T>, DataObjectModification<T>>
         extractDataObjectModifications(final Collection<DataTreeModification<U>> changes, final Class<T> clazz,
                                        final Predicate<DataObjectModification<T>> filter) {
         List<DataObjectModification<? extends DataObject>> dataObjectModifications = new ArrayList<>();
-        List<InstanceIdentifier<? extends DataObject>> paths = new ArrayList<>();
+        List<DataObjectIdentifier<? extends DataObject>> paths = new ArrayList<>();
         if (changes != null) {
             for (DataTreeModification<? extends DataObject> change : changes) {
                 dataObjectModifications.add(change.getRootNode());
-                paths.add(change.getRootPath().path());
+                paths.add(change.path());
             }
         }
         return extractDataObjectModifications(dataObjectModifications, paths, clazz, filter);
@@ -302,23 +300,23 @@ public class TransactUtils {
      * @param <T> The type of changes we're interested in.
      * @return The modifications, mapped by instance identifier.
      */
-    private static <T extends DataObject> Map<InstanceIdentifier<T>, DataObjectModification<T>>
+    private static <T extends DataObject> Map<DataObjectIdentifier<T>, DataObjectModification<T>>
         extractDataObjectModifications(
             final Collection<DataObjectModification<? extends DataObject>> changes,
-            final Collection<InstanceIdentifier<? extends DataObject>> paths, final Class<T> clazz,
+            final Collection<DataObjectIdentifier<? extends DataObject>> paths, final Class<T> clazz,
             final Predicate<DataObjectModification<T>> filter) {
-        Map<InstanceIdentifier<T>, DataObjectModification<T>> result = new HashMap<>();
+        Map<DataObjectIdentifier<T>, DataObjectModification<T>> result = new HashMap<>();
         Queue<DataObjectModification<?>> remainingChanges = new LinkedList<>(changes);
-        Queue<InstanceIdentifier<?>> remainingPaths = new LinkedList<>(paths);
+        Queue<DataObjectIdentifier<?>> remainingPaths = new LinkedList<>(paths);
         while (!remainingChanges.isEmpty()) {
             DataObjectModification<?> change = remainingChanges.remove();
-            InstanceIdentifier<?> path = remainingPaths.remove();
+            DataObjectIdentifier<?> path = remainingPaths.remove();
             // Is the change relevant?
             if (clazz.isAssignableFrom(change.dataType())) {
                 @SuppressWarnings("unchecked")
                 final DataObjectModification<T> dao = (DataObjectModification<T>) change;
                 if (filter.test(dao)) {
-                    result.put((InstanceIdentifier<T>) path, dao);
+                    result.put((DataObjectIdentifier<T>) path, dao);
                 }
             }
             // Add any children to the queue
@@ -339,22 +337,21 @@ public class TransactUtils {
      * @return The extended path.
      */
     private static <N extends EntryObject<N, K> & ChildOf<? super T>, K extends Key<N>, T extends DataObject>
-        InstanceIdentifier<? extends DataObject> extendPath(
-            final InstanceIdentifier<T> path,
-            final DataObjectModification<?> child) {
+            DataObjectIdentifier<? extends DataObject> extendPath(final DataObjectIdentifier<T> path,
+                final DataObjectModification<?> child) {
         @SuppressWarnings("unchecked")
         final Class<N> item = (Class<N>) child.dataType();
         if (child.step() instanceof KeyStep<?, ?> keyStep) {
-            return path.child(item, (K) keyStep.key());
+            return path.toBuilder().child(item, (K) keyStep.key()).build();
         }
 
-        return path.child(item);
+        return path.toBuilder().child(item).build();
     }
 
-    public static <T extends DataObject> Map<InstanceIdentifier<T>, T> extractRemovedObjects(
+    public static <T extends DataObject> Map<DataObjectIdentifier<T>, T> extractRemovedObjects(
             final DataChangeEvent changes, final Class<T> klazz) {
-        Set<InstanceIdentifier<T>> iids = extractRemoved(changes, klazz);
-        return Maps.filterKeys(extractOriginal(changes, klazz),Predicates.in(iids));
+        var iids = extractRemoved(changes, klazz);
+        return Maps.filterKeys(extractOriginal(changes, klazz), Predicates.in(iids));
     }
 
     /**
@@ -366,29 +363,29 @@ public class TransactUtils {
      * @param <U> The type of changes to process.
      * @return The removed instances, keyed by instance identifier.
      */
-    public static <T extends DataObject, U extends DataObject> Map<InstanceIdentifier<T>, T> extractRemovedObjects(
+    public static <T extends DataObject, U extends DataObject> Map<DataObjectIdentifier<T>, T> extractRemovedObjects(
             final Collection<DataTreeModification<U>> changes, final Class<T> clazz) {
-        Map<InstanceIdentifier<T>, T> result = new HashMap<>();
-        for (Map.Entry<InstanceIdentifier<T>, DataObjectModification<T>> entry :
+        Map<DataObjectIdentifier<T>, T> result = new HashMap<>();
+        for (var entry :
                 extractDataObjectModifications(changes, clazz, modificationIsDeletionAndHasDataBefore()).entrySet()) {
             result.put(entry.getKey(), entry.getValue().dataBefore());
         }
         return result;
     }
 
-    public static <T extends DataObject> Map<InstanceIdentifier<T>,T> extract(
-            final Map<InstanceIdentifier<?>, DataObject> changes, final Class<T> klazz) {
-        Map<InstanceIdentifier<T>,T> result = new HashMap<>();
+    public static <T extends DataObject> Map<DataObjectIdentifier<T>,T> extract(
+            final Map<DataObjectIdentifier<?>, DataObject> changes, final Class<T> klazz) {
+        Map<DataObjectIdentifier<T>,T> result = new HashMap<>();
         if (changes != null) {
-            for (Entry<InstanceIdentifier<?>, DataObject> created : changes.entrySet()) {
+            for (var created : changes.entrySet()) {
                 if (klazz.isInstance(created.getValue())) {
                     @SuppressWarnings("unchecked")
                     T value = (T) created.getValue();
-                    Class<?> type = created.getKey().getTargetType();
+                    Class<?> type = created.getKey().lastStep().type();
                     if (type.equals(klazz)) {
                         // Actually checked above
                         @SuppressWarnings("unchecked")
-                        InstanceIdentifier<T> iid = (InstanceIdentifier<T>) created.getKey();
+                        DataObjectIdentifier<T> iid = (DataObjectIdentifier<T>) created.getKey();
                         result.put(iid, value);
                     }
                 }
@@ -424,7 +421,7 @@ public class TransactUtils {
     }
 
     public static <T extends TableSchema<T>> void stampInstanceIdentifier(final Operations op,
-            final TransactionBuilder transaction, final InstanceIdentifier<?> iid, final TableSchema<T> tableSchema,
+            final TransactionBuilder transaction, final DataObjectIdentifier<?> iid, final TableSchema<T> tableSchema,
             final ColumnSchema<T, Map<String, String>> columnSchema,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         transaction.add(
@@ -432,7 +429,7 @@ public class TransactUtils {
     }
 
     public static <T extends TableSchema<T>> Mutate<T> stampInstanceIdentifierMutation(final Operations op,
-            final TransactionBuilder transaction, final InstanceIdentifier<?> iid, final TableSchema<T> tableSchema,
+            final TransactionBuilder transaction, final DataObjectIdentifier<?> iid, final TableSchema<T> tableSchema,
             final ColumnSchema<T, Map<String, String>> columnSchema,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         Map<String,String> externalIdsMap = ImmutableMap.of(SouthboundConstants.IID_EXTERNAL_ID_KEY,

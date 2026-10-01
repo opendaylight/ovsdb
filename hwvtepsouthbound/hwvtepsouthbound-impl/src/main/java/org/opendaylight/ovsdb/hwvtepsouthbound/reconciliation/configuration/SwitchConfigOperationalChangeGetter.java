@@ -19,13 +19,13 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 
 public final class SwitchConfigOperationalChangeGetter {
     private SwitchConfigOperationalChangeGetter() {
     }
 
-    public static DataTreeModification<Node> getModification(final InstanceIdentifier<Node> psNodeId,
+    public static DataTreeModification<Node> getModification(final DataObjectIdentifier<Node> psNodeId,
                                                              final Node configNode, final Node operationalNode) {
 
         NodeBuilder newNodeBuilder = getNodeBuilderFromNode(configNode);

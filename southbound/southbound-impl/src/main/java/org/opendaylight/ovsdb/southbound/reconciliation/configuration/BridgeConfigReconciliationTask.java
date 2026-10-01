@@ -34,17 +34,13 @@ import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationManager;
 import org.opendaylight.ovsdb.southbound.reconciliation.ReconciliationTask;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +56,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
     private final InstanceIdentifierCodec instanceIdentifierCodec;
 
     public BridgeConfigReconciliationTask(final ReconciliationManager reconciliationManager,
-            final OvsdbConnectionManager connectionManager, final InstanceIdentifier<Node> nodeIid,
+            final OvsdbConnectionManager connectionManager, final DataObjectIdentifier<Node> nodeIid,
             final OvsdbConnectionInstance connectionInstance, final InstanceIdentifierCodec instanceIdentifierCodec) {
         super(reconciliationManager, connectionManager, nodeIid, null);
         this.connectionInstance = connectionInstance;
@@ -69,7 +65,7 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
 
     @Override
     public boolean reconcileConfiguration(final OvsdbConnectionManager connectionManagerOfDevice) {
-        String nodeIdVal = nodeIid.firstKeyOf(Node.class).getNodeId().getValue();
+        String nodeIdVal = nodeIid.getFirstKeyOf(Node.class).getNodeId().getValue();
         List<String> bridgeReconcileIncludeList = getNodeIdForBridges(nodeIdVal,
             reconciliationManager.getBridgesReconciliationInclusionList());
         List<String> bridgeReconcileExcludeList = getNodeIdForBridges(nodeIdVal,
@@ -108,15 +104,13 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
             // case 1, 3 & 4
             LOG.trace("Reconciling all bridges with exclusion list {}", bridgeReconcileExcludeList);
             FluentFuture<Optional<Topology>> readTopologyFuture;
-            InstanceIdentifier<Topology> topologyInstanceIdentifier = SouthboundMapper
-                .createTopologyInstanceIdentifier();
+            var topologyInstanceIdentifier = SouthboundMapper.createTopologyInstanceIdentifier();
             try (ReadTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
                 // find all bridges of the specific device in the config data store
                 // TODO: this query is not efficient. It retrieves all the Nodes in the datastore, loop over them and
                 // look for the bridges of specific device. It is mre efficient if MDSAL allows query nodes using
                 // wildcard on node id (ie: ovsdb://uuid/<device uuid>/bridge/*) r attributes
-                readTopologyFuture = tx.read(LogicalDatastoreType.CONFIGURATION,
-                    topologyInstanceIdentifier.toIdentifier());
+                readTopologyFuture = tx.read(LogicalDatastoreType.CONFIGURATION, topologyInstanceIdentifier);
             }
             readTopologyFuture.addCallback(new FutureCallback<>() {
                 @Override
@@ -152,9 +146,8 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
             LOG.trace("Reconcile Bridge from InclusionList {} only", bridgeReconcileIncludeList);
             for (String bridgeNodeIid : bridgeReconcileIncludeList) {
                 try (ReadTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
-                    InstanceIdentifier<Node> nodeInstanceIdentifier =
-                        SouthboundMapper.createInstanceIdentifier(new NodeId(bridgeNodeIid));
-                    readNodeFuture = tx.read(LogicalDatastoreType.CONFIGURATION, nodeInstanceIdentifier.toIdentifier());
+                    readNodeFuture = tx.read(LogicalDatastoreType.CONFIGURATION,
+                        SouthboundMapper.createInstanceIdentifier(new NodeId(bridgeNodeIid)));
                 }
                 readNodeFuture.addCallback(new FutureCallback<Optional<Node>>() {
                     @Override
@@ -178,17 +171,17 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
             }
         }
 
-        final Map<InstanceIdentifier<?>, DataObject> brChanges = new HashMap<>();
+        final Map<DataObjectIdentifier<?>, DataObject> brChanges = new HashMap<>();
         final List<Node> tpChanges = new ArrayList<>();
         for (Node node : bridgeNodeList) {
-            InstanceIdentifier<Node> ndIid = (InstanceIdentifier<Node>) nodeIid;
+            var ndIid = (DataObjectIdentifier<Node>) nodeIid;
             OvsdbBridgeAugmentation bridge = node.augmentation(OvsdbBridgeAugmentation.class);
             if (bridge != null && bridge.getManagedBy() != null
-                && ((DataObjectIdentifier<?>) bridge.getManagedBy().getValue()).toLegacy().equals(ndIid)) {
+                && ((DataObjectIdentifier<?>) bridge.getManagedBy().getValue()).equals(ndIid)) {
                 brChanges.putAll(extractBridgeConfigurationChanges(node, bridge));
                 tpChanges.add(node);
             } else if (node.key().getNodeId().getValue().startsWith(
-                nodeIid.firstKeyOf(Node.class).getNodeId().getValue())) {
+                nodeIid.getFirstKeyOf(Node.class).getNodeId().getValue())) {
                 //&& node.getTerminationPoint() != null && !node.getTerminationPoint().isEmpty()) {
                 // Above check removed to handle delete reconciliation with ManagedBy
                 // param not set in config DS
@@ -209,35 +202,31 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
         return true;
     }
 
-    private static Map<InstanceIdentifier<?>, DataObject> extractBridgeConfigurationChanges(
+    private static Map<DataObjectIdentifier<?>, DataObject> extractBridgeConfigurationChanges(
             final Node bridgeNode, final OvsdbBridgeAugmentation ovsdbBridge) {
-        Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
-        final InstanceIdentifier<Node> bridgeNodeIid =
-                SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
-        final InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbBridgeIid =
-                bridgeNodeIid.builder().augmentation(OvsdbBridgeAugmentation.class).build();
+        final var changes = new HashMap<DataObjectIdentifier<?>, DataObject>();
+        final var bridgeNodeIid = SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
+        final var ovsdbBridgeIid = bridgeNodeIid.toBuilder().augmentation(OvsdbBridgeAugmentation.class).build();
         changes.put(bridgeNodeIid, bridgeNode);
         changes.put(ovsdbBridgeIid, ovsdbBridge);
 
-        final Map<ProtocolEntryKey, ProtocolEntry> protocols = ovsdbBridge.getProtocolEntry();
+        final var protocols = ovsdbBridge.getProtocolEntry();
         if (protocols != null) {
             for (ProtocolEntry protocol : protocols.values()) {
                 if (SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) != null) {
-                    KeyedInstanceIdentifier<ProtocolEntry, ProtocolEntryKey> protocolIid =
-                            ovsdbBridgeIid.child(ProtocolEntry.class, protocol.key());
-                    changes.put(protocolIid, protocol);
+                    changes.put(ovsdbBridgeIid.toBuilder().child(ProtocolEntry.class, protocol.key()).build(),
+                        protocol);
                 } else {
                     throw new IllegalArgumentException("Unknown protocol " + protocol.getProtocol());
                 }
             }
         }
 
-        final Map<ControllerEntryKey, ControllerEntry> controllers = ovsdbBridge.getControllerEntry();
+        final var controllers = ovsdbBridge.getControllerEntry();
         if (controllers != null) {
             for (ControllerEntry controller : controllers.values()) {
-                KeyedInstanceIdentifier<ControllerEntry, ControllerEntryKey> controllerIid =
-                        ovsdbBridgeIid.child(ControllerEntry.class, controller.key());
-                changes.put(controllerIid, controller);
+                changes.put(ovsdbBridgeIid.toBuilder().child(ControllerEntry.class, controller.key()).build(),
+                    controller);
             }
         }
 
@@ -245,25 +234,25 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
     }
 
     @VisibleForTesting
-    void reconcileBridgeConfigurations(final Map<InstanceIdentifier<?>, DataObject> changes) {
+    void reconcileBridgeConfigurations(final Map<DataObjectIdentifier<?>, DataObject> changes) {
         DataChangeEvent changeEvents = new DataChangeEvent() {
             @Override
-            public Map<InstanceIdentifier<?>, DataObject> getCreatedData() {
+            public Map<DataObjectIdentifier<?>, DataObject> getCreatedData() {
                 return changes;
             }
 
             @Override
-            public Map<InstanceIdentifier<?>, DataObject> getUpdatedData() {
+            public Map<DataObjectIdentifier<?>, DataObject> getUpdatedData() {
                 return Collections.emptyMap();
             }
 
             @Override
-            public Map<InstanceIdentifier<?>, DataObject> getOriginalData() {
+            public Map<DataObjectIdentifier<?>, DataObject> getOriginalData() {
                 return Collections.emptyMap();
             }
 
             @Override
-            public Set<InstanceIdentifier<?>> getRemovedPaths() {
+            public Set<DataObjectIdentifier<?>> getRemovedPaths() {
                 return Collections.emptySet();
             }
         };

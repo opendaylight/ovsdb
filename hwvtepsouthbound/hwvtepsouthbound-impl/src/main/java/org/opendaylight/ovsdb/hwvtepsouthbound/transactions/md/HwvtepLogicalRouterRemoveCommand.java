@@ -20,7 +20,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRouters;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRoutersKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +39,10 @@ public class HwvtepLogicalRouterRemoveCommand extends AbstractTransactionCommand
             for (LogicalRouter router : deletedLRRows) {
                 HwvtepNodeName routerNode = new HwvtepNodeName(router.getName());
                 LOG.debug("Clearing device operational data for logical router {}", routerNode);
-                InstanceIdentifier<LogicalRouters> routerIid = getOvsdbConnectionInstance().getInstanceIdentifier()
+                var routerIid = getOvsdbConnectionInstance().getInstanceIdentifier().toBuilder()
                         .augmentation(HwvtepGlobalAugmentation.class)
-                        .child(LogicalRouters.class, new LogicalRoutersKey(routerNode));
+                        .child(LogicalRouters.class, new LogicalRoutersKey(routerNode))
+                        .build();
                 transaction.delete(LogicalDatastoreType.OPERATIONAL, routerIid.toIdentifier());
                 getOvsdbConnectionInstance().getDeviceInfo().clearDeviceOperData(LogicalRouters.class, routerIid);
             }

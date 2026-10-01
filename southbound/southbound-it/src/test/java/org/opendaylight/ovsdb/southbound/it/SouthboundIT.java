@@ -50,7 +50,6 @@ import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.notation.Version;
@@ -161,11 +160,10 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectReference;
 import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.binding.Key;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.opendaylight.yangtools.yang.common.Uint8;
@@ -222,17 +220,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         private static final int RETRY_WAIT = 100;
 
         private final LogicalDatastoreType type;
-        private final Set<InstanceIdentifier<?>> createdIids = new HashSet<>();
-        private final Set<InstanceIdentifier<?>> removedIids = new HashSet<>();
-        private final Set<InstanceIdentifier<?>> updatedIids = new HashSet<>();
-        private final InstanceIdentifier<?> iid;
+        private final Set<DataObjectIdentifier<?>> createdIids = new HashSet<>();
+        private final Set<DataObjectIdentifier<?>> removedIids = new HashSet<>();
+        private final Set<DataObjectIdentifier<?>> updatedIids = new HashSet<>();
+        private final DataObjectIdentifier<?> iid;
 
         private NotifyingDataChangeListener(final LogicalDatastoreType type) {
             this.type = type;
             iid = null;
         }
 
-        private NotifyingDataChangeListener(final LogicalDatastoreType type, final InstanceIdentifier<?> iid) {
+        private NotifyingDataChangeListener(final LogicalDatastoreType type, final DataObjectIdentifier<?> iid) {
             this.type = type;
             this.iid = iid;
         }
@@ -241,7 +239,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         public void onDataTreeChanged(final List<DataTreeModification<DataObject>> changes) {
             for (DataTreeModification<DataObject> change: changes) {
                 DataObjectModification<DataObject> rootNode = change.getRootNode();
-                final InstanceIdentifier<DataObject> identifier = change.getRootPath().path();
+                final DataObjectIdentifier<DataObject> identifier = change.path();
                 switch (rootNode.modificationType()) {
                     case SUBTREE_MODIFIED:
                     case WRITE:
@@ -253,8 +251,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                             if (obj instanceof ManagedNodeEntry managedNodeEntry) {
                                 LOG.info("{} DataChanged: created managed {}",
                                         managedNodeEntry.getBridgeRef().getValue());
-                                createdIids.add(((DataObjectIdentifier<?>) managedNodeEntry.getBridgeRef().getValue())
-                                    .toLegacy());
+                                createdIids.add(((DataObjectIdentifier<?>) managedNodeEntry.getBridgeRef().getValue()));
                             }
                         } else {
                             LOG.info("{} DataTreeChanged: updated {}", type, identifier);
@@ -275,15 +272,15 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
 
-        public boolean isCreated(final InstanceIdentifier<?> path) {
+        public boolean isCreated(final DataObjectIdentifier<?> path) {
             return createdIids.remove(path);
         }
 
-        public boolean isRemoved(final InstanceIdentifier<?> path) {
+        public boolean isRemoved(final DataObjectIdentifier<?> path) {
             return removedIids.remove(path);
         }
 
-        public boolean isUpdated(final InstanceIdentifier<?> path) {
+        public boolean isUpdated(final DataObjectIdentifier<?> path) {
             return updatedIids.remove(path);
         }
 
@@ -294,7 +291,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
 
         public void registerDataChangeListener() {
-            dataBroker.registerTreeChangeListener(type, (InstanceIdentifier)iid, this);
+            dataBroker.registerTreeChangeListener(type, (DataObjectReference)iid, this);
         }
 
         public void waitForCreation(final long timeout) throws InterruptedException {
@@ -454,11 +451,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         mdsalUtils = new MdsalUtils(dataBroker);
         assertTrue("Did not find " + SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue(), getOvsdbTopology());
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        final InstanceIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
-        dataBroker.registerTreeChangeListener(DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION,
-                (InstanceIdentifier)iid), CONFIGURATION_LISTENER);
-        dataBroker.registerTreeChangeListener(DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL,
-                (InstanceIdentifier)iid), OPERATIONAL_LISTENER);
+        final DataObjectIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
+        dataBroker.registerTreeChangeListener(LogicalDatastoreType.CONFIGURATION, (DataObjectIdentifier) iid,
+            CONFIGURATION_LISTENER);
+        dataBroker.registerTreeChangeListener(LogicalDatastoreType.OPERATIONAL, (DataObjectIdentifier) iid,
+            OPERATIONAL_LISTENER);
 
         ovsdbNode = connectOvsdbNode(connectionInfo);
         OvsdbNodeAugmentation ovsdbNodeAugmentation = ovsdbNode.augmentation(OvsdbNodeAugmentation.class);
@@ -505,8 +502,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         LOG.info("getOvsdbTopology: looking for {}...", SouthboundUtils.OVSDB_TOPOLOGY_ID.getValue());
         Boolean found = false;
         final TopologyId topologyId = SouthboundUtils.OVSDB_TOPOLOGY_ID;
-        InstanceIdentifier<Topology> path =
-                InstanceIdentifier.create(NetworkTopology.class).child(Topology.class, new TopologyKey(topologyId));
+        DataObjectIdentifier<Topology> path = DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(topologyId))
+            .build();
         for (int i = 0; i < 60; i++) {
             Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, path);
             if (topology != null) {
@@ -559,19 +557,19 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testNetworkTopology() throws InterruptedException {
         NetworkTopology networkTopology = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION,
-                InstanceIdentifier.create(NetworkTopology.class));
+            DataObjectIdentifier.builder(NetworkTopology.class).build());
         assertNotNull("NetworkTopology could not be found in " + LogicalDatastoreType.CONFIGURATION, networkTopology);
 
         networkTopology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
-                InstanceIdentifier.create(NetworkTopology.class));
+            DataObjectIdentifier.builder(NetworkTopology.class).build());
         assertNotNull("NetworkTopology could not be found in " + LogicalDatastoreType.OPERATIONAL, networkTopology);
     }
 
     @Test
     public void testOvsdbTopology() throws InterruptedException {
-        InstanceIdentifier<Topology> path = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
+        DataObjectIdentifier<Topology> path = DataObjectIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .build();
 
         Topology topology = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
         assertNotNull("Topology could not be found in " + LogicalDatastoreType.CONFIGURATION, topology);
@@ -582,7 +580,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private static Node connectOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
-        final InstanceIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
+        final DataObjectIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
         assertTrue(
                 mdsalUtils.put(LogicalDatastoreType.CONFIGURATION, iid, SouthboundUtils.createNode(connectionInfo)));
         waitForOperationalCreation(iid);
@@ -592,7 +590,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         return node;
     }
 
-    private static void waitForOperationalCreation(final InstanceIdentifier<Node> iid) throws InterruptedException {
+    private static void waitForOperationalCreation(final DataObjectIdentifier<Node> iid) throws InterruptedException {
         synchronized (OPERATIONAL_LISTENER) {
             long start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged creation on {}", iid);
@@ -604,7 +602,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static void waitForOperationalDeletion(final InstanceIdentifier<Node> iid) throws InterruptedException {
+    private static void waitForOperationalDeletion(final DataObjectIdentifier<Node> iid) throws InterruptedException {
         synchronized (OPERATIONAL_LISTENER) {
             long start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged deletion on {}", iid);
@@ -616,7 +614,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static void waitForOperationalUpdate(final InstanceIdentifier<Node> iid) throws InterruptedException {
+    private static void waitForOperationalUpdate(final DataObjectIdentifier<Node> iid) throws InterruptedException {
         synchronized (OPERATIONAL_LISTENER) {
             long start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged update on {}", iid);
@@ -629,7 +627,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     }
 
     private static void disconnectOvsdbNode(final ConnectionInfo connectionInfo) throws InterruptedException {
-        final InstanceIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
+        final DataObjectIdentifier<Node> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
         assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, iid));
         waitForOperationalDeletion(iid);
         Node node = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, iid);
@@ -659,7 +657,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 LOG.info("dp type is {}", dpTypeStr);
                 if (dpTypeStr.equals(NETDEV_DP_TYPE)) {
                     LOG.info("Found a DPDK node; adding a corresponding netdev device");
-                    InstanceIdentifier<Node> bridgeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo,
+                    DataObjectIdentifier<Node> bridgeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo,
                             new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
                     NodeId bridgeNodeId = SouthboundUtils.createManagedNodeId(bridgeIid);
                     try (TestBridge testBridge = new TestBridge(connectionInfo, bridgeIid,
@@ -687,7 +685,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         }
 
                         // Verify that all DPDK ports are created
-                        InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
+                        DataObjectIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
                         Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
                                 terminationPointIid);
                         assertNotNull(terminationPointNode);
@@ -783,8 +781,8 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static void setManagedBy(final OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder,
                               final ConnectionInfo connectionInfo) {
-        InstanceIdentifier<Node> connectionNodePath = SouthboundUtils.createInstanceIdentifier(connectionInfo);
-        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath.toIdentifier()));
+        DataObjectIdentifier<Node> connectionNodePath = SouthboundUtils.createInstanceIdentifier(connectionInfo);
+        ovsdbBridgeAugmentationBuilder.setManagedBy(new OvsdbNodeRef(connectionNodePath));
     }
 
     private static Map<ProtocolEntryKey, ProtocolEntry> createMdsalProtocols() {
@@ -822,7 +820,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                                                    ovsdbTerminationPointAugmentationBuilder)
             throws InterruptedException {
 
-        InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(bridgeNodeId);
+        DataObjectIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(bridgeNodeId);
         NodeBuilder portNodeBuilder = new NodeBuilder();
         NodeId portNodeId = SouthboundMapper.createManagedNodeId(portIid);
         portNodeBuilder.setNodeId(portNodeId);
@@ -853,7 +851,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
          * @param externalIds The external identifiers if any.
          * @param otherConfigs The other configuration items if any.
          */
-        TestBridge(final ConnectionInfo connectionInfo, @Nullable InstanceIdentifier<Node> bridgeIid,
+        TestBridge(final ConnectionInfo connectionInfo, @Nullable DataObjectIdentifier<Node> bridgeIid,
                                   final String bridgeName, NodeId bridgeNodeId, final boolean setProtocolEntries,
                                   final OvsdbFailModeBase failMode, final boolean setManagedBy,
                                   @Nullable final DatapathTypeBase dpType,
@@ -900,7 +898,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         @Override
         public void close() {
-            final InstanceIdentifier<Node> iid =
+            final DataObjectIdentifier<Node> iid =
                     SouthboundUtils.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName));
             assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, iid));
             try {
@@ -935,9 +933,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     .setMappings(mappings)
                     .setAutoattachExternalIds(externalIds)
                     .build();
-            InstanceIdentifier<Autoattach> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+            DataObjectIdentifier<Autoattach> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo).toBuilder()
                     .augmentation(OvsdbNodeAugmentation.class)
-                    .child(Autoattach.class, aaEntry.key());
+                    .child(Autoattach.class, aaEntry.key())
+                    .build();
             final NotifyingDataChangeListener aaOperationalListener =
                     new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, iid);
             aaOperationalListener.registerDataChangeListener();
@@ -952,9 +951,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         @Override
         public void close() {
-            final InstanceIdentifier<Autoattach> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+            final DataObjectIdentifier<Autoattach> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    .toBuilder()
                     .augmentation(OvsdbNodeAugmentation.class)
-                    .child(Autoattach.class, new AutoattachKey(autoattachId));
+                    .child(Autoattach.class, new AutoattachKey(autoattachId))
+                    .build();
             final NotifyingDataChangeListener aaOperationalListener =
                     new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, iid);
             aaOperationalListener.registerDataChangeListener();
@@ -1016,9 +1017,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         .setAutoattachId(new Uri(testAutoattachId))
                         .setMappings(mappings)
                         .build();
-                InstanceIdentifier<Autoattach> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                DataObjectIdentifier<Autoattach> iid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                        .toBuilder()
                         .augmentation(OvsdbNodeAugmentation.class)
-                        .child(Autoattach.class, updatedAa.key());
+                        .child(Autoattach.class, updatedAa.key())
+                        .build();
                 final NotifyingDataChangeListener aaOperationalListener =
                         new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, iid);
                 aaOperationalListener.registerDataChangeListener();
@@ -1105,9 +1108,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 .setQosExternalIds(externalIds)
                 .setQosOtherConfig(otherConfigs)
                 .build();
-            InstanceIdentifier<QosEntries> qeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+            DataObjectIdentifier<QosEntries> qeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    .toBuilder()
                     .augmentation(OvsdbNodeAugmentation.class)
-                    .child(QosEntries.class, qosEntry.key());
+                    .child(QosEntries.class, qosEntry.key())
+                    .build();
             final NotifyingDataChangeListener qosOperationalListener =
                     new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, qeIid);
             qosOperationalListener.registerDataChangeListener();
@@ -1124,9 +1129,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
         @Override
         public void close() {
-            final InstanceIdentifier<QosEntries> qeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+            final DataObjectIdentifier<QosEntries> qeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    .toBuilder()
                     .augmentation(OvsdbNodeAugmentation.class)
-                    .child(QosEntries.class, new QosEntriesKey(qosId));
+                    .child(QosEntries.class, new QosEntriesKey(qosId))
+                    .build();
             final NotifyingDataChangeListener qosOperationalListener =
                     new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, qeIid);
             qosOperationalListener.registerDataChangeListener();
@@ -1143,7 +1150,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     private static class TestQueue implements AutoCloseable {
         private final ConnectionInfo connectionInfo;
         private final Uri queueId;
-        private final InstanceIdentifier<Queues> queueIid;
+        private final DataObjectIdentifier<Queues> queueIid;
 
         /**
          * Creates a test queue entry which can be automatically removed when no longer necessary.
@@ -1167,8 +1174,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 .setQueuesOtherConfig(otherConfigs)
                 .build();
             queueIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    .toBuilder()
                     .augmentation(OvsdbNodeAugmentation.class)
-                    .child(Queues.class, queue.key());
+                    .child(Queues.class, queue.key())
+                    .build();
             final NotifyingDataChangeListener queueOperationalListener =
                     new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, queueIid);
             queueOperationalListener.registerDataChangeListener();
@@ -1182,15 +1191,17 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
         }
 
-        public InstanceIdentifier<Queues> getInstanceIdentifier() {
+        public DataObjectIdentifier<Queues> getInstanceIdentifier() {
             return queueIid;
         }
 
         @Override
         public void close() {
-            InstanceIdentifier<Queues> queuesIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+            DataObjectIdentifier<Queues> queuesIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    .toBuilder()
                     .augmentation(OvsdbNodeAugmentation.class)
-                    .child(Queues.class, new QueuesKey(queueId));
+                    .child(Queues.class, new QueuesKey(queueId))
+                    .build();
             final NotifyingDataChangeListener queueOperationalListener =
                     new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, queuesIid);
             queueOperationalListener.registerDataChangeListener();
@@ -1206,7 +1217,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
     private static OvsdbNodeAugmentation getOvsdbNode(final ConnectionInfo connectionInfo,
             final LogicalDatastoreType store) {
-        InstanceIdentifier<Node> nodeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
+        DataObjectIdentifier<Node> nodeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
         Node node = mdsalUtils.read(store, nodeIid);
         assertNotNull(node);
         OvsdbNodeAugmentation ovsdbNodeAugmentation = node.augmentation(OvsdbNodeAugmentation.class);
@@ -1260,7 +1271,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
      */
     private static Node getBridgeNode(final ConnectionInfo connectionInfo, final String bridgeName,
             final LogicalDatastoreType store) {
-        InstanceIdentifier<Node> bridgeIid =
+        DataObjectIdentifier<Node> bridgeIid =
                 SouthboundUtils.createInstanceIdentifier(connectionInfo, new OvsdbBridgeName(bridgeName));
         return mdsalUtils.read(store, bridgeIid);
     }
@@ -1288,7 +1299,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static InstanceIdentifier<Node> getTpIid(final ConnectionInfo connectionInfo,
+    private static DataObjectIdentifier<Node> getTpIid(final ConnectionInfo connectionInfo,
             final OvsdbBridgeAugmentation bridge) {
         return SouthboundUtils.createInstanceIdentifier(connectionInfo, bridge.getBridgeName());
     }
@@ -1336,7 +1347,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             ovsdbTerminationBuilder.setName(portName);
 
             assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
-            InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
+            DataObjectIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
             Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
             assertNotNull(terminationPointNode);
 
@@ -1373,7 +1384,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
             ovsdbTerminationBuilder.setOfport(ofportExpected);
             assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
-            InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
+            DataObjectIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
             Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
             assertNotNull(terminationPointNode);
 
@@ -1418,7 +1429,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             ovsdbTerminationBuilder.setOfport(ofportInput);
             ovsdbTerminationBuilder.setOfportRequest(ofPortRequestExpected);
             assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
-            InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
+            DataObjectIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
             Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
             assertNotNull(terminationPointNode);
 
@@ -1520,7 +1531,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
                             new OvsdbTerminationPointAugmentationBuilder();
                     helper.writeValues(tpUpdateAugmentationBuilder, updateToTestCase.inputValues);
-                    InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
+                    DataObjectIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
                     NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
                     NodeId portUpdateNodeId = SouthboundUtils.createManagedNodeId(portIid);
                     portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
@@ -1644,17 +1655,18 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             String portName = port1;
             ovsdbTerminationBuilder.setName(portName);
             assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
-            InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
+            DataObjectIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
             Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
             assertNotNull(terminationPointNode);
 
             SouthboundUtils.createInstanceIdentifier(connectionInfo,
                     new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
             portName = port1;
-            InstanceIdentifier<TerminationPoint> nodePath =
+            DataObjectIdentifier<TerminationPoint> nodePath =
                     SouthboundUtils.createInstanceIdentifier(connectionInfo,
-                            new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME))
-                            .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
+                            new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME)).toBuilder()
+                    .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)))
+                    .build();
 
             assertTrue("failed to delete port " + portName,
                     mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, nodePath));
@@ -1681,10 +1693,10 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             SouthboundUtils.createInstanceIdentifier(connectionInfo,
                     new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME));
             portName = port1;
-            nodePath =
-                    SouthboundUtils.createInstanceIdentifier(connectionInfo,
-                            new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME))
-                            .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
+            nodePath = SouthboundUtils.createInstanceIdentifier(connectionInfo,
+                new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME)).toBuilder()
+                .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)))
+                .build();
 
             assertTrue("failed to delete port " + portName,
                     mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, nodePath));
@@ -1695,8 +1707,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
             portName = port2;
             nodePath = SouthboundUtils.createInstanceIdentifier(connectionInfo,
-                    new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME))
-                    .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
+                new OvsdbBridgeName(SouthboundITConstants.BRIDGE_NAME)).toBuilder()
+                .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)))
+                .build();
 
             assertTrue("failed to delete port " + portName,
                     mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, nodePath));
@@ -1728,7 +1741,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             ovsdbTerminationBuilder.setName(portName);
             ovsdbTerminationBuilder.setVlanTag(new VlanId(createdVlanId));
             assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
-            InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
+            DataObjectIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
             Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
             assertNotNull(terminationPointNode);
 
@@ -1749,7 +1762,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
                     new OvsdbTerminationPointAugmentationBuilder();
             tpUpdateAugmentationBuilder.setVlanTag(new VlanId(updatedVlanId));
-            InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
+            DataObjectIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
             NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
             NodeId portUpdateNodeId = SouthboundUtils.createManagedNodeId(portIid);
             portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
@@ -1795,7 +1808,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 ovsdbTerminationBuilder.setName(portName);
                 ovsdbTerminationBuilder.setVlanMode(vlanMode);
                 assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
-                InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
+                DataObjectIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
                 Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
                 assertNotNull(terminationPointNode);
 
@@ -1814,7 +1827,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
                         new OvsdbTerminationPointAugmentationBuilder();
                 tpUpdateAugmentationBuilder.setVlanMode(updatedVlanMode);
-                InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
+                DataObjectIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
                 NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
                 NodeId portUpdateNodeId = SouthboundUtils.createManagedNodeId(portIid);
                 portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
@@ -1880,7 +1893,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 List<Trunks> trunks = buildTrunkList(vlanSet);
                 ovsdbTerminationBuilder.setTrunks(trunks);
                 assertTrue(addTerminationPoint(nodeId, portName, ovsdbTerminationBuilder));
-                InstanceIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
+                DataObjectIdentifier<Node> terminationPointIid = getTpIid(connectionInfo, bridge);
                 Node terminationPointNode = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, terminationPointIid);
                 assertNotNull(terminationPointNode);
 
@@ -1904,7 +1917,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                 OvsdbTerminationPointAugmentationBuilder tpUpdateAugmentationBuilder =
                         new OvsdbTerminationPointAugmentationBuilder();
                 tpUpdateAugmentationBuilder.setTrunks(updatedTrunks);
-                InstanceIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
+                DataObjectIdentifier<Node> portIid = SouthboundMapper.createInstanceIdentifier(testBridgeNodeId);
                 NodeBuilder portUpdateNodeBuilder = new NodeBuilder();
                 NodeId portUpdateNodeId = SouthboundUtils.createManagedNodeId(portIid);
                 portUpdateNodeBuilder.setNodeId(portUpdateNodeId);
@@ -1959,8 +1972,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
 
            // READ and check that qos uuid has been added to the port
-            InstanceIdentifier<TerminationPoint> tpEntryIid = getTpIid(connectionInfo, bridge)
-                    .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)));
+            DataObjectIdentifier<TerminationPoint> tpEntryIid = getTpIid(connectionInfo, bridge).toBuilder()
+                    .child(TerminationPoint.class, new TerminationPointKey(new TpId(portName)))
+                    .build();
             TerminationPoint terminationPoint = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, tpEntryIid);
             assertNotNull(terminationPoint);
 
@@ -1988,13 +2002,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testGetOvsdbNodes() throws InterruptedException {
         ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        InstanceIdentifier<Topology> topologyPath = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
+        DataObjectIdentifier<Topology> topologyPath = DataObjectIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .build();
 
         Topology topology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, topologyPath);
-        InstanceIdentifier<Node> expectedNodeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
-        NodeId expectedNodeId = expectedNodeIid.firstKeyOf(Node.class).getNodeId();
+        DataObjectIdentifier<Node> expectedNodeIid = SouthboundUtils.createInstanceIdentifier(connectionInfo);
+        NodeId expectedNodeId = expectedNodeIid.getFirstKeyOf(Node.class).getNodeId();
         assertNotNull("Expected to find topology: " + topologyPath, topology);
         assertNotNull("Expected to find some nodes" + topology.getNode());
         LOG.info("expectedNodeId: {}, getNode: {}", expectedNodeId, topology.getNode());
@@ -2036,7 +2050,7 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
                 // CREATE: Create the test bridge
                 final OvsdbBridgeName ovsdbBridgeName = new OvsdbBridgeName(testBridgeName);
-                final InstanceIdentifier<Node> bridgeIid =
+                final DataObjectIdentifier<Node> bridgeIid =
                         SouthboundUtils.createInstanceIdentifier(connectionInfo, ovsdbBridgeName);
                 final NodeId bridgeNodeId = SouthboundMapper.createManagedNodeId(bridgeIid);
                 final NodeBuilder bridgeCreateNodeBuilder = new NodeBuilder();
@@ -2249,9 +2263,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         Uint8.valueOf(45), null, null)) {
                     QueuesBuilder queuesBuilder = new QueuesBuilder();
                     queuesBuilder.setQueueId(new Uri(testQueueId));
-                    InstanceIdentifier<Queues> queueIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    DataObjectIdentifier<Queues> queueIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                            .toBuilder()
                             .augmentation(OvsdbNodeAugmentation.class)
-                            .child(Queues.class, queuesBuilder.build().key());
+                            .child(Queues.class, queuesBuilder.build().key())
+                            .build();
                     final NotifyingDataChangeListener queueConfigurationListener =
                             new NotifyingDataChangeListener(LogicalDatastoreType.CONFIGURATION, queueIid);
                     queueConfigurationListener.registerDataChangeListener();
@@ -2335,9 +2351,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             for (short dscp = 1; dscp < 64; dscp++) {
                 QueuesBuilder queuesBuilder = new QueuesBuilder();
                 queuesBuilder.setQueueId(new Uri(testQueueId));
-                InstanceIdentifier<Queues> queueIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                DataObjectIdentifier<Queues> queueIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                        .toBuilder()
                         .augmentation(OvsdbNodeAugmentation.class)
-                        .child(Queues.class, queuesBuilder.build().key());
+                        .child(Queues.class, queuesBuilder.build().key())
+                        .build();
                 final NotifyingDataChangeListener queueOperationalListener =
                         new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, queueIid);
                 queueOperationalListener.registerDataChangeListener();
@@ -2381,9 +2399,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                         SouthboundMapper.createQosType(SouthboundConstants.QOS_LINUX_HTB), null, null)) {
                     QosEntriesBuilder qosBuilder = new QosEntriesBuilder();
                     qosBuilder.setQosId(new Uri(testQosId));
-                    InstanceIdentifier<QosEntries> qosIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    DataObjectIdentifier<QosEntries> qosIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                            .toBuilder()
                             .augmentation(OvsdbNodeAugmentation.class)
-                            .child(QosEntries.class, qosBuilder.build().key());
+                            .child(QosEntries.class, qosBuilder.build().key())
+                            .build();
                     final NotifyingDataChangeListener qosConfigurationListener =
                             new NotifyingDataChangeListener(LogicalDatastoreType.CONFIGURATION, qosIid);
                     qosConfigurationListener.registerDataChangeListener();
@@ -2470,9 +2490,11 @@ public class SouthboundIT extends AbstractMdsalTestBase {
                     null)) {
             QosEntriesBuilder qosBuilder = new QosEntriesBuilder();
             qosBuilder.setQosId(new Uri(testQosId));
-            InstanceIdentifier<QosEntries> qosIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+            DataObjectIdentifier<QosEntries> qosIid = SouthboundUtils.createInstanceIdentifier(connectionInfo)
+                    .toBuilder()
                     .augmentation(OvsdbNodeAugmentation.class)
-                    .child(QosEntries.class, qosBuilder.build().key());
+                    .child(QosEntries.class, qosBuilder.build().key())
+                    .build();
             final NotifyingDataChangeListener qosOperationalListener =
                     new NotifyingDataChangeListener(LogicalDatastoreType.OPERATIONAL, qosIid);
             qosOperationalListener.registerDataChangeListener();
@@ -2486,13 +2508,13 @@ public class SouthboundIT extends AbstractMdsalTestBase {
 
             assertNotNull(operQueue1);
 
-            InstanceIdentifier<Queues> queue1Iid = testQueue1.getInstanceIdentifier();
-            OvsdbQueueRef queue1Ref = new OvsdbQueueRef(queue1Iid.toIdentifier());
+            DataObjectIdentifier<Queues> queue1Iid = testQueue1.getInstanceIdentifier();
+            OvsdbQueueRef queue1Ref = new OvsdbQueueRef(queue1Iid);
 
             Queues operQueue2 = getQueue(new Uri("queue2"), ovsdbNodeAugmentation);
             assertNotNull(operQueue2);
-            InstanceIdentifier<Queues> queue2Iid = testQueue2.getInstanceIdentifier();
-            OvsdbQueueRef queue2Ref = new OvsdbQueueRef(queue2Iid.toIdentifier());
+            DataObjectIdentifier<Queues> queue2Iid = testQueue2.getInstanceIdentifier();
+            OvsdbQueueRef queue2Ref = new OvsdbQueueRef(queue2Iid);
 
             Map<QueueListKey, QueueList> queueList = BindingMap.of(
                 new QueueListBuilder().setQueueNumber(Uint32.ONE).setQueueRef(queue1Ref).build(),
@@ -2517,8 +2539,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
 
             // DELETE one queue from queue list and check that one remains
-            KeyedInstanceIdentifier<QueueList, QueueListKey> qosQueueIid = qosIid
-                    .child(QueueList.class, new QueueListKey(Uint32.ONE));
+            DataObjectIdentifier<QueueList> qosQueueIid = qosIid.toBuilder()
+                    .child(QueueList.class, new QueueListKey(Uint32.ONE))
+                    .build();
             assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, qosQueueIid));
             qosOperationalListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
 
@@ -2542,8 +2565,9 @@ public class SouthboundIT extends AbstractMdsalTestBase {
             }
 
             // DELETE  queue list and check that list is empty
-            qosQueueIid = qosIid
-                    .child(QueueList.class, new QueueListKey(Uint32.ONE));
+            qosQueueIid = qosIid.toBuilder()
+                    .child(QueueList.class, new QueueListKey(Uint32.ONE))
+                    .build();
             assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, qosQueueIid));
             qosOperationalListener.waitForUpdate(OVSDB_UPDATE_TIMEOUT);
 

@@ -48,6 +48,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
@@ -75,30 +76,32 @@ public class TerminationPointUpdateCommandTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testExecute() {
-        Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> created
+        Map<DataObjectIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> created
             = new HashMap<>();
-        created.put(InstanceIdentifier.create(NetworkTopology.class)
+        created.put(DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
             .child(Node.class, new NodeKey(new NodeId("testNode")))
             .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp")))
-            .augmentation(OvsdbTerminationPointAugmentation.class), mock(OvsdbTerminationPointAugmentation.class));
+            .augmentation(OvsdbTerminationPointAugmentation.class)
+            .build(), mock(OvsdbTerminationPointAugmentation.class));
         PowerMockito.mockStatic(TransactUtils.class);
         PowerMockito.when(TransactUtils.extractCreated(any(DataChangeEvent.class),
                 eq(OvsdbTerminationPointAugmentation.class))).thenReturn(created);
         MemberModifier.suppress(MemberMatcher.method(TerminationPointUpdateCommand.class, "updateTerminationPoint",
                 TransactionBuilder.class, BridgeOperationalState.class,
-                InstanceIdentifier.class, OvsdbTerminationPointAugmentation.class, InstanceIdentifierCodec.class));
+                DataObjectIdentifier.class, OvsdbTerminationPointAugmentation.class, InstanceIdentifierCodec.class));
         doNothing().when(terminationPointUpdateCommand).updateTerminationPoint(any(TransactionBuilder.class),
-                any(BridgeOperationalState.class), any(InstanceIdentifier.class),
+                any(BridgeOperationalState.class), any(DataObjectIdentifier.class),
                 any(OvsdbTerminationPointAugmentation.class), any(InstanceIdentifierCodec.class));
 
-        Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> updated =
+        Map<DataObjectIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> updated =
             new HashMap<>();
-        updated.put(InstanceIdentifier.create(NetworkTopology.class)
+        updated.put(DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
             .child(Node.class, new NodeKey(new NodeId("testNode")))
             .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp2")))
-            .augmentation(OvsdbTerminationPointAugmentation.class), mock(OvsdbTerminationPointAugmentation.class));
+            .augmentation(OvsdbTerminationPointAugmentation.class)
+            .build(), mock(OvsdbTerminationPointAugmentation.class));
         PowerMockito.when(TransactUtils.extractUpdated(any(DataChangeEvent.class),
                 eq(OvsdbTerminationPointAugmentation.class))).thenReturn(updated);
 
@@ -118,7 +121,7 @@ public class TerminationPointUpdateCommandTest {
         Node node = mock(Node.class);
         when(node.augmentation(OvsdbBridgeAugmentation.class)).thenReturn(mock(OvsdbBridgeAugmentation.class));
         Optional<Node> optNode = Optional.of(node);
-        when(state.getBridgeNode(any(InstanceIdentifier.class))).thenReturn(optNode);
+        when(state.getBridgeNode(any(DataObjectIdentifier.class))).thenReturn(optNode);
 
         // Test updateInterface()
         Interface ovsInterface = mock(Interface.class);
@@ -153,12 +156,12 @@ public class TerminationPointUpdateCommandTest {
         when(extraPort.getNameColumn()).thenReturn(column);
 
         terminationPointUpdateCommand.updateTerminationPoint(transaction, state,
-            InstanceIdentifier.create(NetworkTopology.class)
+            DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
                 .child(Node.class, new NodeKey(new NodeId("testNode")))
                 .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp")))
-                .augmentation(OvsdbTerminationPointAugmentation.class), terminationPoint,
-                mock(InstanceIdentifierCodec.class));
+                .augmentation(OvsdbTerminationPointAugmentation.class)
+                .build(), terminationPoint, mock(InstanceIdentifierCodec.class));
         verify(transaction, times(1)).add(any(Operation.class));
     }
 }

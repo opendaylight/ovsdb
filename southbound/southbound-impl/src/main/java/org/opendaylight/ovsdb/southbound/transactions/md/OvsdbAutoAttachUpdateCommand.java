@@ -33,7 +33,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.MappingsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.autoattach.MappingsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
@@ -62,7 +61,7 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
     private void updateAutoAttach(ReadWriteTransaction transaction,
             Map<UUID, AutoAttach> newUpdatedAutoAttachRows) {
 
-        final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
         if (ovsdbNode.isPresent()) {
             for (final Entry<UUID, AutoAttach> entry : newUpdatedAutoAttachRows.entrySet()) {
@@ -77,10 +76,11 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
                 Autoattach currentAutoattach = null;
                 if (oldAutoAttach.getUuidColumn() != null) {
                     try {
-                        final InstanceIdentifier<Autoattach> currentIid = nodeIId
+                        final var currentIid = nodeIId.toBuilder()
                                 .augmentation(OvsdbNodeAugmentation.class)
                                 .child(Autoattach.class, new AutoattachKey(new Uri(oldAutoAttach
-                                        .getUuidColumn().getData().toString())));
+                                        .getUuidColumn().getData().toString())))
+                                .build();
                         // FIXME: To be uncommented and replaced to currentIid when
                         // Open vSwitch supports external_ids column
 //                    InstanceIdentifier<Autoattach> currentIid = nodeIId
@@ -89,7 +89,7 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
 //                                    .getExternalIdsColumn().getData()
 //                                    .get(SouthboundConstants.AUTOATTACH_ID_EXTERNAL_ID_KEY))));
                         final Optional<Autoattach> optionalAutoattach =
-                                transaction.read(LogicalDatastoreType.OPERATIONAL, currentIid.toIdentifier()).get();
+                                transaction.read(LogicalDatastoreType.OPERATIONAL, currentIid).get();
                         if (optionalAutoattach.isPresent()) {
                             currentAutoattach = optionalAutoattach.orElseThrow();
                         }
@@ -126,10 +126,10 @@ public class OvsdbAutoAttachUpdateCommand extends AbstractTransactionCommand {
                 final Autoattach autoAttachEntry = autoAttachBuilder.build();
                 LOG.trace("Update Ovsdb Node {} with AutoAttach table entries {}",
                         ovsdbNode.orElseThrow().getNodeId(), autoAttachEntry);
-                final InstanceIdentifier<Autoattach> iid = nodeIId
-                        .augmentation(OvsdbNodeAugmentation.class)
-                        .child(Autoattach.class, autoAttachEntry.key());
-                transaction.put(LogicalDatastoreType.OPERATIONAL, iid.toIdentifier(), autoAttachEntry);
+                transaction.put(LogicalDatastoreType.OPERATIONAL, nodeIId.toBuilder()
+                    .augmentation(OvsdbNodeAugmentation.class)
+                    .child(Autoattach.class, autoAttachEntry.key())
+                    .build(), autoAttachEntry);
             }
         }
     }

@@ -75,14 +75,15 @@ public final class HwvtepLogicalRouterUpdateCommand extends AbstractTransactionC
     }
 
     private void updateLogicalRouter(ReadWriteTransaction transaction, final LogicalRouter router) {
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         Optional<Node> connection = HwvtepSouthboundUtil.readNode(transaction, connectionIId);
         if (connection.isPresent()) {
             Node connectionNode = buildConnectionNode(router);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(), connectionNode);
-            InstanceIdentifier<LogicalRouters> routerIid = getOvsdbConnectionInstance().getInstanceIdentifier()
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, connectionNode);
+            var routerIid = getOvsdbConnectionInstance().getInstanceIdentifier().toBuilder()
                     .augmentation(HwvtepGlobalAugmentation.class)
-                    .child(LogicalRouters.class, new LogicalRoutersKey(new HwvtepNodeName(router.getName())));
+                    .child(LogicalRouters.class, new LogicalRoutersKey(new HwvtepNodeName(router.getName())))
+                    .build();
             getOvsdbConnectionInstance().getDeviceInfo().updateDeviceOperData(LogicalRouters.class, routerIid,
                     router.getUuid(), router);
         }

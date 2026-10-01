@@ -74,44 +74,38 @@ public interface TypedDatabaseSchema extends DatabaseSchema {
     <T extends TypedBaseTable<?>> T getTypedRowWrapper(Class<T> klazz, Row<GenericTableSchema> row);
 
     /**
-     * This method extracts all row updates of Class&lt;T&gt; klazz from a TableUpdates
+     * This method extracts all row updates of {@code Class<T>} klazz from a TableUpdates
      * that correspond to old version of rows of type klazz that have been updated.
      * Example:
-     * <code>
-     * Map&lt;UUID,Bridge&gt; oldBridges = extractRowsOld(Bridge.class,updates,dbSchema)
-     * </code>
+     * {@code Map<UUID,Bridge> oldBridges = extractRowsOld(Bridge.class,updates,dbSchema)}
      *
      * @param klazz Class for row type to be extracted
      * @param updates TableUpdates from which to extract rowUpdates
-     * @return Map&lt;UUID,T&gt; for the type of things being sought
+     * @return {@code Map<UUID,T>} for the type of things being sought
      */
     <T extends TypedBaseTable<?>> Map<UUID, T> extractRowsOld(Class<T> klazz, TableUpdates updates);
 
     /**
-     * This method extracts all row updates of Class&lt;T&gt; klazz from a TableUpdates
+     * This method extracts all row updates of {@code Class<T>} klazz from a TableUpdates
      * that correspond to removal of rows of type klazz.
      * Example:
-     * <code>
-     * Map&lt;UUID,Bridge&gt; updatedBridges = extractRowsRemoved(Bridge.class,updates,dbSchema)
-     * </code>
+     * {@code Map<UUID,Bridge> updatedBridges = extractRowsRemoved(Bridge.class,updates,dbSchema)}
      *
      * @param klazz Class for row type to be extracted
      * @param updates TableUpdates from which to extract rowUpdates
-     * @return Map&lt;UUID,T&gt; for the type of things being sought
+     * @return {@code Map<UUID,T>} for the type of things being sought
      */
     <T extends TypedBaseTable<?>> Map<UUID,T> extractRowsRemoved(Class<T> klazz, TableUpdates updates);
 
     /**
-     * This method extracts all row updates of Class&lt;T&gt; klazz from a TableUpdates
+     * This method extracts all row updates of {@code Class<T>} klazz from a TableUpdates
      * that correspond to insertion or updates of rows of type klazz.
      * Example:
-     * <code>
-     * Map&lt;UUID,Bridge&gt; updatedBridges = extractRowsUpdated(Bridge.class,updates,dbSchema)
-     * </code>
+     * {@code Map<UUID,Bridge> updatedBridges = extractRowsUpdated(Bridge.class,updates,dbSchema)}
      *
      * @param klazz Class for row type to be extracted
      * @param updates TableUpdates from which to extract rowUpdates
-     * @return Map&lt;UUID,T&gt; for the type of things being sought
+     * @return {@code Map<UUID,T>} for the type of things being sought
      */
     <T extends TypedBaseTable<?>> Map<UUID, T> extractRowsUpdated(Class<T> klazz, TableUpdates updates);
 }

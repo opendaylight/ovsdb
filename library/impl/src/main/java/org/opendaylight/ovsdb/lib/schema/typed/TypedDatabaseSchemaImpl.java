@@ -115,17 +115,16 @@ final class TypedDatabaseSchemaImpl extends ForwardingDatabaseSchema implements 
     }
 
     /**
-     * This method extracts all RowUpdates of Class&lt;T&gt; klazz from a TableUpdates that correspond to rows of type
+     * This method extracts all RowUpdates of {@code Class<T>} klazz from a TableUpdates that correspond to rows of type
      * klazz. Example:
-     * <code>
-     * Map&lt;UUID,TableUpdate&lt;GenericTableSchema&gt;.RowUpdate&lt;GenericTableSchema&gt;&gt; updatedBridges =
-     *     extractRowsUpdates(Bridge.class,updates,dbSchema)
-     * </code>
+     * {@code
+     * Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>> updatedBridges =
+     *     extractRowsUpdates(Bridge.class,updates,dbSchema)}
      *
      * @param klazz Class for row type to be extracted
      * @param updates TableUpdates from which to extract rowUpdates
-     * @return Map&lt;UUID,TableUpdate&lt;GenericTableSchema&gt;.RowUpdate&lt;GenericTableSchema&gt;&gt;
-     *     for the type of things being sought
+     * @return {@code Map<UUID,TableUpdate<GenericTableSchema>.RowUpdate<GenericTableSchema>>
+     *     for the type of things being sought}
      */
     private Map<UUID, RowUpdate<GenericTableSchema>> extractRowUpdates(final Class<?> klazz,
             final TableUpdates updates) {

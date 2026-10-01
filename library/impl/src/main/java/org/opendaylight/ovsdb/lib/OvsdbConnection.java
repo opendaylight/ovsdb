@@ -25,10 +25,10 @@ import org.opendaylight.aaa.cert.api.ICertificateManager;
  * listener API.
  */
 public interface OvsdbConnection {
-
     /**
      * connect API can be used by the applications to initiate Active connection from
      * the controller towards ovsdb-server.
+     *
      * @param address IP Address of the remote server that hosts the ovsdb server.
      * @param port Layer 4 port on which the remote ovsdb server is listening on.
      * @return OvsDBClient The primary Client interface for the ovsdb connection.
@@ -38,6 +38,7 @@ public interface OvsdbConnection {
     /**
      * connect API can be used by the applications to initiate Active ssl
      * connection from the controller towards ovsdb-server.
+     *
      * @param address IP Address of the remote server that hosts the ovsdb server.
      * @param port Layer 4 port on which the remote ovsdb server is listening on.
      * @param certificateManagerSrv Certificate manager for SSL/TLS
@@ -47,6 +48,7 @@ public interface OvsdbConnection {
 
     /**
      * Method to disconnect an existing connection.
+     *
      * @param client that represents the ovsdb connection.
      */
     void disconnect(OvsdbClient client);
@@ -76,6 +78,7 @@ public interface OvsdbConnection {
 
     /**
      * Method to register a Passive Connection Listener with the ConnectionService.
+     *
      * @param listener Passive Connection listener interested in Passive OVSDB connection requests.
      */
     void registerConnectionListener(OvsdbConnectionListener listener);

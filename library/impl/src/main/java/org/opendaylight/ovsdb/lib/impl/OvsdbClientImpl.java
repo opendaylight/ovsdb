@@ -89,6 +89,7 @@ public class OvsdbClientImpl implements OvsdbClient {
 
     /**
      * Generate the threadFactory based on ACTIVE, PASSIVE (SSL/NON-SSL) connection type.
+     *
      * @param type ACTIVE or PASSIVE {@link ConnectionType}
      * @param socketConnType SSL or NON-SSL {@link SocketConnectionType}
      * @param executorNameArgs Additional args to append to thread name format

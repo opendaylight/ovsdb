@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.lib;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -16,12 +15,14 @@ import org.eclipse.jdt.annotation.NonNull;
 public interface OvsdbConnectionListener {
     /**
      * Event thrown to the connection listener when a new Passive connection is established.
+     *
      * @param client OvsdbClient that represents the connection.
      */
     void connected(@NonNull OvsdbClient client);
 
     /**
      * Event thrown to the connection listener when an existing connection is terminated.
+     *
      * @param client OvsdbClient that represents the connection.
      */
     void disconnected(OvsdbClient client);

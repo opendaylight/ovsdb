@@ -148,9 +148,8 @@ public final class HwvtepSouthboundMapper {
             final VlanBindings vlanBindings) {
         return tpPath.toBuilder()
             .augmentation(HwvtepPhysicalPortAugmentation.class)
-            .child(VlanBindings.class, new VlanBindingsKey(vlanBindings.key()))
+            .child(VlanBindings.class, vlanBindings.key())
             .build();
-
     }
 
     public static DataObjectReference<Node> createInstanceIdentifier() {

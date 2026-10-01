@@ -42,7 +42,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -55,7 +54,7 @@ public class OvsdbAutoAttachRemovedCommandTest {
     private final Map<UUID, AutoAttach> removedAutoAttachRows = new HashMap<>();
     private OvsdbAutoAttachRemovedCommand ovsdbAutoAttachRemovedCommand;
     private ReadWriteTransaction transaction;
-    private InstanceIdentifier<Autoattach> aaIid;
+    private DataObjectIdentifier<Autoattach> aaIid;
 
     private static final UUID AUTOATTACH_UUID = new UUID("798f35d8-f40a-449a-94d3-c860f5547f9a");
     private static final String CONNECTED_NODE_ID = "10.0.0.1";
@@ -73,12 +72,14 @@ public class OvsdbAutoAttachRemovedCommandTest {
         when(ovsdbAutoAttachRemovedCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         AutoattachKey aaKey = new AutoattachKey(
                 new Uri(SouthboundConstants.AUTOATTACH_URI_PREFIX + "://" + AUTOATTACH_UUID.toString()));
-        aaIid = InstanceIdentifier.create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class, new NodeKey(new NodeId(CONNECTED_NODE_ID)))
+        var nodeIid = DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+            .child(Node.class, new NodeKey(new NodeId(CONNECTED_NODE_ID)))
+            .build();
+        aaIid = nodeIid.toBuilder()
                 .augmentation(OvsdbNodeAugmentation.class)
-                .child(Autoattach.class, aaKey);
-        InstanceIdentifier<Node> nodeIid = aaIid.firstIdentifierOf(Node.class);
+                .child(Autoattach.class, aaKey)
+                .build();
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(nodeIid);
 
         PowerMockito.mockStatic(SouthboundUtil.class);
@@ -106,6 +107,6 @@ public class OvsdbAutoAttachRemovedCommandTest {
     @Test
     public void testExecute() {
         ovsdbAutoAttachRemovedCommand.execute(transaction);
-        verify(transaction).delete(eq(LogicalDatastoreType.OPERATIONAL), eq(aaIid.toIdentifier()));
+        verify(transaction).delete(eq(LogicalDatastoreType.OPERATIONAL), eq(aaIid));
     }
 }

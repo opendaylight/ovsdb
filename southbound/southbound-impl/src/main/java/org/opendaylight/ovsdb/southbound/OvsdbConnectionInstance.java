@@ -64,8 +64,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,16 +86,16 @@ public class OvsdbConnectionInstance {
     private final TransactionInvoker txInvoker;
     private Map<TypedDatabaseSchema, TransactInvoker> transactInvokers = null;
     private MonitorCallBack callback = null;
-    private InstanceIdentifier<Node> instanceIdentifier;
+    private DataObjectIdentifier<Node> instanceIdentifier;
     private volatile boolean hasDeviceOwnership = false;
     private Entity connectedEntity;
     private Registration deviceOwnershipCandidateRegistration;
     private OvsdbNodeAugmentation initialCreateData = null;
-    private final Map<UUID, InstanceIdentifier<Node>> ports = new ConcurrentHashMap<>();
-    private final Map<String, InstanceIdentifier<Node>> portInterfaces = new ConcurrentHashMap<>();
+    private final Map<UUID, DataObjectIdentifier<Node>> ports = new ConcurrentHashMap<>();
+    private final Map<String, DataObjectIdentifier<Node>> portInterfaces = new ConcurrentHashMap<>();
 
     OvsdbConnectionInstance(final ConnectionInfo connectionInfo, final OvsdbClient client, final Operations ops,
-            final TransactionInvoker txInvoker, final InstanceIdentifier<Node> iid) {
+            final TransactionInvoker txInvoker, final DataObjectIdentifier<Node> iid) {
         this.connectionInfo = connectionInfo;
         this.client = client;
         this.ops = ops;
@@ -103,7 +103,7 @@ public class OvsdbConnectionInstance {
         instanceIdentifier = iid;
     }
 
-    public void updatePort(final UUID uuid, final InstanceIdentifier<Node> iid) {
+    public void updatePort(final UUID uuid, final DataObjectIdentifier<Node> iid) {
         ports.put(uuid, iid);
     }
 
@@ -111,11 +111,11 @@ public class OvsdbConnectionInstance {
         ports.remove(uuid);
     }
 
-    public InstanceIdentifier<Node> getPort(final UUID uuid) {
+    public DataObjectIdentifier<Node> getPort(final UUID uuid) {
         return ports.get(uuid);
     }
 
-    public void updatePortInterface(final String name, final InstanceIdentifier<Node> iid) {
+    public void updatePortInterface(final String name, final DataObjectIdentifier<Node> iid) {
         portInterfaces.put(name, iid);
     }
 
@@ -123,7 +123,7 @@ public class OvsdbConnectionInstance {
         portInterfaces.remove(name);
     }
 
-    public InstanceIdentifier<Node> getPortInterface(final String name) {
+    public DataObjectIdentifier<Node> getPortInterface(final String name) {
         return portInterfaces.get(name);
     }
 
@@ -240,7 +240,7 @@ public class OvsdbConnectionInstance {
             Map<OpenvswitchExternalIdsKey, OpenvswitchExternalIds> externalIds =
                     initialCreateData.getOpenvswitchExternalIds();
 
-            stampInstanceIdentifier(transaction, instanceIdentifier.firstIdentifierOf(Node.class),
+            stampInstanceIdentifier(transaction, instanceIdentifier.trimTo(Node.class),
                     instanceIdentifierCodec);
 
             ovs.setExternalIds(
@@ -264,7 +264,7 @@ public class OvsdbConnectionInstance {
         }
     }
 
-    private void stampInstanceIdentifier(final TransactionBuilder transaction,final InstanceIdentifier<Node> iid,
+    private void stampInstanceIdentifier(final TransactionBuilder transaction,final DataObjectIdentifier<Node> iid,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         OpenVSwitch ovs = transaction.getTypedRowWrapper(OpenVSwitch.class);
         ovs.setExternalIds(Collections.emptyMap());
@@ -365,7 +365,7 @@ public class OvsdbConnectionInstance {
         connectionInfo = key;
     }
 
-    public InstanceIdentifier<Node> getInstanceIdentifier() {
+    public DataObjectIdentifier<Node> getInstanceIdentifier() {
         return instanceIdentifier;
     }
 
@@ -377,7 +377,7 @@ public class OvsdbConnectionInstance {
         return getNodeKey().getNodeId();
     }
 
-    public void setInstanceIdentifier(final InstanceIdentifier<Node> iid) {
+    public void setInstanceIdentifier(final DataObjectIdentifier<Node> iid) {
         instanceIdentifier = iid;
     }
 

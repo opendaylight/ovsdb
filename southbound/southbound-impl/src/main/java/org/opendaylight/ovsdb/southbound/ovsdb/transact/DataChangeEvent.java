@@ -10,7 +10,7 @@ package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.yangtools.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 
 public interface DataChangeEvent {
     /**
@@ -20,7 +20,7 @@ public interface DataChangeEvent {
      *
      * @return map of paths and newly created objects
      */
-    Map<InstanceIdentifier<?>, DataObject> getCreatedData();
+    Map<DataObjectIdentifier<?>, DataObject> getCreatedData();
 
     /**
      * Returns a map of paths and objects which were updated by this change in the
@@ -29,14 +29,14 @@ public interface DataChangeEvent {
      *
      * @return map of paths and newly created objects
      */
-    Map<InstanceIdentifier<?>, DataObject> getUpdatedData();
+    Map<DataObjectIdentifier<?>, DataObject> getUpdatedData();
 
     /**
      * Returns an immutable set of removed paths.
      *
      * @return set of removed paths
      */
-    Set<InstanceIdentifier<?>> getRemovedPaths();
+    Set<DataObjectIdentifier<?>> getRemovedPaths();
 
     /**
      * Returns an immutable map of updated or removed paths and their original
@@ -44,5 +44,5 @@ public interface DataChangeEvent {
      *
      * @return map of paths and original state of updated and removed objects.
      */
-    Map<InstanceIdentifier<?>, DataObject> getOriginalData();
+    Map<DataObjectIdentifier<?>, DataObject> getOriginalData();
 }

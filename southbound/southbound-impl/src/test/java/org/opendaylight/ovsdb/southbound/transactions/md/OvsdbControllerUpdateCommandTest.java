@@ -9,6 +9,7 @@
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -53,8 +54,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
@@ -129,11 +128,12 @@ public class OvsdbControllerUpdateCommandTest {
         // suppress call to getControllerEntryIid()
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         Map<UUID, Controller> updatedControllerRows = new HashMap<>();
-        doReturn(InstanceIdentifier.create(NetworkTopology.class)
+        doReturn(DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
             .child(Node.class, new NodeKey(new NodeId("testNode")))
             .augmentation(OvsdbBridgeAugmentation.class)
-            .child(ControllerEntry.class, new ControllerEntryKey(new Uri("testEntry"))))
+            .child(ControllerEntry.class, new ControllerEntryKey(new Uri("testEntry")))
+            .build())
             .when(ovsdbControllerUpdateCommand).getControllerEntryIid(any(ControllerEntry.class), any(String.class));
         doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class),
                 any(ControllerEntry.class));
@@ -148,11 +148,12 @@ public class OvsdbControllerUpdateCommandTest {
     public void testUpdateController2() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         Map<UUID, Controller> updatedControllerRows = new HashMap<>();
-        Map<InstanceIdentifier<Node>, Node> bridgeNodes = new HashMap<>();
+        Map<DataObjectIdentifier<Node>, Node> bridgeNodes = new HashMap<>();
         Node node = mock(Node.class);
-        InstanceIdentifier<Node> bridgeIid = InstanceIdentifier.create(NetworkTopology.class)
+        DataObjectIdentifier<Node> bridgeIid = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-            .child(Node.class, new NodeKey(new NodeId("testNode")));
+            .child(Node.class, new NodeKey(new NodeId("testNode")))
+            .build();
         bridgeNodes.put(bridgeIid, node);
         PowerMockito.doReturn(bridgeNodes).when(ovsdbControllerUpdateCommand, "getBridgeNodes",
                 any(ReadWriteTransaction.class));
@@ -166,9 +167,10 @@ public class OvsdbControllerUpdateCommandTest {
     public void testGetBridgeNodes() throws Exception {
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbControllerUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
-        InstanceIdentifier<Node> connectionIId = InstanceIdentifier.create(NetworkTopology.class)
+        DataObjectIdentifier<Node> connectionIId = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-            .child(Node.class, new NodeKey(new NodeId("testConnection")));
+            .child(Node.class, new NodeKey(new NodeId("testConnection")))
+            .build();
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(connectionIId);
         PowerMockito.mockStatic(SouthboundUtil.class);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
@@ -178,18 +180,19 @@ public class OvsdbControllerUpdateCommandTest {
         OvsdbNodeAugmentation ovsdbNodeAugmentation = mock(OvsdbNodeAugmentation.class);
         when(node.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNodeAugmentation);
 
-        InstanceIdentifier<Node> bridgeIid = InstanceIdentifier.create(NetworkTopology.class)
+        DataObjectIdentifier<Node> bridgeIid = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-            .child(Node.class, new NodeKey(new NodeId("testBridge")));
+            .child(Node.class, new NodeKey(new NodeId("testBridge")))
+            .build();
         ManagedNodeEntry managedNodeEntry = new ManagedNodeEntryBuilder()
-                .setBridgeRef(new OvsdbBridgeRef(bridgeIid.toIdentifier()))
+                .setBridgeRef(new OvsdbBridgeRef(bridgeIid))
                 .build();
 
         when(ovsdbNodeAugmentation.getManagedNodeEntry()).thenReturn(Map.of(managedNodeEntry.key(), managedNodeEntry));
         Optional<Node> bridgeNode = Optional.of(node);
         when(SouthboundUtil.readNode(transaction, bridgeIid)).thenReturn(bridgeNode);
 
-        Map<InstanceIdentifier<Node>, Node> testBridgeNodes = new HashMap<>();
+        Map<DataObjectIdentifier<Node>, Node> testBridgeNodes = new HashMap<>();
         testBridgeNodes.put(bridgeIid, node);
 
         //verify if getBridgeNodes() returns expected value
@@ -208,8 +211,7 @@ public class OvsdbControllerUpdateCommandTest {
         PowerMockito.whenNew(NodeId.class).withAnyArguments().thenReturn(nodeId);
         PowerMockito.whenNew(NodeKey.class).withAnyArguments().thenReturn(nodeKey);
         when(controllerEntry.key()).thenReturn(new ControllerEntryKey(new Uri("key")));
-        assertEquals(KeyedInstanceIdentifier.class, Whitebox
-                .invokeMethod(ovsdbControllerUpdateCommand, "getControllerEntryIid", controllerEntry, BRIDGE_NAME)
-                .getClass());
+        assertInstanceOf(DataObjectIdentifier.WithKey.class, Whitebox
+                .invokeMethod(ovsdbControllerUpdateCommand, "getControllerEntryIid", controllerEntry, BRIDGE_NAME));
     }
 }

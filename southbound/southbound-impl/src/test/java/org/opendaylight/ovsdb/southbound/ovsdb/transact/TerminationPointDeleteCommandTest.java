@@ -25,7 +25,7 @@ import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -37,10 +37,10 @@ public class TerminationPointDeleteCommandTest {
     private TerminationPointDeleteCommand terminationPointDeleteCommand;
     @Mock private BridgeOperationalState state;
     @Mock private DataChangeEvent changes;
-    private final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+    private final Map<DataObjectIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
         originals = new HashMap<>();
-    private final Map<InstanceIdentifier<Node>, Node> originalNodes = new HashMap<>();
-    private final Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> removedTps = new HashSet<>();
+    private final Map<DataObjectIdentifier<Node>, Node> originalNodes = new HashMap<>();
+    private final Set<DataObjectIdentifier<OvsdbTerminationPointAugmentation>> removedTps = new HashSet<>();
 
     @Before
     public void setUp() throws Exception {

@@ -71,7 +71,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     private final ConcurrentMap<ConnectionInfo, OvsdbConnectionInstance> clients = new ConcurrentHashMap<>();
     private final ConcurrentMap<OvsdbClient, OvsdbClient> alreadyProcessedClients = new ConcurrentHashMap<>();
-    private final ConcurrentMap<ConnectionInfo,InstanceIdentifier<Node>> instanceIdentifiers =
+    private final ConcurrentMap<ConnectionInfo, DataObjectIdentifier<Node>> instanceIdentifiers =
             new ConcurrentHashMap<>();
     private final ConcurrentMap<InstanceIdentifier<Node>, OvsdbConnectionInstance> nodeIdVsConnectionInstance =
             new ConcurrentHashMap<>();
@@ -213,7 +213,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
     private void deleteOperNodeAndReleaseOwnership(final OvsdbConnectionInstance ovsdbConnectionInstance) {
         ovsdbConnectionInstance.setHasDeviceOwnership(false);
-        final InstanceIdentifier<?> nodeIid = ovsdbConnectionInstance.getInstanceIdentifier();
+        final var nodeIid = ovsdbConnectionInstance.getInstanceIdentifier();
         //remove the node from oper only if it has ownership
         txInvoker.invoke(new OvsdbNodeRemoveCommand(ovsdbConnectionInstance, null, null) {
 
@@ -234,7 +234,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         });
     }
 
-    public OvsdbClient connect(final InstanceIdentifier<Node> iid,
+    public OvsdbClient connect(final DataObjectIdentifier<Node> iid,
             final OvsdbNodeAugmentation ovsdbNode) throws UnknownHostException, ConnectException {
         LOG.info("Connecting to {}", SouthboundUtil.connectionInfoToString(ovsdbNode.getConnectionInfo()));
 
@@ -247,7 +247,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         // For connections from the controller to the ovs instance, the library doesn't call
         // this method for us
         if (client != null) {
-            putInstanceIdentifier(ovsdbNode.getConnectionInfo(), iid.firstIdentifierOf(Node.class));
+            putInstanceIdentifier(ovsdbNode.getConnectionInfo(), iid.trimTo(Node.class));
             OvsdbConnectionInstance ovsdbConnectionInstance = connectedButCallBacksNotRegistered(client);
             ovsdbConnectionInstance.setOvsdbNodeAugmentation(ovsdbNode);
 
@@ -313,7 +313,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     @VisibleForTesting
-    void putInstanceIdentifier(final ConnectionInfo key, final InstanceIdentifier<Node> iid) {
+    void putInstanceIdentifier(final ConnectionInfo key, final DataObjectIdentifier<Node> iid) {
         ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
         instanceIdentifiers.put(connectionInfo, iid);
     }
@@ -323,7 +323,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         instanceIdentifiers.remove(connectionInfo);
     }
 
-    public InstanceIdentifier<Node> getInstanceIdentifier(final ConnectionInfo key) {
+    public DataObjectIdentifier<Node> getInstanceIdentifier(final ConnectionInfo key) {
         ConnectionInfo connectionInfo = SouthboundMapper.suppressLocalIpPort(key);
         return instanceIdentifiers.get(connectionInfo);
     }
@@ -356,14 +356,13 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         }
     }
 
-    public OvsdbConnectionInstance getConnectionInstance(final InstanceIdentifier<Node> nodePath) {
+    public OvsdbConnectionInstance getConnectionInstance(final DataObjectIdentifier<Node> nodePath) {
         if (nodeIdVsConnectionInstance.get(nodePath) != null) {
             return nodeIdVsConnectionInstance.get(nodePath);
         }
         try {
             ReadTransaction transaction = db.newReadOnlyTransaction();
-            FluentFuture<Optional<Node>> nodeFuture = transaction.read(
-                    LogicalDatastoreType.OPERATIONAL, nodePath.toIdentifier());
+            FluentFuture<Optional<Node>> nodeFuture = transaction.read(LogicalDatastoreType.OPERATIONAL, nodePath);
             transaction.close();
             Optional<Node> optional = nodeFuture.get();
             if (optional.isPresent()) {
@@ -402,13 +401,13 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         return ovsdbConnectionInstance.getHasDeviceOwnership();
     }
 
-    public void reconcileConnection(final InstanceIdentifier<Node> iid, final OvsdbNodeAugmentation ovsdbNode) {
+    public void reconcileConnection(final DataObjectIdentifier<Node> iid, final OvsdbNodeAugmentation ovsdbNode) {
         retryConnection(iid, ovsdbNode,
                 ConnectionReconciliationTriggers.ON_CONTROLLER_INITIATED_CONNECTION_FAILURE);
 
     }
 
-    public void stopConnectionReconciliationIfActive(final InstanceIdentifier<Node> iid,
+    public void stopConnectionReconciliationIfActive(final DataObjectIdentifier<Node> iid,
             final OvsdbNodeAugmentation ovsdbNode) {
         final ReconciliationTask task = new ConnectionReconciliationTask(
                 reconciliationManager,
@@ -418,7 +417,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         reconciliationManager.dequeue(task);
     }
 
-    public void stopBridgeConfigReconciliationIfActive(final InstanceIdentifier<Node> iid) {
+    public void stopBridgeConfigReconciliationIfActive(final DataObjectIdentifier<Node> iid) {
         final ReconciliationTask task =
                 new BridgeConfigReconciliationTask(reconciliationManager, this, iid, null, instanceIdentifierCodec);
         reconciliationManager.dequeue(task);
@@ -497,7 +496,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         // not clear manager entry, which OvsdbNodeRemoveCommand look for before cleanup.
 
         @SuppressWarnings("unchecked")
-        final InstanceIdentifier<Node> nodeIid = (InstanceIdentifier<Node>) entity.getIdentifier();
+        final var nodeIid = ((InstanceIdentifier<Node>) entity.getIdentifier()).toIdentifier();
 
         txInvoker.invoke(transaction -> {
             Optional<Node> ovsdbNodeOpt = SouthboundUtil.readNode(transaction, nodeIid);
@@ -515,7 +514,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                         LOG.debug("{} had no managed nodes", ovsdbNode.getNodeId().getValue());
                     }
                 }
-                transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid.toIdentifier());
+                transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeIid);
             }
         });
 
@@ -552,7 +551,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
     }
 
     private Entity getEntityFromConnectionInstance(@NonNull final OvsdbConnectionInstance ovsdbConnectionInstance) {
-        InstanceIdentifier<Node> iid = ovsdbConnectionInstance.getInstanceIdentifier();
+        var iid = ovsdbConnectionInstance.getInstanceIdentifier();
         if (iid == null) {
             /* Switch initiated connection won't have iid, till it gets OpenVSwitch
              * table update but update callback is always registered after ownership
@@ -564,7 +563,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                     + "connection {}",iid,ovsdbConnectionInstance.getConnectionInfo());
             ovsdbConnectionInstance.setInstanceIdentifier(iid);
         }
-        Entity deviceEntity = new Entity(ENTITY_TYPE, iid);
+        Entity deviceEntity = new Entity(ENTITY_TYPE, iid.toLegacy());
         LOG.debug("Ovsdb Entity {} created for device connection {}",
                 deviceEntity, ovsdbConnectionInstance.getConnectionInfo());
         return deviceEntity;
@@ -613,7 +612,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         entityConnectionMap.remove(ovsdbConnectionInstance.getConnectedEntity(), ovsdbConnectionInstance);
     }
 
-    private void retryConnection(final InstanceIdentifier<Node> iid, final OvsdbNodeAugmentation ovsdbNode,
+    private void retryConnection(final DataObjectIdentifier<Node> iid, final OvsdbNodeAugmentation ovsdbNode,
                                  final ConnectionReconciliationTriggers trigger) {
         final ReconciliationTask task = new ConnectionReconciliationTask(
                 reconciliationManager,
@@ -631,7 +630,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             case ON_DISCONNECT: {
                 FluentFuture<Boolean> readNodeFuture;
                 try (ReadTransaction tx = db.newReadOnlyTransaction()) {
-                    readNodeFuture = tx.exists(LogicalDatastoreType.CONFIGURATION, iid.toIdentifier());
+                    readNodeFuture = tx.exists(LogicalDatastoreType.CONFIGURATION, iid);
                 }
                 readNodeFuture.addCallback(new FutureCallback<Boolean>() {
                     @Override
@@ -643,7 +642,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
 
                         } else {
                             LOG.debug("Connection {} was switch initiated, no reconciliation is required",
-                                    iid.firstKeyOf(Node.class).getNodeId());
+                                    iid.getFirstKeyOf(Node.class).getNodeId());
                         }
                     }
 

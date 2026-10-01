@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import static org.junit.Assert.assertEquals;
@@ -25,16 +24,17 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yangtools.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.powermock.reflect.Whitebox;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DataChangesManagedByOvsdbNodeEventTest {
-    private final InstanceIdentifier<?> iid = InstanceIdentifier.create(NetworkTopology.class);
+    private final DataObjectIdentifier<NetworkTopology> iid =
+        DataObjectIdentifier.builder(NetworkTopology.class).build();
 
     @Mock private DataBroker db;
     @Mock private DataChangeEvent event;
-    private Set<InstanceIdentifier<?>> removedPaths;
+    private Set<DataObjectIdentifier<?>> removedPaths;
     private DataChangesManagedByOvsdbNodeEvent dataChangesManagedByOvsdbNodeEvent;
 
     @Before
@@ -54,7 +54,7 @@ public class DataChangesManagedByOvsdbNodeEventTest {
 
     @Test
     public void testGetMethods() {
-        Map<InstanceIdentifier<?>,DataObject> data = new HashMap<>();
+        Map<DataObjectIdentifier<?>,DataObject> data = new HashMap<>();
 
         //Test getCreatedData()
         when(event.getCreatedData()).thenReturn(data);
@@ -67,8 +67,6 @@ public class DataChangesManagedByOvsdbNodeEventTest {
         //Test getOriginalData()
         when(event.getOriginalData()).thenReturn(data);
         assertEquals(data, dataChangesManagedByOvsdbNodeEvent.getOriginalData());
-
-        DataObject dataObject = mock(DataObject.class);
 
         //Test getRemovedPaths()
         removedPaths = new HashSet<>();

@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
@@ -56,7 +55,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.PropertyIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
@@ -87,11 +85,10 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
     }
 
     private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+            final Map<DataObjectIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
                     createdOrUpdated,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
-        for (Entry<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
-                 OvsdbTerminationPointAugmentation> terminationPointEntry : createdOrUpdated.entrySet()) {
+        for (var terminationPointEntry : createdOrUpdated.entrySet()) {
             updateTerminationPoint(transaction, state, terminationPointEntry.getKey(),
                     terminationPointEntry.getValue(), instanceIdentifierCodec);
         }
@@ -99,7 +96,7 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
 
     @VisibleForTesting
     public void updateTerminationPoint(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final InstanceIdentifier<OvsdbTerminationPointAugmentation> iid,
+            final DataObjectIdentifier<OvsdbTerminationPointAugmentation> iid,
             final OvsdbTerminationPointAugmentation terminationPoint,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
 
@@ -117,7 +114,7 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
                     .build());
 
             TerminationPointCreateCommand.stampInstanceIdentifier(op, transaction,
-                    iid.firstIdentifierOf(OvsdbTerminationPointAugmentation.class), terminationPoint.getName(),
+                    iid.trimTo(OvsdbTerminationPointAugmentation.class), terminationPoint.getName(),
                     instanceIdentifierCodec);
             final String opendaylightIid = instanceIdentifierCodec.serialize(iid);
             // Update port
@@ -178,7 +175,7 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
                 case PropertyIdentifier<?, ?> pi -> pi.container();
             };
 
-            Uri qosId = doi.toLegacy().firstKeyOf(QosEntries.class).getQosId();
+            Uri qosId = doi.getFirstKeyOf(QosEntries.class).getQosId();
             OvsdbNodeAugmentation operNode = getOperNode(state, operBridge);
             if (operNode != null) {
                 Map<QosEntriesKey, QosEntries> entries = operNode.getQosEntries();
@@ -201,7 +198,7 @@ public class TerminationPointUpdateCommand extends AbstractTransactCommand {
     private static OvsdbNodeAugmentation getOperNode(final BridgeOperationalState state,
             final OvsdbBridgeAugmentation operBridge) {
         @SuppressWarnings("unchecked")
-        final var iidNode = ((DataObjectIdentifier<Node>) operBridge.getManagedBy().getValue()).toLegacy();
+        final var iidNode = ((DataObjectIdentifier<Node>) operBridge.getManagedBy().getValue());
         OvsdbNodeAugmentation operNode = null;
         try (ReadTransaction transaction = state.dataBroker().newReadOnlyTransaction()) {
             Optional<Node> nodeOptional = SouthboundUtil.readNode(transaction, iidNode);

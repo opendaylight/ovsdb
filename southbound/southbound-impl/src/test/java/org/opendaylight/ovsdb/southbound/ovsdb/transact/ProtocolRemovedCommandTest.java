@@ -36,6 +36,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolBase;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow10;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
@@ -47,8 +48,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest(TransactUtils.class)
 public class ProtocolRemovedCommandTest {
 
-    private final Set<InstanceIdentifier<ProtocolEntry>> removed = new HashSet<>();
-    @Mock private Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updatedBridges;
+    private final Set<DataObjectIdentifier<ProtocolEntry>> removed = new HashSet<>();
+    @Mock private Map<DataObjectIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> updatedBridges;
 
     @SuppressWarnings("unchecked")
     @Test
@@ -61,15 +62,15 @@ public class ProtocolRemovedCommandTest {
                 (Answer<Class<? extends OvsdbBridgeProtocolBase>>) invocation -> OvsdbBridgeProtocolOpenflow10.class);
 
         BridgeOperationalState bridgeOpState = mock(BridgeOperationalState.class);
-        when(bridgeOpState.getProtocolEntry(any(InstanceIdentifier.class))).thenReturn(Optional.of(protocol));
+        when(bridgeOpState.getProtocolEntry(any(DataObjectIdentifier.class))).thenReturn(Optional.of(protocol));
 
-        InstanceIdentifier<ProtocolEntry> protocolIid = mock(InstanceIdentifier.class);
+        DataObjectIdentifier<ProtocolEntry> protocolIid = mock(DataObjectIdentifier.class);
         removed.add(protocolIid);
         ProtocolRemovedCommand protocolRemovedCommand = mock(ProtocolRemovedCommand.class, Mockito.CALLS_REAL_METHODS);
         MemberModifier.field(ProtocolRemovedCommand.class,"removed").set(protocolRemovedCommand, removed);
 
         MemberModifier.field(ProtocolRemovedCommand.class,"updatedBridges").set(protocolRemovedCommand, updatedBridges);
-        when(updatedBridges.get(any(InstanceIdentifier.class))).thenReturn(mock(OvsdbBridgeAugmentation.class));
+        when(updatedBridges.get(any(DataObjectIdentifier.class))).thenReturn(mock(OvsdbBridgeAugmentation.class));
 
         Operations op = (Operations) setField("op");
         Mutate<GenericTableSchema> mutate = mock(Mutate.class);

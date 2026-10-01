@@ -60,7 +60,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
@@ -103,13 +102,13 @@ public class OpenVSwitchUpdateCommandTest {
         when(column.getData()).thenReturn(ImmutableMap.of(SouthboundConstants.IID_EXTERNAL_ID_KEY, "iidString"));
         PowerMockito.mockStatic(SouthboundUtil.class);
         MemberModifier.suppress(MemberMatcher.method(OpenVSwitchUpdateCommand.class, "getOvsdbConnectionInstance"));
-        InstanceIdentifier<Node> iid = mock(InstanceIdentifier.class);
+        DataObjectIdentifier<Node> iid = mock(DataObjectIdentifier.class);
 //        when((InstanceIdentifier<Node>) SouthboundUtil.deserializeInstanceIdentifier(
 //                any(InstanceIdentifierCodec.class), anyString())).thenReturn(iid);
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(iid);
         when(openVSwitchUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
-        doNothing().when(ovsdbConnectionInstance).setInstanceIdentifier(any(InstanceIdentifier.class));
+        doNothing().when(ovsdbConnectionInstance).setInstanceIdentifier(any(DataObjectIdentifier.class));
 
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
         PowerMockito.whenNew(OvsdbNodeAugmentationBuilder.class).withNoArguments().thenReturn(ovsdbNodeBuilder);

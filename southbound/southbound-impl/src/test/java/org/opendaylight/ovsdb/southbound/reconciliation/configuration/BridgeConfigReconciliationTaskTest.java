@@ -40,10 +40,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbNodeRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -53,8 +51,6 @@ import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.util.concurrent.FluentFutures;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BridgeConfigReconciliationTaskTest {
@@ -68,7 +64,7 @@ public class BridgeConfigReconciliationTaskTest {
     @Mock private SouthboundProvider provider;
 
     private BridgeConfigReconciliationTask configurationReconciliationTask;
-    private InstanceIdentifier<Node> iid;
+    private DataObjectIdentifier<Node> iid;
 
     @Before
     public void setUp() throws Exception {
@@ -94,7 +90,7 @@ public class BridgeConfigReconciliationTaskTest {
         BridgeConfigReconciliationTask underTest = spy(configurationReconciliationTask);
         doNothing().when(underTest).reconcileBridgeConfigurations(any(Map.class));
         assertTrue(underTest.reconcileConfiguration(ovsdbConnectionManager));
-        Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
+        Map<DataObjectIdentifier<?>, DataObject> changes = new HashMap<>();
         for (Node bridgeNode : topology.getNode().values()) {
             changes.putAll(createExpectedConfigurationChanges(bridgeNode));
         }
@@ -105,7 +101,7 @@ public class BridgeConfigReconciliationTaskTest {
         return new NodeBuilder()
                 .setNodeId(new NodeId(new Uri(bridgeName)))
                 .addAugmentation(new OvsdbBridgeAugmentationBuilder()
-                    .setManagedBy(new OvsdbNodeRef(iid.toIdentifier()))
+                    .setManagedBy(new OvsdbNodeRef(iid))
                     .setProtocolEntry(BindingMap.of(
                         new ProtocolEntryBuilder().setProtocol(OvsdbBridgeProtocolOpenflow10.VALUE).build()))
                     .setControllerEntry(BindingMap.of(
@@ -114,24 +110,20 @@ public class BridgeConfigReconciliationTaskTest {
                 .build();
     }
 
-    private static Map<InstanceIdentifier<?>, DataObject> createExpectedConfigurationChanges(final Node bridgeNode) {
+    private static Map<DataObjectIdentifier<?>, DataObject> createExpectedConfigurationChanges(final Node bridgeNode) {
         OvsdbBridgeAugmentation ovsdbBridge = bridgeNode.augmentation(OvsdbBridgeAugmentation.class);
 
-        Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
-        final InstanceIdentifier<Node> bridgeNodeIid =
-                SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
-        final InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbBridgeIid =
-                bridgeNodeIid.builder().augmentation(OvsdbBridgeAugmentation.class).build();
+        Map<DataObjectIdentifier<?>, DataObject> changes = new HashMap<>();
+        final var bridgeNodeIid = SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
+        final var ovsdbBridgeIid = bridgeNodeIid.toBuilder().augmentation(OvsdbBridgeAugmentation.class).build();
         changes.put(bridgeNodeIid, bridgeNode);
         changes.put(ovsdbBridgeIid, ovsdbBridge);
         for (ProtocolEntry protocolEntry : ovsdbBridge.getProtocolEntry().values()) {
-            KeyedInstanceIdentifier<ProtocolEntry, ProtocolEntryKey> protocolIid =
-                    ovsdbBridgeIid.child(ProtocolEntry.class, protocolEntry.key());
+            var protocolIid = ovsdbBridgeIid.toBuilder().child(ProtocolEntry.class, protocolEntry.key()).build();
             changes.put(protocolIid, protocolEntry);
         }
         for (ControllerEntry controller : ovsdbBridge.getControllerEntry().values()) {
-            KeyedInstanceIdentifier<ControllerEntry, ControllerEntryKey> controllerIid =
-                    ovsdbBridgeIid.child(ControllerEntry.class, controller.key());
+            var controllerIid = ovsdbBridgeIid.toBuilder().child(ControllerEntry.class, controller.key()).build();
             changes.put(controllerIid, controller);
         }
         return changes;

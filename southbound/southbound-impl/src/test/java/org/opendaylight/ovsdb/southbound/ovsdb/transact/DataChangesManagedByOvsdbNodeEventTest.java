@@ -25,12 +25,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.reflect.Whitebox;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DataChangesManagedByOvsdbNodeEventTest {
-    private final InstanceIdentifier<?> iid = InstanceIdentifier.create(NetworkTopology.class);
+    private final DataObjectIdentifier<NetworkTopology> iid =
+        DataObjectIdentifier.builder(NetworkTopology.class).build();
 
     @Mock private DataBroker db;
     @Mock private DataChangeEvent event;

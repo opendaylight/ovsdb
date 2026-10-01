@@ -52,7 +52,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.port._interface.attributes.Trunks;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
@@ -82,16 +82,15 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
     }
 
     private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+            final Map<DataObjectIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
                     createdTerminationPoints,
-            final Map<InstanceIdentifier<Node>, Node> nodes, final InstanceIdentifierCodec instanceIdentifierCodec) {
+            final Map<DataObjectIdentifier<Node>, Node> nodes, final InstanceIdentifierCodec instanceIdentifierCodec) {
         for (var entry : createdTerminationPoints.entrySet()) {
             OvsdbTerminationPointAugmentation terminationPoint = entry.getValue();
             LOG.debug("Received request to create termination point {}",
                     terminationPoint.getName());
-            InstanceIdentifier<?> terminationPointIid = entry.getKey();
-            Optional<TerminationPoint> terminationPointOptional =
-                    state.getBridgeTerminationPoint(terminationPointIid);
+            var terminationPointIid = entry.getKey();
+            Optional<TerminationPoint> terminationPointOptional = state.getBridgeTerminationPoint(terminationPointIid);
             if (!terminationPointOptional.isPresent()) {
                 // Configure interface
                 String interfaceUuid = "Interface_" + SouthboundMapper.getRandomUuid();
@@ -112,8 +111,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
                         terminationPoint.getName(),portUuid);
                 //Configure bridge with the above port details
                 Bridge bridge = transaction.getTypedRowWrapper(Bridge.class);
-                String bridgeName = SouthboundUtil
-                    .getBridgeNameFromOvsdbNodeId(entry.getKey().firstIdentifierOf(Node.class));
+                String bridgeName = SouthboundUtil.getBridgeNameFromOvsdbNodeId(entry.getKey().trimTo(Node.class));
                 if (bridgeName != null) {
                     LOG.trace("Updating bridge {} for newly added port {}", bridgeName, terminationPoint.getName());
                     bridge.setName(bridgeName);
@@ -126,7 +124,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
                                     .opEqual(bridge.getNameColumn().getData())).build());
                 } else {
                     LOG.error("Missing BridgeName for Node {} during creation of port {}",
-                            entry.getKey().firstIdentifierOf(Node.class), terminationPoint.getName());
+                            entry.getKey().trimTo(Node.class), terminationPoint.getName());
                 }
             }
         }
@@ -369,7 +367,7 @@ public class TerminationPointCreateCommand extends AbstractTransactCommand {
     }
 
     public static void stampInstanceIdentifier(final Operations op, final TransactionBuilder transaction,
-            final InstanceIdentifier<OvsdbTerminationPointAugmentation> iid, final String interfaceName,
+            final DataObjectIdentifier<OvsdbTerminationPointAugmentation> iid, final String interfaceName,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         Port port = transaction.getTypedRowWrapper(Port.class);
         port.setName(interfaceName);

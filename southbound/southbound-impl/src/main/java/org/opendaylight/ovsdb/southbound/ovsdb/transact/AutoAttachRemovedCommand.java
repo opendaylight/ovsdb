@@ -33,7 +33,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.PropertyIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,10 +60,10 @@ public class AutoAttachRemovedCommand extends AbstractTransactCommand {
     }
 
     private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> original,
-            final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
+            final Map<DataObjectIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> original,
+            final Map<DataObjectIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated) {
         for (var originalEntry : original.entrySet()) {
-            final InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = originalEntry.getKey();
+            final DataObjectIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid = originalEntry.getKey();
             final OvsdbNodeAugmentation ovsdbNodeAugmentation = originalEntry.getValue();
             final OvsdbNodeAugmentation deletedOvsdbNodeAugmentation = updated.get(ovsdbNodeIid);
 
@@ -94,7 +93,7 @@ public class AutoAttachRemovedCommand extends AbstractTransactCommand {
     }
 
     private void deleteAutoAttach(final BridgeOperationalState state, final TransactionBuilder transaction,
-            final InstanceIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid, final Uuid autoattachUuid) {
+            final DataObjectIdentifier<OvsdbNodeAugmentation> ovsdbNodeIid, final Uuid autoattachUuid) {
 
         LOG.debug("Received request to delete Autoattach entry {}", autoattachUuid);
         final OvsdbBridgeAugmentation bridgeAugmentation = getBridge(state, ovsdbNodeIid, autoattachUuid);
@@ -134,12 +133,12 @@ public class AutoAttachRemovedCommand extends AbstractTransactCommand {
     }
 
     private static OvsdbBridgeAugmentation getBridge(final BridgeOperationalState state,
-            final InstanceIdentifier<OvsdbNodeAugmentation> key, final Uuid aaUuid) {
+            final DataObjectIdentifier<OvsdbNodeAugmentation> key, final Uuid aaUuid) {
         if (aaUuid == null) {
             return null;
         }
         try (ReadTransaction transaction = state.dataBroker().newReadOnlyTransaction()) {
-            final var nodeOptional = SouthboundUtil.readNode(transaction, key.firstIdentifierOf(Node.class));
+            final var nodeOptional = SouthboundUtil.readNode(transaction, key.trimTo(Node.class));
             if (nodeOptional.isPresent()) {
                 final var managedNodes = nodeOptional.orElseThrow()
                     .augmentation(OvsdbNodeAugmentation.class).getManagedNodeEntry();
@@ -149,10 +148,11 @@ public class AutoAttachRemovedCommand extends AbstractTransactCommand {
                         case PropertyIdentifier<?, ?> pi -> pi.container();
                     };
 
-                    final var brIid = doi.toLegacy().firstIdentifierOf(Node.class)
-                        .augmentation(OvsdbBridgeAugmentation.class);
+                    final var brIid = doi.trimTo(Node.class).toBuilder()
+                        .augmentation(OvsdbBridgeAugmentation.class)
+                        .build();
                     final Optional<OvsdbBridgeAugmentation> optionalBridge =
-                            transaction.read(LogicalDatastoreType.OPERATIONAL, brIid.toIdentifier()).get();
+                            transaction.read(LogicalDatastoreType.OPERATIONAL, brIid).get();
                     OvsdbBridgeAugmentation bridge = optionalBridge.orElseThrow();
                     if (bridge != null && bridge.getAutoAttach() != null
                             && bridge.getAutoAttach().equals(aaUuid)) {

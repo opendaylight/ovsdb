@@ -143,13 +143,14 @@ public class OvsdbManagersUpdateCommandTest {
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbManagersUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(
-            InstanceIdentifier.create(NetworkTopology.class)
+            DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class, new NodeKey(new NodeId("testNode"))));
+                .child(Node.class, new NodeKey(new NodeId("testNode")))
+                .build());
 
         Optional<Node> ovsdbNode = Optional.of(mock(Node.class));
         PowerMockito.mockStatic(SouthboundUtil.class);
-        when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(InstanceIdentifier.class)))
+        when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(DataObjectIdentifier.class)))
                 .thenReturn(ovsdbNode);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         Map<Uri, Manager> updatedManagerRows = new HashMap<>();

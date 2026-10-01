@@ -37,6 +37,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfigBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfigKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
@@ -81,7 +82,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
      */
     private void updateQueue(ReadWriteTransaction transaction) {
 
-        final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
         if (ovsdbNode.isPresent()) {
             for (Entry<UUID, Queue> entry : updatedQueueRows.entrySet()) {
@@ -131,7 +132,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
 
     private static void setOtherConfig(ReadWriteTransaction transaction,
             QueuesBuilder queuesBuilder, Queue oldQueue, Queue queue,
-            InstanceIdentifier<Node> nodeIId) {
+            DataObjectIdentifier<Node> nodeIId) {
         Map<String, String> oldOtherConfigs = null;
         Map<String, String> otherConfigs = null;
 
@@ -151,7 +152,7 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
 
     private static void removeOldConfigs(ReadWriteTransaction transaction,
             QueuesBuilder queuesBuilder, Map<String, String> oldOtherConfigs,
-            Queue queue, InstanceIdentifier<Node> nodeIId) {
+            Queue queue, DataObjectIdentifier<Node> nodeIId) {
         InstanceIdentifier<Queues> queueIId = nodeIId
                 .augmentation(OvsdbNodeAugmentation.class)
                 .child(Queues.class, queuesBuilder.build().key());

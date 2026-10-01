@@ -128,20 +128,21 @@ public class OvsdbBridgeUpdateCommandTest {
 
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
-        InstanceIdentifier<Node> connectionIId = InstanceIdentifier.create(NetworkTopology.class)
+        DataObjectIdentifier<Node> connectionIId = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
-            .child(Node.class, new NodeKey(new NodeId("testNode")));
+            .child(Node.class, new NodeKey(new NodeId("testNode")))
+            .build();
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(connectionIId);
         Optional<Node> connection = Optional.of(mock(Node.class));
         PowerMockito.mockStatic(SouthboundUtil.class);
-        when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(InstanceIdentifier.class)))
+        when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(DataObjectIdentifier.class)))
                 .thenReturn(connection);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "updateBridge",
                 ReadWriteTransaction.class, Bridge.class, InstanceIdentifier.class));
         ovsdbBridgeUpdateCommand.execute(transaction);
         verify(ovsdbBridgeUpdateCommand).updateBridge(any(ReadWriteTransaction.class),
-                any(Bridge.class), any(InstanceIdentifier.class));
+                any(Bridge.class), any(DataObjectIdentifier.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -169,9 +170,10 @@ public class OvsdbBridgeUpdateCommandTest {
                 Bridge.class));
 
         Bridge bridge = mock(Bridge.class);
-        InstanceIdentifier<Node> connectionIId = InstanceIdentifier.create(NetworkTopology.class)
+        DataObjectIdentifier<Node> connectionIId = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
-            .child(Node.class, new NodeKey(new NodeId("testNode")));
+            .child(Node.class, new NodeKey(new NodeId("testNode")))
+            .build();
         Whitebox.invokeMethod(ovsdbBridgeUpdateCommand, "updateBridge", transaction, bridge, connectionIId);
         verify(ovsdbBridgeUpdateCommand, times(3)).deleteEntries(any(ReadWriteTransaction.class), eq(null));
     }
@@ -180,7 +182,8 @@ public class OvsdbBridgeUpdateCommandTest {
     public void testDeleteEntries() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
-        ovsdbBridgeUpdateCommand.deleteEntries(transaction, List.of(InstanceIdentifier.create(NetworkTopology.class)));
+        ovsdbBridgeUpdateCommand.deleteEntries(transaction,
+            List.of(DataObjectIdentifier.builder(NetworkTopology.class).build()));
         verify(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
     }
 
@@ -206,7 +209,7 @@ public class OvsdbBridgeUpdateCommandTest {
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
             .child(Node.class, new NodeKey(new NodeId("testNode")))
             .build();
-        List<InstanceIdentifier<BridgeOtherConfigs>> resultBridgeOtherConfigs = Whitebox
+        List<DataObjectIdentifier<BridgeOtherConfigs>> resultBridgeOtherConfigs = Whitebox
                 .invokeMethod(ovsdbBridgeUpdateCommand, "bridgeOtherConfigsToRemove", bridgeIid, bridge);
         assertEquals(ArrayList.class, resultBridgeOtherConfigs.getClass());
         verify(oldBridge, times(2)).getOtherConfigColumn();
@@ -324,9 +327,10 @@ public class OvsdbBridgeUpdateCommandTest {
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(
-            InstanceIdentifier.create(NetworkTopology.class)
+            DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
-                .child(Node.class, new NodeKey(new NodeId("testNode"))));
+                .child(Node.class, new NodeKey(new NodeId("testNode")))
+                .build());
         PowerMockito.whenNew(OvsdbNodeRef.class).withAnyArguments().thenReturn(mock(OvsdbNodeRef.class));
         when(ovsdbBridgeAugmentationBuilder.setManagedBy(any(OvsdbNodeRef.class)))
                 .thenReturn(ovsdbBridgeAugmentationBuilder);
@@ -468,9 +472,10 @@ public class OvsdbBridgeUpdateCommandTest {
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(
-            InstanceIdentifier.create(NetworkTopology.class)
+            DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
-                .child(Node.class, new NodeKey(new NodeId("testNode"))));
+                .child(Node.class, new NodeKey(new NodeId("testNode")))
+                .build());
         OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
         Bridge bridge = mock(Bridge.class);
         when(ovsdbBridgeAugmentationBuilder.setBridgeOpenflowNodeRef(any(BindingInstanceIdentifier.class)))

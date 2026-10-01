@@ -12,7 +12,6 @@ import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
@@ -25,7 +24,7 @@ import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,16 +51,13 @@ public class ProtocolUpdateCommand extends AbstractTransactCommand {
     }
 
     private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final Map<InstanceIdentifier<ProtocolEntry>, ProtocolEntry> protocols,
-            final Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> bridges) {
-        for (Entry<InstanceIdentifier<ProtocolEntry>, ProtocolEntry> entry: protocols.entrySet()) {
-            Optional<ProtocolEntry> operationalProtocolEntryOptional =
-                    state.getProtocolEntry(entry.getKey());
+            final Map<DataObjectIdentifier<ProtocolEntry>, ProtocolEntry> protocols,
+            final Map<DataObjectIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> bridges) {
+        for (var entry: protocols.entrySet()) {
+            Optional<ProtocolEntry> operationalProtocolEntryOptional = state.getProtocolEntry(entry.getKey());
             if (!operationalProtocolEntryOptional.isPresent()) {
-                InstanceIdentifier<OvsdbBridgeAugmentation> bridgeIid =
-                        entry.getKey().firstIdentifierOf(OvsdbBridgeAugmentation.class);
-                Optional<OvsdbBridgeAugmentation> bridgeOptional =
-                        state.getOvsdbBridgeAugmentation(bridgeIid);
+                var bridgeIid = entry.getKey().trimTo(OvsdbBridgeAugmentation.class);
+                Optional<OvsdbBridgeAugmentation> bridgeOptional = state.getOvsdbBridgeAugmentation(bridgeIid);
                 OvsdbBridgeAugmentation ovsdbBridge;
                 if (bridgeOptional.isPresent()) {
                     ovsdbBridge = bridgeOptional.orElseThrow();
@@ -92,5 +88,4 @@ public class ProtocolUpdateCommand extends AbstractTransactCommand {
             }
         }
     }
-
 }

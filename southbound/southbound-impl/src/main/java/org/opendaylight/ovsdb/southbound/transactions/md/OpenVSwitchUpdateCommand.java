@@ -275,6 +275,6 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
     @VisibleForTesting
     @NonNull NodeId getNodeId(OpenVSwitch ovs) {
-        return getInstanceIdentifier(ovs).firstKeyOf(Node.class).getNodeId();
+        return getInstanceIdentifier(ovs).getFirstKeyOf(Node.class).getNodeId();
     }
 }

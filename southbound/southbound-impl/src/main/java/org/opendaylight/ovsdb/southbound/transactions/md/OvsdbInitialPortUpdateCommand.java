@@ -24,8 +24,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,9 +52,9 @@ public class OvsdbInitialPortUpdateCommand extends OvsdbPortUpdateCommand {
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     protected void updateToDataStore(ReadWriteTransaction transaction, TerminationPointBuilder tpBuilder,
-                                     InstanceIdentifier<TerminationPoint> tpPath, boolean merge) {
+                                     DataObjectIdentifier<TerminationPoint> tpPath, boolean merge) {
         try {
-            NodeId bridgeNodeId = tpPath.firstKeyOf(Node.class).getNodeId();
+            NodeId bridgeNodeId = tpPath.getFirstKeyOf(Node.class).getNodeId();
             TerminationPoint terminationPoint = tpBuilder.build();
             if (updatedBridgeNodes.containsKey(bridgeNodeId)) {
                 if (brigeToTerminationPointList.containsKey(bridgeNodeId)) {
@@ -77,21 +77,20 @@ public class OvsdbInitialPortUpdateCommand extends OvsdbPortUpdateCommand {
     private void mergeToBridgeNode(ReadWriteTransaction transaction) {
 
         brigeToTerminationPointList.forEach((nodeId, terminationPoints) -> {
-            InstanceIdentifier<Node> bridgeIid = SouthboundMapper.createInstanceIdentifier(nodeId);
+            var bridgeIid = SouthboundMapper.createInstanceIdentifier(nodeId);
             StringBuilder terminationPointList = new StringBuilder();
             Node bridgeNode = updatedBridgeNodes.get(nodeId);
             if (bridgeNode != null) {
                 Node bridgeNodeWithTerminationPoints = new NodeBuilder(bridgeNode)
                     .setTerminationPoint(BindingMap.ordered(terminationPoints))
                     .build();
-                transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid.toIdentifier(),
-                    bridgeNodeWithTerminationPoints);
+                transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid, bridgeNodeWithTerminationPoints);
             }
             terminationPoints.forEach(terminationPoint -> {
                 terminationPointList.append(terminationPoint.key().getTpId().getValue() +  ",");
             });
             LOG.info("DEVICE - {} Initial TerminationPoint List : {} to Bridge : {}", TransactionType.ADD,
-                terminationPointList.toString(), bridgeIid.firstKeyOf(Node.class).getNodeId().getValue());
+                terminationPointList.toString(), bridgeIid.getFirstKeyOf(Node.class).getNodeId().getValue());
         });
     }
 }

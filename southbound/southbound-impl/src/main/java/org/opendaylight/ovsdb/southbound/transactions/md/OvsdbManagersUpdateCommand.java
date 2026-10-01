@@ -34,7 +34,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +107,7 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
     private void updateManagers(ReadWriteTransaction transaction,
                                   Map<Uri, Manager> newUpdatedManagerRows) {
 
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final DataObjectIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, connectionIId);
         if (ovsdbNode.isPresent()) {
             final List<ManagerEntry> managerEntries =
@@ -115,38 +115,37 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
 
             LOG.debug("Update Ovsdb Node : {} with manager entries : {}", ovsdbNode.orElseThrow(), managerEntries);
             for (ManagerEntry managerEntry : managerEntries) {
-                InstanceIdentifier<ManagerEntry> iid = connectionIId
+                DataObjectIdentifier<ManagerEntry> iid = connectionIId.toBuilder()
                         .augmentation(OvsdbNodeAugmentation.class)
-                        .child(ManagerEntry.class, managerEntry.key());
-                transaction.merge(LogicalDatastoreType.OPERATIONAL, iid.toIdentifier(), managerEntry);
+                        .child(ManagerEntry.class, managerEntry.key())
+                        .build();
+                transaction.merge(LogicalDatastoreType.OPERATIONAL, iid, managerEntry);
             }
         }
     }
 
     /**
-     * Create the {@link InstanceIdentifier} for the {@link ManagerEntry}.
+     * Create the {@link DataObjectIdentifier} for the {@link ManagerEntry}.
      *
      * @param managerEntry the {@link ManagerEntry}
-     * @return the {@link InstanceIdentifier}
+     * @return the {@link DataObjectIdentifier}
      */
     @VisibleForTesting
-    final InstanceIdentifier<ManagerEntry> getManagerEntryIid(ManagerEntry managerEntry) {
+    final DataObjectIdentifier<ManagerEntry> getManagerEntryIid(ManagerEntry managerEntry) {
 
         OvsdbConnectionInstance client = getOvsdbConnectionInstance();
         String nodeString = client.getNodeKey().getNodeId().getValue();
         NodeId nodeId = new NodeId(new Uri(nodeString));
         NodeKey nodeKey = new NodeKey(nodeId);
-        InstanceIdentifier<Node> ovsdbNodeIid = InstanceIdentifier.builder(NetworkTopology.class)
+        return DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class,nodeKey)
-                .build();
-
-        return ovsdbNodeIid
+                .child(Node.class, nodeKey)
                 .augmentation(OvsdbNodeAugmentation.class)
-                .child(ManagerEntry.class, managerEntry.key());
+                .child(ManagerEntry.class, managerEntry.key())
+                .build();
     }
 
-    private Map<Uri, Manager> getUriManagerMap(Map<UUID,Manager> uuidManagerMap) {
+    private static Map<Uri, Manager> getUriManagerMap(Map<UUID,Manager> uuidManagerMap) {
         Map<Uri, Manager> uriManagerMap = new HashMap<>();
         for (Map.Entry<UUID, Manager> uuidManagerMapEntry : uuidManagerMap.entrySet()) {
             uriManagerMap.put(
@@ -154,6 +153,5 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
                     uuidManagerMapEntry.getValue());
         }
         return uriManagerMap;
-
     }
 }

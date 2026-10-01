@@ -109,7 +109,7 @@ public class OpenVSwitchUpdateCommandTest {
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(iid);
         when(openVSwitchUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
-        doNothing().when(ovsdbConnectionInstance).setInstanceIdentifier(any(InstanceIdentifier.class));
+        doNothing().when(ovsdbConnectionInstance).setInstanceIdentifier(any(DataObjectIdentifier.class));
 
         OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = mock(OvsdbNodeAugmentationBuilder.class);
         PowerMockito.whenNew(OvsdbNodeAugmentationBuilder.class).withNoArguments().thenReturn(ovsdbNodeBuilder);

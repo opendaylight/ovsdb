@@ -17,7 +17,6 @@ import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,15 +40,15 @@ public class MdsalUtils {
      * Executes delete as a blocking transaction.
      *
      * @param store {@link LogicalDatastoreType} which should be modified
-     * @param path {@link InstanceIdentifier} to read from
+     * @param path {@link DataObjectIdentifier} to read from
      * @param <D> the data object type
      * @return the result of the request
      */
     public <D extends DataObject> boolean delete(
-            final LogicalDatastoreType store, final InstanceIdentifier<D> path)  {
+            final LogicalDatastoreType store, final DataObjectIdentifier<D> path)  {
         boolean result = false;
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.delete(store, path.toIdentifier());
+        transaction.delete(store, path);
         FluentFuture<? extends CommitInfo> future = transaction.commit();
         try {
             future.get();
@@ -64,15 +63,15 @@ public class MdsalUtils {
      * Executes merge as a blocking transaction.
      *
      * @param logicalDatastoreType {@link LogicalDatastoreType} which should be modified
-     * @param path {@link InstanceIdentifier} for path to read
+     * @param path {@link DataObjectIdentifier} for path to read
      * @param <D> the data object type
      * @return the result of the request
      */
     public <D extends DataObject> boolean merge(
-            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, final D data)  {
+            final LogicalDatastoreType logicalDatastoreType, final DataObjectIdentifier<D> path, final D data)  {
         boolean result = false;
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.mergeParentStructureMerge(logicalDatastoreType, path.toIdentifier(), data);
+        transaction.mergeParentStructureMerge(logicalDatastoreType, path, data);
         FluentFuture<? extends CommitInfo> future = transaction.commit();
         try {
             future.get();
@@ -87,15 +86,15 @@ public class MdsalUtils {
      * Executes put as a blocking transaction.
      *
      * @param logicalDatastoreType {@link LogicalDatastoreType} which should be modified
-     * @param path {@link InstanceIdentifier} for path to read
+     * @param path {@link DataObjectIdentifier} for path to read
      * @param <D> the data object type
      * @return the result of the request
      */
     public <D extends DataObject> boolean put(
-            final LogicalDatastoreType logicalDatastoreType, final InstanceIdentifier<D> path, final D data)  {
+            final LogicalDatastoreType logicalDatastoreType, final DataObjectIdentifier<D> path, final D data)  {
         boolean result = false;
         final WriteTransaction transaction = databroker.newWriteOnlyTransaction();
-        transaction.mergeParentStructurePut(logicalDatastoreType, path.toIdentifier(), data);
+        transaction.mergeParentStructurePut(logicalDatastoreType, path, data);
         FluentFuture<? extends CommitInfo> future = transaction.commit();
         try {
             future.get();
@@ -110,11 +109,11 @@ public class MdsalUtils {
      * Executes read as a blocking transaction.
      *
      * @param store {@link LogicalDatastoreType} to read
-     * @param path {@link InstanceIdentifier} for path to read
+     * @param path {@link DataObjectIdentifier} for path to read
      * @param <D> the data object type
      * @return the result as the data object requested
      */
-    public <D extends DataObject> D read(final LogicalDatastoreType store, final InstanceIdentifier<D> path) {
+    public <D extends DataObject> D read(final LogicalDatastoreType store, final DataObjectIdentifier<D> path) {
         Optional<D> optionalDataObject = readOptional(store, path);
         if (optionalDataObject.isPresent()) {
             return optionalDataObject.orElseThrow();
@@ -124,12 +123,12 @@ public class MdsalUtils {
     }
 
     public <D extends DataObject> Optional<D> readOptional(
-            final LogicalDatastoreType store, final InstanceIdentifier<? extends DataObject> path)  {
+            final LogicalDatastoreType store, final DataObjectIdentifier<? extends DataObject> path)  {
         int trialNo = 0;
         ReadTransaction transaction = databroker.newReadOnlyTransaction();
         do {
             try {
-                Optional<D> result = transaction.read(store, (DataObjectIdentifier<D>) path.toIdentifier()).get();
+                Optional<D> result = transaction.read(store, (DataObjectIdentifier<D>) path).get();
                 transaction.close();
                 return result;
             } catch (InterruptedException | ExecutionException e) {
@@ -150,7 +149,7 @@ public class MdsalUtils {
     }
 
 
-    public boolean exists(final LogicalDatastoreType store, final InstanceIdentifier<?> path) {
+    public boolean exists(final LogicalDatastoreType store, final DataObjectIdentifier<?> path) {
         int trialNo = 0;
         ReadTransaction transaction = databroker.newReadOnlyTransaction();
         do {
@@ -175,7 +174,7 @@ public class MdsalUtils {
         return false;
     }
 
-    private static void logReadFailureError(final InstanceIdentifier<?> path, final String cause) {
+    private static void logReadFailureError(final DataObjectIdentifier<?> path, final String cause) {
         LOG.error("{}: Failed to read {} Cause : {}", Thread.currentThread().getStackTrace()[2], path, cause);
     }
 }

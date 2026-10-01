@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class DependentJob<T extends EntryObject<?, ?>> {
+public abstract class DependentJob<T extends EntryObject<?, ?, ?>> {
     private static final Logger LOG = LoggerFactory.getLogger(DependentJob.class);
 
     private static final Predicate<HwvtepDeviceInfo.DeviceData> DATA_INTRANSIT =

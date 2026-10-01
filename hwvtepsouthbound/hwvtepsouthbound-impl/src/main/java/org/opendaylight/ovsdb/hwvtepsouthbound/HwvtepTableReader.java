@@ -96,7 +96,7 @@ public class HwvtepTableReader {
         TerminationPoint.class, PhysicalLocator.class,
         VlanBindings.class, PhysicalPort.class);
 
-    private final ImmutableMap<Class<? extends EntryObject<?, ?>>, WhereClauseGetter<?>> whereClauseGetters;
+    private final ImmutableMap<Class<? extends EntryObject<?, ?, ?>>, WhereClauseGetter<?>> whereClauseGetters;
     private final ImmutableClassToInstanceMap<TypedBaseTable<?>> tables;
     private final HwvtepConnectionInstance connectionInstance;
 
@@ -111,7 +111,7 @@ public class HwvtepTableReader {
         }
 
         final Builder<TypedBaseTable<?>> tableBuilder = ImmutableClassToInstanceMap.<TypedBaseTable<?>>builder();
-        final ImmutableMap.Builder<Class<? extends EntryObject<?, ?>>, WhereClauseGetter<?>> whereBuilder =
+        final ImmutableMap.Builder<Class<? extends EntryObject<?, ?, ?>>, WhereClauseGetter<?>> whereBuilder =
                 ImmutableMap.builderWithExpectedSize(4);
 
         if (dbSchema != null) {
@@ -250,7 +250,7 @@ public class HwvtepTableReader {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public Optional<TypedBaseTable> getHwvtepTableEntryUUID(final Class<? extends EntryObject<?, ?>> cls,
+    public Optional<TypedBaseTable> getHwvtepTableEntryUUID(final Class<? extends EntryObject<?, ?, ?>> cls,
                                                             final DataObjectIdentifier iid,
                                                             final UUID existingUUID) {
         final TypedDatabaseSchema dbSchema;
@@ -314,7 +314,7 @@ public class HwvtepTableReader {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public List<TypedBaseTable> getHwvtepTableEntries(final Class<? extends EntryObject<?, ?>> cls) {
+    public List<TypedBaseTable> getHwvtepTableEntries(final Class<? extends EntryObject<?, ?, ?>> cls) {
         final TypedDatabaseSchema dbSchema;
         try {
             dbSchema = connectionInstance.getSchema(HwvtepSchemaConstants.HARDWARE_VTEP).get();

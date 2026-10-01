@@ -26,12 +26,8 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.EntryObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TransactCommandAggregator implements TransactCommand {
-    private static final Logger LOG = LoggerFactory.getLogger(TransactCommandAggregator.class);
-
     private final List<TransactCommand> commands = new ArrayList<>();
     private final AtomicInteger retryCount = new AtomicInteger(HwvtepSouthboundConstants.CHAIN_RETRY_COUNT);
     private final HwvtepOperationalState operationalState;
@@ -41,8 +37,8 @@ public class TransactCommandAggregator implements TransactCommand {
        child type is the child of hwvtep Global augmentation
      */
     private final Map<DataObjectIdentifier<Node>,
-            Pair<Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>,
-                Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>>> modifiedData = new HashMap<>();
+            Pair<Map<Class<? extends EntryObject<?, ?, ?>>, List<EntryObject<?, ?, ?>>>,
+                Map<Class<? extends EntryObject<?, ?, ?>>, List<EntryObject<?, ?, ?>>>>> modifiedData = new HashMap<>();
 
 
     public TransactCommandAggregator(HwvtepOperationalState state, Collection<DataTreeModification<Node>> changes) {
@@ -90,8 +86,8 @@ public class TransactCommandAggregator implements TransactCommand {
         for (DataTreeModification<Node> change : changes) {
             final DataObjectIdentifier<Node> key = change.path();
             final DataObjectModification<Node> mod = change.getRootNode();
-            final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> updatedData = new HashMap<>();
-            final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> deletedData = new HashMap<>();
+            final Map<Class<? extends EntryObject<?, ?, ?>>, List<EntryObject<?, ?, ?>>> updatedData = new HashMap<>();
+            final Map<Class<? extends EntryObject<?, ?, ?>>, List<EntryObject<?, ?, ?>>> deletedData = new HashMap<>();
             extractDataChanged(key, mod, updatedData, deletedData);
             modifiedData.put(key, Pair.of(updatedData, deletedData));
             operationalState.setModifiedData(modifiedData);
@@ -105,15 +101,15 @@ public class TransactCommandAggregator implements TransactCommand {
     }
 
     private static boolean isMacOnlyUpdate(
-            final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> updatedData,
-                final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> deletedData) {
+            final Map<Class<? extends EntryObject<?, ?, ?>>, List<EntryObject<?, ?, ?>>> updatedData,
+                final Map<Class<? extends EntryObject<?, ?, ?>>, List<EntryObject<?, ?, ?>>> deletedData) {
         return updatedData.containsKey(RemoteUcastMacs.class) && updatedData.size() == 1
                 || deletedData.containsKey(RemoteUcastMacs.class) && deletedData.size() == 1;
     }
 
     private static void extractDataChanged(final DataObjectIdentifier<Node> key, final DataObjectModification<Node> mod,
-        final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> updatedData,
-            final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> deletedData) {
+        final Map<Class<? extends EntryObject<?, ?, ?>>, List<EntryObject<?, ?, ?>>> updatedData,
+            final Map<Class<? extends EntryObject<?, ?, ?>>, List<EntryObject<?, ?, ?>>> deletedData) {
 
         extractDataChanged(mod.modifiedChildren(), updatedData, deletedData);
         DataObjectModification<HwvtepGlobalAugmentation> aug = mod.getModifiedAugmentation(
@@ -130,18 +126,18 @@ public class TransactCommandAggregator implements TransactCommand {
 
     private static void extractDataChanged(
             final Collection<? extends DataObjectModification<?>> children,
-                    final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> updatedData,
-                    final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> deletedData) {
+                    final Map<Class<? extends EntryObject<?, ?, ?>>, List<EntryObject<?, ?, ?>>> updatedData,
+                    final Map<Class<? extends EntryObject<?, ?, ?>>, List<EntryObject<?, ?, ?>>> deletedData) {
         if (children == null) {
             return;
         }
         for (DataObjectModification<?> child : children) {
-            Class<? extends EntryObject<?, ?>> childClass = (Class<? extends EntryObject<?, ?>>) child.dataType();
+            Class<? extends EntryObject<?, ?, ?>> childClass = (Class<? extends EntryObject<?, ?, ?>>) child.dataType();
             switch (child.modificationType()) {
                 case WRITE:
                 case SUBTREE_MODIFIED:
                     DataObject dataAfter = child.dataAfter();
-                    if (!(dataAfter instanceof EntryObject<?, ?> identifiable)) {
+                    if (!(dataAfter instanceof EntryObject<?, ?, ?> identifiable)) {
                         continue;
                     }
                     DataObject before = child.dataBefore();
@@ -157,7 +153,7 @@ public class TransactCommandAggregator implements TransactCommand {
                     break;
                 case DELETE:
                     DataObject dataBefore = child.dataBefore();
-                    if (!(dataBefore instanceof EntryObject<?, ?> identifiable)) {
+                    if (!(dataBefore instanceof EntryObject<?, ?, ?> identifiable)) {
                         continue;
                     }
                     addToUpdatedData(deletedData, childClass, identifiable);
@@ -168,8 +164,9 @@ public class TransactCommandAggregator implements TransactCommand {
         }
     }
 
-    private static void addToUpdatedData(Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> updatedData,
-            Class<? extends EntryObject<?, ?>> childClass, EntryObject<?, ?> identifiable) {
+    private static void addToUpdatedData(
+            Map<Class<? extends EntryObject<?, ?, ?>>, List<EntryObject<?, ?, ?>>> updatedData,
+            Class<? extends EntryObject<?, ?, ?>> childClass, EntryObject<?, ?, ?> identifiable) {
         updatedData.computeIfAbsent(childClass, (cls) -> new ArrayList<>());
         updatedData.get(childClass).add(identifiable);
     }

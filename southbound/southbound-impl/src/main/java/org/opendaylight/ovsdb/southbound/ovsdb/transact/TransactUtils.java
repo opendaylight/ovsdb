@@ -39,7 +39,6 @@ import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundConstants;
 import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.binding.ChildOf;
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.EntryObject;
@@ -336,7 +335,7 @@ public class TransactUtils {
      * @param child The child modification to include.
      * @return The extended path.
      */
-    private static <N extends EntryObject<N, K> & ChildOf<? super T>, K extends Key<N>, T extends DataObject>
+    private static <N extends EntryObject<? super T, N, K>, K extends Key<N>, T extends DataObject>
             DataObjectIdentifier<? extends DataObject> extendPath(final DataObjectIdentifier<T> path,
                 final DataObjectModification<?> child) {
         @SuppressWarnings("unchecked")

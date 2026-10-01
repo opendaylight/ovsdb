@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.binding.EntryObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class DependentJob<T extends EntryObject<?, ?>> {
+public abstract class DependentJob<T extends EntryObject<?, ?, ?>> {
     private static final Logger LOG = LoggerFactory.getLogger(DependentJob.class);
 
     private static final Predicate<HwvtepDeviceInfo.DeviceData> DATA_INTRANSIT =
@@ -131,7 +131,7 @@ public abstract class DependentJob<T extends EntryObject<?, ?>> {
     public void onSuccess() {
     }
 
-    public abstract static class ConfigWaitingJob<T extends EntryObject<?, ?>> extends DependentJob<T> {
+    public abstract static class ConfigWaitingJob<T extends EntryObject<?, ?, ?>> extends DependentJob<T> {
 
         public ConfigWaitingJob(DataObjectIdentifier key, T data,
                 Map<Class<? extends DataObject>, List<DataObjectIdentifier>> dependencies) {
@@ -148,7 +148,7 @@ public abstract class DependentJob<T extends EntryObject<?, ?>> {
         }
     }
 
-    public abstract static class OpWaitingJob<T extends EntryObject<?, ?>> extends DependentJob<T> {
+    public abstract static class OpWaitingJob<T extends EntryObject<?, ?, ?>> extends DependentJob<T> {
 
         public OpWaitingJob(DataObjectIdentifier key, T data,
                 Map<Class<? extends DataObject>, List<DataObjectIdentifier>> dependencies,

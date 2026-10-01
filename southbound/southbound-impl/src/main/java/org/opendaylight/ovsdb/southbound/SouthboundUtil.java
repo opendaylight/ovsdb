@@ -66,9 +66,7 @@ public final class SouthboundUtil {
                 if (optional != null && optional.isPresent()) {
                     OvsdbNodeAugmentation ovsdbNode = null;
                     Node node = optional.orElseThrow();
-                    if (node instanceof OvsdbNodeAugmentation) {
-                        ovsdbNode = (OvsdbNodeAugmentation) node;
-                    } else if (node != null) {
+                    if (node != null) {
                         ovsdbNode = node.augmentation(OvsdbNodeAugmentation.class);
                     }
                     if (ovsdbNode != null) {

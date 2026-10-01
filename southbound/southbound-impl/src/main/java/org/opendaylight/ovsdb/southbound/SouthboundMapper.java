@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -96,6 +97,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier.WithKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -165,13 +167,14 @@ public final class SouthboundMapper {
         return new IpAddress(ipv6);
     }
 
-    public static InstanceIdentifier<Topology> createTopologyInstanceIdentifier() {
-        return InstanceIdentifier.create(NetworkTopology.class)
-            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
+    public static @NonNull WithKey<Topology, TopologyKey> createTopologyInstanceIdentifier() {
+        return DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+            .build();
     }
 
-    public static InstanceIdentifier<Node> createInstanceIdentifier(final NodeId nodeId) {
-        return createTopologyInstanceIdentifier().child(Node.class, new NodeKey(nodeId));
+    public static @NonNull WithKey<Node, NodeKey> createInstanceIdentifier(final NodeId nodeId) {
+        return createTopologyInstanceIdentifier().toBuilder().child(Node.class, new NodeKey(nodeId)).build();
     }
 
     @SuppressWarnings("unchecked")

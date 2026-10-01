@@ -108,15 +108,13 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
             // case 1, 3 & 4
             LOG.trace("Reconciling all bridges with exclusion list {}", bridgeReconcileExcludeList);
             FluentFuture<Optional<Topology>> readTopologyFuture;
-            InstanceIdentifier<Topology> topologyInstanceIdentifier = SouthboundMapper
-                .createTopologyInstanceIdentifier();
+            var topologyInstanceIdentifier = SouthboundMapper.createTopologyInstanceIdentifier();
             try (ReadTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
                 // find all bridges of the specific device in the config data store
                 // TODO: this query is not efficient. It retrieves all the Nodes in the datastore, loop over them and
                 // look for the bridges of specific device. It is mre efficient if MDSAL allows query nodes using
                 // wildcard on node id (ie: ovsdb://uuid/<device uuid>/bridge/*) r attributes
-                readTopologyFuture = tx.read(LogicalDatastoreType.CONFIGURATION,
-                    topologyInstanceIdentifier.toIdentifier());
+                readTopologyFuture = tx.read(LogicalDatastoreType.CONFIGURATION, topologyInstanceIdentifier);
             }
             readTopologyFuture.addCallback(new FutureCallback<>() {
                 @Override
@@ -152,9 +150,8 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
             LOG.trace("Reconcile Bridge from InclusionList {} only", bridgeReconcileIncludeList);
             for (String bridgeNodeIid : bridgeReconcileIncludeList) {
                 try (ReadTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction()) {
-                    InstanceIdentifier<Node> nodeInstanceIdentifier =
-                        SouthboundMapper.createInstanceIdentifier(new NodeId(bridgeNodeIid));
-                    readNodeFuture = tx.read(LogicalDatastoreType.CONFIGURATION, nodeInstanceIdentifier.toIdentifier());
+                    readNodeFuture = tx.read(LogicalDatastoreType.CONFIGURATION,
+                        SouthboundMapper.createInstanceIdentifier(new NodeId(bridgeNodeIid)));
                 }
                 readNodeFuture.addCallback(new FutureCallback<Optional<Node>>() {
                     @Override
@@ -209,35 +206,31 @@ public class BridgeConfigReconciliationTask extends ReconciliationTask {
         return true;
     }
 
-    private static Map<InstanceIdentifier<?>, DataObject> extractBridgeConfigurationChanges(
+    private static Map<DataObjectIdentifier<?>, DataObject> extractBridgeConfigurationChanges(
             final Node bridgeNode, final OvsdbBridgeAugmentation ovsdbBridge) {
-        Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
-        final InstanceIdentifier<Node> bridgeNodeIid =
-                SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
-        final InstanceIdentifier<OvsdbBridgeAugmentation> ovsdbBridgeIid =
-                bridgeNodeIid.builder().augmentation(OvsdbBridgeAugmentation.class).build();
+        final var changes = new HashMap<DataObjectIdentifier<?>, DataObject>();
+        final var bridgeNodeIid = SouthboundMapper.createInstanceIdentifier(bridgeNode.getNodeId());
+        final var ovsdbBridgeIid = bridgeNodeIid.toBuilder().augmentation(OvsdbBridgeAugmentation.class).build();
         changes.put(bridgeNodeIid, bridgeNode);
         changes.put(ovsdbBridgeIid, ovsdbBridge);
 
-        final Map<ProtocolEntryKey, ProtocolEntry> protocols = ovsdbBridge.getProtocolEntry();
+        final var protocols = ovsdbBridge.getProtocolEntry();
         if (protocols != null) {
             for (ProtocolEntry protocol : protocols.values()) {
                 if (SouthboundConstants.OVSDB_PROTOCOL_MAP.get(protocol.getProtocol()) != null) {
-                    KeyedInstanceIdentifier<ProtocolEntry, ProtocolEntryKey> protocolIid =
-                            ovsdbBridgeIid.child(ProtocolEntry.class, protocol.key());
-                    changes.put(protocolIid, protocol);
+                    changes.put(ovsdbBridgeIid.toBuilder().child(ProtocolEntry.class, protocol.key()).build(),
+                        protocol);
                 } else {
                     throw new IllegalArgumentException("Unknown protocol " + protocol.getProtocol());
                 }
             }
         }
 
-        final Map<ControllerEntryKey, ControllerEntry> controllers = ovsdbBridge.getControllerEntry();
+        final var controllers = ovsdbBridge.getControllerEntry();
         if (controllers != null) {
             for (ControllerEntry controller : controllers.values()) {
-                KeyedInstanceIdentifier<ControllerEntry, ControllerEntryKey> controllerIid =
-                        ovsdbBridgeIid.child(ControllerEntry.class, controller.key());
-                changes.put(controllerIid, controller);
+                changes.put(ovsdbBridgeIid.toBuilder().child(ControllerEntry.class, controller.key()).build(),
+                    controller);
             }
         }
 

@@ -103,12 +103,11 @@ public class QosUpdateCommand extends AbstractTransactCommand {
             } catch (NullPointerException e) {
                 LOG.warn("Incomplete Qos external IDs", e);
             }
-            externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
-
-                    instanceIdentifierCodec.serialize(
-                    SouthboundMapper.createInstanceIdentifier(iid.firstKeyOf(Node.class).getNodeId())
+            externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, instanceIdentifierCodec.serialize(
+                    SouthboundMapper.createInstanceIdentifier(iid.getFirstKeyOf(Node.class).getNodeId()).toBuilder()
                     .augmentation(OvsdbNodeAugmentation.class)
-                    .child(QosEntries.class, new QosEntriesKey(qosEntry.getQosId()))));
+                    .child(QosEntries.class, new QosEntriesKey(qosEntry.getQosId()))
+                    .build()));
             qos.setExternalIds(externalIdsMap);
 
             try {
@@ -141,7 +140,7 @@ public class QosUpdateCommand extends AbstractTransactCommand {
             case PropertyIdentifier<?, ?> pi -> pi.container();
         };
 
-        QueuesKey queueKey = doi.toLegacy().firstKeyOf(Queues.class);
+        QueuesKey queueKey = doi.getFirstKeyOf(Queues.class);
         Map<QueuesKey, Queues> queues = operNode.getQueues();
         if (queues != null) {
             Queues queue = queues.get(queueKey);

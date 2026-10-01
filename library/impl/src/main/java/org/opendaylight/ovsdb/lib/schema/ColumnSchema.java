@@ -114,6 +114,7 @@ public class ColumnSchema<E extends TableSchema<E>, D> {
 
     /**
      * Verifies if this Column if of the specified type.
+     *
      * @param typeClass the type to check for
      */
     public void validateType(final Class<?> typeClass) {

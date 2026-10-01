@@ -38,6 +38,7 @@ public abstract class ReconciliationTask implements Runnable {
      * Method contains task reconciliation logic. Please refer to
      * {@link ConnectionReconciliationTask#reconcileConfiguration(OvsdbConnectionManager)}
      * for example.
+     *
      * @param connectionManagerOfDevice Connection manager to get connection instance of the device
      * @return True if reconciliation was successful, else false
      */
@@ -76,6 +77,7 @@ public abstract class ReconciliationTask implements Runnable {
     /**
      * Method returns the time interval for retrying the failed task.
      * {@link ReconciliationTask#doRetry(boolean)}
+     *
      * @return time
      */
     public abstract long retryDelayInMills();

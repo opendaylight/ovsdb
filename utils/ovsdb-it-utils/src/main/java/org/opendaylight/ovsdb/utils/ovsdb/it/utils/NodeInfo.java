@@ -43,9 +43,9 @@ public class NodeInfo {
     private NotifyingDataChangeListener ovsdbWaiter;
     private NotifyingDataChangeListener bridgeWaiter;
 
-
     /**
      * Create a new NodeInfo object.
+     *
      * @param connectionInfo of the OVSDB node
      * @param itUtils OvsdbItUtils instance
      * @param waitList for tracking outstanding md-sal events
@@ -76,6 +76,7 @@ public class NodeInfo {
     /**
      * Connect to the OVSDB node, wait for the connection to be established and for the integration bridge
      * to be successfully created. Contains assertions for unexpected states
+     *
      * @throws InterruptedException if interrupted while waiting for connection
      */
     public void connect() throws Exception {
@@ -101,6 +102,7 @@ public class NodeInfo {
 
     /**
      * Remove integration bridge and teardown connection. Contains assertions for unexpected states.
+     *
      * @throws InterruptedException if interrupted while waiting for disconnect to complete
      */
     public void disconnect() throws Exception {

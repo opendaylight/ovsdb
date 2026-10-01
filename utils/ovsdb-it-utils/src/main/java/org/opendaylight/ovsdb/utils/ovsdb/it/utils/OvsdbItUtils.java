@@ -34,6 +34,7 @@ public class OvsdbItUtils {
 
     /**
      * Create a new OvsdbItUtils instance.
+     *
      * @param dataBroker  md-sal data broker
      */
     public OvsdbItUtils(DataBroker dataBroker) {
@@ -44,6 +45,7 @@ public class OvsdbItUtils {
 
     /**
      * Get a NodeInfo instance initialized with this ItUtil's DataBroker.
+     *
      * @param connectionInfo ConnectionInfo for the OVSDB server
      * @param waitList For tracking outstanding md-sal events notifications
      * @return a new NodeInfo object
@@ -56,6 +58,7 @@ public class OvsdbItUtils {
     /**
      * Checks whether the OVSDB controller is connected. This method will retry 10 times and will through an
      * AssertionError for any number of unexpected states.
+     *
      * @param connectionInfo where to connect to
      * @return true if connected
      * @throws InterruptedException if interrupted while waiting for connection to appear

@@ -30,19 +30,19 @@ public abstract class ColumnType {
     /**
      * JSON.
      * <pre>
-            "type": {
-                "key": {
-                     "maxInteger": 4294967295,
-                     "minInteger": 0,
-                     "type": "integer"
-                },
-                "min": 0,
-                "value": {
-                    "type": "uuid",
-                    "refTable": "Queue"
-                 },
-                 "max": "unlimited"
-            }</pre>
+     *      "type": {
+     *          "key": {
+     *               "maxInteger": 4294967295,
+     *                "minInteger": 0,
+     *               "type": "integer"
+     *          },
+     *           "min": 0,
+     *          "value": {
+     *              "type": "uuid",
+     *               "refTable": "Queue"
+     *           },
+     *           "max": "unlimited"
+     *       }</pre>
      */
     public static ColumnType fromJson(final JsonNode json) {
         for (Function<JsonNode, ColumnType> factory : FACTORIES) {

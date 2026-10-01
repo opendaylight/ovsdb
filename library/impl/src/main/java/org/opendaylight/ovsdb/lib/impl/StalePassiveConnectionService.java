@@ -90,6 +90,7 @@ public class StalePassiveConnectionService implements AutoCloseable {
 
     /**
      * Notify the service that the given client has disconnected.
+     *
      * @param disconnectedClient the client just disconnected
      */
     public synchronized void clientDisconnected(OvsdbClient disconnectedClient) {

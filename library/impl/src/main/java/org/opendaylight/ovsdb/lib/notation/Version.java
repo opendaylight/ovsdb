@@ -14,6 +14,7 @@ import com.google.errorprone.annotations.Var;
 /**
  * This class represents a version according to RFC 7047.
  * The default implementation assumes the left-most digit is most significant when performing comparisons.
+ *
  * @see <a href="http://tools.ietf.org/html/rfc7047#section-3.1">RFC7047 Section 3.1</a>
  */
 public class Version implements Comparable<Version> {
@@ -50,6 +51,7 @@ public class Version implements Comparable<Version> {
      * just to avoid allocating three intermediate String objects in {@link #fromString(String)},
      * as objection allocation data in Java Mission Control from ODL running in a scale lab
      * has identified this as the top #3 (!) memory allocator overall - 1 GB avoidable String.
+     *
      * @author Michael Vorburger.ch
      */
     private static int parse(final String string, final int start, final int end) {

@@ -1171,6 +1171,7 @@ public class SouthboundUtils {
 
     /**
      * Get all OVSDB nodes from topology.
+     *
      * @return a list of nodes or null if the topology could not found
      */
     public Map<NodeKey, Node> getOvsdbNodes() {
@@ -1182,6 +1183,7 @@ public class SouthboundUtils {
 
     /**
      * Get OpenvSwitch other-config by key.
+     *
      * @param node OVSDB node
      * @param key key to extract from other-config
      * @return the value for key or null if key not found

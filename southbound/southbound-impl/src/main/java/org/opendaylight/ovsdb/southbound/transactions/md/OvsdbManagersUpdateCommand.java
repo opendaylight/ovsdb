@@ -103,7 +103,6 @@ public class OvsdbManagersUpdateCommand extends AbstractTransactionCommand {
      *
      * @param transaction the {@link ReadWriteTransaction}
      * @param newUpdatedManagerRows updated {@link Manager} rows
-
      */
     private void updateManagers(ReadWriteTransaction transaction,
                                   Map<Uri, Manager> newUpdatedManagerRows) {

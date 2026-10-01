@@ -145,6 +145,7 @@ public final class DockerOvs implements AutoCloseable {
     /**
      * Get the array of system properties as pax exam Option objects for use in pax exam
      * unit tests with Configuration annotation.
+     *
      * @return List of Option objects
      */
     public static Option[] getSysPropOptions() {
@@ -163,6 +164,7 @@ public final class DockerOvs implements AutoCloseable {
 
     /**
      * Bring up all docker images in the default docker-compose file.
+     *
      * @throws IOException if something goes wrong on the IO end
      * @throws InterruptedException If this thread is interrupted
      */
@@ -172,6 +174,7 @@ public final class DockerOvs implements AutoCloseable {
 
     /**
      * Bring up all docker images in the provided docker-compose file under "META-INF/docker-compose-files/".
+     *
      * @param yamlFileName Just the file name
      * @throws IOException if something goes wrong on the IO end
      * @throws InterruptedException If this thread is interrupted
@@ -259,6 +262,7 @@ public final class DockerOvs implements AutoCloseable {
      * Verify and build the docker and docker-compose commands we will be running. This function adds the docker-compose
      * file to the command lines and also checks (and adjusts the command line) as to whether sudo is required. This is
      * done by attempting to run commands without and then with sudo
+     *
      * @throws IOException if something goes wrong on the IO end
      * @throws InterruptedException If this thread is interrupted
      */
@@ -318,6 +322,7 @@ public final class DockerOvs implements AutoCloseable {
 
     /**
      * Get the IP address of the n'th OVS.
+     *
      * @param ovsNumber which OVS?
      * @return IP string
      */
@@ -330,6 +335,7 @@ public final class DockerOvs implements AutoCloseable {
 
     /**
      * Get the port of the n'th OVS.
+     *
      * @param ovsNumber which OVS?
      * @return Port as a string
      */
@@ -349,6 +355,7 @@ public final class DockerOvs implements AutoCloseable {
 
     /**
      * How many OVS nodes are there.
+     *
      * @return number of running OVS nodes
      */
     public int getNumOvsNodes() {
@@ -407,6 +414,7 @@ public final class DockerOvs implements AutoCloseable {
 
     /**
      * Parse the docker-compose yaml file to extract the port mappings.
+     *
      * @return a list of the external ports
      */
     private List<String> parseDockerComposeYaml() {
@@ -488,6 +496,7 @@ public final class DockerOvs implements AutoCloseable {
 
         /**
          * Construct a new OvsdbPing object.
+         *
          * @param ovsNumber which OVS is this?
          * @param result an AtomicInteger that is incremented upon a successful "ping"
          */
@@ -514,6 +523,7 @@ public final class DockerOvs implements AutoCloseable {
 
         /**
          * Attempt a "ping" of the OVSDB connection.
+         *
          * @return true if the ping was successful OR IF THIS THREAD WAS INTERRUPTED
          */
         private boolean doPing() {
@@ -544,6 +554,7 @@ public final class DockerOvs implements AutoCloseable {
 
     /**
      * Wait for all Ovs's to accept and respond to OVSDB requests.
+     *
      * @param waitFor How long to wait
      * @throws IOException if something goes wrong on the IO end
      * @throws InterruptedException If this thread is interrupted
@@ -586,6 +597,7 @@ public final class DockerOvs implements AutoCloseable {
     /**
      * Since the docker-compose file is a resource in the bundle and docker-compose needs it.
      * in the file system, we copy it over - ugly but necessary.
+     *
      * @param yamlFileName File name
      * @return A File object for the newly created temporary yaml file.
      */
@@ -617,6 +629,7 @@ public final class DockerOvs implements AutoCloseable {
 
     /**
      * Useful for debugging. Dump some interesting config
+     *
      * @throws IOException If something goes wrong with reading the process output
      * @throws InterruptedException because there's some sleeping in here
      */

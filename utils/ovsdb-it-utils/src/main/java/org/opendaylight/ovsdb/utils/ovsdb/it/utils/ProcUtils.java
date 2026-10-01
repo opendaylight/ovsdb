@@ -26,8 +26,9 @@ public final class ProcUtils {
         // Hidden on purpose
     }
 
-     /**
+    /**
      * Run a process and assert the exit code is 0.
+     *
      * @param waitFor How long to wait for the command to execute
      * @param words The words of the command to run
      * @throws IOException if something goes wrong on the IO end
@@ -39,6 +40,7 @@ public final class ProcUtils {
 
     /**
      * Run a process, collect the stdout, and assert the exit code is 0.
+     *
      * @param waitFor How long to wait for the command to execute
      * @param capturedStdout Whatever the process wrote to standard out
      * @param words The words of the command to run
@@ -60,6 +62,7 @@ public final class ProcUtils {
 
     /**
      * Run a process.
+     *
      * @param waitFor How long to wait for the command to execute
      * @param words The words of the command to run
      * @return The process's exit code
@@ -73,6 +76,7 @@ public final class ProcUtils {
 
     /**
      * Run a process, collect the stdout.
+     *
      * @param waitFor How long to wait (milliseconds) for the command to execute
      * @param capturedStdout Whatever the process wrote to standard out
      * @param words The words of the command to run
@@ -116,6 +120,7 @@ public final class ProcUtils {
 
     /**
      * Wait for a process to end.
+     *
      * @param waitFor how long to wait in milliseconds
      * @param proc Process object
      * @return the process's exit value or -1 if the process did not complete within waitFor milliseconds

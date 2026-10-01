@@ -174,9 +174,7 @@ public final class HwvtepSouthboundUtil {
             if (optional != null && optional.isPresent()) {
                 HwvtepGlobalAugmentation hwvtepNode = null;
                 Node node = optional.orElseThrow();
-                if (node instanceof HwvtepGlobalAugmentation) {
-                    hwvtepNode = (HwvtepGlobalAugmentation) node;
-                } else if (node != null) {
+                if (node != null) {
                     hwvtepNode = node.augmentation(HwvtepGlobalAugmentation.class);
                 }
                 if (hwvtepNode != null) {
@@ -205,8 +203,8 @@ public final class HwvtepSouthboundUtil {
         LOG.debug(SCHEMA_VERSION_MISMATCH, column, table, "hw_vtep", ex.getMessage());
     }
 
-    public static <K, D> void updateData(Map<Class<? extends EntryObject<?, ?>>, Map<K, D>> map,
-            Class<? extends EntryObject<?, ?>> cls, K key, D data) {
+    public static <K, D> void updateData(Map<Class<? extends EntryObject<?, ?, ?>>, Map<K, D>> map,
+            Class<? extends EntryObject<?, ?, ?>> cls, K key, D data) {
         LOG.debug("Updating data {} {} {}", cls, key, data);
         if (key == null) {
             return;
@@ -217,8 +215,8 @@ public final class HwvtepSouthboundUtil {
         map.get(cls).put(key, data);
     }
 
-    public static <K, D> D getData(Map<Class<? extends EntryObject<?, ?>>, Map<K, D>> map,
-            Class<? extends EntryObject<?, ?>> cls, K key) {
+    public static <K, D> D getData(Map<Class<? extends EntryObject<?, ?, ?>>, Map<K, D>> map,
+            Class<? extends EntryObject<?, ?, ?>> cls, K key) {
         if (key == null) {
             return null;
         }
@@ -228,8 +226,8 @@ public final class HwvtepSouthboundUtil {
         return null;
     }
 
-    public static <K, D> boolean containsKey(Map<Class<? extends EntryObject<?, ?>>, Map<K, D>> map,
-            Class<? extends EntryObject<?, ?>> cls, K key) {
+    public static <K, D> boolean containsKey(Map<Class<? extends EntryObject<?, ?, ?>>, Map<K, D>> map,
+            Class<? extends EntryObject<?, ?, ?>> cls, K key) {
         if (key == null) {
             return false;
         }
@@ -239,8 +237,8 @@ public final class HwvtepSouthboundUtil {
         return false;
     }
 
-    public static <K, D> void clearData(Map<Class<? extends EntryObject<?, ?>>, Map<K, D>> map,
-            Class<? extends EntryObject<?, ?>> cls, K key) {
+    public static <K, D> void clearData(Map<Class<? extends EntryObject<?, ?, ?>>, Map<K, D>> map,
+            Class<? extends EntryObject<?, ?, ?>> cls, K key) {
         LOG.debug("Clearing data {} {}", cls, key);
         if (key == null) {
             return;

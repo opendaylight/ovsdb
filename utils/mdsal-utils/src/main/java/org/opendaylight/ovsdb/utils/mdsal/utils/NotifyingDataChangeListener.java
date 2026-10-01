@@ -17,9 +17,9 @@ import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.DataObjectReference;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,19 +39,19 @@ public final class NotifyingDataChangeListener implements AutoCloseable, DataTre
     public static final int BIT_DELETE = 4;
     public static final int BIT_ALL = 7;
 
-    private final Set<InstanceIdentifier<?>> createdIids = ConcurrentHashMap.newKeySet();
-    private final Set<InstanceIdentifier<?>> removedIids = ConcurrentHashMap.newKeySet();
-    private final Set<InstanceIdentifier<?>> updatedIids = ConcurrentHashMap.newKeySet();
+    private final Set<DataObjectReference<?>> createdIids = ConcurrentHashMap.newKeySet();
+    private final Set<DataObjectReference<?>> removedIids = ConcurrentHashMap.newKeySet();
+    private final Set<DataObjectReference<?>> updatedIids = ConcurrentHashMap.newKeySet();
     private final List<NotifyingDataChangeListener> waitList;
     private Registration listenerRegistration;
     private int mdsalTimeout = MDSAL_TIMEOUT_OPERATIONAL;
-    private volatile InstanceIdentifier<?> iid;
+    private volatile DataObjectReference<?> iid;
     private volatile LogicalDatastoreType type;
     private volatile boolean listen;
     private volatile int mask;
 
-    public NotifyingDataChangeListener(LogicalDatastoreType type, int mask,
-                                       InstanceIdentifier<?> iid, List<NotifyingDataChangeListener> waitList) {
+    public NotifyingDataChangeListener(LogicalDatastoreType type, int mask, DataObjectReference<?> iid,
+            List<NotifyingDataChangeListener> waitList) {
         this(type, iid, waitList);
         this.mask = mask;
     }
@@ -63,8 +63,8 @@ public final class NotifyingDataChangeListener implements AutoCloseable, DataTre
      * @param iid of the md-sal object we're waiting for
      * @param waitList for tracking outstanding changes
      */
-    public NotifyingDataChangeListener(LogicalDatastoreType type,
-                                        InstanceIdentifier<?> iid, List<NotifyingDataChangeListener> waitList) {
+    public NotifyingDataChangeListener(LogicalDatastoreType type, DataObjectReference<?> iid,
+            List<NotifyingDataChangeListener> waitList) {
         this.type = type;
         this.iid = iid;
         this.waitList = waitList;
@@ -86,15 +86,15 @@ public final class NotifyingDataChangeListener implements AutoCloseable, DataTre
      * @param newType DataStore type
      * @param newIid of the md-sal object we're waiting for
      */
-    public void modify(LogicalDatastoreType newType, InstanceIdentifier<?> newIid) {
-        this.close();
-        this.clear();
-        this.type = newType;
-        this.iid = newIid;
+    public void modify(LogicalDatastoreType newType, DataObjectReference<?> newIid) {
+        close();
+        clear();
+        type = newType;
+        iid = newIid;
     }
 
     public void setlisten(boolean value) {
-        this.listen = value;
+        listen = value;
     }
 
     public void setMask(int mask) {
@@ -110,7 +110,7 @@ public final class NotifyingDataChangeListener implements AutoCloseable, DataTre
 
         for (DataTreeModification<DataObject> change: changes) {
             DataObjectModification<DataObject> rootNode = change.getRootNode();
-            final InstanceIdentifier<DataObject> identifier = change.getRootPath().path();
+            final DataObjectIdentifier<DataObject> identifier = change.path();
             switch (rootNode.modificationType()) {
                 case SUBTREE_MODIFIED:
                 case WRITE:
@@ -140,15 +140,15 @@ public final class NotifyingDataChangeListener implements AutoCloseable, DataTre
         }
     }
 
-    public boolean isCreated(InstanceIdentifier<?> path) {
+    public boolean isCreated(DataObjectReference<?> path) {
         return createdIids.remove(path);
     }
 
-    public boolean isUpdated(InstanceIdentifier<?> path) {
+    public boolean isUpdated(DataObjectReference<?> path) {
         return updatedIids.remove(path);
     }
 
-    public boolean isRemoved(InstanceIdentifier<?> path) {
+    public boolean isRemoved(DataObjectReference<?> path) {
         return removedIids.remove(path);
     }
 

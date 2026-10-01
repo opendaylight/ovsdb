@@ -12,14 +12,13 @@ import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class DataTreeModificationImpl<T extends DataObject> implements DataTreeModification<T> {
-    InstanceIdentifier<T> nodeId;
+    DataObjectIdentifier<T> nodeId;
     T newNode;
     T oldNode;
 
-    public DataTreeModificationImpl(final InstanceIdentifier<T> nodeId, final T newNode, final T oldNode) {
+    public DataTreeModificationImpl(final DataObjectIdentifier<T> nodeId, final T newNode, final T oldNode) {
         this.nodeId = nodeId;
         this.newNode = newNode;
         this.oldNode = oldNode;
@@ -32,7 +31,7 @@ public class DataTreeModificationImpl<T extends DataObject> implements DataTreeM
 
     @Override
     public DataObjectIdentifier<T> path() {
-        return nodeId.toIdentifier();
+        return nodeId;
     }
 
     @Override

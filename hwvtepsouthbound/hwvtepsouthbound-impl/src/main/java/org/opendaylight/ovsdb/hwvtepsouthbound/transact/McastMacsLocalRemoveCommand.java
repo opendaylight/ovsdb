@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -21,7 +20,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,18 +34,16 @@ public class McastMacsLocalRemoveCommand
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<LocalMcastMacs>> removeds =
-                extractRemoved(getChanges(),LocalMcastMacs.class);
+        var removeds = extractRemoved(getChanges(),LocalMcastMacs.class);
         if (!removeds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<LocalMcastMacs>> removed:
-                removeds.entrySet()) {
+            for (var removed : removeds.entrySet()) {
                 removeMcastMacLocal(transaction,  removed.getKey(), removed.getValue());
             }
         }
     }
 
     private void removeMcastMacLocal(final TransactionBuilder transaction,
-            final InstanceIdentifier<Node> instanceIdentifier, final List<LocalMcastMacs> macList) {
+            final DataObjectIdentifier<Node> instanceIdentifier, final List<LocalMcastMacs> macList) {
         final var op = ops();
 
         for (LocalMcastMacs mac: macList) {
@@ -91,8 +87,8 @@ public class McastMacsLocalRemoveCommand
     }
 
     @Override
-    protected String getKeyStr(InstanceIdentifier<LocalMcastMacs> iid) {
-        return getLsKeyStr(iid.firstKeyOf(LocalMcastMacs.class).getLogicalSwitchRef().getValue());
+    protected String getKeyStr(DataObjectIdentifier<LocalMcastMacs> iid) {
+        return getLsKeyStr(iid.getFirstKeyOf(LocalMcastMacs.class).getLogicalSwitchRef().getValue());
     }
 
     // FIXME: hide/move/make this final
@@ -104,12 +100,12 @@ public class McastMacsLocalRemoveCommand
         }
 
         @Override
-        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final LocalMcastMacs data) {
-            return List.of(((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue()).toLegacy());
+        public List<DataObjectIdentifier<?>> getLogicalSwitchDependencies(final LocalMcastMacs data) {
+            return List.of((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue());
         }
 
         @Override
-        public List<InstanceIdentifier<?>> getTerminationPointDependencies(final LocalMcastMacs data) {
+        public List<DataObjectIdentifier<?>> getTerminationPointDependencies(final LocalMcastMacs data) {
             return List.of();
         }
     }

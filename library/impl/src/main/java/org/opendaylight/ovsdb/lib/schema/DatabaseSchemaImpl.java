@@ -88,7 +88,7 @@ public class DatabaseSchemaImpl implements DatabaseSchema {
         try {
             declaredConstructor = clazz.getDeclaredConstructor(TableSchema.class);
         } catch (NoSuchMethodException e) {
-            String message = String.format("Class %s does not have public constructor that accepts TableSchema object",
+            String message = "Class %s does not have public constructor that accepts TableSchema object".formatted(
                     clazz);
             throw new IllegalArgumentException(message, e);
         }
@@ -96,8 +96,8 @@ public class DatabaseSchemaImpl implements DatabaseSchema {
         try {
             return invokable.invoke(null, table);
         } catch (InvocationTargetException | IllegalAccessException e) {
-            String message = String.format("Not able to create instance of class %s using public constructor "
-                    + "that accepts TableSchema object", clazz);
+            String message = "Not able to create instance of class %s using public constructor "
+                    + "that accepts TableSchema object".formatted(clazz);
             throw new IllegalArgumentException(message, e);
         }
     }

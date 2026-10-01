@@ -23,7 +23,7 @@ import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,17 +58,17 @@ public class TerminationPointDeleteCommand extends AbstractTransactCommand {
     }
 
     private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>,
+            final Map<DataObjectIdentifier<OvsdbTerminationPointAugmentation>,
                 OvsdbTerminationPointAugmentation> originals,
-            final Map<InstanceIdentifier<Node>, Node> originalNodes,
-            final Set<InstanceIdentifier<OvsdbTerminationPointAugmentation>> removedTps) {
-        for (InstanceIdentifier<OvsdbTerminationPointAugmentation> removedTpIid: removedTps) {
+            final Map<DataObjectIdentifier<Node>, Node> originalNodes,
+            final Set<DataObjectIdentifier<OvsdbTerminationPointAugmentation>> removedTps) {
+        for (var removedTpIid : removedTps) {
             LOG.debug("Received request to delete termination point {}", removedTpIid);
             OvsdbTerminationPointAugmentation original = originals.get(removedTpIid);
-            String bridgeName = SouthboundUtil.getBridgeNameFromOvsdbNodeId(removedTpIid.firstIdentifierOf(Node.class));
+            String bridgeName = SouthboundUtil.getBridgeNameFromOvsdbNodeId(removedTpIid.trimTo(Node.class));
             if (bridgeName == null) {
                 LOG.error("Missing Bridge Name for Node {} during deletion of Port {}",
-                        removedTpIid.firstIdentifierOf(Node.class), original.getName());
+                        removedTpIid.trimTo(Node.class), original.getName());
                 continue;
             }
             LOG.trace("Deleting port {} from bridge {}", original.getName(), bridgeName);

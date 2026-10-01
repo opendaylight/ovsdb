@@ -11,7 +11,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.Mutator;
 import org.opendaylight.ovsdb.lib.operations.Mutate;
@@ -26,7 +25,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.OpenvswitchOtherConfigsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,10 +53,9 @@ public class OvsdbNodeUpdateCommand extends AbstractTransactCommand {
 
     @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private void execute(final TransactionBuilder transaction,
-            final Map<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated,
+            final Map<DataObjectIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> updated,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
-        for (Entry<InstanceIdentifier<OvsdbNodeAugmentation>, OvsdbNodeAugmentation> ovsdbNodeEntry:
-            updated.entrySet()) {
+        for (var ovsdbNodeEntry: updated.entrySet()) {
             OvsdbNodeAugmentation ovsdbNode = ovsdbNodeEntry.getValue();
             if (ovsdbNode.getConnectionInfo() != null) {
                 LOG.debug("Received request to update ovsdb node ip: {} port: {}",
@@ -70,8 +68,7 @@ public class OvsdbNodeUpdateCommand extends AbstractTransactCommand {
             // OpenVSwitchPart
             OpenVSwitch ovs = transaction.getTypedRowWrapper(OpenVSwitch.class);
 
-            stampInstanceIdentifier(transaction, ovsdbNodeEntry.getKey().firstIdentifierOf(Node.class),
-                    instanceIdentifierCodec);
+            stampInstanceIdentifier(transaction, ovsdbNodeEntry.getKey().trimTo(Node.class), instanceIdentifierCodec);
 
             try {
                 ovs.setExternalIds(YangUtils.convertYangKeyValueListToMap(ovsdbNode.getOpenvswitchExternalIds(),
@@ -101,7 +98,7 @@ public class OvsdbNodeUpdateCommand extends AbstractTransactCommand {
         }
     }
 
-    private void stampInstanceIdentifier(final TransactionBuilder transaction, final InstanceIdentifier<Node> iid,
+    private void stampInstanceIdentifier(final TransactionBuilder transaction, final DataObjectIdentifier<Node> iid,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
         OpenVSwitch ovs = transaction.getTypedRowWrapper(OpenVSwitch.class);
         ovs.setExternalIds(Collections.emptyMap());

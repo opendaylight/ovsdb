@@ -14,16 +14,16 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataObjectWritten;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.ExactDataObjectStep;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class DataObjectModificationImpl<T extends DataObject> extends DataObjectWritten<T> {
     private final Collection<DataObjectModification<? extends DataObject>> childNodesCache = new ArrayList<>();
-    InstanceIdentifier<T> nodeId;
+    DataObjectIdentifier<T> nodeId;
     T newNode;
     T oldNode;
 
-    public DataObjectModificationImpl(final InstanceIdentifier<T> nodeId, final T newData, final T oldData) {
+    public DataObjectModificationImpl(final DataObjectIdentifier<T> nodeId, final T newData, final T oldData) {
         this.nodeId = nodeId;
         newNode = newData;
         oldNode = oldData;

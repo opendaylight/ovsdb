@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.southbound.transactions.md.TransactionInvoker;
@@ -25,13 +24,14 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectReference;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class OvsdbOperGlobalListener implements DataTreeChangeListener<Node>, AutoCloseable {
-    public static final ConcurrentMap<InstanceIdentifier<Node>, Node> OPER_NODE_CACHE = new ConcurrentHashMap<>();
+    public static final ConcurrentMap<DataObjectIdentifier<Node>, Node> OPER_NODE_CACHE = new ConcurrentHashMap<>();
 
     private static final Logger LOG = LoggerFactory.getLogger(OvsdbOperGlobalListener.class);
 
@@ -50,11 +50,11 @@ public final class OvsdbOperGlobalListener implements DataTreeChangeListener<Nod
     }
 
     public void registerListener() {
-        registration = db.registerTreeChangeListener(DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL,
-            InstanceIdentifier.builder(NetworkTopology.class)
+        registration = db.registerTreeChangeListener(LogicalDatastoreType.OPERATIONAL,
+            DataObjectReference.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class)
-                .build()), this);
+                .build(), this);
     }
 
     @Override
@@ -70,7 +70,7 @@ public final class OvsdbOperGlobalListener implements DataTreeChangeListener<Nod
     public void onDataTreeChanged(final List<DataTreeModification<Node>> changes) {
         changes.forEach(change -> {
             try {
-                final var key = change.getRootPath().path();
+                final var key = change.path();
                 final var mod = change.getRootNode();
                 final var addNode = getCreated(mod);
                 if (addNode != null) {
@@ -88,8 +88,7 @@ public final class OvsdbOperGlobalListener implements DataTreeChangeListener<Nod
                         // Oops some one deleted the node held by me.
                         // This should never happen.
                         // Put the node back in oper
-                        txInvoker.invoke(
-                            tx -> tx.put(LogicalDatastoreType.OPERATIONAL, key.toIdentifier(), removedNode));
+                        txInvoker.invoke(tx -> tx.put(LogicalDatastoreType.OPERATIONAL, key, removedNode));
                     }
                 }
 
@@ -105,9 +104,9 @@ public final class OvsdbOperGlobalListener implements DataTreeChangeListener<Nod
 
     private static final int EOS_TIMEOUT = Integer.getInteger("southbound.eos.timeout.delay.secs", 240);
 
-    private static final Map<InstanceIdentifier<Node>, ScheduledFuture> TIMEOUT_FTS = new ConcurrentHashMap<>();
+    private static final Map<DataObjectIdentifier<Node>, ScheduledFuture> TIMEOUT_FTS = new ConcurrentHashMap<>();
 
-    public static void runAfterTimeoutIfNodeNotCreated(final InstanceIdentifier<Node> iid, final Runnable job) {
+    public static void runAfterTimeoutIfNodeNotCreated(final DataObjectIdentifier<Node> iid, final Runnable job) {
         ScheduledFuture<?> ft = TIMEOUT_FTS.get(iid);
         if (ft != null) {
             ft.cancel(false);

@@ -36,7 +36,6 @@ import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepSouthboundConstants;
@@ -64,7 +63,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
@@ -117,9 +116,9 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
 
     private static final class NotifyingDataChangeListener implements DataTreeChangeListener<Node> {
         private final LogicalDatastoreType type;
-        private final Set<InstanceIdentifier<Node>> createdNodes = new HashSet<>();
-        private final Set<InstanceIdentifier<Node>> removedNodes = new HashSet<>();
-        private final Set<InstanceIdentifier<Node>> updatedNodes = new HashSet<>();
+        private final Set<DataObjectIdentifier<Node>> createdNodes = new HashSet<>();
+        private final Set<DataObjectIdentifier<Node>> removedNodes = new HashSet<>();
+        private final Set<DataObjectIdentifier<Node>> updatedNodes = new HashSet<>();
 
         private NotifyingDataChangeListener(LogicalDatastoreType type) {
             this.type = type;
@@ -128,7 +127,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         @Override
         public void onDataTreeChanged(List<DataTreeModification<Node>> changes) {
             for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().path();
+                final DataObjectIdentifier<Node> key = change.path();
                 final DataObjectModification<Node> mod = change.getRootNode();
                 switch (mod.modificationType()) {
                     case DELETE:
@@ -151,15 +150,15 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
             }
         }
 
-        public boolean isCreated(InstanceIdentifier<Node> iid) {
+        public boolean isCreated(DataObjectIdentifier<Node> iid) {
             return createdNodes.remove(iid);
         }
 
-        public boolean isRemoved(InstanceIdentifier<Node> iid) {
+        public boolean isRemoved(DataObjectIdentifier<Node> iid) {
             return removedNodes.remove(iid);
         }
 
-        public boolean isUpdated(InstanceIdentifier<Node> iid) {
+        public boolean isUpdated(DataObjectIdentifier<Node> iid) {
             return updatedNodes.remove(iid);
         }
     }
@@ -275,10 +274,9 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         mdsalUtils = new MdsalUtils(dataBroker);
         assertTrue("Did not find " + HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID.getValue(), getHwvtepTopology());
         final ConnectionInfo connectionInfo = getConnectionInfo(addressStr, portNumber);
-        final InstanceIdentifier<Node> iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
-        final DataTreeIdentifier<Node> treeId = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, iid);
+        final DataObjectIdentifier<Node> iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
 
-        dataBroker.registerTreeChangeListener(treeId, OPERATIONAL_LISTENER);
+        dataBroker.registerTreeChangeListener(LogicalDatastoreType.OPERATIONAL, iid, OPERATIONAL_LISTENER);
 
         hwvtepNode = connectHwvtepNode(connectionInfo);
         // Let's count the test methods (we need to use this instead of @AfterClass on teardown() since the latter is
@@ -307,8 +305,9 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         LOG.info("getHwvtepTopology: looking for {}...", HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID.getValue());
         Boolean found = false;
         final TopologyId topologyId = HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID;
-        InstanceIdentifier<Topology> path =
-                InstanceIdentifier.create(NetworkTopology.class).child(Topology.class, new TopologyKey(topologyId));
+        var path = DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(topologyId))
+            .build();
         for (int i = 0; i < 60; i++) {
             Boolean topology = mdsalUtils.exists(LogicalDatastoreType.OPERATIONAL, path);
             if (topology) {
@@ -329,7 +328,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     }
 
     private static Node connectHwvtepNode(ConnectionInfo connectionInfo) throws InterruptedException {
-        final InstanceIdentifier<Node> iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
+        final var iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
         Assert.assertTrue(mdsalUtils.put(LogicalDatastoreType.CONFIGURATION,
                         iid, HwvtepSouthboundUtils.createNode(connectionInfo)));
         waitForOperationalCreation(iid);
@@ -340,7 +339,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     }
 
     private static void disconnectHwvtepNode(final ConnectionInfo connectionInfo) throws InterruptedException {
-        final InstanceIdentifier<Node> iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
+        final var iid = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
         Assert.assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, iid));
         waitForOperationalDeletion(iid);
         Node node = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL, iid);
@@ -348,7 +347,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         LOG.info("Disconnected from {}", HwvtepSouthboundUtils.connectionInfoToString(connectionInfo));
     }
 
-    private static void waitForOperationalCreation(InstanceIdentifier<Node> iid) throws InterruptedException {
+    private static void waitForOperationalCreation(DataObjectIdentifier<Node> iid) throws InterruptedException {
         synchronized (OPERATIONAL_LISTENER) {
             long start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged creation on {}", iid);
@@ -360,7 +359,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         }
     }
 
-    private static void waitForOperationalDeletion(InstanceIdentifier<Node> iid) throws InterruptedException {
+    private static void waitForOperationalDeletion(DataObjectIdentifier<Node> iid) throws InterruptedException {
         synchronized (OPERATIONAL_LISTENER) {
             long start = System.currentTimeMillis();
             LOG.info("Waiting for OPERATIONAL DataChanged deletion on {}", iid);
@@ -401,7 +400,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
         }
 
         TestPhysicalSwitch(final ConnectionInfo connectionInfo, final String name,
-                        @Nullable InstanceIdentifier<Node> psIid, @Nullable NodeId psNodeId,
+                        @Nullable DataObjectIdentifier<Node> psIid, @Nullable NodeId psNodeId,
                         @Nullable final String description, final boolean setManagedBy,
                         @Nullable final Map<ManagementIpsKey, ManagementIps> managementIps,
                         @Nullable final Map<TunnelIpsKey, TunnelIps> tunnelIps,
@@ -422,8 +421,8 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
                 psAugBuilder.setHwvtepNodeDescription(description);
             }
             if (setManagedBy) {
-                InstanceIdentifier<Node> nodePath = HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo);
-                psAugBuilder.setManagedBy(new HwvtepGlobalRef(nodePath.toIdentifier()));
+                psAugBuilder.setManagedBy(new HwvtepGlobalRef(
+                    HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo)));
             }
             psAugBuilder.setManagementIps(managementIps);
             psAugBuilder.setTunnelIps(tunnelIps);
@@ -441,9 +440,8 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
 
         @Override
         public void close() {
-            final InstanceIdentifier<Node> iid =
-                            HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo, new HwvtepNodeName(psName));
-            Assert.assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION, iid));
+            Assert.assertTrue(mdsalUtils.delete(LogicalDatastoreType.CONFIGURATION,
+                HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo, new HwvtepNodeName(psName))));
             try {
                 Thread.sleep(OVSDB_UPDATE_TIMEOUT);
             } catch (InterruptedException e) {
@@ -466,21 +464,21 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
     @Test
     public void testNetworkTopology() throws InterruptedException {
         NetworkTopology networkTopology = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION,
-                InstanceIdentifier.create(NetworkTopology.class));
+            DataObjectIdentifier.builder(NetworkTopology.class).build());
         Assert.assertNotNull("NetworkTopology could not be found in " + LogicalDatastoreType.CONFIGURATION,
                 networkTopology);
 
         networkTopology = mdsalUtils.read(LogicalDatastoreType.OPERATIONAL,
-                InstanceIdentifier.create(NetworkTopology.class));
+            DataObjectIdentifier.builder(NetworkTopology.class).build());
         Assert.assertNotNull("NetworkTopology could not be found in " + LogicalDatastoreType.OPERATIONAL,
                 networkTopology);
     }
 
     @Test
     public void testHwvtepTopology() throws InterruptedException {
-        InstanceIdentifier<Topology> path = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID));
+        var path = DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+            .build();
 
         Topology topology = mdsalUtils.read(LogicalDatastoreType.CONFIGURATION, path);
         Assert.assertNotNull("Topology could not be found in " + LogicalDatastoreType.CONFIGURATION,
@@ -530,8 +528,7 @@ public class HwvtepSouthboundIT extends AbstractMdsalTestBase {
 
     private static Node getPhysicalSwitchNode(ConnectionInfo connectionInfo, String psName,
             LogicalDatastoreType dataStore) {
-        InstanceIdentifier<Node> psIid =
-                        HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo, new HwvtepNodeName(psName));
-        return mdsalUtils.read(dataStore, psIid);
+        return mdsalUtils.read(dataStore,
+            HwvtepSouthboundUtils.createInstanceIdentifier(connectionInfo, new HwvtepNodeName(psName)));
     }
 }

@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -21,7 +20,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LocalUcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,18 +34,16 @@ public class UcastMacsLocalRemoveCommand
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<LocalUcastMacs>> removeds =
-                extractRemoved(getChanges(),LocalUcastMacs.class);
+        var removeds = extractRemoved(getChanges(),LocalUcastMacs.class);
         if (!removeds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<LocalUcastMacs>> removed:
-                removeds.entrySet()) {
+            for (var removed : removeds.entrySet()) {
                 removeUcastMacLocal(transaction,  removed.getKey(), removed.getValue());
             }
         }
     }
 
     private void removeUcastMacLocal(final TransactionBuilder transaction,
-            final InstanceIdentifier<Node> instanceIdentifier, final List<LocalUcastMacs> macList) {
+            final DataObjectIdentifier<Node> instanceIdentifier, final List<LocalUcastMacs> macList) {
         final var op = ops();
 
         for (LocalUcastMacs mac: macList) {
@@ -99,12 +95,12 @@ public class UcastMacsLocalRemoveCommand
         }
 
         @Override
-        public List<InstanceIdentifier<?>> getLogicalSwitchDependencies(final LocalUcastMacs data) {
-            return List.of(((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue()).toLegacy());
+        public List<DataObjectIdentifier<?>> getLogicalSwitchDependencies(final LocalUcastMacs data) {
+            return List.of((DataObjectIdentifier<?>) data.getLogicalSwitchRef().getValue());
         }
 
         @Override
-        public List<InstanceIdentifier<?>> getTerminationPointDependencies(final LocalUcastMacs data) {
+        public List<DataObjectIdentifier<?>> getTerminationPointDependencies(final LocalUcastMacs data) {
             return List.of();
         }
     }

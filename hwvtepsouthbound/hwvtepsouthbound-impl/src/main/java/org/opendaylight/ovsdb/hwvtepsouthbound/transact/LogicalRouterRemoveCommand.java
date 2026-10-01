@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.hwvtepsouthbound.HwvtepConnectionInstance;
@@ -24,7 +23,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRouters;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalRoutersKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,10 +38,10 @@ public class LogicalRouterRemoveCommand
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<LogicalRouters>> removed =
+        Map<DataObjectIdentifier<Node>, List<LogicalRouters>> removed =
               extractRemoved(getChanges(),LogicalRouters.class);
 
-        for (Entry<InstanceIdentifier<Node>, List<LogicalRouters>> created: removed.entrySet()) {
+        for (var created : removed.entrySet()) {
             if (!HwvtepSouthboundUtil.isEmpty(created.getValue())) {
                 getOperationalState().getDeviceInfo().scheduleTransaction(new TransactCommand<>() {
                     @Override
@@ -72,7 +71,7 @@ public class LogicalRouterRemoveCommand
     }
 
     private void removeLogicalRouter(final TransactionBuilder transaction,
-            final InstanceIdentifier<Node> instanceIdentifier, final List<LogicalRouters> routerList) {
+            final DataObjectIdentifier<Node> instanceIdentifier, final List<LogicalRouters> routerList) {
         final var op = ops();
 
         for (LogicalRouters lrouter: routerList) {

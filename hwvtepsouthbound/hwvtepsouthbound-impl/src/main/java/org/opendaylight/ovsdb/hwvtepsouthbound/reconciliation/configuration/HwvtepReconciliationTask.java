@@ -26,7 +26,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 
 public class HwvtepReconciliationTask extends ReconciliationTask {
     private final HwvtepConnectionInstance connectionInstance;
@@ -35,7 +35,7 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
 
     public HwvtepReconciliationTask(ReconciliationManager reconciliationManager,
                                     HwvtepConnectionManager connectionManager,
-                                    InstanceIdentifier<?> nodeId,
+                                    DataObjectIdentifier<?> nodeId,
                                     Node psNode,
                                     HwvtepConnectionInstance connectionInstance,
                                     DataBroker db) {
@@ -57,8 +57,8 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
 
     @Override
     public boolean reconcileConfiguration(HwvtepConnectionManager connectionManagerOfDevice) {
-        InstanceIdentifier<Node> psNodeIid = HwvtepSouthboundMapper.createInstanceIdentifier(psNode.getNodeId());
-        InstanceIdentifier<Node> nodeId = (InstanceIdentifier<Node>)nodeIid;
+        DataObjectIdentifier<Node> psNodeIid = HwvtepSouthboundMapper.createInstanceIdentifier(psNode.getNodeId());
+        DataObjectIdentifier<Node> nodeId = (DataObjectIdentifier<Node>)nodeIid;
 
         ReadTransaction tx = reconciliationManager.getDb().newReadOnlyTransaction();
         Node globalConfigNode = readNode(tx, LogicalDatastoreType.CONFIGURATION, nodeId);
@@ -79,9 +79,10 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
                 Map<LogicalSwitchesKey, LogicalSwitches> switches = augmentation.getLogicalSwitches();
                 if (switches != null) {
                     for (LogicalSwitches logicalSwitches : switches.values()) {
-                        connectionInstance.getDeviceInfo().updateConfigData(LogicalSwitches.class,
-                                nodeId.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class,
-                                        logicalSwitches.key()), logicalSwitches);
+                        connectionInstance.getDeviceInfo().updateConfigData(LogicalSwitches.class, nodeId.toBuilder()
+                                .augmentation(HwvtepGlobalAugmentation.class)
+                                .child(LogicalSwitches.class, logicalSwitches.key())
+                                .build(), logicalSwitches);
                     }
                 }
             }
@@ -104,7 +105,7 @@ public class HwvtepReconciliationTask extends ReconciliationTask {
     }
 
     private static Node readNode(ReadTransaction transaction,
-                                 LogicalDatastoreType logicalDatastoreType, InstanceIdentifier<Node> iid) {
+                                 LogicalDatastoreType logicalDatastoreType, DataObjectIdentifier<Node> iid) {
         return HwvtepSouthboundUtil.readNode(transaction, logicalDatastoreType, iid).orElse(null);
     }
 }

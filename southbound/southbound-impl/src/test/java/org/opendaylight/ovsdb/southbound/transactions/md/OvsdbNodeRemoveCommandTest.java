@@ -46,7 +46,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.powermock.reflect.Whitebox;
 
@@ -81,9 +80,10 @@ public class OvsdbNodeRemoveCommandTest {
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbNodeRemoveCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(
-            InstanceIdentifier.create(NetworkTopology.class)
+            DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class, new NodeKey(new NodeId("testConnection"))));
+                .child(Node.class, new NodeKey(new NodeId("testConnection")))
+                .build());
         when(transaction.read(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class)))
                 .thenReturn(ovsdbNodeFuture);
 

@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -32,7 +31,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesExternalIds;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.queues.QueuesOtherConfig;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,11 +59,10 @@ public class QueueUpdateCommand extends AbstractTransactCommand {
 
     @SuppressFBWarnings("DCN_NULLPOINTER_EXCEPTION")
     private void execute(final TransactionBuilder transaction, final BridgeOperationalState state,
-            final Map<InstanceIdentifier<Queues>, Queues> createdOrUpdated,
+            final Map<DataObjectIdentifier<Queues>, Queues> createdOrUpdated,
             final InstanceIdentifierCodec instanceIdentifierCodec) {
-        for (Entry<InstanceIdentifier<Queues>, Queues> queueMapEntry : createdOrUpdated.entrySet()) {
-            InstanceIdentifier<OvsdbNodeAugmentation> iid =
-                    queueMapEntry.getKey().firstIdentifierOf(OvsdbNodeAugmentation.class);
+        for (var queueMapEntry : createdOrUpdated.entrySet()) {
+            var iid = queueMapEntry.getKey().trimTo(OvsdbNodeAugmentation.class);
             final var optBridgeNode = state.getBridgeNode(iid);
             if (optBridgeNode.isEmpty()) {
                 return;
@@ -91,11 +89,11 @@ public class QueueUpdateCommand extends AbstractTransactCommand {
             } catch (NullPointerException e) {
                 LOG.warn("Incomplete Queue external IDs", e);
             }
-            externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY,
-                    instanceIdentifierCodec.serialize(
-                    SouthboundMapper.createInstanceIdentifier(iid.firstKeyOf(Node.class).getNodeId())
+            externalIdsMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, instanceIdentifierCodec.serialize(
+                SouthboundMapper.createInstanceIdentifier(iid.getFirstKeyOf(Node.class).getNodeId()).toBuilder()
                     .augmentation(OvsdbNodeAugmentation.class)
-                    .child(Queues.class, new QueuesKey(queueEntry.getQueueId()))));
+                    .child(Queues.class, new QueuesKey(queueEntry.getQueueId()))
+                    .build()));
             queue.setExternalIds(externalIdsMap);
 
             try {

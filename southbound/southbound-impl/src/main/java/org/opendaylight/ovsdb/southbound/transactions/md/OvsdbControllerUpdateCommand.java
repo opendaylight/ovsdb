@@ -91,8 +91,8 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
 
             for (ControllerEntry controllerEntry : controllerEntries) {
                 transaction.merge(LogicalDatastoreType.OPERATIONAL,
-                    getControllerEntryIid(controllerEntry, bridgeEntry.getValue().getNameColumn().getData())
-                        .toIdentifier(), controllerEntry);
+                    getControllerEntryIid(controllerEntry, bridgeEntry.getValue().getNameColumn().getData()),
+                    controllerEntry);
             }
         }
     }
@@ -113,17 +113,17 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
     void updateController(final ReadWriteTransaction transaction,
                                   final Map<UUID, Controller> newUpdatedControllerRows) {
 
-        Map<InstanceIdentifier<Node>, Node> bridgeNodes = getBridgeNodes(transaction);
-        for (Map.Entry<InstanceIdentifier<Node>, Node> bridgeNodeEntry : bridgeNodes.entrySet()) {
+        Map<DataObjectIdentifier<Node>, Node> bridgeNodes = getBridgeNodes(transaction);
+        for (var bridgeNodeEntry : bridgeNodes.entrySet()) {
             final List<ControllerEntry> controllerEntries =
                     SouthboundMapper.createControllerEntries(bridgeNodeEntry.getValue(), newUpdatedControllerRows);
 
             for (ControllerEntry controllerEntry : controllerEntries) {
-                final InstanceIdentifier<Node> bridgeIid = bridgeNodeEntry.getKey();
-                InstanceIdentifier<ControllerEntry> iid = bridgeIid
-                        .augmentation(OvsdbBridgeAugmentation.class)
-                        .child(ControllerEntry.class, controllerEntry.key());
-                transaction.merge(LogicalDatastoreType.OPERATIONAL, iid.toIdentifier(), controllerEntry);
+                final var bridgeIid = bridgeNodeEntry.getKey();
+                transaction.merge(LogicalDatastoreType.OPERATIONAL, bridgeIid.toBuilder()
+                    .augmentation(OvsdbBridgeAugmentation.class)
+                    .child(ControllerEntry.class, controllerEntry.key())
+                    .build(), controllerEntry);
             }
         }
     }
@@ -134,9 +134,9 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
      * @param transaction the {@link ReadWriteTransaction}
      * @return map of nodes
      */
-    private Map<InstanceIdentifier<Node>, Node> getBridgeNodes(final ReadWriteTransaction transaction) {
-        Map<InstanceIdentifier<Node>, Node> bridgeNodes = new HashMap<>();
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+    private Map<DataObjectIdentifier<Node>, Node> getBridgeNodes(final ReadWriteTransaction transaction) {
+        Map<DataObjectIdentifier<Node>, Node> bridgeNodes = new HashMap<>();
+        final var connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, connectionIId);
         if (ovsdbNode.isPresent()) {
             OvsdbNodeAugmentation ovsdbNodeAugmentation =
@@ -146,8 +146,7 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
                     ovsdbNodeAugmentation.getManagedNodeEntry();
                 for (ManagedNodeEntry managedNodeEntry : managedNodeEntries.values()) {
                     @SuppressWarnings("unchecked")
-                    final var bridgeIid = ((DataObjectIdentifier<Node>) managedNodeEntry.getBridgeRef().getValue())
-                        .toLegacy();
+                    final var bridgeIid = ((DataObjectIdentifier<Node>) managedNodeEntry.getBridgeRef().getValue());
                     final Optional<Node> bridgeNode = SouthboundUtil.readNode(transaction, bridgeIid);
                     if (bridgeNode.isPresent()) {
                         bridgeNodes.put(bridgeIid, bridgeNode.orElseThrow());
@@ -173,7 +172,7 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
      * @return the {@link InstanceIdentifier}
      */
     @VisibleForTesting
-    InstanceIdentifier<ControllerEntry> getControllerEntryIid(
+    DataObjectIdentifier<ControllerEntry> getControllerEntryIid(
             final ControllerEntry controllerEntry, final String bridgeName) {
 
         OvsdbConnectionInstance client = getOvsdbConnectionInstance();
@@ -181,13 +180,11 @@ public class OvsdbControllerUpdateCommand extends AbstractTransactionCommand {
                 + "/bridge/" + bridgeName;
         NodeId nodeId = new NodeId(new Uri(nodeString));
         NodeKey nodeKey = new NodeKey(nodeId);
-        InstanceIdentifier<Node> bridgeIid = InstanceIdentifier.builder(NetworkTopology.class)
+        return DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class, nodeKey)
-                .build();
-
-        return bridgeIid
                 .augmentation(OvsdbBridgeAugmentation.class)
-                .child(ControllerEntry.class, controllerEntry.key());
+                .child(ControllerEntry.class, controllerEntry.key())
+                .build();
     }
 }

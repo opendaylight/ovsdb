@@ -26,7 +26,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -39,9 +38,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbTerminationPointAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -192,14 +191,9 @@ public class ReconciliationManager implements AutoCloseable {
 
     private synchronized void registerBridgeCreatedDataTreeChangeListener() {
         if (bridgeCreatedDataTreeChangeRegistration == null) {
-            BridgeCreatedDataTreeChangeListener bridgeCreatedDataTreeChangeListener =
-                    new BridgeCreatedDataTreeChangeListener();
-            InstanceIdentifier<Node> path = SouthboundMapper.createTopologyInstanceIdentifier()
-                    .child(Node.class);
-            DataTreeIdentifier<Node> dataTreeIdentifier = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, path);
-
-            bridgeCreatedDataTreeChangeRegistration = db.registerTreeChangeListener(dataTreeIdentifier,
-                    bridgeCreatedDataTreeChangeListener);
+            bridgeCreatedDataTreeChangeRegistration = db.registerTreeChangeListener(LogicalDatastoreType.OPERATIONAL,
+                SouthboundMapper.createTopologyInstanceIdentifier().toBuilder().child(Node.class).build(),
+                new BridgeCreatedDataTreeChangeListener());
         }
     }
 
@@ -227,14 +221,11 @@ public class ReconciliationManager implements AutoCloseable {
         public void onDataTreeChanged(List<DataTreeModification<Node>> changes) {
             bridgeNodeCache.cleanUp();
             if (!bridgeNodeCache.asMap().isEmpty()) {
-                Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> nodes =
-                        TransactUtils.extractCreated(changes, OvsdbBridgeAugmentation.class);
-                Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
-                            terminationPointsAug =
-                        TransactUtils.extractCreated(changes, OvsdbTerminationPointAugmentation.class);
-                for (Map.Entry<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> entry :
-                        nodes.entrySet()) {
-                    InstanceIdentifier<?> bridgeIid = entry.getKey();
+                var nodes = TransactUtils.extractCreated(changes, OvsdbBridgeAugmentation.class);
+                var terminationPointsAug = TransactUtils.extractCreated(changes,
+                    OvsdbTerminationPointAugmentation.class);
+                for (var entry : nodes.entrySet()) {
+                    var bridgeIid = entry.getKey();
                     NodeKey nodeKey = bridgeIid.firstKeyOf(Node.class);
                     try {
                         NodeConnectionMetadata bridgeNodeMetaData = bridgeNodeCache.get(nodeKey);
@@ -273,17 +264,16 @@ public class ReconciliationManager implements AutoCloseable {
         }
     }
 
-    private static Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+    private static Map<DataObjectIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
         filterTerminationPointsForBridge(NodeKey nodeKey,
-            Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+            Map<DataObjectIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
             terminationPoints) {
 
-        Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+        Map<DataObjectIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
                 filteredTerminationPoints = new HashMap<>();
-        for (Map.Entry<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation> entry :
-                terminationPoints.entrySet()) {
-            InstanceIdentifier<?> bridgeIid = entry.getKey();
-            NodeKey terminationPointNodeKey = bridgeIid.firstKeyOf(Node.class);
+        for (var entry : terminationPoints.entrySet()) {
+            var bridgeIid = entry.getKey();
+            NodeKey terminationPointNodeKey = bridgeIid.getFirstKeyOf(Node.class);
             if (terminationPointNodeKey.getNodeId().equals(nodeKey.getNodeId())) {
                 LOG.trace("TP Match found: {} {} ", terminationPointNodeKey.getNodeId(), nodeKey.getNodeId());
                 filteredTerminationPoints.put(entry.getKey(), entry.getValue());
@@ -304,19 +294,19 @@ public class ReconciliationManager implements AutoCloseable {
 
     private static class NodeConnectionMetadata {
         private final Node node;
-        private InstanceIdentifier<?> nodeIid;
+        private DataObjectIdentifier<?> nodeIid;
         private final OvsdbConnectionManager connectionManager;
         private final OvsdbConnectionInstance connectionInstance;
-        private Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+        private Map<DataObjectIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
             operTerminationPoints;
 
-        public Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+        public Map<DataObjectIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
             getOperTerminationPoints() {
             return operTerminationPoints;
         }
 
         public void setOperTerminationPoints(
-            Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
+            Map<DataObjectIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
                 operTerminationPoints) {
             this.operTerminationPoints = operTerminationPoints;
         }
@@ -341,11 +331,11 @@ public class ReconciliationManager implements AutoCloseable {
             return connectionInstance;
         }
 
-        public void setNodeIid(InstanceIdentifier<?> nodeIid) {
+        public void setNodeIid(DataObjectIdentifier<?> nodeIid) {
             this.nodeIid = nodeIid;
         }
 
-        public InstanceIdentifier<?> getNodeIid() {
+        public DataObjectIdentifier<?> getNodeIid() {
             return nodeIid;
         }
     }

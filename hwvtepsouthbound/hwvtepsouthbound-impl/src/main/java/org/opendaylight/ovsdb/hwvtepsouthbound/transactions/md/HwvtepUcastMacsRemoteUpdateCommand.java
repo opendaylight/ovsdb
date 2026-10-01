@@ -27,14 +27,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentationBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacsBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public final class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
 
@@ -56,9 +54,8 @@ public final class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactio
     }
 
     private void updateUcastMacsRemote(ReadWriteTransaction transaction, Collection<UcastMacsRemote> ucastMacsRemote) {
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
-        Node connectionNode = buildConnectionNode(ucastMacsRemote);
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(), connectionNode);
+        final var connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId, buildConnectionNode(ucastMacsRemote));
     }
 
     private Node buildConnectionNode(final Collection<UcastMacsRemote> macRemotes) {
@@ -85,10 +82,9 @@ public final class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactio
                 physicalLocator = getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocator(locUUID);
             }
             if (physicalLocator != null) {
-                InstanceIdentifier<Node> nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
-                InstanceIdentifier<TerminationPoint> plIid = HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid,
-                        physicalLocator);
-                rumBuilder.setLocatorRef(new HwvtepPhysicalLocatorRef(plIid.toIdentifier()));
+                var nodeIid = getOvsdbConnectionInstance().getInstanceIdentifier();
+                var plIid = HwvtepSouthboundMapper.createInstanceIdentifier(nodeIid, physicalLocator);
+                rumBuilder.setLocatorRef(new HwvtepPhysicalLocatorRef(plIid));
             }
         }
         if (macRemote.getLogicalSwitchColumn() != null
@@ -96,19 +92,21 @@ public final class HwvtepUcastMacsRemoteUpdateCommand extends AbstractTransactio
             UUID lsUUID = macRemote.getLogicalSwitchColumn().getData();
             final LogicalSwitch logicalSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(lsUUID);
             if (logicalSwitch != null) {
-                InstanceIdentifier<LogicalSwitches> switchIid =
+                var switchIid =
                         HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
-                rumBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid.toIdentifier()));
+                rumBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid));
             }
         }
         RemoteUcastMacs remoteUcastMacs = rumBuilder.build();
-        InstanceIdentifier<RemoteUcastMacs> macIid = getMacIid(remoteUcastMacs);
+        var macIid = getMacIid(remoteUcastMacs);
         addToUpdateTx(RemoteUcastMacs.class, macIid, macRemote.getUuid(), macRemote);
         return remoteUcastMacs;
     }
 
-    private InstanceIdentifier<RemoteUcastMacs> getMacIid(final RemoteUcastMacs remoteUcastMacs) {
-        return getOvsdbConnectionInstance().getInstanceIdentifier()
-                .augmentation(HwvtepGlobalAugmentation.class).child(RemoteUcastMacs.class, remoteUcastMacs.key());
+    private DataObjectIdentifier<RemoteUcastMacs> getMacIid(final RemoteUcastMacs remoteUcastMacs) {
+        return getOvsdbConnectionInstance().getInstanceIdentifier().toBuilder()
+            .augmentation(HwvtepGlobalAugmentation.class)
+            .child(RemoteUcastMacs.class, remoteUcastMacs.key())
+            .build();
     }
 }

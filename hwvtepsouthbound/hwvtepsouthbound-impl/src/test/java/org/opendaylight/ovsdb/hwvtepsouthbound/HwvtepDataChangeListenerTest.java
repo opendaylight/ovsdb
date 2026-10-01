@@ -38,7 +38,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -243,15 +242,16 @@ public class HwvtepDataChangeListenerTest extends DataChangeListenerTestBase {
 
         resetOperations();
         final MacAddress macAddr = new MacAddress("FF:FF:FF:FF:FF:FF");
-        final InstanceIdentifier<HwvtepGlobalAugmentation> augIid =
-                nodeIid.augmentation(HwvtepGlobalAugmentation.class);
-        deleteData(LogicalDatastoreType.CONFIGURATION,
-            augIid.child(RemoteMcastMacs.class,
+        final var augIid = nodeIid.toBuilder().augmentation(HwvtepGlobalAugmentation.class).build();
+        deleteData(LogicalDatastoreType.CONFIGURATION, augIid.toBuilder()
+            .child(RemoteMcastMacs.class,
                 new RemoteMcastMacsKey(TestBuilders.buildLogicalSwitchesRef(nodeIid, "ls0"), macAddr))
-            .child(LocatorSet.class),
-            augIid.child(RemoteMcastMacs.class,
+            .child(LocatorSet.class)
+            .build(), augIid.toBuilder()
+            .child(RemoteMcastMacs.class,
                 new RemoteMcastMacsKey(TestBuilders.buildLogicalSwitchesRef(nodeIid, "ls1"), macAddr))
-            .child(LocatorSet.class));
+            .child(LocatorSet.class)
+            .build());
         verify(mockOp, times(2)).delete(ArgumentMatchers.any());
     }
 

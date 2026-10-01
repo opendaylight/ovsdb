@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
 import static org.junit.Assert.assertEquals;
@@ -22,7 +21,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepNodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class HwvtepOperationalStateTest extends DataChangeListenerTestBase {
@@ -31,8 +29,10 @@ public class HwvtepOperationalStateTest extends DataChangeListenerTestBase {
 
     @Test
     public void testUpdateCurrentTxData() throws Exception {
-        InstanceIdentifier<LogicalSwitches> lsIid = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
+        var lsIid = nodeIid.toBuilder()
+            .augmentation(HwvtepGlobalAugmentation.class)
+            .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")))
+            .build();
 
         HwvtepOperationalState opState = new HwvtepOperationalState(connectionInstance);
 

@@ -25,7 +25,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,8 +55,8 @@ public class BridgeOperationalState {
     }
 
     @SuppressWarnings("IllegalCatch")
-    public Optional<Node> getBridgeNode(InstanceIdentifier<?> iid) {
-        InstanceIdentifier<Node> nodeIid = iid.firstIdentifierOf(Node.class);
+    public Optional<Node> getBridgeNode(DataObjectIdentifier<?> iid) {
+        DataObjectIdentifier<Node> nodeIid = iid.trimTo(Node.class);
         try (ReadTransaction transaction = dataBroker.newReadOnlyTransaction()) {
             return SouthboundUtil.readNode(transaction, nodeIid);
         } catch (Exception exp) {
@@ -65,12 +65,12 @@ public class BridgeOperationalState {
         }
     }
 
-    public Optional<OvsdbBridgeAugmentation> getOvsdbBridgeAugmentation(InstanceIdentifier<?> iid) {
+    public Optional<OvsdbBridgeAugmentation> getOvsdbBridgeAugmentation(DataObjectIdentifier<?> iid) {
         return getBridgeNode(iid)
             .flatMap(node -> Optional.ofNullable(node.augmentation(OvsdbBridgeAugmentation.class)));
     }
 
-    public Optional<TerminationPoint> getBridgeTerminationPoint(InstanceIdentifier<?> iid) {
+    public Optional<TerminationPoint> getBridgeTerminationPoint(DataObjectIdentifier<?> iid) {
         if (iid != null) {
             Optional<Node> nodeOptional = getBridgeNode(iid);
             if (nodeOptional.isPresent()) {
@@ -89,12 +89,13 @@ public class BridgeOperationalState {
         return Optional.empty();
     }
 
-    public Optional<OvsdbTerminationPointAugmentation> getOvsdbTerminationPointAugmentation(InstanceIdentifier<?> iid) {
+    public Optional<OvsdbTerminationPointAugmentation> getOvsdbTerminationPointAugmentation(
+            DataObjectIdentifier<?> iid) {
         return getBridgeTerminationPoint(iid)
             .flatMap(tp -> Optional.ofNullable(tp.augmentation(OvsdbTerminationPointAugmentation.class)));
     }
 
-    public Optional<ControllerEntry> getControllerEntry(InstanceIdentifier<?> iid) {
+    public Optional<ControllerEntry> getControllerEntry(DataObjectIdentifier<?> iid) {
         if (iid != null) {
             Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
             if (ovsdbBridgeOptional.isPresent()) {
@@ -114,7 +115,7 @@ public class BridgeOperationalState {
         return Optional.empty();
     }
 
-    public Optional<ProtocolEntry> getProtocolEntry(InstanceIdentifier<ProtocolEntry> iid) {
+    public Optional<ProtocolEntry> getProtocolEntry(DataObjectIdentifier<ProtocolEntry> iid) {
         if (iid != null) {
             Optional<OvsdbBridgeAugmentation> ovsdbBridgeOptional = getOvsdbBridgeAugmentation(iid);
             if (ovsdbBridgeOptional.isPresent()) {

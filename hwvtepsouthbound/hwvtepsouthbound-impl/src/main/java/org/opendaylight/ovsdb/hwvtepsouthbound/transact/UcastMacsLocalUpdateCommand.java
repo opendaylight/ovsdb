@@ -10,7 +10,6 @@ package org.opendaylight.ovsdb.hwvtepsouthbound.transact;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -27,7 +26,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,18 +40,16 @@ public class UcastMacsLocalUpdateCommand
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<LocalUcastMacs>> updateds =
-                extractUpdated(getChanges(),LocalUcastMacs.class);
+        var updateds = extractUpdated(getChanges(),LocalUcastMacs.class);
         if (!updateds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<LocalUcastMacs>> updated:
-                updateds.entrySet()) {
+            for (var updated: updateds.entrySet()) {
                 updateUcastMacsLocal(transaction,  updated.getKey(), updated.getValue());
             }
         }
     }
 
     private void updateUcastMacsLocal(final TransactionBuilder transaction,
-            final InstanceIdentifier<Node> instanceIdentifier, final List<LocalUcastMacs> localUcastMacs) {
+            final DataObjectIdentifier<Node> instanceIdentifier, final List<LocalUcastMacs> localUcastMacs) {
         final var op = ops();
 
         for (LocalUcastMacs localUcastMac: localUcastMacs) {
@@ -88,8 +84,8 @@ public class UcastMacsLocalUpdateCommand
     private void setLogicalSwitch(final UcastMacsLocal ucastMacsLocal, final LocalUcastMacs inputMac) {
         if (inputMac.getLogicalSwitchRef() != null) {
             @SuppressWarnings("unchecked")
-            InstanceIdentifier<LogicalSwitches> lswitchIid =
-                    ((DataObjectIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue()).toLegacy();
+            DataObjectIdentifier<LogicalSwitches> lswitchIid =
+                    (DataObjectIdentifier<LogicalSwitches>) inputMac.getLogicalSwitchRef().getValue();
             Optional<LogicalSwitches> operationalSwitchOptional =
                     getOperationalState().getLogicalSwitches(lswitchIid);
             if (operationalSwitchOptional.isPresent()) {
@@ -110,8 +106,8 @@ public class UcastMacsLocalUpdateCommand
         if (inputMac.getLocatorRef() != null) {
             UUID locatorUuid = null;
             @SuppressWarnings("unchecked")
-            InstanceIdentifier<TerminationPoint> iid =
-                    ((DataObjectIdentifier<TerminationPoint>) inputMac.getLocatorRef().getValue()).toLegacy();
+            DataObjectIdentifier<TerminationPoint> iid =
+                    (DataObjectIdentifier<TerminationPoint>) inputMac.getLocatorRef().getValue();
             //try to find locator in operational DS
             Optional<HwvtepPhysicalLocatorAugmentation> operationalLocatorOptional =
                     getOperationalState().getPhysicalLocatorAugmentation(iid);

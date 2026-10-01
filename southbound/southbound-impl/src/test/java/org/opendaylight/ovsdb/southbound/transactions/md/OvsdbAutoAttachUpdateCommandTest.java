@@ -42,7 +42,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberModifier;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -62,7 +61,7 @@ public class OvsdbAutoAttachUpdateCommandTest {
     private final Map<UUID, AutoAttach> oldAutoAttachRows = new HashMap<>();
     private OvsdbAutoAttachUpdateCommand ovsdbAutoAttachUpdateCommand;
     private ReadWriteTransaction transaction;
-    private InstanceIdentifier<Autoattach> aaIid;
+    private DataObjectIdentifier<Autoattach> aaIid;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -89,12 +88,16 @@ public class OvsdbAutoAttachUpdateCommandTest {
 
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbAutoAttachUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
-        aaIid = InstanceIdentifier.create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class, new NodeKey(new NodeId(CONNECTED_NODE_ID))).augmentation(OvsdbNodeAugmentation.class)
-                .child(Autoattach.class, new AutoattachKey(
-                        new Uri(SouthboundConstants.AUTOATTACH_URI_PREFIX + "://" + AUTOATTACH_UUID.toString())));
-        InstanceIdentifier<Node> connectionIid = aaIid.firstIdentifierOf(Node.class);
+        final var connectionIid = DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+            .child(Node.class, new NodeKey(new NodeId(CONNECTED_NODE_ID)))
+            .build();
+
+        aaIid = connectionIid.toBuilder()
+            .augmentation(OvsdbNodeAugmentation.class)
+            .child(Autoattach.class,
+                new AutoattachKey(new Uri(SouthboundConstants.AUTOATTACH_URI_PREFIX + "://" + AUTOATTACH_UUID)))
+            .build();
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(connectionIid);
         transaction = mock(ReadWriteTransaction.class);
         doNothing().when(transaction).merge(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class),
@@ -117,6 +120,6 @@ public class OvsdbAutoAttachUpdateCommandTest {
     @Test
     public void testExecute() {
         ovsdbAutoAttachUpdateCommand.execute(transaction);
-        verify(transaction).put(eq(LogicalDatastoreType.OPERATIONAL), eq(aaIid.toIdentifier()), any(Autoattach.class));
+        verify(transaction).put(eq(LogicalDatastoreType.OPERATIONAL), eq(aaIid), any(Autoattach.class));
     }
 }

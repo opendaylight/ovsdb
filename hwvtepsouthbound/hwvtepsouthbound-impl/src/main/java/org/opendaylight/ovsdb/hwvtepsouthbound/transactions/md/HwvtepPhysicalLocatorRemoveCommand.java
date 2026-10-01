@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Collection;
@@ -16,12 +15,9 @@ import org.opendaylight.ovsdb.lib.message.TableUpdates;
 import org.opendaylight.ovsdb.lib.schema.DatabaseSchema;
 import org.opendaylight.ovsdb.lib.schema.typed.TyperUtils;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalLocator;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class HwvtepPhysicalLocatorRemoveCommand extends AbstractTransactionCommand {
-
     public HwvtepPhysicalLocatorRemoveCommand(HwvtepConnectionInstance key, TableUpdates updates,
             DatabaseSchema dbSchema) {
         super(key, updates, dbSchema);
@@ -32,9 +28,8 @@ public class HwvtepPhysicalLocatorRemoveCommand extends AbstractTransactionComma
         Collection<PhysicalLocator> deletedPLRows =
                 TyperUtils.extractRowsRemoved(PhysicalLocator.class, getUpdates(), getDbSchema()).values();
         for (PhysicalLocator locator : deletedPLRows) {
-            final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
-            final InstanceIdentifier<TerminationPoint> nodePath = HwvtepSouthboundMapper
-                    .createInstanceIdentifier(connectionIId, locator);
+            final var connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+            final var nodePath = HwvtepSouthboundMapper.createInstanceIdentifier(connectionIId, locator);
             addToDeleteTx(transaction, TerminationPoint.class, nodePath, locator.getUuid());
             //TODO: Check if any cleanup is required
         }

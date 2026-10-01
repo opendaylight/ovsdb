@@ -142,19 +142,20 @@ public class OvsdbPortUpdateCommandTest {
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbPortUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         when(ovsdbConnectionInstance.getInstanceIdentifier()).thenReturn(
-            InstanceIdentifier.create(NetworkTopology.class)
+            DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class, new NodeKey(new NodeId("testNode"))));
+                .child(Node.class, new NodeKey(new NodeId("testNode")))
+                .build());
 
         //case 1: portUpdatedRows & interfaceOldRows not null, not empty
         Optional<Node> node = Optional.of(mock(Node.class));
         PowerMockito.doReturn(node).when(ovsdbPortUpdateCommand, "readNode", any(ReadWriteTransaction.class),
-                any(InstanceIdentifier.class));
+                any(DataObjectIdentifier.class));
         doNothing().when(ovsdbPortUpdateCommand).updateTerminationPoints(any(ReadWriteTransaction.class),
             any(Node.class));
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
         PowerMockito.mockStatic(SouthboundUtil.class);
-        PowerMockito.when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(InstanceIdentifier.class)))
+        PowerMockito.when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(DataObjectIdentifier.class)))
             .thenReturn(node);
         ovsdbPortUpdateCommand.execute(transaction);
         verify(ovsdbConnectionInstance).getInstanceIdentifier();
@@ -173,26 +174,28 @@ public class OvsdbPortUpdateCommandTest {
         when(port.getNameColumn()).thenReturn(bridgeColumn);
         when(bridgeColumn.getData()).thenReturn(TERMINATION_POINT_NAME);
 
-        InstanceIdentifier<Node> nodeIid = InstanceIdentifier.create(NetworkTopology.class)
+        var nodeIid = DataObjectIdentifier.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class, new NodeKey(new NodeId("nodeId")));
+                .child(Node.class, new NodeKey(new NodeId("nodeId")))
+                .build();
 
-        Optional<InstanceIdentifier<Node>> bridgeIid = Optional.of(nodeIid);
+        Optional<DataObjectIdentifier<Node>> bridgeIid = Optional.of(nodeIid);
         PowerMockito.doReturn(bridgeIid).when(ovsdbPortUpdateCommand, "getTerminationPointBridge", any(UUID.class));
 
         NodeId bridgeId = mock(NodeId.class);
         PowerMockito.mockStatic(SouthboundMapper.class);
-        PowerMockito.when(SouthboundMapper.createManagedNodeId(any(InstanceIdentifier.class))).thenReturn(bridgeId);
+        PowerMockito.when(SouthboundMapper.createManagedNodeId(any(DataObjectIdentifier.class))).thenReturn(bridgeId);
 
-        InstanceIdentifier<TerminationPoint> tpPath = InstanceIdentifier.create(NetworkTopology.class)
+        var tpPath = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
             .child(Node.class, new NodeKey(new NodeId("testNode")))
-            .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp")));
+            .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp")))
+            .build();
         PowerMockito.doReturn(tpPath).when(ovsdbPortUpdateCommand, "getInstanceIdentifier",
-                any(InstanceIdentifier.class), any(Port.class));
+                any(DataObjectIdentifier.class), any(Port.class));
 
         PowerMockito.suppress(MemberMatcher.method(OvsdbPortUpdateCommand.class, "buildTerminationPoint",
-                ReadWriteTransaction.class, InstanceIdentifier.class, OvsdbTerminationPointAugmentationBuilder.class,
+                ReadWriteTransaction.class, DataObjectIdentifier.class, OvsdbTerminationPointAugmentationBuilder.class,
                 Node.class, Entry.class));
 
         Column<GenericTableSchema, Set<UUID>> interfacesColumn = mock(Column.class);
@@ -230,12 +233,11 @@ public class OvsdbPortUpdateCommandTest {
 
         PowerMockito.doReturn(bridgeIid).when(ovsdbPortUpdateCommand, "getTerminationPointBridge",
                 any(ReadWriteTransaction.class), any(Node.class), anyString());
-        PowerMockito.when(SouthboundMapper.createManagedNodeId(any(InstanceIdentifier.class))).thenReturn(bridgeId);
+        PowerMockito.when(SouthboundMapper.createManagedNodeId(any(DataObjectIdentifier.class))).thenReturn(bridgeId);
 
         Node node = mock(Node.class);
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updateTerminationPoints", transaction, node);
-        verify(ovsdbPortUpdateCommand).getInstanceIdentifier(any(InstanceIdentifier.class),
-            any(Port.class));
+        verify(ovsdbPortUpdateCommand).getInstanceIdentifier(any(DataObjectIdentifier.class), any(Port.class));
         verify(transaction, times(2)).merge(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class),
                 any(TerminationPoint.class));
     }
@@ -258,22 +260,23 @@ public class OvsdbPortUpdateCommandTest {
         when(tpAugmentationBuilder.setName(anyString())).thenReturn(tpAugmentationBuilder);
         when(tpAugmentationBuilder.setPortUuid(any(Uuid.class))).thenReturn(tpAugmentationBuilder);
         doNothing().when(ovsdbPortUpdateCommand).updatePort(any(ReadWriteTransaction.class),
-            any(Node.class), any(InstanceIdentifier.class), any(Entry.class),
+            any(Node.class), any(DataObjectIdentifier.class), any(Entry.class),
             any(OvsdbTerminationPointAugmentationBuilder.class));
 
         Node node = mock(Node.class);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        InstanceIdentifier<TerminationPoint> tpPath = InstanceIdentifier.create(NetworkTopology.class)
+        DataObjectIdentifier<TerminationPoint> tpPath = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
             .child(Node.class, new NodeKey(new NodeId("testNode")))
-            .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp")));
+            .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp")))
+            .build();
 
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "buildTerminationPoint", transaction, tpPath,
                 tpAugmentationBuilder, node, portEntry);
         verify(tpAugmentationBuilder).setName(anyString());
         verify(tpAugmentationBuilder).setPortUuid(any(Uuid.class));
         verify(ovsdbPortUpdateCommand).updatePort(any(ReadWriteTransaction.class),
-                any(Node.class), any(InstanceIdentifier.class), any(Entry.class),
+                any(Node.class), any(DataObjectIdentifier.class), any(Entry.class),
                 any(OvsdbTerminationPointAugmentationBuilder.class));
     }
 
@@ -301,9 +304,10 @@ public class OvsdbPortUpdateCommandTest {
     @Test
     public void testReadNode() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        InstanceIdentifier<Node> nodePath = InstanceIdentifier.create(NetworkTopology.class)
+        DataObjectIdentifier<Node> nodePath = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-            .child(Node.class, new NodeKey(new NodeId("testNode")));
+            .child(Node.class, new NodeKey(new NodeId("testNode")))
+            .build();
         Optional<Node> node = Optional.of(mock(Node.class));
         FluentFuture<Optional<Node>> fluentFuture = mock(FluentFuture.class);
         when(transaction.read(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class)))
@@ -318,12 +322,13 @@ public class OvsdbPortUpdateCommandTest {
         OvsdbNodeAugmentation ovsdbNode = mock(OvsdbNodeAugmentation.class);
         when(node.augmentation(OvsdbNodeAugmentation.class)).thenReturn(ovsdbNode);
 
-        InstanceIdentifier<Node> iidNode = InstanceIdentifier.create(NetworkTopology.class)
+        DataObjectIdentifier<Node> iidNode = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-            .child(Node.class, new NodeKey(new NodeId("testNode")));
+            .child(Node.class, new NodeKey(new NodeId("testNode")))
+            .build();
 
         ManagedNodeEntry managedNodeEntry = new ManagedNodeEntryBuilder()
-                .setBridgeRef(new OvsdbBridgeRef(iidNode.toIdentifier()))
+                .setBridgeRef(new OvsdbBridgeRef(iidNode))
                 .build();
         when(ovsdbNode.nonnullManagedNodeEntry()).thenCallRealMethod();
         when(ovsdbNode.getManagedNodeEntry()).thenReturn(Map.of(managedNodeEntry.key(), managedNodeEntry));
@@ -331,11 +336,10 @@ public class OvsdbPortUpdateCommandTest {
         Node managedNode = mock(Node.class);
         Optional<Node> optionalNode = Optional.of(managedNode);
         PowerMockito.doReturn(optionalNode).when(ovsdbPortUpdateCommand, "readNode", any(ReadWriteTransaction.class),
-                any(InstanceIdentifier.class));
+                any(DataObjectIdentifier.class));
 
         PowerMockito.mockStatic(SouthboundUtil.class);
-        PowerMockito.when(SouthboundUtil.readNode(any(ReadWriteTransaction.class),
-                any(InstanceIdentifier.class)))
+        PowerMockito.when(SouthboundUtil.readNode(any(ReadWriteTransaction.class), any(DataObjectIdentifier.class)))
                 .thenReturn(optionalNode);
 
         TerminationPoint terminationPoint = new TerminationPointBuilder().setTpId(new TpId(TP_NAME)).build();
@@ -352,9 +356,9 @@ public class OvsdbPortUpdateCommandTest {
         when(managedNode.augmentation(OvsdbBridgeAugmentation.class))
                 .thenReturn(mock(OvsdbBridgeAugmentation.class));
 
-        Optional<InstanceIdentifier<Node>> testResult = Optional.of(iidNode);
+        Optional<DataObjectIdentifier<Node>> testResult = Optional.of(iidNode);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        Optional<InstanceIdentifier<Node>> result = Whitebox.invokeMethod(ovsdbPortUpdateCommand,
+        Optional<DataObjectIdentifier<Node>> result = Whitebox.invokeMethod(ovsdbPortUpdateCommand,
                 "getTerminationPointBridge", transaction, node, TP_NAME);
 
         assertEquals(testResult, result);
@@ -440,17 +444,18 @@ public class OvsdbPortUpdateCommandTest {
         suppress(method(OvsdbPortUpdateCommand.class, "updatePortOtherConfig", Port.class,
             OvsdbTerminationPointAugmentationBuilder.class));
         suppress(method(OvsdbPortUpdateCommand.class, "updateQos", ReadWriteTransaction.class, Node.class,
-                InstanceIdentifier.class, Entry.class, OvsdbTerminationPointAugmentationBuilder.class));
+                DataObjectIdentifier.class, Entry.class, OvsdbTerminationPointAugmentationBuilder.class));
 
         Node node = mock(Node.class);
         Entry<UUID, Port> port = new SimpleEntry<>(mock(UUID.class), mock(Port.class));
         OvsdbTerminationPointAugmentationBuilder ovsdbTerminationPointBuilder = mock(
                 OvsdbTerminationPointAugmentationBuilder.class);
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        InstanceIdentifier<TerminationPoint> tpPath = InstanceIdentifier.create(NetworkTopology.class)
+        DataObjectIdentifier<TerminationPoint> tpPath = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
             .child(Node.class, new NodeKey(new NodeId("testNode")))
-            .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp")));
+            .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp")))
+            .build();
         Whitebox.invokeMethod(ovsdbPortUpdateCommand, "updatePort", transaction, node, tpPath, port,
                 ovsdbTerminationPointBuilder);
 

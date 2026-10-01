@@ -106,10 +106,11 @@ public class OvsdbManagersRemovedCommandTest {
     @Test
     public void testDeleteManagers() throws Exception {
         ReadWriteTransaction transaction = mock(ReadWriteTransaction.class);
-        List<InstanceIdentifier<ManagerEntry>> managerEntryIids = new ArrayList<>();
-        managerEntryIids.add(SouthboundMapper.createInstanceIdentifier(new NodeId("test"))
+        List<DataObjectIdentifier<ManagerEntry>> managerEntryIids = new ArrayList<>();
+        managerEntryIids.add(SouthboundMapper.createInstanceIdentifier(new NodeId("test")).toBuilder()
             .augmentation(OvsdbNodeAugmentation.class)
-            .child(ManagerEntry.class, new ManagerEntryKey(new Uri("testUri"))));
+            .child(ManagerEntry.class, new ManagerEntryKey(new Uri("testUri")))
+            .build());
         doNothing().when(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));
         ovsdbManagersRemovedCommand.deleteManagers(transaction, managerEntryIids);
         verify(transaction).delete(any(LogicalDatastoreType.class), any(DataObjectIdentifier.class));

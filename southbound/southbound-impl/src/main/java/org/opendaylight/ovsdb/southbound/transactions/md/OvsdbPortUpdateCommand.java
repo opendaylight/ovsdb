@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.error.ColumnSchemaNotFoundException;
@@ -90,6 +91,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier.WithKey;
 import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint16;
@@ -436,14 +438,16 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
     }
 
     @SuppressWarnings("unchecked")
-    private InstanceIdentifier<QosEntries> getQosIid(NodeId nodeId, OvsdbNodeAugmentation ovsdbNode, UUID qosUuid) {
+    private @NonNull DataObjectIdentifier<QosEntries> getQosIid(NodeId nodeId, OvsdbNodeAugmentation ovsdbNode,
+            UUID qosUuid) {
         // Search for the QoS entry first in the operational datastore
         final Uuid uuid = new Uuid(qosUuid.toString());
         for (QosEntries qosEntry : ovsdbNode.nonnullQosEntries().values()) {
             if (uuid.equals(qosEntry.getQosUuid())) {
-                return SouthboundMapper.createInstanceIdentifier(nodeId)
+                return SouthboundMapper.createInstanceIdentifier(nodeId).toBuilder()
                         .augmentation(OvsdbNodeAugmentation.class)
-                        .child(QosEntries.class, qosEntry.key());
+                        .child(QosEntries.class, qosEntry.key())
+                        .build();
             }
         }
 
@@ -452,21 +456,23 @@ public class OvsdbPortUpdateCommand extends AbstractTransactionCommand {
             Qos qos = qosUpdate.getValue();
             if (qos.getUuid().equals(qosUuid)) {
                 if (qos.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
-                    return (InstanceIdentifier<QosEntries>) instanceIdentifierCodec.bindingDeserializerOrNull(
+                    return (DataObjectIdentifier<QosEntries>) instanceIdentifierCodec.bindingDeserializerOrNull(
                             qos.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
                 } else {
-                    return SouthboundMapper.createInstanceIdentifier(nodeId)
+                    return SouthboundMapper.createInstanceIdentifier(nodeId).toBuilder()
                             .augmentation(OvsdbNodeAugmentation.class)
                             .child(QosEntries.class, new QosEntriesKey(
-                                    new Uri(SouthboundConstants.QOS_URI_PREFIX + "://" + qosUuid.toString())));
+                                    new Uri(SouthboundConstants.QOS_URI_PREFIX + "://" + qosUuid.toString())))
+                            .build();
                 }
             }
         }
         LOG.debug("QoS UUID {} assigned to port not found in operational node {} or QoS updates", qosUuid, ovsdbNode);
-        return SouthboundMapper.createInstanceIdentifier(nodeId)
+        return SouthboundMapper.createInstanceIdentifier(nodeId).toBuilder()
                 .augmentation(OvsdbNodeAugmentation.class)
                 .child(QosEntries.class, new QosEntriesKey(
-                        new Uri(SouthboundConstants.QOS_URI_PREFIX + "://" + qosUuid.toString())));
+                        new Uri(SouthboundConstants.QOS_URI_PREFIX + "://" + qosUuid.toString())))
+                .build();
     }
 
     private static void updateIfIndex(final Interface interf,

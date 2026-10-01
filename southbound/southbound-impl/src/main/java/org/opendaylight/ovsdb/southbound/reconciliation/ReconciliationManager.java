@@ -26,7 +26,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.southbound.InstanceIdentifierCodec;
@@ -192,14 +191,9 @@ public class ReconciliationManager implements AutoCloseable {
 
     private synchronized void registerBridgeCreatedDataTreeChangeListener() {
         if (bridgeCreatedDataTreeChangeRegistration == null) {
-            BridgeCreatedDataTreeChangeListener bridgeCreatedDataTreeChangeListener =
-                    new BridgeCreatedDataTreeChangeListener();
-            InstanceIdentifier<Node> path = SouthboundMapper.createTopologyInstanceIdentifier()
-                    .child(Node.class);
-            DataTreeIdentifier<Node> dataTreeIdentifier = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, path);
-
-            bridgeCreatedDataTreeChangeRegistration = db.registerTreeChangeListener(dataTreeIdentifier,
-                    bridgeCreatedDataTreeChangeListener);
+            bridgeCreatedDataTreeChangeRegistration = db.registerTreeChangeListener(LogicalDatastoreType.OPERATIONAL,
+                SouthboundMapper.createTopologyInstanceIdentifier().toBuilder().child(Node.class).build(),
+                new BridgeCreatedDataTreeChangeListener());
         }
     }
 
@@ -227,14 +221,11 @@ public class ReconciliationManager implements AutoCloseable {
         public void onDataTreeChanged(List<DataTreeModification<Node>> changes) {
             bridgeNodeCache.cleanUp();
             if (!bridgeNodeCache.asMap().isEmpty()) {
-                Map<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> nodes =
-                        TransactUtils.extractCreated(changes, OvsdbBridgeAugmentation.class);
-                Map<InstanceIdentifier<OvsdbTerminationPointAugmentation>, OvsdbTerminationPointAugmentation>
-                            terminationPointsAug =
-                        TransactUtils.extractCreated(changes, OvsdbTerminationPointAugmentation.class);
-                for (Map.Entry<InstanceIdentifier<OvsdbBridgeAugmentation>, OvsdbBridgeAugmentation> entry :
-                        nodes.entrySet()) {
-                    InstanceIdentifier<?> bridgeIid = entry.getKey();
+                var nodes = TransactUtils.extractCreated(changes, OvsdbBridgeAugmentation.class);
+                var terminationPointsAug = TransactUtils.extractCreated(changes,
+                    OvsdbTerminationPointAugmentation.class);
+                for (var entry : nodes.entrySet()) {
+                    var bridgeIid = entry.getKey();
                     NodeKey nodeKey = bridgeIid.firstKeyOf(Node.class);
                     try {
                         NodeConnectionMetadata bridgeNodeMetaData = bridgeNodeCache.get(nodeKey);

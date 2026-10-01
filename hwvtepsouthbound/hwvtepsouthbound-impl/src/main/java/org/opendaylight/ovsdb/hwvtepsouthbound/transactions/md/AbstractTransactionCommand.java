@@ -31,8 +31,8 @@ public abstract class AbstractTransactionCommand<T extends DataObject> implement
     private final TableUpdates updates;
     private final DatabaseSchema dbSchema;
     protected final HwvtepConnectionInstance key;
-    protected Set<Pair<Class<? extends EntryObject<?, ?>>, DataObjectIdentifier>> addedKeys = new HashSet<>();
-    protected Set<Pair<Class<? extends EntryObject<?, ?>>, DataObjectIdentifier>> deletedKeys = new HashSet<>();
+    protected Set<Pair<Class<? extends EntryObject<?, ?, ?>>, DataObjectIdentifier>> addedKeys = new HashSet<>();
+    protected Set<Pair<Class<? extends EntryObject<?, ?, ?>>, DataObjectIdentifier>> deletedKeys = new HashSet<>();
     protected HwvtepDeviceInfo deviceInfo;
 
 
@@ -69,12 +69,12 @@ public abstract class AbstractTransactionCommand<T extends DataObject> implement
         deviceInfo.addToDeviceUpdate(transactionType, element);
     }
 
-    public void clearDeviceOpUUID(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier iid, UUID uuid) {
+    public void clearDeviceOpUUID(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier iid, UUID uuid) {
         deviceInfo.clearDeviceOperUUID(cls, iid, uuid);
     }
 
-    public void addToDeleteTx(ReadWriteTransaction tx, Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier iid,
-                              UUID uuid) {
+    public void addToDeleteTx(ReadWriteTransaction tx, Class<? extends EntryObject<?, ?, ?>> cls,
+                              DataObjectIdentifier iid, UUID uuid) {
         if (deviceInfo.isAvailableInOperDs(cls, iid)) {
             tx.delete(LogicalDatastoreType.OPERATIONAL, iid);
         }
@@ -82,7 +82,7 @@ public abstract class AbstractTransactionCommand<T extends DataObject> implement
         clearDeviceOpUUID(cls, iid, uuid);
     }
 
-    public void addToUpdateTx(Class<? extends EntryObject<?, ?>> cls, DataObjectIdentifier iid, UUID uuid,
+    public void addToUpdateTx(Class<? extends EntryObject<?, ?, ?>> cls, DataObjectIdentifier iid, UUID uuid,
                               Object southboundData) {
         addedKeys.add(Pair.of(cls, iid));
         deviceInfo.updateDeviceOperData(cls, iid, uuid, southboundData);

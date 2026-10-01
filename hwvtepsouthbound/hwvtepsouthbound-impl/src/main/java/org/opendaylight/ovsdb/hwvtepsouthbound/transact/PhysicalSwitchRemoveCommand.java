@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
@@ -22,7 +21,7 @@ import org.opendaylight.ovsdb.schema.hardwarevtep.Global;
 import org.opendaylight.ovsdb.schema.hardwarevtep.PhysicalSwitch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,18 +35,17 @@ public class PhysicalSwitchRemoveCommand extends AbstractTransactCommand {
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> removeds =
+        Map<DataObjectIdentifier<Node>, PhysicalSwitchAugmentation> removeds =
                 extractRemovedSwitches(getChanges(),PhysicalSwitchAugmentation.class);
         if (!removeds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> removed:
-                removeds.entrySet()) {
+            for (var removed : removeds.entrySet()) {
                 removePhysicalSwitch(transaction,  removed.getKey(), removed.getValue());
             }
         }
     }
 
     private void removePhysicalSwitch(final TransactionBuilder transaction,
-            final InstanceIdentifier<Node> iid, final PhysicalSwitchAugmentation physicalSwitchAugmentation) {
+            final DataObjectIdentifier<Node> iid, final PhysicalSwitchAugmentation physicalSwitchAugmentation) {
         LOG.debug("Removing a physical switch named: {}", physicalSwitchAugmentation.getHwvtepNodeName().getValue());
         Optional<PhysicalSwitchAugmentation> operationalPhysicalSwitchOptional =
                 getOperationalState().getPhysicalSwitchAugmentation(iid);
@@ -74,12 +72,12 @@ public class PhysicalSwitchRemoveCommand extends AbstractTransactCommand {
         }
     }
 
-    private static Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> extractRemovedSwitches(
+    private static Map<DataObjectIdentifier<Node>, PhysicalSwitchAugmentation> extractRemovedSwitches(
             final Collection<DataTreeModification<Node>> changes, final Class<PhysicalSwitchAugmentation> class1) {
-        Map<InstanceIdentifier<Node>, PhysicalSwitchAugmentation> result = new HashMap<>();
+        Map<DataObjectIdentifier<Node>, PhysicalSwitchAugmentation> result = new HashMap<>();
         if (changes != null && !changes.isEmpty()) {
             for (DataTreeModification<Node> change : changes) {
-                final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+                final DataObjectIdentifier<Node> key = change.path();
                 final DataObjectModification<Node> mod = change.getRootNode();
                 Node removed = TransactUtils.getRemoved(mod);
                 if (removed != null) {

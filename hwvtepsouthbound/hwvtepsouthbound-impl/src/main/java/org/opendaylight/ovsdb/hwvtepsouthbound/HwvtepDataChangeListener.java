@@ -35,8 +35,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectReference;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ public final class HwvtepDataChangeListener implements DataTreeChangeListener<No
         this.db = db;
         this.hcm = hcm;
         final var treeId = DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION,
-            InstanceIdentifier.builder(NetworkTopology.class)
+            DataObjectReference.builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
                 .child(Node.class)
                 .build());
@@ -90,7 +91,7 @@ public final class HwvtepDataChangeListener implements DataTreeChangeListener<No
 
     private void connect(List<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().path();
+            final DataObjectIdentifier<Node> key = change.path();
             final DataObjectModification<Node> mod = change.getRootNode();
             Node node = getCreated(mod);
             if (node != null) {
@@ -98,7 +99,7 @@ public final class HwvtepDataChangeListener implements DataTreeChangeListener<No
                 // We can only connect if user configured connection info
                 if (hwvtepGlobal != null && hwvtepGlobal.getConnectionInfo() != null) {
                     ConnectionInfo connection = hwvtepGlobal.getConnectionInfo();
-                    InstanceIdentifier<Node> iid = hcm.getInstanceIdentifier(connection);
+                    var iid = hcm.getInstanceIdentifier(connection);
                     if (iid != null) {
                         LOG.warn("Connection to device {} already exists. Plugin does not allow multiple connections "
                                         + "to same device, hence dropping the request {}", connection, hwvtepGlobal);
@@ -116,7 +117,7 @@ public final class HwvtepDataChangeListener implements DataTreeChangeListener<No
 
     private void updateConnections(List<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().path();
+            final DataObjectIdentifier<Node> key = change.path();
             final DataObjectModification<Node> mod = change.getRootNode();
             Node updated = getUpdated(mod);
             if (updated != null) {
@@ -161,7 +162,7 @@ public final class HwvtepDataChangeListener implements DataTreeChangeListener<No
 
     private void disconnect(Collection<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().path();
+            final DataObjectIdentifier<Node> key = change.path();
             final DataObjectModification<Node> mod = change.getRootNode();
             Node deleted = getRemoved(mod);
             if (deleted != null) {
@@ -234,8 +235,7 @@ public final class HwvtepDataChangeListener implements DataTreeChangeListener<No
             final DataObjectModification<Node> mod = change.getRootNode();
             //From original node to get connection instance
             Node node = mod.dataBefore() != null ? mod.dataBefore() : mod.dataAfter();
-            HwvtepConnectionInstance connection = hcm.getConnectionInstanceFromNodeIid(
-                    change.getRootPath().path());
+            HwvtepConnectionInstance connection = hcm.getConnectionInstanceFromNodeIid(change.path());
             if (connection != null) {
                 if (!result.containsKey(connection)) {
                     List<DataTreeModification<Node>> tempChanges = new ArrayList<>();
@@ -255,14 +255,15 @@ public final class HwvtepDataChangeListener implements DataTreeChangeListener<No
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void disconnectViaCli(Collection<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            String nodeId = change.getRootPath().path().firstKeyOf(Node.class).getNodeId().getValue();
+            String nodeId = change.path().getFirstKeyOf(Node.class).getNodeId().getValue();
             if (!nodeId.contains("/disconnect")) {
                 continue;
             }
             int reconcileIndex = nodeId.indexOf("/disconnect");
             String globalNodeId = nodeId.substring(0, reconcileIndex);
-            InstanceIdentifier<Node> globalNodeIid = change.getRootPath().path().firstIdentifierOf(Topology.class)
-                .child(Node.class, new NodeKey(new NodeId(globalNodeId)));
+            var globalNodeIid = change.path().trimTo(Topology.class).toBuilder()
+                .child(Node.class, new NodeKey(new NodeId(globalNodeId)))
+                .build();
             HwvtepConnectionInstance connectionInstance = hcm.getConnectionInstanceFromNodeIid(globalNodeIid);
             if (connectionInstance != null) {
                 LOG.error("Disconnecting from controller {}", nodeId);

@@ -24,7 +24,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,20 +39,19 @@ public class McastMacsRemoteRemoveCommand
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<RemoteMcastMacs>> removeds =
+        Map<DataObjectIdentifier<Node>, List<RemoteMcastMacs>> removeds =
                 extractRemoved(getChanges(),RemoteMcastMacs.class);
         if (!removeds.isEmpty()) {
-            for (Entry<InstanceIdentifier<Node>, List<RemoteMcastMacs>> removed:
+            for (Entry<DataObjectIdentifier<Node>, List<RemoteMcastMacs>> removed:
                 removeds.entrySet()) {
                 removeMcastMacRemote(transaction,  removed.getKey(), removed.getValue());
             }
         }
         //Remove the ones whose locator set got emptied
-        Map<InstanceIdentifier<Node>, List<RemoteMcastMacs>> updated =
+        Map<DataObjectIdentifier<Node>, List<RemoteMcastMacs>> updated =
                 extractUpdated(getChanges(),RemoteMcastMacs.class);
         if (!HwvtepSouthboundUtil.isEmptyMap(updated)) {
-            for (Entry<InstanceIdentifier<Node>, List<RemoteMcastMacs>> entry:
-                    updated.entrySet()) {
+            for (Entry<DataObjectIdentifier<Node>, List<RemoteMcastMacs>> entry : updated.entrySet()) {
                 List<RemoteMcastMacs> updatedList = entry.getValue();
                 List<RemoteMcastMacs> tobeRemovedList = new ArrayList<>();
                 if (!HwvtepSouthboundUtil.isEmpty(updatedList)) {
@@ -68,30 +67,31 @@ public class McastMacsRemoteRemoveCommand
     }
 
     private void removeMcastMacRemote(final TransactionBuilder transaction,
-                                      final InstanceIdentifier<Node> nodeIid, final List<RemoteMcastMacs> macList) {
+                                      final DataObjectIdentifier<Node> nodeIid, final List<RemoteMcastMacs> macList) {
         for (RemoteMcastMacs mac : macList) {
-            InstanceIdentifier<RemoteMcastMacs> macKey = nodeIid.augmentation(HwvtepGlobalAugmentation.class)
-                    .child(RemoteMcastMacs.class, mac.key());
-            onConfigUpdate(transaction, nodeIid, mac, macKey);
+            onConfigUpdate(transaction, nodeIid, mac, nodeIid.toBuilder()
+                .augmentation(HwvtepGlobalAugmentation.class)
+                .child(RemoteMcastMacs.class, mac.key())
+                .build());
         }
     }
 
     @Override
     public void onConfigUpdate(final TransactionBuilder transaction,
-                               final InstanceIdentifier<Node> nodeIid,
+                               final DataObjectIdentifier<Node> nodeIid,
                                final RemoteMcastMacs remoteMcastMac,
-                               final InstanceIdentifier macKey,
+                               final DataObjectIdentifier macKey,
                                final Object... extraData) {
         processDependencies(EmptyDependencyGetter.INSTANCE, transaction, nodeIid, macKey, remoteMcastMac);
     }
 
     @Override
     public void doDeviceTransaction(final TransactionBuilder transaction,
-                                    final InstanceIdentifier<Node> instanceIdentifier,
+                                    final DataObjectIdentifier<Node> instanceIdentifier,
                                     final RemoteMcastMacs mac,
-                                    final InstanceIdentifier macIid,
+                                    final DataObjectIdentifier macIid,
                                     final Object... extraData) {
-        String nodeId = instanceIdentifier.firstKeyOf(Node.class).getNodeId().getValue();
+        String nodeId = instanceIdentifier.getFirstKeyOf(Node.class).getNodeId().getValue();
         clearConfigData(RemoteMcastMacs.class, macIid);
         long transactionId = getOperationalState().getTransactionId();
         LOG.debug("Remove received for RemoteMcastMacs key: {} txId: {}", macIid, transactionId);
@@ -148,7 +148,7 @@ public class McastMacsRemoteRemoveCommand
     }
 
     @Override
-    protected String getKeyStr(InstanceIdentifier<RemoteMcastMacs> iid) {
-        return getLsKeyStr(iid.firstKeyOf(RemoteMcastMacs.class).getLogicalSwitchRef().getValue());
+    protected String getKeyStr(DataObjectIdentifier<RemoteMcastMacs> iid) {
+        return getLsKeyStr(iid.getFirstKeyOf(RemoteMcastMacs.class).getLogicalSwitchRef().getValue());
     }
 }

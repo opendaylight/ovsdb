@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.Map;
@@ -27,8 +26,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +43,7 @@ public final class GlobalUpdateCommand extends AbstractTransactionCommand {
     @Override
     public void execute(ReadWriteTransaction transaction) {
         for (Global hwvtepGlobal : updatedHwvtepRows.values()) {
-            final InstanceIdentifier<Node> nodePath = getInstanceIdentifier(hwvtepGlobal);
+            final var nodePath = getInstanceIdentifier(hwvtepGlobal);
             LOG.trace("Processing hardware_vtep update for nodePath: {}", nodePath);
 
             HwvtepGlobalAugmentationBuilder hwvtepGlobalBuilder = new HwvtepGlobalAugmentationBuilder();
@@ -62,15 +60,15 @@ public final class GlobalUpdateCommand extends AbstractTransactionCommand {
             nodeBuilder.setNodeId(getNodeId(hwvtepGlobal));
             HwvtepGlobalAugmentation hwvtepGlobalAugmentation = hwvtepGlobalBuilder.build();
             nodeBuilder.addAugmentation(hwvtepGlobalAugmentation);
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath.toIdentifier(), nodeBuilder.build());
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath, nodeBuilder.build());
             getOvsdbConnectionInstance().setHwvtepGlobalAugmentation(hwvtepGlobalAugmentation);
             addToDeviceUpdate(TransactionType.ADD, hwvtepGlobal);
             LOG.info("DEVICE - {} {}", TransactionType.ADD, hwvtepGlobal);
         }
     }
 
-    private InstanceIdentifier<Node> getInstanceIdentifier(Global hwvtep) {
-        InstanceIdentifier<Node> iid = getOvsdbConnectionInstance().getInstanceIdentifier();
+    private DataObjectIdentifier<Node> getInstanceIdentifier(Global hwvtep) {
+        var iid = getOvsdbConnectionInstance().getInstanceIdentifier();
         if (iid == null) {
             LOG.warn("InstanceIdentifier was null when it shouldn't be");
             /* This can be case for switch initiated connection */
@@ -81,7 +79,6 @@ public final class GlobalUpdateCommand extends AbstractTransactionCommand {
     }
 
     private NodeId getNodeId(Global hwvtep) {
-        NodeKey nodeKey = getInstanceIdentifier(hwvtep).firstKeyOf(Node.class);
-        return nodeKey.getNodeId();
+        return getInstanceIdentifier(hwvtep).getFirstKeyOf(Node.class).getNodeId();
     }
 }

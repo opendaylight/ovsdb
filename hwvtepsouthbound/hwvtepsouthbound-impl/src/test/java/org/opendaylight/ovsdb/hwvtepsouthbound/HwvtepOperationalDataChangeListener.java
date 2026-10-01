@@ -11,7 +11,6 @@ import java.util.List;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -26,23 +25,25 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.binding.ChildOf;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectReference;
 import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class HwvtepOperationalDataChangeListener implements DataTreeChangeListener<Node>, AutoCloseable {
     private final Registration registration;
     private final HwvtepConnectionManager hcm;
-    private final DataBroker db;
     private final HwvtepConnectionInstance connectionInstance;
 
     HwvtepOperationalDataChangeListener(DataBroker db, HwvtepConnectionManager hcm,
             HwvtepConnectionInstance connectionInstance) {
-        this.db = db;
         this.hcm = hcm;
         this.connectionInstance = connectionInstance;
-        DataTreeIdentifier<Node> treeId = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, getWildcardPath());
-        registration = db.registerTreeChangeListener(treeId, this);
+        registration = db.registerTreeChangeListener(LogicalDatastoreType.OPERATIONAL,
+            DataObjectReference.builder(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+                .child(Node.class)
+                .build(), this);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class HwvtepOperationalDataChangeListener implements DataTreeChangeListen
     @Override
     public void onDataTreeChanged(List<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().path();
+            final DataObjectIdentifier<Node> key = change.path();
             final DataObjectModification<Node> mod = change.getRootNode();
             for (DataObjectModification<?> child : mod.modifiedChildren()) {
                 updateDeviceOpData(key, child);
@@ -70,9 +71,9 @@ public class HwvtepOperationalDataChangeListener implements DataTreeChangeListen
         }
     }
 
-    private void updateDeviceOpData(InstanceIdentifier<Node> key, DataObjectModification<?> mod) {
+    private void updateDeviceOpData(DataObjectIdentifier<Node> key, DataObjectModification<?> mod) {
         Class<? extends EntryObject<?, ?>> childClass = (Class<? extends EntryObject<?, ?>>) mod.dataType();
-        InstanceIdentifier instanceIdentifier = getKey(key, mod, mod.dataAfter());
+        var instanceIdentifier = getKey(key, mod, mod.dataAfter());
         switch (mod.modificationType()) {
             case WRITE:
                 connectionInstance.getDeviceInfo().updateDeviceOperData(childClass, instanceIdentifier,
@@ -88,37 +89,39 @@ public class HwvtepOperationalDataChangeListener implements DataTreeChangeListen
         }
     }
 
-    private static InstanceIdentifier getKey(InstanceIdentifier<Node> key,
+    private static DataObjectIdentifier getKey(DataObjectIdentifier<Node> key,
                                              DataObjectModification<?> child, DataObject data) {
         Class<? extends DataObject> childClass = child.dataType();
-        InstanceIdentifier instanceIdentifier = null;
         if (LogicalSwitches.class == childClass) {
             LogicalSwitches ls = (LogicalSwitches)data;
-            instanceIdentifier = key.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class,
-                    ls.key());
+            return key.toBuilder()
+                .augmentation(HwvtepGlobalAugmentation.class)
+                .child(LogicalSwitches.class, ls.key())
+                .build();
         } else if (org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology
                 .topology.node.TerminationPoint.class == childClass) {
             TerminationPoint tp = (TerminationPoint)data;
-            instanceIdentifier = key.child(TerminationPoint.class, tp.key());
+            return key.toBuilder()
+                .child(TerminationPoint.class, tp.key())
+                .build();
         } else if (RemoteUcastMacs.class == childClass) {
             RemoteUcastMacs mac = (RemoteUcastMacs)data;
-            instanceIdentifier = key.augmentation(HwvtepGlobalAugmentation.class).child(RemoteUcastMacs.class,
-                    mac.key());
-        } else if (RemoteMcastMacs.class ==  childClass) {
+            return key.toBuilder()
+                .augmentation(HwvtepGlobalAugmentation.class)
+                .child(RemoteUcastMacs.class, mac.key())
+                .build();
+        } else if (RemoteMcastMacs.class == childClass) {
             RemoteMcastMacs mac = (RemoteMcastMacs)data;
-            instanceIdentifier = key.augmentation(HwvtepGlobalAugmentation.class).child(RemoteMcastMacs.class,
-                    mac.key());
+            return key.toBuilder()
+                .augmentation(HwvtepGlobalAugmentation.class)
+                .child(RemoteMcastMacs.class, mac.key())
+                .build();
+        } else {
+            return null;
         }
-        return instanceIdentifier;
     }
 
     Class<? extends ChildOf<? super HwvtepGlobalAugmentation>> getClass(Class<? extends DataObject> cls) {
         return (Class<? extends ChildOf<? super HwvtepGlobalAugmentation>>) cls;
-    }
-
-    private static InstanceIdentifier<Node> getWildcardPath() {
-        return InstanceIdentifier.create(NetworkTopology.class)
-                        .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
-                        .child(Node.class);
     }
 }

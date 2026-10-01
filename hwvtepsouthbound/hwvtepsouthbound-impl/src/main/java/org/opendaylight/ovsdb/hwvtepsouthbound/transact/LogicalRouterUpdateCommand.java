@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.ovsdb.lib.notation.UUID;
@@ -30,7 +29,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.logical.router.attributes.SwitchBindings;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,22 +43,23 @@ public class LogicalRouterUpdateCommand
 
     @Override
     public void execute(final TransactionBuilder transaction) {
-        Map<InstanceIdentifier<Node>, List<LogicalRouters>> updateMap =
+        Map<DataObjectIdentifier<Node>, List<LogicalRouters>> updateMap =
                 extractUpdated(getChanges(),LogicalRouters.class);
 
-        for (Entry<InstanceIdentifier<Node>, List<LogicalRouters>> updated:
-            updateMap.entrySet()) {
+        for (var updated : updateMap.entrySet()) {
             updateLogicalRouter(transaction,  updated.getKey(), updated.getValue());
         }
     }
 
     private void updateLogicalRouter(final TransactionBuilder transaction,
-            final InstanceIdentifier<Node> instanceIdentifier, final List<LogicalRouters> routerList) {
+            final DataObjectIdentifier<Node> instanceIdentifier, final List<LogicalRouters> routerList) {
         final var op = ops();
 
         for (LogicalRouters lrouter: routerList) {
-            final InstanceIdentifier<LogicalRouters> routerKey = instanceIdentifier
-                    .augmentation(HwvtepGlobalAugmentation.class).child(LogicalRouters.class, lrouter.key());
+            final var routerKey = instanceIdentifier.toBuilder()
+                .augmentation(HwvtepGlobalAugmentation.class)
+                .child(LogicalRouters.class, lrouter.key())
+                .build();
             LOG.debug("Creating logical router named: {}", lrouter.getHwvtepNodeName());
 
             final Optional<LogicalRouters> operationalRouterOptional =
@@ -119,8 +118,8 @@ public class LogicalRouterUpdateCommand
             Map<String, UUID> bindingMap = new HashMap<>();
             for (SwitchBindings switchBinding : switchBindings) {
                 @SuppressWarnings("unchecked")
-                InstanceIdentifier<LogicalSwitches> lswitchIid =
-                    ((DataObjectIdentifier<LogicalSwitches>) switchBinding.getLogicalSwitchRef().getValue()).toLegacy();
+                DataObjectIdentifier<LogicalSwitches> lswitchIid =
+                    (DataObjectIdentifier<LogicalSwitches>) switchBinding.getLogicalSwitchRef().getValue();
                 Optional<LogicalSwitches> operationalSwitchOptional =
                         getOperationalState().getLogicalSwitches(lswitchIid);
                 if (operationalSwitchOptional.isPresent()) {
@@ -141,8 +140,7 @@ public class LogicalRouterUpdateCommand
             Map<String, UUID> bindingMap = new HashMap<>();
             for (AclBindings aclBinding : aclBindings.values()) {
                 @SuppressWarnings("unchecked")
-                InstanceIdentifier<Acls> aclIid =
-                        ((DataObjectIdentifier<Acls>) aclBinding.getAclRef().getValue()).toLegacy();
+                DataObjectIdentifier<Acls> aclIid = (DataObjectIdentifier<Acls>) aclBinding.getAclRef().getValue();
                 Optional<Acls> operationalAclOptional =
                         getOperationalState().getAcls(aclIid);
                 if (operationalAclOptional.isPresent()) {

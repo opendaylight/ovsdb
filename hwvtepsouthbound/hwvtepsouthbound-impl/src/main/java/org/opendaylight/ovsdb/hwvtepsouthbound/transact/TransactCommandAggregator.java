@@ -24,8 +24,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteUcastMacs;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.EntryObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ public class TransactCommandAggregator implements TransactCommand {
        each updated/ deleted contains Map < child type, List<ChildData>>
        child type is the child of hwvtep Global augmentation
      */
-    private final Map<InstanceIdentifier<Node>,
+    private final Map<DataObjectIdentifier<Node>,
             Pair<Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>,
                 Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>>>> modifiedData = new HashMap<>();
 
@@ -76,21 +76,19 @@ public class TransactCommandAggregator implements TransactCommand {
     }
 
     @Override
-    public void onConfigUpdate(TransactionBuilder transaction, InstanceIdentifier nodeIid, EntryObject data,
-                               InstanceIdentifier key,
-                               Object... extraData) {
+    public void onConfigUpdate(TransactionBuilder transaction, DataObjectIdentifier nodeIid, EntryObject data,
+                               DataObjectIdentifier key, Object... extraData) {
     }
 
     @Override
-    public void doDeviceTransaction(TransactionBuilder transaction, InstanceIdentifier nodeIid, EntryObject data,
-                                    InstanceIdentifier key,
-                                    Object... extraData) {
+    public void doDeviceTransaction(TransactionBuilder transaction, DataObjectIdentifier nodeIid, EntryObject data,
+                                    DataObjectIdentifier key, Object... extraData) {
     }
 
     private void onDataTreeChanged(final Collection<DataTreeModification<Node>> changes) {
         boolean readOperationalNodes = false;
         for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().getRootIdentifier();
+            final DataObjectIdentifier<Node> key = change.path();
             final DataObjectModification<Node> mod = change.getRootNode();
             final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> updatedData = new HashMap<>();
             final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> deletedData = new HashMap<>();
@@ -113,7 +111,7 @@ public class TransactCommandAggregator implements TransactCommand {
                 || deletedData.containsKey(RemoteUcastMacs.class) && deletedData.size() == 1;
     }
 
-    private static void extractDataChanged(final InstanceIdentifier<Node> key, final DataObjectModification<Node> mod,
+    private static void extractDataChanged(final DataObjectIdentifier<Node> key, final DataObjectModification<Node> mod,
         final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> updatedData,
             final Map<Class<? extends EntryObject<?, ?>>, List<EntryObject<?, ?>>> deletedData) {
 

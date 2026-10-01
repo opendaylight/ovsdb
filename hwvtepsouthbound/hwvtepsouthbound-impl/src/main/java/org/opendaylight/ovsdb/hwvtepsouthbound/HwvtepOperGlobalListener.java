@@ -19,7 +19,6 @@ import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.ovsdb.utils.mdsal.utils.Scheduler;
@@ -29,24 +28,27 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectReference;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class HwvtepOperGlobalListener implements DataTreeChangeListener<Node>, AutoCloseable {
-
     private static final Logger LOG = LoggerFactory.getLogger(HwvtepOperGlobalListener.class);
-    private static final Map<InstanceIdentifier<Node>, ConnectionInfo> NODE_CONNECTION_INFO = new ConcurrentHashMap<>();
-    private static final Map<InstanceIdentifier<Node>, ScheduledFuture> TIMEOUT_FTS = new ConcurrentHashMap<>();
+
+    // FIXME: these should not be static
+    private static final Map<DataObjectIdentifier<Node>, ConnectionInfo> NODE_CONNECTION_INFO =
+        new ConcurrentHashMap<>();
+    private static final Map<DataObjectIdentifier<Node>, ScheduledFuture> TIMEOUT_FTS =
+        new ConcurrentHashMap<>();
+    private static final Map<DataObjectIdentifier<Node>, List<Callable<Void>>> NODE_DELET_WAITING_JOBS =
+        new ConcurrentHashMap<>();
+    private static final Map<DataObjectIdentifier<Node>, Node> CONNECTED_NODES = new ConcurrentHashMap<>();
 
     private Registration registration;
     private final HwvtepConnectionManager hcm;
     private final DataBroker db;
-    private static final Map<InstanceIdentifier<Node>, List<Callable<Void>>> NODE_DELET_WAITING_JOBS
-            = new ConcurrentHashMap<>();
-    private static final Map<InstanceIdentifier<Node>, Node> CONNECTED_NODES = new ConcurrentHashMap<>();
-
 
     HwvtepOperGlobalListener(final DataBroker db, HwvtepConnectionManager hcm) {
         LOG.info("Registering HwvtepOperGlobalListener");
@@ -56,10 +58,7 @@ public final class HwvtepOperGlobalListener implements DataTreeChangeListener<No
     }
 
     private void registerListener() {
-        final DataTreeIdentifier<Node> treeId =
-                        DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, getWildcardPath());
-
-        registration = db.registerTreeChangeListener(treeId, this);
+        registration = db.registerTreeChangeListener(LogicalDatastoreType.OPERATIONAL, getWildcardPath(), this);
     }
 
     @Override
@@ -82,7 +81,7 @@ public final class HwvtepOperGlobalListener implements DataTreeChangeListener<No
         }
     }
 
-    public static void runAfterTimeoutIfNodeNotCreated(InstanceIdentifier<Node> iid, Runnable job) {
+    public static void runAfterTimeoutIfNodeNotCreated(DataObjectIdentifier<Node> iid, Runnable job) {
         ScheduledFuture<?> ft = TIMEOUT_FTS.get(iid);
         if (ft != null) {
             ft.cancel(false);
@@ -96,7 +95,7 @@ public final class HwvtepOperGlobalListener implements DataTreeChangeListener<No
         TIMEOUT_FTS.put(iid, ft);
     }
 
-    public void runAfterNodeDeleted(InstanceIdentifier<Node> iid, Callable<Void> job) throws Exception {
+    public void runAfterNodeDeleted(DataObjectIdentifier<Node> iid, Callable<Void> job) throws Exception {
         synchronized (HwvtepOperGlobalListener.class) {
             if (NODE_DELET_WAITING_JOBS.containsKey(iid)) {
                 LOG.error("Node present in the cache {} adding to delete queue", iid);
@@ -114,7 +113,7 @@ public final class HwvtepOperGlobalListener implements DataTreeChangeListener<No
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private synchronized void runPendingJobs(InstanceIdentifier<Node> iid) {
+    private synchronized void runPendingJobs(DataObjectIdentifier<Node> iid) {
         List<Callable<Void>> jobs = NODE_DELET_WAITING_JOBS.remove(iid);
         if (jobs != null && !jobs.isEmpty()) {
             jobs.forEach(job -> {
@@ -131,7 +130,7 @@ public final class HwvtepOperGlobalListener implements DataTreeChangeListener<No
 
     private static void connect(List<DataTreeModification<Node>> changes) {
         changes.forEach(change -> {
-            InstanceIdentifier<Node> key = change.getRootPath().path();
+            DataObjectIdentifier<Node> key = change.path();
             DataObjectModification<Node> mod = change.getRootNode();
             Node node = getCreated(mod);
             if (node == null) {
@@ -159,7 +158,7 @@ public final class HwvtepOperGlobalListener implements DataTreeChangeListener<No
 
     private static void updated(List<DataTreeModification<Node>> changes) {
         changes.forEach(change -> {
-            InstanceIdentifier<Node> key = change.getRootPath().path();
+            DataObjectIdentifier<Node> key = change.path();
             DataObjectModification<Node> mod = change.getRootNode();
             Node node = getUpdated(mod);
             if (node != null) {
@@ -168,13 +167,13 @@ public final class HwvtepOperGlobalListener implements DataTreeChangeListener<No
         });
     }
 
-    public static Node getNode(final InstanceIdentifier<Node> key) {
+    public static Node getNode(final DataObjectIdentifier<Node> key) {
         return CONNECTED_NODES.get(key);
     }
 
     private void disconnect(List<DataTreeModification<Node>> changes) {
         changes.forEach(change -> {
-            InstanceIdentifier<Node> key = change.getRootPath().path();
+            DataObjectIdentifier<Node> key = change.path();
             DataObjectModification<Node> mod = change.getRootNode();
             Node node = getRemoved(mod);
             if (node != null) {
@@ -187,19 +186,18 @@ public final class HwvtepOperGlobalListener implements DataTreeChangeListener<No
         });
     }
 
-    private static String getNodeId(InstanceIdentifier<Node> iid) {
-        return iid.firstKeyOf(Node.class).getNodeId().getValue();
+    private static String getNodeId(DataObjectIdentifier<Node> iid) {
+        return iid.getFirstKeyOf(Node.class).getNodeId().getValue();
     }
 
-    public void scheduleOldConnectionNodeDelete(InstanceIdentifier<Node> iid) {
+    public void scheduleOldConnectionNodeDelete(DataObjectIdentifier<Node> iid) {
         ConnectionInfo oldConnectionInfo = getNodeConnectionInfo(iid);
         HwvtepSouthboundUtil.schedule(() -> {
             deleteTheNodeOfOldConnection(iid, oldConnectionInfo);
         }, HwvtepSouthboundConstants.STALE_HWVTEP_CLEANUP_DELAY_SECS, TimeUnit.SECONDS);
     }
 
-    private void deleteTheNodeOfOldConnection(InstanceIdentifier<Node> iid,
-                                                    ConnectionInfo oldConnectionInfo) {
+    private void deleteTheNodeOfOldConnection(DataObjectIdentifier<Node> iid, ConnectionInfo oldConnectionInfo) {
         if (oldConnectionInfo == null) {
             return;
         }
@@ -211,7 +209,7 @@ public final class HwvtepOperGlobalListener implements DataTreeChangeListener<No
         }
     }
 
-    private static ConnectionInfo getNodeConnectionInfo(InstanceIdentifier<Node> iid) {
+    private static ConnectionInfo getNodeConnectionInfo(DataObjectIdentifier<Node> iid) {
         return NODE_CONNECTION_INFO.get(iid);
     }
 
@@ -229,10 +227,11 @@ public final class HwvtepOperGlobalListener implements DataTreeChangeListener<No
         return null;
     }
 
-    private static InstanceIdentifier<Node> getWildcardPath() {
-        return InstanceIdentifier.create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
-                .child(Node.class);
+    private static DataObjectReference<Node> getWildcardPath() {
+        return DataObjectReference.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+            .child(Node.class)
+            .build();
     }
 
     private static Node getUpdated(DataObjectModification<Node> mod) {

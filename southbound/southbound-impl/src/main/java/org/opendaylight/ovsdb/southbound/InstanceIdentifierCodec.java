@@ -9,8 +9,8 @@ package org.opendaylight.ovsdb.southbound;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
+import org.opendaylight.yangtools.binding.DataObjectReference;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -65,25 +65,24 @@ public class InstanceIdentifierCodec extends AbstractStringInstanceIdentifierCod
         this.dataSchemaContextTree = DataSchemaContextTree.from(schemaContext);
     }
 
-    public String serialize(final InstanceIdentifier<?> iid) {
+    public String serialize(final DataObjectReference<?> iid) {
         YangInstanceIdentifier normalizedIid = bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid);
         return serialize(normalizedIid);
     }
 
-    public YangInstanceIdentifier getYangInstanceIdentifier(final InstanceIdentifier<?> iid) {
+    public YangInstanceIdentifier getYangInstanceIdentifier(final DataObjectReference<?> iid) {
         return bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid);
     }
 
-    public InstanceIdentifier<?> bindingDeserializer(final String iidString) throws DeserializationException {
+    public DataObjectReference<?> bindingDeserializer(final String iidString) throws DeserializationException {
         return bindingDeserializer(deserialize(iidString));
     }
 
-    public InstanceIdentifier<?> bindingDeserializer(final YangInstanceIdentifier yangIID) {
-        final var ref = bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(yangIID);
-        return ref != null ? ref.toLegacy() : null;
+    public DataObjectReference<?> bindingDeserializer(final YangInstanceIdentifier yangIID) {
+        return bindingNormalizedNodeSerializer.fromYangInstanceIdentifier(yangIID);
     }
 
-    public InstanceIdentifier<?> bindingDeserializerOrNull(final String iidString) {
+    public DataObjectReference<?> bindingDeserializerOrNull(final String iidString) {
         try {
             return bindingDeserializer(iidString);
         } catch (DeserializationException e) {

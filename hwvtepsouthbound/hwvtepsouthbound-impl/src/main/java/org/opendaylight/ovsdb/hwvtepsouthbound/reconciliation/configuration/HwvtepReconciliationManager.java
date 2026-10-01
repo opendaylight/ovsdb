@@ -22,7 +22,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.PhysicalSwitchAugmentation;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +34,8 @@ public final class HwvtepReconciliationManager implements DataTreeChangeListener
     public HwvtepReconciliationManager(DataBroker db, HwvtepConnectionManager hcm) {
         this.hcm = hcm;
 
-        final InstanceIdentifier<Node> iid = HwvtepSouthboundMapper.createInstanceIdentifier();
-        final DataTreeIdentifier<Node> treeId = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, iid);
+        final var iid = HwvtepSouthboundMapper.createInstanceIdentifier();
+        final var treeId = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, iid);
         LOG.trace("Registering listener for path {}", treeId);
         registration = db.registerTreeChangeListener(treeId, this);
     }
@@ -56,8 +55,8 @@ public final class HwvtepReconciliationManager implements DataTreeChangeListener
 
     private void processDisconnectedNodes(List<DataTreeModification<Node>> changes) {
         for (DataTreeModification<Node> change : changes) {
-            final InstanceIdentifier<Node> key = change.getRootPath().path();
-            final DataObjectModification<Node> mod = change.getRootNode();
+            final var key = change.path();
+            final var mod = change.getRootNode();
             Node deleted = getRemoved(mod);
             if (deleted != null) {
                 if (deleted.augmentation(HwvtepGlobalAugmentation.class) != null) {

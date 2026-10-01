@@ -22,7 +22,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hw
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitchesKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public final class PlainLogicalSwitchRemoveCmd
 
     private AtomicInteger retryCount = new AtomicInteger(5);
     private final LogicalSwitches logicalSwitches;
-    private final InstanceIdentifier<Node> nodeIid;
+    private final DataObjectIdentifier<Node> nodeIid;
 
     public PlainLogicalSwitchRemoveCmd(final HwvtepOperationalState state,
                                        final Collection<DataTreeModification<Node>> changes,

@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.hwvtepsouthbound.transactions.md;
 
 import java.util.ArrayList;
@@ -31,15 +30,11 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepGlobalAugmentation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepLogicalSwitchRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.HwvtepPhysicalLocatorRef;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.LogicalSwitches;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacs;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.global.attributes.RemoteMcastMacsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSet;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.hwvtep.rev150901.hwvtep.physical.locator.set.attributes.LocatorSetBuilder;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public final class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactionCommand {
     private final Map<UUID, McastMacsRemote> updatedMMacsRemoteRows;
@@ -62,24 +57,26 @@ public final class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactio
     }
 
     private void updateData(ReadWriteTransaction transaction, McastMacsRemote macRemote) {
-        final InstanceIdentifier<Node> connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var connectionIId = getOvsdbConnectionInstance().getInstanceIdentifier();
 
         // Ensure the node exists
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId.toIdentifier(),
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, connectionIId,
             new NodeBuilder().setNodeId(getOvsdbConnectionInstance().getNodeId()).build());
 
         // Prepare the update in internal structures
         final RemoteMcastMacs mac = buildRemoteMcastMacs(macRemote);
-        final InstanceIdentifier<RemoteMcastMacs> macIid = connectionIId.augmentation(HwvtepGlobalAugmentation.class)
-                .child(RemoteMcastMacs.class, mac.key());
+        final var macIid = connectionIId.toBuilder()
+            .augmentation(HwvtepGlobalAugmentation.class)
+            .child(RemoteMcastMacs.class, mac.key())
+            .build();
         addToUpdateTx(RemoteMcastMacs.class, macIid, macRemote.getUuid(), macRemote);
 
         // Merge update, relying on automatic lifecycle...
-        transaction.merge(LogicalDatastoreType.OPERATIONAL, macIid.toIdentifier(), mac);
+        transaction.merge(LogicalDatastoreType.OPERATIONAL, macIid, mac);
         if (mac.getLocatorSet() == null) {
             // ... but delete locator set if it is empty
             // FIXME: can we use .put() of instead of merge/delete?
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, macIid.child(LocatorSet.class).toIdentifier());
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, macIid.toBuilder().child(LocatorSet.class).build());
         }
     }
 
@@ -103,9 +100,8 @@ public final class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactio
             UUID lsUUID = macRemote.getLogicalSwitchColumn().getData();
             LogicalSwitch logicalSwitch = getOvsdbConnectionInstance().getDeviceInfo().getLogicalSwitch(lsUUID);
             if (logicalSwitch != null) {
-                InstanceIdentifier<LogicalSwitches> switchIid =
-                        HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch);
-                macRemoteBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(switchIid.toIdentifier()));
+                macRemoteBuilder.setLogicalSwitchRef(new HwvtepLogicalSwitchRef(
+                    HwvtepSouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance(), logicalSwitch)));
             }
         }
     }
@@ -129,10 +125,10 @@ public final class HwvtepMcastMacsRemoteUpdateCommand extends AbstractTransactio
                         if (locator == null) {
                             locator = getOvsdbConnectionInstance().getDeviceInfo().getPhysicalLocator(locUUID);
                         }
-                        InstanceIdentifier<TerminationPoint> tpIid = HwvtepSouthboundMapper.createInstanceIdentifier(
-                                getOvsdbConnectionInstance().getInstanceIdentifier(), locator);
                         plsList.add(new LocatorSetBuilder()
-                                .setLocatorRef(new HwvtepPhysicalLocatorRef(tpIid.toIdentifier())).build());
+                            .setLocatorRef(new HwvtepPhysicalLocatorRef(HwvtepSouthboundMapper.createInstanceIdentifier(
+                                getOvsdbConnectionInstance().getInstanceIdentifier(), locator)))
+                            .build());
                     }
                     macRemoteBuilder.setLocatorSet(plsList);
                 }

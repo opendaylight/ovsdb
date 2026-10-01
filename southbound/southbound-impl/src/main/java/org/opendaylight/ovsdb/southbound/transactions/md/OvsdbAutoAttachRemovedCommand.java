@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -26,7 +25,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.Autoattach;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.AutoattachKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,19 +45,19 @@ public class OvsdbAutoAttachRemovedCommand extends AbstractTransactionCommand {
             return;
         }
 
-        final InstanceIdentifier<Node> nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
+        final var nodeIId = getOvsdbConnectionInstance().getInstanceIdentifier();
         final Optional<Node> ovsdbNode = SouthboundUtil.readNode(transaction, nodeIId);
         if (ovsdbNode.isPresent()) {
-            final InstanceIdentifier<Node> ovsdbNodeIid =
+            final var ovsdbNodeIid =
                     SouthboundMapper.createInstanceIdentifier(getOvsdbConnectionInstance().getNodeId());
             // FIXME: Iterate on external_ids instead of uuid when Open vSwitch supports external_ids column
             for (final UUID autoAttachUuid : removedAutoAttachRows.keySet()) {
                 final AutoattachKey autoAttachKey = getAutoAttachKeyToRemove(ovsdbNode.orElseThrow(), autoAttachUuid);
                 if (autoAttachKey != null) {
-                    final InstanceIdentifier<Autoattach> iid = ovsdbNodeIid
-                            .augmentation(OvsdbNodeAugmentation.class)
-                            .child(Autoattach.class, autoAttachKey);
-                    transaction.delete(LogicalDatastoreType.OPERATIONAL, iid.toIdentifier());
+                    transaction.delete(LogicalDatastoreType.OPERATIONAL, ovsdbNodeIid.toBuilder()
+                        .augmentation(OvsdbNodeAugmentation.class)
+                        .child(Autoattach.class, autoAttachKey)
+                        .build());
                     LOG.debug("AutoAttach table {} for Ovsdb Node {} is deleted", autoAttachUuid,
                             ovsdbNode.orElseThrow().getNodeId());
                 } else {

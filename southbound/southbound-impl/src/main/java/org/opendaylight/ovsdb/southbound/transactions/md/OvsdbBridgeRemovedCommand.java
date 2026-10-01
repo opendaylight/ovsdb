@@ -38,12 +38,13 @@ public class OvsdbBridgeRemovedCommand extends AbstractTransactionCommand {
         for (Bridge bridge : removedRows) {
             final var bridgeIid = SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec,
                 getOvsdbConnectionInstance(), bridge);
-            final var mnIid = getOvsdbConnectionInstance().getInstanceIdentifier()
+            final var mnIid = getOvsdbConnectionInstance().getInstanceIdentifier().toBuilder()
                 .augmentation(OvsdbNodeAugmentation.class)
-                .child(ManagedNodeEntry.class, new ManagedNodeEntryKey(new OvsdbBridgeRef(bridgeIid)));
+                .child(ManagedNodeEntry.class, new ManagedNodeEntryKey(new OvsdbBridgeRef(bridgeIid)))
+                .build();
             // TODO handle removal of reference to managed node from model
             transaction.delete(LogicalDatastoreType.OPERATIONAL, bridgeIid);
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, mnIid.toIdentifier());
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, mnIid);
         }
     }
 }

@@ -67,7 +67,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPoint;
 import org.opendaylight.yangtools.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,9 +89,9 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     ArgumentCaptor<List> transactCaptor;
 
     String nodeUuid;
-    protected InstanceIdentifier<Node> nodeIid;
-    InstanceIdentifier<LogicalSwitches> ls0Iid;
-    InstanceIdentifier<LogicalSwitches> ls1Iid;
+    protected DataObjectIdentifier<Node> nodeIid;
+    DataObjectIdentifier<LogicalSwitches> ls0Iid;
+    DataObjectIdentifier<LogicalSwitches> ls1Iid;
 
     Operations mockOp;
 
@@ -100,10 +100,14 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         entityOwnershipService = mock(EntityOwnershipService.class);
         nodeUuid = java.util.UUID.randomUUID().toString();
         nodeIid = createInstanceIdentifier(nodeUuid);
-        ls0Iid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class,
-                new LogicalSwitchesKey(new HwvtepNodeName("ls0")));
-        ls1Iid = nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class,
-                new LogicalSwitchesKey(new HwvtepNodeName("ls1")));
+        ls0Iid = nodeIid.toBuilder()
+            .augmentation(HwvtepGlobalAugmentation.class)
+            .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls0")))
+            .build();
+        ls1Iid = nodeIid.toBuilder()
+            .augmentation(HwvtepGlobalAugmentation.class)
+            .child(LogicalSwitches.class, new LogicalSwitchesKey(new HwvtepNodeName("ls1")))
+            .build();
         loadSchema();
 
         mockOp = mock(Operations.class);
@@ -131,7 +135,7 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
             any(HwvtepPhysicalSwitchAttributes.class));
         doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstance(any(Node.class));
         doReturn(connectionInstance).when(hwvtepConnectionManager).getConnectionInstanceFromNodeIid(
-            any(InstanceIdentifier.class));
+            any(DataObjectIdentifier.class));
 
 
         mockOperations();
@@ -195,13 +199,13 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
     void addNode(final LogicalDatastoreType logicalDatastoreType) throws Exception {
         NodeBuilder nodeBuilder = prepareNode(nodeIid).addAugmentation(new HwvtepGlobalAugmentationBuilder().build());
         WriteTransaction transaction = getDataBroker().newWriteOnlyTransaction();
-        transaction.mergeParentStructurePut(logicalDatastoreType, nodeIid.toIdentifier(), nodeBuilder.build());
+        transaction.mergeParentStructurePut(logicalDatastoreType, nodeIid, nodeBuilder.build());
         transaction.commit();
     }
 
     void deleteNode(final LogicalDatastoreType logicalDatastoreType) {
         ReadWriteTransaction tx = getDataBroker().newReadWriteTransaction();
-        tx.delete(logicalDatastoreType, nodeIid.toIdentifier());
+        tx.delete(logicalDatastoreType, nodeIid);
         tx.commit();
     }
 
@@ -225,10 +229,10 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         return mergeNode(logicalDatastoreType, nodeIid, nodeBuilder);
     }
 
-    void deleteData(final LogicalDatastoreType datastoreType, final InstanceIdentifier<?>... iids) {
+    void deleteData(final LogicalDatastoreType datastoreType, final DataObjectIdentifier<?>... iids) {
         WriteTransaction transaction = getDataBroker().newWriteOnlyTransaction();
-        for (InstanceIdentifier<?> id : iids) {
-            transaction.delete(datastoreType, id.toIdentifier());
+        for (DataObjectIdentifier<?> id : iids) {
+            transaction.delete(datastoreType, id);
         }
         transaction.commit();
     }
@@ -238,9 +242,10 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         ReadWriteTransaction tx = getDataBroker().newReadWriteTransaction();
         if (LogicalSwitches.class == dataObject) {
             for (LogicalSwitchesKey key : TestBuilders.logicalSwitches(data).keySet()) {
-                tx.delete(logicalDatastoreType,
-                    nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(LogicalSwitches.class, key)
-                        .toIdentifier());
+                tx.delete(logicalDatastoreType, nodeIid.toBuilder()
+                    .augmentation(HwvtepGlobalAugmentation.class)
+                    .child(LogicalSwitches.class, key)
+                    .build());
             }
         }
         if (TerminationPoint.class == dataObject) {
@@ -250,41 +255,40 @@ public class DataChangeListenerTestBase extends AbstractDataBrokerTest {
         }
         if (RemoteUcastMacs.class == dataObject) {
             for (RemoteUcastMacsKey key : TestBuilders.remoteUcastMacs(nodeIid, data).keySet()) {
-                tx.delete(logicalDatastoreType,
-                    nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(RemoteUcastMacs.class, key)
-                        .toIdentifier());
+                tx.delete(logicalDatastoreType, nodeIid.toBuilder()
+                    .augmentation(HwvtepGlobalAugmentation.class)
+                    .child(RemoteUcastMacs.class, key)
+                    .build());
             }
         }
         if (RemoteMcastMacs.class == dataObject) {
             for (RemoteMcastMacsKey key : TestBuilders.remoteMcastMacs(nodeIid, data).keySet()) {
-                tx.delete(logicalDatastoreType,
-                    nodeIid.augmentation(HwvtepGlobalAugmentation.class).child(RemoteMcastMacs.class, key)
-                        .toIdentifier());
+                tx.delete(logicalDatastoreType, nodeIid.toBuilder()
+                    .augmentation(HwvtepGlobalAugmentation.class)
+                    .child(RemoteMcastMacs.class, key)
+                    .build());
             }
         }
         tx.commit();
     }
 
-    NodeBuilder prepareNode(final InstanceIdentifier<Node> iid) {
-        return new NodeBuilder().setNodeId(iid.firstKeyOf(Node.class).getNodeId());
+    NodeBuilder prepareNode(final DataObjectIdentifier<Node> iid) {
+        return new NodeBuilder().setNodeId(iid.getFirstKeyOf(Node.class).getNodeId());
     }
 
-    Node mergeNode(final LogicalDatastoreType datastoreType, final InstanceIdentifier<Node> id,
+    Node mergeNode(final LogicalDatastoreType datastoreType, final DataObjectIdentifier<Node> id,
             final NodeBuilder nodeBuilder) {
         Node node = nodeBuilder.build();
         WriteTransaction transaction = getDataBroker().newWriteOnlyTransaction();
-        transaction.mergeParentStructureMerge(datastoreType, id.toIdentifier(), node);
+        transaction.mergeParentStructureMerge(datastoreType, id, node);
         transaction.commit();
         return node;
     }
 
-    public InstanceIdentifier<Node> createInstanceIdentifier(final String nodeIdString) {
-        NodeId nodeId = new NodeId(new Uri(nodeIdString));
-        NodeKey nodeKey = new NodeKey(nodeId);
-        TopologyKey topoKey = new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID);
-        return InstanceIdentifier.builder(NetworkTopology.class)
-                .child(Topology.class, topoKey)
-                .child(Node.class, nodeKey)
+    public DataObjectIdentifier.WithKey<Node, NodeKey> createInstanceIdentifier(final String nodeIdString) {
+        return DataObjectIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(HwvtepSouthboundConstants.HWVTEP_TOPOLOGY_ID))
+                .child(Node.class, new NodeKey(new NodeId(new Uri(nodeIdString))))
                 .build();
     }
 }

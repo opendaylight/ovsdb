@@ -46,7 +46,7 @@ import org.opendaylight.ovsdb.southbound.SouthboundMapper;
 import org.opendaylight.ovsdb.southbound.SouthboundUtil;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yangtools.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -66,7 +66,7 @@ public class TransactUtilsTest {
 
     @Test
     public void testExtractNode() {
-        Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
+        Map<DataObjectIdentifier<?>, DataObject> changes = new HashMap<>();
         assertEquals(HashMap.class, TransactUtils.extractNode(changes).getClass());
     }
 
@@ -75,7 +75,7 @@ public class TransactUtilsTest {
     public void testExtractCreatedAndExtractUpdated() {
         DataChangeEvent changes = mock(DataChangeEvent.class);
         Class<DataObject> klazz = DataObject.class;
-        Map<InstanceIdentifier<?>, DataObject> map = new HashMap<>();
+        Map<DataObjectIdentifier<?>, DataObject> map = new HashMap<>();
         when(changes.getCreatedData()).thenReturn(map);
         when(TransactUtils.extract(any(Map.class),eq(DataObject.class))).thenReturn(new HashMap<>());
 
@@ -88,13 +88,13 @@ public class TransactUtilsTest {
 
     @Test
     public void testExtractCreatedOrUpdated() {
-        Map<InstanceIdentifier<DataObject>, DataObject> result = new HashMap<>();
+        Map<DataObjectIdentifier<DataObject>, DataObject> result = new HashMap<>();
 
         PowerMockito.doReturn(result).when(TransactUtils.class);
         TransactUtils.extractUpdated(any(DataChangeEvent.class), eq(NetworkTopology.class));
 
-        Map<InstanceIdentifier<NetworkTopology>, NetworkTopology> map = new HashMap<>();
-        InstanceIdentifier<NetworkTopology> iid = InstanceIdentifier.create(NetworkTopology.class);
+        Map<DataObjectIdentifier<NetworkTopology>, NetworkTopology> map = new HashMap<>();
+        DataObjectIdentifier<NetworkTopology> iid = DataObjectIdentifier.builder(NetworkTopology.class).build();
 
         NetworkTopology db = mock(NetworkTopology.class);
         map.put(iid, db);
@@ -102,7 +102,7 @@ public class TransactUtilsTest {
         PowerMockito.doReturn(map).when(TransactUtils.class);
         TransactUtils.extractCreated(any(DataChangeEvent.class), eq(NetworkTopology.class));
 
-        Map<InstanceIdentifier<NetworkTopology>, NetworkTopology> testResult = new HashMap<>();
+        Map<DataObjectIdentifier<NetworkTopology>, NetworkTopology> testResult = new HashMap<>();
         testResult.put(iid, db);
         DataChangeEvent changes = mock(DataChangeEvent.class);
         assertEquals(testResult, TransactUtils.extractCreatedOrUpdated(changes, NetworkTopology.class));
@@ -110,20 +110,20 @@ public class TransactUtilsTest {
 
     @Test
     public void testExtractCreatedOrUpdatedOrRemoved() {
-        Map<InstanceIdentifier<NetworkTopology>, NetworkTopology> result = new HashMap<>();
+        Map<DataObjectIdentifier<NetworkTopology>, NetworkTopology> result = new HashMap<>();
 
         PowerMockito.doReturn(result).when(TransactUtils.class);
         TransactUtils.extractCreatedOrUpdated(any(DataChangeEvent.class), eq(NetworkTopology.class));
 
-        Map<InstanceIdentifier<NetworkTopology>, NetworkTopology> map = new HashMap<>();
-        InstanceIdentifier<NetworkTopology> iid = InstanceIdentifier.create(NetworkTopology.class);
+        Map<DataObjectIdentifier<NetworkTopology>, NetworkTopology> map = new HashMap<>();
+        DataObjectIdentifier<NetworkTopology> iid = DataObjectIdentifier.builder(NetworkTopology.class).build();
         NetworkTopology db = mock(NetworkTopology.class);
         map.put(iid, db);
 
         PowerMockito.doReturn(map).when(TransactUtils.class);
         TransactUtils.extractRemovedObjects(any(DataChangeEvent.class), eq(NetworkTopology.class));
 
-        Map<InstanceIdentifier<NetworkTopology>, NetworkTopology> testResult = new HashMap<>();
+        Map<DataObjectIdentifier<NetworkTopology>, NetworkTopology> testResult = new HashMap<>();
         testResult.put(iid, db);
         DataChangeEvent changes = mock(DataChangeEvent.class);
         assertEquals(testResult, TransactUtils.extractCreatedOrUpdatedOrRemoved(changes, NetworkTopology.class));
@@ -133,7 +133,7 @@ public class TransactUtilsTest {
     @Test
     public void testExtractOriginal() {
         DataChangeEvent changes = mock(DataChangeEvent.class);
-        Map<InstanceIdentifier<?>, DataObject> map = new HashMap<>();
+        Map<DataObjectIdentifier<?>, DataObject> map = new HashMap<>();
         when(changes.getOriginalData()).thenReturn(map);
         when(TransactUtils.extract(any(Map.class), eq(DataObject.class))).thenReturn(new HashMap<>());
 
@@ -149,12 +149,12 @@ public class TransactUtilsTest {
 
     @Test
     public void testExtractRemovedObjects() {
-        Set<InstanceIdentifier<DataObject>> iids = new HashSet<>();
+        Set<DataObjectIdentifier<DataObject>> iids = new HashSet<>();
 
         PowerMockito.doReturn(iids).when(TransactUtils.class);
         TransactUtils.extractRemoved(any(DataChangeEvent.class), eq(DataObject.class));
 
-        Map<InstanceIdentifier<DataObject>, DataObject> result = new HashMap<>();
+        Map<DataObjectIdentifier<DataObject>, DataObject> result = new HashMap<>();
 
         PowerMockito.doReturn(result).when(TransactUtils.class);
         TransactUtils.extractOriginal(any(DataChangeEvent.class), eq(DataObject.class));
@@ -166,7 +166,7 @@ public class TransactUtilsTest {
 
     @Test
     public void testExtract() {
-        Map<InstanceIdentifier<?>, DataObject> changes = new HashMap<>();
+        Map<DataObjectIdentifier<?>, DataObject> changes = new HashMap<>();
         Class<DataObject> klazz = DataObject.class;
         assertEquals(HashMap.class, TransactUtils.extract(changes, klazz).getClass());
     }
@@ -205,7 +205,7 @@ public class TransactUtilsTest {
     @Test
     public void testStampInstanceIdentifier() {
         TransactionBuilder transaction = mock(TransactionBuilder.class);
-        InstanceIdentifier<?> iid = InstanceIdentifier.create(NetworkTopology.class);
+        DataObjectIdentifier<?> iid = DataObjectIdentifier.builder(NetworkTopology.class).build();
         TableSchema<GenericTableSchema> tableSchema = mock(TableSchema.class);
         ColumnSchema<GenericTableSchema, Map<String, String>> columnSchema = mock(ColumnSchema.class);
         InstanceIdentifierCodec instanceIdentifierCodec = mock(InstanceIdentifierCodec.class);
@@ -225,7 +225,7 @@ public class TransactUtilsTest {
     @Test
     public void testStampInstanceIdentifierMutation() throws Exception {
         InstanceIdentifierCodec instanceIdentifierCodec = Mockito.mock(InstanceIdentifierCodec.class);
-        when(instanceIdentifierCodec.serialize(any(InstanceIdentifier.class))).thenReturn(IID_STRING);
+        when(instanceIdentifierCodec.serialize(any(DataObjectIdentifier.class))).thenReturn(IID_STRING);
 
         Mutate<GenericTableSchema> mutate = mock(Mutate.class);
         Operations op = mock(Operations.class);
@@ -243,7 +243,7 @@ public class TransactUtilsTest {
         when(mutate.getMutations()).thenReturn(listMutations);
         doNothing().when(mutate).setMutations(any(List.class));
 
-        InstanceIdentifier<?> iid = InstanceIdentifier.create(NetworkTopology.class);
+        DataObjectIdentifier<?> iid = DataObjectIdentifier.builder(NetworkTopology.class).build();
         TransactionBuilder transaction = mock(TransactionBuilder.class);
         TableSchema<GenericTableSchema> tableSchema = mock(TableSchema.class);
         assertEquals(mutate, TransactUtils.stampInstanceIdentifierMutation(op, transaction, iid, tableSchema,

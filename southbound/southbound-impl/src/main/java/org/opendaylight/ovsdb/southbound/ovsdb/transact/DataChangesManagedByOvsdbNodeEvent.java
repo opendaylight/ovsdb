@@ -5,13 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.ovsdb.southbound.ovsdb.transact;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import org.opendaylight.mdsal.binding.api.DataBroker;
@@ -22,34 +20,32 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class DataChangesManagedByOvsdbNodeEvent implements DataChangeEvent {
 
-    private final InstanceIdentifier<?> iid;
+    private final DataObjectIdentifier<?> iid;
     private final DataBroker db;
     private final DataChangeEvent event;
-    private Map<InstanceIdentifier<?>, DataObject> createdData = null;
-    private Map<InstanceIdentifier<?>, DataObject> updatedData = null;
-    private Map<InstanceIdentifier<?>, DataObject> originalData = null;
-    private Set<InstanceIdentifier<?>> removedPaths;
+    private Map<DataObjectIdentifier<?>, DataObject> createdData = null;
+    private Map<DataObjectIdentifier<?>, DataObject> updatedData = null;
+    private Map<DataObjectIdentifier<?>, DataObject> originalData = null;
+    private Set<DataObjectIdentifier<?>> removedPaths;
 
-    public DataChangesManagedByOvsdbNodeEvent(DataBroker dataBroker, InstanceIdentifier<?> iid,
+    public DataChangesManagedByOvsdbNodeEvent(DataBroker dataBroker, DataObjectIdentifier<?> iid,
             DataChangeEvent event) {
         this.db = dataBroker;
         this.iid = iid;
         this.event = event;
     }
 
-    private Map<InstanceIdentifier<?>, DataObject> filter(Map<InstanceIdentifier<?>,
+    private Map<DataObjectIdentifier<?>, DataObject> filter(Map<DataObjectIdentifier<?>,
             DataObject> data) {
-        Map<InstanceIdentifier<?>, DataObject> result
-            = new HashMap<>();
-        for (Entry<InstanceIdentifier<?>, DataObject> entry: data.entrySet()) {
+        Map<DataObjectIdentifier<?>, DataObject> result = new HashMap<>();
+        for (var entry: data.entrySet()) {
             if (isManagedBy(entry.getKey())) {
                 result.put(entry.getKey(),entry.getValue());
             } else {
-                Class<?> type = entry.getKey().getTargetType();
+                Class<?> type = entry.getKey().lastStep().type();
                 if (type.equals(OvsdbNodeAugmentation.class)
                         || type.equals(OvsdbTerminationPointAugmentation.class)
                         || type.equals(Node.class)) {
@@ -61,7 +57,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements DataChangeEvent {
     }
 
     @Override
-    public Map<InstanceIdentifier<?>, DataObject> getCreatedData() {
+    public Map<DataObjectIdentifier<?>, DataObject> getCreatedData() {
         if (this.createdData  == null) {
             this.createdData = filter(event.getCreatedData());
         }
@@ -69,7 +65,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements DataChangeEvent {
     }
 
     @Override
-    public Map<InstanceIdentifier<?>, DataObject> getUpdatedData() {
+    public Map<DataObjectIdentifier<?>, DataObject> getUpdatedData() {
         if (this.updatedData == null) {
             this.updatedData = filter(event.getUpdatedData());
         }
@@ -77,10 +73,10 @@ public class DataChangesManagedByOvsdbNodeEvent implements DataChangeEvent {
     }
 
     @Override
-    public Set<InstanceIdentifier<?>> getRemovedPaths() {
+    public Set<DataObjectIdentifier<?>> getRemovedPaths() {
         if (this.removedPaths == null) {
             this.removedPaths = new HashSet<>();
-            for (InstanceIdentifier<?> path: event.getRemovedPaths()) {
+            for (var path: event.getRemovedPaths()) {
                 if (isManagedBy(path)) {
                     this.removedPaths.add(path);
                 }
@@ -89,10 +85,10 @@ public class DataChangesManagedByOvsdbNodeEvent implements DataChangeEvent {
         return this.removedPaths;
     }
 
-    private boolean isManagedBy(InstanceIdentifier<?> bridgeIid) {
+    private boolean isManagedBy(DataObjectIdentifier<?> bridgeIid) {
 
         // Did we just create the containing node?
-        InstanceIdentifier<?> managedBy = getManagedByIid(event.getCreatedData() , bridgeIid);
+        var managedBy = getManagedByIid(event.getCreatedData() , bridgeIid);
         if (managedBy != null && managedBy.equals(iid)) {
             return true;
         }
@@ -117,27 +113,27 @@ public class DataChangesManagedByOvsdbNodeEvent implements DataChangeEvent {
 
     }
 
-    private InstanceIdentifier<?> getManagedByIidFromOperDS(InstanceIdentifier<?> bridgeIid) {
+    private DataObjectIdentifier<?> getManagedByIidFromOperDS(DataObjectIdentifier<?> bridgeIid) {
         // Get the InstanceIdentifier of the containing node
-        InstanceIdentifier<Node> nodeEntryIid = bridgeIid.firstIdentifierOf(Node.class);
+        DataObjectIdentifier<Node> nodeEntryIid = bridgeIid.trimTo(Node.class);
 
-        Optional<?> bridgeNode =  SouthboundUtil.readNode(db.newReadWriteTransaction(),nodeEntryIid);
+        Optional<?> bridgeNode =  SouthboundUtil.readNode(db.newReadWriteTransaction() ,nodeEntryIid);
         if (bridgeNode.isPresent() && bridgeNode.orElseThrow() instanceof Node node) {
             OvsdbBridgeAugmentation bridge = node.augmentation(OvsdbBridgeAugmentation.class);
             if (bridge != null) {
                 final var managedBy = bridge.getManagedBy();
                 if (managedBy != null && managedBy.getValue() instanceof DataObjectIdentifier<?> doi) {
-                    return doi.toLegacy();
+                    return doi;
                 }
             }
         }
         return null;
     }
 
-    private InstanceIdentifier<?> getManagedByIid(Map<InstanceIdentifier<?>, DataObject> map,
-            InstanceIdentifier<?> iidToCheck) {
+    private DataObjectIdentifier<?> getManagedByIid(Map<DataObjectIdentifier<?>, DataObject> map,
+            DataObjectIdentifier<?> iidToCheck) {
         // Get the InstanceIdentifier of the containing node
-        InstanceIdentifier<Node> nodeEntryIid = iidToCheck.firstIdentifierOf(Node.class);
+        var nodeEntryIid = iidToCheck.trimTo(Node.class);
 
         // Look for the Node in the created/updated data
         DataObject dataObject = null;
@@ -151,7 +147,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements DataChangeEvent {
             if (bridge != null) {
                 final var managedBy = bridge.getManagedBy();
                 if (managedBy != null && managedBy.getValue() instanceof DataObjectIdentifier<?> doi
-                    && iid.equals(doi.toLegacy())) {
+                    && iid.equals(doi)) {
                     return iid;
                 }
             }
@@ -160,7 +156,7 @@ public class DataChangesManagedByOvsdbNodeEvent implements DataChangeEvent {
     }
 
     @Override
-    public Map<InstanceIdentifier<?>, DataObject> getOriginalData() {
+    public Map<DataObjectIdentifier<?>, DataObject> getOriginalData() {
         if (this.originalData == null) {
             this.originalData = filter(event.getOriginalData());
         }

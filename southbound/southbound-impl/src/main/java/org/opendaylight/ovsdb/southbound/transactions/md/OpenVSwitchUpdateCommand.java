@@ -49,6 +49,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
@@ -78,7 +79,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
         for (Entry<UUID, OpenVSwitch> entry : updatedOpenVSwitchRows.entrySet()) {
             OpenVSwitch openVSwitch = entry.getValue();
-            final InstanceIdentifier<Node> nodePath = getInstanceIdentifier(openVSwitch);
+            final var nodePath = getInstanceIdentifier(openVSwitch);
 
             OvsdbNodeAugmentationBuilder ovsdbNodeBuilder = new OvsdbNodeAugmentationBuilder();
 
@@ -91,7 +92,7 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
             setOtherConfig(transaction, ovsdbNodeBuilder, oldEntry, openVSwitch);
             ovsdbNodeBuilder.setConnectionInfo(getConnectionInfo());
 
-            transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath.toIdentifier(), new NodeBuilder()
+            transaction.merge(LogicalDatastoreType.OPERATIONAL, nodePath, new NodeBuilder()
                 .setNodeId(getNodeId(openVSwitch))
                 .addAugmentation(ovsdbNodeBuilder.build())
                 .build());
@@ -251,30 +252,29 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
         }
     }
 
-    private InstanceIdentifier<Node> getInstanceIdentifier(OpenVSwitch ovs) {
+    private DataObjectIdentifier<Node> getInstanceIdentifier(OpenVSwitch ovs) {
         if (ovs.getExternalIdsColumn() != null
                 && ovs.getExternalIdsColumn().getData() != null
                 && ovs.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
             String iidString = ovs.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY);
-            InstanceIdentifier<Node> iid =
-                    (InstanceIdentifier<Node>) instanceIdentifierCodec.bindingDeserializerOrNull(iidString);
+            var iid = (DataObjectIdentifier<Node>) instanceIdentifierCodec.bindingDeserializerOrNull(iidString)
+                .toIdentifier();
             getOvsdbConnectionInstance().setInstanceIdentifier(iid);
         } else {
             String nodeString = SouthboundConstants.OVSDB_URI_PREFIX + "://" + SouthboundConstants.UUID + "/"
                     + ovs.getUuid().toString();
             NodeId nodeId = new NodeId(new Uri(nodeString));
             NodeKey nodeKey = new NodeKey(nodeId);
-            InstanceIdentifier<Node> iid = InstanceIdentifier.builder(NetworkTopology.class)
-                    .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                    .child(Node.class,nodeKey)
-                    .build();
-            getOvsdbConnectionInstance().setInstanceIdentifier(iid);
+            getOvsdbConnectionInstance().setInstanceIdentifier(DataObjectIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class,new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .child(Node.class ,nodeKey)
+                .build());
         }
         return getOvsdbConnectionInstance().getInstanceIdentifier();
     }
 
     @VisibleForTesting
     @NonNull NodeId getNodeId(OpenVSwitch ovs) {
-        return getInstanceIdentifier(ovs).firstKeyOf(Node.class).getNodeId();
+        return getInstanceIdentifier(ovs).getFirstKeyOf(Node.class).getNodeId();
     }
 }

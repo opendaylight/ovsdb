@@ -72,7 +72,7 @@ public class HwvtepOperationalDataChangeListener implements DataTreeChangeListen
     }
 
     private void updateDeviceOpData(DataObjectIdentifier<Node> key, DataObjectModification<?> mod) {
-        Class<? extends EntryObject<?, ?>> childClass = (Class<? extends EntryObject<?, ?>>) mod.dataType();
+        Class<? extends EntryObject<?, ?, ?>> childClass = (Class<? extends EntryObject<?, ?, ?>>) mod.dataType();
         var instanceIdentifier = getKey(key, mod, mod.dataAfter());
         switch (mod.modificationType()) {
             case WRITE:

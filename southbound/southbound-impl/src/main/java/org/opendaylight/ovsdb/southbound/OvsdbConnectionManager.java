@@ -60,7 +60,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -496,7 +495,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
         // not clear manager entry, which OvsdbNodeRemoveCommand look for before cleanup.
 
         @SuppressWarnings("unchecked")
-        final var nodeIid = ((InstanceIdentifier<Node>) entity.getIdentifier()).toIdentifier();
+        final var nodeIid = (DataObjectIdentifier<Node>) entity.getIdentifier();
 
         txInvoker.invoke(transaction -> {
             Optional<Node> ovsdbNodeOpt = SouthboundUtil.readNode(transaction, nodeIid);
@@ -563,7 +562,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
                     + "connection {}",iid,ovsdbConnectionInstance.getConnectionInfo());
             ovsdbConnectionInstance.setInstanceIdentifier(iid);
         }
-        Entity deviceEntity = new Entity(ENTITY_TYPE, iid.toLegacy());
+        Entity deviceEntity = new Entity(ENTITY_TYPE, iid);
         LOG.debug("Ovsdb Entity {} created for device connection {}",
                 deviceEntity, ovsdbConnectionInstance.getConnectionInfo());
         return deviceEntity;
@@ -582,7 +581,7 @@ public class OvsdbConnectionManager implements OvsdbConnectionListener, AutoClos
             disconnected(ovsdbConnectionInstance.getOvsdbClient());
             //TODO do cleanup for old connection or stale check
         }
-        nodeIdVsConnectionInstance.put((DataObjectIdentifier<Node>) candidateEntity.getIdentifier().toIdentifier(),
+        nodeIdVsConnectionInstance.put((DataObjectIdentifier<Node>) candidateEntity.getIdentifier(),
                 ovsdbConnectionInstance);
         entityConnectionMap.put(candidateEntity, ovsdbConnectionInstance);
         ovsdbConnectionInstance.setConnectedEntity(candidateEntity);

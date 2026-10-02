@@ -32,6 +32,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <modules>
     <module>it</module>
     <module>binding-parent</module>
+    <module>bundle-parent</module>
   </modules>
 
   <!--

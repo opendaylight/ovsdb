@@ -7,7 +7,6 @@
  */
 package org.opendaylight.ovsdb.hwvtepsouthbound;
 
-import com.google.common.collect.Sets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -372,7 +371,7 @@ public class HwvtepDeviceInfo {
         if (reference == null || tep == null) {
             return;
         }
-        tepIdReferences.computeIfAbsent(tep, (tepId) -> Sets.newConcurrentHashSet());
+        tepIdReferences.computeIfAbsent(tep, (tepId) -> ConcurrentHashMap.newKeySet());
         tepIdReferences.get(tep).add(reference);
     }
 

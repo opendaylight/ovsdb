@@ -26,7 +26,6 @@ import org.opendaylight.infrautils.diagstatus.ServiceState;
 import org.opendaylight.infrautils.ready.SystemReadyMonitor;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -44,9 +43,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -169,13 +168,11 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
             LOG.warn("OVSDB Southbound Provider instance entity {} was already registered for ownership",
                 instanceEntity, e);
         }
-        InstanceIdentifier<Topology> path = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
-        DataTreeIdentifier<Topology> treeId = DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, path);
-
-        LOG.trace("Registering listener for path {}", treeId);
-        operTopologyRegistration = dataBroker.registerTreeChangeListener(treeId, this);
+        var path = DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+            .build();
+        LOG.trace("Registering listener for path {}", path);
+        operTopologyRegistration = dataBroker.registerTreeChangeListener(LogicalDatastoreType.OPERATIONAL, path, this);
         LOG.info("SouthboundProvider Session Initiated");
     }
 
@@ -204,15 +201,14 @@ public class SouthboundProvider implements DataTreeChangeListener<Topology>, Aut
     }
 
     private void initializeOvsdbTopology(final @NonNull LogicalDatastoreType type) {
-        InstanceIdentifier<Topology> path = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
+        var path = DataObjectIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+                .build();
         ReadWriteTransaction transaction = dataBroker.newReadWriteTransaction();
         FluentFuture<Boolean> ovsdbTp = transaction.exists(type, path);
         try {
             if (!ovsdbTp.get().booleanValue()) {
-                transaction.mergeParentStructurePut(type, path.toIdentifier(),
-                    new TopologyBuilder().setTopologyId(SouthboundConstants.OVSDB_TOPOLOGY_ID).build());
+                transaction.mergeParentStructurePut(type, path, new TopologyBuilder().withKey(path.key()).build());
                 transaction.commit();
             } else {
                 transaction.cancel();

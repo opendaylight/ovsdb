@@ -55,7 +55,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.binding.DataObject;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
@@ -98,7 +97,7 @@ public class TerminationPointCreateCommandTest {
         when(op.insert(any(Interface.class))).thenReturn(insert);
         when(insert.withId(anyString())).thenReturn(insert);
         MemberModifier.suppress(MemberMatcher.method(TerminationPointCreateCommand.class,
-                "stampInstanceIdentifier", TransactionBuilder.class, InstanceIdentifier.class, String.class));
+                "stampInstanceIdentifier", TransactionBuilder.class, DataObjectIdentifier.class, String.class));
         when(ovsInterface.getName()).thenReturn(INTERFACE_NAME);
 
         Port port = mock(Port.class);

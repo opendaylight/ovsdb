@@ -29,7 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntryKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 
 public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
     private final InstanceIdentifierCodec instanceIdentifierCodec;
@@ -51,23 +51,23 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
     public void execute(ReadWriteTransaction transaction) {
         for (Bridge bridge : updatedBridgeRows.values()) {
             final var bridgeIid = SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec,
-                getOvsdbConnectionInstance(), bridge).toLegacy();
+                getOvsdbConnectionInstance(), bridge);
             deleteControllers(transaction, controllerEntriesToRemove(bridgeIid, bridge));
         }
     }
 
     private static void deleteControllers(ReadWriteTransaction transaction,
-            List<InstanceIdentifier<ControllerEntry>> controllerEntryIids) {
+            List<DataObjectIdentifier<ControllerEntry>> controllerEntryIids) {
         for (var controllerEntryIid: controllerEntryIids) {
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, controllerEntryIid.toIdentifier());
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, controllerEntryIid);
         }
     }
 
-    private List<InstanceIdentifier<ControllerEntry>> controllerEntriesToRemove(
-            InstanceIdentifier<Node> bridgeIid, Bridge bridge) {
+    private List<DataObjectIdentifier<ControllerEntry>> controllerEntriesToRemove(
+            DataObjectIdentifier<Node> bridgeIid, Bridge bridge) {
         requireNonNull(bridgeIid);
         requireNonNull(bridge);
-        List<InstanceIdentifier<ControllerEntry>> result = new ArrayList<>();
+        List<DataObjectIdentifier<ControllerEntry>> result = new ArrayList<>();
         Bridge oldBridgeNode = oldBridgeRows.get(bridge.getUuid());
 
         if (oldBridgeNode != null && oldBridgeNode.getControllerColumn() != null) {
@@ -76,11 +76,11 @@ public class OvsdbControllerRemovedCommand extends AbstractTransactionCommand {
                         || !bridge.getControllerColumn().getData().contains(controllerUuid)) {
                     Controller controller = removedControllerRows.get(controllerUuid);
                     if (controller != null && controller.getTargetColumn() != null) {
-                        InstanceIdentifier<ControllerEntry> iid = bridgeIid
-                                .augmentation(OvsdbBridgeAugmentation.class)
-                                .child(ControllerEntry.class,
-                                        new ControllerEntryKey(new Uri(controller.getTargetColumn().getData())));
-                        result.add(iid);
+                        result.add(bridgeIid.toBuilder()
+                            .augmentation(OvsdbBridgeAugmentation.class)
+                            .child(ControllerEntry.class,
+                                new ControllerEntryKey(new Uri(controller.getTargetColumn().getData())))
+                            .build());
                     }
                 }
             }

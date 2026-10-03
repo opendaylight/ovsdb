@@ -48,7 +48,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -104,7 +103,7 @@ public class OvsdbNodeUpdateCommandTest {
         when(ovsdbNode.getOpenvswitchExternalIds()).thenReturn(Map.of(externalId.key(), externalId));
         PowerMockito.suppress(MemberMatcher.method(OvsdbNodeUpdateCommand.class, "stampInstanceIdentifier",
                 TransactionBuilder.class, DataObjectIdentifier.class, InstanceIdentifierCodec.class));
-        PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
+        PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(DataObjectIdentifier.class));
         doNothing().when(ovs).setExternalIds(any(ImmutableMap.class));
 
         Mutate<GenericTableSchema> mutate = mock(Mutate.class);

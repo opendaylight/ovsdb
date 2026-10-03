@@ -39,7 +39,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,9 +111,9 @@ public class OvsdbQueueUpdateCommand extends AbstractTransactionCommand {
         if (queue.getExternalIdsColumn() != null
                 && queue.getExternalIdsColumn().getData() != null) {
             if (queue.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
-                InstanceIdentifier<Queues> queueIid =
-                        (InstanceIdentifier<Queues>) instanceIdentifierCodec.bindingDeserializerOrNull(
-                                queue.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
+                var queueIid = (DataObjectIdentifier<Queues>) instanceIdentifierCodec.bindingDeserializerOrNull(
+                    queue.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY))
+                    .toIdentifier();
                 if (queueIid != null) {
                     QueuesKey queuesKey = queueIid.firstKeyOf(Queues.class);
                     if (queuesKey != null) {

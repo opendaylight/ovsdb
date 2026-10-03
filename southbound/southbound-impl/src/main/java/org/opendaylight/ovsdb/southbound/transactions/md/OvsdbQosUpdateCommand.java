@@ -48,7 +48,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,9 +122,9 @@ public class OvsdbQosUpdateCommand extends AbstractTransactionCommand {
         if (qos.getExternalIdsColumn() != null
                 && qos.getExternalIdsColumn().getData() != null) {
             if (qos.getExternalIdsColumn().getData().containsKey(SouthboundConstants.IID_EXTERNAL_ID_KEY)) {
-                InstanceIdentifier<QosEntries> qosIid =
-                        (InstanceIdentifier<QosEntries>) instanceIdentifierCodec.bindingDeserializerOrNull(
-                                qos.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY));
+                var qosIid = (DataObjectIdentifier<QosEntries>) instanceIdentifierCodec.bindingDeserializerOrNull(
+                    qos.getExternalIdsColumn().getData().get(SouthboundConstants.IID_EXTERNAL_ID_KEY))
+                    .toIdentifier();
                 if (qosIid != null) {
                     QosEntriesKey qosEntriesKey = qosIid.firstKeyOf(QosEntries.class);
                     if (qosEntriesKey != null) {

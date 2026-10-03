@@ -64,7 +64,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.DataObjectReference;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint32;
 
 public class SouthboundMapperTest {
@@ -437,7 +436,7 @@ public class SouthboundMapperTest {
         // if true
         externalIdMap.put(SouthboundConstants.IID_EXTERNAL_ID_KEY, "test");
         InstanceIdentifierCodec iidc = mock(InstanceIdentifierCodec.class);
-        InstanceIdentifier iid = InstanceIdentifier.create(NetworkTopology.class);
+        DataObjectIdentifier iid = DataObjectIdentifier.builder(NetworkTopology.class).build();
         when(iidc.bindingDeserializerOrNull("test")).thenReturn(iid);
         assertEquals("Incorrect Instance Identifier received", iid, SouthboundMapper.getInstanceIdentifier(iidc, ovs));
         // if false

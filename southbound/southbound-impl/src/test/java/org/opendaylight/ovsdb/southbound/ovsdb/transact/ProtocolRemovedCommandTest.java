@@ -37,7 +37,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.OvsdbBridgeProtocolOpenflow10;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
@@ -55,7 +54,7 @@ public class ProtocolRemovedCommandTest {
     @Test
     @Ignore("This needs to be rewritten")
     public void testExecute() throws Exception {
-        PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(InstanceIdentifier.class));
+        PowerMockito.suppress(MemberMatcher.methodsDeclaredIn(DataObjectIdentifier.class));
 
         ProtocolEntry protocol = mock(ProtocolEntry.class);
         when(protocol.getProtocol()).thenAnswer(

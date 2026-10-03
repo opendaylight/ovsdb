@@ -73,7 +73,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.node.TerminationPointKey;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.Uint16;
 import org.opendaylight.yangtools.yang.common.Uint32;
 import org.powermock.api.mockito.PowerMockito;
@@ -653,17 +652,19 @@ public class OvsdbPortUpdateCommandTest {
         when(column.getData()).thenReturn(map);
 
         PowerMockito.mockStatic(SouthboundUtil.class);
-        InstanceIdentifier<TerminationPoint> terminationPointIId = InstanceIdentifier.create(NetworkTopology.class)
+        var terminationPointIId = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
             .child(Node.class, new NodeKey(new NodeId("testNode")))
-            .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp")));
+            .child(TerminationPoint.class, new TerminationPointKey(new TpId("testTp")))
+            .build();
 //        PowerMockito
 //                .when((InstanceIdentifier<TerminationPoint>) SouthboundUtil.deserializeInstanceIdentifier(
 //                        any(InstanceIdentifierCodec.class), anyString()))
 //                .thenReturn(terminationPointIId);
-        InstanceIdentifier<Node> bridgeIid = InstanceIdentifier.create(NetworkTopology.class)
+        var bridgeIid = DataObjectIdentifier.builder(NetworkTopology.class)
             .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-            .child(Node.class, new NodeKey(new NodeId("testNode")));
+            .child(Node.class, new NodeKey(new NodeId("testNode")))
+            .build();
         assertEquals(terminationPointIId,
                 Whitebox.invokeMethod(ovsdbPortUpdateCommand, "getInstanceIdentifier", bridgeIid, port));
     }

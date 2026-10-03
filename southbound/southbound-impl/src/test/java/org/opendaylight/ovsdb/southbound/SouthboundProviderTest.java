@@ -42,10 +42,9 @@ import org.opendaylight.ovsdb.lib.operations.DefaultOperations;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 
 public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
     private EntityOwnershipService entityOwnershipService;
@@ -122,9 +121,9 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
         when(entityOwnershipService.getOwnershipState(any(Entity.class))).thenReturn(
             Optional.of(EntityOwnershipState.from(false, true)));
         Entity entity = new Entity("ovsdb-southbound-provider", "ovsdb-southbound-provider");
-        KeyedInstanceIdentifier<Topology, TopologyKey> topologyIid = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID));
+        var topologyIid = DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+            .build();
 
         try (SouthboundProvider southboundProvider = new SouthboundProvider(
                 getDataBroker(),
@@ -136,10 +135,10 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
                 diagStatusService, new DefaultOperations())) {
 
             // At this point the OVSDB topology must not be present in either tree
-            assertFalse(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION,
-                topologyIid.toIdentifier()).get().isPresent());
-            assertFalse(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
-                topologyIid.toIdentifier()).get().isPresent());
+            assertFalse(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION, topologyIid)
+                .get().isPresent());
+            assertFalse(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL, topologyIid)
+                .get().isPresent());
 
             // Become owner
             southboundProvider.handleOwnershipChange(EntityOwnershipStateChange.from(false, true, true));
@@ -152,19 +151,19 @@ public class SouthboundProviderTest extends AbstractConcurrentDataBrokerTest {
             assertTrue(southboundProvider.isRegistered());
 
             // Now the OVSDB topology must be present in both trees
-            assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION,
-                topologyIid.toIdentifier()).get().isPresent());
-            assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
-                topologyIid.toIdentifier()).get().isPresent());
+            assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION, topologyIid)
+                .get().isPresent());
+            assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL, topologyIid)
+                .get().isPresent());
 
             // Verify idempotency
             southboundProvider.handleOwnershipChange(EntityOwnershipStateChange.from(false, true, true));
 
             // The OVSDB topology must be present in both trees
-            assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION,
-                topologyIid.toIdentifier()).get().isPresent());
-            assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL,
-                topologyIid.toIdentifier()).get().isPresent());
+            assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.CONFIGURATION, topologyIid)
+                .get().isPresent());
+            assertTrue(getDataBroker().newReadOnlyTransaction().read(LogicalDatastoreType.OPERATIONAL, topologyIid)
+                .get().isPresent());
         }
     }
 }

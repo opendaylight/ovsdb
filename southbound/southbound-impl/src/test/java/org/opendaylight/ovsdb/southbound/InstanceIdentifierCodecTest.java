@@ -25,8 +25,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.mdsal.dom.api.DOMSchemaService;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -104,7 +104,7 @@ public class InstanceIdentifierCodecTest {
     @Test
     @Ignore("Mocking of sealed interfaces. This needs proper test data.")
     public void testSerialize() {
-        InstanceIdentifier<?> iid = mock(InstanceIdentifier.class);
+        DataObjectIdentifier<?> iid = mock(DataObjectIdentifier.class);
         YangInstanceIdentifier yiid = mock(YangInstanceIdentifier.class);
         when(bindingNormalizedNodeSerializer.toYangInstanceIdentifier(iid)).thenReturn(yiid);
         assertEquals("Error, did not return correct string", "", instanceIdCodec.serialize(iid));

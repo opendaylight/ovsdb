@@ -51,8 +51,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.util.BindingMap;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,17 +119,16 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
     @VisibleForTesting
     void removeOldConfigs(ReadWriteTransaction transaction, Map<String, String> oldOtherConfigs, OpenVSwitch ovs) {
-        InstanceIdentifier<OvsdbNodeAugmentation> nodeAugmentataionIid = InstanceIdentifier
-                .create(NetworkTopology.class)
+        var nodeAugmentataionIid = DataObjectIdentifier
+                .builder(NetworkTopology.class)
                 .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
                 .child(Node.class, new NodeKey(getNodeId(ovs)))
-                .augmentation(OvsdbNodeAugmentation.class);
-        Set<String> otherConfigKeys = oldOtherConfigs.keySet();
-        for (String otherConfigKey : otherConfigKeys) {
-            KeyedInstanceIdentifier<OpenvswitchOtherConfigs, OpenvswitchOtherConfigsKey> externalIid =
-                    nodeAugmentataionIid
-                    .child(OpenvswitchOtherConfigs.class, new OpenvswitchOtherConfigsKey(otherConfigKey));
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, externalIid.toIdentifier());
+                .augmentation(OvsdbNodeAugmentation.class)
+                .build();
+        for (String otherConfigKey : oldOtherConfigs.keySet()) {
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeAugmentataionIid.toBuilder()
+                .child(OpenvswitchOtherConfigs.class, new OpenvswitchOtherConfigsKey(otherConfigKey))
+                .build());
         }
     }
 
@@ -170,17 +167,15 @@ public class OpenVSwitchUpdateCommand extends AbstractTransactionCommand {
 
     @VisibleForTesting
     void removeExternalIds(ReadWriteTransaction transaction, Map<String, String> oldExternalIds, OpenVSwitch ovs) {
-        InstanceIdentifier<OvsdbNodeAugmentation> nodeAugmentataionIid = InstanceIdentifier
-                .create(NetworkTopology.class)
-                .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
-                .child(Node.class, new NodeKey(getNodeId(ovs)))
-                .augmentation(OvsdbNodeAugmentation.class);
-        Set<String> externalIdKeys = oldExternalIds.keySet();
-        for (String externalIdKey : externalIdKeys) {
-            KeyedInstanceIdentifier<OpenvswitchExternalIds, OpenvswitchExternalIdsKey> externalIid =
-                    nodeAugmentataionIid
-                    .child(OpenvswitchExternalIds.class, new OpenvswitchExternalIdsKey(externalIdKey));
-            transaction.delete(LogicalDatastoreType.OPERATIONAL, externalIid.toIdentifier());
+        var nodeAugmentataionIid = DataObjectIdentifier.builder(NetworkTopology.class)
+            .child(Topology.class, new TopologyKey(SouthboundConstants.OVSDB_TOPOLOGY_ID))
+            .child(Node.class, new NodeKey(getNodeId(ovs)))
+            .augmentation(OvsdbNodeAugmentation.class)
+            .build();
+        for (String externalIdKey : oldExternalIds.keySet()) {
+            transaction.delete(LogicalDatastoreType.OPERATIONAL, nodeAugmentataionIid.toBuilder()
+                .child(OpenvswitchExternalIds.class, new OpenvswitchExternalIdsKey(externalIdKey))
+                .build());
         }
     }
 

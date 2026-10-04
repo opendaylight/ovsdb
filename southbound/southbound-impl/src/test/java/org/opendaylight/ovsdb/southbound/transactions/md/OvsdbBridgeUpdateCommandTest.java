@@ -71,7 +71,6 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.binding.BindingInstanceIdentifier;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
@@ -267,22 +266,10 @@ public class OvsdbBridgeUpdateCommandTest {
 
     @Test
     public void testBuildBridgeNode() throws Exception {
-        NodeBuilder bridgeNodeBuilder = mock(NodeBuilder.class);
-        PowerMockito.whenNew(NodeBuilder.class).withNoArguments().thenReturn(bridgeNodeBuilder);
-        //suppress call to getNodeId()
-        MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "getNodeId", Bridge.class));
-        when(bridgeNodeBuilder.setNodeId(any(NodeId.class))).thenReturn(bridgeNodeBuilder);
-        OvsdbBridgeAugmentationBuilder ovsdbBridgeAugmentationBuilder = mock(OvsdbBridgeAugmentationBuilder.class);
-        PowerMockito.whenNew(OvsdbBridgeAugmentationBuilder.class).withNoArguments()
-                .thenReturn(ovsdbBridgeAugmentationBuilder);
         Bridge bridge = mock(Bridge.class);
         when(bridge.getName()).thenReturn("bridge name");
-        PowerMockito.whenNew(OvsdbBridgeName.class).withAnyArguments().thenReturn(mock(OvsdbBridgeName.class));
-        when(ovsdbBridgeAugmentationBuilder.setBridgeName(any(OvsdbBridgeName.class)))
-                .thenReturn(ovsdbBridgeAugmentationBuilder);
         when(bridge.getUuid()).thenReturn(mock(UUID.class));
         PowerMockito.whenNew(Uuid.class).withAnyArguments().thenReturn(mock(Uuid.class));
-        when(ovsdbBridgeAugmentationBuilder.setBridgeUuid(any(Uuid.class))).thenReturn(ovsdbBridgeAugmentationBuilder);
 
         //suppress calls to the set methods
         MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "setDataPath",
@@ -302,11 +289,14 @@ public class OvsdbBridgeUpdateCommandTest {
         MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "setManagedBy",
                 OvsdbBridgeAugmentationBuilder.class));
 
-        when(ovsdbBridgeAugmentationBuilder.build()).thenReturn(mock(OvsdbBridgeAugmentation.class));
-        when(bridgeNodeBuilder.addAugmentation(any(OvsdbBridgeAugmentation.class))).thenReturn(bridgeNodeBuilder);
-        Node node = mock(Node.class);
-        when(bridgeNodeBuilder.build()).thenReturn(node);
-        assertEquals(node, ovsdbBridgeUpdateCommand.buildBridgeNode(bridge));
+        MemberModifier.suppress(MemberMatcher.method(OvsdbBridgeUpdateCommand.class, "getNodeId", Bridge.class));
+        when(ovsdbBridgeUpdateCommand.getNodeId(bridge)).thenReturn(new NodeId("bridge name"));
+
+        final var node = ovsdbBridgeUpdateCommand.buildBridgeNode(bridge);
+        assertNotNull(node);
+        final var augmentation = node.augmentation(OvsdbBridgeAugmentation.class);
+        assertNotNull(augmentation);
+        assertEquals(new OvsdbBridgeName("bridge name"), augmentation.getBridgeName());
     }
 
     @Test

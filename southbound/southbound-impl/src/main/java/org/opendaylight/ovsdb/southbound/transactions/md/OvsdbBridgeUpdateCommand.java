@@ -403,7 +403,8 @@ public class OvsdbBridgeUpdateCommand extends AbstractTransactionCommand {
         return SouthboundMapper.createInstanceIdentifier(instanceIdentifierCodec, getOvsdbConnectionInstance(), bridge);
     }
 
-    private NodeId getNodeId(Bridge bridge) {
+    @VisibleForTesting
+    NodeId getNodeId(Bridge bridge) {
         return getInstanceIdentifier(bridge).getFirstKeyOf(Node.class).getNodeId();
     }
 

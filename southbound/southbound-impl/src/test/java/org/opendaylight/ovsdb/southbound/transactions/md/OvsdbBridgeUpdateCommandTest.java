@@ -7,8 +7,9 @@
  */
 package org.opendaylight.ovsdb.southbound.transactions.md;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -63,7 +64,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ControllerEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.bridge.attributes.ProtocolEntryBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.ovsdb.rev150105.ovsdb.node.attributes.ManagedNodeEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -75,6 +75,7 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
 import org.opendaylight.yangtools.binding.BindingInstanceIdentifier;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.api.support.membermodification.MemberMatcher;
 import org.powermock.api.support.membermodification.MemberModifier;
@@ -238,12 +239,9 @@ public class OvsdbBridgeUpdateCommandTest {
 
     @Test
     public void testBuildConnectionNode() throws Exception {
-        NodeBuilder connectionNode = mock(NodeBuilder.class);
-        PowerMockito.whenNew(NodeBuilder.class).withNoArguments().thenReturn(connectionNode);
         OvsdbConnectionInstance ovsdbConnectionInstance = mock(OvsdbConnectionInstance.class);
         when(ovsdbBridgeUpdateCommand.getOvsdbConnectionInstance()).thenReturn(ovsdbConnectionInstance);
         when(ovsdbConnectionInstance.getNodeId()).thenReturn(mock(NodeId.class));
-        when(connectionNode.setNodeId(any(NodeId.class))).thenReturn(connectionNode);
 
         PowerMockito.mockStatic(SouthboundMapper.class);
         final var bridgeIid = DataObjectIdentifier.builder(NetworkTopology.class)
@@ -254,25 +252,17 @@ public class OvsdbBridgeUpdateCommandTest {
                 any(OvsdbConnectionInstance.class), any(Bridge.class)))
                 .thenReturn(bridgeIid);
 
-        ManagedNodeEntry managedBridge = new ManagedNodeEntryBuilder()
-                .setBridgeRef(new OvsdbBridgeRef(DataObjectIdentifier.builder(NetworkTopology.class)
-                    .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
-                    .child(Node.class, new NodeKey(new NodeId("testNode")))
-                    .build()))
-                .build();
-
-        ManagedNodeEntryBuilder managedNodeEntryBuilder = mock(ManagedNodeEntryBuilder.class);
-        PowerMockito.whenNew(ManagedNodeEntryBuilder.class).withNoArguments().thenReturn(managedNodeEntryBuilder);
-        PowerMockito.whenNew(OvsdbBridgeRef.class).withAnyArguments().thenReturn(mock(OvsdbBridgeRef.class));
-        when(managedNodeEntryBuilder.setBridgeRef(any(OvsdbBridgeRef.class))).thenReturn(managedNodeEntryBuilder);
-        when(managedNodeEntryBuilder.build()).thenReturn(managedBridge);
-
-        when(connectionNode.addAugmentation(any(OvsdbNodeAugmentation.class))).thenReturn(connectionNode);
-
-        Node node = mock(Node.class);
-        when(connectionNode.build()).thenReturn(node);
         Bridge bridge = mock(Bridge.class);
-        assertEquals(node, ovsdbBridgeUpdateCommand.buildConnectionNode(bridge));
+        final var node = ovsdbBridgeUpdateCommand.buildConnectionNode(bridge);
+        assertNotNull(node);
+        final var augmentation = node.augmentation(OvsdbNodeAugmentation.class);
+        assertNotNull(augmentation);
+        assertEquals(BindingMap.of(new ManagedNodeEntryBuilder()
+            .setBridgeRef(new OvsdbBridgeRef(DataObjectIdentifier.builder(NetworkTopology.class)
+                .child(Topology.class, new TopologyKey(new TopologyId("testTopo")))
+                .child(Node.class, new NodeKey(new NodeId("testNode")))
+                .build()))
+            .build()), augmentation.getManagedNodeEntry());
     }
 
     @Test

@@ -11,7 +11,6 @@ import static java.util.Objects.requireNonNull;
 import static org.opendaylight.ovsdb.southbound.SouthboundUtil.schemaMismatchLog;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableBiMap;
@@ -250,8 +249,7 @@ public final class SouthboundMapper {
         DatapathId datapath;
         if (dpid.matches("^[0-9a-fA-F]{16}")) {
             Splitter splitter = Splitter.fixedLength(2);
-            Joiner joiner = Joiner.on(":");
-            datapath = new DatapathId(joiner.join(splitter.split(dpid)));
+            datapath = new DatapathId(String.join(":", splitter.split(dpid)));
         } else {
             datapath = new DatapathId(dpid);
         }

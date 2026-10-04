@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.ovsdb.lib.OvsdbClient;
 import org.opendaylight.ovsdb.lib.error.SchemaVersionMismatchException;
@@ -105,6 +106,8 @@ import org.slf4j.LoggerFactory;
 public final class SouthboundMapper {
     private static final Logger LOG = LoggerFactory.getLogger(SouthboundMapper.class);
     private static final String N_CONNECTIONS_STR = "n_connections";
+    private static final Pattern DPID_PATTERN = Pattern.compile("^[0-9a-fA-F]{16}");
+    private static final Splitter DPID_SPLITTER = Splitter.fixedLength(2);
 
     @VisibleForTesting
     public static final ImmutableBiMap<DatapathTypeBase, String> DATAPATH_TYPE_MAP = ImmutableBiMap.of(
@@ -246,14 +249,8 @@ public final class SouthboundMapper {
 
     public static DatapathId createDatapathId(final String dpid) {
         requireNonNull(dpid);
-        DatapathId datapath;
-        if (dpid.matches("^[0-9a-fA-F]{16}")) {
-            Splitter splitter = Splitter.fixedLength(2);
-            datapath = new DatapathId(String.join(":", splitter.split(dpid)));
-        } else {
-            datapath = new DatapathId(dpid);
-        }
-        return datapath;
+        return new DatapathId(DPID_PATTERN.matcher(dpid).matches() ? String.join(":", DPID_SPLITTER.split(dpid))
+            : dpid);
     }
 
     public static String createDatapathType(final OvsdbBridgeAugmentation mdsalbridge) {

@@ -45,7 +45,7 @@ jobs:
       group: gerrit-maven-merge-${{ matrix.GERRIT_BRANCH }}
       cancel-in-progress: false
     # yamllint disable-line rule:line-length
-    uses: lfit/releng-reusable-workflows/.github/workflows/compose-maven-merge.yaml@fb907909b12bbaf262de6b24fcafd181cabe6b24 # v0.10.4
+    uses: lfit/releng-reusable-workflows/.github/workflows/compose-maven-merge.yaml@fc3aea6f1ec56737c3cdd8fe1c46cbbb7209394b # v0.11.1
     # "secrets: inherit" does not cross organisations, and this workflow
     # lives in the lfit org, so the secrets have to be passed by name.
     secrets:
